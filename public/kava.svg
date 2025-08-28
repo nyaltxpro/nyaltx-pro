@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500">
+  <circle cx="250" cy="250" r="250" fill="#FF564F"/>
+  <path d="M325,125H175v250h50V275l100,100h70L295,275l100-100h-70l-100,100V125z" fill="white"/>
+</svg>

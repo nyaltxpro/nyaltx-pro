@@ -1,26 +1,324 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0b1217;
+  --foreground: #ffffff;
+  --primary: #00b8d8;
+  --secondary: #818ea3;
+  --success: #17c671;
+  --danger: #ea3943;
+  --warning: #ffb400;
+  --border-color: #1e2c34;
+  --card-bg: #142028;
+  --sidebar-bg: #0b1217;
+  --header-bg: #142028;
+  --nitro-color: #00ffb3;
+  --rank-1st: #ffd700;
+  --rank-2nd: #00c3ff;
+  --rank-3rd: #ff00ff;
+  --rank-4th: #00ffff;
+  --rank-5th: #00ff00;
+  --rank-6th: #ff6600;
 }
 
-@theme inline {
+/* CSS Variables */
+:root {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-poppins);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.light {
+  --background: #ffffff;
+  --foreground: #142028;
+  --card-bg: #ffffff;
+  --sidebar-bg: #f8f9fa;
+  --header-bg: #ffffff;
+  --border-color: #dee2e6;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), 'Poppins', 'Roboto', sans-serif;
+  font-size: 14px;
+}
+
+.token-race {
+  background: linear-gradient(90deg, rgba(20, 32, 40, 0.8) 0%, rgba(20, 32, 40, 0.9) 100%);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 16px;
+}
+
+.token-race-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.token-race-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: var(--foreground);
+}
+
+.token-race-content {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.token-race-item {
+  background: #1a2730;
+  border-radius: 8px;
+  padding: 12px;
+  min-width: 120px;
+  position: relative;
+}
+
+.token-race-rank {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 4px 8px;
+  border-radius: 0 8px 0 8px;
+  font-weight: bold;
+  font-size: 12px;
+}
+
+.rank-1 { background-color: var(--rank-1st); color: #000; }
+.rank-2 { background-color: var(--rank-2nd); color: #000; }
+.rank-3 { background-color: var(--rank-3rd); color: #000; }
+.rank-4 { background-color: var(--rank-4th); color: #000; }
+.rank-5 { background-color: var(--rank-5th); color: #000; }
+.rank-6 { background-color: var(--rank-6th); color: #000; }
+
+.token-symbol {
+  font-weight: bold;
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.token-price {
+  color: var(--nitro-color);
+  font-weight: bold;
+}
+
+.banner-section {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  margin-bottom: 16px;
+  padding: 8px 0;
+}
+
+.banner-item {
+  background: linear-gradient(135deg, #1a2730 0%, #142028 100%);
+  border-radius: 8px;
+  padding: 16px;
+  min-width: 200px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.banner-title {
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.banner-subtitle {
+  color: var(--secondary);
+  font-size: 12px;
+}
+
+.stats-bar {
+  background: #142028;
+  border-radius: 8px;
+  padding: 8px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.stats-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.stats-label {
+  color: var(--secondary);
+  font-size: 12px;
+}
+
+.stats-value {
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.section-card {
+  background: #142028;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.view-more {
+  color: var(--primary);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.gainer-item, .loser-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.gainer-item:last-child, .loser-item:last-child {
+  border-bottom: none;
+}
+
+.token-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.token-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #2c3a43;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+.token-name {
+  font-weight: 500;
+}
+
+.token-chain {
+  font-size: 12px;
+  color: var(--secondary);
+}
+
+.token-percentage {
+  font-weight: bold;
+}
+
+.percentage-positive {
+  color: var(--success);
+}
+
+.percentage-negative {
+  color: var(--danger);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--secondary) var(--background);
+}
+
+*::-webkit-scrollbar {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: var(--secondary);
+  border-radius: 1.25rem;
+  border: 0.1875rem solid var(--background);
+}
+
+.card {
+  background-color: var(--card-bg);
+  border-radius: 0.5rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  border: 1px solid var(--border-color);
+}
+
+.sidebar {
+  background-color: var(--sidebar-bg);
+  border-right: 1px solid var(--border-color);
+}
+
+.header {
+  background-color: var(--header-bg);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.token-row:hover {
+  background-color: rgba(0, 184, 216, 0.05);
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #009cb8;
+}
+
+.text-success {
+  color: var(--success);
+}
+
+.text-danger {
+  color: var(--danger);
+}
+
+/* Animation styles */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+@keyframes scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-scroll {
+  animation: scroll 30s linear infinite;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari and Opera */
 }
