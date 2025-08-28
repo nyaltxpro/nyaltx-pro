@@ -290,7 +290,7 @@ export default function ToolsPage() {
                     </div>
                   )}
                 </div>
-                <button className="mt-auto bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md transition-colors">
+                <button className="mt-auto bg-[#00b8d8] hover:bg-[#00b8d8] text-white py-2 rounded-md transition-colors">
                   Launch Tool
                 </button>
               </div>
@@ -305,7 +305,7 @@ export default function ToolsPage() {
               <button
                 key={category.id}
                 className={`px-4 py-2 rounded-lg flex items-center ${
-                  activeCategory === category.id ? 'bg-blue-600' : 'bg-gray-800'
+                  activeCategory === category.id ? 'bg-[#00b8d8]' : 'bg-gray-800'
                 }`}
                 onClick={() => setActiveCategory(category.id)}
               >
@@ -359,7 +359,7 @@ export default function ToolsPage() {
                   <span className="text-xs text-gray-400 ml-2">Supported tokens</span>
                 </div>
               )}
-              <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md transition-colors">
+              <button className="w-full bg-[#00b8d8] hover:bg-blue-700 text-white py-2 rounded-md transition-colors">
                 Launch Tool
               </button>
             </div>
@@ -402,7 +402,7 @@ export default function ToolsPage() {
             </div>
             
             <div className="flex flex-col sm:flex-row gap-3">
-              <button className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md transition-colors">
+              <button className="bg-[#00b8d8] hover:bg-blue-700 text-white py-2 px-4 rounded-md transition-colors">
                 Get API Key
               </button>
               <button className="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded-md transition-colors">
@@ -437,7 +437,7 @@ export default function ToolsPage() {
               ></textarea>
             </div>
             
-            <button className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md transition-colors">
+            <button className="bg-[#00b8d8] hover:bg-blue-700 text-white py-2 px-4 rounded-md transition-colors">
               Submit Request
             </button>
           </div>

@@ -26,10 +26,10 @@ export default function SwapPage() {
   });
   
   const [toToken, setToToken] = useState({
-    symbol: 'Select a token',
-    name: '',
+    symbol: 'BNB',
+    name: 'BNB',
     balance: '0.0',
-    logo: ''
+    logo: getCryptoIconUrl('bnb')
   });
 
   // Mock token list
@@ -88,22 +88,19 @@ export default function SwapPage() {
   }, [darkMode]);
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen bg-[#0b1217] text-white">
       {/* Banner */}
       <Banner />
       
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold">Swap</h1>
-          <ConnectWalletButton />
-        </div>
+       
         
         {/* Swap Card */}
         <div className="max-w-md mx-auto">
           <div className="bg-[#0f1923] rounded-lg shadow-lg p-6">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-medium">Swap</h2>
+          
               <div className="flex space-x-2">
                 <button 
                   onClick={toggleSettings}
@@ -254,7 +251,7 @@ export default function SwapPage() {
             )}
             
             {/* Connect Wallet Button */}
-            <button className="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-3 px-4 rounded-lg transition-colors">
+            <button className="w-full bg-[#00b8d8] hover:bg-blue-600 text-white font-medium py-3 px-4 rounded-lg transition-colors">
               Connect wallet
             </button>
             
@@ -287,11 +284,7 @@ export default function SwapPage() {
                 </div>
               </div>
               
-              <div className="mt-4 flex justify-center">
-                <button className="bg-yellow-500 hover:bg-yellow-600 text-black font-medium py-2 px-4 rounded-lg transition-colors flex items-center">
-                  <span>Buy Crypto</span>
-                </button>
-              </div>
+           
             </div>
           </div>
         </div>

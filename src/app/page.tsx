@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Banner from './components/Banner';
 import ConnectWalletButton from './components/ConnectWalletButton';
+import Header from './components/Header';
 
 // SortConfig type will be used when we reimplement the token sorting functionality
 // type SortConfig = {
@@ -195,24 +196,11 @@ export default function Home() {
   return (
     <div className={`flex flex-col min-h-screen ${!darkMode ? 'light' : ''}`}>
       {/* Banner */}
-      <Banner />
+     
+
+      <Header/>
       
-      {/* Header */}
-      <header className="flex items-center justify-between p-4 border-b border-gray-800">
-        <div className="flex items-center space-x-4">
-          <div className="text-xl font-bold">DexTools</div>
-        </div>
-        
-        <div className="flex items-center space-x-3">
-          <button className="p-2 rounded-full hover:bg-gray-700">
-            ⚙️
-          </button>
-          <button className="p-2 rounded-full hover:bg-gray-700">
-            ⭐
-          </button>
-          <ConnectWalletButton />
-        </div>
-      </header>
+   
       
       {/* Banner Section */}
       <div className="banner-section px-4">
