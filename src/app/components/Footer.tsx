@@ -28,8 +28,8 @@ const Footer = () => {
         </div>
         
         <div className="flex items-center space-x-4">
-          <Link href="/general-disclaimer" className="text-gray-400 hover:text-white transition-colors">
-            General Disclaimer
+          <Link href="/disclaimer" className="text-gray-400 hover:text-white transition-colors">
+            Disclaimer
           </Link>
           <Link href="/legal-notice" className="text-gray-400 hover:text-white transition-colors">
             Legal Notice
@@ -37,8 +37,8 @@ const Footer = () => {
           <Link href="/privacy-policy" className="text-gray-400 hover:text-white transition-colors">
             Privacy Policy
           </Link>
-          <Link href="/faqs" className="text-gray-400 hover:text-white transition-colors">
-            FAQs
+          <Link href="/faq" className="text-gray-400 hover:text-white transition-colors">
+            FAQ
           </Link>
           <Link href="/terms" className="text-gray-400 hover:text-white transition-colors">
             Terms
