@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
 import { FaRegStar, FaStar, FaCaretUp, FaCaretDown, FaExternalLinkAlt, FaSearch } from 'react-icons/fa';
 import ConnectWalletButton from '../components/ConnectWalletButton';
 import Banner from '../components/Banner';

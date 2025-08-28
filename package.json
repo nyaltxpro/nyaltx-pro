@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "apexcharts": "^5.3.4",
+    "cryptocurrency-icons": "^0.18.1",
     "next": "15.5.2",
     "react": "19.1.0",
     "react-apexcharts": "^1.7.0",

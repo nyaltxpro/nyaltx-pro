@@ -110,12 +110,15 @@ export default function Sidebar() {
         ))}
         
         {/* Add button */}
-        <div className="flex items-center py-3 px-3 mb-1 rounded-md text-gray-400 hover:bg-[#1a2932] hover:text-white cursor-pointer">
+        <Link 
+          href="/add-new"
+          className={`flex items-center py-3 px-3 mb-1 rounded-md transition-all duration-200 ${pathname === '/add-new' ? 'bg-[#1a2932] text-[#00b8d8]' : 'text-gray-400 hover:bg-[#1a2932] hover:text-white'}`}
+        >
           <div className="text-xl"><FaPlus /></div>
           {isExpanded && (
             <span className="ml-3">Add New</span>
           )}
-        </div>
+        </Link>
       </div>
 
       {/* Extra section */}

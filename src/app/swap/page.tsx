@@ -2,9 +2,10 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { FaExchangeAlt, FaChevronDown, FaInfoCircle, FaCog, FaSync } from 'react-icons/fa';
+import { FaExchangeAlt, FaChevronDown, FaCog, FaSync, FaSearch, FaTimes } from 'react-icons/fa';
 import ConnectWalletButton from '../components/ConnectWalletButton';
 import Banner from '../components/Banner';
+import { getCryptoIconUrl } from '../utils/cryptoIcons';
 
 export default function SwapPage() {
   const [darkMode] = useState(true);
@@ -12,13 +13,16 @@ export default function SwapPage() {
   const [toAmount, setToAmount] = useState('');
   const [slippage, setSlippage] = useState('0.5');
   const [showSettings, setShowSettings] = useState(false);
+  const [showTokenModal, setShowTokenModal] = useState(false);
+  const [selectingToken, setSelectingToken] = useState<'from' | 'to'>('from');
+  const [searchTerm, setSearchTerm] = useState('');
 
   // Token selection state
   const [fromToken, setFromToken] = useState({
     symbol: 'ETH',
     name: 'Ethereum',
     balance: '0.0',
-    logo: '/ethereum.svg'
+    logo: getCryptoIconUrl('eth')
   });
   
   const [toToken, setToToken] = useState({
@@ -30,14 +34,14 @@ export default function SwapPage() {
 
   // Mock token list
   const tokenList = [
-    { symbol: 'ETH', name: 'Ethereum', balance: '0.0', logo: '/ethereum.svg' },
-    { symbol: 'USDT', name: 'Tether', balance: '0.0', logo: '/tether.svg' },
-    { symbol: 'USDC', name: 'USD Coin', balance: '0.0', logo: '/usdc.svg' },
-    { symbol: 'BTC', name: 'Bitcoin', balance: '0.0', logo: '/bitcoin.svg' },
-    { symbol: 'DAI', name: 'Dai', balance: '0.0', logo: '/dai.svg' },
-    { symbol: 'LINK', name: 'Chainlink', balance: '0.0', logo: '/chainlink.svg' },
-    { symbol: 'UNI', name: 'Uniswap', balance: '0.0', logo: '/uniswap.svg' },
-    { symbol: 'AAVE', name: 'Aave', balance: '0.0', logo: '/aave.svg' },
+    { symbol: 'ETH', name: 'Ethereum', balance: '0.0', logo: getCryptoIconUrl('eth') },
+    { symbol: 'USDT', name: 'Tether', balance: '0.0', logo: getCryptoIconUrl('usdt') },
+    { symbol: 'USDC', name: 'USD Coin', balance: '0.0', logo: getCryptoIconUrl('usdc') },
+    { symbol: 'BTC', name: 'Bitcoin', balance: '0.0', logo: getCryptoIconUrl('btc') },
+    { symbol: 'DAI', name: 'Dai', balance: '0.0', logo: getCryptoIconUrl('dai') },
+    { symbol: 'LINK', name: 'Chainlink', balance: '0.0', logo: getCryptoIconUrl('link') },
+    { symbol: 'UNI', name: 'Uniswap', balance: '0.0', logo: getCryptoIconUrl('uni') },
+    { symbol: 'AAVE', name: 'Aave', balance: '0.0', logo: getCryptoIconUrl('aave') },
   ];
 
   // Handle input changes
@@ -166,7 +170,13 @@ export default function SwapPage() {
                     onChange={handleFromAmountChange}
                     className="bg-transparent text-2xl w-full focus:outline-none"
                   />
-                  <button className="flex items-center bg-gray-700 hover:bg-gray-600 rounded-lg px-3 py-2 transition-colors">
+                  <button 
+                    className="flex items-center bg-gray-700 hover:bg-gray-600 rounded-lg px-3 py-2 transition-colors"
+                    onClick={() => {
+                      setSelectingToken('from');
+                      setShowTokenModal(true);
+                    }}
+                  >
                     {fromToken.logo && (
                       <div className="w-6 h-6 mr-2 relative">
                         <Image 
@@ -209,7 +219,13 @@ export default function SwapPage() {
                     onChange={handleToAmountChange}
                     className="bg-transparent text-2xl w-full focus:outline-none"
                   />
-                  <button className="flex items-center bg-gray-700 hover:bg-gray-600 rounded-lg px-3 py-2 transition-colors">
+                  <button 
+                    className="flex items-center bg-gray-700 hover:bg-gray-600 rounded-lg px-3 py-2 transition-colors"
+                    onClick={() => {
+                      setSelectingToken('to');
+                      setShowTokenModal(true);
+                    }}
+                  >
                     {toToken.logo ? (
                       <div className="w-6 h-6 mr-2 relative">
                         <Image 
@@ -254,7 +270,7 @@ export default function SwapPage() {
                 <div className="flex items-center">
                   <div className="w-5 h-5 mr-1">
                     <Image 
-                      src="/arbitrum.svg" 
+                      src={getCryptoIconUrl('arb')} 
                       alt="0x" 
                       width={20} 
                       height={20} 
@@ -280,6 +296,72 @@ export default function SwapPage() {
           </div>
         </div>
       </div>
+
+      {/* Token Selection Modal */}
+      {showTokenModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+          <div className="bg-[#0f1923] rounded-lg w-full max-w-md max-h-[80vh] overflow-hidden">
+            <div className="p-4 border-b border-gray-800 flex justify-between items-center">
+              <h3 className="text-lg font-medium">Select a token</h3>
+              <button 
+                onClick={() => setShowTokenModal(false)}
+                className="text-gray-400 hover:text-white"
+              >
+                <FaTimes />
+              </button>
+            </div>
+            
+            <div className="p-4 border-b border-gray-800">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search token name or symbol"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full bg-gray-800 text-white px-4 py-3 pl-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <FaSearch className="absolute left-3 top-3.5 text-gray-400" />
+              </div>
+            </div>
+            
+            <div className="overflow-y-auto max-h-[50vh]">
+              {tokenList.filter(token => 
+                token.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                token.symbol.toLowerCase().includes(searchTerm.toLowerCase())
+              ).map((token) => (
+                <div 
+                  key={token.symbol}
+                  className="flex items-center p-3 hover:bg-gray-800 cursor-pointer border-b border-gray-800"
+                  onClick={() => {
+                    if (selectingToken === 'from') {
+                      setFromToken(token);
+                    } else {
+                      setToToken(token);
+                    }
+                    setShowTokenModal(false);
+                  }}
+                >
+                  <div className="w-8 h-8 mr-3 relative">
+                    <Image 
+                      src={token.logo} 
+                      alt={token.symbol} 
+                      width={32} 
+                      height={32} 
+                    />
+                  </div>
+                  <div>
+                    <div className="font-medium">{token.name}</div>
+                    <div className="text-sm text-gray-400">{token.symbol}</div>
+                  </div>
+                  <div className="ml-auto text-right">
+                    <div>{token.balance}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
