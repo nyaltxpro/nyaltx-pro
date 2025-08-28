@@ -13,6 +13,7 @@ import {
   FaFilter,
   FaEllipsisV
 } from 'react-icons/fa';
+import Header from '../components/Header';
 
 // Dynamically import ApexCharts to avoid SSR issues
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
@@ -215,6 +216,7 @@ export default function TradingView() {
   return (
     <div className="p-4 text-white">
       {/* Token Header */}
+      <Header />
       <div className="bg-[#0f1923] rounded-lg p-4 mb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
