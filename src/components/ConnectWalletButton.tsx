@@ -37,7 +37,7 @@ export default function ConnectWalletButton({ className = "", onConnect }: Conne
 
   return (
     <button 
-      className={`py-1 px-4 rounded-full bg-primary bg-[#00b8d8] text-white font-bold hover:bg-opacity-90 transition-colors duration-200 font-mono text-sm tracking-wide ${className}`}
+      className={`py-1 px-4 rounded-full bg-primary bg-[#00b8d8] text-white font-bold hover:bg-opacity-90 transition-colors duration-200  text-sm tracking-wide ${className}`}
       onClick={handleClick}
     >
       {isConnected ? displayAddress : 'Connect'}

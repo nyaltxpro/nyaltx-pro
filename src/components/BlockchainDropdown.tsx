@@ -111,7 +111,7 @@ const BlockchainDropdown: React.FC<BlockchainDropdownProps> = ({
       <DropdownMenu.Trigger asChild>
         <button
           type="button"
-          className={`flex items-center space-x-2 bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors border border-gray-700 shadow-sm ${isOpen ? 'ring-2 ring-blue-500' : ''} ${className}`}
+          className={`flex items-center space-x-2 bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-full transition-colors border border-gray-700 shadow-sm ${isOpen ? 'ring-2 ring-blue-500' : ''} ${className}`}
         >
           <div className="w-6 h-6 relative">
             <BlockchainLogo
