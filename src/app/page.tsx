@@ -353,11 +353,11 @@ export default function Home() {
         {/* Overlay for better text visibility */}
         <div className="absolute inset-0 w-full "></div>
         {/* Content container */}
-        <div className="relative flex items-center justify-center z-10 text-white">
+        <div className="relative flex items-center justify-center  text-white">
         {bannerItems.map((item,index) => (
           <div key={item.id} className="banner-item mx-5 "
           style={{
-            backgroundImage: `url("/banner/${index+1}.png")`,
+            backgroundImage: `url("/banner/${index+2}.png")`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
