@@ -18,7 +18,7 @@ const poppins = Poppins({
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: "Meme Board | Crypto Token Tracker",
+  title: "NYLTAX | Crypto Token Tracker",
   description: "Track meme tokens, view real-time charts, history and all token information from blockchain.",
   icons: {
     icon: "/logo.png",
