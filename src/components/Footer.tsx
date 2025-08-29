@@ -104,7 +104,7 @@ const Footer = () => {
         </div>
         
         {/* Bottom section with links and app store badges */}
-        <div className="flex flex-col md:flex-row justify-between items-center border-t border-gray-800 pt-4">
+        <div className="flex flex-col md:flex-row justify-between items-center  pt-4">
           {/* Social icons */}
           <div className="grid grid-cols-3 space-x-4 mb-4 md:mb-0">
             <Link href="https://twitter.com/DEXToolsApp" target="_blank" rel="noopener noreferrer">
