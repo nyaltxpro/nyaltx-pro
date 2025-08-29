@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { 
   FaChartLine, 
@@ -17,12 +17,16 @@ import {
   FaChartBar,
   FaChartArea,
   FaWallet,
-  FaExchangeAlt
+  FaExchangeAlt,
+  FaExclamationCircle
 } from 'react-icons/fa';
+import { AdvancedRealTimeChart } from 'react-ts-tradingview-widgets';
 import Header from '../../components/Header';
 
 // Dynamically import ApexCharts to avoid SSR issues
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
+
+// TradingView Chart component is imported from react-ts-tradingview-widgets
 
 // USDT token data
 const tokenData = {
@@ -223,6 +227,7 @@ export default function TradingView() {
   const [showIndicatorModal, setShowIndicatorModal] = useState(false);
   const [showDrawingTools, setShowDrawingTools] = useState(false);
   const [activeDrawingTool, setActiveDrawingTool] = useState<string | null>(null);
+  const [activeChartType, setActiveChartType] = useState<'custom' | 'tradingview'>('custom');
 
   return (
     <div className="p-4 text-white">
@@ -231,7 +236,7 @@ export default function TradingView() {
     
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 mt-8 lg:grid-cols-4 gap-4">
         {/* Left Column - Stats and Order Panel */}
         <div className="lg:col-span-1">
           {/* Order Panel */}
@@ -585,9 +590,27 @@ export default function TradingView() {
               )}
             </div>
             
-            {/* USDT Candlestick Chart */}
+            {/* Chart Tabs */}
+            <div className="mb-4">
+              <div className="flex border-b border-gray-800">
+                <button
+                  className={`px-4 py-2 text-sm font-medium border-b-2 ${activeChartType === 'custom' ? 'text-blue-400 border-blue-400' : 'text-gray-400 border-transparent hover:text-gray-300'}`}
+                  onClick={() => setActiveChartType('custom')}
+                >
+                  Custom Chart
+                </button>
+                <button
+                  className={`px-4 py-2 text-sm font-medium border-b-2 ${activeChartType === 'tradingview' ? 'text-blue-400 border-blue-400' : 'text-gray-400 border-transparent hover:text-gray-300'}`}
+                  onClick={() => setActiveChartType('tradingview')}
+                >
+                  TradingView
+                </button>
+              </div>
+            </div>
+            
+            {/* Chart Container */}
             <div className="w-full h-96 bg-[#1a2932] rounded-lg">
-              {typeof window !== 'undefined' && (
+              {activeChartType === 'custom' && typeof window !== 'undefined' && (
                 <Chart
                   type="candlestick"
                   height={380}
@@ -813,6 +836,31 @@ export default function TradingView() {
                     }
                   }}
                 />
+              )}
+              
+              {activeChartType === 'tradingview' && typeof window !== 'undefined' && (
+                <div className="h-full">
+                  <AdvancedRealTimeChart 
+                    theme="dark"
+                    symbol="COINBASE:USDTUSD"
+                    interval="15"
+                    timezone="Etc/UTC"
+                    style="1"
+                    locale="en"
+                    toolbar_bg="#1a2932"
+                    enable_publishing={false}
+                    hide_top_toolbar={false}
+                    hide_legend={false}
+                    save_image={false}
+                    studies={[
+                      "MASimple@tv-basicstudies",
+                      "RSI@tv-basicstudies"
+                    ]}
+                    width="100%"
+                    height="380"
+                    autosize
+                  />
+                </div>
               )}
             </div>
           </div>

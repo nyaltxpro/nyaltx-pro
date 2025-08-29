@@ -718,13 +718,10 @@ export default function Home() {
                     <div>
                       <div className="flex items-center">
                         <span className="text-white font-medium">{token.name}</span>
-                       
-                       
                         {/* <span className="text-gray-500 text-xs ml-2">{token.fullName}</span> */}
                       </div>
                       <div className="flex items-center text-xs text-gray-500">
                         <span>{token.chain}</span>
-                      
                       </div>
                     </div>
                   </div>
