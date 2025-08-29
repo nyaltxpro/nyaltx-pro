@@ -348,20 +348,22 @@ export default function Home() {
       {/* Banner Section */}
       <div 
         className="banner-section w-[95%] mx-auto my-6 px-8 relative py-12 rounded-xl overflow-hidden shadow-2xl" 
-        style={{
-          backgroundImage: 'url("/banner/3.png")',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          minHeight: '220px',
-        }}
+      
       >
         {/* Overlay for better text visibility */}
         <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-transparent"></div>
         {/* Content container */}
-        <div className="relative z-10 text-white">
-        {bannerItems.map((item) => (
-          <div key={item.id} className="banner-item max-w-2xl">
+        <div className="relative flex z-10 text-white">
+        {bannerItems.map((item,index) => (
+          <div key={item.id} className="banner-item "
+          style={{
+            backgroundImage: `url("/banner/${index}.png")`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            minHeight: '220px',
+          }}
+          >
             <div>
               {item.date && <div className="text-xs text-white/80">{item.date}</div>}
               {item.time && <div className="text-xs text-white/80">{item.time}</div>}
