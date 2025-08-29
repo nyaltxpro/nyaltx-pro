@@ -337,7 +337,7 @@ export default function Home() {
  
 
   return (
-    <div className={`flex flex-col min-h-screen  ${!darkMode ? 'light' : ''}`}>
+    <div className={`flex flex-col min-h-screen ${!darkMode ? 'light' : ''}`}>
       {/* Banner */}
      
 
@@ -346,19 +346,33 @@ export default function Home() {
    
       
       {/* Banner Section */}
-      <div className="banner-section w-[95%] px-4">
+      <div 
+        className="banner-section w-[95%] mx-auto my-6 px-8 relative py-12 rounded-xl overflow-hidden shadow-2xl" 
+        style={{
+          backgroundImage: 'url("/banner/3.png")',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          minHeight: '220px',
+        }}
+      >
+        {/* Overlay for better text visibility */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-transparent"></div>
+        {/* Content container */}
+        <div className="relative z-10 text-white">
         {bannerItems.map((item) => (
-          <div key={item.id} className="banner-item">
+          <div key={item.id} className="banner-item max-w-2xl">
             <div>
-              {item.date && <div className="text-xs text-secondary">{item.date}</div>}
-              {item.time && <div className="text-xs text-secondary">{item.time}</div>}
+              {item.date && <div className="text-xs text-white/80">{item.date}</div>}
+              {item.time && <div className="text-xs text-white/80">{item.time}</div>}
             </div>
             <div>
-              <div className="banner-title">{item.title}</div>
-              <div className="banner-subtitle">{item.subtitle}</div>
+              <div className="banner-title text-2xl font-bold text-white mb-2">{item.title}</div>
+              <div className="banner-subtitle text-lg text-white/90">{item.subtitle}</div>
             </div>
           </div>
         ))}
+        </div>
       </div>
       
       {/* Stats Bar */}
