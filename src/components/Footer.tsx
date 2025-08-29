@@ -10,7 +10,7 @@ import { FaXTwitter } from 'react-icons/fa6';
 
 const Footer = () => {
   return (
-    <footer className="bg-inherit text-white border-t font-roboto border-gray-800 py-8 px-4 mt-8 font-poppins">
+    <footer className="bg-[#152028] text-white border-t font-roboto border-gray-800 py-8 px-4 mt-8 font-poppins">
       <div className="container mx-auto">
         {/* Top section */}
         <div className="grid grid-cols-3 gap-8 mb-8">
