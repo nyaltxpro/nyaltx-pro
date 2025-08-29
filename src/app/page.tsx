@@ -169,6 +169,11 @@ const bannerItems = [
     title: "Follow Us On TikTok!", 
     subtitle: "Official DEXTools Account"
   },
+  { 
+    id: 5, 
+    title: "Follow Us On TikTok!", 
+    subtitle: "Official DEXTools Account"
+  },
 ];
 
 // Mock data for daily losers - will be used in future implementation
