@@ -346,7 +346,7 @@ export default function Home() {
    
       
       {/* Banner Section */}
-      <div className="banner-section px-4">
+      <div className="banner-section w-[95%] px-4">
         {bannerItems.map((item) => (
           <div key={item.id} className="banner-item">
             <div>
