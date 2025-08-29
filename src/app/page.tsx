@@ -337,7 +337,7 @@ export default function Home() {
  
 
   return (
-    <div className={`flex flex-col min-h-screen ${!darkMode ? 'light' : ''}`}>
+    <div className={`flex flex-col items-center justify-center min-h-screen ${!darkMode ? 'light' : ''}`}>
       {/* Banner */}
      
 
@@ -347,22 +347,22 @@ export default function Home() {
       
       {/* Banner Section */}
       <div 
-        className="banner-section w-[95%] mx-auto my-6 px-8 relative py-12 rounded-xl overflow-hidden shadow-2xl" 
+        className="banner-section w-[95%]  mx-auto my-6 px-8 relative py-12 rounded-xl overflow-hidden shadow-2xl" 
       
       >
         {/* Overlay for better text visibility */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-transparent"></div>
+        <div className="absolute inset-0 w-full "></div>
         {/* Content container */}
-        <div className="relative flex z-10 text-white">
+        <div className="relative flex items-center justify-center z-10 text-white">
         {bannerItems.map((item,index) => (
           <div key={item.id} className="banner-item mx-5 "
           style={{
-            backgroundImage: `url("/banner/${index}.png")`,
+            backgroundImage: `url("/banner/${index+1}.png")`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
-            minHeight: '120px',
-            minWidth: '180px',
+            height: '120px',
+            width: '200px',
           }}
           >
             <div>
