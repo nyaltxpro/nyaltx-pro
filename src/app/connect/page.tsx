@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import Header from '@/components/Header';
 
 // Wallet types
 type WalletType = {
@@ -29,15 +30,7 @@ export default function WalletConnectPage() {
   return (
     <div className="flex flex-col min-h-screen bg-[#0b1217] text-white">
       {/* Header */}
-      <header className="p-4 border-b border-gray-800 flex items-center justify-between">
-        <h1 className="text-xl font-medium">Wallet Connect</h1>
-        <nav className="hidden md:flex space-x-4">
-          <Link href="/" className="text-gray-400 hover:text-primary">Home</Link>
-          <Link href="/pairs" className="text-gray-400 hover:text-primary">Live New Pairs</Link>
-          <Link href="/multichart" className="text-gray-400 hover:text-primary">Multichart</Link>
-          <Link href="/airdrops" className="text-gray-400 hover:text-primary">Airdrops</Link>
-        </nav>
-      </header>
+      <Header/>
       
       {/* Main content */}
       <main className="flex-1 flex">

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Banner from "../../components/Banner";
 import HotPairsTicker from "../../components/HotPairsTicker";
 import ConnectWalletButton from '../../components/ConnectWalletButton';
+import Header from "@/components/Header";
 
 // Define types for our data
 type HotPair = {
@@ -236,43 +237,8 @@ export default function LivePairs() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Top banner ad */}
-      <Banner />
-
-      {/* Hot pairs ticker */}
-      <HotPairsTicker pairs={hotPairs} />
       
-      {/* Header */}
-      <header className="flex items-center justify-between p-4 border-b border-gray-800">
-        <div className="flex items-center space-x-4">
-          <div className="text-xl font-bold">Live New Pairs</div>
-          <span className="ml-2 text-gray-400">2:32</span>
-        </div>
-        
-        <div className="flex-1 mx-4">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search pair by symbol, name, contract or token"
-              className="w-full py-2 px-10 rounded-full bg-opacity-10 bg-gray-800 border border-border-color focus:outline-none focus:border-primary"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary">
-              🔍
-            </span>
-          </div>
-        </div>
-        
-        <div className="flex items-center space-x-3">
-          <button className="p-2 rounded-full hover:bg-gray-700">
-            ⚙️
-          </button>
-          <button className="p-2 rounded-full hover:bg-gray-700">
-            ⭐
-          </button>
-          <ConnectWalletButton />
-        </div>
-      </header>
+      <Header/>
 
       {/* Hot pairs ticker */}
       <div className="hot-pairs-ticker flex items-center py-2 px-4 overflow-x-auto">

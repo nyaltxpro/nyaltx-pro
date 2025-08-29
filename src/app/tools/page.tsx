@@ -21,6 +21,7 @@ import {
 import Banner from '../../components/Banner';
 import ConnectWalletButton from '../../components/ConnectWalletButton';
 import { getCryptoIconUrl } from '../utils/cryptoIcons';
+import Header from '@/components/Header';
 
 // Tool category type
 type ToolCategory = {
@@ -220,7 +221,7 @@ export default function ToolsPage() {
   return (
     <div className="min-h-screen bg-gray-900 text-white">
       {/* Banner */}
-      <Banner />
+     <Header/>
       
       {/* Header with search and wallet */}
       <div className="container mx-auto px-4 py-4">

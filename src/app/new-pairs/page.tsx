@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { FaRegStar, FaStar, FaCaretUp, FaCaretDown, FaExternalLinkAlt, FaSearch } from 'react-icons/fa';
 import ConnectWalletButton from '../../components/ConnectWalletButton';
 import Banner from '../../components/Banner';
+import Header from '@/components/Header';
 
 // Define types
 type TokenPair = {
@@ -260,23 +261,7 @@ export default function NewPairsPage() {
       
       {/* Header with search and wallet */}
       <div className="container mx-auto px-4 py-4">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">New Pairs</h1>
-          
-          <div className="flex items-center space-x-4">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search pairs..."
-                className="bg-gray-800 text-white px-4 py-2 pr-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={searchTerm}
-                onChange={handleSearch}
-              />
-              <FaSearch className="absolute right-3 top-3 text-gray-400" />
-            </div>
-            <ConnectWalletButton />
-          </div>
-        </div>
+       <Header/>
         
         {/* Filters */}
         <div className="flex space-x-4 mb-4">

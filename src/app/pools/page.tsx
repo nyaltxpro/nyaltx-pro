@@ -17,6 +17,7 @@ import {
 import Banner from '../../components/Banner';
 import ConnectWalletButton from '../../components/ConnectWalletButton';
 import { getCryptoIconUrl } from '../utils/cryptoIcons';
+import Header from '@/components/Header';
 
 // Pool type definition
 type Pool = {
@@ -310,14 +311,11 @@ export default function PoolsPage() {
   return (
     <div className="min-h-screen bg-gray-900 text-white">
       {/* Banner */}
-      <Banner />
       
+      <Header/>
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold">Pool Explorer</h1>
-          <ConnectWalletButton />
-        </div>
+      
         
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">

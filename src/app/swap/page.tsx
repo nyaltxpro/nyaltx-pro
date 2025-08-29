@@ -6,6 +6,7 @@ import { FaExchangeAlt, FaChevronDown, FaCog, FaSync, FaSearch, FaTimes } from '
 import ConnectWalletButton from '../../components/ConnectWalletButton';
 import Banner from '../../components/Banner';
 import { getCryptoIconUrl } from '../utils/cryptoIcons';
+import Header from '@/components/Header';
 
 export default function SwapPage() {
   const [darkMode] = useState(true);
@@ -90,7 +91,7 @@ export default function SwapPage() {
   return (
     <div className="min-h-screen bg-[#0b1217] text-white">
       {/* Banner */}
-      <Banner />
+      <Header/>
       
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
