@@ -355,13 +355,14 @@ export default function Home() {
         {/* Content container */}
         <div className="relative flex z-10 text-white">
         {bannerItems.map((item,index) => (
-          <div key={item.id} className="banner-item "
+          <div key={item.id} className="banner-item mx-5 "
           style={{
             backgroundImage: `url("/banner/${index}.png")`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
-            minHeight: '220px',
+            minHeight: '120px',
+            minWidth: '180px',
           }}
           >
             <div>
