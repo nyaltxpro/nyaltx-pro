@@ -10,7 +10,7 @@ import { FaXTwitter } from 'react-icons/fa6';
 
 const Footer = () => {
   return (
-    <footer className="bg-inherit text-white border-t border-gray-800 py-8 px-4 mt-8 font-poppins">
+    <footer className="bg-inherit text-white border-t font-roboto border-gray-800 py-8 px-4 mt-8 font-poppins">
       <div className="container mx-auto">
         {/* Top section */}
         <div className="grid grid-cols-3 gap-8 mb-8">
@@ -97,6 +97,7 @@ const Footer = () => {
           </div>
         </div>
         
+        <div className='bg-[#142028] flex w-full flex-col'>
         {/* Disclaimer */}
         <div className="text-xs text-center text-gray-400 mb-6">
           All content available on our website, on hyperlinked websites, and on applications, forums, blogs, social media accounts and other platforms associated with DEXTools is intended solely to provide you with general information. We make no warranties of any kind with respect to our content, including, but not limited to, the accuracy and currency of the information. None of the content we provide should be construed as financial, legal or any other type of advice on which you may rely. Nothing on our Site should be considered an invitation or offer to take any action.
@@ -150,7 +151,7 @@ const Footer = () => {
           </div>
         </div>
         </div>
-        
+        </div>
         {/* Footer links */}
        
       </div>
