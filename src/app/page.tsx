@@ -39,107 +39,107 @@ const tokenRaceData = topTokens.map((token, index) => ({
 // Mock data for token categories (NEW, PRE LAUNCHED, LAUNCHED)
 const tokenCategories = {
   new: [
-    {
-      id: 1,
-      name: "Memewear",
-      fullName: "Memewear",
-      symbol: "BRXL_pump",
-      mcap: "-",
-      vol: "-",
-      holders: "-",
-      time: "12 s",
+    { 
+      id: 1, 
+      name: "Memewear", 
+      fullName: "Memewear", 
+      symbol: "BRXL_pump", 
+      mcap: "-", 
+      vol: "-", 
+      holders: "-", 
+      time: "12 s", 
       percentage: "17.6%"
     },
-    {
-      id: 2,
-      name: "Sparky",
-      fullName: "Sparky",
-      symbol: "BWGX_pump",
-      mcap: "-",
-      vol: "-",
-      holders: "-",
-      time: "16 s",
+    { 
+      id: 2, 
+      name: "Sparky", 
+      fullName: "Sparky", 
+      symbol: "BWGX_pump", 
+      mcap: "-", 
+      vol: "-", 
+      holders: "-", 
+      time: "16 s", 
       percentage: "7.2%"
     },
-    {
-      id: 3,
-      name: "Garbage",
-      fullName: "Garbagecoin",
-      symbol: "GWXG_pump",
-      mcap: "-",
-      vol: "-",
-      holders: "-",
-      time: "",
+    { 
+      id: 3, 
+      name: "Garbage", 
+      fullName: "Garbagecoin", 
+      symbol: "GWXG_pump", 
+      mcap: "-", 
+      vol: "-", 
+      holders: "-", 
+      time: "", 
       percentage: ""
     }
   ],
   preLaunched: [
-    {
-      id: 1,
-      name: "jotchua",
-      fullName: "jotchua",
-      symbol: "SimW_pump",
-      mcap: "$67.71K",
-      vol: "$352.75K",
-      holders: "226",
-      time: "48 m",
+    { 
+      id: 1, 
+      name: "jotchua", 
+      fullName: "jotchua", 
+      symbol: "SimW_pump", 
+      mcap: "$67.71K", 
+      vol: "$352.75K", 
+      holders: "226", 
+      time: "48 m", 
       percentage: "96%"
     },
-    {
-      id: 2,
-      name: "GDP",
-      fullName: "Gross Domestic Product",
-      symbol: "3Mmm_pump",
-      mcap: "$60.73K",
-      vol: "$14.99K",
-      holders: "714",
-      time: "2 h",
+    { 
+      id: 2, 
+      name: "GDP", 
+      fullName: "Gross Domestic Product", 
+      symbol: "3Mmm_pump", 
+      mcap: "$60.73K", 
+      vol: "$14.99K", 
+      holders: "714", 
+      time: "2 h", 
       percentage: "93%"
     },
-    {
-      id: 3,
-      name: "Cope",
-      fullName: "Cope",
-      symbol: "EhxJ_zSs",
-      mcap: "$60.95K",
-      vol: "",
-      holders: "",
-      time: "",
+    { 
+      id: 3, 
+      name: "Cope", 
+      fullName: "Cope", 
+      symbol: "EhxJ_zSs", 
+      mcap: "$60.95K", 
+      vol: "", 
+      holders: "", 
+      time: "", 
       percentage: ""
     }
   ],
   launched: [
-    {
-      id: 1,
-      name: "POT",
-      fullName: "Juppot",
-      symbol: "HjPsG_hyds",
-      mcap: "$467.25",
-      vol: "$514.94",
-      holders: "58",
-      time: "4 m",
+    { 
+      id: 1, 
+      name: "POT", 
+      fullName: "Juppot", 
+      symbol: "HjPsG_hyds", 
+      mcap: "$467.25", 
+      vol: "$514.94", 
+      holders: "58", 
+      time: "4 m", 
       percentage: "100%"
     },
-    {
-      id: 2,
-      name: "Rule34",
-      fullName: "Rule 34",
-      symbol: "CyAu_pump",
-      mcap: "$114.02K",
-      vol: "$335.32K",
-      holders: "763",
-      time: "16 m",
+    { 
+      id: 2, 
+      name: "Rule34", 
+      fullName: "Rule 34", 
+      symbol: "CyAu_pump", 
+      mcap: "$114.02K", 
+      vol: "$335.32K", 
+      holders: "763", 
+      time: "16 m", 
       percentage: "100%"
     },
-    {
-      id: 3,
-      name: "VWH",
-      fullName: "Video Wifi Hat",
-      symbol: "HT.Zc_2RqW",
-      mcap: "$646.08",
-      vol: "",
-      holders: "",
-      time: "",
+    { 
+      id: 3, 
+      name: "VWH", 
+      fullName: "Video Wifi Hat", 
+      symbol: "HT.Zc_2RqW", 
+      mcap: "$646.08", 
+      vol: "", 
+      holders: "", 
+      time: "", 
       percentage: ""
     }
   ]
@@ -147,26 +147,26 @@ const tokenCategories = {
 
 // Mock data for banner items
 const bannerItems = [
-  {
-    id: 1,
-    title: "DEXTools x Nibiru Chain AMA",
+  { 
+    id: 1, 
+    title: "DEXTools x Nibiru Chain AMA", 
     subtitle: "Join Us Here!",
     date: "Wed August 27th",
     time: "7PM CEST / 5PM UTC"
   },
-  {
-    id: 2,
-    title: "DEXTools API V2",
+  { 
+    id: 2, 
+    title: "DEXTools API V2", 
     subtitle: "Powering The Future Of DeFi"
   },
-  {
-    id: 3,
-    title: "DEXTools Meme Board",
+  { 
+    id: 3, 
+    title: "DEXTools Meme Board", 
     subtitle: "Discover Hottest Meme Tokens"
   },
-  {
-    id: 4,
-    title: "Follow Us On TikTok!",
+  { 
+    id: 4, 
+    title: "Follow Us On TikTok!", 
     subtitle: "Official DEXTools Account"
   },
 ];
@@ -206,12 +206,12 @@ export default function Home() {
   const [memeTokens, setMemeTokens] = useState<Token[]>([]);
   const [isLoadingTokens, setIsLoadingTokens] = useState<boolean>(false);
   const [selectedChain, setSelectedChain] = useState<string>('ethereum');
-
+  
   // State for Tron tokens
   const [tronNewTokens, setTronNewTokens] = useState<TronNewToken[]>([]);
   const [tronPreLaunchedTokens, setTronPreLaunchedTokens] = useState<TronPreLaunchedToken[]>([]);
   const [isLoadingTronTokens, setIsLoadingTronTokens] = useState<boolean>(false);
-
+  
   // State for token race slider
   const [currentSlide, setCurrentSlide] = useState(0);
   const [autoSlide, setAutoSlide] = useState(true);
@@ -220,57 +220,57 @@ export default function Home() {
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const tokensPerSlide = 5;
   const totalSlides = Math.ceil(tokenRaceData.length / tokensPerSlide);
-
+  
   // Minimum swipe distance in pixels
   const minSwipeDistance = 50;
-
+  
   // Handle swipe gestures
   const handleTouchStart = (e: React.TouchEvent) => {
     setTouchStart(e.targetTouches[0].clientX);
     setIsPaused(true); // Pause auto-sliding during touch
   };
-
+  
   const handleTouchMove = (e: React.TouchEvent) => {
     setTouchEnd(e.targetTouches[0].clientX);
   };
-
+  
   const handleTouchEnd = () => {
     if (!touchStart || !touchEnd) return;
-
+    
     const distance = touchStart - touchEnd;
     const isLeftSwipe = distance > minSwipeDistance;
     const isRightSwipe = distance < -minSwipeDistance;
-
+    
     if (isLeftSwipe && currentSlide < totalSlides - 1) {
       setCurrentSlide(prev => prev + 1);
     }
-
+    
     if (isRightSwipe && currentSlide > 0) {
       setCurrentSlide(prev => prev - 1);
     }
-
+    
     // Reset touch values
     setTouchEnd(null);
     setTouchStart(null);
     setIsPaused(false); // Resume auto-sliding after touch
   };
-
+  
   // Group tokens for slider display
   const tokenSlides = [];
   for (let i = 0; i < tokenRaceData.length; i += tokensPerSlide) {
     tokenSlides.push(tokenRaceData.slice(i, i + tokensPerSlide));
   }
-
+  
   // Auto slide functionality
   useEffect(() => {
     let slideInterval: NodeJS.Timeout;
-
+    
     if (autoSlide && totalSlides > 1 && !isPaused) {
       slideInterval = setInterval(() => {
         setCurrentSlide(prev => (prev + 1) % totalSlides);
       }, 3000); // Change slide every 3 seconds
     }
-
+    
     return () => {
       if (slideInterval) clearInterval(slideInterval);
     };
@@ -284,7 +284,7 @@ export default function Home() {
       document.documentElement.classList.remove('dark');
     }
   }, [darkMode]);
-
+  
   // Update selected blockchain when chain is selected from All Chains dropdown
   useEffect(() => {
     const blockchain = supportedBlockchains.find(bc => bc.id === selectedChain) || supportedBlockchains[0];
@@ -307,10 +307,10 @@ export default function Home() {
         }
       }
     };
-
+    
     loadMemeTokens();
   }, [selectedBlockchain]);
-
+  
   // Load Tron tokens on component mount
   useEffect(() => {
     const loadTronTokens = async () => {
@@ -319,7 +319,7 @@ export default function Home() {
         // Load Tron tokens for NEW and PRE LAUNCHED categories
         const newTokens = await getTronNewTokens(5); // Get 5 tokens for NEW category
         const preLaunchedTokens = await getTronPreLaunchedTokens(5); // Get 5 tokens for PRE LAUNCHED category
-
+        
         setTronNewTokens(newTokens);
         setTronPreLaunchedTokens(preLaunchedTokens);
       } catch (error) {
@@ -330,59 +330,56 @@ export default function Home() {
         setIsLoadingTronTokens(false);
       }
     };
-
+    
     loadTronTokens();
   }, []);
 
-
+ 
 
   return (
-    <div className={`flex flex-col w-full items-center justify-center min-h-screen ${!darkMode ? 'light' : ''}`}>
+    <div className={`flex flex-col min-h-screen ${!darkMode ? 'light' : ''}`}>
       {/* Banner */}
+     
 
-
-      <Header />
-
-
-
+      <Header/>
+      
+   
+      
       {/* Banner Section */}
-      <div
-        className="banner-section w-[95%]  mx-auto my-6 px-8 relative py-12 rounded-xl overflow-hidden shadow-2xl"
-
+      <div 
+        className="banner-section w-[95%] mx-auto my-6 px-8 relative py-12 rounded-xl overflow-hidden shadow-2xl" 
+        style={{
+          backgroundImage: 'url("/banner/3.png")',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          minHeight: '220px',
+        }}
       >
         {/* Overlay for better text visibility */}
-        <div className="absolute inset-0 w-full "></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-transparent"></div>
         {/* Content container */}
-        <div className="relative flex items-center justify-center  text-white">
-          {bannerItems.map((item, index) => (
-            <div key={item.id} className="banner-item mx-5 "
-              style={{
-                backgroundImage: `url("/banner/${index + 2}.png")`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat',
-                height: '120px',
-                width: '200px',
-              }}
-            >
-              <div>
-                {item.date && <div className="text-xs text-white/80">{item.date}</div>}
-                {item.time && <div className="text-xs text-white/80">{item.time}</div>}
-              </div>
-              <div>
-                <div className="banner-title text-xl font-bold text-white mb-2">{item.title}</div>
-                <div className="banner-subtitle text-lg text-white/90">{item.subtitle}</div>
-              </div>
+        <div className="relative z-10 text-white">
+        {bannerItems.map((item) => (
+          <div key={item.id} className="banner-item">
+            <div>
+              {item.date && <div className="text-xs text-secondary">{item.date}</div>}
+              {item.time && <div className="text-xs text-secondary">{item.time}</div>}
             </div>
-          ))}
+            <div>
+              <div className="banner-title">{item.title}</div>
+              <div className="banner-subtitle">{item.subtitle}</div>
+            </div>
+          </div>
+        ))}
         </div>
       </div>
-
+      
       {/* Stats Bar */}
       <div className="stats-bar mx-4">
         <div className="flex justify-between items-center">
           <div className="text-xl font-bold">NYALTX board</div>
-
+        
         </div>
         <div className="flex space-x-4">
           <div className="stats-item">
@@ -414,7 +411,7 @@ export default function Home() {
           </label>
         </div>
       </div>
-
+      
       {/* Token Race Section */}
       <div className="token-race mx-4">
         <div className="token-race-header">
@@ -424,7 +421,7 @@ export default function Home() {
           <div className="flex space-x-2 items-center">
             <button className="py-1 px-3 bg-[#00c3ff] text-black font-bold rounded-md">NITRO</button>
             <button className="py-1 px-3 bg-gray-700 text-white font-bold rounded-md">RANKING</button>
-            <button
+            <button 
               onClick={() => setAutoSlide(prev => !prev)}
               className={`ml-2 py-1 px-3 font-bold rounded-md flex items-center ${autoSlide ? 'bg-green-500 text-white' : 'bg-gray-700 text-white'}`}
             >
@@ -439,8 +436,8 @@ export default function Home() {
             </button>
           </div>
         </div>
-
-        <div
+        
+        <div 
           className={`token-race-slider relative ${isPaused ? 'paused' : ''}`}
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
@@ -450,10 +447,10 @@ export default function Home() {
         >
           <div className="token-race-content" style={{ transform: `translateX(-${currentSlide * 100}%)` }}>
             {tokenSlides.map((slideTokens, slideIndex) => (
-              <div
-                key={`slide-${slideIndex}`}
-                className="flex gap-2 w-full"
-                style={{
+              <div 
+                key={`slide-${slideIndex}`} 
+                className="flex gap-2 w-full" 
+                style={{ 
                   transform: `translateX(${slideIndex * 100}%)`,
                   position: 'absolute',
                   left: 0,
@@ -467,12 +464,12 @@ export default function Home() {
                     <div className="flex items-center gap-2">
                       {token.image && (
                         <div className="w-5 h-5 rounded-full overflow-hidden">
-                          <Image
-                            src={token.image}
-                            alt={token.symbol}
-                            width={20}
-                            height={20}
-                            unoptimized
+                          <Image 
+                            src={token.image} 
+                            alt={token.symbol} 
+                            width={20} 
+                            height={20} 
+                            unoptimized 
                           />
                         </div>
                       )}
@@ -484,9 +481,9 @@ export default function Home() {
               </div>
             ))}
           </div>
-
+          
           {/* Slider Navigation */}
-          <button
+          <button 
             onClick={() => setCurrentSlide(prev => Math.max(0, prev - 1))}
             className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-gray-800 bg-opacity-70 p-2 rounded-full z-10"
             disabled={currentSlide === 0}
@@ -495,8 +492,8 @@ export default function Home() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-
-          <button
+          
+          <button 
             onClick={() => setCurrentSlide(prev => Math.min(totalSlides - 1, prev + 1))}
             className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-gray-800 bg-opacity-70 p-2 rounded-full z-10"
             disabled={currentSlide === totalSlides - 1}
@@ -505,16 +502,16 @@ export default function Home() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </button>
-
+          
           {/* Slide Counter */}
           <div className="absolute bottom-0 right-0 bg-gray-800 bg-opacity-70 text-white text-xs px-2 py-1 rounded-tl-md">
             {currentSlide + 1}/{totalSlides}
           </div>
-
+          
           {/* Slide Indicators */}
           <div className="flex justify-center mt-4 space-x-2">
             {Array.from({ length: totalSlides }).map((_, index) => (
-              <button
+              <button 
                 key={index}
                 onClick={() => setCurrentSlide(index)}
                 className={`w-2 h-2 rounded-full ${currentSlide === index ? 'bg-[#00c3ff]' : 'bg-gray-500'}`}
@@ -532,18 +529,18 @@ export default function Home() {
         <div className="max-h-[400px] overflow-auto section-card">
           <DailyGainers />
         </div>
-
+        
         {/* Token Creator Section */}
         <div className="max-h-[400px] overflow-auto section-card">
           <TokenCreator />
         </div>
-
+        
         {/* Recently Updated Socials */}
         <div className="max-h-[400px] overflow-auto section-card">
           <RecentSocials />
         </div>
       </div>
-
+      
       {/* Token Categories Section */}
       <div className="token-categories flex flex-col  mx-4 mt-6">
         <div className="flex items-center py-2 rounded-lg card-bg border-gray-700">
@@ -559,10 +556,10 @@ export default function Home() {
             <button className="py-2 px-4 text-gray-400">Token Unlocks</button>
           </div>
           <div className="ml-auto">
-
+         
           </div>
         </div>
-
+        
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
           {/* NEW Category */}
           <div className="border border-[#23323c] rounded-lg overflow-hidden">
@@ -572,7 +569,7 @@ export default function Home() {
                 <span className="text-xs text-blue-400 ml-2">Tron</span>
               </div>
             </div>
-
+            
             {isLoadingTronTokens ? (
               <div className="p-4 text-center text-gray-400">Loading Tron tokens...</div>
             ) : tronNewTokens.length > 0 ? (
@@ -581,12 +578,12 @@ export default function Home() {
                   <div className="flex justify-between items-center mb-2">
                     <div className="flex items-center">
                       <div className="w-8 h-8 rounded-md mr-2 overflow-hidden">
-                        <Image
-                          src={token.logoUrl}
-                          alt={token.name}
-                          width={32}
-                          height={32}
-                          unoptimized
+                        <Image 
+                          src={token.logoUrl} 
+                          alt={token.name} 
+                          width={32} 
+                          height={32} 
+                          unoptimized 
                         />
                       </div>
                       <div>
@@ -602,7 +599,7 @@ export default function Home() {
                     </div>
                     <button className="px-3 py-1 bg-[#00b8d8] text-white text-xs font-bold rounded">TRADE</button>
                   </div>
-
+                  
                   <div className="grid grid-cols-3 gap-2 text-xs">
                     <div>
                       <div className="text-gray-500">Price</div>
@@ -617,7 +614,7 @@ export default function Home() {
                       <div className="text-white">{token.time}</div>
                     </div>
                   </div>
-
+                  
                   <div className="mt-2 flex justify-between items-center">
                     <div className="text-xs text-white">{token.time}</div>
                     <div className="text-xs text-green-500">{token.percentage}</div>
@@ -628,7 +625,7 @@ export default function Home() {
               <div className="p-4 text-center text-gray-400">No Tron tokens found</div>
             )}
           </div>
-
+          
           {/* PRE LAUNCHED Category */}
           <div className="border border-[#23323c] rounded-lg overflow-hidden">
             <div className="flex items-center p-3 border-b border-gray-800">
@@ -637,7 +634,7 @@ export default function Home() {
                 <span className="text-xs text-blue-400 ml-2">Tron</span>
               </div>
             </div>
-
+            
             {isLoadingTronTokens ? (
               <div className="p-4 text-center text-gray-400">Loading Tron tokens...</div>
             ) : tronPreLaunchedTokens.length > 0 ? (
@@ -646,12 +643,12 @@ export default function Home() {
                   <div className="flex justify-between items-center mb-2">
                     <div className="flex items-center">
                       <div className="w-8 h-8 rounded-md mr-2 overflow-hidden">
-                        <Image
-                          src={token.logoUrl}
-                          alt={token.name}
-                          width={32}
-                          height={32}
-                          unoptimized
+                        <Image 
+                          src={token.logoUrl} 
+                          alt={token.name} 
+                          width={32} 
+                          height={32} 
+                          unoptimized 
                         />
                       </div>
                       <div>
@@ -667,7 +664,7 @@ export default function Home() {
                     </div>
                     <button className="px-3 py-1 bg-[#00b8d8] text-white text-xs font-bold rounded">TRADE</button>
                   </div>
-
+                  
                   <div className="grid grid-cols-3 gap-2 text-xs">
                     <div>
                       <div className="text-gray-500">Launch</div>
@@ -688,7 +685,7 @@ export default function Home() {
               <div className="p-4 text-center text-gray-400">No Tron tokens found</div>
             )}
           </div>
-
+          
           {/* LAUNCHED Category */}
           <div className="border border-[#23323c] rounded-lg overflow-hidden">
             <div className="flex items-center p-3 border-b border-gray-800">
@@ -696,36 +693,36 @@ export default function Home() {
                 <span className="text-white font-bold mr-2">🚀 LAUNCHED</span>
               </div>
             </div>
-
+            
             {tronPreLaunchedTokens.map((token) => (
               <div key={token.id} className="p-3 border-b border-gray-800 hover:bg-gray-800">
                 <div className="flex justify-between items-center mb-2">
                   <div className="flex items-center">
-                    <div className="w-8 h-8 rounded-md mr-2 overflow-hidden">
-                      <Image
-                        src={token.logoUrl}
-                        alt={token.name}
-                        width={32}
-                        height={32}
-                        unoptimized
-                      />
-                    </div>
+                  <div className="w-8 h-8 rounded-md mr-2 overflow-hidden">
+                        <Image 
+                          src={token.logoUrl} 
+                          alt={token.name} 
+                          width={32} 
+                          height={32} 
+                          unoptimized 
+                        />
+                      </div>
                     <div>
                       <div className="flex items-center">
                         <span className="text-white font-medium">{token.name}</span>
-
-
+                       
+                       
                         {/* <span className="text-gray-500 text-xs ml-2">{token.fullName}</span> */}
                       </div>
                       <div className="flex items-center text-xs text-gray-500">
                         <span>{token.chain}</span>
-
+                      
                       </div>
                     </div>
                   </div>
                   <button className="px-3 py-1 bg-[#00b8d8] text-white text-xs font-bold rounded">TRADE</button>
                 </div>
-
+                
                 <div className="grid grid-cols-3 gap-2 text-xs">
                   {/* <div>
                     <div className="text-gray-500">MCap.</div>
@@ -740,7 +737,7 @@ export default function Home() {
                     <div className="text-white">{token.holders}</div>
                   </div>
                 </div>
-
+                
                 {token.launchDate && (
                   <div className="mt-2 flex justify-between items-center">
                     <div className="text-xs text-white">{token.launchDate}</div>
@@ -754,11 +751,11 @@ export default function Home() {
           </div>
         </div>
       </div>
-
-
-
-
-
+      
+    
+      
+    
+      
     </div>
   );
 }
