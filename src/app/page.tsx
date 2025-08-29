@@ -346,7 +346,7 @@ export default function Home() {
           {[1, 2, 3, 4, 5].map((imageNum) => (
             <div 
               key={imageNum}
-              className="min-w-[300px] md:min-w-[350px] lg:min-w-[400px] flex-shrink-0 rounded-xl overflow-hidden shadow-lg snap-center"
+              className="min-w-[200px] md:min-w-[250px] lg:min-w-[400px] flex-shrink-0 rounded-xl overflow-hidden shadow-lg snap-center"
             >
               {/* Banner Image */}
               <div className="h-[200px] w-full relative">
@@ -358,26 +358,15 @@ export default function Home() {
               </div>
               
               {/* Content Below Image */}
-              <div className="p-4 bg-white dark:bg-gray-800">
+              <div className="p-2   ">
                 {bannerItems.length >= imageNum && (
                   <>
                     <div className="flex justify-between items-center mb-2">
-                      <div>
-                        {bannerItems[imageNum-1]?.date && (
-                          <div className="text-xs text-gray-500 dark:text-gray-400">
-                            {bannerItems[imageNum-1].date}
-                          </div>
-                        )}
-                        {bannerItems[imageNum-1]?.time && (
-                          <div className="text-xs text-gray-500 dark:text-gray-400">
-                            {bannerItems[imageNum-1].time}
-                          </div>
-                        )}
-                      </div>
+                    
                     </div>
-                    <h3 className="text-xl font-bold mb-2">
+                    <p className="text-md font-medium mb-2">
                       {bannerItems[imageNum-1]?.title || `Banner ${imageNum}`}
-                    </h3>
+                    </p>
                     <p className="text-gray-600 dark:text-gray-300">
                       {bannerItems[imageNum-1]?.subtitle || "Explore the latest updates and features"}
                     </p>
