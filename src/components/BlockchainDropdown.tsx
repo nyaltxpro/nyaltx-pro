@@ -170,12 +170,13 @@ const BlockchainDropdown: React.FC<BlockchainDropdownProps> = ({
                 className="flex flex-col items-center justify-center cursor-pointer outline-none transition-colors"
                 onSelect={() => handleNetworkSelect(network)}
               >
-                <div className="w-14 h-14 bg-[#1a2330] rounded-full flex items-center justify-center mb-2 border border-gray-700">
+                <div className="w-14 h-14 rounded-full flex items-center justify-center mb-2 ">
                   <BlockchainLogo
                     blockchainId={network.id}
                     blockchainName={network.name}
                     iconMap={blockchainIcons}
                     size={36}
+                    
                   />
                 </div>
                 <span className="text-sm text-white text-center uppercase font-medium">{network.name}</span>
