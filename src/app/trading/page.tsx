@@ -315,147 +315,6 @@ export default function TradingView() {
           <div className="bg-[#0f1923] rounded-xl p-4 mb-4">
             <div className="flex justify-between items-center mb-4">
         
-             
-              <div className="flex space-x-2">
-                <button 
-                  className="p-2 bg-[#1a2932] rounded hover:bg-[#253440]" 
-                  title="Technical Indicators"
-                  onClick={() => setShowIndicatorModal(!showIndicatorModal)}
-                >
-                  <FaChartLine className="text-gray-400" />
-                </button>
-                <button 
-                  className="p-2 bg-[#1a2932] rounded hover:bg-[#253440]" 
-                  title="Drawing Tools"
-                  onClick={() => setShowDrawingTools(!showDrawingTools)}
-                >
-                  <FaPencilAlt className="text-gray-400" />
-                </button>
-                <button className="p-2 bg-[#1a2932] rounded hover:bg-[#253440]">
-                  <FaEllipsisV className="text-gray-400" />
-                </button>
-              </div>
-              
-              {/* Technical Indicators Modal */}
-              {showIndicatorModal && (
-                <div className="absolute right-0 mt-2 w-64 bg-[#1a2932] rounded-md shadow-lg z-10 border border-gray-700">
-                  <div className="p-3 border-b border-gray-700">
-                    <h3 className="text-sm font-medium">Technical Indicators</h3>
-                  </div>
-                  <div className="p-2">
-                    <div className="space-y-2">
-                      <label className="flex items-center space-x-2">
-                        <input 
-                          type="checkbox" 
-                          checked={selectedIndicators.includes('MA20')} 
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedIndicators([...selectedIndicators, 'MA20']);
-                            } else {
-                              setSelectedIndicators(selectedIndicators.filter(i => i !== 'MA20'));
-                            }
-                          }}
-                          className="form-checkbox h-4 w-4 text-blue-600 rounded"
-                        />
-                        <span className="text-sm">Moving Average (20)</span>
-                      </label>
-                      <label className="flex items-center space-x-2">
-                        <input 
-                          type="checkbox" 
-                          checked={selectedIndicators.includes('MA50')} 
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedIndicators([...selectedIndicators, 'MA50']);
-                            } else {
-                              setSelectedIndicators(selectedIndicators.filter(i => i !== 'MA50'));
-                            }
-                          }}
-                          className="form-checkbox h-4 w-4 text-blue-600 rounded"
-                        />
-                        <span className="text-sm">Moving Average (50)</span>
-                      </label>
-                      <label className="flex items-center space-x-2">
-                        <input 
-                          type="checkbox" 
-                          checked={selectedIndicators.includes('RSI')} 
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedIndicators([...selectedIndicators, 'RSI']);
-                            } else {
-                              setSelectedIndicators(selectedIndicators.filter(i => i !== 'RSI'));
-                            }
-                          }}
-                          className="form-checkbox h-4 w-4 text-blue-600 rounded"
-                        />
-                        <span className="text-sm">RSI (14)</span>
-                      </label>
-                      <label className="flex items-center space-x-2">
-                        <input 
-                          type="checkbox" 
-                          checked={selectedIndicators.includes('MACD')} 
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedIndicators([...selectedIndicators, 'MACD']);
-                            } else {
-                              setSelectedIndicators(selectedIndicators.filter(i => i !== 'MACD'));
-                            }
-                          }}
-                          className="form-checkbox h-4 w-4 text-blue-600 rounded"
-                        />
-                        <span className="text-sm">MACD</span>
-                      </label>
-                      <label className="flex items-center space-x-2">
-                        <input 
-                          type="checkbox" 
-                          checked={selectedIndicators.includes('BB')} 
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedIndicators([...selectedIndicators, 'BB']);
-                            } else {
-                              setSelectedIndicators(selectedIndicators.filter(i => i !== 'BB'));
-                            }
-                          }}
-                          className="form-checkbox h-4 w-4 text-blue-600 rounded"
-                        />
-                        <span className="text-sm">Bollinger Bands</span>
-                      </label>
-                    </div>
-                  </div>
-                </div>
-              )}
-              
-              {/* Drawing Tools Panel */}
-              {showDrawingTools && (
-                <div className="absolute right-0 mt-2 w-64 bg-[#1a2932] rounded-md shadow-lg z-10 border border-gray-700">
-                  <div className="p-3 border-b border-gray-700">
-                    <h3 className="text-sm font-medium">Drawing Tools</h3>
-                  </div>
-                  <div className="p-2 grid grid-cols-3 gap-2">
-                    <button 
-                      className={`p-2 rounded flex flex-col items-center justify-center ${activeDrawingTool === 'line' ? 'bg-blue-600' : 'bg-[#253440] hover:bg-[#2d3e4c]'}`}
-                      onClick={() => setActiveDrawingTool(activeDrawingTool === 'line' ? null : 'line')}
-                    >
-                      <FaRulerHorizontal className="text-gray-300" />
-                      <span className="text-xs mt-1">Line</span>
-                    </button>
-                    <button 
-                      className={`p-2 rounded flex flex-col items-center justify-center ${activeDrawingTool === 'rectangle' ? 'bg-blue-600' : 'bg-[#253440] hover:bg-[#2d3e4c]'}`}
-                      onClick={() => setActiveDrawingTool(activeDrawingTool === 'rectangle' ? null : 'rectangle')}
-                    >
-                      <FaChartArea className="text-gray-300" />
-                      <span className="text-xs mt-1">Rectangle</span>
-                    </button>
-                    <button 
-                      className={`p-2 rounded flex flex-col items-center justify-center ${activeDrawingTool === 'fibonacci' ? 'bg-blue-600' : 'bg-[#253440] hover:bg-[#2d3e4c]'}`}
-                      onClick={() => setActiveDrawingTool(activeDrawingTool === 'fibonacci' ? null : 'fibonacci')}
-                    >
-                      <FaChartBar className="text-gray-300" />
-                      <span className="text-xs mt-1">Fibonacci</span>
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
             
             {/* Chart Tabs */}
          
@@ -464,7 +323,7 @@ export default function TradingView() {
             <div className="w-full h-96 bg-[#1a2932] rounded-lg">
            
          
-                <div className="h-full border-none">
+            
                   <AdvancedRealTimeChart 
                     theme="dark"
                     backgroundColor="#0f1923"
@@ -472,6 +331,7 @@ export default function TradingView() {
                     interval="15"
                     timezone="Etc/UTC"
                     style="1"
+                  
                     locale="en"
                     toolbar_bg="#0f1923"
                     enable_publishing={false}
@@ -488,7 +348,7 @@ export default function TradingView() {
                   />
                 </div>
               
-            </div>
+           
           </div>
 
           {/* Trades/Info Tabs */}
