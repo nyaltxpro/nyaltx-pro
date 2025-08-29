@@ -48,13 +48,7 @@ export default function AirdropsPage() {
       {/* Header */}
       <Header/>
       <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-3xl font-bold mb-1">Airdrops</h1>
-          <p className="text-gray-400 text-sm">Hurry up! Claim your free tokens before they run out.</p>
-        </div>
-        <div>
-          <ConnectWalletButton />
-        </div>
+ 
         <div className="relative">
           <div className="absolute right-0 -top-24">
             {/* <Image 
@@ -68,33 +62,6 @@ export default function AirdropsPage() {
         </div>
       </div>
 
-      {/* Filter and Create Button */}
-      <div className="flex justify-between items-center mb-8">
-        <div className="flex space-x-2">
-          <h3 className="mr-2 text-gray-400 flex items-center">State</h3>
-          <button 
-            onClick={() => setActiveFilter('active')}
-            className={`px-4 py-1.5 rounded-md transition-all duration-200 relative ${activeFilter === 'active' ? 'bg-primary text-white' : 'bg-transparent text-gray-400 hover:text-white'}`}
-          >
-            Active
-            {activeFilter === 'active' && (
-              <span className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1.5 h-1.5 bg-primary rounded-full animate-pulse"></span>
-            )}
-          </button>
-          <button 
-            onClick={() => setActiveFilter('all')}
-            className={`px-4 py-1.5 rounded-md transition-all duration-200 relative ${activeFilter === 'all' ? 'bg-primary text-white' : 'bg-transparent text-gray-400 hover:text-white'}`}
-          >
-            All
-            {activeFilter === 'all' && (
-              <span className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1.5 h-1.5 bg-primary rounded-full animate-pulse"></span>
-            )}
-          </button>
-        </div>
-        <button className="bg-[#00b8d8] hover:bg-[#00a2c0] text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200">
-          CREATE AIRDROP
-        </button>
-      </div>
 
       {/* Airdrops Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
