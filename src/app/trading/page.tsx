@@ -330,7 +330,7 @@ export default function TradingView() {
                     symbol="COINBASE:USDTUSD"
                     interval="15"
                     timezone="Etc/UTC"
-                    style="1"
+                    style="2"
                   
                     locale="en"
                     toolbar_bg="#0f1923"
@@ -348,7 +348,7 @@ export default function TradingView() {
                   />
                 </div>
               
-           
+            </div>
           </div>
 
           {/* Trades/Info Tabs */}
