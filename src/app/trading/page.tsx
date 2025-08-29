@@ -488,7 +488,7 @@ export default function TradingView() {
                     timezone="Etc/UTC"
                     style="1"
                     locale="en"
-                    toolbar_bg="#1a2932"
+                    toolbar_bg="#0f1923"
                     enable_publishing={false}
                     hide_top_toolbar={false}
                     hide_legend={false}
