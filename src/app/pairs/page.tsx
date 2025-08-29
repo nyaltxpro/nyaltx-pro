@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Banner from "../components/Banner";
-import HotPairsTicker from "../components/HotPairsTicker";
-import ConnectWalletButton from '../components/ConnectWalletButton';
+import Banner from "../../components/Banner";
+import HotPairsTicker from "../../components/HotPairsTicker";
+import ConnectWalletButton from '../../components/ConnectWalletButton';
 
 // Define types for our data
 type HotPair = {

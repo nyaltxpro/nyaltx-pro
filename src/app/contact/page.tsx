@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react';
-import Header from '../components/Header';
+import Header from '../../components/Header';
 import { FaEnvelope, FaPhone, FaMapMarkerAlt, FaPaperPlane } from 'react-icons/fa';
 
 export default function ContactPage() {

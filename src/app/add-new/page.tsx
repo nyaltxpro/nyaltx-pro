@@ -3,8 +3,8 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { FaPlus, FaArrowRight, FaExclamationTriangle } from 'react-icons/fa';
-import ConnectWalletButton from '../components/ConnectWalletButton';
-import Banner from '../components/Banner';
+import ConnectWalletButton from '../../components/ConnectWalletButton';
+import Banner from '../../components/Banner';
 import { getCryptoIconUrl } from '../utils/cryptoIcons';
 
 // Define types

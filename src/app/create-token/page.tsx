@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { FaInfoCircle, FaChevronDown, FaChevronUp } from 'react-icons/fa';
-import ConnectWalletButton from '../components/ConnectWalletButton';
+import ConnectWalletButton from '../../components/ConnectWalletButton';
 
 interface FAQ {
   question: string;

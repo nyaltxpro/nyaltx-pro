@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { FaRegStar, FaStar, FaCaretUp, FaCaretDown, FaExternalLinkAlt, FaSearch } from 'react-icons/fa';
-import ConnectWalletButton from '../components/ConnectWalletButton';
-import Banner from '../components/Banner';
+import ConnectWalletButton from '../../components/ConnectWalletButton';
+import Banner from '../../components/Banner';
 
 // Define types
 type TokenPair = {

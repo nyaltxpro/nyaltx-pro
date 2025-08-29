@@ -3,7 +3,7 @@ import ContextProvider from "./providers/Web3Provider";
 import { useState, useEffect } from 'react';
 
 // Import web3modal to initialize it
-import "./lib/web3modal";
+import "../lib/web3modal";
 
 export default function Providers({
   children

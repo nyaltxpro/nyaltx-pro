@@ -1,9 +1,20 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import Banner from './components/Banner';
-import ConnectWalletButton from './components/ConnectWalletButton';
-import Header from './components/Header';
+import Banner from '../components/Banner';
+import ConnectWalletButton from '../components/ConnectWalletButton';
+import Header from '../components/Header';
+import BlockchainSelector from '../components/BlockchainSelector';
+import MemeTokenDisplay from '../components/MemeTokenDisplay';
+import AllChainsDropdown from '../components/AllChainsDropdown';
+import BlockchainNetworksGrid from '../components/BlockchainNetworksGrid';
+import DailyGainers from '../components/DailyGainers';
+import TokenCreator from '../components/TokenCreator';
+import RecentSocials from '../components/RecentSocials';
+import { Blockchain, Token } from '../lib/types/blockchain';
+import { supportedBlockchains, getMemeTokens, getTronNewTokens, getTronPreLaunchedTokens } from '../lib/blockchain/blockchainUtils';
+import Image from 'next/image';
+import memeTokensData from './data/memetoken.json';
 
 // SortConfig type will be used when we reimplement the token sorting functionality
 // type SortConfig = {
@@ -11,16 +22,128 @@ import Header from './components/Header';
 //   direction: 'ascending' | 'descending';
 // } | null;
 
-// Mock data for token race
-const tokenRaceData = [
-  { id: 1, symbol: "SLIPPY", price: "5000", rank: 1 },
-  { id: 2, symbol: "ATH", price: "2200", rank: 2 },
-  { id: 3, symbol: "FOMO", price: "2000", rank: 3 },
-  { id: 4, symbol: "BabyWL", price: "1500", rank: 4 },
-  { id: 5, symbol: "SHIK", price: "1000", rank: 5 },
-  { id: 6, symbol: "NOBODY", price: "1000", rank: 6 },
-  { id: 7, symbol: "Frug", price: "1000", rank: 7 },
-];
+// Get top 10 coins from memetoken.json sorted by market_cap_rank
+const topTokens = [...memeTokensData]
+  .sort((a, b) => (a.market_cap_rank || Infinity) - (b.market_cap_rank || Infinity))
+  .slice(0, 10);
+
+// Format tokens for token race display
+const tokenRaceData = topTokens.map((token, index) => ({
+  id: token.id,
+  symbol: token.symbol.toUpperCase(),
+  price: token.current_price.toString(),
+  rank: index + 1,
+  image: token.image
+}));
+
+// Mock data for token categories (NEW, PRE LAUNCHED, LAUNCHED)
+const tokenCategories = {
+  new: [
+    { 
+      id: 1, 
+      name: "Memewear", 
+      fullName: "Memewear", 
+      symbol: "BRXL_pump", 
+      mcap: "-", 
+      vol: "-", 
+      holders: "-", 
+      time: "12 s", 
+      percentage: "17.6%"
+    },
+    { 
+      id: 2, 
+      name: "Sparky", 
+      fullName: "Sparky", 
+      symbol: "BWGX_pump", 
+      mcap: "-", 
+      vol: "-", 
+      holders: "-", 
+      time: "16 s", 
+      percentage: "7.2%"
+    },
+    { 
+      id: 3, 
+      name: "Garbage", 
+      fullName: "Garbagecoin", 
+      symbol: "GWXG_pump", 
+      mcap: "-", 
+      vol: "-", 
+      holders: "-", 
+      time: "", 
+      percentage: ""
+    }
+  ],
+  preLaunched: [
+    { 
+      id: 1, 
+      name: "jotchua", 
+      fullName: "jotchua", 
+      symbol: "SimW_pump", 
+      mcap: "$67.71K", 
+      vol: "$352.75K", 
+      holders: "226", 
+      time: "48 m", 
+      percentage: "96%"
+    },
+    { 
+      id: 2, 
+      name: "GDP", 
+      fullName: "Gross Domestic Product", 
+      symbol: "3Mmm_pump", 
+      mcap: "$60.73K", 
+      vol: "$14.99K", 
+      holders: "714", 
+      time: "2 h", 
+      percentage: "93%"
+    },
+    { 
+      id: 3, 
+      name: "Cope", 
+      fullName: "Cope", 
+      symbol: "EhxJ_zSs", 
+      mcap: "$60.95K", 
+      vol: "", 
+      holders: "", 
+      time: "", 
+      percentage: ""
+    }
+  ],
+  launched: [
+    { 
+      id: 1, 
+      name: "POT", 
+      fullName: "Juppot", 
+      symbol: "HjPsG_hyds", 
+      mcap: "$467.25", 
+      vol: "$514.94", 
+      holders: "58", 
+      time: "4 m", 
+      percentage: "100%"
+    },
+    { 
+      id: 2, 
+      name: "Rule34", 
+      fullName: "Rule 34", 
+      symbol: "CyAu_pump", 
+      mcap: "$114.02K", 
+      vol: "$335.32K", 
+      holders: "763", 
+      time: "16 m", 
+      percentage: "100%"
+    },
+    { 
+      id: 3, 
+      name: "VWH", 
+      fullName: "Video Wifi Hat", 
+      symbol: "HT.Zc_2RqW", 
+      mcap: "$646.08", 
+      vol: "", 
+      holders: "", 
+      time: "", 
+      percentage: ""
+    }
+  ]
+};
 
 // Mock data for banner items
 const bannerItems = [
@@ -48,133 +171,110 @@ const bannerItems = [
   },
 ];
 
-// Mock data for daily gainers
-const dailyGainers = [
-  { id: 1, name: "Imagine", chain: "WETH", price: "$0.05544", change: "+73,889.14%" },
-  { id: 2, name: "SCALR", chain: "WETH", price: "$0.00344", change: "+35,798.92%" },
-];
-
 // Mock data for daily losers - will be used in future implementation
 // const dailyLosers = [
 //   { id: 1, name: "PEPE", chain: "ETH", price: "$0.00000089", change: "-12.34%" },
 //   { id: 2, name: "SHIB", chain: "ETH", price: "$0.00000178", change: "-8.76%" },
 // ];
 
-// Mock data for token creator
-const tokenCreators = [
-  { id: 1, name: "LADYMOO", time: "6 h ago", chain: "ETH" },
-  { id: 2, name: "MSI", time: "1 d ago", chain: "ETH" },
-];
+// Social updates are now dynamically loaded in the RecentSocials component
 
-// Mock data for recently updated socials
-const recentSocials = [
-  { id: 1, name: "TOTO", time: "1 hour ago", platforms: ["website", "telegram", "twitter", "discord"] },
-  { id: 2, name: "ATH", time: "1 hour ago", platforms: ["website", "twitter", "discord"] },
-];
+// Define types for Tron tokens
+type TronNewToken = {
+  id: string;
+  name: string;
+  logoUrl: string;
+  time: string;
+  price: string;
+  percentage: string;
+  chain: string;
+};
 
-// Mock data for tokens - will be used when we reimplement the token list
-// const mockTokens = [
-//   {
-//     id: 1,
-//     name: "BTC",
-//     symbol: "BTC",
-//     price: 29876.54,
-//     change24h: 5.67,
-//     marketCap: 1234567890,
-//     volume24h: 45678901,
-//     liquidity: 3456789,
-//     chart: "up"
-//   },
-//   {
-//     id: 2,
-//     name: "DOGE",
-//     symbol: "DOGE",
-//     price: 0.12345,
-//     change24h: -2.34,
-//     marketCap: 9876543210,
-//     volume24h: 876543210,
-//     liquidity: 65432198,
-//     chart: "down"
-//   },
-//   {
-//     id: 3,
-//     name: "SHIB",
-//     symbol: "SHIB",
-//     price: 0.00000987,
-//     change24h: 12.45,
-//     marketCap: 5678901234,
-//     volume24h: 345678901,
-//     liquidity: 23456789,
-//     chart: "up"
-//   },
-//   {
-//     id: 4,
-//     name: "FLOKI",
-//     symbol: "FLOKI",
-//     price: 0.00012345,
-//     change24h: -1.23,
-//     marketCap: 3456789012,
-//     volume24h: 234567890,
-//     liquidity: 12345678,
-//     chart: "down"
-//   },
-//   {
-//     id: 5,
-//     name: "WOJAK",
-//     symbol: "WOJAK",
-//     price: 0.00000456,
-//     change24h: 8.90,
-//     marketCap: 2345678901,
-//     volume24h: 123456789,
-//     liquidity: 9876543,
-//     chart: "up"
-//   },
-//   {
-//     id: 6,
-//     name: "BONK",
-//     symbol: "BONK",
-//     price: 0.00000789,
-//     change24h: -3.45,
-//     marketCap: 1987654321,
-//     volume24h: 98765432,
-//     liquidity: 8765432,
-//     chart: "down"
-//   },
-//   {
-//     id: 7,
-//     name: "MEME",
-//     symbol: "MEME",
-//     price: 0.03456,
-//     change24h: 7.89,
-//     marketCap: 4567890123,
-//     volume24h: 456789012,
-//     liquidity: 34567890,
-//     chart: "up"
-//   }
-// ];
-
-// Utility functions - commented out since not currently used but will be needed for future features
-// Format numbers with commas
-// function formatNumber(num: number): string {
-//   return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-// }
-
-// Format currency with appropriate decimals
-// function formatCurrency(num: number): string {
-//   if (num < 0.0001) {
-//     return num.toFixed(8);
-//   } else if (num < 0.01) {
-//     return num.toFixed(6);
-//   } else if (num < 1) {
-//     return num.toFixed(4);
-//   } else {
-//     return num.toFixed(2);
-//   }
-// }
+type TronPreLaunchedToken = {
+  id: string;
+  name: string;
+  logoUrl: string;
+  launchDate: string;
+  holders: string;
+  chain: string;
+};
 
 export default function Home() {
   // Default to dark mode as shown in the image
   const [darkMode] = useState(true);
+  const [selectedBlockchain, setSelectedBlockchain] = useState<Blockchain | null>(supportedBlockchains[0]);
+  const [memeTokens, setMemeTokens] = useState<Token[]>([]);
+  const [isLoadingTokens, setIsLoadingTokens] = useState<boolean>(false);
+  const [selectedChain, setSelectedChain] = useState<string>('ethereum');
+  
+  // State for Tron tokens
+  const [tronNewTokens, setTronNewTokens] = useState<TronNewToken[]>([]);
+  const [tronPreLaunchedTokens, setTronPreLaunchedTokens] = useState<TronPreLaunchedToken[]>([]);
+  const [isLoadingTronTokens, setIsLoadingTronTokens] = useState<boolean>(false);
+  
+  // State for token race slider
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [autoSlide, setAutoSlide] = useState(true);
+  const [isPaused, setIsPaused] = useState(false);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const tokensPerSlide = 5;
+  const totalSlides = Math.ceil(tokenRaceData.length / tokensPerSlide);
+  
+  // Minimum swipe distance in pixels
+  const minSwipeDistance = 50;
+  
+  // Handle swipe gestures
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.targetTouches[0].clientX);
+    setIsPaused(true); // Pause auto-sliding during touch
+  };
+  
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+  
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+    
+    if (isLeftSwipe && currentSlide < totalSlides - 1) {
+      setCurrentSlide(prev => prev + 1);
+    }
+    
+    if (isRightSwipe && currentSlide > 0) {
+      setCurrentSlide(prev => prev - 1);
+    }
+    
+    // Reset touch values
+    setTouchEnd(null);
+    setTouchStart(null);
+    setIsPaused(false); // Resume auto-sliding after touch
+  };
+  
+  // Group tokens for slider display
+  const tokenSlides = [];
+  for (let i = 0; i < tokenRaceData.length; i += tokensPerSlide) {
+    tokenSlides.push(tokenRaceData.slice(i, i + tokensPerSlide));
+  }
+  
+  // Auto slide functionality
+  useEffect(() => {
+    let slideInterval: NodeJS.Timeout;
+    
+    if (autoSlide && totalSlides > 1 && !isPaused) {
+      slideInterval = setInterval(() => {
+        setCurrentSlide(prev => (prev + 1) % totalSlides);
+      }, 3000); // Change slide every 3 seconds
+    }
+    
+    return () => {
+      if (slideInterval) clearInterval(slideInterval);
+    };
+  }, [autoSlide, totalSlides, isPaused]);
 
   // Toggle dark mode
   useEffect(() => {
@@ -184,17 +284,60 @@ export default function Home() {
       document.documentElement.classList.remove('dark');
     }
   }, [darkMode]);
+  
+  // Update selected blockchain when chain is selected from All Chains dropdown
+  useEffect(() => {
+    const blockchain = supportedBlockchains.find(bc => bc.id === selectedChain) || supportedBlockchains[0];
+    setSelectedBlockchain(blockchain);
+  }, [selectedChain]);
 
-  // Sorting functionality will be reimplemented when we add the token list back
+  // Load meme tokens when blockchain changes
+  useEffect(() => {
+    const loadMemeTokens = async () => {
+      if (selectedBlockchain) {
+        setIsLoadingTokens(true);
+        try {
+          const tokens = await getMemeTokens(selectedBlockchain.id);
+          setMemeTokens(tokens);
+        } catch (error) {
+          console.error('Error loading meme tokens:', error);
+          setMemeTokens([]);
+        } finally {
+          setIsLoadingTokens(false);
+        }
+      }
+    };
+    
+    loadMemeTokens();
+  }, [selectedBlockchain]);
+  
+  // Load Tron tokens on component mount
+  useEffect(() => {
+    const loadTronTokens = async () => {
+      setIsLoadingTronTokens(true);
+      try {
+        // Load Tron tokens for NEW and PRE LAUNCHED categories
+        const newTokens = await getTronNewTokens(5); // Get 5 tokens for NEW category
+        const preLaunchedTokens = await getTronPreLaunchedTokens(5); // Get 5 tokens for PRE LAUNCHED category
+        
+        setTronNewTokens(newTokens);
+        setTronPreLaunchedTokens(preLaunchedTokens);
+      } catch (error) {
+        console.error('Error loading Tron tokens:', error);
+        setTronNewTokens([]);
+        setTronPreLaunchedTokens([]);
+      } finally {
+        setIsLoadingTronTokens(false);
+      }
+    };
+    
+    loadTronTokens();
+  }, []);
 
-  // Filter tokens by search term - will be used when we reimplement the token list
-  // const filteredTokens = tokens.filter(token => 
-  //   token.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-  //   token.symbol.toLowerCase().includes(searchTerm.toLowerCase())
-  // );
+ 
 
   return (
-    <div className={`flex flex-col min-h-screen ${!darkMode ? 'light' : ''}`}>
+    <div className={`flex flex-col min-h-screen  ${!darkMode ? 'light' : ''}`}>
       {/* Banner */}
      
 
@@ -220,7 +363,10 @@ export default function Home() {
       
       {/* Stats Bar */}
       <div className="stats-bar mx-4">
-        <div className="text-xl font-bold">DEXTboard</div>
+        <div className="flex justify-between items-center">
+          <div className="text-xl font-bold">Cryipticboard</div>
+        
+        </div>
         <div className="flex space-x-4">
           <div className="stats-item">
             <span className="stats-label">Networks:</span>
@@ -258,119 +404,344 @@ export default function Home() {
           <div className="flex items-center gap-2">
             <span className="text-xl font-bold">🏁 TOKEN RACE</span>
           </div>
-          <div className="flex space-x-2">
+          <div className="flex space-x-2 items-center">
             <button className="py-1 px-3 bg-[#00c3ff] text-black font-bold rounded-md">NITRO</button>
             <button className="py-1 px-3 bg-gray-700 text-white font-bold rounded-md">RANKING</button>
+            <button 
+              onClick={() => setAutoSlide(prev => !prev)}
+              className={`ml-2 py-1 px-3 font-bold rounded-md flex items-center ${autoSlide ? 'bg-green-500 text-white' : 'bg-gray-700 text-white'}`}
+            >
+              <span className="mr-1">{autoSlide ? 'Auto' : 'Manual'}</span>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                {autoSlide ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                )}
+              </svg>
+            </button>
           </div>
         </div>
         
-        <div className="token-race-content">
-          {tokenRaceData.map((token) => (
-            <div key={token.id} className="token-race-item">
-              <div className={`token-race-rank rank-${token.rank}`}>{token.rank}{token.rank === 1 ? 'ST' : token.rank === 2 ? 'ND' : token.rank === 3 ? 'RD' : 'TH'}</div>
-              <div className="token-symbol">{token.symbol}</div>
-              <div className="token-price">{token.price} <span className="text-[#00c3ff]">NITRO</span></div>
-            </div>
-          ))}
+        <div 
+          className={`token-race-slider relative ${isPaused ? 'paused' : ''}`}
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
+          <div className="token-race-content" style={{ transform: `translateX(-${currentSlide * 100}%)` }}>
+            {tokenSlides.map((slideTokens, slideIndex) => (
+              <div 
+                key={`slide-${slideIndex}`} 
+                className="flex gap-2 w-full" 
+                style={{ 
+                  transform: `translateX(${slideIndex * 100}%)`,
+                  position: 'absolute',
+                  left: 0,
+                  opacity: currentSlide === slideIndex ? 1 : 0,
+                  transition: 'opacity 0.3s ease-in-out'
+                }}
+              >
+                {slideTokens.map((token) => (
+                  <div key={token.id} className="token-race-item">
+                    <div className={`token-race-rank rank-${token.rank}`}>{token.rank}{token.rank === 1 ? 'ST' : token.rank === 2 ? 'ND' : token.rank === 3 ? 'RD' : 'TH'}</div>
+                    <div className="flex items-center gap-2">
+                      {token.image && (
+                        <div className="w-5 h-5 rounded-full overflow-hidden">
+                          <Image 
+                            src={token.image} 
+                            alt={token.symbol} 
+                            width={20} 
+                            height={20} 
+                            unoptimized 
+                          />
+                        </div>
+                      )}
+                      <div className="token-symbol">{token.symbol}</div>
+                    </div>
+                    <div className="token-price">{token.price} <span className="text-[#00c3ff]">NITRO</span></div>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+          
+          {/* Slider Navigation */}
+          <button 
+            onClick={() => setCurrentSlide(prev => Math.max(0, prev - 1))}
+            className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-gray-800 bg-opacity-70 p-2 rounded-full z-10"
+            disabled={currentSlide === 0}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          
+          <button 
+            onClick={() => setCurrentSlide(prev => Math.min(totalSlides - 1, prev + 1))}
+            className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-gray-800 bg-opacity-70 p-2 rounded-full z-10"
+            disabled={currentSlide === totalSlides - 1}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+          
+          {/* Slide Counter */}
+          <div className="absolute bottom-0 right-0 bg-gray-800 bg-opacity-70 text-white text-xs px-2 py-1 rounded-tl-md">
+            {currentSlide + 1}/{totalSlides}
+          </div>
+          
+          {/* Slide Indicators */}
+          <div className="flex justify-center mt-4 space-x-2">
+            {Array.from({ length: totalSlides }).map((_, index) => (
+              <button 
+                key={index}
+                onClick={() => setCurrentSlide(index)}
+                className={`w-2 h-2 rounded-full ${currentSlide === index ? 'bg-[#00c3ff]' : 'bg-gray-500'}`}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
+          </div>
         </div>
       </div>
-      
+
+
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4">
         {/* Daily Gainers Section */}
-        <div className="section-card">
-          <div className="section-header">
-            <div className="section-title">Daily gainers</div>
-            <div className="view-more">More ›</div>
-          </div>
-          
-          <div>
-            {dailyGainers.map((token, index) => (
-              <div key={token.id} className="gainer-item">
-                <div className="token-info">
-                  <div className="token-icon">{index + 1}</div>
-                  <div>
-                    <div className="token-name">{token.name}</div>
-                    <div className="token-chain">{token.chain}</div>
-                  </div>
-                </div>
-                <div>
-                  <div className="text-right">{token.price}</div>
-                  <div className="token-percentage percentage-positive">{token.change}</div>
-                </div>
-              </div>
-            ))}
-          </div>
+        <div className="max-h-[400px] overflow-auto section-card">
+          <DailyGainers />
         </div>
         
         {/* Token Creator Section */}
-        <div className="section-card">
-          <div className="section-header">
-            <div className="section-title">
-              <span className="mr-2">🔵</span>
-              Token Creator <span className="text-xs text-secondary">by DEXTools</span>
-            </div>
-            <div className="view-more">More ›</div>
-          </div>
-          
-          <div className="mb-4">
-            <div className="flex justify-between text-sm text-secondary mb-2">
-              <div>Safety for traders.</div>
-              <div>Visibility for your projects.</div>
-            </div>
-          </div>
-          
-          <div>
-            {tokenCreators.map((creator) => (
-              <div key={creator.id} className="gainer-item">
-                <div className="token-info">
-                  <div className="token-icon">👤</div>
-                  <div>
-                    <div className="token-name">{creator.name}</div>
-                    <div className="token-chain">{creator.time}</div>
-                  </div>
-                </div>
-                <div>
-                  <div className="flex items-center">
-                    <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center text-xs font-bold">E</div>
-                    <div className="text-xs ml-1">{creator.chain}</div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+        <div className="max-h-[400px] overflow-auto section-card">
+          <TokenCreator />
         </div>
         
         {/* Recently Updated Socials */}
-        <div className="section-card">
-          <div className="section-header">
-            <div className="section-title">Recently updated socials</div>
-            <div className="view-more">More ›</div>
+        <div className="max-h-[400px] overflow-auto section-card">
+          <RecentSocials />
+        </div>
+      </div>
+      
+      {/* Token Categories Section */}
+      <div className="token-categories flex flex-col  mx-4 mt-6">
+        <div className="flex items-center py-2 rounded-lg card-bg border-gray-700">
+          <div className="flex space-x-4 text-sm font-medium">
+            <button className="py-2 px-4   text-white">Hot Pairs</button>
+            <button className="py-2 px-4 text-gray-400">Token Race</button>
+            <button className="py-2 px-4 text-gray-400">Pairs</button>
+            <button className="py-2 px-4 text-gray-400  bg-opacity-20 rounded-t-md">Meme Board</button>
+            <button className="py-2 px-4 text-gray-400">Token Creator</button>
+            <button className="py-2 px-4 text-gray-400">New Socials</button>
+            <button className="py-2 px-4 text-gray-400">Exchanges</button>
+            <button className="py-2 px-4 text-gray-400">Liquidity Unlocks</button>
+            <button className="py-2 px-4 text-gray-400">Token Unlocks</button>
+          </div>
+          <div className="ml-auto">
+         
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+          {/* NEW Category */}
+          <div className="border border-[#23323c] rounded-lg overflow-hidden">
+            <div className="flex items-center p-3 border-b border-gray-800">
+              <div className="flex items-center">
+                <span className="text-white font-bold mr-2">🆕 NEW</span>
+                <span className="text-xs text-blue-400 ml-2">Tron</span>
+              </div>
+            </div>
+            
+            {isLoadingTronTokens ? (
+              <div className="p-4 text-center text-gray-400">Loading Tron tokens...</div>
+            ) : tronNewTokens.length > 0 ? (
+              tronNewTokens.map((token) => (
+                <div key={token.id} className="p-3 border-b border-gray-800 hover:bg-gray-800">
+                  <div className="flex justify-between items-center mb-2">
+                    <div className="flex items-center">
+                      <div className="w-8 h-8 rounded-md mr-2 overflow-hidden">
+                        <Image 
+                          src={token.logoUrl} 
+                          alt={token.name} 
+                          width={32} 
+                          height={32} 
+                          unoptimized 
+                        />
+                      </div>
+                      <div>
+                        <div className="flex items-center">
+                          <span className="text-white font-medium">{token.name}</span>
+                          <span className="text-blue-400 text-xs ml-2 px-1 rounded bg-blue-900">TRX</span>
+                        </div>
+                        <div className="flex items-center text-xs text-gray-500">
+                          <span>{token.id.substring(0, 8)}...</span>
+                          <span className="ml-2">🔍</span>
+                        </div>
+                      </div>
+                    </div>
+                    <button className="px-3 py-1 bg-[#00b8d8] text-white text-xs font-bold rounded">TRADE</button>
+                  </div>
+                  
+                  <div className="grid grid-cols-3 gap-2 text-xs">
+                    <div>
+                      <div className="text-gray-500">Price</div>
+                      <div className="text-white">{token.price}</div>
+                    </div>
+                    <div>
+                      <div className="text-gray-500">Chain</div>
+                      <div className="text-white">{token.chain}</div>
+                    </div>
+                    <div>
+                      <div className="text-gray-500">Time</div>
+                      <div className="text-white">{token.time}</div>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-2 flex justify-between items-center">
+                    <div className="text-xs text-white">{token.time}</div>
+                    <div className="text-xs text-green-500">{token.percentage}</div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="p-4 text-center text-gray-400">No Tron tokens found</div>
+            )}
           </div>
           
-          <div>
-            {recentSocials.map((social) => (
-              <div key={social.id} className="gainer-item">
-                <div className="token-info">
-                  <div className="token-icon">🔄</div>
+          {/* PRE LAUNCHED Category */}
+          <div className="border border-[#23323c] rounded-lg overflow-hidden">
+            <div className="flex items-center p-3 border-b border-gray-800">
+              <div className="flex items-center">
+                <span className="text-white font-bold mr-2">🚀 PRE LAUNCHED</span>
+                <span className="text-xs text-blue-400 ml-2">Tron</span>
+              </div>
+            </div>
+            
+            {isLoadingTronTokens ? (
+              <div className="p-4 text-center text-gray-400">Loading Tron tokens...</div>
+            ) : tronPreLaunchedTokens.length > 0 ? (
+              tronPreLaunchedTokens.map((token) => (
+                <div key={token.id} className="p-3 border-b border-gray-800 hover:bg-gray-800">
+                  <div className="flex justify-between items-center mb-2">
+                    <div className="flex items-center">
+                      <div className="w-8 h-8 rounded-md mr-2 overflow-hidden">
+                        <Image 
+                          src={token.logoUrl} 
+                          alt={token.name} 
+                          width={32} 
+                          height={32} 
+                          unoptimized 
+                        />
+                      </div>
+                      <div>
+                        <div className="flex items-center">
+                          <span className="text-white font-medium">{token.name}</span>
+                          <span className="text-blue-400 text-xs ml-2 px-1 rounded bg-blue-900">TRX</span>
+                        </div>
+                        <div className="flex items-center text-xs text-gray-500">
+                          <span>{token.id.substring(0, 8)}...</span>
+                          <span className="ml-2">🔍</span>
+                        </div>
+                      </div>
+                    </div>
+                    <button className="px-3 py-1 bg-[#00b8d8] text-white text-xs font-bold rounded">TRADE</button>
+                  </div>
+                  
+                  <div className="grid grid-cols-3 gap-2 text-xs">
+                    <div>
+                      <div className="text-gray-500">Launch</div>
+                      <div className="text-white">{token.launchDate}</div>
+                    </div>
+                    <div>
+                      <div className="text-gray-500">Chain</div>
+                      <div className="text-white">{token.chain}</div>
+                    </div>
+                    <div>
+                      <div className="text-gray-500">Holders</div>
+                      <div className="text-white">{token.holders}</div>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="p-4 text-center text-gray-400">No Tron tokens found</div>
+            )}
+          </div>
+          
+          {/* LAUNCHED Category */}
+          <div className="border border-[#23323c] rounded-lg overflow-hidden">
+            <div className="flex items-center p-3 border-b border-gray-800">
+              <div className="flex items-center">
+                <span className="text-white font-bold mr-2">🚀 LAUNCHED</span>
+              </div>
+            </div>
+            
+            {tronPreLaunchedTokens.map((token) => (
+              <div key={token.id} className="p-3 border-b border-gray-800 hover:bg-gray-800">
+                <div className="flex justify-between items-center mb-2">
+                  <div className="flex items-center">
+                  <div className="w-8 h-8 rounded-md mr-2 overflow-hidden">
+                        <Image 
+                          src={token.logoUrl} 
+                          alt={token.name} 
+                          width={32} 
+                          height={32} 
+                          unoptimized 
+                        />
+                      </div>
+                    <div>
+                      <div className="flex items-center">
+                        <span className="text-white font-medium">{token.name}</span>
+                       
+                       
+                        {/* <span className="text-gray-500 text-xs ml-2">{token.fullName}</span> */}
+                      </div>
+                      <div className="flex items-center text-xs text-gray-500">
+                        <span>{token.chain}</span>
+                      
+                      </div>
+                    </div>
+                  </div>
+                  <button className="px-3 py-1 bg-[#00b8d8] text-white text-xs font-bold rounded">TRADE</button>
+                </div>
+                
+                <div className="grid grid-cols-3 gap-2 text-xs">
+                  {/* <div>
+                    <div className="text-gray-500">MCap.</div>
+                    <div className="text-white">{token.mcap}</div>
+                  </div>
                   <div>
-                    <div className="token-name">{social.name}</div>
-                    <div className="token-chain">{social.time}</div>
+                    <div className="text-gray-500">Vol.</div>
+                    <div className="text-white">{token.volume}</div>
+                  </div> */}
+                  <div>
+                    <div className="text-gray-500">Holders</div>
+                    <div className="text-white">{token.holders}</div>
                   </div>
                 </div>
-                <div>
-                  <div className="flex space-x-1">
-                    {social.platforms.includes('website') && <div className="w-5 h-5 rounded bg-gray-700 flex items-center justify-center">🌐</div>}
-                    {social.platforms.includes('telegram') && <div className="w-5 h-5 rounded bg-gray-700 flex items-center justify-center">📱</div>}
-                    {social.platforms.includes('twitter') && <div className="w-5 h-5 rounded bg-gray-700 flex items-center justify-center">🐦</div>}
-                    {social.platforms.includes('discord') && <div className="w-5 h-5 rounded bg-gray-700 flex items-center justify-center">💬</div>}
+                
+                {token.launchDate && (
+                  <div className="mt-2 flex justify-between items-center">
+                    <div className="text-xs text-white">{token.launchDate}</div>
+                    {token.holders && (
+                      <div className="text-xs text-green-500">{token.holders}</div>
+                    )}
                   </div>
-                </div>
+                )}
               </div>
             ))}
           </div>
         </div>
       </div>
+      
+    
+      
+    
+      
     </div>
   );
 }

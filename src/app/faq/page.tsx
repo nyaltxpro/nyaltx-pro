@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react';
-import Header from '../components/Header';
+import Header from '../../components/Header';
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
 
 interface FAQItem {

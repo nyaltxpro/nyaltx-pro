@@ -13,7 +13,7 @@ import {
   FaFilter,
   FaEllipsisV
 } from 'react-icons/fa';
-import Header from '../components/Header';
+import Header from '../../components/Header';
 
 // Dynamically import ApexCharts to avoid SSR issues
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });

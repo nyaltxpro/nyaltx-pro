@@ -2,161 +2,46 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import ConnectWalletButton from '../components/ConnectWalletButton';
-import Header from '../components/Header';
+import ConnectWalletButton from '../../components/ConnectWalletButton';
+import Header from '../../components/Header';
+import memetokenData from '../data/memetoken.json';
 
+// Interface matching the structure from memetoken.json
 interface Airdrop {
   id: string;
   name: string;
   symbol: string;
-  logo: string;
-  total: string;
-  createdDate: string;
-  createdTime: string;
+  image: string;
+  current_price: number;
+  market_cap: number;
+  market_cap_rank: number;
+  fully_diluted_valuation: number;
+  total_volume: number;
+  high_24h: number;
+  low_24h: number;
+  price_change_24h: number;
+  price_change_percentage_24h: number;
+  market_cap_change_24h: number;
+  market_cap_change_percentage_24h: number;
+  circulating_supply: number;
+  total_supply: number | null;
+  max_supply: number | null;
+  ath: number;
+  ath_change_percentage: number;
+  ath_date: string;
+  atl: number;
+  atl_change_percentage: number;
+  atl_date: string;
+  roi: null;
+  last_updated: string;
 }
 
 export default function AirdropsPage() {
   const [activeFilter, setActiveFilter] = useState<'active' | 'all'>('active');
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
   
-  // Mock data for airdrops
-  const airdrops: Airdrop[] = [
-    {
-      id: '1',
-      name: 'Pepe-X King',
-      symbol: 'PXK',
-      logo: '/airdrops/pepe-x.png',
-      total: '50.00',
-      createdDate: 'Aug 21',
-      createdTime: '01:38:09'
-    },
-    {
-      id: '2',
-      name: 'DOLPHIN PROJECT',
-      symbol: 'DOLPHIN',
-      logo: '/airdrops/dolphin.png',
-      total: '2.00M',
-      createdDate: 'Aug 10',
-      createdTime: '07:09:14'
-    },
-    {
-      id: '3',
-      name: 'CLEONS',
-      symbol: 'CLE',
-      logo: '/airdrops/cleons.png',
-      total: '12.00M',
-      createdDate: 'Aug 10',
-      createdTime: '04:19:28'
-    },
-    {
-      id: '4',
-      name: 'DOLPHIN PROJECT',
-      symbol: 'DOLPHIN',
-      logo: '/airdrops/dolphin.png',
-      total: '100.00K',
-      createdDate: 'Aug 9',
-      createdTime: '06:15:45'
-    },
-    {
-      id: '5',
-      name: 'DOLPHIN PROJECT',
-      symbol: 'DOLPHIN',
-      logo: '/airdrops/dolphin.png',
-      total: '100.00K',
-      createdDate: 'Aug 9',
-      createdTime: '06:00:14'
-    },
-    {
-      id: '6',
-      name: 'JUJI Panda',
-      symbol: 'JUJI',
-      logo: '/airdrops/juji.png',
-      total: '10.00K',
-      createdDate: 'Aug 8',
-      createdTime: '21:24:42'
-    },
-    {
-      id: '7',
-      name: 'AyyLmaos',
-      symbol: 'AYYS',
-      logo: '/airdrops/ayylmaos.png',
-      total: '7.00K',
-      createdDate: 'Jul 14',
-      createdTime: '22:45:28'
-    },
-    {
-      id: '8',
-      name: 'BRO on BASE',
-      symbol: 'BRO',
-      logo: '/airdrops/bro.png',
-      total: '350.00K',
-      createdDate: 'Jun 10',
-      createdTime: '09:12:31'
-    },
-    {
-      id: '9',
-      name: 'Gremly',
-      symbol: 'GREMLY',
-      logo: '/airdrops/gremly.png',
-      total: '225.79B',
-      createdDate: 'Jun 25',
-      createdTime: '17:31:21'
-    },
-    {
-      id: '10',
-      name: 'TAIKI INU',
-      symbol: 'TAIKI',
-      logo: '/airdrops/taiki.png',
-      total: '500.00M',
-      createdDate: 'Jun 3',
-      createdTime: '03:12:40'
-    },
-    {
-      id: '11',
-      name: 'Grump',
-      symbol: 'GRUMP',
-      logo: '/airdrops/grump.png',
-      total: '15.10M',
-      createdDate: 'May 13',
-      createdTime: '13:43:52'
-    },
-    {
-      id: '12',
-      name: 'MemeCoinTracker',
-      symbol: 'MCT',
-      logo: '/airdrops/mct.png',
-      total: '8.00M',
-      createdDate: 'May 11',
-      createdTime: '23:44:43'
-    },
-    {
-      id: '13',
-      name: 'Paft Drunk',
-      symbol: 'PAFT',
-      logo: '/airdrops/paft.png',
-      total: '8.00M',
-      createdDate: 'May 4',
-      createdTime: '21:21:17'
-    },
-    {
-      id: '14',
-      name: 'ethereum maxi',
-      symbol: 'ethmaxi',
-      logo: '/airdrops/ethmaxi.png',
-      total: '1.00M',
-      createdDate: 'Apr 24',
-      createdTime: '05:43:51'
-    },
-    {
-      id: '15',
-      name: 'Sna-King Trump',
-      symbol: 'SNAKT',
-      logo: '/airdrops/snakt.png',
-      total: '3.50M',
-      createdDate: 'Apr 9',
-      createdTime: '09:22:15'
-    }
-  ];
+  // Use memetoken data for airdrops
+  const airdrops: Airdrop[] = memetokenData.slice(0, 30); // Limit to 30 tokens for better performance
 
   return (
     <div className="min-h-screen bg-[#0b1217] text-white p-6">
@@ -172,13 +57,13 @@ export default function AirdropsPage() {
         </div>
         <div className="relative">
           <div className="absolute right-0 -top-24">
-            <Image 
+            {/* <Image 
               src="/airdrops/parachute-tokens.png" 
               alt="Airdrop Tokens" 
               width={300} 
               height={200}
               className="opacity-80"
-            />
+            /> */}
           </div>
         </div>
       </div>
@@ -217,7 +102,7 @@ export default function AirdropsPage() {
           .filter(airdrop => activeFilter === 'all' || 
             // For 'active' filter, show only airdrops from the last 30 days
             (activeFilter === 'active' && 
-              ['Aug', 'Jul'].includes(airdrop.createdDate.split(' ')[0])))
+              new Date(airdrop.last_updated).getTime() > Date.now() - (30 * 24 * 60 * 60 * 1000)))
           .map((airdrop) => (
           <div 
             key={airdrop.id} 
@@ -229,99 +114,30 @@ export default function AirdropsPage() {
             <div className="p-4 flex items-start">
               <div className="w-16 h-16 mr-4 relative">
                 <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-800 flex items-center justify-center">
-                  {airdrop.name === 'Pepe-X King' && (
-                    <div className="absolute inset-0 z-10">
-                      <div className="absolute top-0 left-0 w-full h-full">
-                        <div className="w-16 h-8 relative">
-                          <svg className="absolute -top-2 left-1/2 transform -translate-x-1/2 z-20 w-12 h-6" viewBox="0 0 24 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M12 0L14.5 4.5L19.5 5.25L15.75 8.75L16.75 13.75L12 11.5L7.25 13.75L8.25 8.75L4.5 5.25L9.5 4.5L12 0Z" fill="#FFD700"/>
-                          </svg>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  <div className="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center bg-[#1a2730]">
-                    {airdrop.name === 'Pepe-X King' && (
-                      <div className="w-full h-full bg-green-700 flex items-center justify-center">
-                        <span className="text-2xl">🐸</span>
-                      </div>
-                    )}
-                    {airdrop.name === 'DOLPHIN PROJECT' && (
-                      <div className="w-full h-full bg-blue-900 flex items-center justify-center">
-                        <span className="text-2xl">🐬</span>
-                      </div>
-                    )}
-                    {airdrop.name === 'CLEONS' && (
-                      <div className="w-full h-full bg-yellow-900 flex items-center justify-center">
-                        <span className="text-2xl">👑</span>
-                      </div>
-                    )}
-                    {airdrop.name === 'JUJI Panda' && (
-                      <div className="w-full h-full bg-amber-600 flex items-center justify-center">
-                        <span className="text-2xl">🐼</span>
-                      </div>
-                    )}
-                    {airdrop.name === 'AyyLmaos' && (
-                      <div className="w-full h-full bg-gray-700 flex items-center justify-center">
-                        <span className="text-2xl">👽</span>
-                      </div>
-                    )}
-                    {airdrop.name === 'BRO on BASE' && (
-                      <div className="w-full h-full bg-blue-800 flex items-center justify-center">
-                        <span className="text-2xl">🐐</span>
-                      </div>
-                    )}
-                    {airdrop.name === 'Gremly' && (
-                      <div className="w-full h-full bg-green-600 flex items-center justify-center">
-                        <span className="text-2xl">👺</span>
-                      </div>
-                    )}
-                    {airdrop.name === 'TAIKI INU' && (
-                      <div className="w-full h-full bg-orange-600 flex items-center justify-center">
-                        <span className="text-2xl">🦊</span>
-                      </div>
-                    )}
-                    {airdrop.name === 'Grump' && (
-                      <div className="w-full h-full bg-purple-700 flex items-center justify-center">
-                        <span className="text-2xl">😾</span>
-                      </div>
-                    )}
-                    {airdrop.name === 'MemeCoinTracker' && (
-                      <div className="w-full h-full bg-purple-900 flex items-center justify-center">
-                        <span className="text-2xl">📊</span>
-                      </div>
-                    )}
-                    {airdrop.name === 'Paft Drunk' && (
-                      <div className="w-full h-full bg-gray-600 flex items-center justify-center">
-                        <span className="text-2xl">🤖</span>
-                      </div>
-                    )}
-                    {airdrop.name === 'ethereum maxi' && (
-                      <div className="w-full h-full bg-blue-900 flex items-center justify-center">
-                        <span className="text-2xl">💎</span>
-                      </div>
-                    )}
-                    {airdrop.name === 'Sna-King Trump' && (
-                      <div className="w-full h-full bg-blue-800 flex items-center justify-center">
-                        <span className="text-2xl">👑</span>
-                      </div>
-                    )}
-                  </div>
+                  <Image 
+                    src={airdrop.image || '/placeholder.png'} 
+                    alt={airdrop.name} 
+                    width={56} 
+                    height={56} 
+                    className="rounded-full"
+                  />
                 </div>
               </div>
               <div className="flex-1">
                 <h3 className="font-bold text-lg mb-1">{airdrop.name}</h3>
                 <div className="flex items-center mb-1">
-                  <span className="text-gray-400 mr-1">Total:</span>
-                  <span className="font-medium">{airdrop.total}</span>
+                  <span className="text-gray-400 mr-1">Total Supply:</span>
+                  <span className="font-medium">
+                    {airdrop.circulating_supply ? new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 2 }).format(airdrop.circulating_supply) : 'N/A'}
+                  </span>
                   {airdrop.symbol && (
                     <span className="ml-2 bg-gray-700 text-xs px-2 py-0.5 rounded-full text-gray-300">
-                      {airdrop.symbol}
+                      {airdrop.symbol.toUpperCase()}
                     </span>
                   )}
                 </div>
                 <div className="text-xs text-gray-400">
-                  Created {airdrop.createdDate} {airdrop.createdTime}
+                  Updated: {new Date(airdrop.last_updated).toLocaleDateString()} {new Date(airdrop.last_updated).toLocaleTimeString()}
                 </div>
               </div>
             </div>

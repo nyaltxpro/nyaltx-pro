@@ -3,8 +3,8 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { FaExchangeAlt, FaChevronDown, FaCog, FaSync, FaSearch, FaTimes } from 'react-icons/fa';
-import ConnectWalletButton from '../components/ConnectWalletButton';
-import Banner from '../components/Banner';
+import ConnectWalletButton from '../../components/ConnectWalletButton';
+import Banner from '../../components/Banner';
 import { getCryptoIconUrl } from '../utils/cryptoIcons';
 
 export default function SwapPage() {

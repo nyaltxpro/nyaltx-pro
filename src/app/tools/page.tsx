@@ -18,8 +18,8 @@ import {
   FaCheck,
   FaInfoCircle
 } from 'react-icons/fa';
-import Banner from '../components/Banner';
-import ConnectWalletButton from '../components/ConnectWalletButton';
+import Banner from '../../components/Banner';
+import ConnectWalletButton from '../../components/ConnectWalletButton';
 import { getCryptoIconUrl } from '../utils/cryptoIcons';
 
 // Tool category type

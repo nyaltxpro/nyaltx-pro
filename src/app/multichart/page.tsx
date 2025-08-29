@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import Banner from '../components/Banner';
-import ConnectWalletButton from '../components/ConnectWalletButton';
+import Banner from '../../components/Banner';
+import ConnectWalletButton from '../../components/ConnectWalletButton';
 
 // Define types
 type ChartItem = {

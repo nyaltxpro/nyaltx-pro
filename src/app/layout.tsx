@@ -2,12 +2,12 @@
 import type { Metadata } from "next";
 import { Poppins, Inter } from "next/font/google";
 import "./globals.css";
-import Sidebar from "./components/Sidebar";
-import Footer from "./components/Footer";
+import Sidebar from "../components/Sidebar";
+import Footer from "../components/Footer";
 import Providers from "./providers";
 import "./globals.css";
 
-import "./lib/web3modal";
+import "../lib/web3modal";
 
 const poppins = Poppins({
   weight: ['400', '500', '600', '700'],
@@ -36,7 +36,7 @@ export default function RootLayout({
 
   
   return (
-    <html lang="en">
+    <html lang="en" className={poppins.variable}>
       <body
         className={inter.className}
       >

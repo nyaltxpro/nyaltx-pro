@@ -3,10 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { FaSearch, FaCaretUp, FaCaretDown, FaExternalLinkAlt, FaRegStar, FaStar } from 'react-icons/fa';
-import ConnectWalletButton from '../components/ConnectWalletButton';
-import Banner from '../components/Banner';
+import ConnectWalletButton from '../../components/ConnectWalletButton';
+import Banner from '../../components/Banner';
 import { getCryptoIconUrl } from '../utils/cryptoIcons';
-import Header from '../components/Header';
+import Header from '../../components/Header';
 
 // Define types
 type TrendingToken = {

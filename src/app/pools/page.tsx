@@ -14,8 +14,8 @@ import {
   FaSortDown,
   FaExternalLinkAlt
 } from 'react-icons/fa';
-import Banner from '../components/Banner';
-import ConnectWalletButton from '../components/ConnectWalletButton';
+import Banner from '../../components/Banner';
+import ConnectWalletButton from '../../components/ConnectWalletButton';
 import { getCryptoIconUrl } from '../utils/cryptoIcons';
 
 // Pool type definition

@@ -1,6 +1,6 @@
 'use client'
 
-import { wagmiAdapter, projectId } from '../lib/web3modal'
+import { wagmiAdapter, projectId } from '../../lib/web3modal'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { createAppKit } from '@reown/appkit/react'
 import React, { type ReactNode } from 'react'
