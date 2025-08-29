@@ -240,88 +240,9 @@ export default function TradingView() {
         {/* Left Column - Stats and Order Panel */}
         <div className="lg:col-span-1">
           {/* Order Panel */}
-          <div className="bg-[#0f1923] rounded-lg p-4 mb-4">
-            <h2 className="text-lg font-semibold mb-3">Place Order</h2>
-            
-            <div className="flex mb-4">
-              <button 
-                className={`flex-1 py-2 rounded-l-md ${orderType === 'buy' ? 'bg-green-600 text-white' : 'bg-[#1a2932] text-gray-400'}`}
-                onClick={() => setOrderType('buy')}
-              >
-                Buy
-              </button>
-              <button 
-                className={`flex-1 py-2 rounded-r-md ${orderType === 'sell' ? 'bg-red-600 text-white' : 'bg-[#1a2932] text-gray-400'}`}
-                onClick={() => setOrderType('sell')}
-              >
-                Sell
-              </button>
-            </div>
-            
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm text-gray-400 mb-1">Amount USDT</label>
-                <div className="relative">
-                  <input 
-                    type="text" 
-                    className="w-full bg-[#1a2932] rounded-md py-2 px-3 text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    placeholder="0.00"
-                  />
-                  <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-                    <span className="text-gray-400">USDT</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div>
-                <label className="block text-sm text-gray-400 mb-1">Price</label>
-                <div className="relative">
-                  <input 
-                    type="text" 
-                    className="w-full bg-[#1a2932] rounded-md py-2 px-3 text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    placeholder="0.00"
-                    value="1.0002"
-                    readOnly
-                  />
-                  <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-                    <span className="text-gray-400">USD</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div>
-                <label className="block text-sm text-gray-400 mb-1">Total</label>
-                <div className="relative">
-                  <input 
-                    type="text" 
-                    className="w-full bg-[#1a2932] rounded-md py-2 px-3 text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    placeholder="0.00"
-                  />
-                  <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-                    <span className="text-gray-400">USD</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="pt-2">
-                <button className={`w-full py-3 rounded-md font-medium ${orderType === 'buy' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'}`}>
-                  {orderType === 'buy' ? 'Buy USDT' : 'Sell USDT'}
-                </button>
-              </div>
-            </div>
-            
-            <div className="mt-4 pt-4 border-t border-gray-800">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-400">Available Balance</span>
-                <div className="flex items-center">
-                  <FaWallet className="text-gray-500 mr-2" />
-                  <span>1,250.00 USD</span>
-                </div>
-              </div>
-            </div>
-          </div>
+        
           
-          <div className="bg-[#0f1923] rounded-lg p-4 mb-4">
+          <div className="bg-[#0f1923] rounded-xl p-4 mb-4">
             <h2 className="text-lg font-semibold mb-3">Token Info</h2>
             
             <div className="space-y-3">
@@ -352,7 +273,7 @@ export default function TradingView() {
             </div>
           </div>
 
-          <div className="bg-[#0f1923] rounded-lg p-4">
+          <div className="bg-[#0f1923] rounded-xl p-4">
             <h2 className="text-lg font-semibold mb-3">Price Stats</h2>
             
             <div className="space-y-3">
@@ -391,64 +312,10 @@ export default function TradingView() {
         {/* Right Column - Chart and Trades */}
         <div className="lg:col-span-2">
           {/* Chart */}
-          <div className="bg-[#0f1923] rounded-lg p-4 mb-4">
+          <div className="bg-[#0f1923] rounded-xl p-4 mb-4">
             <div className="flex justify-between items-center mb-4">
-              <div className="flex space-x-2">
-                {timeframes.map((timeframe) => (
-                <button
-                  key={timeframe}
-                  className={`px-3 py-1 text-xs rounded ${activeTimeframe === timeframe ? 'bg-blue-600 text-white' : 'bg-[#1a2932] text-gray-400 hover:bg-[#253440]'}`}
-                  onClick={() => {
-                    setActiveTimeframe(timeframe);
-                    
-                    // In a real app, this would fetch data for the selected timeframe
-                    // For now, we'll just simulate different data by adjusting the existing data
-                    const multiplier = timeframes.indexOf(timeframe) + 1;
-                    const adjustedData = candlestickData.map(candle => ({
-                      x: candle.x,
-                      y: candle.y.map(price => price * (1 + (multiplier - 3) * 0.01))
-                    }));
-                    
-                    // Update chart data
-                    setChartData(adjustedData);
-                    
-                    // Update volume data
-                    const newVolumeData = adjustedData.map((candle, index) => {
-                      const isUp = index > 0 ? candle.y[3] > adjustedData[index - 1].y[3] : true;
-                      return {
-                        x: candle.x,
-                        y: Math.floor(Math.random() * 10000 * multiplier) + 5000,
-                        fillColor: isUp ? '#26a69a80' : '#ef535080'
-                      };
-                    });
-                    setChartVolume(newVolumeData);
-                    
-                    // Update MA data
-                    const newMA = [];
-                    for (let i = 0; i < adjustedData.length; i++) {
-                      if (i >= 19) {
-                        let sum = 0;
-                        for (let j = i; j > i - 20; j--) {
-                          sum += adjustedData[j].y[3]; // Close price
-                        }
-                        newMA.push({
-                          x: adjustedData[i].x,
-                          y: sum / 20
-                        });
-                      } else {
-                        newMA.push({
-                          x: adjustedData[i].x,
-                          y: null
-                        });
-                      }
-                    }
-                    setChartMA(newMA);
-                  }}
-                >
-                  {timeframe}
-                </button>
-              ))}
-              </div>
+        
+             
               <div className="flex space-x-2">
                 <button 
                   className="p-2 bg-[#1a2932] rounded hover:bg-[#253440]" 
@@ -640,7 +507,7 @@ export default function TradingView() {
           </div>
 
           {/* Trades/Info Tabs */}
-          <div className="bg-[#0f1923] rounded-lg overflow-hidden">
+          <div className="bg-[#0f1923] rounded-xl overflow-hidden">
             <div className="flex border-b border-gray-800">
               <button
                 className={`px-6 py-3 text-sm font-medium ${
@@ -856,8 +723,8 @@ export default function TradingView() {
           </div>
         </div>
         <div className="lg:col-span-1">
-          <div className="bg-[#0f1923] rounded-lg p-4 mb-4">
-            <h2 className="text-lg font-semibold mb-3">Token Info</h2>
+          <div className="bg-[#0f1923] rounded-xl p-4 mb-4">
+            <h2 className="text-lg font-semibold mb-3">Favorites</h2>
             
             <div className="space-y-3">
               <div className="flex justify-between">
@@ -887,40 +754,6 @@ export default function TradingView() {
             </div>
           </div>
 
-          <div className="bg-[#0f1923] rounded-lg p-4">
-            <h2 className="text-lg font-semibold mb-3">Price Stats</h2>
-            
-            <div className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-gray-400">All Time High</span>
-                <div className="text-right">
-                  <div>$0.8942</div>
-                  <div className="text-xs text-gray-500">Aug 15, 2023</div>
-                </div>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">All Time Low</span>
-                <div className="text-right">
-                  <div>$0.0124</div>
-                  <div className="text-xs text-gray-500">Jan 03, 2023</div>
-                </div>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">24h High</span>
-                <span>$0.6104</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">24h Low</span>
-                <span>$0.5512</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">Price Change (24h)</span>
-                <span className={tokenData.priceChange < 0 ? 'text-red-500' : 'text-green-500'}>
-                  {tokenData.priceChangePercent}%
-                </span>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
