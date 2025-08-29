@@ -338,40 +338,54 @@ export default function Home() {
 
   return (
     <div className={`flex flex-col min-h-screen ${!darkMode ? 'light' : ''}`}>
-      {/* Banner */}
-     
-
       <Header/>
       
-   
-      
-      {/* Banner Section */}
-      <div 
-        className="banner-section w-[95%] mx-auto my-6 px-8 relative py-12 rounded-xl overflow-hidden shadow-2xl" 
-        style={{
-          backgroundImage: 'url("/banner/3.png")',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          minHeight: '220px',
-        }}
-      >
-        {/* Overlay for better text visibility */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-transparent"></div>
-        {/* Content container */}
-        <div className="relative z-10 text-white">
-        {bannerItems.map((item) => (
-          <div key={item.id} className="banner-item">
-            <div>
-              {item.date && <div className="text-xs text-secondary">{item.date}</div>}
-              {item.time && <div className="text-xs text-secondary">{item.time}</div>}
+      {/* Banner Carousel Section */}
+      <div className="banner-carousel w-[95%] mx-auto my-6 overflow-hidden">
+        <div className="flex gap-4 overflow-x-auto pb-4 snap-x">
+          {[1, 2, 3, 4, 5].map((imageNum) => (
+            <div 
+              key={imageNum}
+              className="min-w-[300px] md:min-w-[350px] lg:min-w-[400px] flex-shrink-0 rounded-xl overflow-hidden shadow-lg snap-center"
+            >
+              {/* Banner Image */}
+              <div className="h-[200px] w-full relative">
+                <img 
+                  src={`/banner/${imageNum}.png`} 
+                  alt={`Banner ${imageNum}`}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              
+              {/* Content Below Image */}
+              <div className="p-4 bg-white dark:bg-gray-800">
+                {bannerItems.length >= imageNum && (
+                  <>
+                    <div className="flex justify-between items-center mb-2">
+                      <div>
+                        {bannerItems[imageNum-1]?.date && (
+                          <div className="text-xs text-gray-500 dark:text-gray-400">
+                            {bannerItems[imageNum-1].date}
+                          </div>
+                        )}
+                        {bannerItems[imageNum-1]?.time && (
+                          <div className="text-xs text-gray-500 dark:text-gray-400">
+                            {bannerItems[imageNum-1].time}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <h3 className="text-xl font-bold mb-2">
+                      {bannerItems[imageNum-1]?.title || `Banner ${imageNum}`}
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-300">
+                      {bannerItems[imageNum-1]?.subtitle || "Explore the latest updates and features"}
+                    </p>
+                  </>
+                )}
+              </div>
             </div>
-            <div>
-              <div className="banner-title">{item.title}</div>
-              <div className="banner-subtitle">{item.subtitle}</div>
-            </div>
-          </div>
-        ))}
+          ))}
         </div>
       </div>
       
