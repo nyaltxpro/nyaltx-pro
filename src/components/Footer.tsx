@@ -5,7 +5,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { FaTwitter, FaTelegram, FaTiktok, FaYoutube } from 'react-icons/fa';
 import { SiMedium } from 'react-icons/si';
-import { BsInstagram } from 'react-icons/bs';
+import { BsInstagram, BsMedium } from 'react-icons/bs';
+import { FaXTwitter } from 'react-icons/fa6';
 
 const Footer = () => {
   return (
@@ -104,15 +105,15 @@ const Footer = () => {
         {/* Bottom section with links and app store badges */}
         <div className="flex flex-col md:flex-row justify-between items-center border-t border-gray-800 pt-4">
           {/* Social icons */}
-          <div className="flex w-[15%] space-x-4 mb-4 md:mb-0">
+          <div className="grid grid-cols-3 space-x-4 mb-4 md:mb-0">
             <Link href="https://twitter.com/DEXToolsApp" target="_blank" rel="noopener noreferrer">
-              <FaTwitter className="text-gray-400 hover:text-white" />
+              <FaXTwitter className="text-gray-400 hover:text-white" />
             </Link>
             <Link href="https://t.me/DEXToolsCommunity" target="_blank" rel="noopener noreferrer">
               <FaTelegram className="text-gray-400 hover:text-white" />
             </Link>
             <Link href="https://medium.com/@DEXToolsOfficial" target="_blank" rel="noopener noreferrer">
-              <SiMedium className="text-gray-400 hover:text-white" />
+              <BsMedium className="text-gray-400 hover:text-white" />
             </Link>
             <Link href="https://www.instagram.com/dextools.io/" target="_blank" rel="noopener noreferrer">
               <BsInstagram className="text-gray-400 hover:text-white" />
