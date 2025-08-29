@@ -372,7 +372,7 @@ export default function Home() {
                     <p className="text-md font-medium mb-2">
                       {bannerItems[imageNum-1]?.title || `Banner ${imageNum}`}
                     </p>
-                    <p className="text-gray-600 dark:text-gray-300">
+                    <p className="text-gray-600 text-xs dark:text-gray-300">
                       {bannerItems[imageNum-1]?.subtitle || "Explore the latest updates and features"}
                     </p>
                   </>
