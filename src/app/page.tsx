@@ -346,7 +346,7 @@ export default function Home() {
       <Header/>
       
       {/* Banner Carousel Section */}
-      <div className="banner-carousel w-[95%] mx-auto my-6 overflow-hidden">
+      <div className="banner-carousel w-[100%] mx-auto my-6 overflow-hidden">
         <div className="flex gap-4 overflow-x-auto pb-4 snap-x">
           {[1, 2, 3, 4, 5].map((imageNum) => (
             <div 
