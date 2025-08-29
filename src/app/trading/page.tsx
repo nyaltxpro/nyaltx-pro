@@ -458,22 +458,7 @@ export default function TradingView() {
             </div>
             
             {/* Chart Tabs */}
-            <div className="mb-4">
-              <div className="flex border-b border-gray-800">
-                <button
-                  className={`px-4 py-2 text-sm font-medium border-b-2 ${activeChartType === 'custom' ? 'text-blue-400 border-blue-400' : 'text-gray-400 border-transparent hover:text-gray-300'}`}
-                  onClick={() => setActiveChartType('custom')}
-                >
-                  Custom Chart
-                </button>
-                <button
-                  className={`px-4 py-2 text-sm font-medium border-b-2 ${activeChartType === 'tradingview' ? 'text-blue-400 border-blue-400' : 'text-gray-400 border-transparent hover:text-gray-300'}`}
-                  onClick={() => setActiveChartType('tradingview')}
-                >
-                  TradingView
-                </button>
-              </div>
-            </div>
+         
             
             {/* Chart Container */}
             <div className="w-full h-96 bg-[#1a2932] rounded-lg">
