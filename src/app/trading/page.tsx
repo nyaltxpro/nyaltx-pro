@@ -11,154 +11,160 @@ import {
   FaRegClock,
   FaSearch,
   FaFilter,
-  FaEllipsisV
+  FaEllipsisV,
+  FaPencilAlt,
+  FaRulerHorizontal,
+  FaChartBar,
+  FaChartArea,
+  FaWallet,
+  FaExchangeAlt
 } from 'react-icons/fa';
 import Header from '../../components/Header';
 
 // Dynamically import ApexCharts to avoid SSR issues
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
-// Mock data for the trading view
+// USDT token data
 const tokenData = {
-  name: 'FEATURES',
-  symbol: 'FEAT',
-  price: 0.5716,
-  priceChange: -0.01,
-  priceChangePercent: -1.72,
-  marketCap: '$10.5M',
-  volume24h: '$170.8K',
-  liquidity: '$120.6K',
-  holders: 1842,
-  transactions: 11744,
+  name: 'Tether USD',
+  symbol: 'USDT',
+  price: 1.0002,
+  priceChange: 0.0001,
+  priceChangePercent: 0.01,
+  marketCap: '$103.4B',
+  volume24h: '$42.7B',
+  liquidity: '$5.2B',
+  holders: 4820156,
+  transactions: 1245789,
 };
 
 const timeframes = ['1m', '5m', '15m', '30m', '1h', '4h', '1d', '1w'];
 
-// Mock candlestick data for the chart
+// USDT candlestick data - realistic stablecoin price movements
 const candlestickData = [
   {
     x: new Date(2023, 7, 28, 10, 0).getTime(),
-    y: [0.5716, 0.5820, 0.5650, 0.5790]
+    y: [1.0002, 1.0008, 0.9998, 1.0005]
   },
   {
     x: new Date(2023, 7, 28, 10, 15).getTime(),
-    y: [0.5790, 0.5850, 0.5760, 0.5810]
+    y: [1.0005, 1.0009, 1.0001, 1.0003]
   },
   {
     x: new Date(2023, 7, 28, 10, 30).getTime(),
-    y: [0.5810, 0.5890, 0.5780, 0.5845]
+    y: [1.0003, 1.0007, 0.9999, 1.0001]
   },
   {
     x: new Date(2023, 7, 28, 10, 45).getTime(),
-    y: [0.5845, 0.5910, 0.5800, 0.5870]
+    y: [1.0001, 1.0006, 0.9997, 1.0004]
   },
   {
     x: new Date(2023, 7, 28, 11, 0).getTime(),
-    y: [0.5870, 0.5950, 0.5830, 0.5880]
+    y: [1.0004, 1.0010, 1.0000, 1.0008]
   },
   {
     x: new Date(2023, 7, 28, 11, 15).getTime(),
-    y: [0.5880, 0.5920, 0.5800, 0.5830]
+    y: [1.0008, 1.0012, 1.0003, 1.0005]
   },
   {
     x: new Date(2023, 7, 28, 11, 30).getTime(),
-    y: [0.5830, 0.5870, 0.5770, 0.5810]
+    y: [1.0005, 1.0009, 1.0001, 1.0002]
   },
   {
     x: new Date(2023, 7, 28, 11, 45).getTime(),
-    y: [0.5810, 0.5850, 0.5760, 0.5840]
+    y: [1.0002, 1.0007, 0.9998, 1.0000]
   },
   {
     x: new Date(2023, 7, 28, 12, 0).getTime(),
-    y: [0.5840, 0.5900, 0.5820, 0.5890]
+    y: [1.0000, 1.0005, 0.9996, 0.9999]
   },
   {
     x: new Date(2023, 7, 28, 12, 15).getTime(),
-    y: [0.5890, 0.5950, 0.5850, 0.5920]
+    y: [0.9999, 1.0004, 0.9995, 1.0002]
   },
   {
     x: new Date(2023, 7, 28, 12, 30).getTime(),
-    y: [0.5920, 0.5980, 0.5870, 0.5950]
+    y: [1.0002, 1.0008, 0.9999, 1.0006]
   },
   {
     x: new Date(2023, 7, 28, 12, 45).getTime(),
-    y: [0.5950, 0.6000, 0.5900, 0.5980]
+    y: [1.0006, 1.0011, 1.0002, 1.0009]
   },
   {
     x: new Date(2023, 7, 28, 13, 0).getTime(),
-    y: [0.5980, 0.6050, 0.5930, 0.6000]
+    y: [1.0009, 1.0014, 1.0005, 1.0011]
   },
   {
     x: new Date(2023, 7, 28, 13, 15).getTime(),
-    y: [0.6000, 0.6080, 0.5950, 0.6030]
+    y: [1.0011, 1.0016, 1.0007, 1.0013]
   },
   {
     x: new Date(2023, 7, 28, 13, 30).getTime(),
-    y: [0.6030, 0.6100, 0.5980, 0.6050]
+    y: [1.0013, 1.0018, 1.0009, 1.0015]
   },
   {
     x: new Date(2023, 7, 28, 13, 45).getTime(),
-    y: [0.6050, 0.6120, 0.6000, 0.6080]
+    y: [1.0015, 1.0019, 1.0010, 1.0012]
   },
   {
     x: new Date(2023, 7, 28, 14, 0).getTime(),
-    y: [0.6080, 0.6150, 0.6020, 0.6100]
+    y: [1.0012, 1.0017, 1.0008, 1.0010]
   },
   {
     x: new Date(2023, 7, 28, 14, 15).getTime(),
-    y: [0.6100, 0.6170, 0.6040, 0.6120]
+    y: [1.0010, 1.0015, 1.0006, 1.0008]
   },
   {
     x: new Date(2023, 7, 28, 14, 30).getTime(),
-    y: [0.6120, 0.6180, 0.6050, 0.6090]
+    y: [1.0008, 1.0013, 1.0004, 1.0006]
   },
   {
     x: new Date(2023, 7, 28, 14, 45).getTime(),
-    y: [0.6090, 0.6140, 0.6020, 0.6050]
+    y: [1.0006, 1.0011, 1.0002, 1.0004]
   },
   {
     x: new Date(2023, 7, 28, 15, 0).getTime(),
-    y: [0.6050, 0.6100, 0.5980, 0.6020]
+    y: [1.0004, 1.0009, 1.0000, 1.0002]
   },
   {
     x: new Date(2023, 7, 28, 15, 15).getTime(),
-    y: [0.6020, 0.6070, 0.5950, 0.5980]
+    y: [1.0002, 1.0007, 0.9998, 1.0000]
   },
   {
     x: new Date(2023, 7, 28, 15, 30).getTime(),
-    y: [0.5980, 0.6030, 0.5920, 0.5950]
+    y: [1.0000, 1.0005, 0.9996, 0.9998]
   },
   {
     x: new Date(2023, 7, 28, 15, 45).getTime(),
-    y: [0.5950, 0.6000, 0.5890, 0.5920]
+    y: [0.9998, 1.0003, 0.9994, 0.9996]
   },
   {
     x: new Date(2023, 7, 28, 16, 0).getTime(),
-    y: [0.5920, 0.5970, 0.5860, 0.5890]
+    y: [0.9996, 1.0001, 0.9992, 0.9999]
   },
   {
     x: new Date(2023, 7, 28, 16, 15).getTime(),
-    y: [0.5890, 0.5940, 0.5830, 0.5860]
+    y: [0.9999, 1.0004, 0.9995, 1.0001]
   },
   {
     x: new Date(2023, 7, 28, 16, 30).getTime(),
-    y: [0.5860, 0.5910, 0.5800, 0.5830]
+    y: [1.0001, 1.0006, 0.9997, 1.0003]
   },
   {
     x: new Date(2023, 7, 28, 16, 45).getTime(),
-    y: [0.5830, 0.5880, 0.5770, 0.5800]
+    y: [1.0003, 1.0008, 0.9999, 1.0005]
   },
   {
     x: new Date(2023, 7, 28, 17, 0).getTime(),
-    y: [0.5800, 0.5850, 0.5740, 0.5770]
+    y: [1.0005, 1.0010, 1.0001, 1.0007]
   },
   {
     x: new Date(2023, 7, 28, 17, 15).getTime(),
-    y: [0.5770, 0.5820, 0.5710, 0.5740]
+    y: [1.0007, 1.0012, 1.0003, 1.0004]
   },
   {
     x: new Date(2023, 7, 28, 17, 30).getTime(),
-    y: [0.5740, 0.5790, 0.5680, 0.5716]
+    y: [1.0004, 1.0009, 1.0000, 1.0002]
   }
 ];
 
@@ -198,11 +204,11 @@ for (let i = 0; i < candlestickData.length; i++) {
 };
 
 const tradingHistory = [
-  { id: 1, time: '2023/08/28', type: 'Buy', price: '$0.0718', amount: '$1,000.00', amountToken: '13,927.57', txHash: '0x123...abc' },
-  { id: 2, time: '2023/08/28', type: 'Sell', price: '$0.0724', amount: '$500.00', amountToken: '6,906.08', txHash: '0x456...def' },
-  { id: 3, time: '2023/08/28', type: 'Buy', price: '$0.0715', amount: '$2,000.00', amountToken: '27,972.02', txHash: '0x789...ghi' },
-  { id: 4, time: '2023/08/27', type: 'Sell', price: '$0.0730', amount: '$1,500.00', amountToken: '20,547.94', txHash: '0xabc...123' },
-  { id: 5, time: '2023/08/27', type: 'Buy', price: '$0.0710', amount: '$3,000.00', amountToken: '42,253.52', txHash: '0xdef...456' },
+  { id: 1, time: '2023/08/28', type: 'Buy', price: '$1.0002', amount: '$5,000.00', amountToken: '4,999.00', txHash: '0x123...abc' },
+  { id: 2, time: '2023/08/28', type: 'Sell', price: '$1.0004', amount: '$2,500.00', amountToken: '2,499.00', txHash: '0x456...def' },
+  { id: 3, time: '2023/08/28', type: 'Buy', price: '$0.9998', amount: '$10,000.00', amountToken: '10,002.00', txHash: '0x789...ghi' },
+  { id: 4, time: '2023/08/27', type: 'Sell', price: '$1.0001', amount: '$7,500.00', amountToken: '7,499.25', txHash: '0xabc...123' },
+  { id: 5, time: '2023/08/27', type: 'Buy', price: '$0.9997', amount: '$15,000.00', amountToken: '15,004.50', txHash: '0xdef...456' },
 ];
 
 export default function TradingView() {
@@ -212,57 +218,104 @@ export default function TradingView() {
   const [chartMA, setChartMA] = useState(maData);
   const [favorited, setFavorited] = useState(false);
   const [activeTab, setActiveTab] = useState('trades');
+  const [orderType, setOrderType] = useState('buy');
+  const [selectedIndicators, setSelectedIndicators] = useState(['MA20']);
+  const [showIndicatorModal, setShowIndicatorModal] = useState(false);
+  const [showDrawingTools, setShowDrawingTools] = useState(false);
+  const [activeDrawingTool, setActiveDrawingTool] = useState<string | null>(null);
 
   return (
     <div className="p-4 text-white">
       {/* Token Header */}
       <Header />
-      <div className="bg-[#0f1923] rounded-lg p-4 mb-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
-              <span className="font-bold text-white">F</span>
+    
+
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+        {/* Left Column - Stats and Order Panel */}
+        <div className="lg:col-span-1">
+          {/* Order Panel */}
+          <div className="bg-[#0f1923] rounded-lg p-4 mb-4">
+            <h2 className="text-lg font-semibold mb-3">Place Order</h2>
+            
+            <div className="flex mb-4">
+              <button 
+                className={`flex-1 py-2 rounded-l-md ${orderType === 'buy' ? 'bg-green-600 text-white' : 'bg-[#1a2932] text-gray-400'}`}
+                onClick={() => setOrderType('buy')}
+              >
+                Buy
+              </button>
+              <button 
+                className={`flex-1 py-2 rounded-r-md ${orderType === 'sell' ? 'bg-red-600 text-white' : 'bg-[#1a2932] text-gray-400'}`}
+                onClick={() => setOrderType('sell')}
+              >
+                Sell
+              </button>
             </div>
-            <div>
-              <div className="flex items-center">
-                <h1 className="text-xl font-bold">{tokenData.name}</h1>
-                <span className="ml-2 text-gray-400">{tokenData.symbol}</span>
-                <button 
-                  className="ml-3 text-gray-400 hover:text-yellow-400"
-                  onClick={() => setFavorited(!favorited)}
-                >
-                  <FaStar className={favorited ? 'text-yellow-400' : ''} />
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Amount USDT</label>
+                <div className="relative">
+                  <input 
+                    type="text" 
+                    className="w-full bg-[#1a2932] rounded-md py-2 px-3 text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    placeholder="0.00"
+                  />
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                    <span className="text-gray-400">USDT</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Price</label>
+                <div className="relative">
+                  <input 
+                    type="text" 
+                    className="w-full bg-[#1a2932] rounded-md py-2 px-3 text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    placeholder="0.00"
+                    value="1.0002"
+                    readOnly
+                  />
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                    <span className="text-gray-400">USD</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Total</label>
+                <div className="relative">
+                  <input 
+                    type="text" 
+                    className="w-full bg-[#1a2932] rounded-md py-2 px-3 text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    placeholder="0.00"
+                  />
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                    <span className="text-gray-400">USD</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="pt-2">
+                <button className={`w-full py-3 rounded-md font-medium ${orderType === 'buy' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'}`}>
+                  {orderType === 'buy' ? 'Buy USDT' : 'Sell USDT'}
                 </button>
               </div>
-              <div className="flex items-center text-sm">
-                <span className="text-gray-400">Ethereum</span>
-                <a href="#" className="ml-2 text-blue-400 flex items-center">
-                  <span className="mr-1">0x5716...</span>
-                  <FaExternalLinkAlt className="text-xs" />
-                </a>
+            </div>
+            
+            <div className="mt-4 pt-4 border-t border-gray-800">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-400">Available Balance</span>
+                <div className="flex items-center">
+                  <FaWallet className="text-gray-500 mr-2" />
+                  <span>1,250.00 USD</span>
+                </div>
               </div>
             </div>
           </div>
           
-          <div className="flex items-center space-x-6">
-            <div>
-              <div className="text-2xl font-bold">${tokenData.price}</div>
-              <div className={`flex items-center text-sm ${tokenData.priceChange < 0 ? 'text-red-500' : 'text-green-500'}`}>
-                {tokenData.priceChange < 0 ? <FaArrowDown className="mr-1" /> : <FaArrowUp className="mr-1" />}
-                {tokenData.priceChangePercent}%
-              </div>
-            </div>
-            <button className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-md font-medium">
-              Trade
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-        {/* Left Column - Stats */}
-        <div className="lg:col-span-1">
           <div className="bg-[#0f1923] rounded-lg p-4 mb-4">
             <h2 className="text-lg font-semibold mb-3">Token Info</h2>
             
@@ -331,7 +384,7 @@ export default function TradingView() {
         </div>
 
         {/* Right Column - Chart and Trades */}
-        <div className="lg:col-span-3">
+        <div className="lg:col-span-2">
           {/* Chart */}
           <div className="bg-[#0f1923] rounded-lg p-4 mb-4">
             <div className="flex justify-between items-center mb-4">
@@ -392,16 +445,147 @@ export default function TradingView() {
               ))}
               </div>
               <div className="flex space-x-2">
-                <button className="p-2 bg-[#1a2932] rounded hover:bg-[#253440]">
+                <button 
+                  className="p-2 bg-[#1a2932] rounded hover:bg-[#253440]" 
+                  title="Technical Indicators"
+                  onClick={() => setShowIndicatorModal(!showIndicatorModal)}
+                >
                   <FaChartLine className="text-gray-400" />
+                </button>
+                <button 
+                  className="p-2 bg-[#1a2932] rounded hover:bg-[#253440]" 
+                  title="Drawing Tools"
+                  onClick={() => setShowDrawingTools(!showDrawingTools)}
+                >
+                  <FaPencilAlt className="text-gray-400" />
                 </button>
                 <button className="p-2 bg-[#1a2932] rounded hover:bg-[#253440]">
                   <FaEllipsisV className="text-gray-400" />
                 </button>
               </div>
+              
+              {/* Technical Indicators Modal */}
+              {showIndicatorModal && (
+                <div className="absolute right-0 mt-2 w-64 bg-[#1a2932] rounded-md shadow-lg z-10 border border-gray-700">
+                  <div className="p-3 border-b border-gray-700">
+                    <h3 className="text-sm font-medium">Technical Indicators</h3>
+                  </div>
+                  <div className="p-2">
+                    <div className="space-y-2">
+                      <label className="flex items-center space-x-2">
+                        <input 
+                          type="checkbox" 
+                          checked={selectedIndicators.includes('MA20')} 
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedIndicators([...selectedIndicators, 'MA20']);
+                            } else {
+                              setSelectedIndicators(selectedIndicators.filter(i => i !== 'MA20'));
+                            }
+                          }}
+                          className="form-checkbox h-4 w-4 text-blue-600 rounded"
+                        />
+                        <span className="text-sm">Moving Average (20)</span>
+                      </label>
+                      <label className="flex items-center space-x-2">
+                        <input 
+                          type="checkbox" 
+                          checked={selectedIndicators.includes('MA50')} 
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedIndicators([...selectedIndicators, 'MA50']);
+                            } else {
+                              setSelectedIndicators(selectedIndicators.filter(i => i !== 'MA50'));
+                            }
+                          }}
+                          className="form-checkbox h-4 w-4 text-blue-600 rounded"
+                        />
+                        <span className="text-sm">Moving Average (50)</span>
+                      </label>
+                      <label className="flex items-center space-x-2">
+                        <input 
+                          type="checkbox" 
+                          checked={selectedIndicators.includes('RSI')} 
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedIndicators([...selectedIndicators, 'RSI']);
+                            } else {
+                              setSelectedIndicators(selectedIndicators.filter(i => i !== 'RSI'));
+                            }
+                          }}
+                          className="form-checkbox h-4 w-4 text-blue-600 rounded"
+                        />
+                        <span className="text-sm">RSI (14)</span>
+                      </label>
+                      <label className="flex items-center space-x-2">
+                        <input 
+                          type="checkbox" 
+                          checked={selectedIndicators.includes('MACD')} 
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedIndicators([...selectedIndicators, 'MACD']);
+                            } else {
+                              setSelectedIndicators(selectedIndicators.filter(i => i !== 'MACD'));
+                            }
+                          }}
+                          className="form-checkbox h-4 w-4 text-blue-600 rounded"
+                        />
+                        <span className="text-sm">MACD</span>
+                      </label>
+                      <label className="flex items-center space-x-2">
+                        <input 
+                          type="checkbox" 
+                          checked={selectedIndicators.includes('BB')} 
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedIndicators([...selectedIndicators, 'BB']);
+                            } else {
+                              setSelectedIndicators(selectedIndicators.filter(i => i !== 'BB'));
+                            }
+                          }}
+                          className="form-checkbox h-4 w-4 text-blue-600 rounded"
+                        />
+                        <span className="text-sm">Bollinger Bands</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {/* Drawing Tools Panel */}
+              {showDrawingTools && (
+                <div className="absolute right-0 mt-2 w-64 bg-[#1a2932] rounded-md shadow-lg z-10 border border-gray-700">
+                  <div className="p-3 border-b border-gray-700">
+                    <h3 className="text-sm font-medium">Drawing Tools</h3>
+                  </div>
+                  <div className="p-2 grid grid-cols-3 gap-2">
+                    <button 
+                      className={`p-2 rounded flex flex-col items-center justify-center ${activeDrawingTool === 'line' ? 'bg-blue-600' : 'bg-[#253440] hover:bg-[#2d3e4c]'}`}
+                      onClick={() => setActiveDrawingTool(activeDrawingTool === 'line' ? null : 'line')}
+                    >
+                      <FaRulerHorizontal className="text-gray-300" />
+                      <span className="text-xs mt-1">Line</span>
+                    </button>
+                    <button 
+                      className={`p-2 rounded flex flex-col items-center justify-center ${activeDrawingTool === 'rectangle' ? 'bg-blue-600' : 'bg-[#253440] hover:bg-[#2d3e4c]'}`}
+                      onClick={() => setActiveDrawingTool(activeDrawingTool === 'rectangle' ? null : 'rectangle')}
+                    >
+                      <FaChartArea className="text-gray-300" />
+                      <span className="text-xs mt-1">Rectangle</span>
+                    </button>
+                    <button 
+                      className={`p-2 rounded flex flex-col items-center justify-center ${activeDrawingTool === 'fibonacci' ? 'bg-blue-600' : 'bg-[#253440] hover:bg-[#2d3e4c]'}`}
+                      onClick={() => setActiveDrawingTool(activeDrawingTool === 'fibonacci' ? null : 'fibonacci')}
+                    >
+                      <FaChartBar className="text-gray-300" />
+                      <span className="text-xs mt-1">Fibonacci</span>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
             
-            {/* Candlestick Chart */}
+            {/* USDT Candlestick Chart */}
             <div className="w-full h-96 bg-[#1a2932] rounded-lg">
               {typeof window !== 'undefined' && (
                 <Chart
@@ -409,11 +593,11 @@ export default function TradingView() {
                   height={380}
                   series={[
                     {
-                      name: 'candles',
+                      name: 'USDT/USD',
                       data: chartData
                     },
                     {
-                      name: 'volume',
+                      name: 'Volume',
                       data: chartVolume,
                       type: 'bar'
                     },
@@ -444,8 +628,19 @@ export default function TradingView() {
                       background: '#1a2932',
                       animations: {
                         enabled: true,
+                        dynamicAnimation: {
+                          speed: 350
+                        }
                       },
                       stacked: false,
+                    },
+                    title: {
+                      text: 'USDT/USD Price Chart',
+                      align: 'left',
+                      style: {
+                        fontSize: '16px',
+                        color: '#ffffff'
+                      }
                     },
                     stroke: {
                       width: [1, 0, 2],
@@ -474,6 +669,23 @@ export default function TradingView() {
                         wick: {
                           useFillColor: true,
                         }
+                      },
+                      bar: {
+                        columnWidth: '60%',
+                        colors: {
+                          ranges: [
+                            {
+                              from: -1000,
+                              to: 0,
+                              color: '#ef535080'
+                            },
+                            {
+                              from: 1,
+                              to: 10000,
+                              color: '#26a69a80'
+                            }
+                          ]
+                        }
                       }
                     },
                     xaxis: {
@@ -494,21 +706,51 @@ export default function TradingView() {
                       },
                       axisTicks: {
                         show: false
-                      }
-                    },
-                    yaxis: {
-                      tooltip: {
-                        enabled: true
                       },
-                      labels: {
-                        style: {
-                          colors: '#9ca3af'
-                        },
-                        formatter: function(val) {
-                          return '$' + val.toFixed(4);
+                      crosshairs: {
+                        show: true,
+                        stroke: {
+                          color: '#6366f1',
+                          width: 1,
+                          dashArray: 0
                         }
                       }
                     },
+                    yaxis: [
+                      {
+                        tooltip: {
+                          enabled: true
+                        },
+                        labels: {
+                          style: {
+                            colors: '#9ca3af'
+                          },
+                          formatter: function(val) {
+                            return '$' + val.toFixed(4);
+                          }
+                        },
+                        tickAmount: 6,
+                        min: 0.995,
+                        max: 1.005,
+                        decimalsInFloat: 4,
+                        forceNiceScale: false
+                      },
+                      {
+                        seriesName: 'Volume',
+                        opposite: true,
+                        labels: {
+                          style: {
+                            colors: '#9ca3af'
+                          },
+                          formatter: function(val) {
+                            if (val >= 1000000) return (val / 1000000).toFixed(1) + 'M';
+                            if (val >= 1000) return (val / 1000).toFixed(1) + 'K';
+                            return val.toFixed(0);
+                          }
+                        },
+                        showForNullSeries: false
+                      }
+                    ],
                     grid: {
                       borderColor: '#2d3748',
                       strokeDashArray: 2,
@@ -531,15 +773,44 @@ export default function TradingView() {
                     },
                     tooltip: {
                       theme: 'dark',
+                      shared: true,
+                      custom: [({ seriesIndex, dataPointIndex, w }) => {
+                        const o = w.globals.seriesCandleO[0][dataPointIndex];
+                        const h = w.globals.seriesCandleH[0][dataPointIndex];
+                        const l = w.globals.seriesCandleL[0][dataPointIndex];
+                        const c = w.globals.seriesCandleC[0][dataPointIndex];
+                        const date = w.globals.categoryLabels[dataPointIndex];
+                        
+                        return (
+                          '<div class="apexcharts-tooltip-candlestick">' +
+                          '<div>Date: <span>' + date + '</span></div>' +
+                          '<div>Open: <span style="color: #fff">$' + o.toFixed(4) + '</span></div>' +
+                          '<div>High: <span style="color: #fff">$' + h.toFixed(4) + '</span></div>' +
+                          '<div>Low: <span style="color: #fff">$' + l.toFixed(4) + '</span></div>' +
+                          '<div>Close: <span style="color: #fff">$' + c.toFixed(4) + '</span></div>' +
+                          '</div>'
+                        );
+                      }],
                       x: {
                         format: 'dd MMM HH:mm'
-                      },
-                      y: {
-                        formatter: function(val) {
-                          return '$' + val.toFixed(4);
-                        }
                       }
                     },
+                    annotations: {
+                      yaxis: [
+                        {
+                          y: 1.0000,
+                          borderColor: '#FEB019',
+                          label: {
+                            borderColor: '#FEB019',
+                            style: {
+                              color: '#fff',
+                              background: '#FEB019'
+                            },
+                            text: 'Peg Price $1.00'
+                          }
+                        }
+                      ]
+                    }
                   }}
                 />
               )}
@@ -639,8 +910,9 @@ export default function TradingView() {
               <div className="p-4">
                 <h3 className="text-lg font-semibold mb-3">Token Information</h3>
                 <p className="text-gray-300 mb-4">
-                  FEATURES (FEAT) is a utility token designed for the DeFi ecosystem. It provides governance rights, 
-                  staking rewards, and access to premium features within the platform.
+                  Tether USD (USDT) is a stablecoin pegged to the US Dollar. Each USDT token is backed by one US dollar, 
+                  maintaining a 1:1 ratio with the USD. It enables users to transfer value globally without the volatility 
+                  associated with cryptocurrencies.
                 </p>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -653,11 +925,15 @@ export default function TradingView() {
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-400">Contract</span>
-                        <a href="#" className="text-blue-400 hover:underline">0x5716...8F1b</a>
+                        <a href="#" className="text-blue-400 hover:underline">0xdAC17...4DD0</a>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-400">Decimals</span>
-                        <span>18</span>
+                        <span>6</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Issuer</span>
+                        <span>Tether Limited</span>
                       </div>
                     </div>
                   </div>
@@ -667,15 +943,15 @@ export default function TradingView() {
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
                         <span className="text-gray-400">Website</span>
-                        <a href="#" className="text-blue-400 hover:underline">features.io</a>
+                        <a href="#" className="text-blue-400 hover:underline">tether.to</a>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-400">Twitter</span>
-                        <a href="#" className="text-blue-400 hover:underline">@FeaturesToken</a>
+                        <a href="#" className="text-blue-400 hover:underline">@Tether_to</a>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-400">Telegram</span>
-                        <a href="#" className="text-blue-400 hover:underline">t.me/FeaturesToken</a>
+                        <span className="text-gray-400">Support</span>
+                        <a href="#" className="text-blue-400 hover:underline">support@tether.to</a>
                       </div>
                     </div>
                   </div>
@@ -693,19 +969,19 @@ export default function TradingView() {
                     <div className="space-y-2">
                       <div className="flex justify-between">
                         <span className="text-gray-400">1h Change</span>
-                        <span className="text-red-500">-0.8%</span>
+                        <span className="text-green-500">+0.01%</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-400">24h Change</span>
-                        <span className="text-red-500">-1.72%</span>
+                        <span className="text-green-500">+0.01%</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-400">7d Change</span>
-                        <span className="text-green-500">+12.4%</span>
+                        <span className="text-red-500">-0.02%</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-400">30d Change</span>
-                        <span className="text-green-500">+45.2%</span>
+                        <span className="text-green-500">+0.05%</span>
                       </div>
                     </div>
                   </div>
@@ -715,19 +991,19 @@ export default function TradingView() {
                     <div className="space-y-2">
                       <div className="flex justify-between">
                         <span className="text-gray-400">24h Volume</span>
-                        <span>$170,800</span>
+                        <span>$42.7B</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-400">7d Volume</span>
-                        <span>$1,245,600</span>
+                        <span>$298.4B</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-400">Market Cap Rank</span>
-                        <span>#342</span>
+                        <span>#3</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-400">Volume/Market Cap</span>
-                        <span>0.0163</span>
+                        <span>0.413</span>
                       </div>
                     </div>
                   </div>
@@ -736,14 +1012,92 @@ export default function TradingView() {
                 <h4 className="font-medium mb-3">Holder Distribution</h4>
                 <div className="w-full bg-[#1a2932] rounded-lg p-4 h-48 flex items-center justify-center">
                   <div className="text-center">
-                    <div className="text-gray-400">Holder Distribution Chart</div>
-                    <div className="text-xs text-gray-500 mt-1">
-                      (In a real app, this would be a pie or bar chart showing token distribution)
+                    <div className="text-gray-400">USDT Holder Distribution</div>
+                    <div className="mt-2 flex justify-center space-x-4">
+                      <div className="text-center">
+                        <div className="text-xl font-bold">65%</div>
+                        <div className="text-xs text-gray-500">Exchanges</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-xl font-bold">20%</div>
+                        <div className="text-xs text-gray-500">Institutions</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-xl font-bold">15%</div>
+                        <div className="text-xs text-gray-500">Retail</div>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             )}
+          </div>
+        </div>
+        <div className="lg:col-span-1">
+          <div className="bg-[#0f1923] rounded-lg p-4 mb-4">
+            <h2 className="text-lg font-semibold mb-3">Token Info</h2>
+            
+            <div className="space-y-3">
+              <div className="flex justify-between">
+                <span className="text-gray-400">Price</span>
+                <span>${tokenData.price}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Market Cap</span>
+                <span>{tokenData.marketCap}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">24h Volume</span>
+                <span>{tokenData.volume24h}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Liquidity</span>
+                <span>{tokenData.liquidity}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Holders</span>
+                <span>{tokenData.holders}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Transactions</span>
+                <span>{tokenData.transactions}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-[#0f1923] rounded-lg p-4">
+            <h2 className="text-lg font-semibold mb-3">Price Stats</h2>
+            
+            <div className="space-y-3">
+              <div className="flex justify-between">
+                <span className="text-gray-400">All Time High</span>
+                <div className="text-right">
+                  <div>$0.8942</div>
+                  <div className="text-xs text-gray-500">Aug 15, 2023</div>
+                </div>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">All Time Low</span>
+                <div className="text-right">
+                  <div>$0.0124</div>
+                  <div className="text-xs text-gray-500">Jan 03, 2023</div>
+                </div>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">24h High</span>
+                <span>$0.6104</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">24h Low</span>
+                <span>$0.5512</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Price Change (24h)</span>
+                <span className={tokenData.priceChange < 0 ? 'text-red-500' : 'text-green-500'}>
+                  {tokenData.priceChangePercent}%
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>

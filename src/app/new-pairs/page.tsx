@@ -257,11 +257,11 @@ export default function NewPairsPage() {
   return (
     <div className="min-h-screen bg-[#0b1217] text-white">
       {/* Banner */}
-      <Banner />
+      <Header/>
       
       {/* Header with search and wallet */}
       <div className="container mx-auto px-4 py-4">
-       <Header/>
+     
         
         {/* Filters */}
         <div className="flex space-x-4 mb-4">
