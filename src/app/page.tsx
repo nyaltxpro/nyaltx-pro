@@ -369,7 +369,7 @@ export default function Home() {
               {item.time && <div className="text-xs text-white/80">{item.time}</div>}
             </div>
             <div>
-              <div className="banner-title text-2xl font-bold text-white mb-2">{item.title}</div>
+              <div className="banner-title text-xl font-bold text-white mb-2">{item.title}</div>
               <div className="banner-subtitle text-lg text-white/90">{item.subtitle}</div>
             </div>
           </div>
