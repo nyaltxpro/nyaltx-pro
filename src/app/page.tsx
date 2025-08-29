@@ -364,7 +364,7 @@ export default function Home() {
       {/* Stats Bar */}
       <div className="stats-bar mx-4">
         <div className="flex justify-between items-center">
-          <div className="text-xl font-bold">Cryipticboard</div>
+          <div className="text-xl font-bold">NYALTX board</div>
         
         </div>
         <div className="flex space-x-4">

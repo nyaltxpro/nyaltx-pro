@@ -97,7 +97,7 @@ export default function Sidebar() {
           />
         </div>
         {isExpanded && (
-          <span className="ml-2 font-bold text-white">DexTools</span>
+          <span className="ml-2 font-bold text-white">NYALTX</span>
         )}
       </div>
 
