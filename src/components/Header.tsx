@@ -54,7 +54,7 @@ const Header = () => {
                   <input
                     type="text"
                     placeholder="Search pair by symbol, name, contract or token"
-                    className="w-full py-2 px-10 rounded-lg bg-opacity-10 bg-gray-800 border border-border-color focus:outline-none focus:border-primary"
+                    className="w-full py-2 px-10 rounded-lg bg-opacity-10 bg-gray-800 border border-gray-700 focus:outline-none focus:border-primary"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
