@@ -6,6 +6,7 @@ import { FaPlus, FaArrowRight, FaExclamationTriangle } from 'react-icons/fa';
 import ConnectWalletButton from '../../components/ConnectWalletButton';
 import Banner from '../../components/Banner';
 import { getCryptoIconUrl } from '../utils/cryptoIcons';
+import Header from '@/components/Header';
 
 // Define types
 type AddOption = 'token' | 'pool' | 'farm' | 'nft';
@@ -77,7 +78,7 @@ export default function AddNewPage() {
   return (
     <div className="min-h-screen bg-gray-900 text-white">
       {/* Banner */}
-      <Banner />
+     <Header/>
       
       <div className="container mx-auto px-4 py-6">
         <div className="flex justify-between items-center mb-6">
