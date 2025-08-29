@@ -351,14 +351,14 @@ export default function Home() {
           {[1, 2, 3, 4, 5].map((imageNum) => (
             <div 
               key={imageNum}
-              className="min-w-[100px] md:min-w-[150px] lg:min-w-[200px] flex-shrink-0 rounded-xl overflow-hidden shadow-lg snap-center"
+              className="min-w-[100px] md:min-w-[150px] lg:min-w-[200px] flex-shrink-0  overflow-hidden shadow-lg snap-center"
             >
               {/* Banner Image */}
               <div className="h-[100px] w-full relative">
                 <img 
                   src={`/banner/${imageNum}.png`} 
                   alt={`Banner ${imageNum}`}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full rounded-xl object-cover"
                 />
               </div>
               
