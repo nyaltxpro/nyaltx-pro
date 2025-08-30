@@ -6,11 +6,16 @@ const nextConfig: NextConfig = {
     return config;
   },
   images: {
-    domains: ["coin-images.coingecko.com"],
+    domains: ["coin-images.coingecko.com", "cryptologos.cc"],
     remotePatterns: [
       {
         protocol: "https",
         hostname: "coin-images.coingecko.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "cryptologos.cc",
         pathname: "/**",
       },
     ],

@@ -17,6 +17,8 @@ import { Blockchain, Token } from '../lib/types/blockchain';
 import { supportedBlockchains, getMemeTokens, getTronNewTokens, getTronPreLaunchedTokens } from '../lib/blockchain/blockchainUtils';
 import memeTokensData from './data/memetoken.json';
 import Header from '@/components/Header';
+import RecentlyAddedCoins from '@/components/RecentlyAddedCoins';
+import TrendingCoins from '@/components/TrendingCoins';
 
 // SortConfig type will be used when we reimplement the token sorting functionality
 // type SortConfig = {
@@ -550,12 +552,12 @@ export default function Home() {
         
         {/* Token Creator Section */}
         <div className="max-h-[400px] overflow-auto section-card">
-          <TokenCreator />
+          <RecentlyAddedCoins />
         </div>
         
         {/* Recently Updated Socials */}
         <div className="max-h-[400px] overflow-auto section-card">
-          <RecentSocials />
+          <TrendingCoins />
         </div>
       </div>
       

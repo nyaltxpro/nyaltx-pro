@@ -1,4 +1,5 @@
 import { Blockchain, Token, BlockchainTokens } from '../types/blockchain';
+import { getCryptoIconUrl } from '../../app/utils/cryptoIcons';
 
 // Define supported blockchains with their metadata
 export const supportedBlockchains: Blockchain[] = [
@@ -6,7 +7,7 @@ export const supportedBlockchains: Blockchain[] = [
         id: 'ethereum',
         name: 'Ethereum',
         symbol: 'ETH',
-        logoURI: '/ethereum.svg',
+        logoURI: getCryptoIconUrl('eth'),
         chainId: 1,
         explorerURL: 'https://etherscan.io'
     },
@@ -14,7 +15,7 @@ export const supportedBlockchains: Blockchain[] = [
         id: 'smartchain',
         name: 'Binance Smart Chain',
         symbol: 'BNB',
-        logoURI: '/binance.svg',
+        logoURI: getCryptoIconUrl('bnb'),
         chainId: 56,
         explorerURL: 'https://bscscan.com'
     },
@@ -22,7 +23,7 @@ export const supportedBlockchains: Blockchain[] = [
         id: 'solana',
         name: 'Solana',
         symbol: 'SOL',
-        logoURI: '/solana.svg',
+        logoURI: getCryptoIconUrl('sol'),
         chainId: 101,
         explorerURL: 'https://explorer.solana.com'
     },
@@ -30,7 +31,7 @@ export const supportedBlockchains: Blockchain[] = [
         id: 'arbitrum',
         name: 'Arbitrum',
         symbol: 'ARB',
-        logoURI: '/arbitrum.svg',
+        logoURI: 'https://cryptologos.cc/logos/arbitrum-arb-logo.png',
         chainId: 42161,
         explorerURL: 'https://arbiscan.io'
     },
@@ -38,7 +39,7 @@ export const supportedBlockchains: Blockchain[] = [
         id: 'avalanche',
         name: 'Avalanche',
         symbol: 'AVAX',
-        logoURI: '/avalanche.svg',
+        logoURI: getCryptoIconUrl('avax'),
         chainId: 43114,
         explorerURL: 'https://snowtrace.io'
     },
@@ -46,7 +47,7 @@ export const supportedBlockchains: Blockchain[] = [
         id: 'polygon',
         name: 'Polygon',
         symbol: 'MATIC',
-        logoURI: '/polygon.svg',
+        logoURI: getCryptoIconUrl('matic'),
         chainId: 137,
         explorerURL: 'https://polygonscan.com'
     }
@@ -114,14 +115,35 @@ export function getBlockchainByName(id: string): Blockchain | undefined {
     return supportedBlockchains.find(blockchain => blockchain.id === id);
 }
 
-export async function loadBlockchainIcon(blockchain: string): Promise<string | null> {
-    try {
-        const icon = await import(`../../assets/blockchains/${blockchain}/info/logo.png`);
-        return icon.default;
-
-    } catch (error) {
-        console.error(`Error loading icon for ${blockchain}:`, error);
-        return null;
+export function loadBlockchainIcon(blockchain: string): string {
+    // Map blockchain IDs to their corresponding crypto symbol
+    const blockchainToSymbol: Record<string, string> = {
+        'ethereum': 'eth',
+        'smartchain': 'bnb',
+        'solana': 'sol',
+        'arbitrum': 'arb',
+        'avalanche': 'avax',
+        'polygon': 'matic',
+        'optimism': 'op',
+        'tron': 'trx',
+        'filecoin': 'fil',
+        'near': 'near',
+        'polkadot': 'dot',
+        'kusama': 'ksm',
+        'ripple': 'xrp',
+        'stellar': 'xlm',
+        'tezos': 'xtz',
+        'litecoin': 'ltc',
+        'zcash': 'zec'
+    };
+    
+    const symbol = blockchainToSymbol[blockchain.toLowerCase()];
+    
+    if (symbol) {
+        return getCryptoIconUrl(symbol);
+    } else {
+        // Fallback to a generic blockchain icon
+        return '/blockchain-generic.svg';
     }
 }
 

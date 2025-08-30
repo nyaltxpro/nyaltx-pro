@@ -1,12 +1,27 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { FaExchangeAlt, FaChevronDown, FaCog, FaSync, FaSearch, FaTimes } from 'react-icons/fa';
+import { FaExchangeAlt, FaChevronDown, FaCog, FaSync, FaSearch, FaTimes, FaInfoCircle } from 'react-icons/fa';
 import ConnectWalletButton from '../../components/ConnectWalletButton';
 import Banner from '../../components/Banner';
 import { getCryptoIconUrl } from '../utils/cryptoIcons';
 import Header from '@/components/Header';
+import ExchangeSelector from '@/components/ExchangeSelector';
+import NetworkSelector from '@/components/NetworkSelector';
+import { dexManager } from '@/lib/dex/dexManager';
+import { DexInterface, PriceQuote, Token, CHAIN_IDS, DEX_PROTOCOL } from '@/lib/dex/types';
+
+// Network definitions for UI display
+const networks = [
+  { id: CHAIN_IDS.ETHEREUM, name: 'Ethereum', icon: '/ethereum.svg', color: '#627EEA' },
+  { id: CHAIN_IDS.POLYGON, name: 'Polygon', icon: '/polygon.svg', color: '#8247E5' },
+  { id: CHAIN_IDS.ARBITRUM, name: 'Arbitrum', icon: '/arbitrum.svg', color: '#28A0F0' },
+  { id: CHAIN_IDS.OPTIMISM, name: 'Optimism', icon: '/optimism.svg', color: '#FF0420' },
+  { id: CHAIN_IDS.BSC, name: 'BNB Chain', icon: '/bnb.svg', color: '#F0B90B' },
+  { id: CHAIN_IDS.AVALANCHE, name: 'Avalanche', icon: '/avalanche.svg', color: '#E84142' },
+  { id: CHAIN_IDS.SOLANA, name: 'Solana', icon: '/solana.svg', color: '#14F195' },
+];
 
 export default function SwapPage() {
   const [darkMode] = useState(true);
@@ -17,47 +32,118 @@ export default function SwapPage() {
   const [showTokenModal, setShowTokenModal] = useState(false);
   const [selectingToken, setSelectingToken] = useState<'from' | 'to'>('from');
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedExchange, setSelectedExchange] = useState<DexInterface | null>(null);
+  const [availableExchanges, setAvailableExchanges] = useState<DexInterface[]>([]);
+  const [chainId, setChainId] = useState<number>(CHAIN_IDS.ETHEREUM);
+  const [quotes, setQuotes] = useState<PriceQuote[]>([]);
+  const [bestQuote, setBestQuote] = useState<PriceQuote | null>(null);
+  const [isLoadingQuotes, setIsLoadingQuotes] = useState(false);
 
   // Token selection state
-  const [fromToken, setFromToken] = useState({
+  const [fromToken, setFromToken] = useState<Token>({
+    address: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
     symbol: 'ETH',
     name: 'Ethereum',
-    balance: '0.0',
-    logo: getCryptoIconUrl('eth')
+    decimals: 18,
+    chainId: CHAIN_IDS.ETHEREUM,
+    logoURI: getCryptoIconUrl('eth')
   });
   
-  const [toToken, setToToken] = useState({
+  const [toToken, setToToken] = useState<Token>({
+    address: '0xB8c77482e45F1F44dE1745F52C74426C631bDD52',
     symbol: 'BNB',
     name: 'BNB',
-    balance: '0.0',
-    logo: getCryptoIconUrl('bnb')
+    decimals: 18,
+    chainId: CHAIN_IDS.ETHEREUM,
+    logoURI: getCryptoIconUrl('bnb')
   });
 
-  // Mock token list
-  const tokenList = [
-    { symbol: 'ETH', name: 'Ethereum', balance: '0.0', logo: getCryptoIconUrl('eth') },
-    { symbol: 'USDT', name: 'Tether', balance: '0.0', logo: getCryptoIconUrl('usdt') },
-    { symbol: 'USDC', name: 'USD Coin', balance: '0.0', logo: getCryptoIconUrl('usdc') },
-    { symbol: 'BTC', name: 'Bitcoin', balance: '0.0', logo: getCryptoIconUrl('btc') },
-    { symbol: 'DAI', name: 'Dai', balance: '0.0', logo: getCryptoIconUrl('dai') },
-    { symbol: 'LINK', name: 'Chainlink', balance: '0.0', logo: getCryptoIconUrl('link') },
-    { symbol: 'UNI', name: 'Uniswap', balance: '0.0', logo: getCryptoIconUrl('uni') },
-    { symbol: 'AAVE', name: 'Aave', balance: '0.0', logo: getCryptoIconUrl('aave') },
+  // Token list with proper Token interface
+  const tokenList: Token[] = [
+    { address: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE', symbol: 'ETH', name: 'Ethereum', decimals: 18, chainId: chainId, logoURI: getCryptoIconUrl('eth') },
+    { address: '0xdAC17F958D2ee523a2206206994597C13D831ec7', symbol: 'USDT', name: 'Tether', decimals: 6, chainId: chainId, logoURI: getCryptoIconUrl('usdt') },
+    { address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', symbol: 'USDC', name: 'USD Coin', decimals: 6, chainId: chainId, logoURI: getCryptoIconUrl('usdc') },
+    { address: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', symbol: 'WBTC', name: 'Wrapped Bitcoin', decimals: 8, chainId: chainId, logoURI: getCryptoIconUrl('btc') },
+    { address: '0x6B175474E89094C44Da98b954EedeAC495271d0F', symbol: 'DAI', name: 'Dai', decimals: 18, chainId: chainId, logoURI: getCryptoIconUrl('dai') },
+    { address: '0x514910771AF9Ca656af840dff83E8264EcF986CA', symbol: 'LINK', name: 'Chainlink', decimals: 18, chainId: chainId, logoURI: getCryptoIconUrl('link') },
+    { address: '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984', symbol: 'UNI', name: 'Uniswap', decimals: 18, chainId: chainId, logoURI: getCryptoIconUrl('uni') },
+    { address: '0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9', symbol: 'AAVE', name: 'Aave', decimals: 18, chainId: chainId, logoURI: getCryptoIconUrl('aave') },
   ];
+
+  // Initialize available exchanges and select default exchange
+  useEffect(() => {
+    const exchanges = dexManager.getDexList();
+    setAvailableExchanges(exchanges);
+    
+    // Set default exchange to Uniswap V3 if available
+    const defaultExchange = exchanges.find(ex => ex.config.name === DEX_PROTOCOL.UNISWAP_V3);
+    if (defaultExchange) {
+      setSelectedExchange(defaultExchange);
+    } else if (exchanges.length > 0) {
+      setSelectedExchange(exchanges[0]);
+    }
+  }, []);
+
+  // Get quotes when inputs change
+  useEffect(() => {
+    const getQuotes = async () => {
+      if (!fromAmount || parseFloat(fromAmount) <= 0 || !fromToken || !toToken || !selectedExchange) {
+        setQuotes([]);
+        setBestQuote(null);
+        return;
+      }
+      
+      setIsLoadingQuotes(true);
+      
+      try {
+        const allQuotes = await dexManager.getAllQuotes({
+          tokenIn: fromToken,
+          tokenOut: toToken,
+          amountIn: fromAmount,
+          slippageTolerance: slippage,
+          chainId: chainId
+        });
+        
+        setQuotes(allQuotes);
+        
+        // Find best quote
+        const best = allQuotes.reduce((best, current) => {
+          if (!best || parseFloat(current.outputAmount) > parseFloat(best.outputAmount)) {
+            return current;
+          }
+          return best;
+        }, null as PriceQuote | null);
+        
+        setBestQuote(best);
+        
+        // Update to amount based on selected exchange
+        if (selectedExchange) {
+          const selectedQuote = allQuotes.find(q => q.protocol === selectedExchange.config.name);
+          if (selectedQuote) {
+            setToAmount(selectedQuote.outputAmount);
+          }
+        }
+      } catch (error) {
+        console.error('Error getting quotes:', error);
+      } finally {
+        setIsLoadingQuotes(false);
+      }
+    };
+    
+    getQuotes();
+  }, [fromAmount, fromToken, toToken, selectedExchange, slippage, chainId]);
 
   // Handle input changes
   const handleFromAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setFromAmount(value);
-    // In a real app, this would calculate the equivalent amount based on exchange rates
-    setToAmount(value ? (parseFloat(value) * 1950).toString() : '');
+    // To amount will be updated by the useEffect that fetches quotes
   };
 
   const handleToAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setToAmount(value);
-    // In a real app, this would calculate the equivalent amount based on exchange rates
-    setFromAmount(value ? (parseFloat(value) / 1950).toString() : '');
+    // This is just for UI feedback, actual swaps are always based on exact input
   };
 
   // Swap tokens
@@ -67,6 +153,17 @@ export default function SwapPage() {
     setToToken(temp);
     setFromAmount(toAmount);
     setToAmount(fromAmount);
+  };
+  
+  // Handle exchange selection
+  const handleExchangeSelect = (exchange: DexInterface) => {
+    setSelectedExchange(exchange);
+    
+    // Update the to amount based on the selected exchange's quote
+    const selectedQuote = quotes.find(q => q.protocol === exchange.config.name);
+    if (selectedQuote) {
+      setToAmount(selectedQuote.outputAmount);
+    }
   };
 
   // Toggle settings
@@ -157,7 +254,7 @@ export default function SwapPage() {
             <div className="mb-2">
               <div className="flex justify-between text-sm mb-1">
                 <span>From</span>
-                <span>Balance: {fromToken.balance}</span>
+                <span>Balance: 0.0</span>
               </div>
               <div className="bg-gray-800 rounded-lg p-4">
                 <div className="flex justify-between">
@@ -175,10 +272,10 @@ export default function SwapPage() {
                       setShowTokenModal(true);
                     }}
                   >
-                    {fromToken.logo && (
+                    {fromToken.logoURI && (
                       <div className="w-6 h-6 mr-2 relative">
                         <Image 
-                          src={fromToken.logo} 
+                          src={fromToken.logoURI} 
                           alt={fromToken.symbol} 
                           width={24} 
                           height={24} 
@@ -206,7 +303,7 @@ export default function SwapPage() {
             <div className="mb-4">
               <div className="flex justify-between text-sm mb-1">
                 <span>To</span>
-                <span>Balance: {toToken.balance}</span>
+                <span>Balance: 0.0</span>
               </div>
               <div className="bg-gray-800 rounded-lg p-4">
                 <div className="flex justify-between">
@@ -224,10 +321,10 @@ export default function SwapPage() {
                       setShowTokenModal(true);
                     }}
                   >
-                    {toToken.logo ? (
+                    {toToken.logoURI ? (
                       <div className="w-6 h-6 mr-2 relative">
                         <Image 
-                          src={toToken.logo} 
+                          src={toToken.logoURI} 
                           alt={toToken.symbol} 
                           width={24} 
                           height={24} 
@@ -251,10 +348,85 @@ export default function SwapPage() {
               </div>
             )}
             
+            {/* Network Selector */}
+            <div className="mb-4">
+              <div className="text-sm mb-2">Select Network</div>
+              <NetworkSelector
+                selectedChainId={chainId}
+                onSelectNetwork={(newChainId) => {
+                  setChainId(newChainId);
+                  // Update token chainIds
+                  setFromToken(prev => ({ ...prev, chainId: newChainId }));
+                  setToToken(prev => ({ ...prev, chainId: newChainId }));
+                }}
+              />
+            </div>
+            
             {/* Connect Wallet Button */}
             <button className="w-full bg-[#00b8d8] hover:bg-blue-600 text-white font-medium py-3 px-4 rounded-lg transition-colors">
               Connect wallet
             </button>
+            
+            {/* Exchange Selector */}
+            <div className="mt-4 mb-4">
+              <div className="text-sm mb-2">Select Exchange</div>
+              <ExchangeSelector
+                exchanges={availableExchanges}
+                selectedExchange={selectedExchange}
+                onSelectExchange={handleExchangeSelect}
+                chainId={chainId}
+              />
+            </div>
+            
+            {/* Available Quotes */}
+            {quotes.length > 0 && (
+              <div className="mt-4 mb-4 bg-gray-800 rounded-lg p-3">
+                <div className="text-sm font-medium mb-2">Available Routes</div>
+                {quotes.map((quote, index) => {
+                  const exchange = availableExchanges.find(ex => ex.config.name === quote.protocol);
+                  const isSelected = selectedExchange?.config.name === quote.protocol;
+                  
+                  return (
+                    <div 
+                      key={index} 
+                      className={`flex justify-between items-center p-2 rounded-lg mb-1 cursor-pointer ${isSelected ? 'bg-gray-700' : 'hover:bg-gray-700'}`}
+                      onClick={() => {
+                        if (exchange) {
+                          handleExchangeSelect(exchange);
+                        }
+                      }}
+                    >
+                      <div className="flex items-center">
+                        <div className="w-5 h-5 mr-2">
+                          <Image 
+                            src={exchange?.config.logoURI || '/placeholder.svg'} 
+                            alt={quote.protocol} 
+                            width={20} 
+                            height={20} 
+                          />
+                        </div>
+                        <div>
+                          <span>{quote.protocol}</span>
+                          <div className="flex mt-1">
+                            {exchange?.config.supportedChains.map(supportedChain => (
+                              <div 
+                                key={supportedChain}
+                                className={`w-2 h-2 rounded-full mr-1 ${supportedChain === chainId ? 'bg-green-500' : 'bg-gray-500'}`} 
+                                title={`${networks.find(n => n.id === supportedChain)?.name || 'Unknown'} ${supportedChain === chainId ? '(active)' : ''}`}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div>{parseFloat(quote.outputAmount).toFixed(6)}</div>
+                        <div className="text-xs text-gray-400">Fee: {quote.fee}%</div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
             
             {/* Provider Info */}
             <div className="mt-4">
@@ -263,29 +435,29 @@ export default function SwapPage() {
                 <span>{slippage}%</span>
               </div>
               
-              <div className="flex justify-between items-center mt-2">
-                <span className="text-sm text-gray-400">Provider</span>
-                <div className="flex items-center">
-                  <div className="w-5 h-5 mr-1">
-                    <Image 
-                      src={getCryptoIconUrl('arb')} 
-                      alt="0x" 
-                      width={20} 
-                      height={20} 
-                    />
+              {selectedExchange && (
+                <div className="flex justify-between items-center mt-2">
+                  <span className="text-sm text-gray-400">Provider</span>
+                  <div className="flex items-center">
+                    <div className="w-5 h-5 mr-1">
+                      <Image 
+                        src={selectedExchange.config.logoURI} 
+                        alt={selectedExchange.config.name} 
+                        width={20} 
+                        height={20} 
+                      />
+                    </div>
+                    <span className="text-sm">{selectedExchange.config.name}</span>
                   </div>
-                  <span className="text-sm">0x</span>
                 </div>
-              </div>
+              )}
               
-              <div className="flex justify-between items-center mt-2">
-                <span className="text-sm text-gray-400">By</span>
-                <div className="flex items-center">
-                  <span className="text-sm">0xBase</span>
+              {bestQuote && selectedExchange && bestQuote.protocol !== selectedExchange.config.name && (
+                <div className="flex items-center mt-2 p-2 bg-yellow-800 bg-opacity-30 rounded-lg text-xs">
+                  <FaInfoCircle className="text-yellow-500 mr-2" />
+                  <span>Better rate available on {bestQuote.protocol}</span>
                 </div>
-              </div>
-              
-           
+              )}
             </div>
           </div>
         </div>
@@ -337,7 +509,7 @@ export default function SwapPage() {
                 >
                   <div className="w-8 h-8 mr-3 relative">
                     <Image 
-                      src={token.logo} 
+                      src={token.logoURI || '/placeholder.svg'} 
                       alt={token.symbol} 
                       width={32} 
                       height={32} 
@@ -348,7 +520,7 @@ export default function SwapPage() {
                     <div className="text-sm text-gray-400">{token.symbol}</div>
                   </div>
                   <div className="ml-auto text-right">
-                    <div>{token.balance}</div>
+                    <div>0.0</div>
                   </div>
                 </div>
               ))}
