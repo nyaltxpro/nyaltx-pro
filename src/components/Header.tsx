@@ -75,30 +75,6 @@ const Header = () => {
                 <ConnectWalletButton />
               </div>
             </div>
-      
-            {/* Hot pairs ticker */}
-            {/* <div className="hot-pairs-ticker flex items-center py-2 px-4 overflow-x-auto">
-              <div className="flex items-center bg-[#332700] text-yellow-500 px-2 py-1 rounded mr-2">
-                <span className="mr-1">🔥</span>
-                <span className="font-medium">HOT PAIRS</span>
-              </div>
-              
-              {hotPairs.map((pair) => (
-                <div key={pair.id} className="flex items-center mx-2">
-                  <span className="text-gray-400 mr-1">#{pair.id}</span>
-                  <span className="font-medium mr-1">{pair.symbol}</span>
-                  <span className={`text-sm ${pair.change.startsWith('+') ? 'text-green-500' : 'text-red-500'}`}>
-                    {pair.change}
-                  </span>
-                </div>
-              ))}
-              
-              <div className="ml-auto flex items-center bg-yellow-800 bg-opacity-30 px-2 py-1 rounded">
-                <span className="text-yellow-500 mr-1">🔥</span>
-                <span className="text-yellow-500 font-medium">SUPPLY</span>
-                <span className="ml-1 text-yellow-500">$900</span>
-              </div>
-            </div> */}
             <HotPairsTicker pairs={hotPairs} />
     </div>
   )

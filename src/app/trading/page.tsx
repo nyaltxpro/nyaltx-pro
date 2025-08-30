@@ -18,10 +18,24 @@ import {
   FaChartArea,
   FaWallet,
   FaExchangeAlt,
-  FaExclamationCircle
+  FaExclamationCircle,
+  FaGlobe,
+  FaTelegram,
+  FaTwitter,
+  FaRegCopy,
+  FaChevronDown,
+  FaInfoCircle,
+  FaUsers,
+  FaShieldAlt,
+  FaCoins,
+  FaExclamationTriangle,
+  FaThumbsUp,
+  FaThumbsDown,
+  FaTimes
 } from 'react-icons/fa';
 import { AdvancedRealTimeChart } from 'react-ts-tradingview-widgets';
 import Header from '../../components/Header';
+import Faq from '@/components/Faq';
 
 // Dynamically import ApexCharts to avoid SSR issues
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
@@ -242,68 +256,221 @@ export default function TradingView() {
           {/* Order Panel */}
         
           
-          <div className="bg-[#0f1923] rounded-xl p-4 mb-4">
-            <h2 className="text-lg font-semibold mb-3">Token Info</h2>
-            
-            <div className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-gray-400">Price</span>
-                <span>${tokenData.price}</span>
+          <div className="bg-[#0f1923] rounded-xl overflow-hidden mb-4">
+            <div className="p-4 pb-2">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center">
+                  <img src="/logo.png" alt="Token Logo" className="w-8 h-8 mr-2" />
+                  <div>
+                    <h3 className="font-semibold">UNISWAP V2</h3>
+                  </div>
+                </div>
+                <div>
+                  <button className="p-1 bg-[#1a2932] rounded hover:bg-[#253440]">
+                    <FaSearch className="text-gray-400" size={16} />
+                  </button>
+                </div>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">Market Cap</span>
-                <span>{tokenData.marketCap}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">24h Volume</span>
-                <span>{tokenData.volume24h}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">Liquidity</span>
-                <span>{tokenData.liquidity}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">Holders</span>
-                <span>{tokenData.holders}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">Transactions</span>
-                <span>{tokenData.transactions}</span>
+              
+              <div className="flex justify-between items-center mb-2">
+                <div>
+                  <span className="text-gray-400 mr-1">DEXT:</span>
+                  <span className="text-blue-400">0XFB7...C75A</span>
+                  <button className="ml-1 text-gray-400 hover:text-white">
+                    <FaRegCopy size={14} />
+                  </button>
+                </div>
+                <div>
+                  <span className="text-gray-400 mr-1">PAIR:</span>
+                  <span className="text-blue-400">0XA29...7D6D</span>
+                  <button className="ml-1 text-gray-400 hover:text-white">
+                    <FaRegCopy size={14} />
+                  </button>
+                </div>
               </div>
             </div>
+            
+            <div className="grid grid-cols-2 gap-1">
+              <div className="bg-[#1a2932] p-3">
+                <div className="text-gray-400 text-sm">MARKET CAP</div>
+                <div className="text-xl font-bold">$36.25M</div>
+              </div>
+              <div className="bg-[#1a2932] p-3">
+                <div className="text-gray-400 text-sm">LIQUIDITY</div>
+                <div className="text-xl font-bold">$713.8K</div>
+              </div>
+              <div className="bg-[#1a2932] p-3">
+                <div className="text-gray-400 text-sm">CIRC. SUPPLY</div>
+                <div className="text-xl font-bold">68.02M</div>
+              </div>
+              <div className="bg-[#1a2932] p-3">
+                <div className="text-gray-400 text-sm">HOLDERS</div>
+                <div className="text-xl font-bold">22.88K</div>
+              </div>
+              <div className="bg-[#1a2932] p-3">
+                <div className="text-gray-400 text-sm">TOTAL MKTCAP</div>
+                <div className="text-xl font-bold">$64.25M</div>
+              </div>
+              <div className="bg-[#1a2932] p-3">
+                <div className="text-gray-400 text-sm">24H VOLUME</div>
+                <div className="text-xl font-bold">$62.45K</div>
+              </div>
+              <div className="bg-[#1a2932] p-3">
+                <div className="text-gray-400 text-sm">TOTAL SUPPLY</div>
+                <div className="text-xl font-bold">120.55M</div>
+              </div>
+              <div className="bg-[#1a2932] p-3">
+                <div className="text-gray-400 text-sm">VOLATILITY</div>
+                <div className="text-xl font-bold">0.0874</div>
+              </div>
+            </div>
+            
+            <button className="w-full py-3 text-center text-gray-400 hover:text-white bg-[#1a2932] border-t border-gray-800">
+              More info <FaChevronDown className="inline ml-1" />
+            </button>
           </div>
 
           <div className="bg-[#0f1923] rounded-xl p-4">
-            <h2 className="text-lg font-semibold mb-3">Price Stats</h2>
+            {/* DEXTscore Section */}
+            <div className="flex flex-col items-center mb-6">
+                <div className="relative mb-6">
+                  <div className="w-44 h-28 mx-auto relative">
+                    <svg viewBox="0 0 120 70" className="w-full h-full">
+                      {/* Background semi-circle */}
+                      <path
+                        d="M10,60 A50,50 0 0,1 110,60"
+                        fill="none"
+                        stroke="#1a2932"
+                        strokeWidth="10"
+                        strokeLinecap="round"
+                      />
+                      {/* Foreground semi-circle (score indicator) - full score */}
+                      <path
+                        d="M10,60 A50,50 0 0,1 110,60"
+                        fill="none"
+                        stroke="#00e8fc"
+                        strokeWidth="10"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                    <div className="absolute bottom-0 left-0 right-0 flex justify-center">
+                      <div className="text-4xl font-bold">99<span className="text-gray-400 text-xl">/99</span></div>
+                    </div>
+                  </div>
+                </div>
+              <h2 className="text-xl font-semibold mb-2">DEXTscore</h2>
+              <p className="text-gray-400 text-sm text-center mb-3">Project reliability score based on:</p>
+              
+              <div className="flex justify-center space-x-3 mb-4">
+                <div className="flex flex-col items-center">
+                  <FaInfoCircle className="text-gray-400 mb-1" />
+                  <span className="text-sm">99pt</span>
+                </div>
+                <div className="flex flex-col items-center">
+                  <FaExchangeAlt className="text-gray-400 mb-1" />
+                  <span className="text-sm">99pt</span>
+                </div>
+                <div className="flex flex-col items-center">
+                  <FaUsers className="text-gray-400 mb-1" />
+                  <span className="text-sm">99pt</span>
+                </div>
+                <div className="flex flex-col items-center">
+                  <FaShieldAlt className="text-gray-400 mb-1" />
+                  <span className="text-sm">99pt</span>
+                </div>
+                <div className="flex flex-col items-center">
+                  <FaCoins className="text-gray-400 mb-1" />
+                  <span className="text-sm">99pt</span>
+                </div>
+              </div>
+            </div>
             
-            <div className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-gray-400">All Time High</span>
-                <div className="text-right">
-                  <div>$0.8942</div>
-                  <div className="text-xs text-gray-500">Aug 15, 2023</div>
+            {/* Audit Section */}
+            <div className="mb-6">
+              <div className="flex justify-between items-center mb-4">
+                <div className="flex items-center">
+                  <span className="text-lg font-medium">Audit</span>
+                  <FaInfoCircle className="text-gray-400 ml-2" size={14} />
+                </div>
+                <div className="flex items-center text-gray-400">
+                  <FaExclamationTriangle className="mr-1" size={14} />
+                  <span className="text-sm">Verify external audits</span>
                 </div>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">All Time Low</span>
-                <div className="text-right">
-                  <div>$0.0124</div>
-                  <div className="text-xs text-gray-500">Jan 03, 2023</div>
+              
+              <div className="space-y-4">
+                <div className="flex justify-between items-center py-2 border-b border-gray-800">
+                  <div className="flex items-center">
+                    <FaInfoCircle className="text-gray-400 mr-2" size={14} />
+                    <span>Contract Verified</span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="mr-2">Yes</span>
+                    <div className="w-4 h-4 rounded-full bg-green-500"></div>
+                  </div>
+                </div>
+                
+                <div className="flex justify-between items-center py-2 border-b border-gray-800">
+                  <div className="flex items-center">
+                    <FaInfoCircle className="text-gray-400 mr-2" size={14} />
+                    <span>Honeypot</span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="mr-2">No</span>
+                    <div className="w-4 h-4 rounded-full bg-green-500"></div>
+                  </div>
+                </div>
+                
+                <div className="flex justify-between items-center py-2 border-b border-gray-800">
+                  <div className="flex items-center">
+                    <FaInfoCircle className="text-gray-400 mr-2" size={14} />
+                    <span>Buy Tax</span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="mr-2">0%</span>
+                    <div className="w-4 h-4 rounded-full bg-green-500"></div>
+                  </div>
+                </div>
+                
+                <div className="flex justify-between items-center py-2 border-b border-gray-800">
+                  <div className="flex items-center">
+                    <FaInfoCircle className="text-gray-400 mr-2" size={14} />
+                    <span>Sell Tax</span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="mr-2">0%</span>
+                    <div className="w-4 h-4 rounded-full bg-green-500"></div>
+                  </div>
                 </div>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">24h High</span>
-                <span>$0.6104</span>
+              
+              <button className="w-full py-3 mt-4 bg-green-500 hover:bg-green-600 rounded-md flex items-center justify-center">
+                <FaShieldAlt className="mr-2" />
+                <span>Check Audits</span>
+              </button>
+            </div>
+            
+            {/* Community Trust Section */}
+            <div>
+              <div className="flex justify-between items-center mb-3">
+                <span className="text-lg font-medium">COMMUNITY TRUST</span>
+                <span className="text-gray-400">(4109 votes)</span>
+                <FaInfoCircle className="text-gray-400" size={14} />
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">24h Low</span>
-                <span>$0.5512</span>
+              
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center">
+                  <FaThumbsUp className="text-green-500 mr-1" />
+                  <span className="text-green-500">93.3%</span>
+                </div>
+                <div className="flex items-center">
+                  <span className="text-red-500">6.7%</span>
+                  <FaThumbsDown className="text-red-500 ml-1" />
+                </div>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">Price Change (24h)</span>
-                <span className={tokenData.priceChange < 0 ? 'text-red-500' : 'text-green-500'}>
-                  {tokenData.priceChangePercent}%
-                </span>
+              
+              <div className="w-full bg-gray-800 rounded-full h-2">
+                <div className="bg-gradient-to-r from-green-500 to-red-500 h-2 rounded-full" style={{ width: '93.3%' }}></div>
               </div>
             </div>
           </div>
@@ -320,10 +487,41 @@ export default function TradingView() {
          
             
             {/* Chart Container */}
-            <div className="w-full h-96 bg-[#1a2932] rounded-lg">
-           
-         
-            
+            <div className="w-full h-96  rounded-lg">
+              <div className="flex items-center justify-between p-3 border-b border-gray-800">
+                <div className="flex items-center">
+                  <img src="/logo.png" alt="Token Logo" className="w-8 h-8 mr-2" />
+                  <div>
+                    <h3 className="font-semibold">NYLTAX</h3>
+                    <div className="flex items-center text-sm">
+                      <span className="text-gray-400 mr-2">NLX / WETH</span>
+                      <span className="text-red-500">-6.06%</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center ml-4 space-x-2">
+                    <div className="p-1 rounded-full hover:bg-gray-700 cursor-pointer">
+                      <FaChartLine className="text-gray-400" size={16} />
+                    </div>
+                    <div className="p-1 rounded-full hover:bg-gray-700 cursor-pointer">
+                      <FaGlobe className="text-gray-400" size={16} />
+                    </div>
+                    <div className="p-1 rounded-full hover:bg-gray-700 cursor-pointer">
+                      <FaTelegram className="text-gray-400" size={16} />
+                    </div>
+                    <div className="p-1 rounded-full hover:bg-gray-700 cursor-pointer">
+                      <FaTwitter className="text-gray-400" size={16} />
+                    </div>
+                    <div className="p-1 rounded-full hover:bg-gray-700 cursor-pointer">
+                      <FaSearch className="text-gray-400" size={16} />
+                    </div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-xl font-bold">$0.5330</div>
+                  <div className="text-sm text-gray-400">0.0001228 ETH</div>
+                </div>
+              </div>
+              
                   <AdvancedRealTimeChart 
                     theme="dark"
                     backgroundColor="#0f1923"
@@ -566,36 +764,64 @@ export default function TradingView() {
               </div>
             )}
           </div>
+          <Faq/>
         </div>
         <div className="lg:col-span-1">
           <div className="bg-[#0f1923] rounded-xl p-4 mb-4">
-            <h2 className="text-lg font-semibold mb-3">Favorites</h2>
+            <div className="flex justify-between items-center mb-4">
+              <div className="flex items-center">
+                <h2 className="text-lg font-semibold">FAVORITES</h2>
+                <FaInfoCircle className="text-gray-400 ml-2" size={16} />
+              </div>
+              <div className="flex items-center">
+                <button className="p-2 text-gray-400 hover:text-white">
+                  <FaChartBar size={18} />
+                </button>
+                <button className="p-2 text-gray-400 hover:text-white">
+                  <FaTimes size={18} />
+                </button>
+              </div>
+            </div>
             
-            <div className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-gray-400">Price</span>
-                <span>${tokenData.price}</span>
+            <div className="flex justify-between mb-4">
+              <div className="bg-[#1a2932] rounded-md px-4 py-2 flex-grow mr-2">
+                <div className="flex items-center">
+                  <span className="text-gray-400">Last added</span>
+                  <FaChevronDown className="ml-1 text-gray-400" size={12} />
+                </div>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">Market Cap</span>
-                <span>{tokenData.marketCap}</span>
+              <div className="bg-[#1a2932] rounded-md px-4 py-2 w-24">
+                <div className="flex items-center justify-between">
+                  <span>All</span>
+                  <FaChevronDown className="text-gray-400" size={12} />
+                </div>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">24h Volume</span>
-                <span>{tokenData.volume24h}</span>
+            </div>
+            
+            <div className="bg-[#1a2932] rounded-lg p-3 mb-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center mr-2 overflow-hidden">
+                    <img src="/logo.png" alt="Token Logo" className="w-full h-full object-cover" />
+                  </div>
+                  <div>
+                    <div className="flex items-center">
+                      <span className="font-medium">MAR...</span>
+                      <span className="text-gray-400 ml-2">/ Meet Martin.</span>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <button className="bg-indigo-600 hover:bg-indigo-700 text-sm px-3 py-1 rounded">
+                    Ad
+                  </button>
+                </div>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">Liquidity</span>
-                <span>{tokenData.liquidity}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">Holders</span>
-                <span>{tokenData.holders}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">Transactions</span>
-                <span>{tokenData.transactions}</span>
-              </div>
+            </div>
+            
+            <div className="text-center py-8">
+              <p className="text-xl mb-2">Your favorite list is empty!</p>
+              <p className="text-gray-400">Start building your favorite list by adding this pair.</p>
             </div>
           </div>
 

@@ -86,8 +86,8 @@ export default function Sidebar() {
       onMouseLeave={() => setIsExpanded(false)}
     >
       {/* Logo */}
-      <div className="flex items-center justify-center h-16 border-b border-gray-800">
-        <div className="flex items-center justify-center">
+      <div className="flex items-center w-full justify-center h-16 border-b border-gray-800">
+        <div className="flex items-center justify-start">
           <Image
             src="/logo.png" 
             alt="DexTools Logo" 

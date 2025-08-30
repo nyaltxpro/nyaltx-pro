@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { getRandomSolanaValidatorsAsGainers } from '../lib/blockchain/blockchainUtils';
 
 interface GainerToken {
     id: string;
@@ -18,20 +17,7 @@ export default function DailyGainers() {
     const [tokens, setTokens] = useState<GainerToken[]>([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const fetchGainers = async () => {
-            try {
-                const gainers = await getRandomSolanaValidatorsAsGainers(10);
-                setTokens(gainers);
-            } catch (error) {
-                console.error('Error fetching daily gainers:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchGainers();
-    }, []);
+     
 
     return (
         <>
