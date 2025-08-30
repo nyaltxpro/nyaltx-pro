@@ -1,6 +1,30 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
+import Image from 'next/image'
+import { getTronNewTokens, getTronPreLaunchedTokens } from '../lib/blockchain/blockchainUtils'
 
 const Tokens = () => {
+  const [isLoadingTronTokens, setIsLoadingTronTokens] = useState(true);
+  const [tronNewTokens, setTronNewTokens] = useState<any[]>([]);
+  const [tronPreLaunchedTokens, setTronPreLaunchedTokens] = useState<any[]>([]);
+
+  useEffect(() => {
+    const loadTokens = async () => {
+      try {
+        const newTokens = await getTronNewTokens(5);
+        const preLaunchedTokens = await getTronPreLaunchedTokens(5);
+        
+        setTronNewTokens(newTokens);
+        setTronPreLaunchedTokens(preLaunchedTokens);
+      } catch (error) {
+        console.error('Error loading tokens:', error);
+      } finally {
+        setIsLoadingTronTokens(false);
+      }
+    };
+
+    loadTokens();
+  }, []);
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
     {/* NEW Category */}

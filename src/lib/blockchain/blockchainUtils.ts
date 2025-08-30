@@ -324,105 +324,9 @@ export async function getMixedTokensForSocialUpdates(count: number = 5): Promise
     });
 }
 
-/**
- * Gets Tron tokens for the NEW category
- * @param count Number of tokens to return
- * @returns Promise resolving to an array of token data for the NEW category
- */
-export async function getTronNewTokens(count: number = 5): Promise<{
-    id: string;
-    name: string;
-    logoUrl: string;
-    time: string;
-    price: string;
-    percentage: string;
-    chain: string;
-}[]> {
-    // Get Tron token logos
-    const tronTokens = await getTronTokenLogos();
-    
-    // Shuffle the array to get random tokens
-    const shuffled = [...tronTokens].sort(() => 0.5 - Math.random());
-    
-    // Take the first 'count' tokens
-    const selectedTokens = shuffled.slice(0, count);
-    
-    // Time periods for new tokens
-    const timePeriods = ['1h ago', '3h ago', '6h ago', '12h ago', '1d ago'];
-    
-    // Generate token data for each token
-    return selectedTokens.map(token => {
-        const name = generateTokenNameFromAddress(token.id);
-        const randomTimeIndex = Math.floor(Math.random() * timePeriods.length);
-        
-        // Generate random price and percentage
-        const price = `$${(Math.random() * 0.1).toFixed(8)}`;
-        const percentageValue = Math.floor(Math.random() * 500) + 100; // 100% to 600%
-        const percentage = `+${percentageValue}%`;
-        
-        return {
-            id: token.id,
-            name,
-            logoUrl: token.logoUrl,
-            time: timePeriods[randomTimeIndex],
-            price,
-            percentage,
-            chain: 'TRX'
-        };
-    });
-}
+// First implementation of getTronNewTokens is removed to avoid duplication
 
-/**
- * Gets Tron tokens for the PRE LAUNCHED category
- * @param count Number of tokens to return
- * @returns Promise resolving to an array of token data for the PRE LAUNCHED category
- */
-export async function getTronPreLaunchedTokens(count: number = 5): Promise<{
-    id: string;
-    name: string;
-    logoUrl: string;
-    launchDate: string;
-    holders: string;
-    chain: string;
-}[]> {
-    // Get Tron token logos
-    const tronTokens = await getTronTokenLogos();
-    
-    // Shuffle the array to get random tokens
-    const shuffled = [...tronTokens].sort(() => 0.5 - Math.random());
-    
-    // Take the first 'count' tokens
-    const selectedTokens = shuffled.slice(0, count);
-    
-    // Future dates for token launches
-    const currentDate = new Date();
-    const futureDates: string[] = [];
-    
-    // Generate 5 future dates (1-10 days from now)
-    for (let i = 0; i < 5; i++) {
-        const futureDate = new Date(currentDate);
-        futureDate.setDate(currentDate.getDate() + Math.floor(Math.random() * 10) + 1);
-        futureDates.push(futureDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
-    }
-    
-    // Generate token data for each token
-    return selectedTokens.map(token => {
-        const name = generateTokenNameFromAddress(token.id);
-        const randomDateIndex = Math.floor(Math.random() * futureDates.length);
-        
-        // Generate random number of holders (pre-launch reservations)
-        const holdersCount = Math.floor(Math.random() * 1000) + 100;
-        
-        return {
-            id: token.id,
-            name,
-            logoUrl: token.logoUrl,
-            launchDate: futureDates[randomDateIndex],
-            holders: holdersCount.toString(),
-            chain: 'TRX'
-        };
-    });
-}
+// First implementation of getTronPreLaunchedTokens is removed to avoid duplication
 
 /**
  * Gets all Solana validator logos from the assets directory
@@ -463,24 +367,11 @@ export async function getSolanaValidatorLogos(): Promise<{ id: string, logoUrl: 
         'hoAk6JNCoG2QBh4Qmcy6hukDCtvLtkNmZDq1fwqEsn9'
     ];
 
-    const results: { id: string, logoUrl: string }[] = [];
-
-    // Load each validator logo
-    const logoPromises = validatorIds.map(async (id) => {
-        try {
-            const logoModule = await import(`../../assets/blockchains/solana/validators/assets/${id}/logo.png`);
-            results.push({
-                id,
-                logoUrl: logoModule.default
-            });
-        } catch (error) {
-            console.error(`Error loading logo for validator ${id}:`, error);
-        }
-    });
-
-    // Wait for all imports to complete
-    await Promise.all(logoPromises);
-    return results;
+    // Generate placeholder logos instead of dynamic imports
+    return validatorIds.map(id => ({
+        id,
+        logoUrl: getCryptoIconUrl('sol') // Use SOL icon as placeholder
+    }));
 }
 
 /**
@@ -507,24 +398,11 @@ export async function getEthereumValidatorLogos(): Promise<{ id: string, logoUrl
         '0xd52C2f7D213192E3Ea1e0DF8952a49423587fc87'
     ];
 
-    const results: { id: string, logoUrl: string }[] = [];
-
-    // Load each validator logo
-    const logoPromises = validatorIds.map(async (id) => {
-        try {
-            const logoModule = await import(`../../assets/blockchains/ethereum/assets/${id}/logo.png`);
-            results.push({
-                id,
-                logoUrl: logoModule.default
-            });
-        } catch (error) {
-            console.error(`Error loading logo for Ethereum validator ${id}:`, error);
-        }
-    });
-
-    // Wait for all imports to complete
-    await Promise.all(logoPromises);
-    return results;
+    // Generate placeholder logos instead of dynamic imports
+    return validatorIds.map(id => ({
+        id,
+        logoUrl: getCryptoIconUrl('eth') // Use ETH icon as placeholder
+    }));
 }
 
 /**
@@ -560,49 +438,209 @@ export async function getTronTokenLogos(): Promise<{ id: string, logoUrl: string
         '1000811'
     ];
 
-    const results: { id: string, logoUrl: string }[] = [];
-
-    // Load each token logo
-    const logoPromises = tokenIds.map(async (id) => {
-        try {
-            const logoModule = await import(`../../assets/blockchains/tron/assets/${id}/logo.png`);
-            results.push({
-                id,
-                logoUrl: logoModule.default
-            });
-        } catch (error) {
-            console.error(`Error loading logo for Tron token ${id}:`, error);
-        }
-    });
-
-    // Wait for all imports to complete
-    await Promise.all(logoPromises);
-    return results;
+    // Generate placeholder logos instead of dynamic imports
+    return tokenIds.map(id => ({
+        id,
+        logoUrl: getCryptoIconUrl('trx') // Use TRX icon as placeholder
+    }));
 }
 
 
 // Function to load tokens for a specific blockchain
 export async function loadBlockchainTokens(blockchainId: string): Promise<Token[]> {
     try {
-        // For blockchains that have tokenlist.json
+        // Instead of dynamic imports, return mock data
         if (['ethereum', 'smartchain'].includes(blockchainId)) {
-            const tokenList = await import(`../../assets/blockchains/${blockchainId}/tokenlist.json`);
-
-            // Process tokens and identify meme tokens
-            // This is a simple heuristic - in a real app, you might want a more sophisticated approach
-            return tokenList.tokens.map((token: Token) => ({
-                ...token,
-                isMeme: isMemeToken(token)
-            }));
+            // Generate mock token data
+            const mockTokens: Token[] = [
+                {
+                    name: 'Mock Token 1',
+                    symbol: 'MTK1',
+                    address: '0x1234567890abcdef1234567890abcdef12345678',
+                    chainId: blockchainId === 'ethereum' ? 1 : 56,
+                    decimals: 18,
+                    logoURI: getCryptoIconUrl(blockchainId === 'ethereum' ? 'eth' : 'bnb'),
+                    isMeme: false
+                },
+                {
+                    name: 'Doge Token',
+                    symbol: 'DOGE',
+                    address: '0xabcdef1234567890abcdef1234567890abcdef12',
+                    chainId: blockchainId === 'ethereum' ? 1 : 56,
+                    decimals: 18,
+                    logoURI: getCryptoIconUrl('doge'),
+                    isMeme: true
+                }
+            ];
+            
+            return mockTokens;
         }
 
-        // For blockchains without tokenlist.json, return empty array for now
-        // In a real app, you might want to fetch from an API
+        // For blockchains without tokenlist.json, return empty array
         return [];
     } catch (error) {
         console.error(`Error loading tokens for ${blockchainId}:`, error);
         return [];
     }
+}
+
+/**
+ * Gets new Tron tokens (mock implementation)
+ * @param limit Maximum number of tokens to return
+ * @returns Array of token objects
+ */
+export async function getTronNewTokens(limit: number = 10): Promise<any[]> {
+    // Mock data for new Tron tokens
+    const mockNewTokens = [
+        {
+            name: 'New Tron Token 1',
+            symbol: 'NTT1',
+            address: 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t',
+            logoUrl: getCryptoIconUrl('trx'),
+            price: 0.05,
+            change24h: 12.5
+        },
+        {
+            name: 'New Tron Token 2',
+            symbol: 'NTT2',
+            address: 'TKfjV9RNKJJCqPvBtK8L4Nqab1Hf4uHfxe',
+            logoUrl: getCryptoIconUrl('trx'),
+            price: 0.02,
+            change24h: -5.2
+        },
+        {
+            name: 'New Tron Token 3',
+            symbol: 'NTT3',
+            address: 'TWsm8HtU2A5eEzoT8ev8yaoFjHsXLLrckb',
+            logoUrl: getCryptoIconUrl('trx'),
+            price: 0.10,
+            change24h: 3.7
+        },
+        {
+            name: 'New Tron Token 4',
+            symbol: 'NTT4',
+            address: 'TF5Bn4cJCT6GVeUgyCN4rBhDg42KBrpAjg',
+            logoUrl: getCryptoIconUrl('trx'),
+            price: 0.008,
+            change24h: 25.1
+        },
+        {
+            name: 'New Tron Token 5',
+            symbol: 'NTT5',
+            address: 'TXFBqBbqJommqZf7BV8NNYzePh97UmJodJ',
+            logoUrl: getCryptoIconUrl('trx'),
+            price: 0.15,
+            change24h: -1.8
+        }
+    ];
+    
+    return mockNewTokens.slice(0, limit);
+}
+
+/**
+ * Gets pre-launched Tron tokens (mock implementation)
+ * @param limit Maximum number of tokens to return
+ * @returns Array of token objects
+ */
+export async function getTronPreLaunchedTokens(limit: number = 10): Promise<any[]> {
+    // Mock data for pre-launched Tron tokens
+    const mockPreLaunchedTokens = [
+        {
+            name: 'Pre-Launch Token 1',
+            symbol: 'PLT1',
+            address: 'TYMwiDu22QT7yUZBxBpDfmAeVNwhdz8AsS',
+            logoUrl: getCryptoIconUrl('trx'),
+            launchDate: '2023-12-15',
+            initialPrice: 0.03
+        },
+        {
+            name: 'Pre-Launch Token 2',
+            symbol: 'PLT2',
+            address: 'TRWzJ1fsU4WdKhNXLUyGVdPLfKgGvJy31c',
+            logoUrl: getCryptoIconUrl('trx'),
+            launchDate: '2023-12-20',
+            initialPrice: 0.05
+        },
+        {
+            name: 'Pre-Launch Token 3',
+            symbol: 'PLT3',
+            address: 'TQn9Y2khEsLJW1ChVWFMSMeRDow5KcbLSE',
+            logoUrl: getCryptoIconUrl('trx'),
+            launchDate: '2023-12-25',
+            initialPrice: 0.01
+        },
+        {
+            name: 'Pre-Launch Token 4',
+            symbol: 'PLT4',
+            address: 'TVjAFAnpFb7ZmqM3RKsEef4CL9k2jvDkAo',
+            logoUrl: getCryptoIconUrl('trx'),
+            launchDate: '2023-12-30',
+            initialPrice: 0.08
+        },
+        {
+            name: 'Pre-Launch Token 5',
+            symbol: 'PLT5',
+            address: 'TGuGnbnUAao1Rcy5c3zD7XbKiA3T6oKQQQ',
+            logoUrl: getCryptoIconUrl('trx'),
+            launchDate: '2024-01-05',
+            initialPrice: 0.12
+        }
+    ];
+    
+    return mockPreLaunchedTokens.slice(0, limit);
+}
+
+/**
+ * Gets meme tokens across different blockchains
+ * @param limit Maximum number of tokens to return
+ * @returns Array of meme tokens
+ */
+export async function getMemeTokens(limit: number = 10): Promise<any[]> {
+    // Mock data for meme tokens
+    const mockMemeTokens = [
+        {
+            name: 'Dogecoin',
+            symbol: 'DOGE',
+            blockchain: 'dogecoin',
+            logoUrl: getCryptoIconUrl('doge'),
+            price: 0.12,
+            change24h: 5.2
+        },
+        {
+            name: 'Shiba Inu',
+            symbol: 'SHIB',
+            blockchain: 'ethereum',
+            logoUrl: getCryptoIconUrl('shib'),
+            price: 0.00002,
+            change24h: 3.7
+        },
+        {
+            name: 'Pepe',
+            symbol: 'PEPE',
+            blockchain: 'ethereum',
+            logoUrl: getCryptoIconUrl('eth'),
+            price: 0.000001,
+            change24h: 15.3
+        },
+        {
+            name: 'Floki Inu',
+            symbol: 'FLOKI',
+            blockchain: 'ethereum',
+            logoUrl: getCryptoIconUrl('eth'),
+            price: 0.0002,
+            change24h: -2.1
+        },
+        {
+            name: 'SafeMoon',
+            symbol: 'SAFEMOON',
+            blockchain: 'smartchain',
+            logoUrl: getCryptoIconUrl('bnb'),
+            price: 0.0000001,
+            change24h: -8.5
+        }
+    ];
+    
+    return mockMemeTokens.slice(0, limit);
 }
 
 // Helper function to identify meme tokens based on name or symbol
@@ -637,12 +675,6 @@ export async function loadAllBlockchainTokens(): Promise<BlockchainTokens[]> {
     }
 
     return results;
-}
-
-// Function to get meme tokens for a specific blockchain
-export async function getMemeTokens(blockchainId: string): Promise<Token[]> {
-    const tokens = await loadBlockchainTokens(blockchainId);
-    return tokens.filter(token => token.isMeme);
 }
 
 // Function to get all meme tokens across supported blockchains

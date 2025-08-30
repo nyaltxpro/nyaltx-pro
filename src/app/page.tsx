@@ -314,7 +314,9 @@ export default function Home() {
       if (selectedBlockchain) {
         setIsLoadingTokens(true);
         try {
-          const tokens = await getMemeTokens(selectedBlockchain.id);
+          // Use the getMemeTokens function with a limit parameter (10) instead of blockchain ID
+          // This matches our updated implementation in blockchainUtils.ts
+          const tokens = await getMemeTokens(10);
           setMemeTokens(tokens);
         } catch (error) {
           console.error('Error loading meme tokens:', error);
