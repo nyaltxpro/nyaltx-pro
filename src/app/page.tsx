@@ -393,7 +393,7 @@ export default function Home() {
           </div>
         </div>
         <div className="flex items-center">
-          <span className="text-sm mr-2">Today&apos;s trending tokens</span>
+          <span className="text-xs mr-2">Today&apos;s trending tokens</span>
           <label className="relative inline-flex items-center cursor-pointer">
             <input type="checkbox" className="sr-only peer" checked={true} readOnly />
             <div className="w-9 h-5 bg-gray-700 rounded-full peer peer-checked:bg-primary peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
