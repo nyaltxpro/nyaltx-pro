@@ -155,7 +155,7 @@ const Row: React.FC<{ item: any; onInspect: (o: any) => void }> = ({ item, onIns
   
   return (
     <div className="grid grid-cols-6 gap-2 items-center border-b border-gray-700 py-2">
-      <div className="flex items-center gap-2 col-span-2 truncate" title={tokenData.name || ""}>
+      <div className="flex items-center gap-2 col-span-6 truncate" title={tokenData.name || ""}>
         {isLoading ? (
           <div className="w-6 h-6 rounded-full bg-gray-700 animate-pulse"></div>
         ) : tokenData.image ? (
@@ -164,12 +164,18 @@ const Row: React.FC<{ item: any; onInspect: (o: any) => void }> = ({ item, onIns
           <div className="w-6 h-6 rounded-full bg-gray-800 flex items-center justify-center text-xs">{tokenData.symbol?.[0] || '?'}</div>
         )}
         <span className="font-medium truncate">{tokenData.name || "—"}</span>
+        <div className="text-sm opacity-80">{tokenData.symbol || "—"}</div>
+        <button onClick={() => onInspect(item)} className="col-span-6 mt-2 text-xs px-2 py-1 rounded bg-cyan-400 hover:bg-gray-700 w-max">Trade</button>
+        <div className="text-xs text-right opacity-60">{formatTime(tokenData.ts)}</div>
+     
       </div>
-      <div className="text-sm opacity-80">{tokenData.symbol || "—"}</div>
-      <div className="text-xs font-mono opacity-80" title={tokenData.mint || ""}>{truncate(tokenData.mint, 8)}</div>
+     
+      {/* <div className="text-xs font-mono opacity-80" title={tokenData.mint || ""}>{truncate(tokenData.mint, 8)}</div>
       <div className="text-xs font-mono opacity-60" title={tokenData.creator || ""}>{truncate(tokenData.creator, 6)}</div>
-      <div className="text-xs text-right opacity-60">{formatTime(tokenData.ts)}</div>
-      <button onClick={() => onInspect(item)} className="col-span-6 mt-2 text-xs px-2 py-1 rounded bg-gray-800 hover:bg-gray-700 w-max">Inspect JSON</button>
+      */}
+      <button onClick={() => onInspect(item)} className="col-span-1 mt-2 text-xs px-2 py-1 rounded bg-gray-800 hover:bg-gray-700 w-max">Inspect JSON</button>
+
+   
     </div>
   );
 };
