@@ -1,0 +1,505 @@
+import React, { useEffect, useRef, useState, FC } from 'react';
+import { FiLoader, FiClock, FiCheckCircle, FiZap } from 'react-icons/fi';
+
+// Define TokenData interface
+interface TokenData {
+  id?: string;
+  address?: string;
+  name?: string;
+  symbol?: string;
+  decimals?: number;
+  totalSupply?: string;
+  image?: string;
+  uri?: string;
+  metadataFetched?: boolean;
+  timestamp?: number;
+  chain?: string;
+  price?: string;
+  change24h?: string;
+  mint?: string;
+  creator?: string;
+  ts?: number;
+}
+
+// Define TokenSectionProps interface
+interface TokenSectionProps {
+  isLoadingTronTokens?: boolean;
+  tronTokens?: TokenData[];
+  isLoadingEthTokens?: boolean;
+  ethTokens?: TokenData[];
+  isLoadingBscTokens?: boolean;
+  bscTokens?: TokenData[];
+}
+
+// Mock tokens for fallback when data is not available
+const mockTokens: TokenData[] = [
+  {
+    id: 'mock1',
+    name: 'Loading Token',
+    symbol: 'LOAD',
+    image: '',
+    chain: 'ethereum'
+  },
+  {
+    id: 'mock2',
+    name: 'Sample Token',
+    symbol: 'SMPL',
+    image: '',
+    chain: 'ethereum'
+  },
+  {
+    id: 'mock3',
+    name: 'Test Token',
+    symbol: 'TEST',
+    image: '',
+    chain: 'ethereum'
+  }
+];
+
+// Helper functions for token data processing
+function formatTime(ts: number | string | undefined): string {
+  if (!ts) return "";
+  const d = typeof ts === "number" ? new Date(ts) : new Date(ts);
+  if (Number.isNaN(d.getTime())) return String(ts);
+  return d.toLocaleTimeString();
+}
+
+function truncate(s: string | undefined, n = 6): string {
+  if (!s) return "";
+  return s.length > n * 2 ? `${s.slice(0, n)}…${s.slice(-n)}` : s;
+}
+
+// Function to normalize URI
+function normalizeUri(uri: string | undefined): string {
+  if (!uri) return "";
+  
+  // Handle IPFS URIs
+  if (uri.startsWith('ipfs://')) {
+    const ipfsHash = uri.replace('ipfs://', '');
+    return `https://ipfs.io/ipfs/${ipfsHash}`;
+  }
+  
+  // Handle Arweave URIs
+  if (uri.startsWith('ar://')) {
+    const arweaveHash = uri.replace('ar://', '');
+    return `https://arweave.net/${arweaveHash}`;
+  }
+  
+  // Handle rapidlaunch.io URIs
+  if (!uri.startsWith('http') && (uri.includes('rapidlaunch.io') || uri.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i))) {
+    // This looks like a rapidlaunch UUID format
+    return `https://rapidlaunch.io/temp/metadata/${uri.includes('/') ? uri.split('/').pop() : uri}.json`;
+  }
+  
+  // Handle EU development URIs
+  if (uri.includes('eu-dev.uxento.io/data/')) {
+    if (!uri.startsWith('http')) {
+      return `https://${uri}`;
+    }
+  }
+  
+  return uri;
+}
+
+// Helper function to extract token fields from event data
+function pickTokenFields(ev: any): TokenData {
+  // Extract data from nested structures
+  const tokenData = ev?.token || ev;
+  const metadata = tokenData?.metadata || ev?.metadata || {};
+  
+  // Extract basic token information
+  const name = ev?.name || tokenData?.name || metadata?.name;
+  const symbol = ev?.symbol || tokenData?.symbol || metadata?.symbol;
+  const mint = ev?.mint || ev?.ca || ev?.tokenMint || tokenData?.mint || ev?.token_address || ev?.address;
+  const creator = ev?.creator || tokenData?.creator || ev?.owner || ev?.creatorAddress;
+  const ts = ev?.ts || ev?.timestamp || tokenData?.ts || tokenData?.timestamp || Date.now();
+  
+  // Handle image URLs with more comprehensive extraction
+  const image = ev?.logoURI || tokenData?.logoURI || metadata?.image || ev?.image;
+  
+  // Extract URI for metadata
+  const uri = ev?.uri || tokenData?.uri || ev?.metadata_uri;
+  
+  // Return structured token data
+  return {
+    id: ev?.id || tokenData?.id,
+    address: ev?.address || tokenData?.address,
+    name,
+    symbol,
+    decimals: ev?.decimals || tokenData?.decimals,
+    totalSupply: ev?.totalSupply || tokenData?.totalSupply,
+    image,
+    uri,
+    metadataFetched: Boolean(ev?.metadataFetched || tokenData?.metadataFetched),
+    timestamp: ev?.timestamp || tokenData?.timestamp,
+    chain: ev?.chain || tokenData?.chain,
+    price: ev?.price || tokenData?.price,
+    change24h: ev?.change24h || tokenData?.change24h,
+    mint,
+    creator,
+    ts
+  };
+}
+
+// Function to fetch metadata from token URI
+async function fetchMetadata(token: TokenData): Promise<TokenData> {
+  if (!token.uri || token.metadataFetched) {
+    return token;
+  }
+  
+  try {
+    // Normalize the URI before fetching
+    const normalizedUri = normalizeUri(token.uri);
+    
+    // Fetch metadata from the normalized URI
+    const response = await fetch(normalizedUri);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch metadata: ${response.status}`);
+    }
+    
+    const metadata = await response.json();
+    
+    // Update token with metadata information
+    return {
+      ...token,
+      name: token.name || metadata.name,
+      symbol: token.symbol || metadata.symbol,
+      image: token.image || normalizeUri(metadata.image),
+      metadataFetched: true
+    };
+  } catch (error) {
+    console.error('Error fetching metadata:', error);
+    return {
+      ...token,
+      metadataFetched: true // Mark as fetched even on error to prevent retries
+    };
+  }
+}
+
+// Main TokenSection component
+const TokenSection: FC<TokenSectionProps> = ({
+  isLoadingTronTokens = false,
+  tronTokens = [],
+  isLoadingEthTokens = false,
+  ethTokens = [],
+  isLoadingBscTokens = false,
+  bscTokens = []
+}) => {
+  // WebSocket connection state
+  const [wsConnected, setWsConnected] = useState<boolean>(false);
+  const [wsError, setWsError] = useState<string | null>(null);
+  const wsRef = useRef<WebSocket | null>(null);
+  
+  // Combined tokens state
+  const [allTokens, setAllTokens] = useState<TokenData[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  
+  // Update combined tokens when props change
+  useEffect(() => {
+    // Combine all tokens from different chains
+    const combined = [
+      ...tronTokens.map(token => ({ ...token, chain: 'tron' })),
+      ...ethTokens.map(token => ({ ...token, chain: 'ethereum' })),
+      ...bscTokens.map(token => ({ ...token, chain: 'bsc' }))
+    ];
+    
+    setAllTokens(combined);
+    setIsLoading(isLoadingTronTokens || isLoadingEthTokens || isLoadingBscTokens);
+  }, [tronTokens, ethTokens, bscTokens, isLoadingTronTokens, isLoadingEthTokens, isLoadingBscTokens]);
+  
+  // WebSocket connection setup
+  useEffect(() => {
+    // Function to establish WebSocket connection
+    const connectWebSocket = () => {
+      try {
+        const ws = new WebSocket('wss://api.example.com/tokens/ws');
+        wsRef.current = ws;
+        
+        ws.onopen = () => {
+          console.log('WebSocket connected');
+          setWsConnected(true);
+          setWsError(null);
+        };
+        
+        ws.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            
+            if (data.type === 'token') {
+              const token = pickTokenFields(data);
+              
+              // Update the appropriate token list based on chain
+              if (token.chain === 'tron') {
+                setLocalTronTokens(prev => {
+                  const exists = prev.some(t => t.id === token.id);
+                  if (exists) {
+                    return prev.map(t => t.id === token.id ? { ...t, ...token } : t);
+                  } else {
+                    return [...prev, token];
+                  }
+                });
+              } else if (token.chain === 'ethereum') {
+                setLocalEthTokens(prev => {
+                  const exists = prev.some(t => t.id === token.id);
+                  if (exists) {
+                    return prev.map(t => t.id === token.id ? { ...t, ...token } : t);
+                  } else {
+                    return [...prev, token];
+                  }
+                });
+              } else if (token.chain === 'bsc') {
+                setLocalBscTokens(prev => {
+                  const exists = prev.some(t => t.id === token.id);
+                  if (exists) {
+                    return prev.map(t => t.id === token.id ? { ...t, ...token } : t);
+                  } else {
+                    return [...prev, token];
+                  }
+                });
+              }
+              
+              // Fetch metadata for the token if needed
+              if (token.uri && !token.metadataFetched) {
+                fetchMetadata(token).then(updatedToken => {
+                  // Update token with fetched metadata
+                  if (updatedToken.chain === 'tron') {
+                    setLocalTronTokens(prev => 
+                      prev.map(t => t.id === updatedToken.id ? { ...t, ...updatedToken } : t)
+                    );
+                  } else if (updatedToken.chain === 'ethereum') {
+                    setLocalEthTokens(prev => 
+                      prev.map(t => t.id === updatedToken.id ? { ...t, ...updatedToken } : t)
+                    );
+                  } else if (updatedToken.chain === 'bsc') {
+                    setLocalBscTokens(prev => 
+                      prev.map(t => t.id === updatedToken.id ? { ...t, ...updatedToken } : t)
+                    );
+                  }
+                });
+              }
+            }
+          } catch (error) {
+            console.error('Error processing WebSocket message:', error);
+          }
+        };
+        
+        ws.onerror = (error) => {
+          console.error('WebSocket error:', error);
+          setWsError('Connection error');
+          setWsConnected(false);
+        };
+        
+        ws.onclose = () => {
+          console.log('WebSocket disconnected');
+          setWsConnected(false);
+          
+          // Attempt to reconnect after a delay
+          setTimeout(() => {
+            if (wsRef.current?.readyState === WebSocket.CLOSED) {
+              connectWebSocket();
+            }
+          }, 5000);
+        };
+      } catch (error) {
+        console.error('Failed to connect to WebSocket:', error);
+        setWsError('Failed to connect');
+        setWsConnected(false);
+      }
+    };
+    
+    // Establish initial connection
+    connectWebSocket();
+    
+    // Cleanup function to close WebSocket connection
+    return () => {
+      if (wsRef.current) {
+        wsRef.current.close();
+        wsRef.current = null;
+      }
+    };
+  }, []);
+  
+  // Helper function to categorize tokens
+  const categorizeTokens = (tokens: TokenData[]) => {
+    const now = Date.now();
+    const oneHourAgo = now - 60 * 60 * 1000;
+    const oneDayAgo = now - 24 * 60 * 60 * 1000;
+    
+    return {
+      new: tokens.filter(token => token.ts && token.ts > oneHourAgo),
+      preLaunched: tokens.filter(token => token.ts && token.ts <= oneHourAgo && token.ts > oneDayAgo),
+      launched: tokens.filter(token => token.ts && token.ts <= oneDayAgo)
+    };
+  };
+  
+  // Categorize tokens for each chain
+  const tronTokenCategories = categorizeTokens(localTronTokens);
+  const ethTokenCategories = categorizeTokens(localEthTokens);
+  const bscTokenCategories = categorizeTokens(localBscTokens);
+  
+  // Render token card
+  const renderTokenCard = (token: TokenData, index: number) => {
+    return (
+      <div key={token.id || index} className="token-card">
+        <div className="token-header">
+          <div className="token-icon">
+            {token.image ? (
+              <img src={token.image} alt={token.symbol || 'Token'} />
+            ) : (
+              <div className="token-icon-placeholder">
+                {token.symbol ? token.symbol.charAt(0) : '?'}
+              </div>
+            )}
+          </div>
+          <div className="token-info">
+            <h3>{token.name || 'Unknown Token'}</h3>
+            <p>{token.symbol || '???'}</p>
+          </div>
+        </div>
+        <div className="token-details">
+          {token.mint && (
+            <div className="token-detail">
+              <span>Contract:</span>
+              <span>{truncate(token.mint)}</span>
+            </div>
+          )}
+          {token.creator && (
+            <div className="token-detail">
+              <span>Creator:</span>
+              <span>{truncate(token.creator)}</span>
+            </div>
+          )}
+          {token.ts && (
+            <div className="token-detail">
+              <span>Created:</span>
+              <span>{formatTime(token.ts)}</span>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+  
+  // Render token section for a specific category
+  const renderTokenSection = (
+    title: string,
+    tokens: TokenData[],
+    isLoading: boolean,
+    icon: any
+  ) => {
+    return (
+      <div className="token-section">
+        <div className="section-header">
+          {icon}
+          <h2>{title}</h2>
+        </div>
+        <div className="token-list">
+          {isLoading ? (
+            <div className="loading-spinner">
+              <FiLoader className="spinner" />
+              <p>Loading tokens...</p>
+            </div>
+          ) : tokens.length > 0 ? (
+            tokens.map((token, index) => renderTokenCard(token, index))
+          ) : (
+            <div className="no-tokens">
+              <p>No tokens available</p>
+              {mockTokens.map((token, index) => renderTokenCard({ ...token, id: `mock-${index}` }, index))}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+  
+  // Main render
+  return (
+    <div className="token-sections-container">
+      <div className="connection-status">
+        {wsConnected ? (
+          <span className="connected">WebSocket Connected</span>
+        ) : (
+          <span className="disconnected">
+            WebSocket Disconnected {wsError && `(${wsError})`}
+          </span>
+        )}
+      </div>
+      
+      <div className="token-sections">
+        <h1>New Tokens</h1>
+        <div className="token-sections-row">
+          {renderTokenSection(
+            "Tron New Tokens",
+            tronTokenCategories.new,
+            isLoadingLocalTronTokens,
+            <BsCurrencyBitcoin />
+          )}
+          
+          {renderTokenSection(
+            "Ethereum New Tokens",
+            ethTokenCategories.new,
+            isLoadingLocalEthTokens,
+            <FaEthereum />
+          )}
+          
+          {renderTokenSection(
+            "BSC New Tokens",
+            bscTokenCategories.new,
+            isLoadingLocalBscTokens,
+            <SiBinance />
+          )}
+        </div>
+        
+        <h1>Pre-Launched Tokens</h1>
+        <div className="token-sections-row">
+          {renderTokenSection(
+            "Tron Pre-Launched",
+            tronTokenCategories.preLaunched,
+            isLoadingLocalTronTokens,
+            <BsCurrencyBitcoin />
+          )}
+          
+          {renderTokenSection(
+            "Ethereum Pre-Launched",
+            ethTokenCategories.preLaunched,
+            isLoadingLocalEthTokens,
+            <FaEthereum />
+          )}
+          
+          {renderTokenSection(
+            "BSC Pre-Launched",
+            bscTokenCategories.preLaunched,
+            isLoadingLocalBscTokens,
+            <SiBinance />
+          )}
+        </div>
+        
+        <h1>Launched Tokens</h1>
+        <div className="token-sections-row">
+          {renderTokenSection(
+            "Tron Launched",
+            tronTokenCategories.launched,
+            isLoadingLocalTronTokens,
+            <BsCurrencyBitcoin />
+          )}
+          
+          {renderTokenSection(
+            "Ethereum Launched",
+            ethTokenCategories.launched,
+            isLoadingLocalEthTokens,
+            <FaEthereum />
+          )}
+          
+          {renderTokenSection(
+            "BSC Launched",
+            bscTokenCategories.launched,
+            isLoadingLocalBscTokens,
+            <SiBinance />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default TokenSection;

@@ -137,14 +137,14 @@ const Header = () => {
             
             {/* Header */}
             <div className="flex w-full items-center justify-between p-4 border-b border-gray-800">
-              <div className="flex w-[40%] items-center space-x-4">
+              <div className="flex w-[20%] items-center space-x-4">
                 <BlockchainDropdown 
                   onSelectNetwork={(networkId) => console.log(`Selected network: ${networkId}`)} 
                 />
               
               </div>
               
-              <div className="flex w-[60%] mx-4">
+              <div className="flex w-[60%] items-center justify-center  mx-4">
                 <div className="w-[80%] relative" ref={searchRef}>
                   <form onSubmit={handleSearchSubmit}>
                   <span className="absolute left-3  top-1/2 transform bg-gray-600 p-1 rounded-full -translate-y-1/2 text-secondary">
@@ -247,9 +247,9 @@ const Header = () => {
               </div>
               
               <div className="flex w-[15%] items-center justify-between space-x-3">
-                <Link href="/profile" className="p-2 rounded-full hover:bg-gray-700">
+                {/* <Link href="/profile" className="p-2 rounded-full hover:bg-gray-700">
                   <CgProfile className={pathname?.startsWith('/profile') ? 'text-blue-400' : ''} />
-                </Link>
+                </Link> */}
                 <button className="p-2 rounded-full hover:bg-gray-700">
                   <FiSettings/>
                 </button>
