@@ -1,34 +1,87 @@
 import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
-import { loadBlockchainIcon } from '../lib/blockchain/blockchainUtils';
+import Image from 'next/image';
+// import { blockchainNetworks } from '../lib/blockchain/blockchainUtils';
+import { isTopBlockchain } from '../lib/blockchain/topBlockchains';
+import { getBlockchainLogoUrl } from '../lib/blockchain/blockchainLogos';
+import { getCryptoIconUrl } from '../app/utils/cryptoIcons';
 import chainsData from '../app/data/chains.json';
 
 // Blockchain logo component with fallbacks
 const BlockchainLogo: React.FC<{
   blockchainId: string;
   blockchainName: string;
-  iconMap: Record<string, string>;
   size: number;
-}> = ({ blockchainId, blockchainName, iconMap, size }) => {
+}> = ({ blockchainId, blockchainName, size }) => {
   // Default fallback icon
   const defaultIcon = '/globe.svg';
   
-  // Try to get icon from the icon map first, then use image from chains data, then SVG path, then fallback
-  const network = blockchainNetworks.find(n => n.id === blockchainId);
-  const chainImage = network?.image?.large || network?.image?.small || network?.image?.thumb;
-  const iconSrc = iconMap[blockchainId] || chainImage || `/${blockchainId}.svg` || defaultIcon;
+  // Direct mapping from blockchain IDs to logo files in /cc directory
+  const ccLogoMap: Record<string, string> = {
+    'arbitrum-one': '/cc/arbitrum.png',
+    'base': '/cc/base.png',
+    'fantom': '/cc/fantom.png',
+    'optimistic-ethereum': '/cc/optimism.png',
+    'ronin': '/cc/ronin.png',
+    'sei-v2': '/cc/sei.png',
+    'sui': '/cc/sui.png',
+    'xai': '/cc/xai.png',
+    'near-protocol': '/cc/near.png',
+    'celestia': '/cc/celestia.png'
+  };
+  
+  // Map blockchain ID to a cryptocurrency symbol for icon lookup
+  const symbolMap: Record<string, string> = {
+    'ethereum': 'ETH',
+    'bitcoin': 'BTC',
+    'binance-smart-chain': 'BNB',
+    'solana': 'SOL',
+    'polygon-pos': 'MATIC',
+    'avalanche': 'AVAX',
+    'tron': 'TRX',
+    'cardano': 'ADA',
+    'cosmos': 'ATOM',
+    'polkadot': 'DOT',
+    'near-protocol': 'NEAR',
+    'internet-computer': 'ICP',
+    'celestia': 'TIA'
+  };
+  
+  // Get the symbol for this blockchain
+  const symbol = symbolMap[blockchainId] || blockchainId.toUpperCase();
+  
+  // First check if we have a direct PNG in /public/cc directory
+  const directPngPath = ccLogoMap[blockchainId];
+  
+  // Then try cryptocurrency icons
+  const cryptoIconPath = `/crypto-icons/color/${symbol.toLowerCase()}.svg`;
+  
+  // Try blockchain-specific PNG first, then crypto icon, then default
+  const iconSrc = directPngPath || cryptoIconPath || defaultIcon;
+  
+  const [imgError, setImgError] = useState(false);
   
   return (
     <div className="relative flex items-center justify-center w-full h-full">
-      <Image
-        src={iconSrc}
-        alt={blockchainName}
-        width={size}
-        height={size}
-        className="object-contain"
-        unoptimized
-      />
+      {!imgError ? (
+        <Image
+          src={iconSrc}
+          alt={blockchainName}
+          width={size}
+          height={size}
+          className="object-contain"
+          unoptimized
+          onError={() => setImgError(true)}
+        />
+      ) : (
+        // Fallback to text if image fails to load
+        <div 
+          className="flex items-center justify-center bg-gray-700 rounded-full w-full h-full text-white font-bold"
+          style={{ fontSize: size / 2 }}
+        >
+          {symbol.substring(0, 2)}
+        </div>
+      )}
     </div>
   );
 };
@@ -45,14 +98,16 @@ interface BlockchainNetwork {
   };
 }
 
-// Convert chains data to BlockchainNetwork objects
-const blockchainNetworks: BlockchainNetwork[] = chainsData.map(chain => ({
-  id: chain.id,
-  name: chain.name || chain.id.charAt(0).toUpperCase() + chain.id.slice(1),
-  symbol: chain.shortname || (chain.name ? chain.name.substring(0, 3).toUpperCase() : chain.id.substring(0, 3).toUpperCase()),
-  logoPath: chain.image?.large || chain.image?.small || chain.image?.thumb || `/${chain.id}.svg`,
-  image: chain.image
-}));
+// Convert chains data to BlockchainNetwork objects and filter for top 20 blockchains
+const blockchainNetworks: BlockchainNetwork[] = chainsData
+  .filter(chain => isTopBlockchain(chain.id))
+  .map(chain => ({
+    id: chain.id,
+    name: chain.name || chain.id.charAt(0).toUpperCase() + chain.id.slice(1),
+    symbol: chain.shortname || (chain.name ? chain.name.substring(0, 3).toUpperCase() : chain.id.substring(0, 3).toUpperCase()),
+    logoPath: chain.image?.large || chain.image?.small || chain.image?.thumb || `/${chain.id}.svg`,
+    image: chain.image
+  }));
 
 interface BlockchainDropdownProps {
   onSelectNetwork?: (networkId: string) => void;
@@ -65,31 +120,7 @@ const BlockchainDropdown: React.FC<BlockchainDropdownProps> = ({
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedNetwork, setSelectedNetwork] = useState<BlockchainNetwork>(blockchainNetworks[0]);
-  const [blockchainIcons, setBlockchainIcons] = useState<Record<string, string>>({});
   const [isOpen, setIsOpen] = useState(false);
-
-  // Load blockchain icons when component mounts
-  useEffect(() => {
-    const loadIcons = async () => {
-      const iconPromises = blockchainNetworks.map(async (network) => {
-        const iconUrl = await loadBlockchainIcon(network.id);
-        return { id: network.id, iconUrl };
-      });
-
-      const results = await Promise.all(iconPromises);
-      const iconMap: Record<string, string> = {};
-      
-      results.forEach(result => {
-        if (result.iconUrl) {
-          iconMap[result.id] = result.iconUrl;
-        }
-      });
-
-      setBlockchainIcons(iconMap);
-    };
-
-    loadIcons();
-  }, []);
 
   // Filter networks based on search term
   const filteredNetworks = blockchainNetworks.filter(network => 
@@ -117,7 +148,6 @@ const BlockchainDropdown: React.FC<BlockchainDropdownProps> = ({
             <BlockchainLogo
               blockchainId={selectedNetwork.id}
               blockchainName={selectedNetwork.name}
-              iconMap={blockchainIcons}
               size={24}
             />
           </div>
@@ -174,9 +204,7 @@ const BlockchainDropdown: React.FC<BlockchainDropdownProps> = ({
                   <BlockchainLogo
                     blockchainId={network.id}
                     blockchainName={network.name}
-                    iconMap={blockchainIcons}
                     size={36}
-                    
                   />
                 </div>
                 <span className="text-sm text-white text-center uppercase font-medium">{network.name}</span>

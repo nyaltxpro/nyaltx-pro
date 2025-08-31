@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Banner from '../../components/Banner';
 import ConnectWalletButton from '../../components/ConnectWalletButton';
+import Header from '@/components/Header';
 
 // Define types
 type ChartItem = {
@@ -138,7 +139,7 @@ export default function MultichartPage() {
   return (
     <div className="flex flex-col min-h-screen bg-gray-900 text-white">
       {/* Top banner ad */}
-      <Banner />
+     <Header/>
 
       {/* Hot pairs ticker */}
       <div className="bg-gray-800 bg-opacity-70 py-1 px-4 flex items-center">

@@ -23,16 +23,38 @@ export function getCryptoIconPath(symbol: string, style: 'color' | 'black' = 'co
 }
 
 /**
+ * Map of blockchain symbols to their corresponding filenames in the /cc directory
+ */
+const ccLogoMap: Record<string, string> = {
+  'ARB': 'arbitrum',
+  'BASE': 'base',
+  'FTM': 'fantom',
+  'OP': 'optimism',
+  'RON': 'ronin',
+  'SEI': 'sei',
+  'SUI': 'sui',
+  'XAI': 'xai'
+};
+
+/**
  * Get the URL for a cryptocurrency icon
  * @param symbol The cryptocurrency symbol (e.g., 'BTC', 'ETH')
  * @returns The URL to the icon
  */
 export function getCryptoIconUrl(symbol: string): string {
-  // Convert symbol to lowercase
+  // Convert symbol to uppercase for the map lookup
+  const upperSymbol = symbol;
+  
+  // Check if we have a custom PNG logo in the /cc directory
+  if (ccLogoMap[upperSymbol]) {
+    return `/cc/${ccLogoMap[upperSymbol]}.png`;
+  }
+  
+  // Convert symbol to lowercase for the default path
   const normalizedSymbol = symbol.toLowerCase();
   
-  // Return the URL to the icon
-  return `https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/svg/color/${normalizedSymbol}.svg`;
+  // Fallback to the cryptocurrency-icons package
+  return `/crypto-icons/color/${normalizedSymbol}.svg`;
 }
 
 /**

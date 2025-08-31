@@ -17,6 +17,7 @@
     "@uniswap/v2-sdk": "^4.15.2",
     "@web3modal/wagmi": "^5.1.11",
     "apexcharts": "^5.3.4",
+    "axios": "^1.11.0",
     "cryptocurrency-icons": "^0.18.1",
     "next": "15.5.2",
     "react": "19.1.0",

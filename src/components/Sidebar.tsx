@@ -58,23 +58,23 @@ export default function Sidebar() {
   
   const navItems = [
     { icon: <FaHome />, text: 'Home', href: '/' },
-    { icon: <FaChartBar />, text: 'Multichart', href: '/multichart' },
+    // { icon: <FaChartBar />, text: 'Multichart', href: '/multichart' },
     { icon: <FaChartLine />, text: 'Trading', href: '/trading' },
     { icon: <FaExchangeAlt />, text: 'Pairs', href: '/pairs' },
-    { icon: <FaFire />, text: 'New Pairs', href: '/new-pairs' },
+    // { icon: <FaFire />, text: 'New Pairs', href: '/new-pairs' },
     { icon: <FaGift />, text: 'Airdrops', href: '/airdrops' },
     { icon: <FaRocket />, text: 'Trending', href: '/trending' },
     { icon: <FaCoins />, text: 'Create Token', href: '/create-token' },
     { icon: <FaWallet />, text: 'Connect', href: '/connect' },
-    { icon: <FaLayerGroup />, text: 'Pool Explorer', href: '/pools' },
+    // { icon: <FaLayerGroup />, text: 'Pool Explorer', href: '/pools' },
     { icon: <FaSyncAlt />, text: 'Swap', href: '/swap' },
-    { icon: <FaLightbulb />, text: 'Tools', href: '/tools' },
+    // { icon: <FaLightbulb />, text: 'Tools', href: '/tools' },
   ];
 
   const extraItems = [
     { icon: <FaImage />, text: 'NFTs', href: '/nfts' },
-    { icon: <FaGlobe />, text: 'Network', href: '/network' },
-    { icon: <FaShoppingCart />, text: 'Market', href: '/market' },
+    // { icon: <FaGlobe />, text: 'Network', href: '/network' },
+    // { icon: <FaShoppingCart />, text: 'Market', href: '/market' },
   ];
 
   return (
@@ -115,7 +115,7 @@ export default function Sidebar() {
         ))}
         
         {/* Add button */}
-        <Link 
+        {/* <Link 
           href="/add-new"
           className={`flex items-center py-3 px-3 mb-1 rounded-md transition-all duration-200 ${pathname === '/add-new' ? 'bg-[#1a2932] text-[#00b8d8]' : 'text-gray-400 hover:bg-[#1a2932] hover:text-white'}`}
         >
@@ -123,7 +123,7 @@ export default function Sidebar() {
           {isExpanded && (
             <span className="ml-3">Add New</span>
           )}
-        </Link>
+        </Link> */}
       </div>
 
       {/* Extra section */}
