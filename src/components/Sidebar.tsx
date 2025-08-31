@@ -86,19 +86,18 @@ export default function Sidebar() {
       onMouseLeave={() => setIsExpanded(false)}
     >
       {/* Logo */}
-      <div className="flex items-center w-full justify-center h-16 border-b border-gray-800">
-        <div className="flex items-center justify-start">
+      <div className="flex items-center h-16 border-b border-gray-800 px-4">
+        <div className="flex items-center">
           <Image
             src="/logo.png" 
             alt="DexTools Logo" 
-            // className="w-8 h-8" 
             width={30}
             height={30}
           />
+          {isExpanded && (
+            <span className="ml-2 font-bold text-white">NYALTX</span>
+          )}
         </div>
-        {isExpanded && (
-          <span className="ml-2 font-bold text-white">NYALTX</span>
-        )}
       </div>
 
       {/* Navigation Items */}

@@ -143,7 +143,7 @@ const Footer = () => {
                 <Link href="/team" className="text-blue-400 hover:text-blue-300">Team</Link>
                 <Link href="/contact" className="text-blue-400 hover:text-blue-300">Contact</Link>
                 <Link href="/privacy-policy" className="text-blue-400 hover:text-blue-300">Privacy policy</Link>
-                <Link href="/cookie-settings" className="text-blue-400 hover:text-blue-300">Cookie Settings</Link>
+                <Link href="/cookies-settings" className="text-blue-400 hover:text-blue-300">Cookie Settings</Link>
               </div>
 
               <div className="text-xs text-gray-400 text-center md:text-right">
