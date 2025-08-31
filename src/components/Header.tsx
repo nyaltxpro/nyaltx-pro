@@ -81,9 +81,9 @@ const Header = () => {
                 {/* <Link href="/profile" className="p-2 rounded-full hover:bg-gray-700">
                   <CgProfile className={pathname?.startsWith('/profile') ? 'text-blue-400' : ''} />
                 </Link> */}
-                <button className="p-2 rounded-full hover:bg-gray-700">
-                  <FiSettings/>
-                </button>
+                <Link href="/settings" className="p-2 rounded-full hover:bg-gray-700">
+                  <FiSettings className={pathname?.startsWith('/settings') ? 'text-blue-400' : ''} />
+                </Link>
                 <button className="p-2 rounded-full hover:bg-gray-700">
                   <SlStar/>
                 </button>

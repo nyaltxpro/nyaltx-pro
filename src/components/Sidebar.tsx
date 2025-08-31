@@ -20,7 +20,8 @@ import {
   FaShoppingCart,
   FaFire,
   FaCoins,
-  FaChartLine
+  FaChartLine,
+  FaCog
 } from 'react-icons/fa';
 import Image from 'next/image';
 
@@ -73,6 +74,7 @@ export default function Sidebar() {
 
   const extraItems = [
     { icon: <FaImage />, text: 'NFTs', href: '/nfts' },
+    { icon: <FaCog />, text: 'Settings', href: '/settings' },
     // { icon: <FaGlobe />, text: 'Network', href: '/network' },
     // { icon: <FaShoppingCart />, text: 'Market', href: '/market' },
   ];
