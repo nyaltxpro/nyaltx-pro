@@ -36,6 +36,7 @@ import {
 import { AdvancedRealTimeChart } from 'react-ts-tradingview-widgets';
 import Header from '../../components/Header';
 import Faq from '@/components/Faq';
+import SwapCard from '@/components/SwapCard';
 
 // Dynamically import ApexCharts to avoid SSR issues
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
@@ -330,150 +331,10 @@ export default function TradingView() {
             </button>
           </div>
 
-          <div className="bg-[#0f1923] rounded-xl p-4">
-            {/* DEXTscore Section */}
-            <div className="flex flex-col items-center mb-6">
-                <div className="relative mb-6">
-                  <div className="w-44 h-28 mx-auto relative">
-                    <svg viewBox="0 0 120 70" className="w-full h-full">
-                      {/* Background semi-circle */}
-                      <path
-                        d="M10,60 A50,50 0 0,1 110,60"
-                        fill="none"
-                        stroke="#1a2932"
-                        strokeWidth="10"
-                        strokeLinecap="round"
-                      />
-                      {/* Foreground semi-circle (score indicator) - full score */}
-                      <path
-                        d="M10,60 A50,50 0 0,1 110,60"
-                        fill="none"
-                        stroke="#00e8fc"
-                        strokeWidth="10"
-                        strokeLinecap="round"
-                      />
-                    </svg>
-                    <div className="absolute bottom-0 left-0 right-0 flex justify-center">
-                      <div className="text-4xl font-bold">99<span className="text-gray-400 text-xl">/99</span></div>
-                    </div>
-                  </div>
-                </div>
-              <h2 className="text-xl font-semibold mb-2">DEXTscore</h2>
-              <p className="text-gray-400 text-sm text-center mb-3">Project reliability score based on:</p>
-              
-              <div className="flex justify-center space-x-3 mb-4">
-                <div className="flex flex-col items-center">
-                  <FaInfoCircle className="text-gray-400 mb-1" />
-                  <span className="text-sm">99pt</span>
-                </div>
-                <div className="flex flex-col items-center">
-                  <FaExchangeAlt className="text-gray-400 mb-1" />
-                  <span className="text-sm">99pt</span>
-                </div>
-                <div className="flex flex-col items-center">
-                  <FaUsers className="text-gray-400 mb-1" />
-                  <span className="text-sm">99pt</span>
-                </div>
-                <div className="flex flex-col items-center">
-                  <FaShieldAlt className="text-gray-400 mb-1" />
-                  <span className="text-sm">99pt</span>
-                </div>
-                <div className="flex flex-col items-center">
-                  <FaCoins className="text-gray-400 mb-1" />
-                  <span className="text-sm">99pt</span>
-                </div>
-              </div>
-            </div>
-            
-            {/* Audit Section */}
-            <div className="mb-6">
-              <div className="flex justify-between items-center mb-4">
-                <div className="flex items-center">
-                  <span className="text-lg font-medium">Audit</span>
-                  <FaInfoCircle className="text-gray-400 ml-2" size={14} />
-                </div>
-                <div className="flex items-center text-gray-400">
-                  <FaExclamationTriangle className="mr-1" size={14} />
-                  <span className="text-sm">Verify external audits</span>
-                </div>
-              </div>
-              
-              <div className="space-y-4">
-                <div className="flex justify-between items-center py-2 border-b border-gray-800">
-                  <div className="flex items-center">
-                    <FaInfoCircle className="text-gray-400 mr-2" size={14} />
-                    <span>Contract Verified</span>
-                  </div>
-                  <div className="flex items-center">
-                    <span className="mr-2">Yes</span>
-                    <div className="w-4 h-4 rounded-full bg-green-500"></div>
-                  </div>
-                </div>
-                
-                <div className="flex justify-between items-center py-2 border-b border-gray-800">
-                  <div className="flex items-center">
-                    <FaInfoCircle className="text-gray-400 mr-2" size={14} />
-                    <span>Honeypot</span>
-                  </div>
-                  <div className="flex items-center">
-                    <span className="mr-2">No</span>
-                    <div className="w-4 h-4 rounded-full bg-green-500"></div>
-                  </div>
-                </div>
-                
-                <div className="flex justify-between items-center py-2 border-b border-gray-800">
-                  <div className="flex items-center">
-                    <FaInfoCircle className="text-gray-400 mr-2" size={14} />
-                    <span>Buy Tax</span>
-                  </div>
-                  <div className="flex items-center">
-                    <span className="mr-2">0%</span>
-                    <div className="w-4 h-4 rounded-full bg-green-500"></div>
-                  </div>
-                </div>
-                
-                <div className="flex justify-between items-center py-2 border-b border-gray-800">
-                  <div className="flex items-center">
-                    <FaInfoCircle className="text-gray-400 mr-2" size={14} />
-                    <span>Sell Tax</span>
-                  </div>
-                  <div className="flex items-center">
-                    <span className="mr-2">0%</span>
-                    <div className="w-4 h-4 rounded-full bg-green-500"></div>
-                  </div>
-                </div>
-              </div>
-              
-              <button className="w-full py-3 mt-4 bg-green-500 hover:bg-green-600 rounded-md flex items-center justify-center">
-                <FaShieldAlt className="mr-2" />
-                <span>Check Audits</span>
-              </button>
-            </div>
-            
-            {/* Community Trust Section */}
-            <div>
-              <div className="flex justify-between items-center mb-3">
-                <span className="text-lg font-medium">COMMUNITY TRUST</span>
-                <span className="text-gray-400">(4109 votes)</span>
-                <FaInfoCircle className="text-gray-400" size={14} />
-              </div>
-              
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center">
-                  <FaThumbsUp className="text-green-500 mr-1" />
-                  <span className="text-green-500">93.3%</span>
-                </div>
-                <div className="flex items-center">
-                  <span className="text-red-500">6.7%</span>
-                  <FaThumbsDown className="text-red-500 ml-1" />
-                </div>
-              </div>
-              
-              <div className="w-full bg-gray-800 rounded-full h-2">
-                <div className="bg-gradient-to-r from-green-500 to-red-500 h-2 rounded-full" style={{ width: '93.3%' }}></div>
-              </div>
-            </div>
-          </div>
+          <SwapCard/>
+
+
+
         </div>
 
         {/* Right Column - Chart and Trades */}
