@@ -8,6 +8,7 @@ module.exports = {
     extend: {
       fontFamily: {
         poppins: ['var(--font-poppins)', 'sans-serif'],
+        roboto: ['var(--font-roboto)', 'sans-serif'],
       },
       colors: {
         primary: 'var(--primary)',

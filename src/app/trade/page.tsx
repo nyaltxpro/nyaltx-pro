@@ -309,7 +309,7 @@ export default function TradingView() {
   };
 
   return (
-    <div className="p-4 text-white">
+    <div className="p-4 text-white font-roboto">
       {/* Token Header */}
       <Header />
     
@@ -714,7 +714,9 @@ export default function TradingView() {
               </div>
             )}
           </div>
-          <Faq/>
+          <div className="mt-4">
+            <Faq baseToken={baseToken} quoteToken={quoteToken} />
+          </div>
         </div>
         <div className="lg:col-span-1">
           <div className="bg-[#0f1923] rounded-xl p-4 mb-4">

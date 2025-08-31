@@ -26,6 +26,7 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-poppins);
+  --font-roboto: var(--font-roboto);
 }
 
 .light {
@@ -42,6 +43,10 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans), 'Poppins', 'Roboto', sans-serif;
   font-size: 14px;
+}
+
+.font-roboto {
+  font-family: 'Roboto', sans-serif !important;
 }
 
 .token-race {

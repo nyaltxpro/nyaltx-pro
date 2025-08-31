@@ -1,6 +1,6 @@
 
 import type { Metadata } from "next";
-import { Poppins, Inter } from "next/font/google";
+import { Poppins, Inter, Roboto } from "next/font/google";
 import "./globals.css";
 import Sidebar from "../components/Sidebar";
 import Footer from "../components/Footer";
@@ -16,6 +16,12 @@ const poppins = Poppins({
 });
 
 const inter = Inter({ subsets: ['latin'] })
+
+const roboto = Roboto({
+  weight: ['400', '500', '700'],
+  subsets: ['latin'],
+  variable: '--font-roboto',
+});
 
 export const metadata: Metadata = {
   title: "NYLTAX | Crypto Token Tracker",
@@ -36,7 +42,7 @@ export default function RootLayout({
 
   
   return (
-    <html lang="en" className={poppins.variable}>
+    <html lang="en" className={`${poppins.variable} ${roboto.variable}`}>
       <body
         className={inter.className}
       >

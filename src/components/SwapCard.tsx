@@ -22,7 +22,13 @@ const networks = [
     { id: CHAIN_IDS.SOLANA, name: 'Solana', icon: '/solana.svg', color: '#14F195' },
 ];
 
-export default function SwapPage() {
+interface SwapPageProps {
+    inTradeView?: boolean;
+    baseToken?: string;
+    quoteToken?: string;
+}
+
+export default function SwapPage({ inTradeView = false, baseToken, quoteToken }: SwapPageProps) {
     const [darkMode] = useState(true);
     const [fromAmount, setFromAmount] = useState('');
     const [toAmount, setToAmount] = useState('');
@@ -41,20 +47,20 @@ export default function SwapPage() {
     // Token selection state
     const [fromToken, setFromToken] = useState<Token>({
         address: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
-        symbol: 'ETH',
-        name: 'Ethereum',
+        symbol: baseToken || 'ETH',
+        name: baseToken ? baseToken : 'Ethereum',
         decimals: 18,
         chainId: CHAIN_IDS.ETHEREUM,
-        logoURI: getCryptoIconUrl('eth')
+        logoURI: getCryptoIconUrl(baseToken?.toLowerCase() || 'eth')
     });
 
     const [toToken, setToToken] = useState<Token>({
         address: '0xB8c77482e45F1F44dE1745F52C74426C631bDD52',
-        symbol: 'BNB',
-        name: 'BNB',
+        symbol: quoteToken || 'BNB',
+        name: quoteToken ? quoteToken : 'BNB',
         decimals: 18,
         chainId: CHAIN_IDS.ETHEREUM,
-        logoURI: getCryptoIconUrl('bnb')
+        logoURI: getCryptoIconUrl(quoteToken?.toLowerCase() || 'bnb')
     });
 
     // Token list with proper Token interface
@@ -185,16 +191,16 @@ export default function SwapPage() {
     }, [darkMode]);
 
     return (
-        <div className="w-full">
-            {/* Banner */}
+        <div className={`w-full ${inTradeView ? 'h-full' : ''}`}>
+            {/* Banner - Only show if not in trade view */}
+            {!inTradeView && <div className="mb-4"></div>}
 
             {/* Main Content */}
-            <div className="container mx-auto px-4 py-8">
-
+            <div className={`${inTradeView ? 'h-full' : 'container mx-auto  py-8'}`}>
 
                 {/* Swap Card */}
-                <div className="max-w-md mx-auto">
-                    <div className="bg-[#0f1923] rounded-lg shadow-lg p-6">
+                <div className={`${inTradeView ? 'h-full' : 'max-w-md mx-auto'}`}>
+                    <div className={`bg-[#0f1923] rounded-xl shadow-lg p-6 ${inTradeView ? 'h-full' : ''}`}>
                         <div className="flex justify-between items-center mb-4">
 
                             <div className="flex space-x-2">
@@ -346,35 +352,39 @@ export default function SwapPage() {
                             </div>
                         )}
 
-                        {/* Network Selector */}
-                        <div className="mb-4">
-                            <div className="text-sm mb-2">Select Network</div>
-                            <NetworkSelector
-                                selectedChainId={chainId}
-                                onSelectNetwork={(newChainId) => {
-                                    setChainId(newChainId);
-                                    // Update token chainIds
-                                    setFromToken(prev => ({ ...prev, chainId: newChainId }));
-                                    setToToken(prev => ({ ...prev, chainId: newChainId }));
-                                }}
-                            />
-                        </div>
+                        {/* Network Selector - Hide in trade view if needed */}
+                        {(!inTradeView || true) && (
+                            <div className="mb-4">
+                                <div className="text-sm mb-2">Select Network</div>
+                                <NetworkSelector
+                                    selectedChainId={chainId}
+                                    onSelectNetwork={(newChainId) => {
+                                        setChainId(newChainId);
+                                        // Update token chainIds
+                                        setFromToken(prev => ({ ...prev, chainId: newChainId }));
+                                        setToToken(prev => ({ ...prev, chainId: newChainId }));
+                                    }}
+                                />
+                            </div>
+                        )}
 
                         {/* Connect Wallet Button */}
-                        <button className="w-full bg-[#00b8d8] hover:bg-blue-600 text-white font-medium py-3 px-4 rounded-lg transition-colors">
+                        <button className="w-full bg-[#00b8d8]  text-white font-medium py-3 px-4 rounded-lg transition-colors">
                             Connect wallet
                         </button>
 
                         {/* Exchange Selector */}
-                        <div className="mt-4 mb-4">
-                            <div className="text-sm mb-2">Select Exchange</div>
-                            <ExchangeSelector
-                                exchanges={availableExchanges}
-                                selectedExchange={selectedExchange}
-                                onSelectExchange={handleExchangeSelect}
-                                chainId={chainId}
-                            />
-                        </div>
+                        {(!inTradeView || true) && (
+                            <div className="mt-4 mb-4">
+                                <div className="text-sm mb-2">Select Exchange</div>
+                                <ExchangeSelector
+                                    exchanges={availableExchanges}
+                                    selectedExchange={selectedExchange}
+                                    onSelectExchange={handleExchangeSelect}
+                                    chainId={chainId}
+                                />
+                            </div>
+                        )}
 
                         {/* Available Quotes */}
                         {quotes.length > 0 && (
