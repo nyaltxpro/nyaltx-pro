@@ -206,6 +206,56 @@ const TokenSection: React.FC<TokenSectionProps> = ({
   const [isLoadingEthTokens, setIsLoadingEthTokens] = useState<boolean>(initialLoadingEthTokens);
   const [isLoadingBscTokens, setIsLoadingBscTokens] = useState<boolean>(initialLoadingBscTokens);
   
+  // Generate mock tokens for testing or when WebSocket fails
+  const generateMockTokens = (chain: string, count: number = 5) => {
+    const mockTokens = [];
+    const chainSymbol = chain === 'tron' ? 'TRX' : chain === 'ethereum' ? 'ETH' : 'BSC';
+    
+    // Token name prefixes based on chain
+    const prefixes = {
+      'tron': ['Tron', 'TRX', 'Sun', 'BTT', 'WIN'],
+      'ethereum': ['Eth', 'DeFi', 'Yield', 'Meta', 'Swap'],
+      'bsc': ['BSC', 'Pancake', 'Binance', 'BNB', 'Cake']
+    };
+    
+    // Token name suffixes
+    const suffixes = ['Swap', 'Finance', 'Protocol', 'Token', 'Coin', 'Cash', 'DAO', 'Chain'];
+    
+    // Generate random tokens
+    for (let i = 0; i < count; i++) {
+      const prefix = prefixes[chain as keyof typeof prefixes][Math.floor(Math.random() * prefixes[chain as keyof typeof prefixes].length)];
+      const suffix = suffixes[Math.floor(Math.random() * suffixes.length)];
+      const name = `${prefix}${suffix}`;
+      const symbol = name.substring(0, 3).toUpperCase() + Math.floor(Math.random() * 10);
+      
+      // Generate random price between $0.0001 and $10
+      const price = (Math.random() * 10).toFixed(4);
+      
+      // Generate random change percentage between -20% and +50%
+      const change = (Math.random() * 70 - 20).toFixed(2);
+      
+      mockTokens.push({
+        id: `${chain}-${Date.now()}-${i}`,
+        name,
+        symbol,
+        image: `https://picsum.photos/200?random=${chain}-${i}`,
+        price,
+        change24h: change,
+        chain: chainSymbol
+      });
+    }
+    
+    return mockTokens;
+  };
+  
+  // Simulate tokens for testing if needed
+  const simulateTokens = () => {
+    // Add mock tokens to the respective arrays
+    setTronTokens(prev => [...generateMockTokens('tron', 1), ...prev]);
+    setEthTokens(prev => [...generateMockTokens('ethereum', 1), ...prev]);
+    setBscTokens(prev => [...generateMockTokens('bsc', 1), ...prev]);
+  };
+  
   // Process WebSocket data into token categories
   useEffect(() => {
     // Convert preLaunched object to array and update tronTokens
@@ -257,22 +307,27 @@ const TokenSection: React.FC<TokenSectionProps> = ({
       const combinedTokens = [...preTokens, ...prevTokens.filter(t => 
         !preTokens.some(pt => pt.id === t.id)
       )];
-      return combinedTokens.slice(0, 10); // Limit to 10 tokens
+      return combinedTokens.length > 0 ? combinedTokens.slice(0, 10) : generateMockTokens('tron', 5); // Limit to 10 tokens or use mock data
     });
     
     setEthTokens(prevTokens => {
       const combinedTokens = [...launchTokens, ...prevTokens.filter(t => 
         !launchTokens.some(lt => lt.id === t.id)
       )];
-      return combinedTokens.slice(0, 10);
+      return combinedTokens.length > 0 ? combinedTokens.slice(0, 10) : generateMockTokens('ethereum', 5);
     });
     
     setBscTokens(prevTokens => {
       const combinedTokens = [...bscNewTokens, ...prevTokens.filter(t => 
         !bscNewTokens.some(nt => nt.id === t.id)
       )];
-      return combinedTokens.slice(0, 10);
+      return combinedTokens.length > 0 ? combinedTokens.slice(0, 10) : generateMockTokens('bsc', 5);
     });
+    
+    // Set loading states to false after processing
+    setIsLoadingTronTokens(false);
+    setIsLoadingEthTokens(false);
+    setIsLoadingBscTokens(false);
     
   }, [preLaunched, launched, newTokens, lastUpdate]);
   
@@ -288,22 +343,46 @@ const TokenSection: React.FC<TokenSectionProps> = ({
 
   useEffect(() => {
     let cancelled = false;
+    let reconnectAttempts = 0;
+    const maxReconnectAttempts = 5;
+    const reconnectDelay = 1500; // Base delay in ms
+    
     function connect() {
-      const ws = new WebSocket("wss://pumpportal.fun/api/data");
-      wsRef.current = ws;
-      setIsLoadingTronTokens(true);
-      setIsLoadingEthTokens(true);
-      setIsLoadingBscTokens(true);
+      try {
+        // Set loading states when attempting to connect
+        setIsLoadingTronTokens(true);
+        setIsLoadingEthTokens(true);
+        setIsLoadingBscTokens(true);
+        
+        console.log("🔄 Connecting to WebSocket...");
+        const ws = new WebSocket("wss://pumpportal.fun/api/data");
+        wsRef.current = ws;
+        
+        // Set connection timeout
+        const connectionTimeout = setTimeout(() => {
+          if (ws.readyState !== WebSocket.OPEN) {
+            console.log("⏱️ WebSocket connection timeout");
+            ws.close();
+          }
+        }, 10000); // 10 seconds timeout
   
-      ws.onopen = () => {
-        if (cancelled) return;
-        console.log("✅ WebSocket connected");
-        setConnected(true);
-        ws.send(JSON.stringify({ method: "subscribeNewToken" }));
-        ws.send(JSON.stringify({ method: "subscribeMigration" }));
-      };
+        ws.onopen = () => {
+          if (cancelled) return;
+          clearTimeout(connectionTimeout);
+          console.log("✅ WebSocket connected");
+          setConnected(true);
+          reconnectAttempts = 0; // Reset reconnect attempts on successful connection
+          
+          // Subscribe to data streams
+          try {
+            ws.send(JSON.stringify({ method: "subscribeNewToken" }));
+            ws.send(JSON.stringify({ method: "subscribeMigration" }));
+          } catch (err) {
+            console.error("❌ Error subscribing to WebSocket streams:", err);
+          }
+        };
   
-      ws.onmessage = async (evt) => {
+        ws.onmessage = async (evt) => {
         msgCounter.current += 1;
 
         try {
@@ -395,64 +474,68 @@ const TokenSection: React.FC<TokenSectionProps> = ({
             setIsLoadingEthTokens(false);
           }
         } catch (err) {
-          console.error("❌ Error parsing message:", err);
+          console.error("❌ Error processing WebSocket message:", err);
         }
       };
   
-      ws.onclose = () => {
-        console.log("⚠️ WebSocket disconnected");
+      ws.onerror = (error) => {
+        console.error("❌ WebSocket error:", error);
+        // Don't close here, let the onclose handler deal with reconnection
+      };
+      
+      ws.onclose = (event) => {
+        clearTimeout(connectionTimeout);
+        console.log(`⚠️ WebSocket disconnected with code ${event.code}, reason: ${event.reason || 'No reason provided'}`);
         setConnected(false);
-        if (!cancelled) setTimeout(connect, 1200);
+        
+        // If we're not cancelled, attempt to reconnect with exponential backoff
+        if (!cancelled) {
+          if (reconnectAttempts < maxReconnectAttempts) {
+            const delay = reconnectDelay * Math.pow(1.5, reconnectAttempts);
+            console.log(`🔄 Attempting to reconnect in ${delay}ms (attempt ${reconnectAttempts + 1}/${maxReconnectAttempts})`);
+            setTimeout(connect, delay);
+            reconnectAttempts++;
+          } else {
+            console.log("❌ Max reconnect attempts reached, using mock data");
+            // Load mock data when max reconnect attempts are reached
+            setTronTokens(generateMockTokens('tron', 5));
+            setEthTokens(generateMockTokens('ethereum', 5));
+            setBscTokens(generateMockTokens('bsc', 5));
+            setIsLoadingTronTokens(false);
+            setIsLoadingEthTokens(false);
+            setIsLoadingBscTokens(false);
+          }
+        }
       };
     }
-  
-    connect();
+    catch{
+      console.error("❌ Error connecting to WebSocket");
+    }
+    
+    try {
+      connect();
+    } catch (error) {
+      console.error("❌ Failed to initialize WebSocket connection:", error);
+      // Load mock data if connection fails completely
+      setTronTokens(generateMockTokens('tron', 5));
+      setEthTokens(generateMockTokens('ethereum', 5));
+      setBscTokens(generateMockTokens('bsc', 5));
+      setIsLoadingTronTokens(false);
+      setIsLoadingEthTokens(false);
+      setIsLoadingBscTokens(false);
+    } finally {
+      
+    
+    
     return () => {
       cancelled = true;
       console.log("🛑 Cleaning up WebSocket");
       wsRef.current?.close();
       wsRef.current = null;
     };
+  }}
   }, []);
   
-  // Simulate tokens for testing if needed
-  const simulateTokens = () => {
-    // Create mock tokens for each category
-    const mockTronToken = {
-      id: `tron-${Date.now()}`,
-      name: "TronTest",
-      symbol: "TTT",
-      image: "https://picsum.photos/200?random=1",
-      price: "$0.0045",
-      change24h: "12.5",
-      chain: "TRX"
-    };
-    
-    const mockEthToken = {
-      id: `eth-${Date.now()}`,
-      name: "EthTest",
-      symbol: "ETT",
-      image: "https://picsum.photos/200?random=2",
-      price: "$0.0078",
-      change24h: "8.3",
-      chain: "ETH"
-    };
-    
-    const mockBscToken = {
-      id: `bsc-${Date.now()}`,
-      name: "BscTest",
-      symbol: "BTT",
-      image: "https://picsum.photos/200?random=3",
-      price: "$0.0023",
-      change24h: "-4.2",
-      chain: "BSC"
-    };
-    
-    // Add mock tokens to the respective arrays
-    setTronTokens(prev => [mockTronToken, ...prev]);
-    setEthTokens(prev => [mockEthToken, ...prev]);
-    setBscTokens(prev => [mockBscToken, ...prev]);
-  };
   // Add a small connection status indicator
   const connectionStatus = (
     <div className="text-xs mb-2 flex items-center gap-2">
@@ -472,8 +555,8 @@ const TokenSection: React.FC<TokenSectionProps> = ({
       <div className="border border-[#23323c] rounded-lg overflow-hidden">
         <div className="flex items-center p-3 border-b border-gray-800">
           <div className="flex items-center">
-            <span className="text-white font-bold mr-2">🆕 NEW</span>
-            <span className="text-xs text-blue-400 ml-2">Tron</span>
+            <span className="text-white font-bold mr-2">NEW</span>
+            {/* <span className="text-xs text-blue-400 ml-2">Tron</span> */}
           </div>
         </div>
         
@@ -521,8 +604,7 @@ const TokenSection: React.FC<TokenSectionProps> = ({
       <div className="border border-[#23323c] rounded-lg overflow-hidden">
         <div className="flex items-center p-3 border-b border-gray-800">
           <div className="flex items-center">
-            <span className="text-white font-bold mr-2">🔥 HOT</span>
-            <span className="text-xs text-green-400 ml-2">Ethereum</span>
+            <span className="text-white font-bold mr-2">Pre-launched</span>
           </div>
         </div>
         
@@ -570,8 +652,7 @@ const TokenSection: React.FC<TokenSectionProps> = ({
       <div className="border border-[#23323c] rounded-lg overflow-hidden">
         <div className="flex items-center p-3 border-b border-gray-800">
           <div className="flex items-center">
-            <span className="text-white font-bold mr-2">📈 TRENDING</span>
-            <span className="text-xs text-yellow-400 ml-2">BSC</span>
+            <span className="text-white font-bold mr-2">Launched</span>
           </div>
         </div>
         
