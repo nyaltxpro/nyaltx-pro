@@ -44,107 +44,107 @@ const tokenRaceData = topTokens.map((token, index) => ({
 // Mock data for token categories (NEW, PRE LAUNCHED, LAUNCHED)
 const tokenCategories = {
   new: [
-    { 
-      id: 1, 
-      name: "Memewear", 
-      fullName: "Memewear", 
-      symbol: "BRXL_pump", 
-      mcap: "-", 
-      vol: "-", 
-      holders: "-", 
-      time: "12 s", 
+    {
+      id: 1,
+      name: "Memewear",
+      fullName: "Memewear",
+      symbol: "BRXL_pump",
+      mcap: "-",
+      vol: "-",
+      holders: "-",
+      time: "12 s",
       percentage: "17.6%"
     },
-    { 
-      id: 2, 
-      name: "Sparky", 
-      fullName: "Sparky", 
-      symbol: "BWGX_pump", 
-      mcap: "-", 
-      vol: "-", 
-      holders: "-", 
-      time: "16 s", 
+    {
+      id: 2,
+      name: "Sparky",
+      fullName: "Sparky",
+      symbol: "BWGX_pump",
+      mcap: "-",
+      vol: "-",
+      holders: "-",
+      time: "16 s",
       percentage: "7.2%"
     },
-    { 
-      id: 3, 
-      name: "Garbage", 
-      fullName: "Garbagecoin", 
-      symbol: "GWXG_pump", 
-      mcap: "-", 
-      vol: "-", 
-      holders: "-", 
-      time: "", 
+    {
+      id: 3,
+      name: "Garbage",
+      fullName: "Garbagecoin",
+      symbol: "GWXG_pump",
+      mcap: "-",
+      vol: "-",
+      holders: "-",
+      time: "",
       percentage: ""
     }
   ],
   preLaunched: [
-    { 
-      id: 1, 
-      name: "jotchua", 
-      fullName: "jotchua", 
-      symbol: "SimW_pump", 
-      mcap: "$67.71K", 
-      vol: "$352.75K", 
-      holders: "226", 
-      time: "48 m", 
+    {
+      id: 1,
+      name: "jotchua",
+      fullName: "jotchua",
+      symbol: "SimW_pump",
+      mcap: "$67.71K",
+      vol: "$352.75K",
+      holders: "226",
+      time: "48 m",
       percentage: "96%"
     },
-    { 
-      id: 2, 
-      name: "GDP", 
-      fullName: "Gross Domestic Product", 
-      symbol: "3Mmm_pump", 
-      mcap: "$60.73K", 
-      vol: "$14.99K", 
-      holders: "714", 
-      time: "2 h", 
+    {
+      id: 2,
+      name: "GDP",
+      fullName: "Gross Domestic Product",
+      symbol: "3Mmm_pump",
+      mcap: "$60.73K",
+      vol: "$14.99K",
+      holders: "714",
+      time: "2 h",
       percentage: "93%"
     },
-    { 
-      id: 3, 
-      name: "Cope", 
-      fullName: "Cope", 
-      symbol: "EhxJ_zSs", 
-      mcap: "$60.95K", 
-      vol: "", 
-      holders: "", 
-      time: "", 
+    {
+      id: 3,
+      name: "Cope",
+      fullName: "Cope",
+      symbol: "EhxJ_zSs",
+      mcap: "$60.95K",
+      vol: "",
+      holders: "",
+      time: "",
       percentage: ""
     }
   ],
   launched: [
-    { 
-      id: 1, 
-      name: "POT", 
-      fullName: "Juppot", 
-      symbol: "HjPsG_hyds", 
-      mcap: "$467.25", 
-      vol: "$514.94", 
-      holders: "58", 
-      time: "4 m", 
+    {
+      id: 1,
+      name: "POT",
+      fullName: "Juppot",
+      symbol: "HjPsG_hyds",
+      mcap: "$467.25",
+      vol: "$514.94",
+      holders: "58",
+      time: "4 m",
       percentage: "100%"
     },
-    { 
-      id: 2, 
-      name: "Rule34", 
-      fullName: "Rule 34", 
-      symbol: "CyAu_pump", 
-      mcap: "$114.02K", 
-      vol: "$335.32K", 
-      holders: "763", 
-      time: "16 m", 
+    {
+      id: 2,
+      name: "Rule34",
+      fullName: "Rule 34",
+      symbol: "CyAu_pump",
+      mcap: "$114.02K",
+      vol: "$335.32K",
+      holders: "763",
+      time: "16 m",
       percentage: "100%"
     },
-    { 
-      id: 3, 
-      name: "VWH", 
-      fullName: "Video Wifi Hat", 
-      symbol: "HT.Zc_2RqW", 
-      mcap: "$646.08", 
-      vol: "", 
-      holders: "", 
-      time: "", 
+    {
+      id: 3,
+      name: "VWH",
+      fullName: "Video Wifi Hat",
+      symbol: "HT.Zc_2RqW",
+      mcap: "$646.08",
+      vol: "",
+      holders: "",
+      time: "",
       percentage: ""
     }
   ]
@@ -152,31 +152,31 @@ const tokenCategories = {
 
 // Mock data for banner items
 const bannerItems = [
-  { 
-    id: 1, 
-    title: "DEXTools x Nibiru Chain AMA", 
+  {
+    id: 1,
+    title: "DEXTools x Nibiru Chain AMA",
     subtitle: "Join Us Here!",
     date: "Wed August 27th",
     time: "7PM CEST / 5PM UTC"
   },
-  { 
-    id: 2, 
-    title: "DEXTools API V2", 
+  {
+    id: 2,
+    title: "DEXTools API V2",
     subtitle: "Powering The Future Of DeFi"
   },
-  { 
-    id: 3, 
-    title: "DEXTools Meme Board", 
+  {
+    id: 3,
+    title: "DEXTools Meme Board",
     subtitle: "Discover Hottest Meme Tokens"
   },
-  { 
-    id: 4, 
-    title: "Follow Us On TikTok!", 
+  {
+    id: 4,
+    title: "Follow Us On TikTok!",
     subtitle: "Official DEXTools Account"
   },
-  { 
-    id: 5, 
-    title: "Follow Us On TikTok!", 
+  {
+    id: 5,
+    title: "Follow Us On TikTok!",
     subtitle: "Official DEXTools Account"
   },
 ];
@@ -216,20 +216,20 @@ export default function Home() {
   const [memeTokens, setMemeTokens] = useState<Token[]>([]);
   const [isLoadingTokens, setIsLoadingTokens] = useState<boolean>(false);
   const [selectedChain, setSelectedChain] = useState<string>('ethereum');
-  
+
   // State for Tron tokens
   const [tronNewTokens, setTronNewTokens] = useState<TronNewToken[]>([]);
   const [tronPreLaunchedTokens, setTronPreLaunchedTokens] = useState<TronPreLaunchedToken[]>([]);
   const [isLoadingTronTokens, setIsLoadingTronTokens] = useState<boolean>(false);
-  
+
   // State for Ethereum tokens
   const [ethTokens, setEthTokens] = useState<any[]>([]);
   const [isLoadingEthTokens, setIsLoadingEthTokens] = useState<boolean>(false);
-  
+
   // State for BSC tokens
   const [bscTokens, setBscTokens] = useState<any[]>([]);
   const [isLoadingBscTokens, setIsLoadingBscTokens] = useState<boolean>(false);
-  
+
   // State for token race slider
   const [currentSlide, setCurrentSlide] = useState(0);
   const [autoSlide, setAutoSlide] = useState(true);
@@ -238,57 +238,57 @@ export default function Home() {
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const tokensPerSlide = 5;
   const totalSlides = Math.ceil(tokenRaceData.length / tokensPerSlide);
-  
+
   // Minimum swipe distance in pixels
   const minSwipeDistance = 50;
-  
+
   // Handle swipe gestures
   const handleTouchStart = (e: React.TouchEvent) => {
     setTouchStart(e.targetTouches[0].clientX);
     setIsPaused(true); // Pause auto-sliding during touch
   };
-  
+
   const handleTouchMove = (e: React.TouchEvent) => {
     setTouchEnd(e.targetTouches[0].clientX);
   };
-  
+
   const handleTouchEnd = () => {
     if (!touchStart || !touchEnd) return;
-    
+
     const distance = touchStart - touchEnd;
     const isLeftSwipe = distance > minSwipeDistance;
     const isRightSwipe = distance < -minSwipeDistance;
-    
+
     if (isLeftSwipe && currentSlide < totalSlides - 1) {
       setCurrentSlide(prev => prev + 1);
     }
-    
+
     if (isRightSwipe && currentSlide > 0) {
       setCurrentSlide(prev => prev - 1);
     }
-    
+
     // Reset touch values
     setTouchEnd(null);
     setTouchStart(null);
     setIsPaused(false); // Resume auto-sliding after touch
   };
-  
+
   // Group tokens for slider display
   const tokenSlides = [];
   for (let i = 0; i < tokenRaceData.length; i += tokensPerSlide) {
     tokenSlides.push(tokenRaceData.slice(i, i + tokensPerSlide));
   }
-  
+
   // Auto slide functionality
   useEffect(() => {
     let slideInterval: NodeJS.Timeout;
-    
+
     if (autoSlide && totalSlides > 1 && !isPaused) {
       slideInterval = setInterval(() => {
         setCurrentSlide(prev => (prev + 1) % totalSlides);
       }, 3000); // Change slide every 3 seconds
     }
-    
+
     return () => {
       if (slideInterval) clearInterval(slideInterval);
     };
@@ -302,7 +302,7 @@ export default function Home() {
       document.documentElement.classList.remove('dark');
     }
   }, [darkMode]);
-  
+
   // Update selected blockchain when chain is selected from All Chains dropdown
   useEffect(() => {
     const blockchain = supportedBlockchains.find(bc => bc.id === selectedChain) || supportedBlockchains[0];
@@ -327,10 +327,10 @@ export default function Home() {
         }
       }
     };
-    
+
     loadMemeTokens();
   }, [selectedBlockchain]);
-  
+
   // Load Tron tokens on component mount
   useEffect(() => {
     const loadTronTokens = async () => {
@@ -339,7 +339,7 @@ export default function Home() {
         // Load Tron tokens for NEW and PRE LAUNCHED categories
         const newTokens = await getTronNewTokens(5); // Get 5 tokens for NEW category
         const preLaunchedTokens = await getTronPreLaunchedTokens(5); // Get 5 tokens for PRE LAUNCHED category
-        
+
         setTronNewTokens(newTokens);
         setTronPreLaunchedTokens(preLaunchedTokens);
       } catch (error) {
@@ -350,25 +350,25 @@ export default function Home() {
         setIsLoadingTronTokens(false);
       }
     };
-    
+
     loadTronTokens();
   }, []);
 
- 
+
 
   return (
     <div className={`flex flex-col min-h-screen ${!darkMode ? 'light' : ''}`}>
-    <Header/>
+      <Header />
 
-    <Ads/>
-      
-     
-      
+      <Ads />
+
+
+
       {/* Stats Bar */}
       <div className="stats-bar mx-4">
         <div className="flex justify-between items-center">
           <div className="text-xl font-bold">NYALTX board</div>
-        
+
         </div>
         <div className="flex space-x-4">
           <div className="stats-item">
@@ -400,7 +400,7 @@ export default function Home() {
           </label>
         </div>
       </div>
-      
+
       {/* Token Race Section */}
       <div className="token-race mx-4">
         <div className="token-race-header">
@@ -425,8 +425,8 @@ export default function Home() {
             </button> */}
           </div>
         </div>
-        
-        <div 
+
+        <div
           className={`token-race-slider relative ${isPaused ? 'paused' : ''}`}
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
@@ -436,10 +436,10 @@ export default function Home() {
         >
           <div className="token-race-content" style={{ transform: `translateX(-${currentSlide * 100}%)` }}>
             {tokenSlides.map((slideTokens, slideIndex) => (
-              <div 
-                key={`slide-${slideIndex}`} 
-                className="flex gap-2 w-full" 
-                style={{ 
+              <div
+                key={`slide-${slideIndex}`}
+                className="flex gap-2 w-full"
+                style={{
                   transform: `translateX(${slideIndex * 100}%)`,
                   position: 'absolute',
                   left: 0,
@@ -453,12 +453,12 @@ export default function Home() {
                     <div className="flex items-center gap-2">
                       {token.image && (
                         <div className="w-5 h-5 rounded-full overflow-hidden">
-                          <Image 
-                            src={token.image} 
-                            alt={token.symbol} 
-                            width={20} 
-                            height={20} 
-                            unoptimized 
+                          <Image
+                            src={token.image}
+                            alt={token.symbol}
+                            width={20}
+                            height={20}
+                            unoptimized
                           />
                         </div>
                       )}
@@ -470,7 +470,7 @@ export default function Home() {
               </div>
             ))}
           </div>
-          
+
           {/* Slider Navigation */}
           {/* <button 
             onClick={() => setCurrentSlide(prev => Math.max(0, prev - 1))}
@@ -481,7 +481,7 @@ export default function Home() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button> */}
-          
+
           {/* <button 
             onClick={() => setCurrentSlide(prev => Math.min(totalSlides - 1, prev + 1))}
             className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-gray-800 bg-opacity-70 p-2 rounded-full z-10"
@@ -491,12 +491,12 @@ export default function Home() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </button> */}
-          
+
           {/* Slide Counter */}
           {/* <div className="absolute bottom-0 right-0 bg-gray-800 bg-opacity-70 text-white text-xs px-2 py-1 rounded-tl-md">
             {currentSlide + 1}/{totalSlides}
           </div> */}
-          
+
           {/* Slide Indicators */}
           {/* <div className="flex justify-center mt-4 space-x-2">
             {Array.from({ length: totalSlides }).map((_, index) => (
@@ -518,18 +518,18 @@ export default function Home() {
         <div className="max-h-[400px] overflow-auto section-card">
           <DailyGainers />
         </div>
-        
+
         {/* Token Creator Section */}
         <div className="max-h-[400px] overflow-auto section-card">
           <RecentlyAddedCoins />
         </div>
-        
+
         {/* Recently Updated Socials */}
         <div className="max-h-[400px] overflow-auto section-card">
           <TrendingCoins />
         </div>
       </div>
-      
+
       {/* Token Categories Section */}
       <div className="token-categories flex flex-col  mx-4 mt-6">
         <div className="flex items-center py-2 rounded-lg card-bg border-gray-700">
@@ -545,18 +545,13 @@ export default function Home() {
             <button className="py-2 px-4 text-gray-400">Token Unlocks</button>
           </div>
           <div className="ml-auto">
-         
+
           </div>
         </div>
 
         {/* Token section  */}
-        <TokenSection 
-          isLoadingTronTokens={isLoadingTronTokens}
-          tronTokens={tronNewTokens}
-          isLoadingEthTokens={isLoadingEthTokens}
-          ethTokens={ethTokens}
-          isLoadingBscTokens={isLoadingBscTokens}
-          bscTokens={bscTokens}
+        <TokenSection
+       
         />
       </div>
     </div>
