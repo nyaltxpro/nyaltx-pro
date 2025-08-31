@@ -24,7 +24,7 @@ const roboto = Roboto({
 });
 
 export const metadata: Metadata = {
-  title: "NYLTAX | Crypto Token Tracker",
+  title: "NYALTX | Crypto Token Tracker",
   description: "Track meme tokens, view real-time charts, history and all token information from blockchain.",
   icons: {
     icon: "/logo.png",
