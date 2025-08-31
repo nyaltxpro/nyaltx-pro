@@ -275,7 +275,7 @@ export default function LivePairs() {
       <Header/>
 
       {/* Hot pairs ticker */}
-      <div className="hot-pairs-ticker flex items-center py-2 px-4 overflow-x-auto">
+      {/* <div className="hot-pairs-ticker flex items-center py-2 px-4 overflow-x-auto">
         <div className="flex items-center bg-[#332700] text-yellow-500 px-2 py-1 rounded mr-2">
           <span className="mr-1">🔥</span>
           <span className="font-medium">HOT PAIRS</span>
@@ -296,7 +296,7 @@ export default function LivePairs() {
           <span className="text-yellow-500 font-medium">SUPPLY</span>
           <span className="ml-1 text-yellow-500">$900</span>
         </div>
-      </div>
+      </div> */}
 
       {/* Main content */}
       <main className="flex-1 p-4">
