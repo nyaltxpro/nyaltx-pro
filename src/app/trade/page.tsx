@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
@@ -235,10 +235,17 @@ const tradingHistory = [
   { id: 5, time: '2023/08/27', type: 'Buy', price: '$0.9997', amount: '$15,000.00', amountToken: '15,004.50', txHash: '0xdef...456' },
 ];
 
-export default function TradingView() {
+// Client component that uses useSearchParams
+function TradingViewContent() {
   const searchParams = useSearchParams();
   const baseToken = searchParams.get('base') || 'BTC';
   const quoteToken = searchParams.get('quote') || 'USDT';
+  
+  return <TradingViewWithParams baseToken={baseToken} quoteToken={quoteToken} />;
+}
+
+// Main component that accepts params directly
+function TradingViewWithParams({ baseToken, quoteToken }: { baseToken: string, quoteToken: string }) {
   
   const [activeTimeframe, setActiveTimeframe] = useState('15m');
   const [chartData, setChartData] = useState(candlestickData);
@@ -780,5 +787,14 @@ export default function TradingView() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Export the main component wrapped in Suspense
+export default function TradingView() {
+  return (
+    <Suspense fallback={<div className="p-4 text-white font-roboto">Loading trade data...</div>}>
+      <TradingViewContent />
+    </Suspense>
   );
 }
