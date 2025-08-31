@@ -1,10 +1,14 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
 import Banner from "../../components/Banner";
 import HotPairsTicker from "../../components/HotPairsTicker";
 import ConnectWalletButton from '../../components/ConnectWalletButton';
 import Header from "@/components/Header";
+import { getTradingPairs, TradingPair } from "../../api/coingecko/pairs";
+import PairsTable from "../../components/PairsTable";
 
 // Define types for our data
 type HotPair = {
@@ -119,20 +123,62 @@ const mockPairs: TokenPair[] = [
 ];
 
 export default function LivePairs() {
+  const router = useRouter();
   const [darkMode] = useState(true);
-  const [pairs, setPairs] = useState<TokenPair[]>(mockPairs);
+  const [pairs, setPairs] = useState<TradingPair[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortConfig, setSortConfig] = useState<{ key: keyof TokenPair; direction: 'ascending' | 'descending' } | null>(null);
+  const [sortConfig, setSortConfig] = useState<{ key: keyof TradingPair; direction: 'ascending' | 'descending' } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [activeFilter, setActiveFilter] = useState<'all' | 'verified' | 'favorites'>('all');
   const itemsPerPage = 10;
   
+  // Fetch trading pairs data from CoinGecko
+  useEffect(() => {
+    const fetchPairs = async () => {
+      try {
+        setIsLoading(true);
+        const data = await getTradingPairs('usd', currentPage, itemsPerPage, false, 'market_cap_desc', '1h,24h,7d');
+        setPairs(data);
+      } catch (error) {
+        console.error('Error fetching trading pairs:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchPairs();
+  }, [currentPage]);
+  
+  // Store favorites in state
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  
+  // Load favorites from localStorage on component mount
+  useEffect(() => {
+    try {
+      const storedFavorites = localStorage.getItem('favoritePairs');
+      if (storedFavorites) {
+        const parsedFavorites = JSON.parse(storedFavorites);
+        setFavorites(new Set(parsedFavorites));
+      }
+    } catch (error) {
+      console.error('Error loading favorites from localStorage:', error);
+    }
+  }, []);
+  
   // Toggle favorite status for a pair
-  const toggleFavorite = (id: number, e: React.MouseEvent) => {
+  const toggleFavorite = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    setPairs(pairs.map(pair => 
-      pair.id === id ? { ...pair, favorite: !pair.favorite } : pair
-    ));
+    const newFavorites = new Set(favorites);
+    if (newFavorites.has(id)) {
+      newFavorites.delete(id);
+    } else {
+      newFavorites.add(id);
+    }
+    setFavorites(newFavorites);
+    
+    // Save to local storage
+    localStorage.setItem('favoritePairs', JSON.stringify([...newFavorites]));
   };
 
   // Toggle dark mode
@@ -144,10 +190,14 @@ export default function LivePairs() {
     }
   }, [darkMode]);
 
-  // Sort pairs
-  const requestSort = (key: keyof TokenPair) => {
+  // Request sort by key
+  const requestSort = (key: keyof TradingPair) => {
     let direction: 'ascending' | 'descending' = 'ascending';
-    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'ascending') {
+    if (
+      sortConfig &&
+      sortConfig.key === key &&
+      sortConfig.direction === 'ascending'
+    ) {
       direction = 'descending';
     }
     setSortConfig({ key, direction });
@@ -158,15 +208,18 @@ export default function LivePairs() {
     // First filter the pairs by search term and active filter
     const filteredItems = pairs.filter(pair => {
       // Apply search filter
-      const matchesSearch = pair.symbol.toLowerCase().includes(searchTerm.toLowerCase()) || 
-        pair.address.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearch = 
+        pair.symbol?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        pair.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        false;
       
       // Apply category filter
       let matchesFilter = true;
       if (activeFilter === 'verified') {
-        matchesFilter = !pair.rugPulled;
+        // Consider verified if it has market cap rank
+        matchesFilter = !!pair.market_cap_rank;
       } else if (activeFilter === 'favorites') {
-        matchesFilter = !!pair.favorite;
+        matchesFilter = favorites.has(pair.id);
       }
       
       return matchesSearch && matchesFilter;
@@ -175,42 +228,21 @@ export default function LivePairs() {
     // Then sort them if a sort config exists
     if (sortConfig !== null) {
       filteredItems.sort((a, b) => {
-        const aValue = a[sortConfig.key] as string | number;
-        const bValue = b[sortConfig.key] as string | number;
+        const aValue = a[sortConfig.key];
+        const bValue = b[sortConfig.key];
         
-        // Handle special cases for sorting
-        if (sortConfig.key === 'poolVariation') {
-          // Remove % sign and convert to number for comparison
-          const aNum = parseFloat(aValue.toString().replace('%', ''));
-          const bNum = parseFloat(bValue.toString().replace('%', ''));
-          return sortConfig.direction === 'ascending' ? aNum - bNum : bNum - aNum;
+        // Handle numeric comparison
+        if (typeof aValue === 'number' && typeof bValue === 'number') {
+          return sortConfig.direction === 'ascending' ? aValue - bValue : bValue - aValue;
         }
         
-        // Handle price sorting (remove $ and commas)
-        if (sortConfig.key === 'price' || sortConfig.key === 'liquidity') {
-          // Handle special case for rug pulled tokens with '-' as price
-          if (aValue === '-') return sortConfig.direction === 'ascending' ? -1 : 1;
-          if (bValue === '-') return sortConfig.direction === 'ascending' ? 1 : -1;
-          
-          const aNum = parseFloat(aValue.toString().replace(/[$,]/g, ''));
-          const bNum = parseFloat(bValue.toString().replace(/[$,]/g, ''));
-          return sortConfig.direction === 'ascending' ? aNum - bNum : bNum - aNum;
-        }
-        
-        // For dates
-        if (sortConfig.key === 'timeAdded') {
-          const aDate = new Date(aValue.toString()).getTime();
-          const bDate = new Date(bValue.toString()).getTime();
-          return sortConfig.direction === 'ascending' ? aDate - bDate : bDate - aDate;
-        }
-        
-        // Default string comparison
+        // Handle string comparison
         if (typeof aValue === 'string' && typeof bValue === 'string') {
           return sortConfig.direction === 'ascending' ? 
             aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
         }
         
-        // Default numeric comparison
+        // Default comparison for other types
         if (aValue < bValue) {
           return sortConfig.direction === 'ascending' ? -1 : 1;
         }
@@ -221,7 +253,7 @@ export default function LivePairs() {
       });
     }
     return filteredItems;
-  }, [pairs, searchTerm, sortConfig, activeFilter]);
+  }, [pairs, searchTerm, sortConfig, activeFilter, favorites]);
 
   // Pagination
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -319,194 +351,116 @@ export default function LivePairs() {
           </div>
         </div>
 
-        {/* Table header */}
+        {/* Real-time pairs data table */}
         <div className="overflow-x-auto rounded-lg border border-gray-800">
-          <table className="w-full">
-            <thead>
-              <tr className="text-left text-sm text-gray-400 border-b border-gray-800">
-                <th className="py-2 px-4 cursor-pointer hover:text-primary" onClick={() => requestSort('symbol')}>
-                  Pair Info {sortConfig?.key === 'symbol' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
-                </th>
-                <th className="py-2 px-4 cursor-pointer hover:text-primary" onClick={() => requestSort('timeAdded')}>
-                  Listed Since {sortConfig?.key === 'timeAdded' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
-                </th>
-                <th className="py-2 px-4 cursor-pointer hover:text-primary" onClick={() => requestSort('price')}>
-                  Token Price USD {sortConfig?.key === 'price' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
-                </th>
-                <th className="py-2 px-4">Initial Liquidity</th>
-                <th className="py-2 px-4 cursor-pointer hover:text-primary" onClick={() => requestSort('liquidity')}>
-                  Total Liquidity {sortConfig?.key === 'liquidity' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
-                </th>
-                <th className="py-2 px-4">Pool Amount</th>
-                <th className="py-2 px-4 cursor-pointer hover:text-primary" onClick={() => requestSort('poolVariation')}>
-                  Pool Variation {sortConfig?.key === 'poolVariation' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
-                </th>
-                <th className="py-2 px-4">Pool Remaining</th>
-                <th className="py-2 px-4">Audit</th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentItems.map((pair) => (
-                <tr 
-                  key={pair.id} 
-                  className="border-b border-gray-800 hover:bg-gray-800 hover:bg-opacity-30 transition-all duration-150 cursor-pointer relative overflow-hidden group"
-                  onMouseEnter={(e) => {
-                    const el = e.currentTarget;
-                    const highlight = document.createElement('div');
-                    highlight.className = 'absolute inset-0 bg-primary opacity-0 group-hover:opacity-5 transition-opacity duration-300';
-                    el.appendChild(highlight);
-                    setTimeout(() => highlight.remove(), 500);
-                  }}
-                  onClick={() => alert(`View details for ${pair.symbol}`)}
-                >
-                  <td className="py-3 px-4">
-                    <div className="flex items-center">
-                      <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-white mr-2 group-hover:bg-primary group-hover:text-white transition-colors duration-200">
-                        {pair.symbol.charAt(0)}
-                      </div>
-                      <div>
-                        <div className="font-medium">{pair.symbol}</div>
-                        <div className="text-xs text-gray-400">{pair.address}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="py-3 px-4">
-                    <div className="flex items-center">
-                      <span className="text-gray-400 mr-1">⏱</span>
-                      <span>{pair.formattedTime}</span>
-                      <div className="ml-1 text-xs text-gray-500">
-                        {new Date(pair.timeAdded).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="py-3 px-4">
-                    {pair.rugPulled ? (
-                      <div className="flex items-center">
-                        <span className="inline-block w-3 h-3 rounded-full bg-red-500 mr-2"></span>
-                        <span className="text-gray-400">RUG PULLED</span>
-                      </div>
-                    ) : (
-                      <div className="flex flex-col">
-                        <div className="font-medium">{pair.price}</div>
-                        <div className="text-xs text-gray-400 mt-1">
-                          {/* Add a small fake chart indicator */}
-                          <div className="inline-flex items-center space-x-1">
-                            <span className="inline-block w-2 h-2 bg-green-500 rounded-full"></span>
-                            <span className="inline-block w-1 h-3 bg-green-500 rounded-sm"></span>
-                            <span className="inline-block w-1 h-2 bg-green-500 rounded-sm"></span>
-                            <span className="inline-block w-1 h-4 bg-green-500 rounded-sm"></span>
-                            <span className="inline-block w-1 h-1 bg-green-500 rounded-sm"></span>
-                            <span className="inline-block w-1 h-3 bg-green-500 rounded-sm"></span>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </td>
-                  <td className="py-3 px-4">
-                    <div className="flex items-center">
-                      <div className="w-8 h-8 rounded-full bg-blue-900 bg-opacity-30 flex items-center justify-center text-blue-400 mr-2">
-                        <span className="text-xs">Ξ</span>
-                      </div>
-                      <div className="text-xs">
-                        <div className="font-medium text-blue-400">{pair.network}</div>
-                        <div className="text-gray-400">
-                          {new Date(pair.timeAdded).toLocaleDateString()}
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="py-3 px-4">
-                    <div className="flex flex-col">
-                      <div className="font-medium">{pair.liquidity}</div>
-                      <div className="flex items-center mt-1">
-                        <div className="w-24 h-1 bg-gray-700 rounded overflow-hidden">
-                          {/* Scale based on liquidity amount - simplified for demo */}
-                          <div 
-                            className="h-full bg-blue-500"
-                            style={{ 
-                              width: `${Math.min(parseFloat(pair.liquidity.replace(/[$,]/g, '')) / 1000, 100)}%` 
-                            }}
-                          ></div>
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="py-3 px-4">
-                    <div className="flex items-center">
-                      <div className="w-6 h-6 rounded-full bg-gray-800 flex items-center justify-center text-yellow-500 mr-2">
-                        <span className="text-xs">Ξ</span>
-                      </div>
-                      <span>{pair.poolAmount}</span>
-                    </div>
-                  </td>
-                  <td className="py-3 px-4">
-                    <div className={`px-2 py-1 rounded text-center ${
-                      pair.poolVariation.startsWith('-') 
-                        ? 'bg-red-900 bg-opacity-30 text-red-500' 
-                        : pair.poolVariation === '0%' 
-                          ? 'bg-gray-700 text-gray-400' 
-                          : 'bg-green-900 bg-opacity-30 text-green-500'
-                    }`}>
-                      {pair.poolVariation}
-                      {pair.poolVariation !== '0%' && (
-                        <div className="flex justify-center mt-1">
-                          <div className="w-16 h-1 bg-gray-700 rounded overflow-hidden">
-                            <div 
-                              className={`h-full ${pair.poolVariation.startsWith('-') ? 'bg-red-500' : 'bg-green-500'}`}
-                              style={{ width: `${Math.min(parseFloat(pair.poolVariation), 100)}%` }}
-                            ></div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </td>
-                  <td className="py-3 px-4">
-                    <div className="flex items-center">
-                      <div className="w-6 h-6 rounded-full bg-gray-800 flex items-center justify-center text-green-500 mr-2">
-                        <span className="text-xs">Ξ</span>
-                      </div>
-                      <span>{pair.poolRemaining}</span>
-                      {parseFloat(pair.poolRemaining) > 0 && (
-                        <div className="ml-2 w-16 h-1 bg-gray-700 rounded overflow-hidden">
-                          <div 
-                            className="h-full bg-green-500"
-                            style={{ 
-                              width: `${Math.min(parseFloat(pair.poolRemaining) / 10 * 100, 100)}%` 
-                            }}
-                          ></div>
-                        </div>
-                      )}
-                    </div>
-                  </td>
-                  <td className="py-3 px-4">
-                    <div className="flex items-center space-x-2">
-                      <button 
-                        className="px-2 py-1 border border-gray-600 rounded hover:bg-gray-700 transition-colors duration-200" 
-                        onClick={(e) => toggleFavorite(pair.id, e)}
-                      >
-                        <span className={`${pair.favorite ? 'text-red-500' : 'text-gray-400'} hover:text-red-500 transition-colors duration-200`}>❤</span>
-                      </button>
-                      {!pair.rugPulled && (
-                        <button 
-                          className="px-2 py-1 bg-blue-900 bg-opacity-30 text-blue-400 rounded hover:bg-blue-800 text-xs transition-colors duration-200"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            alert(`View audit for ${pair.symbol}`);
-                          }}
-                        >
-                          Audit
-                        </button>
-                      )}
-                    </div>
-                  </td>
+          {isLoading ? (
+            <div className="w-full p-8 flex justify-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+            </div>
+          ) : (
+            <table className="w-full">
+              <thead>
+                <tr className="text-left text-sm text-gray-400 border-b border-gray-800">
+                  <th className="py-2 px-4">#</th>
+                  <th className="py-2 px-4">Favorite</th>
+                  <th className="py-2 px-4 cursor-pointer hover:text-primary" onClick={() => requestSort('name' as keyof TradingPair)}>
+                    Name {sortConfig?.key === 'name' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
+                  </th>
+                  <th className="py-2 px-4 cursor-pointer hover:text-primary" onClick={() => requestSort('current_price' as keyof TradingPair)}>
+                    Price {sortConfig?.key === 'current_price' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
+                  </th>
+                  <th className="py-2 px-4 cursor-pointer hover:text-primary" onClick={() => requestSort('price_change_percentage_24h' as keyof TradingPair)}>
+                    24h % {sortConfig?.key === 'price_change_percentage_24h' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
+                  </th>
+                  <th className="py-2 px-4 cursor-pointer hover:text-primary" onClick={() => requestSort('market_cap' as keyof TradingPair)}>
+                    Market Cap {sortConfig?.key === 'market_cap' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
+                  </th>
+                  <th className="py-2 px-4 cursor-pointer hover:text-primary" onClick={() => requestSort('total_volume' as keyof TradingPair)}>
+                    Volume (24h) {sortConfig?.key === 'total_volume' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {currentItems.map((pair) => (
+                  <tr 
+                    key={pair.id} 
+                    className="border-b border-gray-800 hover:bg-gray-800 hover:bg-opacity-30 transition-all duration-150 cursor-pointer"
+                    onClick={() => router.push(`/trade?base=${pair.symbol.toUpperCase()}&quote=USDT`)}
+                  >
+                    <td className="py-3 px-4 whitespace-nowrap text-sm">
+                      {pair.market_cap_rank || '-'}
+                    </td>
+                    <td 
+                      className="py-3 px-4 whitespace-nowrap text-sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleFavorite(pair.id, e);
+                      }}
+                    >
+                      <span className={`${favorites.has(pair.id) ? 'text-yellow-400' : 'text-gray-600'} hover:text-yellow-400 transition-colors duration-200`}>★</span>
+                    </td>
+                    <td className="py-3 px-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0 h-8 w-8 mr-3">
+                          <Image
+                            src={pair.image}
+                            alt={pair.name}
+                            width={32}
+                            height={32}
+                            className="rounded-full"
+                            unoptimized
+                          />
+                        </div>
+                        <div>
+                          <div className="text-sm font-medium">{pair.name}</div>
+                          <div className="text-xs text-gray-400">{pair.symbol.toUpperCase()}/USDT</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-3 px-4 whitespace-nowrap text-sm">
+                      {new Intl.NumberFormat('en-US', {
+                        style: 'currency',
+                        currency: 'USD',
+                        minimumFractionDigits: pair.current_price < 1 ? 4 : 2,
+                        maximumFractionDigits: pair.current_price < 1 ? 6 : 2,
+                      }).format(pair.current_price)}
+                    </td>
+                    <td className={`py-3 px-4 whitespace-nowrap text-sm ${
+                      (pair.price_change_percentage_24h || 0) > 0 
+                        ? 'text-green-500' 
+                        : (pair.price_change_percentage_24h || 0) < 0 
+                          ? 'text-red-500' 
+                          : ''
+                    }`}>
+                      {pair.price_change_percentage_24h 
+                        ? `${pair.price_change_percentage_24h > 0 ? '+' : ''}${pair.price_change_percentage_24h.toFixed(2)}%` 
+                        : '0.00%'}
+                    </td>
+                    <td className="py-3 px-4 whitespace-nowrap text-sm">
+                      {new Intl.NumberFormat('en-US', {
+                        style: 'currency',
+                        currency: 'USD',
+                        notation: 'compact',
+                        maximumFractionDigits: 2
+                      }).format(pair.market_cap)}
+                    </td>
+                    <td className="py-3 px-4 whitespace-nowrap text-sm">
+                      {new Intl.NumberFormat('en-US', {
+                        style: 'currency',
+                        currency: 'USD',
+                        notation: 'compact',
+                        maximumFractionDigits: 2
+                      }).format(pair.total_volume)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
         
         {/* No results message */}
-        {sortedPairs.length === 0 && (
+        {!isLoading && sortedPairs.length === 0 && (
           <div className="flex flex-col items-center justify-center py-10 text-gray-400">
             <div className="text-5xl mb-4">🔍</div>
             <div className="text-xl font-medium mb-2">No pairs found</div>
@@ -518,8 +472,9 @@ export default function LivePairs() {
           </div>
         )}
         
+        
         {/* Pagination */}
-        {sortedPairs.length > 0 && (
+        {!isLoading && sortedPairs.length > 0 && (
           <div className="flex justify-between items-center mt-4 text-sm">
             <div className="text-gray-400">
               Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, sortedPairs.length)} of {sortedPairs.length} pairs

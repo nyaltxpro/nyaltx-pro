@@ -83,6 +83,9 @@ export const getCoinIcon = (coinId: string): string => {
   return `https://assets.coingecko.com/coins/images/1/small/${coinId}.png`;
 };
 
+// Export pairs functions
+export * from './pairs';
+
 export default {
   getTopTickers,
   getCoinData,

@@ -283,7 +283,7 @@ export default function TrendingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen  text-white">
       {/* Banner */}
       <Header />
       
@@ -293,17 +293,8 @@ export default function TrendingPage() {
           <h1 className="text-2xl font-bold">Trending</h1>
           
           <div className="flex items-center space-x-4">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search tokens..."
-                className="bg-gray-800 text-white px-4 py-2 pr-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={searchTerm}
-                onChange={handleSearch}
-              />
-              <FaSearch className="absolute right-3 top-3 text-gray-400" />
-            </div>
-            <ConnectWalletButton />
+         
+       
           </div>
         </div>
         
@@ -311,25 +302,25 @@ export default function TrendingPage() {
         <div className="flex flex-wrap gap-4 mb-6">
           <div className="flex space-x-2">
             <button
-              className={`px-4 py-2 rounded-lg ${activeFilter === 'all' ? 'bg-blue-600' : 'bg-gray-800'}`}
+              className={`px-4 py-2 rounded-lg ${activeFilter === 'all' ? 'bg-cyan-500' : 'bg-gray-800'}`}
               onClick={() => setActiveFilter('all')}
             >
               All
             </button>
             <button
-              className={`px-4 py-2 rounded-lg ${activeFilter === 'gainers' ? 'bg-blue-600' : 'bg-gray-800'}`}
+              className={`px-4 py-2 rounded-lg ${activeFilter === 'gainers' ? 'bg-cyan-500' : 'bg-gray-800'}`}
               onClick={() => setActiveFilter('gainers')}
             >
               Gainers
             </button>
             <button
-              className={`px-4 py-2 rounded-lg ${activeFilter === 'losers' ? 'bg-blue-600' : 'bg-gray-800'}`}
+              className={`px-4 py-2 rounded-lg ${activeFilter === 'losers' ? 'bg-cyan-500' : 'bg-gray-800'}`}
               onClick={() => setActiveFilter('losers')}
             >
               Losers
             </button>
             <button
-              className={`px-4 py-2 rounded-lg ${activeFilter === 'favorites' ? 'bg-blue-600' : 'bg-gray-800'}`}
+              className={`px-4 py-2 rounded-lg ${activeFilter === 'favorites' ? 'bg-cyan-500' : 'bg-gray-800'}`}
               onClick={() => setActiveFilter('favorites')}
             >
               Favorites
@@ -338,25 +329,25 @@ export default function TrendingPage() {
           
           <div className="flex space-x-2 ml-auto">
             <button
-              className={`px-4 py-2 rounded-lg ${timeframe === '1h' ? 'bg-blue-600' : 'bg-gray-800'}`}
+              className={`px-4 py-2 rounded-lg ${timeframe === '1h' ? 'bg-cyan-500' : 'bg-gray-800'}`}
               onClick={() => setTimeframe('1h')}
             >
               1H
             </button>
             <button
-              className={`px-4 py-2 rounded-lg ${timeframe === '24h' ? 'bg-blue-600' : 'bg-gray-800'}`}
+              className={`px-4 py-2 rounded-lg ${timeframe === '24h' ? 'bg-cyan-500' : 'bg-gray-800'}`}
               onClick={() => setTimeframe('24h')}
             >
               24H
             </button>
             <button
-              className={`px-4 py-2 rounded-lg ${timeframe === '7d' ? 'bg-blue-600' : 'bg-gray-800'}`}
+              className={`px-4 py-2 rounded-lg ${timeframe === '7d' ? 'bg-cyan-500' : 'bg-gray-800'}`}
               onClick={() => setTimeframe('7d')}
             >
               7D
             </button>
             <button
-              className={`px-4 py-2 rounded-lg ${timeframe === '30d' ? 'bg-blue-600' : 'bg-gray-800'}`}
+              className={`px-4 py-2 rounded-lg ${timeframe === '30d' ? 'bg-cyan-500' : 'bg-gray-800'}`}
               onClick={() => setTimeframe('30d')}
             >
               30D
