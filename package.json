@@ -19,6 +19,7 @@
     "apexcharts": "^5.3.4",
     "axios": "^1.11.0",
     "cryptocurrency-icons": "^0.18.1",
+    "framer-motion": "^12.23.12",
     "next": "15.5.2",
     "react": "19.1.0",
     "react-apexcharts": "^1.7.0",

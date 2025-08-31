@@ -16,32 +16,91 @@ interface RecentCoin {
   market_cap_rank: number;
 }
 
+// Local storage key for caching
+const STORAGE_KEY = 'recently_added_coins';
+const CACHE_EXPIRY = 30 * 60 * 1000; // 30 minutes in milliseconds
+
 export default function RecentlyAddedCoins() {
   const [coins, setCoins] = useState<RecentCoin[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Function to load data from cache
+    const loadFromCache = () => {
+      try {
+        if (typeof window !== 'undefined') {
+          const cachedData = localStorage.getItem(STORAGE_KEY);
+          if (cachedData) {
+            const { data, timestamp } = JSON.parse(cachedData);
+            const now = Date.now();
+            
+            // Check if cache is still valid (not expired)
+            if (now - timestamp < CACHE_EXPIRY) {
+              console.log('Loading recently added coins from cache');
+              setCoins(data);
+              setLoading(false);
+              return true;
+            }
+          }
+        }
+        return false;
+      } catch (e) {
+        console.error('Error loading from cache:', e);
+        return false;
+      }
+    };
+    
+    // Function to save data to cache
+    const saveToCache = (data: RecentCoin[]) => {
+      try {
+        if (typeof window !== 'undefined') {
+          const cacheData = {
+            data,
+            timestamp: Date.now()
+          };
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(cacheData));
+        }
+      } catch (e) {
+        console.error('Error saving to cache:', e);
+      }
+    };
+
     const fetchRecentCoins = async () => {
       try {
+        // Try to load from cache first if we're in loading state
+        if (loading && loadFromCache()) {
+          return; // Exit if we successfully loaded from cache
+        }
+        
         setLoading(true);
         const data = await getRecentlyAddedCoins('usd', 10);
         setCoins(data);
+        saveToCache(data); // Save the fresh data to cache
+        setError(null);
         setLoading(false);
       } catch (err) {
         console.error('Error fetching recently added coins:', err);
-        setError('Failed to load recently added coins');
+        
+        // If API call fails but we have cached data, use it
+        if (!loadFromCache()) {
+          setError('Failed to load recently added coins');
+        }
+        
         setLoading(false);
       }
     };
 
-    fetchRecentCoins();
+    // Try to load from cache immediately
+    if (!loadFromCache()) {
+      fetchRecentCoins();
+    }
 
     // Refresh data every 5 minutes
     const intervalId = setInterval(fetchRecentCoins, 5 * 60 * 1000);
     
     return () => clearInterval(intervalId);
-  }, []);
+  }, [loading]);
 
   // Format price with appropriate decimal places
   const formatPrice = (price: number) => {

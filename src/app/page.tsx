@@ -19,6 +19,7 @@ import memeTokensData from './data/memetoken.json';
 import Header from '@/components/Header';
 import RecentlyAddedCoins from '@/components/RecentlyAddedCoins';
 import TrendingCoins from '@/components/TrendingCoins';
+import Ads from '@/components/Ads';
 
 // SortConfig type will be used when we reimplement the token sorting functionality
 // type SortConfig = {
@@ -358,44 +359,10 @@ export default function Home() {
   return (
     <div className={`flex flex-col min-h-screen ${!darkMode ? 'light' : ''}`}>
     <Header/>
+
+    <Ads/>
       
-      {/* Banner Carousel Section */}
-      <div className="banner-carousel flex items-center justify-between w-[98%] mx-auto my-6 overflow-hidden">
-        <div className="flex gap-4 overflow-x-auto pb-4 snap-x">
-          {[1, 2, 3, 4, 5].map((imageNum) => (
-            <div 
-              key={imageNum}
-              className="min-w-[100px] md:min-w-[150px] lg:min-w-[200px] flex-shrink-0  overflow-hidden shadow-lg snap-center"
-            >
-              {/* Banner Image */}
-              <div className="h-[100px] w-full relative">
-                <img 
-                  src={`/banner/${imageNum}.png`} 
-                  alt={`Banner ${imageNum}`}
-                  className="w-full h-full rounded-xl object-cover"
-                />
-              </div>
-              
-              {/* Content Below Image */}
-              <div className="p-2   ">
-                {bannerItems.length >= imageNum && (
-                  <>
-                    <div className="flex justify-between items-center mb-2">
-                    
-                    </div>
-                    <p className="text-md font-medium mb-2">
-                      {bannerItems[imageNum-1]?.title || `Banner ${imageNum}`}
-                    </p>
-                    <p className="text-gray-600 text-xs dark:text-gray-300">
-                      {bannerItems[imageNum-1]?.subtitle || "Explore the latest updates and features"}
-                    </p>
-                  </>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+     
       
       {/* Stats Bar */}
       <div className="stats-bar mx-4">
@@ -438,12 +405,12 @@ export default function Home() {
       <div className="token-race mx-4">
         <div className="token-race-header">
           <div className="flex items-center gap-2">
-            <span className="text-xl font-bold">🏁 TOKEN RACE</span>
+            <span className="text-xl font-bold">TOKEN RACE</span>
           </div>
           <div className="flex space-x-2 items-center">
             <button className="py-1 px-3 bg-[#00c3ff] text-black font-bold rounded-md">NITRO</button>
             <button className="py-1 px-3 bg-gray-700 text-white font-bold rounded-md">RANKING</button>
-            <button 
+            {/* <button 
               onClick={() => setAutoSlide(prev => !prev)}
               className={`ml-2 py-1 px-3 font-bold rounded-md flex items-center ${autoSlide ? 'bg-green-500 text-white' : 'bg-gray-700 text-white'}`}
             >
@@ -455,7 +422,7 @@ export default function Home() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                 )}
               </svg>
-            </button>
+            </button> */}
           </div>
         </div>
         
@@ -505,7 +472,7 @@ export default function Home() {
           </div>
           
           {/* Slider Navigation */}
-          <button 
+          {/* <button 
             onClick={() => setCurrentSlide(prev => Math.max(0, prev - 1))}
             className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-gray-800 bg-opacity-70 p-2 rounded-full z-10"
             disabled={currentSlide === 0}
@@ -513,9 +480,9 @@ export default function Home() {
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
-          </button>
+          </button> */}
           
-          <button 
+          {/* <button 
             onClick={() => setCurrentSlide(prev => Math.min(totalSlides - 1, prev + 1))}
             className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-gray-800 bg-opacity-70 p-2 rounded-full z-10"
             disabled={currentSlide === totalSlides - 1}
@@ -523,15 +490,15 @@ export default function Home() {
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
-          </button>
+          </button> */}
           
           {/* Slide Counter */}
-          <div className="absolute bottom-0 right-0 bg-gray-800 bg-opacity-70 text-white text-xs px-2 py-1 rounded-tl-md">
+          {/* <div className="absolute bottom-0 right-0 bg-gray-800 bg-opacity-70 text-white text-xs px-2 py-1 rounded-tl-md">
             {currentSlide + 1}/{totalSlides}
-          </div>
+          </div> */}
           
           {/* Slide Indicators */}
-          <div className="flex justify-center mt-4 space-x-2">
+          {/* <div className="flex justify-center mt-4 space-x-2">
             {Array.from({ length: totalSlides }).map((_, index) => (
               <button 
                 key={index}
@@ -540,7 +507,7 @@ export default function Home() {
                 aria-label={`Go to slide ${index + 1}`}
               />
             ))}
-          </div>
+          </div> */}
         </div>
       </div>
 

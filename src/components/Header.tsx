@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import Image from 'next/image';
+import Link from 'next/link';
 import Banner from './Banner'
 import ConnectWalletButton from './ConnectWalletButton';
 import BlockchainDropdown from './BlockchainDropdown';
@@ -8,6 +9,8 @@ import './animations.css';
 import { SlStar } from 'react-icons/sl';
 import { BiSearch } from 'react-icons/bi';
 import { FiSettings } from 'react-icons/fi';
+import { MdOutlineCollections } from 'react-icons/md';
+import { CgProfile } from 'react-icons/cg';
 import LivePriceTicker from './LivePriceTicker';
 import { commonCryptoSymbols, getCryptoIconUrl } from '../app/utils/cryptoIcons';
 import { getCryptoName } from '../app/utils/cryptoNames';
@@ -23,6 +26,7 @@ interface TokenPair {
 
 const Header = () => {
   const router = useRouter();
+  const pathname = usePathname();
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState<TokenPair[]>([]);
   const [showResults, setShowResults] = useState(false);
@@ -132,11 +136,12 @@ const Header = () => {
   
             
             {/* Header */}
-            <div className="flex  w-full items-center  justify-between p-4 border-b border-gray-800">
-              <div className="flex w-[25%] items-center space-x-4">
-              <BlockchainDropdown 
+            <div className="flex w-full items-center justify-between p-4 border-b border-gray-800">
+              <div className="flex w-[40%] items-center space-x-4">
+                <BlockchainDropdown 
                   onSelectNetwork={(networkId) => console.log(`Selected network: ${networkId}`)} 
                 />
+              
               </div>
               
               <div className="flex w-[60%] mx-4">
@@ -242,7 +247,9 @@ const Header = () => {
               </div>
               
               <div className="flex w-[15%] items-center justify-between space-x-3">
-            
+                <Link href="/profile" className="p-2 rounded-full hover:bg-gray-700">
+                  <CgProfile className={pathname?.startsWith('/profile') ? 'text-blue-400' : ''} />
+                </Link>
                 <button className="p-2 rounded-full hover:bg-gray-700">
                   <FiSettings/>
                 </button>

@@ -148,12 +148,12 @@ export default function Sidebar() {
         ))}
         
         {/* User profile */}
-        <div className="flex items-center py-3 px-3 mt-4 rounded-md text-gray-400 hover:bg-[#1a2932] hover:text-white cursor-pointer">
+        <Link href="/profile" className="flex items-center py-3 px-3 mt-4 rounded-md text-gray-400 hover:bg-[#1a2932] hover:text-white cursor-pointer">
           <div className="text-xl"><FaUser /></div>
           {isExpanded && (
             <span className="ml-3">Profile</span>
           )}
-        </div>
+        </Link>
       </div>
     </div>
   );
