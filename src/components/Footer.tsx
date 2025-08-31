@@ -147,7 +147,7 @@ const Footer = () => {
               </div>
 
               <div className="text-xs text-gray-400 text-center md:text-right">
-                © Nyaltx.io 2025 - 2149.0 - info@Nyaltx.io | Ads & Marketing: marketing@Nyalt.io
+                © Nyaltx.io 2025 - 2149.0 - info@Nyaltx.io | Ads & Marketing: marketing@Nyaltx.io
               </div>
             </div>
           </div>
