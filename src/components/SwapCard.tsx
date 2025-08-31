@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { FaExchangeAlt, FaChevronDown, FaCog, FaSync, FaSearch, FaTimes, FaInfoCircle } from 'react-icons/fa';
+import { FaExchangeAlt, FaChevronDown, FaCog, FaSync, FaSearch, FaTimes, FaInfoCircle, FaFire } from 'react-icons/fa';
+import { useRouter } from 'next/navigation';
 
 import { getCryptoIconUrl } from '@/app/utils/cryptoIcons';
 import Header from '@/components/Header';
@@ -10,6 +11,8 @@ import ExchangeSelector from '@/components/ExchangeSelector';
 import NetworkSelector from '@/components/NetworkSelector';
 import { dexManager } from '@/lib/dex/dexManager';
 import { DexInterface, PriceQuote, Token, CHAIN_IDS, DEX_PROTOCOL } from '@/lib/dex/types';
+import { getTrendingCoins } from '@/api/coingecko/client';
+import { getTokenId } from '@/api/coingecko/api';
 
 // Network definitions for UI display
 const networks = [
@@ -29,6 +32,7 @@ interface SwapPageProps {
 }
 
 export default function SwapPage({ inTradeView = false, baseToken, quoteToken }: SwapPageProps) {
+    const router = useRouter();
     const [darkMode] = useState(true);
     const [fromAmount, setFromAmount] = useState('');
     const [toAmount, setToAmount] = useState('');
@@ -43,6 +47,9 @@ export default function SwapPage({ inTradeView = false, baseToken, quoteToken }:
     const [quotes, setQuotes] = useState<PriceQuote[]>([]);
     const [bestQuote, setBestQuote] = useState<PriceQuote | null>(null);
     const [isLoadingQuotes, setIsLoadingQuotes] = useState(false);
+    const [trendingCoins, setTrendingCoins] = useState<any[]>([]);
+    const [isLoadingTrending, setIsLoadingTrending] = useState(false);
+    const [trendingError, setTrendingError] = useState<string | null>(null);
 
     // Token selection state
     const [fromToken, setFromToken] = useState<Token>({
@@ -87,6 +94,27 @@ export default function SwapPage({ inTradeView = false, baseToken, quoteToken }:
         } else if (exchanges.length > 0) {
             setSelectedExchange(exchanges[0]);
         }
+    }, []);
+    
+    // Fetch trending coins
+    useEffect(() => {
+        const fetchTrendingCoins = async () => {
+            try {
+                setIsLoadingTrending(true);
+                setTrendingError(null);
+                const data = await getTrendingCoins();
+                if (data && data.coins) {
+                    setTrendingCoins(data.coins.slice(0, 5));
+                }
+            } catch (error) {
+                console.error('Error fetching trending coins:', error);
+                setTrendingError('Failed to load trending coins');
+            } finally {
+                setIsLoadingTrending(false);
+            }
+        };
+
+        fetchTrendingCoins();
     }, []);
 
     // Get quotes when inputs change
@@ -170,6 +198,38 @@ export default function SwapPage({ inTradeView = false, baseToken, quoteToken }:
             setToAmount(selectedQuote.outputAmount);
         }
     };
+    
+    // Handle trending coin selection
+    const handleTrendingCoinClick = (coin: any) => {
+        const symbol = coin.item.symbol.toUpperCase();
+        
+        // Update the from token with the selected trending coin
+        setFromToken({
+            address: '0x' + Math.random().toString(16).slice(2, 14),  // Placeholder address
+            symbol: symbol,
+            name: coin.item.name,
+            decimals: 18,
+            chainId: chainId,
+            logoURI: coin.item.large || getCryptoIconUrl(symbol.toLowerCase())
+        });
+        
+        // Set USDT as the to token if it's not already
+        if (toToken.symbol !== 'USDT') {
+            setToToken({
+                address: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+                symbol: 'USDT',
+                name: 'Tether',
+                decimals: 6,
+                chainId: chainId,
+                logoURI: getCryptoIconUrl('usdt')
+            });
+        }
+        
+        // Navigate to the trade page with the selected pair
+        if (!inTradeView) {
+            router.push(`/trade?base=${symbol}&quote=USDT`);
+        }
+    };
 
     // Toggle settings
     const toggleSettings = () => {
@@ -200,9 +260,9 @@ export default function SwapPage({ inTradeView = false, baseToken, quoteToken }:
 
                 {/* Swap Card */}
                 <div className={`${inTradeView ? 'h-full' : 'max-w-md mx-auto'}`}>
-                    <div className={`bg-[#0f1923] rounded-xl shadow-lg p-6 ${inTradeView ? 'h-full' : ''}`}>
-                        <div className="flex justify-between items-center mb-4">
-
+                    <div className={`bg-[#0f1923] rounded-xl shadow-lg py-3 px-2 ${inTradeView ? 'h-full' : ''}`}>
+                        <div className="flex justify-between px-2 items-center mb-4">
+                            <h3 className="text-lg font-medium">Swap</h3>
                             <div className="flex space-x-2">
                                 <button
                                     onClick={toggleSettings}
@@ -369,9 +429,58 @@ export default function SwapPage({ inTradeView = false, baseToken, quoteToken }:
                         )}
 
                         {/* Connect Wallet Button */}
-                        <button className="w-full bg-[#00b8d8]  text-white font-medium py-3 px-4 rounded-lg transition-colors">
+                        <button className="w-full bg-[#00b8d8] text-white font-medium py-3 px-4 rounded-lg transition-colors">
                             Connect wallet
                         </button>
+                        
+                        {/* Trending Coins Section */}
+                        <div className="mt-6">
+                            <div className="flex items-center mb-3">
+                                <FaFire className="text-orange-500 mr-2" />
+                                <h3 className="text-md font-medium">Trending Coins</h3>
+                            </div>
+                            
+                            {isLoadingTrending ? (
+                                <div className="flex justify-center py-4">
+                                    <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-500"></div>
+                                </div>
+                            ) : trendingError ? (
+                                <div className="text-red-500 text-center py-2 text-sm">{trendingError}</div>
+                            ) : (
+                                <div className="overflow-x-auto">
+                                    <div className="flex space-x-2 pb-2">
+                                        {trendingCoins.map((coin, index) => (
+                                            <div 
+                                                key={coin.item.id}
+                                                onClick={() => handleTrendingCoinClick(coin)}
+                                                className="flex-shrink-0 bg-gray-800 hover:bg-gray-700 rounded-lg p-2 cursor-pointer transition-colors"
+                                            >
+                                                <div className="flex items-center space-x-2">
+                                                    <div className="relative">
+                                                        <div className="w-8 h-8 rounded-full overflow-hidden">
+                                                            <Image 
+                                                                src={coin.item.small || getCryptoIconUrl(coin.item.symbol.toLowerCase())} 
+                                                                alt={coin.item.name}
+                                                                width={32}
+                                                                height={32}
+                                                                unoptimized
+                                                            />
+                                                        </div>
+                                                        <div className="absolute -top-1 -right-1 bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                                                            {index + 1}
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                        <div className="font-medium text-sm">{coin.item.symbol.toUpperCase()}</div>
+                                                        <div className="text-xs text-gray-400">{coin.item.name.length > 10 ? coin.item.name.substring(0, 10) + '...' : coin.item.name}</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
 
                         {/* Exchange Selector */}
                         {(!inTradeView || true) && (

@@ -14,6 +14,7 @@ import { CgProfile } from 'react-icons/cg';
 import LivePriceTicker from './LivePriceTicker';
 import { commonCryptoSymbols, getCryptoIconUrl } from '../app/utils/cryptoIcons';
 import { getCryptoName } from '../app/utils/cryptoNames';
+import SearchModal from './SearchModal';
 
 
 // Define token pair type
@@ -27,105 +28,17 @@ interface TokenPair {
 const Header = () => {
   const router = useRouter();
   const pathname = usePathname();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [searchResults, setSearchResults] = useState<TokenPair[]>([]);
-  const [showResults, setShowResults] = useState(false);
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
-
-  // Popular token pairs for quick suggestions
-  const popularPairs: TokenPair[] = [
-    { baseToken: 'BTC', quoteToken: 'USDT', baseName: getCryptoName('BTC'), quoteName: getCryptoName('USDT') },
-    { baseToken: 'ETH', quoteToken: 'USDT', baseName: getCryptoName('ETH'), quoteName: getCryptoName('USDT') },
-    { baseToken: 'BTC', quoteToken: 'USDC', baseName: getCryptoName('BTC'), quoteName: getCryptoName('USDC') },
-    { baseToken: 'ETH', quoteToken: 'USDC', baseName: getCryptoName('ETH'), quoteName: getCryptoName('USDC') },
-    { baseToken: 'SOL', quoteToken: 'USDT', baseName: getCryptoName('SOL'), quoteName: getCryptoName('USDT') },
-    { baseToken: 'BNB', quoteToken: 'USDT', baseName: getCryptoName('BNB'), quoteName: getCryptoName('USDT') },
-  ];
-
-  // Handle search input change
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setSearchTerm(value);
-    
-    if (value.trim() === '') {
-      setSearchResults([]);
-      return;
-    }
-
-    // Search for token pairs
-    const results: TokenPair[] = [];
-    
-    // First check if the search term contains a trading pair format (e.g., BTC/USDT)
-    const pairMatch = value.match(/([A-Za-z0-9]+)[/\\-]([A-Za-z0-9]+)/);
-    if (pairMatch) {
-      const baseToken = pairMatch[1].toUpperCase();
-      const quoteToken = pairMatch[2].toUpperCase();
-      
-      if (commonCryptoSymbols.includes(baseToken) && commonCryptoSymbols.includes(quoteToken)) {
-        results.push({ 
-          baseToken, 
-          quoteToken, 
-          baseName: getCryptoName(baseToken),
-          quoteName: getCryptoName(quoteToken)
-        });
-      }
-    }
-    
-    // Then search for individual tokens and create pairs with common quote currencies
-    const upperSearch = value.toUpperCase();
-    const matchingTokens = commonCryptoSymbols.filter(symbol => 
-      symbol.includes(upperSearch)
-    );
-    
-    // For each matching token, create pairs with common quote currencies
-    const quoteCurrencies = ['USDT', 'USDC', 'ETH', 'BTC'];
-    matchingTokens.forEach(token => {
-      // Don't create pairs where base = quote
-      quoteCurrencies.forEach(quote => {
-        if (token !== quote) {
-          results.push({ 
-            baseToken: token, 
-            quoteToken: quote,
-            baseName: getCryptoName(token),
-            quoteName: getCryptoName(quote)
-          });
-        }
-      });
-    });
-    
-    // Limit results to avoid overwhelming the UI
-    setSearchResults(results.slice(0, 10));
-    setShowResults(true);
+  
+  // Open search modal
+  const openSearchModal = () => {
+    setIsSearchModalOpen(true);
   };
 
-  // Handle clicking on a search result
-  const handleResultClick = (pair: TokenPair) => {
-    router.push(`/trade?base=${pair.baseToken}&quote=${pair.quoteToken}`);
-    setSearchTerm('');
-    setShowResults(false);
-  };
-
-  // Close search results when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        setShowResults(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-
-  // Handle search form submission
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (searchResults.length > 0) {
-      handleResultClick(searchResults[0]);
-    }
+  // Close search modal
+  const closeSearchModal = () => {
+    setIsSearchModalOpen(false);
   };
   
   return (
@@ -144,105 +57,23 @@ const Header = () => {
               
               </div>
               
-              <div className="flex w-[60%] items-center justify-center  mx-4">
+              <div className="flex w-[60%] items-center justify-center mx-4">
                 <div className="w-[80%] relative" ref={searchRef}>
-                  <form onSubmit={handleSearchSubmit}>
-                  <span className="absolute left-3  top-1/2 transform bg-gray-600 p-1 rounded-full -translate-y-1/2 text-secondary">
+                  <div 
+                    className="relative cursor-pointer"
+                    onClick={openSearchModal}
+                  >
+                    <span className="absolute left-3 top-1/2 transform bg-gray-600 p-1 rounded-full -translate-y-1/2 text-secondary">
                       <BiSearch/>
                     </span>
                     <input
                       type="text"
                       placeholder="Search pair by symbol, name, contract or token"
-                      className="w-full py-2  ml-1 px-8 rounded-full bg-opacity-10 bg-gray-800 border border-gray-700 focus:outline-none focus:border-primary"
-                      value={searchTerm}
-                      onChange={handleSearchChange}
-                      onFocus={() => searchResults.length > 0 && setShowResults(true)}
+                      className="w-full py-2 ml-1 px-8 rounded-full bg-opacity-10 bg-gray-800 border border-gray-700 focus:outline-none focus:border-primary cursor-pointer"
+                      readOnly
+                      onClick={openSearchModal}
                     />
-                   
-                  </form>
-                  
-                  {/* Search results dropdown */}
-                  {showResults && searchResults.length > 0 && (
-                    <div className="absolute z-50 mt-1 w-full bg-gray-800 border border-gray-700 rounded-lg shadow-lg max-h-96 overflow-y-auto">
-                      {searchResults.map((pair, index) => (
-                        <div 
-                          key={index}
-                          className="flex items-center p-3 hover:bg-gray-700 cursor-pointer border-b border-gray-700 last:border-b-0"
-                          onClick={() => handleResultClick(pair)}
-                        >
-                          <div className="flex items-center mr-3">
-                            <div className="relative h-6 w-6 mr-1">
-                              <Image
-                                src={getCryptoIconUrl(pair.baseToken)}
-                                alt={pair.baseToken}
-                                width={24}
-                                height={24}
-                                className="rounded-full"
-                                unoptimized
-                              />
-                            </div>
-                            <div className="relative h-6 w-6">
-                              <Image
-                                src={getCryptoIconUrl(pair.quoteToken)}
-                                alt={pair.quoteToken}
-                                width={24}
-                                height={24}
-                                className="rounded-full"
-                                unoptimized
-                              />
-                            </div>
-                          </div>
-                          <div>
-                            <span className="font-medium">{pair.baseToken}/{pair.quoteToken}</span>
-                            <div className="text-xs text-gray-400">{pair.baseName || getCryptoName(pair.baseToken)} / {pair.quoteName || getCryptoName(pair.quoteToken)}</div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  
-                  {/* Show popular pairs when search is empty */}
-                  {showResults && searchTerm.trim() === '' && (
-                    <div className="absolute z-50 mt-1 w-full bg-gray-800 border border-gray-700 rounded-lg shadow-lg max-h-96 overflow-y-auto">
-                      <div className="p-3 border-b border-gray-700">
-                        <h3 className="text-sm text-gray-400">Popular Pairs</h3>
-                      </div>
-                      {popularPairs.map((pair, index) => (
-                        <div 
-                          key={index}
-                          className="flex items-center p-3 hover:bg-gray-700 cursor-pointer border-b border-gray-700 last:border-b-0"
-                          onClick={() => handleResultClick(pair)}
-                        >
-                          <div className="flex items-center mr-3">
-                            <div className="relative h-6 w-6 mr-1">
-                              <Image
-                                src={getCryptoIconUrl(pair.baseToken)}
-                                alt={pair.baseToken}
-                                width={24}
-                                height={24}
-                                className="rounded-full"
-                                unoptimized
-                              />
-                            </div>
-                            <div className="relative h-6 w-6">
-                              <Image
-                                src={getCryptoIconUrl(pair.quoteToken)}
-                                alt={pair.quoteToken}
-                                width={24}
-                                height={24}
-                                className="rounded-full"
-                                unoptimized
-                              />
-                            </div>
-                          </div>
-                          <div>
-                            <span className="font-medium">{pair.baseToken}/{pair.quoteToken}</span>
-                            <div className="text-xs text-gray-400">{pair.baseName || getCryptoName(pair.baseToken)} / {pair.quoteName || getCryptoName(pair.quoteToken)}</div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                  </div>
                 </div>
               </div>
               
@@ -260,6 +91,12 @@ const Header = () => {
               </div>
             </div>
             <LivePriceTicker />
+            
+            {/* Search Modal */}
+            <SearchModal 
+              isOpen={isSearchModalOpen} 
+              onClose={closeSearchModal} 
+            />
     </div>
   )
 }
