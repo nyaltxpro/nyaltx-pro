@@ -316,7 +316,7 @@ function TradingViewWithParams({ baseToken, quoteToken }: { baseToken: string, q
   };
 
   return (
-    <div className="p-4 text-white font-roboto">
+    <div className="p-4 text-white ">
       {/* Token Header */}
       <Header />
     

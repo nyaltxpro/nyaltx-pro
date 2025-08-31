@@ -79,7 +79,7 @@ export default function RecentlyAddedCoins() {
       ) : (
         <div className="space-y-4">
           {coins.map((coin) => (
-            <div key={coin.id} className="bg-gray-700 rounded-lg p-4 flex justify-between items-center">
+            <div key={coin.id} className=" rounded-lg p-2 flex justify-between items-center">
               <div className="flex items-center">
                 <div className="relative h-8 w-8 mr-3">
                   <Image

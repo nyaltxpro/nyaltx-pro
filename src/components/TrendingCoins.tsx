@@ -79,7 +79,7 @@ export default function TrendingCoins() {
       ) : (
         <div className="space-y-3">
           {trendingCoins.map((coin) => (
-            <div key={coin.id} className="bg-gray-700 rounded-lg p-3 flex justify-between items-center">
+            <div key={coin.id} className="rounded-lg p-2 flex justify-between items-center">
               <div className="flex items-center">
                 <div className="relative h-8 w-8 mr-3">
                   <Image
@@ -98,15 +98,15 @@ export default function TrendingCoins() {
               
               <div className="text-right">
                 <div className="font-medium text-sm flex items-center">
-                  <Image 
+                  {/* <Image 
                     src="/bitcoin.svg" 
                     alt="BTC" 
                     width={12} 
                     height={12} 
                     className="mr-1"
                     unoptimized
-                  />
-                  {formatBtcPrice(coin.price_btc)}
+                  /> */}
+                  {/* {formatBtcPrice(coin.price_btc)} */}
                 </div>
                 <div className="text-xs text-gray-400">
                   Rank #{coin.market_cap_rank || 'N/A'}

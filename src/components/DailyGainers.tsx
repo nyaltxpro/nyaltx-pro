@@ -46,7 +46,7 @@ export default function DailyGainers() {
     return (
         <>
             <div className="section-header flex justify-between items-center">
-                <div className="section-title">Market Movers</div>
+            <h2 className="text-xl font-semibold mb-4">Market Movers</h2>
                 <div className="flex space-x-2">
                     <button
                         onClick={() => setActiveTab('gainers')}
@@ -70,17 +70,18 @@ export default function DailyGainers() {
             ) : (
                 <div>
                     {displayData.map((coin, index) => (
-                        <div key={coin.id} className="gainer-item">
+                        <div key={coin.id} className="flex justify-between items-center p-2">
                             <div className="token-info my-2">
                                 <div className='flex items-center'>
-                                    <Image
-                                        src={coin.image}
-                                        alt={coin.name}
-                                        width={22}
-                                        height={22}
-                                        className="object-contain bg-white mr-2 rounded-full"
-                                        unoptimized
-                                    />
+                                      <div className="relative h-8 w-8 mr-3">
+                                                    <Image
+                                                      src={coin.image}
+                                                      alt={coin.name}
+                                                      fill
+                                                      className="rounded-full object-cover"
+                                                      unoptimized
+                                                    />
+                                                  </div>
                                     <div className="token-name">{coin.name}</div>
                                     <div className="token-chain">${formatPrice(coin.current_price)}</div>
                                 </div>

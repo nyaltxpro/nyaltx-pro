@@ -142,17 +142,18 @@ const Header = () => {
               <div className="flex w-[60%] mx-4">
                 <div className="w-[80%] relative" ref={searchRef}>
                   <form onSubmit={handleSearchSubmit}>
+                  <span className="absolute left-3  top-1/2 transform bg-gray-600 p-1 rounded-full -translate-y-1/2 text-secondary">
+                      <BiSearch/>
+                    </span>
                     <input
                       type="text"
                       placeholder="Search pair by symbol, name, contract or token"
-                      className="w-full py-2 px-10 rounded-full bg-opacity-10 bg-gray-800 border border-gray-700 focus:outline-none focus:border-primary"
+                      className="w-full py-2  ml-1 px-8 rounded-full bg-opacity-10 bg-gray-800 border border-gray-700 focus:outline-none focus:border-primary"
                       value={searchTerm}
                       onChange={handleSearchChange}
                       onFocus={() => searchResults.length > 0 && setShowResults(true)}
                     />
-                    <span className="absolute left-3 top-1/2 transform bg-gray-600 p-2 -translate-y-1/2 text-secondary">
-                      <BiSearch/>
-                    </span>
+                   
                   </form>
                   
                   {/* Search results dropdown */}
