@@ -173,7 +173,7 @@ const Row: React.FC<{ item: any; onInspect: (o: any) => void }> = ({ item, onIns
       {/* <div className="text-xs font-mono opacity-80" title={tokenData.mint || ""}>{truncate(tokenData.mint, 8)}</div>
       <div className="text-xs font-mono opacity-60" title={tokenData.creator || ""}>{truncate(tokenData.creator, 6)}</div>
       */}
-      <button onClick={() => onInspect(item)} className="col-span-1 mt-2 text-xs px-2 py-1 rounded bg-gray-800 hover:bg-gray-700 w-max">Inspect JSON</button>
+      <button onClick={() => onInspect(item)} className="col-span-1 mt-2 text-xs px-2 py-1 rounded bg-gray-800 hover:bg-gray-700 w-max">Details</button>
 
    
     </div>
