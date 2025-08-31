@@ -12,7 +12,7 @@ import { getCryptoIconUrl } from '../../app/utils/cryptoIcons';
 export const RaydiumConfig: DexConfig = {
   id: 'raydium',
   name: DEX_PROTOCOL.RAYDIUM,
-  logoURI: getCryptoIconUrl('ray'),
+  logoURI: '/exchanges/raydium-ray-logo.png',
   supportedChains: [CHAIN_IDS.SOLANA],
   // Solana uses program IDs instead of router addresses
   routerAddress: {

@@ -8,7 +8,7 @@ import { getCryptoIconUrl } from '../../app/utils/cryptoIcons';
 export const UniswapV2Config: DexConfig = {
   id: 'uniswap-v2',
   name: DEX_PROTOCOL.UNISWAP_V2,
-  logoURI: getCryptoIconUrl('uni'),
+  logoURI: '/exchanges/uniswap-uni-logo.png',
   supportedChains: [CHAIN_IDS.ETHEREUM, CHAIN_IDS.POLYGON, CHAIN_IDS.ARBITRUM, CHAIN_IDS.OPTIMISM],
   routerAddress: {
     [CHAIN_IDS.ETHEREUM]: '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D',

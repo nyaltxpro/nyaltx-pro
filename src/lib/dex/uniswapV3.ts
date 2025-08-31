@@ -11,7 +11,7 @@ import { getCryptoIconUrl } from '../../app/utils/cryptoIcons';
 export const UniswapV3Config: DexConfig = {
   id: 'uniswap-v3',
   name: DEX_PROTOCOL.UNISWAP_V3,
-  logoURI: getCryptoIconUrl('uni'),
+  logoURI: '/exchanges/uniswap-uni-logo.png',
   supportedChains: [CHAIN_IDS.ETHEREUM, CHAIN_IDS.POLYGON, CHAIN_IDS.ARBITRUM, CHAIN_IDS.OPTIMISM],
   routerAddress: {
     [CHAIN_IDS.ETHEREUM]: '0xE592427A0AEce92De3Edee1F18E0157C05861564',

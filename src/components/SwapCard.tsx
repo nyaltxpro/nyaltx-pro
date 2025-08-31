@@ -405,7 +405,7 @@ export default function SwapPage({ inTradeView = false, baseToken, quoteToken }:
                                             }}
                                         >
                                             <div className="flex items-center">
-                                                <div className="w-5 h-5 mr-2">
+                                                <div className="w-5 h-5 mr-2 bg-white rounded-full flex items-center justify-center">
                                                     <Image
                                                         src={exchange?.config.logoURI || '/placeholder.svg'}
                                                         alt={quote.protocol}
@@ -447,7 +447,7 @@ export default function SwapPage({ inTradeView = false, baseToken, quoteToken }:
                                 <div className="flex justify-between items-center mt-2">
                                     <span className="text-sm text-gray-400">Provider</span>
                                     <div className="flex items-center">
-                                        <div className="w-5 h-5 mr-1">
+                                        <div className=" p-1 mr-1 bg-white rounded-full ">
                                             <Image
                                                 src={selectedExchange.config.logoURI}
                                                 alt={selectedExchange.config.name}

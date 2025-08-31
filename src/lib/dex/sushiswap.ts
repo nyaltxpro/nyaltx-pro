@@ -11,7 +11,7 @@ import { getCryptoIconUrl } from '../../app/utils/cryptoIcons';
 export const SushiSwapConfig: DexConfig = {
   id: 'sushiswap',
   name: DEX_PROTOCOL.SUSHISWAP,
-  logoURI: getCryptoIconUrl('sushi'),
+  logoURI: '/exchanges/sushiswap-sushi-logo.png',
   supportedChains: [CHAIN_IDS.ETHEREUM, CHAIN_IDS.POLYGON, CHAIN_IDS.ARBITRUM, CHAIN_IDS.AVALANCHE],
   routerAddress: {
     [CHAIN_IDS.ETHEREUM]: '0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F',

@@ -11,7 +11,7 @@ import { getCryptoIconUrl } from '../../app/utils/cryptoIcons';
 export const PancakeSwapConfig: DexConfig = {
   id: 'pancakeswap',
   name: DEX_PROTOCOL.PANCAKESWAP,
-  logoURI: 'https://cryptologos.cc/logos/pancakeswap-cake-logo.png',
+  logoURI: '/exchanges/pancakeswap-cake-logo.png',
   supportedChains: [CHAIN_IDS.BSC, CHAIN_IDS.ETHEREUM],
   routerAddress: {
     [CHAIN_IDS.BSC]: '0x10ED43C718714eb63d5aA57B78B54704E256024E',

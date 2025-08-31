@@ -32,12 +32,12 @@ const ExchangeSelector: React.FC<ExchangeSelectorProps> = ({
         <div className="flex items-center">
           {selectedExchange && (
             <>
-              <div className="w-6 h-6 mr-2 relative">
+              <div className="p-1 mr-2 relative bg-white rounded-full flex items-center">
                 <Image
                   src={selectedExchange.config.logoURI}
                   alt={selectedExchange.config.name}
-                  width={24}
-                  height={24}
+                  width={20}
+                  height={20}
                 />
               </div>
               <span>{selectedExchange.config.name}</span>
@@ -60,12 +60,12 @@ const ExchangeSelector: React.FC<ExchangeSelectorProps> = ({
                   setIsOpen(false);
                 }}
               >
-                <div className="w-6 h-6 mr-2 relative">
+                <div className="p-1 mr-2 relative bg-white rounded-full ">
                   <Image
                     src={exchange.config.logoURI}
                     alt={exchange.config.name}
-                    width={24}
-                    height={24}
+                    width={20}
+                    height={20}
                   />
                 </div>
                 <div>
