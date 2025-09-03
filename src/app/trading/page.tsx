@@ -247,7 +247,7 @@ export default function TradingView() {
   return (
     <div className="p-4 text-white">
       {/* Token Header */}
-      <Header />
+      {/* <Header /> */}
     
 
       {/* Main Content Grid */}

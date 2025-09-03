@@ -216,6 +216,7 @@ export default function Home() {
   const [memeTokens, setMemeTokens] = useState<Token[]>([]);
   const [isLoadingTokens, setIsLoadingTokens] = useState<boolean>(false);
   const [selectedChain, setSelectedChain] = useState<string>('ethereum');
+  const [isPageLoading, setIsPageLoading] = useState<boolean>(true);
 
   // State for Tron tokens
   const [tronNewTokens, setTronNewTokens] = useState<TronNewToken[]>([]);
@@ -230,69 +231,6 @@ export default function Home() {
   const [bscTokens, setBscTokens] = useState<any[]>([]);
   const [isLoadingBscTokens, setIsLoadingBscTokens] = useState<boolean>(false);
 
-  // State for token race slider
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [autoSlide, setAutoSlide] = useState(true);
-  const [isPaused, setIsPaused] = useState(false);
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [touchEnd, setTouchEnd] = useState<number | null>(null);
-  const tokensPerSlide = 5;
-  const totalSlides = Math.ceil(tokenRaceData.length / tokensPerSlide);
-
-  // Minimum swipe distance in pixels
-  const minSwipeDistance = 50;
-
-  // Handle swipe gestures
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchStart(e.targetTouches[0].clientX);
-    setIsPaused(true); // Pause auto-sliding during touch
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientX);
-  };
-
-  const handleTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
-
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
-
-    if (isLeftSwipe && currentSlide < totalSlides - 1) {
-      setCurrentSlide(prev => prev + 1);
-    }
-
-    if (isRightSwipe && currentSlide > 0) {
-      setCurrentSlide(prev => prev - 1);
-    }
-
-    // Reset touch values
-    setTouchEnd(null);
-    setTouchStart(null);
-    setIsPaused(false); // Resume auto-sliding after touch
-  };
-
-  // Group tokens for slider display
-  const tokenSlides = [];
-  for (let i = 0; i < tokenRaceData.length; i += tokensPerSlide) {
-    tokenSlides.push(tokenRaceData.slice(i, i + tokensPerSlide));
-  }
-
-  // Auto slide functionality
-  useEffect(() => {
-    let slideInterval: NodeJS.Timeout;
-
-    if (autoSlide && totalSlides > 1 && !isPaused) {
-      slideInterval = setInterval(() => {
-        setCurrentSlide(prev => (prev + 1) % totalSlides);
-      }, 3000); // Change slide every 3 seconds
-    }
-
-    return () => {
-      if (slideInterval) clearInterval(slideInterval);
-    };
-  }, [autoSlide, totalSlides, isPaused]);
 
   // Toggle dark mode
   useEffect(() => {
@@ -354,23 +292,103 @@ export default function Home() {
     loadTronTokens();
   }, []);
 
+  // Simulate page loading
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsPageLoading(false);
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
 
 
   return (
     <div className={`flex flex-col min-h-screen ${!darkMode ? 'light' : ''}`}>
-      <Header />
+      {/* <Header /> */}
 
-      <Ads />
+      {isPageLoading ? (
+        // Skeleton Loading State
+        <div className="flex flex-col min-h-screen">
+          {/* Skeleton Ads */}
+          <div className="h-16 bg-gray-700 rounded animate-pulse mx-4 mt-4"></div>
 
+          {/* Skeleton Stats Bar */}
+          <div className="stats-bar mx-4 flex flex-col w-[90%] md:w-full md:flex-row md:justify-between md:items-center gap-4 mt-4">
+            <div className="h-6 bg-gray-700 rounded animate-pulse w-32"></div>
+            <div className="flex flex-wrap gap-x-4 gap-y-2">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="h-4 bg-gray-700 rounded animate-pulse w-24"></div>
+              ))}
+            </div>
+            <div className="h-5 bg-gray-700 rounded animate-pulse w-40"></div>
+          </div>
 
+          {/* Skeleton Token Race */}
+          <div className="token-race mx-4 mt-4">
+            <div className="flex justify-between items-center mb-4">
+              <div className="h-6 bg-gray-700 rounded animate-pulse w-32"></div>
+              <div className="flex space-x-2">
+                <div className="h-8 bg-gray-700 rounded animate-pulse w-16"></div>
+                <div className="h-8 bg-gray-700 rounded animate-pulse w-20"></div>
+              </div>
+            </div>
+            <div className="flex gap-2 overflow-x-auto pb-4">
+              {[...Array(10)].map((_, i) => (
+                <div key={i} className="flex-shrink-0 bg-gray-800 rounded-lg p-3 w-32">
+                  <div className="h-4 bg-gray-700 rounded animate-pulse mb-2 w-8"></div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-5 h-5 bg-gray-700 rounded-full animate-pulse"></div>
+                    <div className="h-4 bg-gray-700 rounded animate-pulse w-12"></div>
+                  </div>
+                  <div className="h-4 bg-gray-700 rounded animate-pulse w-16"></div>
+                </div>
+              ))}
+            </div>
+          </div>
 
-      {/* Stats Bar */}
-      <div className="stats-bar mx-4">
-        <div className="flex justify-between items-center">
-          <div className="text-xl font-bold">NYALTX board</div>
+          {/* Skeleton Main Content Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="max-h-[400px] section-card">
+                <div className="h-6 bg-gray-700 rounded animate-pulse mb-4 w-32"></div>
+                <div className="space-y-3">
+                  {[...Array(8)].map((_, j) => (
+                    <div key={j} className="flex items-center space-x-3">
+                      <div className="w-8 h-8 bg-gray-700 rounded-full animate-pulse"></div>
+                      <div className="flex-1">
+                        <div className="h-4 bg-gray-700 rounded animate-pulse mb-1 w-20"></div>
+                        <div className="h-3 bg-gray-700 rounded animate-pulse w-16"></div>
+                      </div>
+                      <div className="h-4 bg-gray-700 rounded animate-pulse w-12"></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
 
+          {/* Skeleton Token Categories */}
+          <div className="token-categories flex flex-col mx-4 mt-6">
+            <div className="flex items-center py-2 rounded-lg card-bg border-gray-700 overflow-x-auto mb-4">
+              <div className="flex space-x-4">
+                {[...Array(9)].map((_, i) => (
+                  <div key={i} className="h-8 bg-gray-700 rounded animate-pulse w-20"></div>
+                ))}
+              </div>
+            </div>
+            <div className="h-64 bg-gray-700 rounded animate-pulse"></div>
+          </div>
         </div>
-        <div className="flex space-x-4">
+      ) : (
+        <>
+          <Ads />
+
+          {/* Stats Bar */}
+          <div className="stats-bar mx-4 flex flex-col w-[90%] md:w-full  md:flex-row md:justify-between md:items-center gap-4">
+        <div className="flex justify-between items-center mb-2 md:mb-0">
+          <div className="text-xl font-bold">NYALTX board</div>
+        </div>
+        <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
           <div className="stats-item">
             <span className="stats-label">Networks:</span>
             <span className="stats-value">132</span>
@@ -392,7 +410,7 @@ export default function Home() {
             <span className="stats-value text-primary">1,897,863 DXT</span>
           </div>
         </div>
-        <div className="flex items-center">
+        <div className="flex items-center mt-2 md:mt-0">
           <span className="text-xs mr-2">Today&apos;s trending tokens</span>
           <label className="relative inline-flex items-center cursor-pointer">
             <input type="checkbox" className="sr-only peer" checked={true} readOnly />
@@ -402,112 +420,40 @@ export default function Home() {
       </div>
 
       {/* Token Race Section */}
-      <div className="token-race mx-4">
-        <div className="token-race-header">
-          <div className="flex items-center gap-2">
+      <div className="token-race mx-4 mt-4">
+        <div className="token-race-header flex-col md:flex-row">
+          <div className="flex items-center gap-2 mb-2 md:mb-0">
             <span className="text-xl font-bold">TOKEN RACE</span>
           </div>
           <div className="flex space-x-2 items-center">
             <button className="py-1 px-3 bg-[#00c3ff] text-black font-bold rounded-md">NITRO</button>
             <button className="py-1 px-3 bg-gray-700 text-white font-bold rounded-md">RANKING</button>
-            {/* <button 
-              onClick={() => setAutoSlide(prev => !prev)}
-              className={`ml-2 py-1 px-3 font-bold rounded-md flex items-center ${autoSlide ? 'bg-green-500 text-white' : 'bg-gray-700 text-white'}`}
-            >
-              <span className="mr-1">{autoSlide ? 'Auto' : 'Manual'}</span>
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                {autoSlide ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                )}
-              </svg>
-            </button> */}
           </div>
         </div>
 
-        <div
-          className={`token-race-slider relative ${isPaused ? 'paused' : ''}`}
-          onMouseEnter={() => setIsPaused(true)}
-          onMouseLeave={() => setIsPaused(false)}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-        >
-          <div className="token-race-content" style={{ transform: `translateX(-${currentSlide * 100}%)` }}>
-            {tokenSlides.map((slideTokens, slideIndex) => (
-              <div
-                key={`slide-${slideIndex}`}
-                className="flex gap-2 w-full"
-                style={{
-                  transform: `translateX(${slideIndex * 100}%)`,
-                  position: 'absolute',
-                  left: 0,
-                  opacity: currentSlide === slideIndex ? 1 : 0,
-                  transition: 'opacity 0.3s ease-in-out'
-                }}
-              >
-                {slideTokens.map((token) => (
-                  <div key={token.id} className="token-race-item">
-                    <div className={`token-race-rank rank-${token.rank}`}>{token.rank}{token.rank === 1 ? 'ST' : token.rank === 2 ? 'ND' : token.rank === 3 ? 'RD' : 'TH'}</div>
-                    <div className="flex items-center gap-2">
-                      {token.image && (
-                        <div className="w-5 h-5 rounded-full overflow-hidden">
-                          <Image
-                            src={token.image}
-                            alt={token.symbol}
-                            width={20}
-                            height={20}
-                            unoptimized
-                          />
-                        </div>
-                      )}
-                      <div className="token-symbol">{token.symbol}</div>
+        <div className="overflow-x-auto pb-4">
+          <div className="flex gap-2">
+            {tokenRaceData.map((token) => (
+              <div key={token.id} className="token-race-item flex-shrink-0">
+                <div className={`token-race-rank rank-${token.rank}`}>{token.rank}{token.rank === 1 ? 'ST' : token.rank === 2 ? 'ND' : token.rank === 3 ? 'RD' : 'TH'}</div>
+                <div className="flex items-center gap-2">
+                  {token.image && (
+                    <div className="w-5 h-5 rounded-full overflow-hidden">
+                      <Image
+                        src={token.image}
+                        alt={token.symbol}
+                        width={20}
+                        height={20}
+                        unoptimized
+                      />
                     </div>
-                    <div className="token-price">{token.price} <span className="text-[#00c3ff]">NITRO</span></div>
-                  </div>
-                ))}
+                  )}
+                  <div className="token-symbol">{token.symbol}</div>
+                </div>
+                <div className="token-price">{token.price} <span className="text-[#00c3ff]">NITRO</span></div>
               </div>
             ))}
           </div>
-
-          {/* Slider Navigation */}
-          {/* <button 
-            onClick={() => setCurrentSlide(prev => Math.max(0, prev - 1))}
-            className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-gray-800 bg-opacity-70 p-2 rounded-full z-10"
-            disabled={currentSlide === 0}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button> */}
-
-          {/* <button 
-            onClick={() => setCurrentSlide(prev => Math.min(totalSlides - 1, prev + 1))}
-            className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-gray-800 bg-opacity-70 p-2 rounded-full z-10"
-            disabled={currentSlide === totalSlides - 1}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </button> */}
-
-          {/* Slide Counter */}
-          {/* <div className="absolute bottom-0 right-0 bg-gray-800 bg-opacity-70 text-white text-xs px-2 py-1 rounded-tl-md">
-            {currentSlide + 1}/{totalSlides}
-          </div> */}
-
-          {/* Slide Indicators */}
-          {/* <div className="flex justify-center mt-4 space-x-2">
-            {Array.from({ length: totalSlides }).map((_, index) => (
-              <button 
-                key={index}
-                onClick={() => setCurrentSlide(index)}
-                className={`w-2 h-2 rounded-full ${currentSlide === index ? 'bg-[#00c3ff]' : 'bg-gray-500'}`}
-                aria-label={`Go to slide ${index + 1}`}
-              />
-            ))}
-          </div> */}
         </div>
       </div>
 
@@ -531,13 +477,13 @@ export default function Home() {
       </div>
 
       {/* Token Categories Section */}
-      <div className="token-categories flex flex-col  mx-4 mt-6">
-        <div className="flex items-center py-2 rounded-lg card-bg border-gray-700">
-          <div className="flex space-x-4 text-sm font-medium">
-            <button className="py-2 px-4   text-white">Hot Pairs</button>
+      <div className="token-categories flex flex-col mx-4 mt-6">
+        <div className="flex items-center py-2 rounded-lg card-bg border-gray-700 overflow-x-auto">
+          <div className="flex space-x-4 text-sm font-medium whitespace-nowrap">
+            <button className="py-2 px-4 text-white">Hot Pairs</button>
             <button className="py-2 px-4 text-gray-400">Token Race</button>
             <button className="py-2 px-4 text-gray-400">Pairs</button>
-            <button className="py-2 px-4 text-gray-400  bg-opacity-20 rounded-t-md">Meme Board</button>
+            <button className="py-2 px-4 text-gray-400 bg-opacity-20 rounded-t-md">Meme Board</button>
             <button className="py-2 px-4 text-gray-400">Token Creator</button>
             <button className="py-2 px-4 text-gray-400">New Socials</button>
             <button className="py-2 px-4 text-gray-400">Exchanges</button>
@@ -551,9 +497,11 @@ export default function Home() {
 
         {/* Token section  */}
         <TokenSection
-       
+
         />
       </div>
+        </>
+      )}
     </div>
   );
 }

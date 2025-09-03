@@ -6,7 +6,7 @@ import Header from '../../components/Header';
 export default function TermsPage() {
   return (
     <div className="min-h-screen bg-gray-900 text-white">
-      <Header />
+      {/* <Header /> */}
       
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-8 text-center">Terms of Service</h1>

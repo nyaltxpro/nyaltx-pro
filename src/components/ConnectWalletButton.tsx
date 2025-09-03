@@ -1,11 +1,8 @@
 "use client";
 
 import { useRouter } from 'next/navigation';
-// Import web3modal initialization first
-import '../lib/web3modal';
 import { useAccount } from 'wagmi';
 import { useState, useEffect } from 'react';
-
 import { useAppKit } from "@reown/appkit/react";
 
 interface ConnectWalletButtonProps {
@@ -20,10 +17,12 @@ export default function ConnectWalletButton({ className = "", onConnect }: Conne
   const [displayAddress, setDisplayAddress] = useState<string>('');
   
   useEffect(() => {
-    if (address) {
+    if (isConnected && address) {
       setDisplayAddress(`${address.slice(0, 6)}...${address.slice(-4)}`);
+    } else {
+      setDisplayAddress('');
     }
-  }, [address]);
+  }, [isConnected, address]);
 
   const handleClick = () => {
     if (onConnect) {

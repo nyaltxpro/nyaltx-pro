@@ -30,7 +30,7 @@ export default function WalletConnectPage() {
   return (
     <div className="flex flex-col min-h-screen bg-[#0b1217] text-white">
       {/* Header */}
-      <Header/>
+      {/* <Header/> */}
       
       {/* Main content */}
       <main className="flex-1 flex">

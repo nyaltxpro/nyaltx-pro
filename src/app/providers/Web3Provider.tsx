@@ -31,8 +31,15 @@ const modal = createAppKit({
     defaultNetwork: mainnet,
     metadata: metadata,
     features: {
-        analytics: true // Optional - defaults to your Cloud configuration
+        analytics: true, // Optional - defaults to your Cloud configuration
+        connectMethodsOrder: ['wallet', 'social'],
+        onramp: false
     },
+    enableWalletConnect: true,
+    enableInjected: true,
+    enableEIP6963: true,
+    enableCoinbase: true,
+    allWallets: 'HIDE',
     themeVariables: {
         '--w3m-font-family': 'Roboto, sans-serif',
       }
@@ -42,7 +49,7 @@ function ContextProvider({ children, cookies }: { children: ReactNode; cookies: 
     const initialState = cookieToInitialState(wagmiAdapter.wagmiConfig as Config, cookies)
 
     return (
-        <WagmiProvider config={wagmiAdapter.wagmiConfig as Config} initialState={initialState}>
+        <WagmiProvider config={wagmiAdapter.wagmiConfig as Config} initialState={initialState} reconnectOnMount={false}>
             <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
         </WagmiProvider>
     )

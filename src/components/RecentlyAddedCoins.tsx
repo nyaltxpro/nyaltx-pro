@@ -138,7 +138,7 @@ export default function RecentlyAddedCoins() {
       ) : (
         <div className="space-y-4">
           {coins.map((coin) => (
-            <div key={coin.id} className=" rounded-lg p-2 flex justify-between items-center">
+            <div key={coin.id} className="rounded-lg p-2 flex flex-col sm:flex-row sm:justify-between sm:items-center">
               <div className="flex items-center">
                 <div className="relative h-8 w-8 mr-3">
                   <Image
@@ -155,7 +155,7 @@ export default function RecentlyAddedCoins() {
                 </div>
               </div>
               
-              <div className="text-right">
+              <div className="text-right w-full sm:w-auto mt-2 sm:mt-0 flex justify-between sm:block">
                 <div className="font-medium">${formatPrice(coin.current_price)}</div>
                 <div className={`text-xs ${coin.price_change_percentage_24h >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                   {coin.price_change_percentage_24h >= 0 ? '+' : ''}

@@ -188,7 +188,7 @@ export default function SwapPage() {
   return (
     <div className="min-h-screen bg-[#0b1217] text-white">
       {/* Banner */}
-      <Header/>
+      {/* <Header/> */}
       
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">

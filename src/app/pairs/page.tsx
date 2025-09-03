@@ -299,7 +299,7 @@ export default function LivePairs() {
       </div> */}
 
       {/* Main content */}
-      <main className="flex-1 p-4">
+      <main className="flex-1 p-2 md:p-4">
         <div className="mb-6">
           <h1 className="text-2xl font-bold mb-2">LIVE NEW PAIRS</h1>
           <div className="flex items-center text-sm text-gray-400">
@@ -310,8 +310,8 @@ export default function LivePairs() {
         </div>
 
         {/* Search and filter bar */}
-        <div className="flex justify-between mb-4">
-          <div className="flex space-x-2">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
+          <div className="flex flex-wrap gap-2">
             <button 
               className={`px-3 py-1 rounded-md border transition-colors duration-200 ${activeFilter === 'all' ? 'bg-primary text-white border-primary shadow-md shadow-primary/20' : 'bg-gray-800 hover:bg-gray-700 text-white border-gray-700'}`}
               onClick={() => setActiveFilter('all')}
@@ -335,7 +335,7 @@ export default function LivePairs() {
             <input
               type="text"
               placeholder="Find by symbol, name, token contract or pair address"
-              className="py-2 px-4 rounded-lg bg-gray-800 bg-opacity-50 border border-gray-700 w-96"
+              className="py-2 px-4 rounded-lg bg-gray-800 bg-opacity-50 border border-gray-700 w-full md:w-96"
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
@@ -374,10 +374,10 @@ export default function LivePairs() {
                   <th className="py-2 px-4 cursor-pointer hover:text-primary" onClick={() => requestSort('price_change_percentage_24h' as keyof TradingPair)}>
                     24h % {sortConfig?.key === 'price_change_percentage_24h' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
                   </th>
-                  <th className="py-2 px-4 cursor-pointer hover:text-primary" onClick={() => requestSort('market_cap' as keyof TradingPair)}>
+                  <th className="py-2 px-4 cursor-pointer hover:text-primary hidden md:table-cell" onClick={() => requestSort('market_cap' as keyof TradingPair)}>
                     Market Cap {sortConfig?.key === 'market_cap' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
                   </th>
-                  <th className="py-2 px-4 cursor-pointer hover:text-primary" onClick={() => requestSort('total_volume' as keyof TradingPair)}>
+                  <th className="py-2 px-4 cursor-pointer hover:text-primary hidden lg:table-cell" onClick={() => requestSort('total_volume' as keyof TradingPair)}>
                     Volume (24h) {sortConfig?.key === 'total_volume' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
                   </th>
                 </tr>
@@ -438,7 +438,7 @@ export default function LivePairs() {
                         ? `${pair.price_change_percentage_24h > 0 ? '+' : ''}${pair.price_change_percentage_24h.toFixed(2)}%` 
                         : '0.00%'}
                     </td>
-                    <td className="py-3 px-4 whitespace-nowrap text-sm">
+                    <td className="py-3 px-4 whitespace-nowrap text-sm hidden md:table-cell">
                       {new Intl.NumberFormat('en-US', {
                         style: 'currency',
                         currency: 'USD',
@@ -446,7 +446,7 @@ export default function LivePairs() {
                         maximumFractionDigits: 2
                       }).format(pair.market_cap)}
                     </td>
-                    <td className="py-3 px-4 whitespace-nowrap text-sm">
+                    <td className="py-3 px-4 whitespace-nowrap text-sm hidden lg:table-cell">
                       {new Intl.NumberFormat('en-US', {
                         style: 'currency',
                         currency: 'USD',
@@ -477,7 +477,7 @@ export default function LivePairs() {
         
         {/* Pagination */}
         {!isLoading && sortedPairs.length > 0 && (
-          <div className="flex justify-between items-center mt-4 text-sm">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-4 text-sm">
             <div className="text-gray-400">
               Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, sortedPairs.length)} of {sortedPairs.length} pairs
             </div>

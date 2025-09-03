@@ -7,170 +7,59 @@ import ConnectWalletButton from '../../components/ConnectWalletButton';
 import Banner from '../../components/Banner';
 import { getCryptoIconUrl } from '../utils/cryptoIcons';
 import Header from '../../components/Header';
+import { coinGeckoService, CoinGeckoMarketData } from '../../api/coingecko/trending';
 
 // Define types
 type TrendingToken = {
-  id: number;
+  id: string;
   name: string;
   symbol: string;
   logo: string;
-  price: string;
+  price: number;
   priceUsd: string;
-  change24h: string;
-  marketCap: string;
-  volume24h: string;
+  change24h: number;
+  change24hFormatted: string;
+  marketCap: number;
+  marketCapFormatted: string;
+  volume24h: number;
+  volume24hFormatted: string;
   rank: number;
   favorite: boolean;
   sparkline: number[];
 };
 
-// Mock data for trending tokens
-const mockTrendingTokens: TrendingToken[] = [
-  {
-    id: 1,
-    name: 'Bitcoin',
-    symbol: 'BTC',
-    logo: getCryptoIconUrl('btc'),
-    price: '65,432.78',
-    priceUsd: '$65,432.78',
-    change24h: '+2.5%',
-    marketCap: '$1.24T',
-    volume24h: '$42.8B',
-    rank: 1,
-    favorite: true,
-    sparkline: [42, 45, 43, 47, 50, 48, 52, 53, 56, 54, 58, 60, 58, 62, 65]
-  },
-  {
-    id: 2,
-    name: 'Ethereum',
-    symbol: 'ETH',
-    logo: getCryptoIconUrl('eth'),
-    price: '3,456.92',
-    priceUsd: '$3,456.92',
-    change24h: '+1.8%',
-    marketCap: '$415.7B',
-    volume24h: '$18.2B',
-    rank: 2,
-    favorite: true,
-    sparkline: [32, 30, 33, 35, 34, 37, 36, 39, 38, 40, 42, 41, 43, 45, 44]
-  },
-  {
-    id: 3,
-    name: 'Solana',
-    symbol: 'SOL',
-    logo: getCryptoIconUrl('sol'),
-    price: '142.35',
-    priceUsd: '$142.35',
-    change24h: '+4.2%',
-    marketCap: '$62.8B',
-    volume24h: '$3.5B',
-    rank: 3,
-    favorite: false,
-    sparkline: [22, 24, 23, 26, 25, 28, 30, 29, 32, 31, 34, 33, 36, 38, 37]
-  },
-  {
-    id: 4,
-    name: 'Binance Coin',
-    symbol: 'BNB',
-    logo: getCryptoIconUrl('bnb'),
-    price: '567.89',
-    priceUsd: '$567.89',
-    change24h: '-0.7%',
-    marketCap: '$87.3B',
-    volume24h: '$2.1B',
-    rank: 4,
-    favorite: false,
-    sparkline: [28, 27, 29, 26, 28, 25, 27, 24, 26, 23, 25, 22, 24, 21, 23]
-  },
-  {
-    id: 5,
-    name: 'XRP',
-    symbol: 'XRP',
-    logo: getCryptoIconUrl('xrp'),
-    price: '0.5432',
-    priceUsd: '$0.5432',
-    change24h: '-1.2%',
-    marketCap: '$28.9B',
-    volume24h: '$1.7B',
-    rank: 5,
-    favorite: false,
-    sparkline: [18, 17, 19, 16, 18, 15, 17, 14, 16, 13, 15, 12, 14, 11, 13]
-  },
-  {
-    id: 6,
-    name: 'Cardano',
-    symbol: 'ADA',
-    logo: getCryptoIconUrl('ada'),
-    price: '0.4321',
-    priceUsd: '$0.4321',
-    change24h: '+0.5%',
-    marketCap: '$15.2B',
-    volume24h: '$0.8B',
-    rank: 6,
-    favorite: true,
-    sparkline: [12, 13, 11, 14, 10, 15, 9, 16, 8, 17, 7, 18, 6, 19, 5]
-  },
-  {
-    id: 7,
-    name: 'Dogecoin',
-    symbol: 'DOGE',
-    logo: getCryptoIconUrl('doge'),
-    price: '0.1234',
-    priceUsd: '$0.1234',
-    change24h: '+8.7%',
-    marketCap: '$16.8B',
-    volume24h: '$2.3B',
-    rank: 7,
-    favorite: false,
-    sparkline: [8, 10, 9, 11, 10, 12, 11, 13, 12, 14, 13, 15, 14, 16, 15]
-  },
-  {
-    id: 8,
-    name: 'Polygon',
-    symbol: 'MATIC',
-    logo: getCryptoIconUrl('matic'),
-    price: '0.7654',
-    priceUsd: '$0.7654',
-    change24h: '+3.2%',
-    marketCap: '$7.5B',
-    volume24h: '$0.6B',
-    rank: 8,
-    favorite: false,
-    sparkline: [14, 15, 13, 16, 12, 17, 11, 18, 10, 19, 9, 20, 8, 21, 7]
-  },
-  {
-    id: 9,
-    name: 'Avalanche',
-    symbol: 'AVAX',
-    logo: getCryptoIconUrl('avax'),
-    price: '34.56',
-    priceUsd: '$34.56',
-    change24h: '+2.1%',
-    marketCap: '$12.3B',
-    volume24h: '$0.9B',
-    rank: 9,
-    favorite: true,
-    sparkline: [20, 22, 21, 23, 22, 24, 23, 25, 24, 26, 25, 27, 26, 28, 27]
-  },
-  {
-    id: 10,
-    name: 'Chainlink',
-    symbol: 'LINK',
-    logo: getCryptoIconUrl('link'),
-    price: '15.43',
-    priceUsd: '$15.43',
-    change24h: '-0.3%',
-    marketCap: '$8.7B',
-    volume24h: '$0.5B',
-    rank: 10,
-    favorite: false,
-    sparkline: [16, 15, 17, 14, 18, 13, 19, 12, 20, 11, 21, 10, 22, 9, 23]
-  }
-];
+type GlobalMarketData = {
+  totalMarketCap: string;
+  totalVolume: string;
+  btcDominance: string;
+  marketCapChange24h: number;
+  volumeChange24h: number;
+};
+
+// Convert CoinGecko data to TrendingToken format
+const convertToTrendingToken = (coin: CoinGeckoMarketData, favorites: Set<string>): TrendingToken => {
+  return {
+    id: coin.id,
+    name: coin.name,
+    symbol: coin.symbol.toUpperCase(),
+    logo: coin.image,
+    price: coin.current_price,
+    priceUsd: `$${coinGeckoService.formatPrice(coin.current_price)}`,
+    change24h: coin.price_change_percentage_24h || 0,
+    change24hFormatted: coinGeckoService.formatPercentageChange(coin.price_change_percentage_24h || 0),
+    marketCap: coin.market_cap,
+    marketCapFormatted: coinGeckoService.formatMarketCap(coin.market_cap),
+    volume24h: coin.total_volume,
+    volume24hFormatted: coinGeckoService.formatVolume(coin.total_volume),
+    rank: coin.market_cap_rank,
+    favorite: favorites.has(coin.id),
+    sparkline: coin.sparkline_in_7d?.price?.slice(-15) || []
+  };
+};
 
 // Sparkline chart component
-const SparklineChart = ({ data, change }: { data: number[], change: string }) => {
-  const isPositive = change.startsWith('+');
+const SparklineChart = ({ data, change }: { data: number[], change: number }) => {
+  const isPositive = change >= 0;
   const color = isPositive ? '#26a69a' : '#ef5350';
   
   // Calculate the path for the sparkline
@@ -202,19 +91,104 @@ const SparklineChart = ({ data, change }: { data: number[], change: string }) =>
 
 export default function TrendingPage() {
   const [darkMode] = useState(true);
-  const [tokens, setTokens] = useState<TrendingToken[]>(mockTrendingTokens);
+  const [tokens, setTokens] = useState<TrendingToken[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [globalData, setGlobalData] = useState<GlobalMarketData | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortConfig, setSortConfig] = useState<{ key: keyof TrendingToken; direction: 'ascending' | 'descending' } | null>(null);
   const [timeframe, setTimeframe] = useState<'1h' | '24h' | '7d' | '30d'>('24h');
   const [activeFilter, setActiveFilter] = useState<'all' | 'gainers' | 'losers' | 'favorites'>('all');
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
   
+  // Load market data from CoinGecko
+  const loadMarketData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Get top 20 cryptocurrencies and global data in parallel
+      const [marketData, globalResponse] = await Promise.all([
+        coinGeckoService.getTopCryptocurrencies(20),
+        coinGeckoService.getGlobalMarketData().catch(err => {
+          console.warn('Global data failed, using fallback:', err);
+          return { data: { 
+            total_market_cap: { usd: 0 }, 
+            total_volume: { usd: 0 }, 
+            market_cap_percentage: { btc: 0 },
+            market_cap_change_percentage_24h_usd: 0
+          }};
+        })
+      ]);
+      
+      // Convert to TrendingToken format
+      const trendingTokens = marketData.map(coin => convertToTrendingToken(coin, favorites));
+      
+      // Set global market data with fallback
+      const global = globalResponse.data;
+      setGlobalData({
+        totalMarketCap: global.total_market_cap?.usd ? coinGeckoService.formatMarketCap(global.total_market_cap.usd) : 'N/A',
+        totalVolume: global.total_volume?.usd ? coinGeckoService.formatVolume(global.total_volume.usd) : 'N/A',
+        btcDominance: global.market_cap_percentage?.btc ? `${global.market_cap_percentage.btc.toFixed(1)}%` : 'N/A',
+        marketCapChange24h: global.market_cap_change_percentage_24h_usd || 0,
+        volumeChange24h: 0 // CoinGecko doesn't provide volume change in global endpoint
+      });
+      
+      setTokens(trendingTokens);
+    } catch (err) {
+      console.error('Error loading market data:', err);
+      setError('Failed to load market data. Using cached data if available.');
+      
+      // Try to show cached data if available
+      if (tokens.length === 0) {
+        setError('Failed to load market data. Please check your connection and try again.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Toggle favorite status for a token
-  const toggleFavorite = (id: number, e: React.MouseEvent) => {
+  const toggleFavorite = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
+    const newFavorites = new Set(favorites);
+    if (newFavorites.has(id)) {
+      newFavorites.delete(id);
+    } else {
+      newFavorites.add(id);
+    }
+    setFavorites(newFavorites);
+    
+    // Update tokens with new favorite status
     setTokens(tokens.map(token => 
-      token.id === id ? { ...token, favorite: !token.favorite } : token
+      token.id === id ? { ...token, favorite: newFavorites.has(id) } : token
     ));
   };
+
+  // Load data on component mount and set up refresh interval
+  useEffect(() => {
+    loadMarketData();
+    
+    // Refresh data every 10 minutes to reduce API calls
+    const interval = setInterval(() => {
+      // Only refresh if not currently loading
+      if (!loading) {
+        loadMarketData();
+      }
+    }, 10 * 60 * 1000);
+    
+    return () => clearInterval(interval);
+  }, [loading]);
+
+  // Update favorites when tokens change
+  useEffect(() => {
+    setTokens(prevTokens => 
+      prevTokens.map(token => ({
+        ...token,
+        favorite: favorites.has(token.id)
+      }))
+    );
+  }, [favorites]);
 
   // Dark mode effect
   useEffect(() => {
@@ -263,9 +237,9 @@ export default function TrendingPage() {
                            token.name.toLowerCase().includes(searchTerm.toLowerCase());
       
       if (activeFilter === 'gainers') {
-        return matchesSearch && token.change24h.startsWith('+');
+        return matchesSearch && token.change24h > 0;
       } else if (activeFilter === 'losers') {
-        return matchesSearch && token.change24h.startsWith('-');
+        return matchesSearch && token.change24h < 0;
       } else if (activeFilter === 'favorites') {
         return matchesSearch && token.favorite;
       } else {
@@ -285,12 +259,12 @@ export default function TrendingPage() {
   return (
     <div className="min-h-screen  text-white">
       {/* Banner */}
-      <Header />
+      {/* <Header /> */}
       
       {/* Header with search and wallet */}
       <div className="container mx-auto px-4 py-4">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Trending</h1>
+          <h1 className="text-2xl font-bold">Top 20 Cryptocurrencies</h1>
           
           <div className="flex items-center space-x-4">
          
@@ -355,31 +329,119 @@ export default function TrendingPage() {
           </div>
         </div>
         
+        {/* Skeleton Loading State */}
+        {loading && (
+          <>
+            {/* Skeleton Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="bg-[var(--card-bg)] p-4 rounded-lg border border-[var(--border-color)]">
+                  <div className="h-4 bg-gray-700 rounded animate-pulse mb-2 w-24"></div>
+                  <div className="h-6 bg-gray-700 rounded animate-pulse mb-1 w-32"></div>
+                  <div className="h-4 bg-gray-700 rounded animate-pulse w-20"></div>
+                </div>
+              ))}
+            </div>
+
+            {/* Skeleton Table */}
+            <div className="overflow-x-auto">
+              <table className="min-w-full bg-[var(--card-bg)] rounded-lg overflow-hidden border border-[var(--border-color)]">
+                <thead className="bg-[var(--header-bg)]">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider w-16">Rank</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Name</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Price</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">24h Change</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Market Cap</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Volume (24h)</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Chart</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider w-16"></th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[var(--border-color)]">
+                  {[...Array(20)].map((_, index) => (
+                    <tr key={index} className="hover:bg-[var(--hover-bg)] transition-colors">
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <div className="h-4 bg-gray-700 rounded animate-pulse w-6"></div>
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="h-8 w-8 bg-gray-700 rounded-full animate-pulse mr-3"></div>
+                          <div>
+                            <div className="h-4 bg-gray-700 rounded animate-pulse w-16 mb-1"></div>
+                            <div className="h-3 bg-gray-700 rounded animate-pulse w-12"></div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <div className="h-4 bg-gray-700 rounded animate-pulse w-20"></div>
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <div className="h-4 bg-gray-700 rounded animate-pulse w-16"></div>
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <div className="h-4 bg-gray-700 rounded animate-pulse w-24"></div>
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <div className="h-4 bg-gray-700 rounded animate-pulse w-20"></div>
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <div className="h-8 bg-gray-700 rounded animate-pulse w-16"></div>
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <div className="h-4 w-4 bg-gray-700 rounded animate-pulse"></div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
+        
+        {/* Error State */}
+        {error && (
+          <div className="bg-red-900/20 border border-red-500 rounded-lg p-4 mb-6">
+            <div className="text-red-400">{error}</div>
+            <button 
+              onClick={loadMarketData}
+              className="mt-2 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-sm transition-colors"
+            >
+              Retry
+            </button>
+          </div>
+        )}
+        
         {/* Trending Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <div className="bg-[#0f1923] p-4 rounded-lg">
-            <h3 className="text-gray-400 text-sm mb-1">Total Market Cap</h3>
-            <div className="text-xl font-bold">$2.45T</div>
-            <div className="text-green-500 text-sm">+1.8% (24h)</div>
+        {globalData && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="bg-[var(--card-bg)] p-4 rounded-lg border border-[var(--border-color)]">
+              <h3 className="text-gray-400 text-sm mb-1">Total Market Cap</h3>
+              <div className="text-xl font-bold">{globalData.totalMarketCap}</div>
+              <div className={`text-sm ${globalData.marketCapChange24h >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                {coinGeckoService.formatPercentageChange(globalData.marketCapChange24h)} (24h)
+              </div>
+            </div>
+            
+            <div className="bg-[var(--card-bg)] p-4 rounded-lg border border-[var(--border-color)]">
+              <h3 className="text-gray-400 text-sm mb-1">24h Trading Volume</h3>
+              <div className="text-xl font-bold">{globalData.totalVolume}</div>
+              <div className="text-gray-400 text-sm">Global volume</div>
+            </div>
+            
+            <div className="bg-[var(--card-bg)] p-4 rounded-lg border border-[var(--border-color)]">
+              <h3 className="text-gray-400 text-sm mb-1">BTC Dominance</h3>
+              <div className="text-xl font-bold">{globalData.btcDominance}</div>
+              <div className="text-gray-400 text-sm">Market share</div>
+            </div>
           </div>
-          
-          <div className="bg-[#0f1923] p-4 rounded-lg">
-            <h3 className="text-gray-400 text-sm mb-1">24h Trading Volume</h3>
-            <div className="text-xl font-bold">$98.7B</div>
-            <div className="text-red-500 text-sm">-2.3% (24h)</div>
-          </div>
-          
-          <div className="bg-[#0f1923] p-4 rounded-lg">
-            <h3 className="text-gray-400 text-sm mb-1">BTC Dominance</h3>
-            <div className="text-xl font-bold">48.2%</div>
-            <div className="text-green-500 text-sm">+0.5% (24h)</div>
-          </div>
-        </div>
+        )}
         
         {/* Tokens Table */}
-        <div className="overflow-x-auto">
-          <table className="min-w-full bg-gray-800 rounded-lg overflow-hidden">
-            <thead className="bg-gray-700">
+        {!loading && !error && (
+          <div className="overflow-x-auto">
+            <table className="min-w-full bg-[var(--card-bg)] rounded-lg overflow-hidden border border-[var(--border-color)]">
+              <thead className="bg-[var(--header-bg)]">
               <tr>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider w-16">
                   <button 
@@ -464,19 +526,19 @@ export default function TrendingPage() {
                     </div>
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium">${token.price}</div>
+                    <div className="text-sm font-medium">{token.priceUsd}</div>
                   </td>
-                  <td className={`px-4 py-4 whitespace-nowrap ${token.change24h.startsWith('+') ? 'text-green-500' : 'text-red-500'}`}>
-                    <div className="text-sm font-medium">{token.change24h}</div>
+                  <td className={`px-4 py-4 whitespace-nowrap ${token.change24h >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                    <div className="text-sm font-medium">{token.change24hFormatted}</div>
                   </td>
                   <td className="px-4 py-4">
                     <SparklineChart data={token.sparkline} change={token.change24h} />
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap">
-                    <div className="text-sm">{token.marketCap}</div>
+                    <div className="text-sm">{token.marketCapFormatted}</div>
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap">
-                    <div className="text-sm">{token.volume24h}</div>
+                    <div className="text-sm">{token.volume24hFormatted}</div>
                   </td>
                   <td className="px-4 py-4 text-center">
                     <div className="flex items-center justify-center space-x-3">
@@ -494,15 +556,16 @@ export default function TrendingPage() {
                 </tr>
               ))}
             </tbody>
-          </table>
-        </div>
+            </table>
+          </div>
+        )}
         
         {/* Hot Trends Section */}
         <div className="mt-8">
           <h2 className="text-xl font-bold mb-4">Hot Trends</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Trending Category Cards */}
-            <div className="bg-[#0f1923] rounded-lg p-4 hover:bg-gray-800 transition-colors cursor-pointer">
+            <div className="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-lg p-4 hover:bg-[var(--hover-bg)] transition-colors cursor-pointer">
               <h3 className="font-medium mb-2">DeFi</h3>
               <div className="text-sm text-gray-400 mb-2">Top DeFi tokens by market cap</div>
               <div className="flex items-center justify-between">
@@ -511,7 +574,7 @@ export default function TrendingPage() {
               </div>
             </div>
             
-            <div className="bg-[#0f1923] rounded-lg p-4 hover:bg-gray-800 transition-colors cursor-pointer">
+            <div className="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-lg p-4 hover:bg-[var(--hover-bg)] transition-colors cursor-pointer">
               <h3 className="font-medium mb-2">NFTs</h3>
               <div className="text-sm text-gray-400 mb-2">Top NFT tokens by volume</div>
               <div className="flex items-center justify-between">
@@ -520,7 +583,7 @@ export default function TrendingPage() {
               </div>
             </div>
             
-            <div className="bg-[#0f1923] rounded-lg p-4 hover:bg-gray-800 transition-colors cursor-pointer">
+            <div className="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-lg p-4 hover:bg-[var(--hover-bg)] transition-colors cursor-pointer">
               <h3 className="font-medium mb-2">Layer 2</h3>
               <div className="text-sm text-gray-400 mb-2">Top L2 scaling solutions</div>
               <div className="flex items-center justify-between">
@@ -529,7 +592,7 @@ export default function TrendingPage() {
               </div>
             </div>
             
-            <div className="bg-[#0f1923] rounded-lg p-4 hover:bg-gray-800 transition-colors cursor-pointer">
+            <div className="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-lg p-4 hover:bg-[var(--hover-bg)] transition-colors cursor-pointer">
               <h3 className="font-medium mb-2">Meme Coins</h3>
               <div className="text-sm text-gray-400 mb-2">Top meme coins by volume</div>
               <div className="flex items-center justify-between">

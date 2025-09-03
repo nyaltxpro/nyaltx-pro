@@ -18,7 +18,11 @@ export const wagmiAdapter = new WagmiAdapter({
   }),
   ssr: true,
   projectId,
-  networks
+  networks,
+  transports: {
+    [mainnet.id]: http(),
+    [arbitrum.id]: http(),
+  }
 })
 
 export const config = wagmiAdapter.wagmiConfig

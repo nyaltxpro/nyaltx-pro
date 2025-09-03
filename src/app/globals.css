@@ -78,10 +78,6 @@ body {
   transition: box-shadow 0.3s ease;
 }
 
-.token-race-slider.paused {
-  /* box-shadow: 0 0 0 2px rgba(0, 195, 255, 0.5); */
-}
-
 .token-race-content {
   display: flex;
   gap: 8px;

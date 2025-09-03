@@ -69,8 +69,15 @@ async function fetchMetadata(tokenData: TokenData): Promise<TokenData> {
   
   try {
     console.log('Fetching metadata from URI:', tokenData.uri);
-    const response = await fetch(tokenData.uri);
-    if (!response.ok) throw new Error(`Failed to fetch: ${response.status}`);
+    
+    // Use our API proxy to avoid CORS issues
+    const proxyUrl = `/api/metadata?uri=${encodeURIComponent(tokenData.uri)}`;
+    const response = await fetch(proxyUrl);
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(`Failed to fetch: ${response.status} - ${errorData.error || 'Unknown error'}`);
+    }
     
     const metadata = await response.json();
     console.log('Metadata fetched:', metadata);
@@ -462,7 +469,7 @@ export default function PumpPortalSimpleUI() {
         
         </header>
 
-        <main className="grid md:grid-cols-3 gap-6 mt-6">
+        <main className="grid md:grid-cols-2 gap-6 mt-6">
           <section className="bg-gray-950 rounded-2xl p-4 border border-gray-800">
             <h2 className="text-lg font-semibold mb-3">
               New 
@@ -479,7 +486,7 @@ export default function PumpPortalSimpleUI() {
             </div>
           </section>
 
-          <section className="bg-gray-950 rounded-2xl p-4 border border-gray-800">
+          {/* <section className="bg-gray-950 rounded-2xl p-4 border border-gray-800">
             <h2 className="text-lg font-semibold mb-3">
               Pre‑launched 
               <span className="text-xs ml-2 text-gray-400">{Object.keys(preLaunched).length} tokens</span>
@@ -502,7 +509,7 @@ export default function PumpPortalSimpleUI() {
                 <p className="text-sm opacity-60">Waiting for creations…</p>
               )}
             </div>
-          </section>
+          </section> */}
 
           <section className="bg-gray-950 rounded-2xl p-4 border border-gray-800">
             <h2 className="text-lg font-semibold mb-3">

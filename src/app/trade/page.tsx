@@ -315,10 +315,46 @@ function TradingViewWithParams({ baseToken, quoteToken }: { baseToken: string, q
     return `COINBASE:${baseToken}${quoteToken}`;
   };
 
+  const chartProps: any = {
+    theme: "dark",
+    symbol: getTradingViewSymbol(),
+    interval: "15",
+    timezone: "Etc/UTC",
+    style: "1",
+    locale: "en",
+    toolbar_bg: "#0f1923",
+    enable_publishing: false,
+    hide_top_toolbar: false,
+    hide_legend: false,
+    withdateranges: true,
+    save_image: false,
+    studies: [
+      "MASimple@tv-basicstudies",
+      "RSI@tv-basicstudies"
+    ],
+    width: "100%",
+    height: "100%",
+    details: true,
+    hotlist: true,
+    calendar: true,
+    overrides: {
+      "paneProperties.background": "#0f1923",
+      "paneProperties.vertGridProperties.color": "#1a2932",
+      "paneProperties.horzGridProperties.color": "#1a2932",
+      "symbolWatermarkProperties.transparency": 90,
+      "scalesProperties.textColor": "#AAA",
+      "mainSeriesProperties.candleStyle.wickUpColor": 'rgb(38,166,154)',
+      "mainSeriesProperties.candleStyle.wickDownColor": 'rgb(239,83,80)',
+      "studies.MA.color": "#E6E6FA",
+      "studies.MA.linewidth": 2,
+      "studies.RSI.color": "#F0E68C"
+    }
+  };
+
   return (
     <div className="p-4 text-white ">
       {/* Token Header */}
-      <Header />
+      {/* <Header /> */}
     
 
       {/* Main Content Grid */}
@@ -423,79 +459,8 @@ function TradingViewWithParams({ baseToken, quoteToken }: { baseToken: string, q
          
             
             {/* Chart Container */}
-            <div className="w-full h-96  rounded-lg">
-              <div className="flex items-center justify-between p-3 border-b border-gray-800">
-                <div className="flex items-center">
-                  <div className="relative w-8 h-8 mr-2">
-                    <Image 
-                      src={getCryptoIconUrl(baseToken)} 
-                      alt={baseToken} 
-                      width={32} 
-                      height={32} 
-                      className="rounded-full" 
-                      unoptimized 
-                    />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold">{baseToken}</h3>
-                    <div className="flex items-center text-sm">
-                      <span className="text-gray-400 mr-2">{baseToken} / {quoteToken}</span>
-                      <span className={pairData?.priceChangePercentage24h && pairData.priceChangePercentage24h >= 0 ? 'text-green-500' : 'text-red-500'}>
-                        {pairData ? formatPercentage(pairData.priceChangePercentage24h) : '0.00%'}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex items-center ml-4 space-x-2">
-                    <div className="p-1 rounded-full hover:bg-gray-700 cursor-pointer">
-                      <FaChartLine className="text-gray-400" size={16} />
-                    </div>
-                    <div className="p-1 rounded-full hover:bg-gray-700 cursor-pointer">
-                      <FaGlobe className="text-gray-400" size={16} />
-                    </div>
-                    <div className="p-1 rounded-full hover:bg-gray-700 cursor-pointer">
-                      <FaTelegram className="text-gray-400" size={16} />
-                    </div>
-                    <div className="p-1 rounded-full hover:bg-gray-700 cursor-pointer">
-                      <FaTwitter className="text-gray-400" size={16} />
-                    </div>
-                    <div className="p-1 rounded-full hover:bg-gray-700 cursor-pointer">
-                      <FaSearch className="text-gray-400" size={16} />
-                    </div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="text-xl font-bold">
-                    {pairData ? (quoteToken === 'USDT' || quoteToken === 'USDC' || quoteToken === 'DAI' 
-                      ? formatCurrency(pairData.price, 'USD', 6) 
-                      : pairData.price.toFixed(8)) : '$0.00'}
-                  </div>
-                  <div className="text-sm text-gray-400">
-                    {pairData ? `${pairData.price.toFixed(8)} ${quoteToken}` : `0.00 ${quoteToken}`}
-                  </div>
-                </div>
-              </div>
-              
-                  <AdvancedRealTimeChart 
-                    theme="dark"
-                    backgroundColor="#0f1923"
-                    symbol={getTradingViewSymbol()}
-                    interval="15"
-                    timezone="Etc/UTC"
-                    style="2"
-                    locale="en"
-                    toolbar_bg="#0f1923"
-                    enable_publishing={false}
-                    hide_top_toolbar={false}
-                    hide_legend={false}
-                    save_image={false}
-                    studies={[
-                      "MASimple@tv-basicstudies",
-                      "RSI@tv-basicstudies"
-                    ]}
-                    width="100%"
-                    height="380"
-                    autosize
-                  />
+            <div className="w-full h-[500px] rounded-lg relative">
+                  <AdvancedRealTimeChart {...chartProps} />
                 </div>
               
             </div>

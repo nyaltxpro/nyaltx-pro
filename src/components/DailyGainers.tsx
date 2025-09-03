@@ -71,30 +71,28 @@ export default function DailyGainers() {
                 <div>
                     {displayData.map((coin, index) => (
                         <div key={coin.id} className="flex justify-between items-center p-2">
-                            <div className="token-info my-2">
-                                <div className='flex items-center'>
-                                      <div className="relative h-8 w-8 mr-3">
-                                                    <Image
-                                                      src={coin.image}
-                                                      alt={coin.name}
-                                                      fill
-                                                      className="rounded-full object-cover"
-                                                      unoptimized
-                                                    />
-                                                  </div>
-                                    <div className="token-name">{coin.name}</div>
-                                    <div className="token-chain">${formatPrice(coin.current_price)}</div>
+                                                        <div className="flex items-center">
+                                <div className="relative h-8 w-8 mr-3 flex-shrink-0">
+                                    <Image
+                                        src={coin.image}
+                                        alt={coin.name}
+                                        fill
+                                        className="rounded-full object-cover"
+                                        unoptimized
+                                    />
+                                </div>
+                                <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
+                                    <div className="token-name font-medium">{coin.name}</div>
+                                    <div className="token-chain text-sm text-gray-400">${formatPrice(coin.current_price)}</div>
                                 </div>
                             </div>
-                            <div>
-                                <div className="token-percentage percentage-positive">
-                                    <p className={`font-medium ${coin.price_change_percentage_24h >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                                        {coin.price_change_percentage_24h >= 0 ? '+' : ''}{coin.price_change_percentage_24h.toFixed(2)}%
-                                    </p>
-                                    <p className="text-sm text-gray-400">
-                                        Vol: {formatVolume(coin.total_volume)}
-                                    </p>
-                                </div>
+                            <div className="text-right">
+                                <p className={`font-medium ${coin.price_change_percentage_24h >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                                    {coin.price_change_percentage_24h >= 0 ? '+' : ''}{coin.price_change_percentage_24h.toFixed(2)}%
+                                </p>
+                                <p className="text-sm text-gray-400">
+                                    Vol: {formatVolume(coin.total_volume)}
+                                </p>
                             </div>
                         </div>
                     ))}

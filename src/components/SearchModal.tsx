@@ -5,17 +5,14 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { BiSearch } from 'react-icons/bi';
 import { IoMdClose } from 'react-icons/io';
+import { motion, AnimatePresence } from 'framer-motion';
 import { commonCryptoSymbols, getCryptoIconUrl } from '../app/utils/cryptoIcons';
 import { getCryptoName } from '../app/utils/cryptoNames';
 import { getTrendingCoins } from '../api/coingecko/client';
-
-// Define token pair type
-interface TokenPair {
-  baseToken: string;
-  quoteToken: string;
-  baseName?: string;
-  quoteName?: string;
-}
+import { usePumpFunTokens } from '../hooks/usePumpFunTokens';
+import { TokenPair, PumpFunToken, SearchResult } from '../types/token';
+import nyaxTokensData from '../../nyax-tokens-data.json';
+import nyaxLogoMappings from '../../nyax-logo-mappings.json';
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -32,14 +29,46 @@ interface TrendingCoin {
   price_btc: number;
 }
 
+interface NyaxToken {
+  logoId: string;
+  name: string | null;
+  symbol: string | null;
+  contractAddress: string | null;
+  network: string;
+  logo: string;
+  aboutUs: string | null;
+  url: string;
+  description?: string | null;
+  totalSupply?: string | null;
+  circulatingSupply?: string | null;
+  marketCap?: string | null;
+  price?: string | null;
+  website?: string | null;
+  telegram?: string | null;
+  twitter?: string | null;
+  discord?: string | null;
+  whitepaper?: string | null;
+  email?: string | null;
+  etherscan?: string | null;
+  video?: string | null;
+  additionalInfo?: any;
+}
+
 const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
-  const [searchResults, setSearchResults] = useState<TokenPair[]>([]);
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [trendingCoins, setTrendingCoins] = useState<TrendingCoin[]>([]);
   const [trendingLoading, setTrendingLoading] = useState(true);
   const modalRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { tokens: pumpFunTokens } = usePumpFunTokens();
+  const [nyaxTokens] = useState<NyaxToken[]>(nyaxTokensData.tokens || []);
+
+  // Function to get logo URL from mappings
+  const getNyaxLogoUrl = (logoId: string): string | null => {
+    return nyaxLogoMappings[logoId as keyof typeof nyaxLogoMappings] || null;
+  };
 
   // Popular token pairs for quick suggestions
   const popularPairs: TokenPair[] = [
@@ -71,54 +100,77 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
       return;
     }
 
-    // Search for token pairs
-    const results: TokenPair[] = [];
+    const results: SearchResult[] = [];
+    const upperSearch = value.toUpperCase();
     
-    // First check if the search term contains a trading pair format (e.g., BTC/USDT)
+    // Search PumpFun tokens first
+    const matchingPumpFunTokens = pumpFunTokens.filter(token => 
+      (token.name && token.name.toLowerCase().includes(value.toLowerCase())) ||
+      (token.symbol && token.symbol.toLowerCase().includes(value.toLowerCase())) ||
+      (token.mint && token.mint.toLowerCase().includes(value.toLowerCase()))
+    );
+    
+    matchingPumpFunTokens.forEach(token => {
+      results.push({
+        type: 'pumpfun',
+        data: token
+      });
+    });
+    
+    // Search for traditional token pairs
     const pairMatch = value.match(/([A-Za-z0-9]+)[/\\-]([A-Za-z0-9]+)/);
     if (pairMatch) {
       const baseToken = pairMatch[1].toUpperCase();
       const quoteToken = pairMatch[2].toUpperCase();
       
       if (commonCryptoSymbols.includes(baseToken) && commonCryptoSymbols.includes(quoteToken)) {
-        results.push({ 
-          baseToken, 
-          quoteToken, 
-          baseName: getCryptoName(baseToken),
-          quoteName: getCryptoName(quoteToken)
+        results.push({
+          type: 'pair',
+          data: { 
+            baseToken, 
+            quoteToken, 
+            baseName: getCryptoName(baseToken),
+            quoteName: getCryptoName(quoteToken)
+          }
         });
       }
     }
     
-    // Then search for individual tokens and create pairs with common quote currencies
-    const upperSearch = value.toUpperCase();
+    // Search for individual tokens and create pairs
     const matchingTokens = commonCryptoSymbols.filter(symbol => 
       symbol.includes(upperSearch)
     );
     
-    // For each matching token, create pairs with common quote currencies
     const quoteCurrencies = ['USDT', 'USDC', 'ETH', 'BTC'];
     matchingTokens.forEach(token => {
-      // Don't create pairs where base = quote
       quoteCurrencies.forEach(quote => {
         if (token !== quote) {
-          results.push({ 
-            baseToken: token, 
-            quoteToken: quote,
-            baseName: getCryptoName(token),
-            quoteName: getCryptoName(quote)
+          results.push({
+            type: 'pair',
+            data: { 
+              baseToken: token, 
+              quoteToken: quote,
+              baseName: getCryptoName(token),
+              quoteName: getCryptoName(quote)
+            }
           });
         }
       });
     });
     
     // Limit results to avoid overwhelming the UI
-    setSearchResults(results.slice(0, 10));
+    setSearchResults(results.slice(0, 15));
   };
 
   // Handle clicking on a search result
-  const handleResultClick = (pair: TokenPair) => {
-    router.push(`/trade?base=${pair.baseToken}&quote=${pair.quoteToken}`);
+  const handleResultClick = (result: SearchResult) => {
+    if (result.type === 'pair') {
+      const pair = result.data as TokenPair;
+      router.push(`/trade?base=${pair.baseToken}&quote=${pair.quoteToken}`);
+    } else if (result.type === 'nyax') {
+      const token = result.data as NyaxToken;
+      router.push(`/trade?base=${token.symbol || 'UNKNOWN'}&quote=USDT`);
+    }
     setSearchTerm('');
     onClose();
   };
@@ -135,12 +187,95 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
     onClose();
   };
 
+  // Handle clicking on a Nyaltz token
+  const handleNyaxTokenClick = (token: NyaxToken) => {
+    router.push(`/trade?base=${token.symbol || 'UNKNOWN'}&quote=USDT`);
+    onClose();
+  };
+
   // Handle search form submission
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
     if (searchResults.length > 0) {
       handleResultClick(searchResults[0]);
+    }
+  };
+
+  // Render search result item
+  const renderSearchResult = (result: SearchResult, index: number) => {
+    if (result.type === 'pumpfun') {
+      const token = result.data as PumpFunToken;
+      return (
+        <div 
+          key={`pumpfun-${token.mint}-${index}`}
+          className="flex items-center p-3 hover:bg-gray-700 cursor-pointer border-b border-gray-700 last:border-b-0"
+          onClick={() => handleResultClick(result)}
+        >
+          <div className="flex items-center mr-3">
+{token.image ? (
+              <img 
+                src={token.image} 
+                alt={token.symbol || 'Token'} 
+                className="w-8 h-8 rounded-full object-cover"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
+            ) : (
+              <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white text-sm font-bold">
+                {token.symbol?.[0] || '?'}
+              </div>
+            )}
+          </div>
+          <div className="flex-1">
+            <div className="flex items-center gap-2">
+              <span className="font-medium text-white">{token.name || 'Unknown Token'}</span>
+              <span className="text-xs bg-purple-600 text-white px-2 py-0.5 rounded-full">PumpFun</span>
+            </div>
+            <div className="text-sm text-gray-400">
+              {token.symbol && <span className="mr-2">${token.symbol}</span>}
+              {token.mint && <span className="text-xs font-mono">{token.mint.slice(0, 8)}...</span>}
+            </div>
+          </div>
+        </div>
+      );
+    } else {
+      const pair = result.data as TokenPair;
+      return (
+        <div 
+          key={`pair-${pair.baseToken}-${pair.quoteToken}-${index}`}
+          className="flex items-center p-3 hover:bg-gray-700 cursor-pointer border-b border-gray-700 last:border-b-0"
+          onClick={() => handleResultClick(result)}
+        >
+          <div className="flex items-center mr-3">
+            <div className="relative h-6 w-6 mr-1">
+              <Image
+                src={getCryptoIconUrl(pair.baseToken)}
+                alt={pair.baseToken}
+                width={24}
+                height={24}
+                className="rounded-full"
+                unoptimized
+              />
+            </div>
+            <div className="relative h-6 w-6">
+              <Image
+                src={getCryptoIconUrl(pair.quoteToken)}
+                alt={pair.quoteToken}
+                width={24}
+                height={24}
+                className="rounded-full"
+                unoptimized
+              />
+            </div>
+          </div>
+          <div>
+            <span className="font-medium">{pair.baseToken}/{pair.quoteToken}</span>
+            <div className="text-xs text-gray-400">{pair.baseName || getCryptoName(pair.baseToken)} / {pair.quoteName || getCryptoName(pair.quoteToken)}</div>
+          </div>
+        </div>
+      );
     }
   };
 
@@ -216,16 +351,37 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
     };
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-start justify-center pt-16">
-      <div 
-        ref={modalRef}
-        className="bg-[#0f1923] w-full max-w-3xl rounded-lg shadow-xl overflow-hidden"
-      >
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div 
+          className="fixed inset-0 bg-[#0b1217] bg-opacity-70 z-50 flex items-start justify-center pt-16"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              onClose();
+            }
+          }}
+        >
+          <motion.div 
+            ref={modalRef}
+            className="w-full max-w-3xl rounded-lg overflow-hidden"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{ 
+              type: "spring", 
+              stiffness: 400, 
+              damping: 25,
+              duration: 0.25 
+            }}
+            style={{ transformOrigin: "center center" }}
+          >
         {/* Search input */}
-        <div className="p-4 border-b border-gray-800">
+        <div className="p-2 border-b rounded-full border-gray-800">
           <div className="relative">
             <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
               <BiSearch size={20} />
@@ -235,7 +391,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                 ref={inputRef}
                 type="text"
                 placeholder="Search pair by symbol, name, contract or token"
-                className="w-full py-2 px-10 rounded-md bg-gray-800 border border-gray-700 focus:outline-none focus:border-blue-500"
+                className="w-full py-2 px-10 focus:ring-0 rounded-md outline-none  focus:outline-none "
                 value={searchTerm}
                 onChange={handleSearchChange}
               />
@@ -249,28 +405,73 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
           </div>
         </div>
 
-        {/* Featured content */}
-        <div className="p-4">
-          {/* Featured swap */}
-          <div className="mb-6 bg-gray-800 bg-opacity-30 rounded-lg p-3">
-            <div className="flex items-center">
-              <div className="w-8 h-8 mr-2 rounded-full overflow-hidden">
-                <Image 
-                  src="/crypto-icons/color/sol.svg" 
-                  alt="1inch" 
-                  width={32} 
-                  height={32} 
-                  className="rounded-full"
-                />
-              </div>
-              <div className="text-sm">
-                <span className="text-blue-400">1inch</span> - Swap Solana tokens on 6 off EVM chains. <span className="text-blue-400">Swap now!</span>
+        {/* Search Results */}
+        {searchTerm && searchResults.length > 0 && (
+          <div className="border-b border-gray-800">
+            <div className="p-4">
+              <h3 className="text-blue-400 font-bold mb-3">SEARCH RESULTS</h3>
+              <div className="max-h-60 overflow-y-auto">
+                {searchResults.map((result, index) => renderSearchResult(result, index))}
               </div>
             </div>
           </div>
+        )}
+
+        {/* Featured content */}
+        <div className="p-4">
+          {/* PumpFun Tokens */}
+          {!searchTerm && pumpFunTokens.length > 0 && (
+            <div className="mb-6">
+              <div className="flex justify-between items-center mb-3">
+                <h3 className="text-purple-400 font-bold">PUMPFUN TOKENS</h3>
+                <div className="flex space-x-2">
+                  <button className="bg-purple-600 text-xs px-3 py-1 rounded">LATEST</button>
+                  <button className="border border-purple-600 text-purple-400 text-xs px-3 py-1 rounded">ALL</button>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 max-h-60 overflow-y-auto">
+                {pumpFunTokens.map((token, index) => (
+                  <div 
+                    key={token.mint || index} 
+                    className="relative bg-gray-800 bg-opacity-30 rounded-lg p-3 overflow-hidden cursor-pointer hover:bg-gray-700 transition-colors"
+                    onClick={() => handleResultClick({ type: 'pumpfun', data: token })}
+                  >
+                    <div className="flex items-center mb-2">
+                      <div className="w-6 h-6 mr-2 rounded-full overflow-hidden">
+                        {token.image ? (
+                          <img 
+                            src={token.image} 
+                            alt={token.symbol || 'Token'} 
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                            }}
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white text-xs font-bold">
+                            {token.symbol?.[0] || '?'}
+                          </div>
+                        )}
+                      </div>
+                      <div className="text-sm font-bold truncate">{token.symbol || 'Unknown'}</div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="text-xs text-gray-400 truncate max-w-[80px]">{token.name || 'Unknown Token'}</div>
+                      <div className="text-xs text-purple-400 font-bold">NEW</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Trending Coins */}
-          <div className="mb-6">
+          <motion.div 
+            className="mb-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1, duration: 0.3 }}
+          >
             <div className="flex justify-between items-center mb-3">
               <h3 className="text-blue-400 font-bold">TRENDING COINS</h3>
               <div className="flex space-x-2">
@@ -278,7 +479,12 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                 <button className="border border-blue-600 text-blue-400 text-xs px-3 py-1 rounded">RANKING</button>
               </div>
             </div>
-            <div className="flex space-x-3 overflow-x-auto pb-2">
+            <motion.div 
+              className="flex space-x-3 overflow-x-auto pb-2"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2, duration: 0.3 }}
+            >
               {trendingLoading ? (
                 <div className="flex justify-center items-center w-full py-4">
                   <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-500"></div>
@@ -287,7 +493,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                 trendingCoins.map((coin, index) => (
                   <div 
                     key={coin.id} 
-                    className="relative min-w-[120px] bg-gray-800 bg-opacity-30 rounded-lg p-3 overflow-hidden cursor-pointer hover:bg-gray-700 transition-colors"
+                    className="relative bg-gray-800 bg-opacity-30 rounded-lg p-3 overflow-hidden cursor-pointer hover:bg-gray-700 transition-colors"
                     onClick={() => handleTrendingClick(coin)}
                   >
                     <div className={`absolute top-0 right-0 px-2 py-1 text-xs font-bold ${
@@ -321,11 +527,91 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                   No trending coins found
                 </div>
               )}
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
           
+          {/* Nyaltz Tokens */}
+          {!searchTerm && nyaxTokens.length > 0 && (
+            <motion.div 
+              className="mb-6"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25, duration: 0.3 }}
+            >
+              <div className="flex justify-between items-center mb-3">
+                <h3 className="text-cyan-400 font-bold">NYALTZ LISTINGS ({nyaxTokens.length} TOKENS)</h3>
+                <div className="flex space-x-2">
+                  <button className="bg-cyan-600 text-xs px-3 py-1 rounded">ALL</button>
+                  <button className="border border-cyan-600 text-cyan-400 text-xs px-3 py-1 rounded">FEATURED</button>
+                </div>
+              </div>
+              <motion.div 
+                className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 max-h-80 overflow-y-auto"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3, duration: 0.3 }}
+              >
+                {nyaxTokens.map((token, index) => (
+                  <div 
+                    key={token.logoId || index} 
+                    className="relative bg-gray-800 bg-opacity-30 rounded-lg p-3 overflow-hidden cursor-pointer hover:bg-gray-700 transition-colors group"
+                    onClick={() => handleNyaxTokenClick(token)}
+                  >
+                    <div className="flex flex-col items-center text-center">
+                      <div className="w-12 h-12 mb-2 rounded-full overflow-hidden border-2 border-transparent group-hover:border-cyan-400 transition-colors">
+                        {(() => {
+                          const logoUrl = getNyaxLogoUrl(token.logoId) || token.logo;
+                          return logoUrl ? (
+                            <img 
+                              src={logoUrl} 
+                              alt={token.symbol || token.name || 'Token'} 
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                const target = e.currentTarget;
+                                target.style.display = 'none';
+                                const fallback = target.nextElementSibling as HTMLElement;
+                                if (fallback) fallback.style.display = 'flex';
+                              }}
+                            />
+                          ) : null;
+                        })()}
+                        <div 
+                          className="w-full h-full bg-gradient-to-r from-blue-500 to-cyan-500 flex items-center justify-center text-white text-lg font-bold"
+                          style={{ display: (getNyaxLogoUrl(token.logoId) || token.logo) ? 'none' : 'flex' }}
+                        >
+                          {(token.symbol || token.name || '?')[0].toUpperCase()}
+                        </div>
+                      </div>
+                      <div className="w-full">
+                        <div className="text-sm font-bold truncate text-white mb-1">
+                          {token.symbol || 'N/A'}
+                        </div>
+                        <div className="text-xs text-gray-400 truncate mb-1">
+                          {token.name || 'Unknown Token'}
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div className="text-xs text-cyan-400 font-bold">
+                            {token.network}
+                          </div>
+                          <div className="text-xs bg-cyan-600 text-white px-1 py-0.5 rounded">
+                            NYALTZ
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </motion.div>
+            </motion.div>
+          )}
+
           {/* Popular Tokens */}
-          <div className="mb-6">
+          <motion.div 
+            className="mb-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.3 }}
+          >
             <div className="flex justify-between items-center mb-3">
               <h3 className="text-blue-400 font-bold">POPULAR TOKENS</h3>
               <div className="flex space-x-2">
@@ -333,7 +619,12 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                 <button className="border border-blue-600 text-blue-400 text-xs px-3 py-1 rounded">ALL</button>
               </div>
             </div>
-            <div className="flex space-x-3 overflow-x-auto pb-2">
+            <motion.div 
+              className="flex space-x-3 overflow-x-auto pb-2"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4, duration: 0.3 }}
+            >
               {popularTokens.map((token, index) => (
                 <div 
                   key={index} 
@@ -357,11 +648,13 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                   </div>
                 </div>
               ))}
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </div>
-      </div>
-    </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
 

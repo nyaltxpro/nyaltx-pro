@@ -13,9 +13,9 @@ const Footer = () => {
     <footer className="bg-[#152028] text-white border-t font-roboto border-gray-800 py-8 px-4 mt-8 font-poppins">
       <div className="container mx-auto">
         {/* Top section */}
-        <div className="grid grid-cols-3 gap-8 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
           {/* Left column */}
-          <div className='col-span-2'>
+          <div className='lg:col-span-2'>
             <h2 className="text-xl font-medium mb-4">Get news about cryptocurrencies every day!</h2>
             <h3 className="text-lg font-medium mb-4">Be part of Nyaltx Force community! The premium community of Nyaltx</h3>
             <p className="text-sm mb-4">
@@ -24,7 +24,7 @@ const Footer = () => {
             </p>
 
             {/* Tiers */}
-            <div className="grid grid-cols-3 gap-8 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 mb-8">
               {/* Free Tier */}
               <div className="bg-[#1a2632] rounded-lg p-4">
                 <div className="flex items-center mb-2">
@@ -61,14 +61,14 @@ const Footer = () => {
           </div>
 
           {/* Right column */}
-          <div className='col-span-1'>
+          <div className='lg:col-span-1'>
             <h3 className="text-lg font-medium mb-4">Follow us on social media!</h3>
             <p className="text-sm mb-6">
               Follow us on social media and find all you need to know about crypto world!
             </p>
 
             {/* Social media icons */}
-            <div className="grid grid-cols-3 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               <Link href="https://twitter.com/Nyaltx" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center">
                 <FaXTwitter className="text-2xl mb-1" />
                 <span className="text-xs">Twitter</span>
@@ -106,7 +106,7 @@ const Footer = () => {
           {/* Bottom section with links and app store badges */}
           <div className="flex flex-col md:flex-row justify-between items-center  pt-4">
             {/* Social icons */}
-            <div className="grid grid-cols-5 space-x-4 mb-4 md:mb-0">
+            <div className="flex flex-wrap justify-center items-center space-x-4 mb-4 md:mb-0">
               <Link href="https://x.com/nyaltx" target="_blank" rel="noopener noreferrer">
                 <FaXTwitter className="text-gray-400 hover:text-white" />
               </Link>
@@ -125,7 +125,7 @@ const Footer = () => {
             </div>
 
             {/* App store badges */}
-            <div className="flex w-[20%] mx-2  space-x-4">
+            <div className="flex w-full md:w-auto justify-center space-x-4 my-4 md:my-0">
               <Link href="https://apps.apple.com/app/Nyaltx" target="_blank" rel="noopener noreferrer">
                 <Image src="/app-store-badge.svg" alt="App Store" width={120} height={40} />
               </Link>
@@ -134,7 +134,7 @@ const Footer = () => {
               </Link>
             </div>
 
-            <div className="flex w-[60%]  flex-wrap justify-center md:justify-between mt-6 text-sm">
+            <div className="flex flex-col md:flex-row w-full lg:w-[60%] items-center justify-center md:justify-between mt-6 text-sm">
               <div className="flex flex-wrap justify-center space-x-4 mb-4 md:mb-0">
                 <Link href="/general-statement" className="text-blue-400 hover:text-blue-300">General Statement</Link>
                 <Link href="/legal-advice" className="text-blue-400 hover:text-blue-300">Legal Advice</Link>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import ConnectWalletButton from '../../components/ConnectWalletButton';
 import Header from '../../components/Header';
@@ -39,14 +39,23 @@ interface Airdrop {
 export default function AirdropsPage() {
   const [activeFilter, setActiveFilter] = useState<'active' | 'all'>('active');
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   
   // Use memetoken data for airdrops
   const airdrops: Airdrop[] = memetokenData.slice(0, 30); // Limit to 30 tokens for better performance
 
+  // Simulate loading state
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#0b1217] text-white p-6">
       {/* Header */}
-      <Header/>
+      {/* <Header/> */}
       <div className="flex justify-between items-center mb-6">
  
         <div className="relative">
@@ -63,14 +72,45 @@ export default function AirdropsPage() {
       </div>
 
 
+      {/* Skeleton Loading State */}
+      {loading && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[...Array(12)].map((_, index) => (
+            <div 
+              key={index}
+              className="bg-[#142028] rounded-lg overflow-hidden border border-gray-800 animate-pulse"
+            >
+              <div className="p-4 flex items-start">
+                <div className="w-16 h-16 mr-4 relative">
+                  <div className="w-16 h-16 rounded-full bg-gray-700 animate-pulse"></div>
+                </div>
+                <div className="flex-1">
+                  <div className="h-5 bg-gray-700 rounded animate-pulse mb-2 w-32"></div>
+                  <div className="flex items-center mb-1">
+                    <div className="h-4 bg-gray-700 rounded animate-pulse w-20 mr-2"></div>
+                    <div className="h-4 bg-gray-700 rounded animate-pulse w-16 mr-2"></div>
+                    <div className="h-5 bg-gray-700 rounded-full animate-pulse w-12"></div>
+                  </div>
+                  <div className="h-3 bg-gray-700 rounded animate-pulse w-40"></div>
+                </div>
+              </div>
+              <div className="border-t border-gray-800 p-2">
+                <div className="w-full h-8 bg-gray-700 rounded-md animate-pulse"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Airdrops Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {airdrops
-          .filter(airdrop => activeFilter === 'all' || 
-            // For 'active' filter, show only airdrops from the last 30 days
-            (activeFilter === 'active' && 
-              new Date(airdrop.last_updated).getTime() > Date.now() - (30 * 24 * 60 * 60 * 1000)))
-          .map((airdrop) => (
+      {!loading && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {airdrops
+            .filter(airdrop => activeFilter === 'all' || 
+              // For 'active' filter, show only airdrops from the last 30 days
+              (activeFilter === 'active' && 
+                new Date(airdrop.last_updated).getTime() > Date.now() - (30 * 24 * 60 * 60 * 1000)))
+            .map((airdrop) => (
           <div 
             key={airdrop.id} 
             className={`bg-[#142028] rounded-lg overflow-hidden border animate-fadeIn ${hoveredCard === airdrop.id ? 'border-primary shadow-lg shadow-primary/10' : 'border-gray-800'} transition-all duration-300 hover:translate-y-[-2px]`}
@@ -119,7 +159,8 @@ export default function AirdropsPage() {
             </div>
           </div>
         ))}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
