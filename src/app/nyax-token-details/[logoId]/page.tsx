@@ -40,10 +40,40 @@ const NYAXTokenDetailsPage: React.FC = () => {
   const router = useRouter();
   const logoId = params?.logoId as string;
   const [copiedAddress, setCopiedAddress] = useState(false);
+  const [isTokenAvailableOnDex, setIsTokenAvailableOnDex] = useState(false);
 
   const token: NyaxToken | undefined = nyaxTokensData.tokens.find(
     (t: NyaxToken) => t.logoId === logoId
   );
+
+  // Check if token is available on DEXs
+  React.useEffect(() => {
+    const checkTokenAvailability = () => {
+      if (!token || !token.contractAddress) {
+        setIsTokenAvailableOnDex(false);
+        return;
+      }
+
+      // List of well-known tokens that are available on major DEXs
+      const dexAvailableTokens = [
+        'ETH', 'WETH', 'USDT', 'USDC', 'DAI', 'WBTC', 'UNI', 'LINK', 'AAVE', 'COMP',
+        'MKR', 'SNX', 'YFI', 'SUSHI', 'CRV', 'BAL', 'MATIC', 'BNB', 'CAKE', 'BUSD',
+        'ADA', 'DOT', 'AVAX', 'SOL', 'LUNA', 'ATOM', 'FTM', 'NEAR', 'ALGO', 'XTZ'
+      ];
+
+      // Check if token symbol is in the list of DEX-available tokens
+      const isAvailable = token.symbol && dexAvailableTokens.includes(token.symbol.toUpperCase());
+      
+      // Also check if it has a valid contract address (indicates it's a real token)
+      const hasValidContract = token.contractAddress && 
+        token.contractAddress.startsWith('0x') && 
+        token.contractAddress.length === 42;
+
+      setIsTokenAvailableOnDex(Boolean(isAvailable && hasValidContract));
+    };
+
+    checkTokenAvailability();
+  }, [token]);
 
   if (!token) {
     return (
@@ -201,25 +231,53 @@ const NYAXTokenDetailsPage: React.FC = () => {
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="xl:col-span-2 space-y-8">
-            {/* Swap Card */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="bg-gradient-to-br from-[#1a2932] to-[#243540] rounded-2xl p-8 border border-gray-700/50 shadow-xl"
-            >
-              <h2 className="text-3xl font-bold mb-6 text-cyan-400 flex items-center gap-3">
-                <div className="w-1 h-8 bg-gradient-to-b from-cyan-400 to-blue-500 rounded-full"></div>
-                Trade {token.symbol}
-              </h2>
-              <div className="max-w-md mx-auto">
-                <SwapCard 
-                  inTradeView={true} 
-                  baseToken={token.symbol || undefined}
-                  quoteToken="USDT"
-                />
-              </div>
-            </motion.div>
+            {/* Swap Card - Only show if token is available on DEXs */}
+            {isTokenAvailableOnDex ? (
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="bg-gradient-to-br from-[#1a2932] to-[#243540] rounded-2xl p-8 border border-gray-700/50 shadow-xl"
+              >
+                <h2 className="text-3xl font-bold mb-6 text-cyan-400 flex items-center gap-3">
+                  <div className="w-1 h-8 bg-gradient-to-b from-cyan-400 to-blue-500 rounded-full"></div>
+                  Trade {token.symbol}
+                </h2>
+                <div className="max-w-md mx-auto">
+                  <SwapCard 
+                    inTradeView={true} 
+                    baseToken={token.symbol || undefined}
+                    quoteToken="USDT"
+                  />
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="bg-gradient-to-br from-[#1a2932] to-[#243540] rounded-2xl p-8 border border-gray-700/50 shadow-xl"
+              >
+                <h2 className="text-3xl font-bold mb-6 text-cyan-400 flex items-center gap-3">
+                  <div className="w-1 h-8 bg-gradient-to-b from-cyan-400 to-blue-500 rounded-full"></div>
+                  Trading Not Available
+                </h2>
+                <div className="text-center py-8">
+                  <div className="text-gray-400 text-lg mb-4">
+                    This token is not currently available for trading on decentralized exchanges.
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    Trading is only available for tokens listed on major DEXs like Uniswap and PancakeSwap.
+                  </div>
+                  {token.contractAddress && (
+                    <div className="mt-4 p-4 bg-[#0f1923] rounded-lg">
+                      <div className="text-xs text-gray-400 mb-2">Contract Address:</div>
+                      <div className="font-mono text-cyan-300 text-sm break-all">{token.contractAddress}</div>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            )}
             {/* About Section */}
             {token.aboutUs && (
               <motion.div
