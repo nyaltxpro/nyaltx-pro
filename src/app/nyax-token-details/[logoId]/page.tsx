@@ -8,6 +8,7 @@ import { SiBinance } from 'react-icons/si';
 import { BiArrowBack, BiCopy } from 'react-icons/bi';
 import { MdContentCopy } from 'react-icons/md';
 import nyaxTokensData from '../../../../nyax-tokens-data.json';
+import SwapCard from '../../../components/SwapCard';
 
 interface NyaxToken {
   logoId: string;
@@ -196,16 +197,35 @@ const NYAXTokenDetailsPage: React.FC = () => {
       </div>
 
       {/* Content */}
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="xl:col-span-2 space-y-8">
+            {/* Swap Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="bg-gradient-to-br from-[#1a2932] to-[#243540] rounded-2xl p-8 border border-gray-700/50 shadow-xl"
+            >
+              <h2 className="text-3xl font-bold mb-6 text-cyan-400 flex items-center gap-3">
+                <div className="w-1 h-8 bg-gradient-to-b from-cyan-400 to-blue-500 rounded-full"></div>
+                Trade {token.symbol}
+              </h2>
+              <div className="max-w-md mx-auto">
+                <SwapCard 
+                  inTradeView={true} 
+                  baseToken={token.symbol || undefined}
+                  quoteToken="USDT"
+                />
+              </div>
+            </motion.div>
             {/* About Section */}
             {token.aboutUs && (
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
+                transition={{ delay: 0.2 }}
                 className="bg-gradient-to-br from-[#1a2932] to-[#243540] rounded-2xl p-8 border border-gray-700/50 shadow-xl"
               >
                 <h2 className="text-3xl font-bold mb-6 text-cyan-400 flex items-center gap-3">
@@ -222,7 +242,7 @@ const NYAXTokenDetailsPage: React.FC = () => {
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
+              transition={{ delay: 0.3 }}
               className="bg-gradient-to-br from-[#1a2932] to-[#243540] rounded-2xl p-8 border border-gray-700/50 shadow-xl"
             >
               <h2 className="text-3xl font-bold mb-6 text-cyan-400 flex items-center gap-3">
