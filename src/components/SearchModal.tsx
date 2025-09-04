@@ -414,7 +414,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
     <AnimatePresence>
       {isOpen && (
         <motion.div 
-          className="fixed inset-0 bg-[#0b1217] bg-opacity-70 z-50 flex items-start justify-center pt-16"
+          className="fixed inset-0 bg-[#152028] bg-opacity-70 z-50 flex items-start justify-center pt-16"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
