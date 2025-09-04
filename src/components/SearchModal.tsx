@@ -117,6 +117,21 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
       });
     });
     
+    // Search NYAX tokens
+    const matchingNyaxTokens = nyaxTokens.filter(token => 
+      (token.name && token.name.toLowerCase().includes(value.toLowerCase())) ||
+      (token.symbol && token.symbol.toLowerCase().includes(value.toLowerCase())) ||
+      (token.contractAddress && token.contractAddress.toLowerCase().includes(value.toLowerCase())) ||
+      (token.logoId && token.logoId.includes(value))
+    );
+    
+    matchingNyaxTokens.forEach(token => {
+      results.push({
+        type: 'nyax',
+        data: token
+      });
+    });
+    
     // Search for traditional token pairs
     const pairMatch = value.match(/([A-Za-z0-9]+)[/\\-]([A-Za-z0-9]+)/);
     if (pairMatch) {
@@ -236,6 +251,50 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
             <div className="text-sm text-gray-400">
               {token.symbol && <span className="mr-2">${token.symbol}</span>}
               {token.mint && <span className="text-xs font-mono">{token.mint.slice(0, 8)}...</span>}
+            </div>
+          </div>
+        </div>
+      );
+    } else if (result.type === 'nyax') {
+      const token = result.data as NyaxToken;
+      return (
+        <div 
+          key={`nyax-${token.logoId}-${index}`}
+          className="flex items-center p-3 hover:bg-gray-700 cursor-pointer border-b border-gray-700 last:border-b-0"
+          onClick={() => handleResultClick(result)}
+        >
+          <div className="flex items-center mr-3">
+            <div className="w-8 h-8 rounded-full overflow-hidden">
+              {token.logo ? (
+                <img 
+                  src={token.logo} 
+                  alt={token.symbol || token.name || 'Token'} 
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    target.style.display = 'none';
+                    const fallback = target.nextElementSibling as HTMLElement;
+                    if (fallback) fallback.style.display = 'flex';
+                  }}
+                />
+              ) : null}
+              <div 
+                className="w-full h-full bg-gradient-to-r from-cyan-500 to-blue-500 flex items-center justify-center text-white text-sm font-bold"
+                style={{ display: token.logo ? 'none' : 'flex' }}
+              >
+                {(token.symbol || token.name || '?')[0].toUpperCase()}
+              </div>
+            </div>
+          </div>
+          <div className="flex-1">
+            <div className="flex items-center gap-2">
+              <span className="font-medium text-white">{token.name || 'Unknown Token'}</span>
+              <span className="text-xs bg-cyan-600 text-white px-2 py-0.5 rounded-full">NYAX</span>
+            </div>
+            <div className="text-sm text-gray-400">
+              {token.symbol && <span className="mr-2">${token.symbol}</span>}
+              <span className="text-xs text-cyan-400">{token.network}</span>
+              {token.contractAddress && <span className="text-xs font-mono ml-2">{token.contractAddress.slice(0, 8)}...</span>}
             </div>
           </div>
         </div>
@@ -560,7 +619,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                     <div className="flex flex-col items-center text-center">
                       <div className="w-12 h-12 mb-2 rounded-full overflow-hidden border-2 border-transparent group-hover:border-cyan-400 transition-colors">
                         {(() => {
-                          const logoUrl = getNyaxLogoUrl(token.logoId) || token.logo;
+                          const logoUrl =  token.logo;
                           return logoUrl ? (
                             <img 
                               src={logoUrl} 
@@ -577,7 +636,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                         })()}
                         <div 
                           className="w-full h-full bg-gradient-to-r from-blue-500 to-cyan-500 flex items-center justify-center text-white text-lg font-bold"
-                          style={{ display: (getNyaxLogoUrl(token.logoId) || token.logo) ? 'none' : 'flex' }}
+                          style={{ display: (token.logo) ? 'none' : 'flex' }}
                         >
                           {(token.symbol || token.name || '?')[0].toUpperCase()}
                         </div>
