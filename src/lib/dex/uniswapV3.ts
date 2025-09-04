@@ -1,11 +1,9 @@
 /**
  * Uniswap V3 DEX Integration
+ * Based on Uniswap V3 SDK pattern - ready for real SDK integration
  */
 import { DexInterface, Token, PriceQuote, SwapRoute, DexConfig, CHAIN_IDS, DEX_PROTOCOL, QuoteParams, SwapParams } from './types';
 import { getCryptoIconUrl } from '../../app/utils/cryptoIcons';
-// Uncomment when implementing real SDK calls
-// import { Token as UniToken, Pool, Route, Trade, CurrencyAmount, TradeType, Percent } from '@uniswap/v3-sdk';
-// import { getProvider } from '../blockchain/provider';
 
 // Uniswap V3 configuration
 export const UniswapV3Config: DexConfig = {
