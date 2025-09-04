@@ -598,7 +598,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
               transition={{ delay: 0.25, duration: 0.3 }}
             >
               <div className="flex justify-between items-center mb-3">
-                <h3 className="text-cyan-400 font-bold">NYALTZ LISTINGS ({nyaxTokens.length} TOKENS)</h3>
+                <h3 className="text-cyan-400 font-bold">NYAX LISTINGS ({nyaxTokens.length} TOKENS)</h3>
                 <div className="flex space-x-2">
                   <button className="bg-cyan-600 text-xs px-3 py-1 rounded">ALL</button>
                   <button className="border border-cyan-600 text-cyan-400 text-xs px-3 py-1 rounded">FEATURED</button>
