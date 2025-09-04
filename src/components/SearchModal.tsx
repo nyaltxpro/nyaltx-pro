@@ -650,7 +650,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                         </div>
                         <div className="flex items-center justify-between">
                           <div className="text-xs text-cyan-400 font-bold">
-                            {token.network}
+                            {token.network == 'Ethereum' ? 'ETH' : token.network == 'BSC' ? 'BSC' : token.network}
                           </div>
                           {/* <div className="text-xs bg-cyan-600 text-white px-1 py-0.5 rounded">
                             NYAX
