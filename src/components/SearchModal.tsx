@@ -427,7 +427,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
         >
           <motion.div 
             ref={modalRef}
-            className="w-full max-w-3xl rounded-lg overflow-hidden"
+            className="w-full max-w-5xl rounded-lg p-3 overflow-hidden"
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
@@ -440,7 +440,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
             style={{ transformOrigin: "center center" }}
           >
         {/* Search input */}
-        <div className="p-2 border-b rounded-full border-gray-800">
+        <div className="p-2 border-b rounded-full border-gray-500">
           <div className="relative">
             <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
               <BiSearch size={20} />
