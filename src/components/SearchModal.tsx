@@ -652,9 +652,9 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                           <div className="text-xs text-cyan-400 font-bold">
                             {token.network}
                           </div>
-                          <div className="text-xs bg-cyan-600 text-white px-1 py-0.5 rounded">
-                            NYALTZ
-                          </div>
+                          {/* <div className="text-xs bg-cyan-600 text-white px-1 py-0.5 rounded">
+                            NYAX
+                          </div> */}
                         </div>
                       </div>
                     </div>

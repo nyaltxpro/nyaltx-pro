@@ -103,10 +103,10 @@ const NyaltzListingsPage: React.FC = () => {
             className="text-center"
           >
             <h1 className="text-4xl md:text-6xl font-bold mb-4">
-              NYALTZ LISTINGS
+              NYAX LISTINGS
             </h1>
             <p className="text-xl text-cyan-100 mb-6">
-              Discover all {tokens.length} tokens listed on the Nyaltz exchange
+              Discover all {tokens.length} tokens listed on the NYAX exchange
             </p>
             <div className="flex flex-wrap justify-center gap-4 text-sm">
               <div className="bg-white bg-opacity-20 px-4 py-2 rounded-full">
