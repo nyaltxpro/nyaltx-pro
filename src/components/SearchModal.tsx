@@ -444,7 +444,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
             style={{ transformOrigin: "center center" }}
           >
             {/* Search input */}
-            <div className="p-2 border-b rounded-full border-gray-500">
+            <div className="p-2 border rounded-full border-gray-500">
               <div className="relative">
                 <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
                   <BiSearch size={20} />
