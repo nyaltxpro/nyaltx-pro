@@ -525,7 +525,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
           )}
 
           {/* Trending Coins */}
-          <motion.div 
+          {/* <motion.div 
             className="mb-6"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -587,7 +587,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                 </div>
               )}
             </motion.div>
-          </motion.div>
+          </motion.div> */}
           
           {/* Nyaltz Tokens */}
           {!searchTerm && nyaxTokens.length > 0 && (
