@@ -14,10 +14,10 @@ interface NYAXSwapCardProps {
     network: string;
     logo: string;
   };
-  isAvailable: boolean;
+  isAvailable?: boolean;
 }
 
-const NYAXSwapCard: React.FC<NYAXSwapCardProps> = ({ token, isAvailable }) => {
+const NYAXSwapCard: React.FC<NYAXSwapCardProps> = ({ token }) => {
   const [fromAmount, setFromAmount] = useState('');
   const [toAmount, setToAmount] = useState('');
   const [slippage, setSlippage] = useState('0.5');
@@ -51,30 +51,30 @@ const NYAXSwapCard: React.FC<NYAXSwapCardProps> = ({ token, isAvailable }) => {
     setToAmount(tempAmount);
   };
 
-  if (!isAvailable) {
-    return (
-      <div className="bg-gradient-to-br from-[#1a2932] to-[#243540] rounded-2xl p-6 border border-gray-700/50 shadow-xl">
-        <div className="text-center py-6">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-700 flex items-center justify-center">
-            <FaExchangeAlt className="text-gray-500 text-2xl" />
-          </div>
-          <h3 className="text-xl font-bold text-gray-400 mb-2">Trading Not Available</h3>
-          <p className="text-gray-500 text-sm mb-4">
-            This token is not currently available for trading on decentralized exchanges.
-          </p>
-          <div className="text-xs text-gray-600">
-            Trading is only available for tokens listed on major DEXs like Uniswap and PancakeSwap.
-          </div>
-          {token.contractAddress && (
-            <div className="mt-4 p-3 bg-[#0f1923] rounded-lg">
-              <div className="text-xs text-gray-500 mb-1">Contract Address:</div>
-              <div className="font-mono text-gray-400 text-xs break-all">{token.contractAddress}</div>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
+  // if (!isAvailable) {
+  //   return (
+  //     <div className="bg-gradient-to-br from-[#1a2932] to-[#243540] rounded-2xl p-6 border border-gray-700/50 shadow-xl">
+  //       <div className="text-center py-6">
+  //         <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-700 flex items-center justify-center">
+  //           <FaExchangeAlt className="text-gray-500 text-2xl" />
+  //         </div>
+  //         <h3 className="text-xl font-bold text-gray-400 mb-2">Trading Not Available</h3>
+  //         <p className="text-gray-500 text-sm mb-4">
+  //           This token is not currently available for trading on decentralized exchanges.
+  //         </p>
+  //         <div className="text-xs text-gray-600">
+  //           Trading is only available for tokens listed on major DEXs like Uniswap and PancakeSwap.
+  //         </div>
+  //         {token.contractAddress && (
+  //           <div className="mt-4 p-3 bg-[#0f1923] rounded-lg">
+  //             <div className="text-xs text-gray-500 mb-1">Contract Address:</div>
+  //             <div className="font-mono text-gray-400 text-xs break-all">{token.contractAddress}</div>
+  //           </div>
+  //         )}
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="bg-gradient-to-br from-[#1a2932] to-[#243540] rounded-2xl p-6 border border-gray-700/50 shadow-xl">
