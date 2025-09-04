@@ -8,7 +8,7 @@ import { SiBinance } from 'react-icons/si';
 import { BiArrowBack, BiCopy } from 'react-icons/bi';
 import { MdContentCopy } from 'react-icons/md';
 import nyaxTokensData from '../../../../nyax-tokens-data.json';
-import SwapCard from '../../../components/SwapCard';
+import NYAXSwapCard from '../../../components/NYAXSwapCard';
 
 interface NyaxToken {
   logoId: string;
@@ -231,53 +231,6 @@ const NYAXTokenDetailsPage: React.FC = () => {
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="xl:col-span-2 space-y-8">
-            {/* Swap Card - Only show if token is available on DEXs */}
-            {isTokenAvailableOnDex ? (
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="bg-gradient-to-br from-[#1a2932] to-[#243540] rounded-2xl p-8 border border-gray-700/50 shadow-xl"
-              >
-                <h2 className="text-3xl font-bold mb-6 text-cyan-400 flex items-center gap-3">
-                  <div className="w-1 h-8 bg-gradient-to-b from-cyan-400 to-blue-500 rounded-full"></div>
-                  Trade {token.symbol}
-                </h2>
-                <div className="max-w-md mx-auto">
-                  <SwapCard 
-                    inTradeView={true} 
-                    baseToken={token.symbol || undefined}
-                    quoteToken="USDT"
-                  />
-                </div>
-              </motion.div>
-            ) : (
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="bg-gradient-to-br from-[#1a2932] to-[#243540] rounded-2xl p-8 border border-gray-700/50 shadow-xl"
-              >
-                <h2 className="text-3xl font-bold mb-6 text-cyan-400 flex items-center gap-3">
-                  <div className="w-1 h-8 bg-gradient-to-b from-cyan-400 to-blue-500 rounded-full"></div>
-                  Trading Not Available
-                </h2>
-                <div className="text-center py-8">
-                  <div className="text-gray-400 text-lg mb-4">
-                    This token is not currently available for trading on decentralized exchanges.
-                  </div>
-                  <div className="text-sm text-gray-500">
-                    Trading is only available for tokens listed on major DEXs like Uniswap and PancakeSwap.
-                  </div>
-                  {token.contractAddress && (
-                    <div className="mt-4 p-4 bg-[#0f1923] rounded-lg">
-                      <div className="text-xs text-gray-400 mb-2">Contract Address:</div>
-                      <div className="font-mono text-cyan-300 text-sm break-all">{token.contractAddress}</div>
-                    </div>
-                  )}
-                </div>
-              </motion.div>
-            )}
             {/* About Section */}
             {token.aboutUs && (
               <motion.div
@@ -339,6 +292,24 @@ const NYAXTokenDetailsPage: React.FC = () => {
                   </div>
                 ))}
               </div>
+            </motion.div>
+
+            {/* NYAX Swap Card - Positioned below token details */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              <NYAXSwapCard 
+                token={{
+                  symbol: token.symbol,
+                  name: token.name,
+                  contractAddress: token.contractAddress,
+                  network: token.network,
+                  logo: token.logo
+                }}
+                isAvailable={isTokenAvailableOnDex}
+              />
             </motion.div>
           </div>
 
