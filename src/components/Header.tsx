@@ -78,6 +78,9 @@ const Header = () => {
               </div>
               
               <div className="flex w-[15%] items-center justify-between space-x-3">
+                {/* <Link href="/pricing" className="p-2 rounded-full hover:bg-gray-700 text-sm font-medium">
+                  <span className={pathname?.startsWith('/pricing') ? 'text-cyan-400' : ''}>Pricing</span>
+                </Link> */}
                 <Link href="/nyaltz-listings" className="p-2 rounded-full hover:bg-gray-700" title="NYAX Listings">
                   <MdOutlineCollections className={pathname?.startsWith('/nyaltz-listings') ? 'text-cyan-400' : ''} />
                 </Link>

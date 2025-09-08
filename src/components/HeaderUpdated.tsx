@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import Link from 'next/link';
 import Banner from './Banner'
 import ConnectWalletButton from './ConnectWalletButton';
 import BlockchainDropdown from './BlockchainDropdown';
@@ -183,7 +184,9 @@ const Header = ({ toggleMobileMenu }: HeaderProps) => {
                          </div>
               
               <div className="hidden md:flex w-[15%] items-center justify-between space-x-3">
-            
+                {/* <Link href="/pricing" className="p-2 rounded-full hover:bg-gray-700 text-sm font-medium">
+                  Pricing
+                </Link> */}
                 <button className="p-2 rounded-full hover:bg-gray-700">
                   <FiSettings/>
                 </button>
