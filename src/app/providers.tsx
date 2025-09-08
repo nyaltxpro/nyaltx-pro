@@ -1,5 +1,5 @@
 'use client'
-import ContextProvider from "./providers/Web3Provider";
+import ContextProvider from "../providers/Web3Provider";
 import { useState, useEffect } from 'react';
 
 // Import web3modal to initialize it

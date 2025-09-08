@@ -2,7 +2,7 @@
  * Uniswap V2 DEX Integration
  */
 import { DexInterface, Token, PriceQuote, SwapRoute, DexConfig, CHAIN_IDS, DEX_PROTOCOL, QuoteParams, SwapParams } from './types';
-import { getCryptoIconUrl } from '../../app/utils/cryptoIcons';
+import { getCryptoIconUrl } from '../../utils/cryptoIcons';
 
 // Uniswap V2 configuration
 export const UniswapV2Config: DexConfig = {

@@ -11,8 +11,8 @@ import { BiSearch } from 'react-icons/bi';
 import { FiSettings } from 'react-icons/fi';
 import { FiMenu } from 'react-icons/fi'; // Import hamburger menu icon
 import LivePriceTicker from './LivePriceTicker';
-import { commonCryptoSymbols, getCryptoIconUrl } from '../app/utils/cryptoIcons';
-import { getCryptoName } from '../app/utils/cryptoNames';
+import { commonCryptoSymbols, getCryptoIconUrl } from '../utils/cryptoIcons';
+import { getCryptoName } from '../utils/cryptoNames';
 import SearchModal from './SearchModal';
 
 // Define token pair type

@@ -98,19 +98,19 @@ export default function Sidebar({ isMobileMenuOpen, toggleMobileMenu }: SidebarP
   }, []);
 
   const navItems = [
-    { icon: <FaHome />, text: 'Home', href: '/' },
-    { icon: <FaChartLine />, text: 'Trading', href: '/trading' },
+    { icon: <FaHome />, text: 'Home', href: '/dashboard' },
+    { icon: <FaChartLine />, text: 'Trading', href: '/dashboard/trading' },
     // { icon: <FaExchangeAlt />, text: 'Pairs', href: '/pairs' },
-    { icon: <FaGift />, text: 'Airdrops', href: '/airdrops' },
-    { icon: <FaRocket />, text: 'Trending', href: '/trending' },
-    { icon: <FaCoins />, text: 'Create Token', href: '/create-token' },
-    { icon: <FaWallet />, text: 'Connect', href: '/connect' },
-    { icon: <FaSyncAlt />, text: 'Swap', href: '/swap' },
+    { icon: <FaGift />, text: 'Airdrops', href: '/dashboard/airdrops' },
+    { icon: <FaRocket />, text: 'Trending', href: '/dashboard/trending' },
+    { icon: <FaCoins />, text: 'Create Token', href: '/dashboard/create-token' },
+    { icon: <FaWallet />, text: 'Connect', href: '/dashboard/connect' },
+    { icon: <FaSyncAlt />, text: 'Swap', href: '/dashboard/swap' },
   ];
 
   const extraItems = [
-    { icon: <FaImage />, text: 'NFTs', href: '/nfts' },
-    { icon: <FaCog />, text: 'Settings', href: '/settings' },
+    { icon: <FaImage />, text: 'NFTs', href: '/dashboard/nfts' },
+    { icon: <FaCog />, text: 'Settings', href: '/dashboard/settings' },
   ];
 
   const sidebarExpanded = isDesktop ? isExpanded : isMobileMenuOpen;

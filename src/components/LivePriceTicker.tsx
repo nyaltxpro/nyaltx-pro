@@ -4,7 +4,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
 import { CoinTicker } from '../api/coingecko';
 import priceWebSocketService from '../api/websocket/priceWebsocket';
-import { getCryptoIconUrl, cryptoIconExists, commonCryptoSymbols } from '../app/utils/cryptoIcons';
+import { getCryptoIconUrl, cryptoIconExists, commonCryptoSymbols } from '../utils/cryptoIcons';
 
 const LivePriceTicker: React.FC = () => {
   const [tickers, setTickers] = useState<CoinTicker[]>([]);

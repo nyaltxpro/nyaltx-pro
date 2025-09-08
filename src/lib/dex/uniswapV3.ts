@@ -3,7 +3,7 @@
  * Real implementation using Uniswap V3 Quoter contract
  */
 import { DexInterface, Token, PriceQuote, SwapRoute, DexConfig, CHAIN_IDS, DEX_PROTOCOL, QuoteParams, SwapParams } from './types';
-import { getCryptoIconUrl } from '../../app/utils/cryptoIcons';
+import { getCryptoIconUrl } from '../../utils/cryptoIcons';
 import { createPublicClient, http, parseUnits, formatUnits, Address } from 'viem';
 import { mainnet, bsc, polygon, arbitrum, optimism } from 'viem/chains';
 

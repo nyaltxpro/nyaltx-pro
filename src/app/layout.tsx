@@ -54,10 +54,10 @@ export default function RootLayout({
     <html lang="en" className={`${poppins.variable} ${roboto.variable}`}>
       <body className={inter.className}>
         <Providers>
-          <Sidebar isMobileMenuOpen={isMobileMenuOpen} toggleMobileMenu={toggleMobileMenu} />
+          {/* <Sidebar isMobileMenuOpen={isMobileMenuOpen} toggleMobileMenu={toggleMobileMenu} /> */}
           {/* Apply margin-left for desktop, none for mobile */}
-          <div className="md:ml-16 transition-all duration-300 flex flex-col min-h-screen">
-            <Header toggleMobileMenu={toggleMobileMenu} />
+          <div className=" transition-all duration-300 flex flex-col min-h-screen">
+            {/* <Header toggleMobileMenu={toggleMobileMenu} /> */}
             <main className="flex-grow">
               {children}
             </main>

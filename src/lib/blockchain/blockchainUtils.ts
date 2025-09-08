@@ -1,5 +1,5 @@
 import { Blockchain, Token, BlockchainTokens } from '../types/blockchain';
-import { getCryptoIconUrl } from '../../app/utils/cryptoIcons';
+import { getCryptoIconUrl } from '../../utils/cryptoIcons';
 
 // Define supported blockchains with their metadata
 export const supportedBlockchains: Blockchain[] = [

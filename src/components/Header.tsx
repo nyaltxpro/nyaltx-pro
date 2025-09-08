@@ -12,8 +12,8 @@ import { FiSettings } from 'react-icons/fi';
 import { MdOutlineCollections } from 'react-icons/md';
 import { CgProfile } from 'react-icons/cg';
 import LivePriceTicker from './LivePriceTicker';
-import { commonCryptoSymbols, getCryptoIconUrl } from '../app/utils/cryptoIcons';
-import { getCryptoName } from '../app/utils/cryptoNames';
+import { commonCryptoSymbols, getCryptoIconUrl } from '../utils/cryptoIcons';
+import { getCryptoName } from '../utils/cryptoNames';
 import SearchModal from './SearchModal';
 
 

@@ -2,7 +2,7 @@
  * SushiSwap DEX Integration
  */
 import { DexInterface, Token, PriceQuote, SwapRoute, DexConfig, CHAIN_IDS, DEX_PROTOCOL, QuoteParams, SwapParams } from './types';
-import { getCryptoIconUrl } from '../../app/utils/cryptoIcons';
+import { getCryptoIconUrl } from '../../utils/cryptoIcons';
 // Uncomment when implementing real SDK calls
 // import { Token as SushiToken, Pair, Route, Trade, TokenAmount, TradeType, Percent } from '@sushiswap/sdk';
 // import { getProvider } from '../blockchain/provider';

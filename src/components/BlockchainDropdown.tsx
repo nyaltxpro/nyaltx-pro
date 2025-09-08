@@ -4,8 +4,8 @@ import Image from 'next/image';
 // import { blockchainNetworks } from '../lib/blockchain/blockchainUtils';
 import { isTopBlockchain } from '../lib/blockchain/topBlockchains';
 import { getBlockchainLogoUrl } from '../lib/blockchain/blockchainLogos';
-import { getCryptoIconUrl } from '../app/utils/cryptoIcons';
-import chainsData from '../app/data/chains.json';
+import { getCryptoIconUrl } from '../utils/cryptoIcons';
+import chainsData from '@/data/chains.json';
 
 // Blockchain logo component with fallbacks
 const BlockchainLogo: React.FC<{

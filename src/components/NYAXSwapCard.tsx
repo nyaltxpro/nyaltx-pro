@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FaExchangeAlt, FaChevronDown, FaCog, FaInfoCircle, FaExternalLinkAlt, FaSearch, FaTimes } from 'react-icons/fa';
 import { SiBinance } from 'react-icons/si';
 import { FaEthereum } from 'react-icons/fa';
-import { getCryptoIconUrl } from '@/app/utils/cryptoIcons';
+import { getCryptoIconUrl } from '@/utils/cryptoIcons';
 import { dexManager } from '@/lib/dex/dexManager';
 import { DexInterface, PriceQuote, Token as DexToken, CHAIN_IDS, DEX_PROTOCOL } from '@/lib/dex/types';
 import { useAccount, useWalletClient } from 'wagmi';
@@ -84,7 +84,7 @@ const NYAXSwapCard: React.FC<NYAXSwapCardProps> = ({ token }) => {
     publicClient: ReturnType<typeof createPublicClient>
   ) => {
     try {
-      const current: bigint = await publicClient.readContract({
+      const current: any = await publicClient.readContract({
         address: tokenAddr,
         abi: ERC20_ABI,
         functionName: 'allowance',

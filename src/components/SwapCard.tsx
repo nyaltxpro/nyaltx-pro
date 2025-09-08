@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { FaExchangeAlt, FaChevronDown, FaCog, FaSync, FaSearch, FaTimes, FaInfoCircle, FaFire } from 'react-icons/fa';
 import { useRouter } from 'next/navigation';
 
-import { getCryptoIconUrl } from '@/app/utils/cryptoIcons';
+import { getCryptoIconUrl } from '@/utils/cryptoIcons';
 import Header from '@/components/Header';
 import ExchangeSelector from '@/components/ExchangeSelector';
 import NetworkSelector from '@/components/NetworkSelector';

@@ -2,7 +2,7 @@
  * Raydium DEX Integration (Solana)
  */
 import { DexInterface, Token, PriceQuote, SwapRoute, DexConfig, CHAIN_IDS, DEX_PROTOCOL, QuoteParams, SwapParams } from './types';
-import { getCryptoIconUrl } from '../../app/utils/cryptoIcons';
+import { getCryptoIconUrl } from '../../utils/cryptoIcons';
 // Uncomment when implementing real SDK calls
 // import { Liquidity, Token as RaydiumToken, TokenAmount, Percent } from '@raydium-io/raydium-sdk';
 // import { Connection, PublicKey, Transaction } from '@solana/web3.js';

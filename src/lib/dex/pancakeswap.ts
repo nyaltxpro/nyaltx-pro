@@ -2,7 +2,7 @@
  * PancakeSwap DEX Integration
  */
 import { DexInterface, Token, PriceQuote, SwapRoute, DexConfig, CHAIN_IDS, DEX_PROTOCOL, QuoteParams, SwapParams } from './types';
-import { getCryptoIconUrl } from '../../app/utils/cryptoIcons';
+import { getCryptoIconUrl } from '../../utils/cryptoIcons';
 // Uncomment when implementing real SDK calls
 // import { Token as PancakeToken, Pair, Route, Trade, TokenAmount, TradeType, Percent } from '@pancakeswap/sdk';
 // import { getProvider } from '../blockchain/provider';

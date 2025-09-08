@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { FaChevronDown } from 'react-icons/fa';
 import { CHAIN_IDS } from '@/lib/dex/types';
-import { getCryptoIconUrl } from '@/app/utils/cryptoIcons';
+import { getCryptoIconUrl } from '@/utils/cryptoIcons';
 
 interface Network {
   id: number;
