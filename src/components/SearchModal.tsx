@@ -184,7 +184,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
       router.push(`/trade?base=${pair.baseToken}&quote=${pair.quoteToken}`);
     } else if (result.type === 'nyax') {
       const token = result.data as NyaxToken;
-      router.push(`/nyax-token-details/${token.logoId}`);
+      router.push(`/dashboard/nyax-token-details/${token.logoId}`);
     } else if (result.type === 'pumpfun') {
       // Handle PumpFun token clicks - you can customize this as needed
       const token = result.data as PumpFunToken;
@@ -208,7 +208,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
 
   // Handle clicking on a NYAX token
   const handleNyaxTokenClick = (token: NyaxToken) => {
-    router.push(`/nyax-token-details/${token.logoId}`);
+    router.push(`/dashboard/nyax-token-details/${token.logoId}`);
     onClose();
   };
 
