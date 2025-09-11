@@ -104,6 +104,7 @@ export default function Sidebar({ isMobileMenuOpen, toggleMobileMenu }: SidebarP
     { icon: <FaGift />, text: 'Airdrops', href: '/dashboard/airdrops' },
     { icon: <FaRocket />, text: 'Trending', href: '/dashboard/trending' },
     { icon: <FaCoins />, text: 'Create Token', href: '/dashboard/create-token' },
+    { icon: <FaPlus />, text: 'Register Token', href: '/dashboard/register-token' },
     { icon: <FaWallet />, text: 'Connect', href: '/dashboard/connect' },
     { icon: <FaSyncAlt />, text: 'Swap', href: '/dashboard/swap' },
   ];

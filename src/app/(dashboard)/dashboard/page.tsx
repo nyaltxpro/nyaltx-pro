@@ -323,9 +323,9 @@ export default function Home() {
             </div>
 
       {/* Pump.fun Live Section */}
-      <div className="p-4">
+      {/* <div className="p-4">
         <PumpFunLive />
-      </div>
+      </div> */}
             <div className="h-5 bg-gray-700 rounded animate-pulse w-40"></div>
           </div>
 
