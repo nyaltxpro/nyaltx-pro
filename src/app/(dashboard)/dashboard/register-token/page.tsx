@@ -16,6 +16,12 @@ export default function RegisterTokenPage() {
   const [tokenSymbol, setTokenSymbol] = useState('');
   const [blockchain, setBlockchain] = useState('ethereum');
   const [contractAddress, setContractAddress] = useState('');
+  const [website, setWebsite] = useState('');
+  const [twitter, setTwitter] = useState('');
+  const [telegram, setTelegram] = useState('');
+  const [discord, setDiscord] = useState('');
+  const [github, setGithub] = useState('');
+  const [imageUri, setImageUri] = useState('');
   const [faqs, setFaqs] = useState<FAQ[]>([
     {
       question: 'What is token registration?',
@@ -43,7 +49,18 @@ export default function RegisterTokenPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // TODO: Hook this up to your backend or on-chain verification as needed
-    console.log({ tokenName, tokenSymbol, blockchain, contractAddress });
+    console.log({ 
+      tokenName, 
+      tokenSymbol, 
+      blockchain, 
+      contractAddress,
+      website,
+      twitter,
+      telegram,
+      discord,
+      github,
+      imageUri,
+    });
     alert('Token registration submitted!');
   };
 
@@ -184,6 +201,75 @@ export default function RegisterTokenPage() {
                     required
                   />
                   <p className="text-xs text-gray-500 mt-1">Paste the verified contract address</p>
+                </div>
+
+                {/* Image URI */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                    Image URI (Logo)
+                  </label>
+                  <input
+                    type="url"
+                    className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
+                    placeholder="https://.../logo.png"
+                    value={imageUri}
+                    onChange={(e) => setImageUri(e.target.value)}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Direct URL to your token logo (PNG/SVG recommended)</p>
+                </div>
+
+                {/* Socials */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1">Website</label>
+                    <input
+                      type="url"
+                      className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
+                      placeholder="https://example.com"
+                      value={website}
+                      onChange={(e) => setWebsite(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1">Twitter</label>
+                    <input
+                      type="url"
+                      className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
+                      placeholder="https://twitter.com/yourhandle"
+                      value={twitter}
+                      onChange={(e) => setTwitter(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1">Telegram</label>
+                    <input
+                      type="url"
+                      className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
+                      placeholder="https://t.me/yourchannel"
+                      value={telegram}
+                      onChange={(e) => setTelegram(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1">Discord</label>
+                    <input
+                      type="url"
+                      className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
+                      placeholder="https://discord.gg/yourinvite"
+                      value={discord}
+                      onChange={(e) => setDiscord(e.target.value)}
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-300 mb-1">GitHub</label>
+                    <input
+                      type="url"
+                      className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
+                      placeholder="https://github.com/org/repo"
+                      value={github}
+                      onChange={(e) => setGithub(e.target.value)}
+                    />
+                  </div>
                 </div>
 
                 <div className="text-center">
