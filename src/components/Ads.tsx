@@ -37,7 +37,7 @@ const Ads = () => {
 
   // Exclusion list (by symbol or name). Add more symbols here as needed.
   const EXCLUDE_SYMBOLS = useMemo(() => new Set<string>([
-    'RANTS', 'BDOGE', 'VAULT' ,'CLOT' ,'ONE'
+    'RANTS', 'BDOGE', 'VAULT' ,'CLOT' ,'ONE' , 'TREKS', 'XPAY' , 'HACHIKO'
   ]), []);
   
   useEffect(() => {
