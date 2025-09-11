@@ -48,7 +48,7 @@ export default function Web3Checkout({ selectedTier }: { selectedTier?: string }
   ];
 
   const [network, setNetwork] = useState('ethereum');
-  const [token, setToken] = useState('USDC');
+  const [token, setToken] = useState('USDT');
   const [email, setEmail] = useState('');
   const [promo, setPromo] = useState('');
   const [agree, setAgree] = useState(true);
