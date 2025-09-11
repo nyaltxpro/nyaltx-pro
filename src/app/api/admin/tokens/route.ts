@@ -57,14 +57,13 @@ export async function PUT(req: NextRequest) {
 
   const col = await getCollection<TokenRegistration>('token_registrations');
   const now = new Date().toISOString();
-  const result = await col.findOneAndUpdate(
-    { id },
-    { $set: { status, updatedAt: now } },
-    { returnDocument: 'after' }
-  );
-  if (!result?.value) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  const upd = await col.updateOne({ id }, { $set: { status, updatedAt: now } });
+  if (upd.matchedCount === 0) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
+  const updated = await col.findOne({ id });
   const all = await col.find({}).sort({ createdAt: -1 }).toArray();
-  return NextResponse.json({ data: all, record: result.value });
+  return NextResponse.json({ data: all, record: updated });
 }
 
 export async function DELETE(req: NextRequest) {
