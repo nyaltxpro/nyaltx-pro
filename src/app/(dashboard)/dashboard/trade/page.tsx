@@ -241,6 +241,7 @@ function TradePageContent() {
   const searchParams = useSearchParams();
   const baseToken = (searchParams.get('base') || searchParams.get('token') || 'BTC').toUpperCase();
   const chainParam = searchParams.get('chain')?.toLowerCase() || '';
+  const addressParam = searchParams.get('address')?.toLowerCase() || '';
   const quoteToken = searchParams.get('quote') || 'USDT';
 
   return (
@@ -248,6 +249,7 @@ function TradePageContent() {
       baseToken={baseToken}
       quoteToken={quoteToken}
       chainParam={chainParam}
+      addressParam={addressParam}
     />
   );
 }
@@ -261,7 +263,7 @@ export default function Page() {
 }
 
 // Main component that accepts params directly
-function TradingViewWithParams({ baseToken, quoteToken, chainParam }: { baseToken: string, quoteToken: string, chainParam?: string }) {
+function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam }: { baseToken: string, quoteToken: string, chainParam?: string, addressParam?: string }) {
 
   const [activeTimeframe, setActiveTimeframe] = useState('15m');
   const [chartData, setChartData] = useState(candlestickData);
@@ -286,36 +288,59 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam }: { baseToke
 
   // Helper: pick token metadata from catalog
   const resolveToken = React.useCallback(() => {
-    const list = tokens as Array<{ symbol: string; chain: string; address: string; name: string }>; 
+    const list = tokens as Array<{ symbol: string; chain: string; address: string; name: string }>;
+
+    // If explicit address is provided, resolve by address (and optional chain)
+    if (addressParam) {
+      const byAddress = list.filter(t => t.address.toLowerCase() === addressParam);
+      if (byAddress.length) {
+        if (chainParam) {
+          const byChain = byAddress.find(t => t.chain.toLowerCase() === chainParam.toLowerCase());
+          if (byChain) return byChain;
+        }
+        return byAddress[0];
+      }
+    }
+
+    // Fallback: resolve by symbol (as before)
     const symbolMatches = list.filter(t => t.symbol.toUpperCase() === baseToken.toUpperCase());
     if (!symbolMatches.length) return null;
     if (chainParam) {
       const byChain = symbolMatches.find(t => t.chain.toLowerCase() === chainParam.toLowerCase());
       if (byChain) return byChain;
     }
-    // prefer ethereum if present
     const eth = symbolMatches.find(t => t.chain === 'ethereum');
     return eth || symbolMatches[0];
-  }, [baseToken, chainParam]);
+  }, [baseToken, chainParam, addressParam]);
 
   // Build dexscreener embed URL for token address
   const buildDexUrl = React.useCallback(() => {
+    // If explicit chain/address provided, use them directly
+    if (addressParam && chainParam) {
+      return `https://dexscreener.com/${chainParam}/${addressParam}?embed=1&theme=dark&trades=0&info=0`;
+    }
     const t = resolveToken();
     if (!t) return '';
     return `https://dexscreener.com/${t.chain}/${t.address}?embed=1&theme=dark&trades=0&info=0`;
-  }, [resolveToken]);
+  }, [resolveToken, addressParam, chainParam]);
 
   const buildTransactionDexUrl = React.useCallback(() => {
+    if (addressParam && chainParam) {
+      return `https://dexscreener.com/${chainParam}/${addressParam}?embed=1&theme=dark&chart=0&info=0`;
+    }
     const t = resolveToken();
     if (!t) return '';
     return `https://dexscreener.com/${t.chain}/${t.address}?embed=1&theme=dark&chart=0&info=0`;
-  }, [resolveToken]);
+  }, [resolveToken, addressParam, chainParam]);
 
   const buildInfonDexUrl = React.useCallback(() => {
+    if (addressParam && chainParam) {
+      return `https://dexscreener.com/${chainParam}/${addressParam}?embed=1&theme=dark&chart=0&trades=0`;
+    }
     const t = resolveToken();
     if (!t) return '';
     return `https://dexscreener.com/${t.chain}/${t.address}?embed=1&theme=dark&chart=0&trades=0`;
-  }, [resolveToken]);
+  }, [resolveToken, addressParam, chainParam]);
 
   // Fetch token pair data
   useEffect(() => {
@@ -356,7 +381,7 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam }: { baseToke
       isMounted = false;
       clearInterval(intervalId);
     };
-  }, [baseToken, quoteToken, buildDexUrl]);
+  }, [baseToken, quoteToken, buildDexUrl, buildTransactionDexUrl, buildInfonDexUrl]);
 
   // Get TradingView symbol
   const getTradingViewSymbol = () => {
@@ -429,7 +454,7 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam }: { baseToke
             </div>
 
             <iframe
-          src={infoDexEmbedUrl || `https://dexscreener.com/ethereum/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48?embed=1&theme=dark&chart=0&trades=0`}
+          src={infoDexEmbedUrl}
           width="100%"
           height="600"
           style={{ border: 0 }}
@@ -499,7 +524,7 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam }: { baseToke
               <div className="w-full h-[500px] rounded-lg relative">
                 {/* <AdvancedRealTimeChart {...chartProps} /> */}
                 <iframe
-                  src={dexEmbedUrl || `https://dexscreener.com/ethereum/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48?embed=1&theme=dark&trades=0&info=0`}
+                  src={dexEmbedUrl}
                   width="100%"
                   height="500"
                   style={{ border: 0, backgroundColor: "transparent" }}

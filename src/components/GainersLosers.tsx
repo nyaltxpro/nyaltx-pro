@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import tokens from '@/data/tokens.json';
 
 interface Coin {
   id: string;
@@ -17,6 +19,7 @@ const GainersLosers = () => {
   const [activeTab, setActiveTab] = useState<'gainers' | 'losers'>('gainers');
   const [coins, setCoins] = useState<Coin[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchCoins = async () => {
@@ -49,6 +52,23 @@ const GainersLosers = () => {
     if (price < 1) return price.toFixed(4);
     if (price < 10) return price.toFixed(2);
     return price.toFixed(2);
+  };
+
+  const handleNavigate = (coin: Coin) => {
+    const base = coin.symbol?.toUpperCase() || coin.name?.toUpperCase();
+    if (!base) return;
+
+    const list = tokens as Array<{ symbol: string; chain: string; address: string; name: string }>;
+    const matches = list.filter(t => t.symbol.toUpperCase() === base);
+    const selected = matches.find(t => t.chain.toLowerCase() === 'ethereum') || matches[0];
+    const chain = selected?.chain;
+    const address = selected?.address;
+
+    const params = new URLSearchParams({ base });
+    if (chain) params.set('chain', chain);
+    if (address) params.set('address', address);
+
+    router.push(`/dashboard/trade?${params.toString()}`);
   };
 
   return (
@@ -96,7 +116,11 @@ const GainersLosers = () => {
             </thead>
             <tbody>
               {(activeTab === 'gainers' ? gainers : losers).map((coin, index) => (
-                <tr key={coin.id} className="border-t border-gray-800">
+                <tr
+                  key={coin.id}
+                  className="border-t border-gray-800 cursor-pointer hover:bg-gray-800/40"
+                  onClick={() => handleNavigate(coin)}
+                >
                   <td className="py-3 text-gray-400">{index + 1}</td>
                   <td className="py-3">
                     <div className="flex items-center">
@@ -136,3 +160,4 @@ const GainersLosers = () => {
 };
 
 export default GainersLosers;
+

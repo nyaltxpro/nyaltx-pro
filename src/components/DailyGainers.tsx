@@ -2,11 +2,14 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { useMarketData } from '../api/websocket/useMarketData';
 import { MarketData } from '../api/websocket/marketData';
+import tokens from '@/data/tokens.json';
 
 export default function DailyGainers() {
     const [activeTab, setActiveTab] = useState<'gainers' | 'losers'>('gainers');
+    const router = useRouter();
     
     // Use our new websocket hook to get market data
     const { 
@@ -43,6 +46,25 @@ export default function DailyGainers() {
         }
     };
 
+    const handleNavigate = (coin: MarketData) => {
+        const base = coin.symbol?.toUpperCase() || coin.name?.toUpperCase();
+        if (!base) return;
+
+        // Resolve chain and address from tokens catalog
+        const list = tokens as Array<{ symbol: string; chain: string; address: string; name: string }>;
+        const matches = list.filter(t => t.symbol.toUpperCase() === base);
+        // prefer ethereum if multiple
+        const selected = matches.find(t => t.chain.toLowerCase() === 'ethereum') || matches[0];
+        const chain = selected?.chain;
+        const address = selected?.address;
+
+        const params = new URLSearchParams({ base });
+        if (chain) params.set('chain', chain);
+        if (address) params.set('address', address);
+
+        router.push(`/dashboard/trade?${params.toString()}`);
+    };
+
     return (
         <>
             <div className="section-header flex justify-between items-center">
@@ -70,8 +92,12 @@ export default function DailyGainers() {
             ) : (
                 <div>
                     {displayData.map((coin, index) => (
-                        <div key={coin.id} className="flex justify-between items-center p-2">
-                                                        <div className="flex items-center">
+                        <div
+                            key={coin.id}
+                            className="flex justify-between items-center p-2 cursor-pointer hover:bg-gray-800/40 rounded"
+                            onClick={() => handleNavigate(coin as MarketData)}
+                        >
+                            <div className="flex items-center">
                                 <div className="relative h-8 w-8 mr-3 flex-shrink-0">
                                     <Image
                                         src={coin.image}

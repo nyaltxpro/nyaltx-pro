@@ -502,9 +502,9 @@ export default function Home() {
         </div>
 
         {/* Token section  */}
-        <TokenSection
+        {/* <TokenSection
 
-        />
+        /> */}
       </div>
         </>
       )}

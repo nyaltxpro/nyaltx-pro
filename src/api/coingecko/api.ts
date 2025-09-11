@@ -227,3 +227,35 @@ export function formatPercentage(
     maximumFractionDigits,
   }).format(value / 100);
 }
+
+/**
+ * Fetch a coin's platform contract addresses map from CoinGecko
+ * Example response structure: { ethereum: "0x...", solana: "...", 'binance-smart-chain': "0x...", ... }
+ */
+export async function fetchCoinPlatforms(
+  coinId: string
+): Promise<Record<string, string> | null> {
+  try {
+    const response = await fetch(
+      `${COINGECKO_API_URL}/coins/${coinId}?localization=false&tickers=false&market_data=false&community_data=false&developer_data=false`
+    );
+    if (!response.ok) {
+      throw new Error(`Failed to fetch coin platforms: ${response.statusText}`);
+    }
+    const data = await response.json();
+    // Prefer detail_platforms if available, else fallback to platforms
+    if (data?.detail_platforms && typeof data.detail_platforms === 'object') {
+      const map: Record<string, string> = {};
+      Object.entries<any>(data.detail_platforms).forEach(([platform, info]) => {
+        if (info && typeof info === 'object' && info.contract_address !== undefined) {
+          map[platform] = info.contract_address || '';
+        }
+      });
+      return map;
+    }
+    return (data?.platforms as Record<string, string>) || {};
+  } catch (err) {
+    console.error('Error fetching coin platforms:', err);
+    return null;
+  }
+}

@@ -3,6 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { getTrendingCoins } from '../api/coingecko/client';
+import { useRouter } from 'next/navigation';
+import tokens from '@/data/tokens.json';
+import { fetchCoinPlatforms } from '@/api/coingecko/api';
 
 interface TrendingCoin {
   id: string;
@@ -18,12 +21,15 @@ export default function TrendingCoins() {
   const [trendingCoins, setTrendingCoins] = useState<TrendingCoin[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchTrendingCoins = async () => {
       try {
         setLoading(true);
         const data = await getTrendingCoins();
+
+        console.log('data',data)
         
         // CoinGecko returns trending coins in a nested structure
         if (data && data.coins) {
@@ -64,6 +70,65 @@ export default function TrendingCoins() {
     return price.toFixed(6);
   };
 
+  const handleNavigate = async (coin: TrendingCoin) => {
+    const base = coin.symbol?.toUpperCase() || coin.name?.toUpperCase();
+    if (!base) return;
+
+    const list = tokens as Array<{ symbol: string; chain: string; address: string; name: string }>;
+    const matches = list.filter(t => t.symbol.toUpperCase() === base);
+    let selected = matches.find(t => t.chain.toLowerCase() === 'ethereum') || matches[0];
+    let chain = selected?.chain;
+    let address = selected?.address;
+
+    // If not found in local tokens, fetch platforms from CoinGecko by ID
+    if (!chain || !address) {
+      try {
+        const platforms = await fetchCoinPlatforms(coin.id);
+        if (platforms) {
+          // Map CoinGecko platform keys to our chain slugs
+          const platformToChain: Record<string, string> = {
+            'ethereum': 'ethereum',
+            'binance-smart-chain': 'binance',
+            'polygon-pos': 'polygon',
+            'avalanche': 'avalanche',
+            'fantom': 'fantom',
+            'base': 'base',
+            'arbitrum-one': 'arbitrum',
+            'optimistic-ethereum': 'optimism',
+            'solana': 'solana',
+          };
+          const preference = [
+            'ethereum',
+            'arbitrum-one',
+            'optimistic-ethereum',
+            'base',
+            'polygon-pos',
+            'binance-smart-chain',
+            'avalanche',
+            'fantom',
+            'solana',
+          ];
+          for (const key of preference) {
+            const addr = (platforms as any)[key];
+            if (addr) {
+              chain = platformToChain[key] || key;
+              address = addr;
+              break;
+            }
+          }
+        }
+      } catch (e) {
+        console.error('Failed to fetch platforms for', coin.id, e);
+      }
+    }
+
+    const params = new URLSearchParams({ base });
+    if (chain) params.set('chain', chain);
+    if (address) params.set('address', address);
+
+    router.push(`/dashboard/trade?${params.toString()}`);
+  };
+
   return (
     <div className="w-full">
       <h2 className="text-xl font-semibold mb-4">Trending Search List</h2>
@@ -79,7 +144,11 @@ export default function TrendingCoins() {
       ) : (
         <div className="space-y-3">
           {trendingCoins.map((coin) => (
-            <div key={coin.id} className="rounded-lg p-2 flex flex-col sm:flex-row sm:justify-between sm:items-center">
+            <div
+              key={coin.id}
+              className="rounded-lg p-2 flex flex-col sm:flex-row sm:justify-between sm:items-center cursor-pointer hover:bg-gray-800/40"
+              onClick={() => handleNavigate(coin)}
+            >
               <div className="flex items-center">
                 <div className="relative h-8 w-8 mr-3">
                   <Image

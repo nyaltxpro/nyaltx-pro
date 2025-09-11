@@ -250,6 +250,15 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
     onClose();
   };
 
+  // Handle clicking on a catalog token (from tokens.json)
+  const handleCatalogItemClick = (item: { symbol: string; chain?: string }) => {
+    const qs = new URLSearchParams();
+    if (item.symbol) qs.set('token', item.symbol.toUpperCase());
+    if (item.chain) qs.set('chain', item.chain.toLowerCase());
+    router.push(`/dashboard/trade?${qs.toString()}`);
+    onClose();
+  };
+
   // Handle search form submission
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -720,6 +729,51 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                             </div>
                           </div>
                         </div>
+                      </div>
+                    ))}
+                  </motion.div>
+                </motion.div>
+              )}
+
+              {/* All Tokens (from catalog) */}
+              {!searchTerm && (
+                <motion.div
+                  className="mb-6"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.28, duration: 0.3 }}
+                >
+                  <div className="flex justify-between items-center mb-3">
+                    <h3 className="text-emerald-400 font-bold">
+                      ALL TOKENS ({(catalog as Array<{ symbol: string; name: string; chain: string; address: string }>).length})
+                    </h3>
+                    <div className="flex space-x-2">
+                      <span className="text-xs text-gray-400">From local catalog</span>
+                    </div>
+                  </div>
+                  <motion.div
+                    className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 max-h-80 overflow-y-auto"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.3, duration: 0.3 }}
+                  >
+                    {(catalog as Array<{ symbol: string; name: string; chain: string; address: string }>).map((item, index) => (
+                      <div
+                        key={`${item.symbol}-${item.chain}-${index}`}
+                        className="relative bg-gray-800 bg-opacity-30 rounded-lg p-3 overflow-hidden cursor-pointer hover:bg-gray-700 transition-colors group"
+                        onClick={() => handleCatalogItemClick(item)}
+                      >
+                        <div className="flex items-center mb-2">
+                          <div className="w-6 h-6 mr-2 rounded-full overflow-hidden">
+                            <Image src={getCryptoIconUrl(item.symbol)} alt={item.symbol} width={24} height={24} className="rounded-full" unoptimized />
+                          </div>
+                          <div className="text-sm font-bold">{item.symbol}</div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div className="text-xs text-gray-400 truncate max-w-[80px]" title={item.name}>{item.name}</div>
+                          <div className="text-xs text-emerald-400 font-bold">{item.chain.toUpperCase()}</div>
+                        </div>
+                        <div className="mt-1 text-[10px] text-gray-500 font-mono truncate" title={item.address}>{item.address}</div>
                       </div>
                     ))}
                   </motion.div>
