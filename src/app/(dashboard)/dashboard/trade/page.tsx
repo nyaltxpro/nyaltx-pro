@@ -43,6 +43,7 @@ import SwapPage from '@/components/SwapCard';
 import { fetchTokenPairData, TokenPairData, formatCurrency, formatPercentage, getTokenId } from '@/api/coingecko/api';
 import { getCryptoIconUrl } from '@/utils/cryptoIcons';
 import { getCryptoName } from '@/utils/cryptoNames';
+import nyaxTokensData from '../../../../../nyax-tokens-data.json';
 
 // Dynamically import ApexCharts to avoid SSR issues
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
@@ -287,6 +288,9 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
   const [pairData, setPairData] = useState<TokenPairData | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [headerImageUrl, setHeaderImageUrl] = useState<string | null>(null);
+  const [dexPriceUsd, setDexPriceUsd] = useState<string | null>(null);
+  const [dexChange24h, setDexChange24h] = useState<number | null>(null);
 
   // Helper: pick token metadata from catalog
   const resolveToken = React.useCallback(() => {
@@ -314,6 +318,80 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
     const eth = symbolMatches.find(t => t.chain === 'ethereum');
     return eth || symbolMatches[0];
   }, [baseToken, chainParam, addressParam]);
+
+  // Map NYAX network labels to our chain slugs
+  const mapNetworkToChain = (network: string | null | undefined): string | undefined => {
+    if (!network) return undefined;
+    const key = network.toLowerCase();
+    const mapping: Record<string, string> = {
+      'ethereum': 'ethereum',
+      'eth': 'ethereum',
+      'bsc': 'binance',
+      'binance': 'binance',
+      'binance smart chain': 'binance',
+      'polygon': 'polygon',
+      'matic': 'polygon',
+      'avalanche': 'avalanche',
+      'avax': 'avalanche',
+      'arbitrum': 'arbitrum',
+      'arbitrum one': 'arbitrum',
+      'optimism': 'optimism',
+      'base': 'base',
+      'fantom': 'fantom',
+      'solana': 'solana',
+    };
+    return mapping[key];
+  };
+
+  // Resolve NYAX image URL for the current token
+  useEffect(() => {
+    try {
+      const nyaxList = (nyaxTokensData as any).tokens as Array<{ symbol?: string; network?: string; contractAddress?: string; logo?: string }>;
+      if (!nyaxList || nyaxList.length === 0) return;
+      let found: any = null;
+      if (addressParam) {
+        const lower = addressParam.toLowerCase();
+        found = nyaxList.find(t => (t.contractAddress || '').toLowerCase() === lower);
+      }
+      if (!found) {
+        const desiredChain = chainParam;
+        found = nyaxList.find(t => (t.symbol || '').toUpperCase() === baseToken.toUpperCase() && (!desiredChain || mapNetworkToChain(t.network) === desiredChain));
+      }
+      setHeaderImageUrl(found?.logo || null);
+    } catch (e) {
+      // ignore
+    }
+  }, [baseToken, chainParam, addressParam]);
+
+  // Fetch DexScreener price using chain/address (or resolved token)
+  useEffect(() => {
+    let aborted = false;
+    const fetchDex = async () => {
+      try {
+        let chain = chainParam;
+        let address = addressParam;
+        if (!chain || !address) {
+          const t = resolveToken();
+          chain = chain || t?.chain;
+          address = address || t?.address;
+        }
+        if (!chain || !address) return;
+        const res = await fetch(`https://api.dexscreener.com/latest/dex/pairs/${chain}/${address}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        const pair = data?.pairs?.[0];
+        if (!pair) return;
+        if (aborted) return;
+        setDexPriceUsd(pair.priceUsd || null);
+        const ch = pair?.priceChange?.h24;
+        setDexChange24h(typeof ch === 'number' ? ch : (typeof ch === 'string' ? parseFloat(ch) : null));
+      } catch (e) {
+        // ignore
+      }
+    };
+    fetchDex();
+    return () => { aborted = true; };
+  }, [chainParam, addressParam, resolveToken]);
 
   // Build dexscreener embed URL for token address
   const buildDexUrl = React.useCallback(() => {
@@ -473,13 +551,18 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
               {/* Token Header Bar */}
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full overflow-hidden bg-[#1a2932] flex items-center justify-center">
-                  <Image
-                    src={getCryptoIconUrl(baseToken)}
-                    alt={baseToken}
-                    width={40}
-                    height={40}
-                    unoptimized
-                  />
+                  {headerImageUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={headerImageUrl} alt={baseToken} className="w-10 h-10 object-cover" />
+                  ) : (
+                    <Image
+                      src={getCryptoIconUrl(baseToken)}
+                      alt={baseToken}
+                      width={40}
+                      height={40}
+                      unoptimized
+                    />
+                  )}
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
@@ -520,12 +603,20 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
                 <div className="ml-4 text-right">
                   <div className="flex items-center gap-2">
                     <div className="text-2xl font-bold">
-                      {pairData ? formatCurrency(pairData.price, 'USD', pairData.price < 1 ? 6 : 2) : '$0.00'}
+                      {dexPriceUsd
+                        ? formatCurrency(parseFloat(dexPriceUsd), 'USD', parseFloat(dexPriceUsd) < 1 ? 6 : 2)
+                        : pairData
+                          ? formatCurrency(pairData.price, 'USD', pairData.price < 1 ? 6 : 2)
+                          : '$0.00'}
                     </div>
                     <FaInfoCircle className="text-gray-500" />
                   </div>
-                  <div className={`${pairData?.priceChangePercentage24h && pairData.priceChangePercentage24h >= 0 ? 'text-green-500' : 'text-red-500'} text-sm`}>
-                    {pairData?.priceChangePercentage24h !== undefined ? `${pairData.priceChangePercentage24h >= 0 ? '+' : ''}${pairData.priceChangePercentage24h.toFixed(2)}% 24h` : '—'}
+                  <div className={`${(dexChange24h ?? pairData?.priceChangePercentage24h ?? 0) >= 0 ? 'text-green-500' : 'text-red-500'} text-sm`}>
+                    {dexChange24h !== null && dexChange24h !== undefined
+                      ? `${dexChange24h >= 0 ? '+' : ''}${dexChange24h.toFixed(2)}% 24h`
+                      : pairData?.priceChangePercentage24h !== undefined
+                        ? `${pairData.priceChangePercentage24h >= 0 ? '+' : ''}${pairData.priceChangePercentage24h.toFixed(2)}% 24h`
+                        : '—'}
                   </div>
                 </div>
               </div>

@@ -66,6 +66,30 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
   const { tokens: pumpFunTokens } = usePumpFunTokens();
   const [nyaxTokens] = useState<NyaxToken[]>(nyaxTokensData.tokens || []);
 
+  // Map NYAX network labels to our chain slugs
+  const mapNetworkToChain = (network: string | null | undefined): string | undefined => {
+    if (!network) return undefined;
+    const key = network.toLowerCase();
+    const mapping: Record<string, string> = {
+      'ethereum': 'ethereum',
+      'eth': 'ethereum',
+      'bsc': 'binance',
+      'binance': 'binance',
+      'binance smart chain': 'binance',
+      'polygon': 'polygon',
+      'matic': 'polygon',
+      'avalanche': 'avalanche',
+      'avax': 'avalanche',
+      'arbitrum': 'arbitrum',
+      'arbitrum one': 'arbitrum',
+      'optimism': 'optimism',
+      'base': 'base',
+      'fantom': 'fantom',
+      'solana': 'solana',
+    };
+    return mapping[key];
+  };
+
   // Function to get logo URL from mappings
   const getNyaxLogoUrl = (logoId: string): string | null => {
     return nyaxLogoMappings[logoId as keyof typeof nyaxLogoMappings] || null;
@@ -211,21 +235,32 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
   const handleResultClick = (result: SearchResult) => {
     if (result.type === 'pair') {
       const pair = result.data as TokenPair;
-      router.push(`/dashboard/trade?token=${pair.baseToken}`);
+      const params = new URLSearchParams();
+      params.set('base', pair.baseToken);
+      router.push(`/dashboard/trade?${params.toString()}`);
     } else if (result.type === 'nyax') {
       const token = result.data as NyaxToken;
-      router.push(`/dashboard/trade?token=${token.logoId}`);
+      const params = new URLSearchParams();
+      if (token.symbol) params.set('base', token.symbol.toUpperCase());
+      const chain = mapNetworkToChain(token.network);
+      if (chain) params.set('chain', chain);
+      if (token.contractAddress) params.set('address', token.contractAddress);
+      router.push(`/dashboard/trade?${params.toString()}`);
     } else if (result.type === 'pumpfun') {
       // Handle PumpFun token clicks - you can customize this as needed
       const token = result.data as PumpFunToken;
-      router.push(`/dashboard/trade?base=${token.symbol || 'UNKNOWN'}&quote=USDT`);
+      const params = new URLSearchParams();
+      params.set('base', (token.symbol || 'UNKNOWN').toUpperCase());
+      router.push(`/dashboard/trade?${params.toString()}`);
     } else if (result.type === 'catalog') {
       const item = result.data as any;
       const sym = (item.symbol || '').toUpperCase();
       const chain = (item.chain || '').toLowerCase();
+      const address = (item.address || '').toLowerCase();
       const qs = new URLSearchParams();
-      if (sym) qs.set('token', sym);
+      if (sym) qs.set('base', sym);
       if (chain) qs.set('chain', chain);
+      if (address) qs.set('address', address);
       router.push(`/dashboard/trade?${qs.toString()}`);
     }
     setSearchTerm('');
@@ -234,27 +269,33 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
 
   // Handle clicking on a trending coin
   const handleTrendingClick = (coin: TrendingCoin) => {
-    router.push(`/dashboard/trade?base=${coin.symbol.toUpperCase()}&quote=USDT`);
+    router.push(`/dashboard/trade?base=${coin.symbol.toUpperCase()}`);
     onClose();
   };
 
   // Handle clicking on a popular token
   const handlePopularTokenClick = (token: { symbol: string }) => {
-    router.push(`/dashboard/trade?base=${token.symbol}&quote=USDT`);
+    router.push(`/dashboard/trade?base=${token.symbol.toUpperCase()}`);
     onClose();
   };
 
   // Handle clicking on a NYAX token
   const handleNyaxTokenClick = (token: NyaxToken) => {
-    router.push(`/dashboard/trade?token=${token.logoId}`);
+    const params = new URLSearchParams();
+    if (token.symbol) params.set('base', token.symbol.toUpperCase());
+    const chain = mapNetworkToChain(token.network);
+    if (chain) params.set('chain', chain);
+    if (token.contractAddress) params.set('address', token.contractAddress);
+    router.push(`/dashboard/trade?${params.toString()}`);
     onClose();
   };
 
   // Handle clicking on a catalog token (from tokens.json)
-  const handleCatalogItemClick = (item: { symbol: string; chain?: string }) => {
+  const handleCatalogItemClick = (item: { symbol: string; chain?: string; address?: string }) => {
     const qs = new URLSearchParams();
-    if (item.symbol) qs.set('token', item.symbol.toUpperCase());
-    if (item.chain) qs.set('chain', item.chain.toLowerCase());
+    if (item.symbol) qs.set('base', item.symbol.toUpperCase());
+    if (item.chain) qs.set('chain', (item.chain as string).toLowerCase());
+    if ((item as any).address) qs.set('address', ((item as any).address as string).toLowerCase());
     router.push(`/dashboard/trade?${qs.toString()}`);
     onClose();
   };
