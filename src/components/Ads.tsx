@@ -34,6 +34,11 @@ const Ads = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [speedMs, setSpeedMs] = useState<number>(30);
+
+  // Exclusion list (by symbol or name). Add more symbols here as needed.
+  const EXCLUDE_SYMBOLS = useMemo(() => new Set<string>([
+    'RANTS', 'BDOGE', 'VAULT' ,'CLOT' ,'ONE'
+  ]), []);
   
   useEffect(() => {
     let active = true;
@@ -57,10 +62,18 @@ const Ads = () => {
     return () => { active = false; clearInterval(id); };
   }, []);
 
-  // Duplicate items for seamless scroll
+  // Apply filters and duplicate items for seamless scroll
+  const filtered = useMemo(() => {
+    return listings.filter((t) => {
+      const sym = (t.tokenSymbol || '').toUpperCase();
+      const name = (t.tokenName || '').toUpperCase();
+      return !EXCLUDE_SYMBOLS.has(sym) && !EXCLUDE_SYMBOLS.has(name);
+    });
+  }, [listings, EXCLUDE_SYMBOLS]);
+
   const infiniteItems = useMemo(() => {
-    return [...listings, ...listings, ...listings];
-  }, [listings]);
+    return [...filtered, ...filtered, ...filtered];
+  }, [filtered]);
 
   const handleClick = (t: Listing) => {
     const params = new URLSearchParams();
