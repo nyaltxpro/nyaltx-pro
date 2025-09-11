@@ -29,41 +29,10 @@ const Footer = () => {
               contests, investing tips and advanced market info. There are 3 tiers:
             </p>
 
-            {/* Tiers */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
-              {/* Free Tier */}
-              <div className="rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur p-4 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_30px_-10px_rgba(99,102,241,0.35)]">
-                <div className="flex items-center mb-2">
-                  <div className="mr-2">🐠</div>
-                  <h4 className="font-semibold">Free</h4>
-                </div>
-                <p className="text-xs">
-                  Get a taste of our community, get support and join the discussions.
-                </p>
-              </div>
+            
+           
 
-              {/* Nyaltx Force Tier */}
-              <div className="rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur p-4 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_30px_-10px_rgba(99,102,241,0.35)]">
-                <div className="flex items-center mb-2">
-                  <div className="mr-2">🐬</div>
-                  <h4 className="font-semibold">Nyaltx Force</h4>
-                </div>
-                <p className="text-xs">
-                  You can access holding 1000 Nyaltx and verifying your wallet.
-                </p>
-              </div>
 
-              {/* Nyaltx Force Ventures Tier */}
-              <div className="rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur p-4 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_30px_-10px_rgba(99,102,241,0.35)]">
-                <div className="flex items-center mb-2">
-                  <div className="mr-2">🐳</div>
-                  <h4 className="font-semibold">Nyaltx Force Ventures</h4>
-                </div>
-                <p className="text-xs">
-                  You can access holding 10k Nyaltx, it includes exclusive access to our ventures and all the community deals.
-                </p>
-              </div>
-            </div>
           </div>
 
           {/* Right column */}
@@ -75,7 +44,7 @@ const Footer = () => {
 
             {/* Social media icons */}
             <div className="grid grid-cols-3 gap-4">
-              <Link href="https://twitter.com/Nyaltx" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center rounded-xl border border-white/10 bg-white/[0.03] p-3 hover:border-white/20 transition-colors">
+              <Link href="https://x.com/nyaltx" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center rounded-xl border border-white/10 bg-white/[0.03] p-3 hover:border-white/20 transition-colors">
                 <FaXTwitter className="text-xl mb-1 opacity-90" />
                 <span className="text-xs text-gray-300/90">Twitter</span>
               </Link>
