@@ -10,6 +10,9 @@ export interface PumpFunToken {
   metadataFetched?: boolean;
   poolAddress?: string;
   launched?: boolean;
+  // Live fields (from trades or metadata augmentation)
+  price?: number; // latest trade price (quote in SOL or USD if provided)
+  marketCap?: number; // derived or provided market cap
 }
 
 export interface TokenPair {
@@ -20,6 +23,20 @@ export interface TokenPair {
 }
 
 export interface SearchResult {
-  type: 'pair' | 'pumpfun' | 'nyax';
+  type: 'pair' | 'pumpfun' | 'nyax' | 'catalog';
   data: TokenPair | PumpFunToken | any;
+}
+
+// Live trade message (Pump.fun subscribeTokenTrade)
+export interface PumpFunTrade {
+  mint?: string; // token mint
+  price?: number; // trade price (unit depends on feed)
+  amount?: number; // trade amount
+  ts?: number; // timestamp
+  buyer?: string;
+  seller?: string;
+  name?: string;
+  symbol?: string;
+  image?: string;
+  marketCap?: number; // if provided by feed
 }

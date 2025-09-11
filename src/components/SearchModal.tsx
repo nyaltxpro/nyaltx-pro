@@ -11,6 +11,7 @@ import { getCryptoName } from '../utils/cryptoNames';
 import { getTrendingCoins } from '../api/coingecko/client';
 import { usePumpFunTokens } from '../hooks/usePumpFunTokens';
 import { TokenPair, PumpFunToken, SearchResult } from '../types/token';
+import catalog from '@/data/tokens.json';
 import nyaxTokensData from '../../nyax-tokens-data.json';
 import nyaxLogoMappings from '../../nyax-logo-mappings.json';
 
@@ -132,6 +133,35 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
       });
     });
 
+    // Search top token catalog (by symbol/name/address)
+    try {
+      const list = (catalog as Array<{ symbol: string; name: string; chain: string; address: string }>);
+      // Exact address match first
+      const isAddr = /^0x[a-fA-F0-9]{40}$/.test(value.trim());
+      if (isAddr) {
+        const exact = list.find(t => t.address.toLowerCase() === value.trim().toLowerCase());
+        if (exact) {
+          results.push({ type: 'catalog', data: exact });
+        }
+      }
+      // Exact symbol match next
+      const exactSym = list.find(t => t.symbol.toLowerCase() === value.toLowerCase());
+      if (exactSym) {
+        results.push({ type: 'catalog', data: exactSym });
+      }
+      const match = list.filter(t =>
+        t.symbol.toLowerCase().includes(value.toLowerCase()) ||
+        t.name.toLowerCase().includes(value.toLowerCase()) ||
+        t.address.toLowerCase().includes(value.toLowerCase())
+      );
+      match.forEach(item => {
+        // avoid duplicating exact pushes above
+        if (!results.find(r => r.type === 'catalog' && r.data.address === item.address)) {
+          results.push({ type: 'catalog', data: item });
+        }
+      });
+    } catch {}
+
     // Search for traditional token pairs
     const pairMatch = value.match(/([A-Za-z0-9]+)[/\\-]([A-Za-z0-9]+)/);
     if (pairMatch) {
@@ -181,14 +211,22 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
   const handleResultClick = (result: SearchResult) => {
     if (result.type === 'pair') {
       const pair = result.data as TokenPair;
-      router.push(`/trade?base=${pair.baseToken}&quote=${pair.quoteToken}`);
+      router.push(`/dashboard/trade?token=${pair.baseToken}`);
     } else if (result.type === 'nyax') {
       const token = result.data as NyaxToken;
-      router.push(`/dashboard/nyax-token-details/${token.logoId}`);
+      router.push(`/dashboard/trade?token=${token.logoId}`);
     } else if (result.type === 'pumpfun') {
       // Handle PumpFun token clicks - you can customize this as needed
       const token = result.data as PumpFunToken;
-      router.push(`/trade?base=${token.symbol || 'UNKNOWN'}&quote=USDT`);
+      router.push(`/dashboard/trade?base=${token.symbol || 'UNKNOWN'}&quote=USDT`);
+    } else if (result.type === 'catalog') {
+      const item = result.data as any;
+      const sym = (item.symbol || '').toUpperCase();
+      const chain = (item.chain || '').toLowerCase();
+      const qs = new URLSearchParams();
+      if (sym) qs.set('token', sym);
+      if (chain) qs.set('chain', chain);
+      router.push(`/dashboard/trade?${qs.toString()}`);
     }
     setSearchTerm('');
     onClose();
@@ -196,19 +234,19 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
 
   // Handle clicking on a trending coin
   const handleTrendingClick = (coin: TrendingCoin) => {
-    router.push(`/trade?base=${coin.symbol.toUpperCase()}&quote=USDT`);
+    router.push(`/dashboard/trade?base=${coin.symbol.toUpperCase()}&quote=USDT`);
     onClose();
   };
 
   // Handle clicking on a popular token
   const handlePopularTokenClick = (token: { symbol: string }) => {
-    router.push(`/trade?base=${token.symbol}&quote=USDT`);
+    router.push(`/dashboard/trade?base=${token.symbol}&quote=USDT`);
     onClose();
   };
 
   // Handle clicking on a NYAX token
   const handleNyaxTokenClick = (token: NyaxToken) => {
-    router.push(`/dashboard/nyax-token-details/${token.logoId}`);
+    router.push(`/dashboard/trade?token=${token.logoId}`);
     onClose();
   };
 
@@ -300,6 +338,26 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
               <span className="text-xs text-cyan-400">{token.network}</span>
               {token.contractAddress && <span className="text-xs font-mono ml-2">{token.contractAddress.slice(0, 8)}...</span>}
             </div>
+          </div>
+        </div>
+      );
+    } else if (result.type === 'catalog') {
+      const item = result.data as any;
+      return (
+        <div
+          key={`catalog-${item.symbol}-${item.chain}-${index}`}
+          className="flex items-center p-3 hover:bg-gray-700 cursor-pointer border-b border-gray-700 last:border-b-0"
+          onClick={() => handleResultClick(result)}
+        >
+          <div className="flex items-center mr-3">
+            <div className="relative h-6 w-6 mr-1">
+              <Image src={getCryptoIconUrl(item.symbol)} alt={item.symbol} width={24} height={24} className="rounded-full" unoptimized />
+            </div>
+          </div>
+          <div>
+            <span className="font-medium">{item.symbol}</span>
+            <div className="text-xs text-gray-400">{item.name} • {item.chain}</div>
+            <div className="text-[10px] text-gray-500 font-mono">{item.address.slice(0, 8)}...{item.address.slice(-6)}</div>
           </div>
         </div>
       );
@@ -692,7 +750,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                     <div
                       key={index}
                       className="relative min-w-[120px] bg-gray-800 bg-opacity-30 rounded-lg p-3 overflow-hidden cursor-pointer hover:bg-gray-700 transition-colors"
-                      onClick={() => router.push(`/trade?base=${token.symbol}&quote=USDT`)}
+                      onClick={() => router.push(`/dashboard/trade?token=${token.symbol}`)}
                     >
                       <div className="flex items-center mb-2">
                         <div className="w-6 h-6 mr-2 rounded-full overflow-hidden">

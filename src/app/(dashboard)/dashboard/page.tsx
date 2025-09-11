@@ -20,6 +20,7 @@ import Header from '@/components/Header';
 import RecentlyAddedCoins from '@/components/RecentlyAddedCoins';
 import TrendingCoins from '@/components/TrendingCoins';
 import Ads from '@/components/Ads';
+import PumpFunLive from '@/components/PumpFunLive';
 
 // SortConfig type will be used when we reimplement the token sorting functionality
 // type SortConfig = {
@@ -320,6 +321,11 @@ export default function Home() {
                 <div key={i} className="h-4 bg-gray-700 rounded animate-pulse w-24"></div>
               ))}
             </div>
+
+      {/* Pump.fun Live Section */}
+      <div className="p-4">
+        <PumpFunLive />
+      </div>
             <div className="h-5 bg-gray-700 rounded animate-pulse w-40"></div>
           </div>
 

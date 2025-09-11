@@ -1,16 +1,62 @@
 'use client'
 
 import React from 'react';
-import Header from '../../../components/Header';
+import PublicHeader from '@/components/PublicHeader';
+import { motion } from 'framer-motion';
+import { FiShield, FiAlertTriangle } from 'react-icons/fi';
 
 const GeneralStatement = () => {
   return (
-    <div className="min-h-screen text-white">
-      <Header />
+    <div className="min-h-screen bg-[#0a0b0f] text-white">
+      <PublicHeader />
       
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-6">NYALTX Legal Advice</h1>
-        <div className="prose dark:prose-invert max-w-none">
+      {/* Background accents */}
+      <div className="pointer-events-none fixed inset-0 -z-10">
+        <div className="absolute inset-0 bg-[radial-gradient(1000px_600px_at_50%_-100px,rgba(56,189,248,0.12),rgba(67,56,202,0)_60%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(800px_400px_at_80%_10%,rgba(99,102,241,0.18),rgba(14,165,233,0)_60%)]" />
+      </div>
+
+      {/* Hero */}
+      <section className="container mx-auto px-4 pt-16 pb-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="flex flex-col items-start gap-4"
+        >
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-sm text-white/80 backdrop-blur">
+            <FiShield className="h-4 w-4 text-cyan-300" />
+            <span>Compliance & Transparency</span>
+          </div>
+          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">
+            <span className="bg-gradient-to-r from-cyan-300 via-sky-400 to-indigo-400 bg-clip-text text-transparent">
+              NYALTX Legal Advice
+            </span>
+          </h1>
+          <p className="max-w-3xl text-white/70">
+            Please review our general terms, severe risk warnings, and responsibilities when interacting with cryptoassets and related information services.
+          </p>
+        </motion.div>
+      </section>
+
+      {/* Content Card */}
+      <section className="container mx-auto px-4 pb-20">
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl"
+        >
+          <div className="pointer-events-none absolute -inset-px rounded-2xl bg-gradient-to-r from-cyan-500/20 via-sky-500/10 to-indigo-500/20 blur-[10px]" />
+
+          <div className="relative p-6 md:p-10">
+            <div className="mb-6 flex flex-wrap items-center gap-3 text-xs">
+              <span className="rounded-full bg-cyan-500/10 px-3 py-1 text-cyan-300 ring-1 ring-cyan-500/30">Updated</span>
+              <span className="rounded-full bg-indigo-500/10 px-3 py-1 text-indigo-300 ring-1 ring-indigo-500/30">Legal</span>
+              <span className="rounded-full bg-sky-500/10 px-3 py-1 text-sky-300 ring-1 ring-sky-500/30">Web3</span>
+            </div>
+
+            <div className="prose dark:prose-invert max-w-none prose-p:leading-relaxed">
           <h2 className="text-2xl font-semibold mt-6 mb-4">GENERAL TERMS AND CONDITIONS OF USE OF THE WEBSITE</h2>
           
           <h3 className="text-xl font-semibold mt-5 mb-3">Acceptance of terms and conditions of use</h3>
@@ -85,7 +131,10 @@ const GeneralStatement = () => {
             exploited in any way, even if the source is cited, without the prior written consent of the Company.
           </p>
           
-          <h3 className="text-xl font-semibold mt-5 mb-3">Severe warning</h3>
+          <h3 className="text-xl font-semibold mt-5 mb-3 inline-flex items-center gap-2">
+            <FiAlertTriangle className="h-5 w-5 text-amber-300" />
+            <span>Severe warning</span>
+          </h3>
           <p className="mb-4">
             Corporate Roadshow, Inc. wishes to expressly inform the users of its website of the following circumstances related 
             to the activity carried out in connection with the cryptocurrency and other cryptoassets markets:
@@ -170,10 +219,13 @@ const GeneralStatement = () => {
             or other alterations. The user must also be aware that information received or sent through this Web site is 
             susceptible to interception.
           </p>
-        </div>
-      </div>
+            </div>
+          </div>
+        </motion.div>
+      </section>
     </div>
   );
 };
 
 export default GeneralStatement;
+

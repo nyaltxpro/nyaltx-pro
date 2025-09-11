@@ -230,6 +230,25 @@ const NYAXTokenDetailsPage: React.FC = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
           {/* Main Content */}
+
+      
+
+    <iframe
+      src="https://dexscreener.com/solana/DdXuAoKbi7pWmpJfDLFWF2oQ1oaa3SyQm3yGm18fpump?embed=1"
+      width="100%"
+      height="500"
+      style={{ border: 0 }}
+    />
+
+<iframe
+      src="https://dexscreener.com/solana/DdXuAoKbi7pWmpJfDLFWF2oQ1oaa3SyQm3yGm18fpump?embed=1&theme=dark&trades=0&info=0"
+      width="100%"
+      height="500"
+      style={{ border: 0 }}
+    />
+
+
+
           <div className="xl:col-span-2 space-y-8">
             {/* About Section */}
             {token.aboutUs && (

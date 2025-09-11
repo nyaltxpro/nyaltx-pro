@@ -10,7 +10,13 @@ import { FaXTwitter } from 'react-icons/fa6';
 
 const Footer = () => {
   return (
-    <footer className="bg-[#152028] text-white border-t font-roboto border-gray-800 py-8 px-4 mt-8 font-poppins">
+    <footer className="relative text-white border-t border-white/10 py-10 px-4 mt-8 font-poppins">
+      {/* subtle aurora background */}
+      <div className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute -top-10 left-10 h-40 w-40 rounded-full bg-cyan-500/10 blur-3xl" />
+        <div className="absolute bottom-0 right-10 h-44 w-44 rounded-full bg-indigo-500/10 blur-3xl" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent_0,transparent_95%,rgba(255,255,255,0.04)_95%,rgba(255,255,255,0.04)_100%),linear-gradient(to_bottom,transparent_0,transparent_95%,rgba(255,255,255,0.04)_95%,rgba(255,255,255,0.04)_100%)] bg-[length:22px_22px] opacity-10" />
+      </div>
       <div className="container mx-auto">
         {/* Top section */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
@@ -24,9 +30,9 @@ const Footer = () => {
             </p>
 
             {/* Tiers */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
               {/* Free Tier */}
-              <div className="bg-[#1a2632] rounded-lg p-4">
+              <div className="rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur p-4 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_30px_-10px_rgba(99,102,241,0.35)]">
                 <div className="flex items-center mb-2">
                   <div className="mr-2">🐠</div>
                   <h4 className="font-semibold">Free</h4>
@@ -37,7 +43,7 @@ const Footer = () => {
               </div>
 
               {/* Nyaltx Force Tier */}
-              <div className="bg-[#1a2632] rounded-lg p-4">
+              <div className="rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur p-4 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_30px_-10px_rgba(99,102,241,0.35)]">
                 <div className="flex items-center mb-2">
                   <div className="mr-2">🐬</div>
                   <h4 className="font-semibold">Nyaltx Force</h4>
@@ -48,7 +54,7 @@ const Footer = () => {
               </div>
 
               {/* Nyaltx Force Ventures Tier */}
-              <div className="bg-[#1a2632] rounded-lg p-4">
+              <div className="rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur p-4 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_30px_-10px_rgba(99,102,241,0.35)]">
                 <div className="flex items-center mb-2">
                   <div className="mr-2">🐳</div>
                   <h4 className="font-semibold">Nyaltx Force Ventures</h4>
@@ -69,63 +75,53 @@ const Footer = () => {
 
             {/* Social media icons */}
             <div className="grid grid-cols-3 gap-4">
-              <Link href="https://twitter.com/Nyaltx" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center">
-                <FaXTwitter className="text-2xl mb-1" />
-                <span className="text-xs">Twitter</span>
+              <Link href="https://twitter.com/Nyaltx" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center rounded-xl border border-white/10 bg-white/[0.03] p-3 hover:border-white/20 transition-colors">
+                <FaXTwitter className="text-xl mb-1 opacity-90" />
+                <span className="text-xs text-gray-300/90">Twitter</span>
               </Link>
-              <Link href="https://www.instagram.com/Nyaltx.io/" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center">
-                <BsInstagram className="text-2xl mb-1" />
-                <span className="text-xs">Instagram</span>
+              <Link href="https://www.instagram.com/Nyaltx.io/" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center rounded-xl border border-white/10 bg-white/[0.03] p-3 hover:border-white/20 transition-colors">
+                <BsInstagram className="text-xl mb-1 opacity-90" />
+                <span className="text-xs text-gray-300/90">Instagram</span>
               </Link>
-              <Link href="https://www.youtube.com/c/Nyaltx" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center">
-                <FaYoutube className="text-2xl mb-1" />
-                <span className="text-xs">Youtube</span>
+              <Link href="https://www.youtube.com/c/Nyaltx" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center rounded-xl border border-white/10 bg-white/[0.03] p-3 hover:border-white/20 transition-colors">
+                <FaYoutube className="text-xl mb-1 opacity-90" />
+                <span className="text-xs text-gray-300/90">Youtube</span>
               </Link>
-              <Link href="https://t.me/NyaltxCommunity" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center">
-                <FaTelegram className="text-2xl mb-1" />
-                <span className="text-xs">Telegram</span>
+              <Link href="https://t.me/NyaltxCommunity" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center rounded-xl border border-white/10 bg-white/[0.03] p-3 hover:border-white/20 transition-colors">
+                <FaTelegram className="text-xl mb-1 opacity-90" />
+                <span className="text-xs text-gray-300/90">Telegram</span>
               </Link>
-              <Link href="https://www.tiktok.com/@Nyaltx.io" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center">
-                <FaTiktok className="text-2xl mb-1" />
-                <span className="text-xs">TikTok</span>
+              <Link href="https://www.tiktok.com/@Nyaltx.io" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center rounded-xl border border-white/10 bg-white/[0.03] p-3 hover:border-white/20 transition-colors">
+                <FaTiktok className="text-xl mb-1 opacity-90" />
+                <span className="text-xs text-gray-300/90">TikTok</span>
               </Link>
-              <Link href="https://medium.com/@NyaltxOfficial" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center">
-                <BsMedium  className="text-2xl mb-1" />
-                <span className="text-xs">Medium</span>
+              <Link href="https://medium.com/@NyaltxOfficial" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center rounded-xl border border-white/10 bg-white/[0.03] p-3 hover:border-white/20 transition-colors">
+                <BsMedium  className="text-xl mb-1 opacity-90" />
+                <span className="text-xs text-gray-300/90">Medium</span>
               </Link>
             </div>
           </div>
         </div>
 
-        <div className='bg-[#142028] flex w-full flex-col'>
+        <div className='  flex w-full flex-col backdrop-blur'>
           {/* Disclaimer */}
-          <div className="text-xs text-center text-gray-400 mb-6">
+          <div className="text-xs text-justify text-gray-400/90 mb-6 max-w-8xl mx-auto px-4">
             All content available on our website, on hyperlinked websites, and on applications, forums, blogs, social media accounts and other platforms associated with Nyaltxools is intended solely to provide you with general information. We make no warranties of any kind with respect to our content, including, but not limited to, the accuracy and currency of the information. None of the content we provide should be construed as financial, legal or any other type of advice on which you may rely. Nothing on our Site should be considered an invitation or offer to take any action.
           </div>
 
           {/* Bottom section with links and app store badges */}
-          <div className="flex flex-col md:flex-row justify-between items-center  pt-4">
+          <div className="flex flex-col md:flex-row justify-between items-center pt-4">
             {/* Social icons */}
-            <div className="flex flex-wrap justify-center items-center space-x-4 mb-4 md:mb-0">
-              <Link href="https://x.com/nyaltx" target="_blank" rel="noopener noreferrer">
-                <FaXTwitter className="text-gray-400 hover:text-white" />
-              </Link>
-              <Link href="https://t.me/nyaltx" target="_blank" rel="noopener noreferrer">
-                <FaTelegram className="text-gray-400 hover:text-white" />
-              </Link>
-              <Link href="https://medium.com/@Nyaltx" target="_blank" rel="noopener noreferrer">
-                <BsMedium className="text-gray-400 hover:text-white" />
-              </Link>
-              <Link href="https://www.instagram.com/Nyaltx" target="_blank" rel="noopener noreferrer">
-                <BsInstagram className="text-gray-400 hover:text-white" />
-              </Link>
-              <Link href="https://www.youtube.com/c/Nyaltx" target="_blank" rel="noopener noreferrer">
-                <FaYoutube className="text-gray-400 hover:text-white" />
-              </Link>
+            <div className="flex flex-wrap justify-center items-center gap-4 mb-4 md:mb-0">
+              <Link href="https://x.com/nyaltx" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors"><FaXTwitter /></Link>
+              <Link href="https://t.me/nyaltx" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors"><FaTelegram /></Link>
+              <Link href="https://medium.com/@Nyaltx" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors"><BsMedium /></Link>
+              <Link href="https://www.instagram.com/Nyaltx" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors"><BsInstagram /></Link>
+              <Link href="https://www.youtube.com/c/Nyaltx" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors"><FaYoutube /></Link>
             </div>
 
             {/* App store badges */}
-            <div className="flex w-full md:w-auto justify-center space-x-4 my-4 md:my-0">
+            <div className="flex w-full md:w-auto justify-center gap-4 my-4 md:my-0">
               <Link href="https://apps.apple.com/app/Nyaltx" target="_blank" rel="noopener noreferrer">
                 <Image src="/app-store-badge.svg" alt="App Store" width={120} height={40} />
               </Link>
@@ -135,18 +131,18 @@ const Footer = () => {
             </div>
 
             <div className="flex flex-col md:flex-row w-full lg:w-[60%] items-center justify-center md:justify-between mt-6 text-sm">
-              <div className="flex flex-wrap justify-center space-x-4 mb-4 md:mb-0">
-                <Link href="/general-statement" className="text-blue-400 hover:text-blue-300">General Statement</Link>
-                <Link href="/legal-advice" className="text-blue-400 hover:text-blue-300">Legal Advice</Link>
-                <Link href="/about-us" className="text-blue-400 hover:text-blue-300">About us</Link>
-                <Link href="/Nyaltx-token" className="text-blue-400 hover:text-blue-300">Nyaltx Token</Link>
-                <Link href="/team" className="text-blue-400 hover:text-blue-300">Team</Link>
-                <Link href="/contact" className="text-blue-400 hover:text-blue-300">Contact</Link>
-                <Link href="/privacy-policy" className="text-blue-400 hover:text-blue-300">Privacy policy</Link>
-                <Link href="/cookies-settings" className="text-blue-400 hover:text-blue-300">Cookie Settings</Link>
+              <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 mb-4 md:mb-0">
+                <Link href="/general-statement" className="text-gray-300 hover:text-white">General Statement</Link>
+                <Link href="/legal-advice" className="text-gray-300 hover:text-white">Legal Advice</Link>
+                <Link href="/about-us" className="text-gray-300 hover:text-white">About us</Link>
+                <Link href="/Nyaltx-token" className="text-gray-300 hover:text-white">Nyaltx Token</Link>
+                <Link href="/team" className="text-gray-300 hover:text-white">Team</Link>
+                <Link href="/contact" className="text-gray-300 hover:text-white">Contact</Link>
+                <Link href="/privacy-policy" className="text-gray-300 hover:text-white">Privacy policy</Link>
+                <Link href="/cookies-settings" className="text-gray-300 hover:text-white">Cookie Settings</Link>
               </div>
 
-              <div className="text-xs text-gray-400 text-center md:text-right">
+              <div className="text-xs text-gray-400/90 text-center md:text-right">
                 © Nyaltx.io 2025 - 2149.0 - info@Nyaltx.io | Ads & Marketing: marketing@Nyaltx.io
               </div>
             </div>

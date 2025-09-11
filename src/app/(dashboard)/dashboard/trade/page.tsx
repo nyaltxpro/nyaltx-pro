@@ -4,12 +4,13 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
-import { 
-  FaChartLine, 
-  FaStar, 
-  FaExternalLinkAlt, 
-  FaArrowUp, 
-  FaArrowDown, 
+import tokens from '@/data/tokens.json';
+import {
+  FaChartLine,
+  FaStar,
+  FaExternalLinkAlt,
+  FaArrowUp,
+  FaArrowDown,
   FaRegClock,
   FaSearch,
   FaFilter,
@@ -235,18 +236,33 @@ const tradingHistory = [
   { id: 5, time: '2023/08/27', type: 'Buy', price: '$0.9997', amount: '$15,000.00', amountToken: '15,004.50', txHash: '0xdef...456' },
 ];
 
-// Client component that uses useSearchParams
-function TradingViewContent() {
+// Move useSearchParams into a child and wrap with Suspense to satisfy Next.js requirements
+function TradePageContent() {
   const searchParams = useSearchParams();
-  const baseToken = searchParams.get('base') || 'BTC';
+  const baseToken = (searchParams.get('base') || searchParams.get('token') || 'BTC').toUpperCase();
+  const chainParam = searchParams.get('chain')?.toLowerCase() || '';
   const quoteToken = searchParams.get('quote') || 'USDT';
-  
-  return <TradingViewWithParams baseToken={baseToken} quoteToken={quoteToken} />;
+
+  return (
+    <TradingViewWithParams
+      baseToken={baseToken}
+      quoteToken={quoteToken}
+      chainParam={chainParam}
+    />
+  );
+}
+
+export default function Page() {
+  return (
+    <Suspense fallback={<div className="p-4 text-white">Loading trade page…</div>}>
+      <TradePageContent />
+    </Suspense>
+  );
 }
 
 // Main component that accepts params directly
-function TradingViewWithParams({ baseToken, quoteToken }: { baseToken: string, quoteToken: string }) {
-  
+function TradingViewWithParams({ baseToken, quoteToken, chainParam }: { baseToken: string, quoteToken: string, chainParam?: string }) {
+
   const [activeTimeframe, setActiveTimeframe] = useState('15m');
   const [chartData, setChartData] = useState(candlestickData);
   const [chartVolume, setChartVolume] = useState(volumeData);
@@ -259,21 +275,57 @@ function TradingViewWithParams({ baseToken, quoteToken }: { baseToken: string, q
   const [showDrawingTools, setShowDrawingTools] = useState(false);
   const [activeDrawingTool, setActiveDrawingTool] = useState<string | null>(null);
   const [activeChartType, setActiveChartType] = useState<'custom' | 'tradingview'>('custom');
-  
+  const [dexEmbedUrl, setDexEmbedUrl] = useState<string>("");
+
+  const [transactionDexEmbedUrl, setTransactionDexEmbedUrl] = useState<string>("");
+  const [infoDexEmbedUrl, setInfoDexEmbedUrl] = useState<string>("");
   // Token pair data state
   const [pairData, setPairData] = useState<TokenPairData | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  
+
+  // Helper: pick token metadata from catalog
+  const resolveToken = React.useCallback(() => {
+    const list = tokens as Array<{ symbol: string; chain: string; address: string; name: string }>; 
+    const symbolMatches = list.filter(t => t.symbol.toUpperCase() === baseToken.toUpperCase());
+    if (!symbolMatches.length) return null;
+    if (chainParam) {
+      const byChain = symbolMatches.find(t => t.chain.toLowerCase() === chainParam.toLowerCase());
+      if (byChain) return byChain;
+    }
+    // prefer ethereum if present
+    const eth = symbolMatches.find(t => t.chain === 'ethereum');
+    return eth || symbolMatches[0];
+  }, [baseToken, chainParam]);
+
+  // Build dexscreener embed URL for token address
+  const buildDexUrl = React.useCallback(() => {
+    const t = resolveToken();
+    if (!t) return '';
+    return `https://dexscreener.com/${t.chain}/${t.address}?embed=1&theme=dark&trades=0&info=0`;
+  }, [resolveToken]);
+
+  const buildTransactionDexUrl = React.useCallback(() => {
+    const t = resolveToken();
+    if (!t) return '';
+    return `https://dexscreener.com/${t.chain}/${t.address}?embed=1&theme=dark&chart=0&info=0`;
+  }, [resolveToken]);
+
+  const buildInfonDexUrl = React.useCallback(() => {
+    const t = resolveToken();
+    if (!t) return '';
+    return `https://dexscreener.com/${t.chain}/${t.address}?embed=1&theme=dark&chart=0&trades=0`;
+  }, [resolveToken]);
+
   // Fetch token pair data
   useEffect(() => {
     let isMounted = true;
-    
+
     const fetchData = async () => {
       try {
         setIsLoading(true);
         const data = await fetchTokenPairData(baseToken, quoteToken);
-        
+
         if (isMounted && data) {
           setPairData(data);
           setError(null);
@@ -291,18 +343,21 @@ function TradingViewWithParams({ baseToken, quoteToken }: { baseToken: string, q
         }
       }
     };
-    
+
     fetchData();
-    
+    setDexEmbedUrl(buildDexUrl());
+    setTransactionDexEmbedUrl(buildTransactionDexUrl());
+    setInfoDexEmbedUrl(buildInfonDexUrl());
+
     // Set up interval to refresh data every minute
     const intervalId = setInterval(fetchData, 60000);
-    
+
     return () => {
       isMounted = false;
       clearInterval(intervalId);
     };
-  }, [baseToken, quoteToken]);
-  
+  }, [baseToken, quoteToken, buildDexUrl]);
+
   // Get TradingView symbol
   const getTradingViewSymbol = () => {
     // For stablecoins, use USD as the quote
@@ -310,7 +365,7 @@ function TradingViewWithParams({ baseToken, quoteToken }: { baseToken: string, q
       const baseId = getTokenId(baseToken);
       return baseId ? `COINBASE:${baseToken}USD` : 'COINBASE:BTCUSD';
     }
-    
+
     // For crypto pairs
     return `COINBASE:${baseToken}${quoteToken}`;
   };
@@ -355,50 +410,32 @@ function TradingViewWithParams({ baseToken, quoteToken }: { baseToken: string, q
     <div className="p-4 text-white ">
       {/* Token Header */}
       {/* <Header /> */}
-    
+
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 mt-8 lg:grid-cols-4 gap-4">
         {/* Left Column - Stats and Order Panel */}
         <div className="lg:col-span-1">
           {/* Order Panel */}
-        
-          
+
+
           <div className="bg-[#0f1923] rounded-xl overflow-hidden mb-4">
             <div className="p-4 pb-2">
               <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center">
-                  <img src="/logo.png" alt="Token Logo" className="w-8 h-8 mr-2" />
-                  <div>
-                    <h3 className="font-semibold">UNISWAP V2</h3>
-                  </div>
-                </div>
-                <div>
-                  <button className="p-1 bg-[#1a2932] rounded hover:bg-[#253440]">
-                    <FaSearch className="text-gray-400" size={16} />
-                  </button>
-                </div>
-              </div>
-              
-              <div className="flex justify-between items-center mb-2">
-                <div>
-                  <span className="text-gray-400 mr-1">DEXT:</span>
-                  <span className="text-blue-400">0XFB7...C75A</span>
-                  <button className="ml-1 text-gray-400 hover:text-white">
-                    <FaRegCopy size={14} />
-                  </button>
-                </div>
-                <div>
-                  <span className="text-gray-400 mr-1">PAIR:</span>
-                  <span className="text-blue-400">0XA29...7D6D</span>
-                  <button className="ml-1 text-gray-400 hover:text-white">
-                    <FaRegCopy size={14} />
-                  </button>
-                </div>
-              </div>
-            </div>
             
-            <div className="grid grid-cols-2 gap-1">
+            
+              </div>
+
+            </div>
+
+            <iframe
+          src={infoDexEmbedUrl || `https://dexscreener.com/ethereum/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48?embed=1&theme=dark&chart=0&trades=0`}
+          width="100%"
+          height="600"
+          style={{ border: 0 }}
+        />
+
+            {/* <div className="grid grid-cols-2 gap-1">
               <div className="bg-[#1a2932] p-3">
                 <div className="text-gray-400 text-sm">MARKET CAP</div>
                 <div className="text-xl font-bold">{pairData ? formatCurrency(pairData.marketCap, 'USD', 2) : '$0.00'}</div>
@@ -433,8 +470,8 @@ function TradingViewWithParams({ baseToken, quoteToken }: { baseToken: string, q
                 <div className="text-gray-400 text-sm">QUOTE TOKEN</div>
                 <div className="text-xl font-bold">{getCryptoName(quoteToken)}</div>
               </div>
-            </div>
-            
+            </div> */}
+
             <button className="w-full py-3 text-center text-gray-400 hover:text-white bg-[#1a2932] border-t border-gray-800">
               More info <FaChevronDown className="inline ml-1" />
             </button>
@@ -442,8 +479,8 @@ function TradingViewWithParams({ baseToken, quoteToken }: { baseToken: string, q
 
 
 
-      <SwapPage/>
-        
+          <SwapPage />
+
 
 
         </div>
@@ -453,16 +490,22 @@ function TradingViewWithParams({ baseToken, quoteToken }: { baseToken: string, q
           {/* Chart */}
           <div className="bg-[#0f1923] rounded-xl p-4 mb-4">
             <div className="flex justify-between items-center mb-4">
-        
-            
-            {/* Chart Tabs */}
-         
-            
-            {/* Chart Container */}
-            <div className="w-full h-[500px] rounded-lg relative">
-                  <AdvancedRealTimeChart {...chartProps} />
-                </div>
-              
+
+
+              {/* Chart Tabs */}
+
+
+              {/* Chart Container */}
+              <div className="w-full h-[500px] rounded-lg relative">
+                {/* <AdvancedRealTimeChart {...chartProps} /> */}
+                <iframe
+                  src={dexEmbedUrl || `https://dexscreener.com/ethereum/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48?embed=1&theme=dark&trades=0&info=0`}
+                  width="100%"
+                  height="500"
+                  style={{ border: 0, backgroundColor: "transparent" }}
+                />
+              </div>
+
             </div>
           </div>
 
@@ -470,31 +513,28 @@ function TradingViewWithParams({ baseToken, quoteToken }: { baseToken: string, q
           <div className="bg-[#0f1923] rounded-xl overflow-hidden">
             <div className="flex border-b border-gray-800">
               <button
-                className={`px-6 py-3 text-sm font-medium ${
-                  activeTab === 'trades' 
-                    ? 'text-blue-400 border-b-2 border-blue-400' 
-                    : 'text-gray-400 hover:text-gray-300'
-                }`}
+                className={`px-6 py-3 text-sm font-medium ${activeTab === 'trades'
+                  ? 'text-blue-400 border-b-2 border-blue-400'
+                  : 'text-gray-400 hover:text-gray-300'
+                  }`}
                 onClick={() => setActiveTab('trades')}
               >
                 Trades
               </button>
               <button
-                className={`px-6 py-3 text-sm font-medium ${
-                  activeTab === 'info' 
-                    ? 'text-blue-400 border-b-2 border-blue-400' 
-                    : 'text-gray-400 hover:text-gray-300'
-                }`}
+                className={`px-6 py-3 text-sm font-medium ${activeTab === 'info'
+                  ? 'text-blue-400 border-b-2 border-blue-400'
+                  : 'text-gray-400 hover:text-gray-300'
+                  }`}
                 onClick={() => setActiveTab('info')}
               >
                 Info
               </button>
               <button
-                className={`px-6 py-3 text-sm font-medium ${
-                  activeTab === 'analytics' 
-                    ? 'text-blue-400 border-b-2 border-blue-400' 
-                    : 'text-gray-400 hover:text-gray-300'
-                }`}
+                className={`px-6 py-3 text-sm font-medium ${activeTab === 'analytics'
+                  ? 'text-blue-400 border-b-2 border-blue-400'
+                  : 'text-gray-400 hover:text-gray-300'
+                  }`}
                 onClick={() => setActiveTab('analytics')}
               >
                 Analytics
@@ -518,7 +558,16 @@ function TradingViewWithParams({ baseToken, quoteToken }: { baseToken: string, q
                 </div>
 
                 <div className="overflow-x-auto">
-                  <table className="min-w-full">
+                  <div style={{ backgroundColor: "#0f1923", padding: "0px", borderRadius: "8px" }}>
+                    <iframe
+                      src={transactionDexEmbedUrl }
+                      width="100%"
+                      height="300"
+                      style={{ border: 0, display: "block", width: "100%" }}
+                    />
+                  </div>
+
+                  {/* <table className="min-w-full">
                     <thead>
                       <tr className="text-left text-gray-400 text-sm">
                         <th className="pb-3 font-medium">Time</th>
@@ -550,7 +599,7 @@ function TradingViewWithParams({ baseToken, quoteToken }: { baseToken: string, q
                         </tr>
                       ))}
                     </tbody>
-                  </table>
+                  </table> */}
                 </div>
               </div>
             )}
@@ -559,16 +608,16 @@ function TradingViewWithParams({ baseToken, quoteToken }: { baseToken: string, q
               <div className="p-4">
                 <h3 className="text-lg font-semibold mb-3">Token Information</h3>
                 <p className="text-gray-300 mb-4">
-                  {baseToken === 'USDT' ? 
-                    `Tether USD (USDT) is a stablecoin pegged to the US Dollar. Each USDT token is backed by one US dollar, maintaining a 1:1 ratio with the USD. It enables users to transfer value globally without the volatility associated with cryptocurrencies.` : 
-                    baseToken === 'BTC' ? 
-                    `Bitcoin (BTC) is the first decentralized cryptocurrency, created in 2009 by an unknown person or group using the pseudonym Satoshi Nakamoto. It operates on a blockchain, a distributed ledger that records all transactions across a network of computers.` : 
-                    baseToken === 'ETH' ? 
-                    `Ethereum (ETH) is a decentralized, open-source blockchain with smart contract functionality. Ether is the native cryptocurrency of the platform. It is the second-largest cryptocurrency by market capitalization, after Bitcoin.` : 
-                    `${getCryptoName(baseToken)} (${baseToken}) is a cryptocurrency traded against ${getCryptoName(quoteToken)} (${quoteToken}). View the chart for real-time price information.`
+                  {baseToken === 'USDT' ?
+                    `Tether USD (USDT) is a stablecoin pegged to the US Dollar. Each USDT token is backed by one US dollar, maintaining a 1:1 ratio with the USD. It enables users to transfer value globally without the volatility associated with cryptocurrencies.` :
+                    baseToken === 'BTC' ?
+                      `Bitcoin (BTC) is the first decentralized cryptocurrency, created in 2009 by an unknown person or group using the pseudonym Satoshi Nakamoto. It operates on a blockchain, a distributed ledger that records all transactions across a network of computers.` :
+                      baseToken === 'ETH' ?
+                        `Ethereum (ETH) is a decentralized, open-source blockchain with smart contract functionality. Ether is the native cryptocurrency of the platform. It is the second-largest cryptocurrency by market capitalization, after Bitcoin.` :
+                        `${getCryptoName(baseToken)} (${baseToken}) is a cryptocurrency traded against ${getCryptoName(quoteToken)} (${quoteToken}). View the chart for real-time price information.`
                   }
                 </p>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <h4 className="font-medium mb-2">Contract Details</h4>
@@ -591,7 +640,7 @@ function TradingViewWithParams({ baseToken, quoteToken }: { baseToken: string, q
                       </div>
                     </div>
                   </div>
-                  
+
                   <div>
                     <h4 className="font-medium mb-2">Social Links</h4>
                     <div className="space-y-2 text-sm">
@@ -616,7 +665,7 @@ function TradingViewWithParams({ baseToken, quoteToken }: { baseToken: string, q
             {activeTab === 'analytics' && (
               <div className="p-4">
                 <h3 className="text-lg font-semibold mb-3">Token Analytics</h3>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                   <div>
                     <h4 className="font-medium mb-3">Price Performance</h4>
@@ -639,7 +688,7 @@ function TradingViewWithParams({ baseToken, quoteToken }: { baseToken: string, q
                       </div>
                     </div>
                   </div>
-                  
+
                   <div>
                     <h4 className="font-medium mb-3">Trading Volume</h4>
                     <div className="space-y-2">
@@ -662,7 +711,7 @@ function TradingViewWithParams({ baseToken, quoteToken }: { baseToken: string, q
                     </div>
                   </div>
                 </div>
-                
+
                 <h4 className="font-medium mb-3">Holder Distribution</h4>
                 <div className="w-full bg-[#1a2932] rounded-lg p-4 h-48 flex items-center justify-center">
                   <div className="text-center">
@@ -706,7 +755,7 @@ function TradingViewWithParams({ baseToken, quoteToken }: { baseToken: string, q
                 </button>
               </div>
             </div>
-            
+
             <div className="flex justify-between mb-4">
               <div className="bg-[#1a2932] rounded-md px-4 py-2 flex-grow mr-2">
                 <div className="flex items-center">
@@ -721,7 +770,7 @@ function TradingViewWithParams({ baseToken, quoteToken }: { baseToken: string, q
                 </div>
               </div>
             </div>
-            
+
             <div className="bg-[#1a2932] rounded-lg p-3 mb-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
@@ -742,7 +791,7 @@ function TradingViewWithParams({ baseToken, quoteToken }: { baseToken: string, q
                 </div>
               </div>
             </div>
-            
+
             <div className="text-center py-8">
               <p className="text-xl mb-2">Your favorite list is empty!</p>
               <p className="text-gray-400">Start building your favorite list by adding this pair.</p>
@@ -755,11 +804,4 @@ function TradingViewWithParams({ baseToken, quoteToken }: { baseToken: string, q
   );
 }
 
-// Export the main component wrapped in Suspense
-export default function TradingView() {
-  return (
-    <Suspense fallback={<div className="p-4 text-white font-roboto">Loading trade data...</div>}>
-      <TradingViewContent />
-    </Suspense>
-  );
-}
+// Note: single default export defined above (Page). Removed legacy wrapper to avoid duplicate default export.

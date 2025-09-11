@@ -1,5 +1,7 @@
+"use client";
 import React, { useEffect } from 'react'
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface FAQ {
     question: string;
@@ -141,35 +143,53 @@ const Faq: React.FC<FaqProps> = ({ baseToken = '', quoteToken = '', className = 
         setFaqs(updatedFaqs);
     };
     return (
-        <div className={`bg-[#0f1923] my-5 rounded-lg shadow-lg p-6 ${className}`}>
-                <h2 className="text-xl font-semibold text-white mb-4">
+        <div className={`my-5 rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur p-6 ${className}`}>
+                <h2 className="text-xl font-semibold text-white mb-2">
                     {baseToken && quoteToken 
                         ? `Frequently Asked Questions about ${baseToken}/${quoteToken}` 
                         : "Frequently Asked Questions"}
                 </h2>
 
-                <p className="text-gray-300 mb-4">
+                <p className="text-gray-300/90 mb-4 text-sm">
                     {baseToken && quoteToken 
                         ? `Find answers to common questions about trading ${baseToken} against ${quoteToken} and using our platform.` 
                         : "Our platform is easy to use, has low fees, and is trusted by thousands of users for cryptocurrency trading."}
                 </p>
 
-                <div className="space-y-4 mt-6">
+                <div className="space-y-3 mt-4">
                     {faqs.map((faq, index) => (
-                        <div key={index} className="border-b border-gray-800 pb-3">
+                        <motion.div
+                          key={index}
+                          className="rounded-xl border border-white/10 bg-white/[0.02] p-4 transition-colors"
+                          initial={{ opacity: 0, y: 8 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          viewport={{ once: true, amount: 0.2 }}
+                          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                        >
                             <button
                                 className="flex justify-between items-center w-full text-left text-gray-300 hover:text-white"
                                 onClick={() => toggleFAQ(index)}
                             >
                                 <span className="font-medium">{faq.question}</span>
-                                {faq.isOpen ? <FaChevronUp /> : <FaChevronDown />}
+                                <span className="shrink-0 ml-3">{faq.isOpen ? <FaChevronUp /> : <FaChevronDown />}</span>
                             </button>
-                            {faq.isOpen && (
-                                <p className="mt-2 text-gray-400 text-sm">
+                            <AnimatePresence initial={false}>
+                              {faq.isOpen && (
+                                <motion.div
+                                  key="content"
+                                  initial={{ height: 0, opacity: 0 }}
+                                  animate={{ height: 'auto', opacity: 1 }}
+                                  exit={{ height: 0, opacity: 0 }}
+                                  transition={{ duration: 0.3 }}
+                                  className="overflow-hidden"
+                                >
+                                  <p className="mt-2 text-gray-400 text-sm">
                                     {faq.answer}
-                                </p>
-                            )}
-                        </div>
+                                  </p>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                        </motion.div>
                     ))}
                 </div>
             </div>
