@@ -2,12 +2,14 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { FaSearch, FaCaretUp, FaCaretDown, FaExternalLinkAlt, FaRegStar, FaStar } from 'react-icons/fa';
 import ConnectWalletButton from '../../../../components/ConnectWalletButton';
 import Banner from '../../../../components/Banner';
 import { getCryptoIconUrl } from '../../../../utils/cryptoIcons';
 import Header from '../../../../components/Header';
 import { coinGeckoService, CoinGeckoMarketData } from '../../../../api/coingecko/trending';
+import catalog from '@/data/tokens.json';
 
 // Define types
 type TrendingToken = {
@@ -90,6 +92,7 @@ const SparklineChart = ({ data, change }: { data: number[], change: number }) =>
 };
 
 export default function TrendingPage() {
+  const router = useRouter();
   const [darkMode] = useState(true);
   const [tokens, setTokens] = useState<TrendingToken[]>([]);
   const [loading, setLoading] = useState(true);
@@ -100,6 +103,51 @@ export default function TrendingPage() {
   const [timeframe, setTimeframe] = useState<'1h' | '24h' | '7d' | '30d'>('24h');
   const [activeFilter, setActiveFilter] = useState<'all' | 'gainers' | 'losers' | 'favorites'>('all');
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
+
+  // Resolve local mapping for chain/address from catalog by symbol
+  const resolveCatalogBySymbol = (symbol: string): { chain?: string; address?: string } => {
+    try {
+      const list = (catalog as Array<{ symbol: string; chain: string; address: string }>);
+      const matches = list.filter(t => t.symbol.toUpperCase() === symbol.toUpperCase());
+      if (!matches.length) return {};
+      // Prefer ethereum when multiple chains exist
+      const eth = matches.find(t => t.chain.toLowerCase() === 'ethereum');
+      const picked = eth || matches[0];
+      return { chain: picked.chain.toLowerCase(), address: picked.address.toLowerCase() };
+    } catch {
+      return {};
+    }
+  };
+
+  const navigateToTrade = async (symbol: string) => {
+    let { chain, address } = resolveCatalogBySymbol(symbol);
+
+    // Fallback: use DexScreener search to find a matching pair if not in catalog
+    if (!chain || !address) {
+      try {
+        const res = await fetch(`https://api.dexscreener.com/latest/dex/search?q=${encodeURIComponent(symbol)}`);
+        if (res.ok) {
+          const data = await res.json();
+          const pairs: any[] = data?.pairs || [];
+          // Prefer pairs where the baseToken.symbol matches exactly
+          const exact = pairs.find(p => (p?.baseToken?.symbol || '').toUpperCase() === symbol.toUpperCase());
+          const pick = exact || pairs[0];
+          if (pick?.chainId && pick?.baseToken?.address) {
+            chain = pick.chainId.toLowerCase();
+            address = (pick.baseToken.address as string).toLowerCase();
+          }
+        }
+      } catch (e) {
+        // ignore network errors
+      }
+    }
+
+    const qs = new URLSearchParams();
+    qs.set('base', symbol.toUpperCase());
+    if (chain) qs.set('chain', chain);
+    if (address) qs.set('address', address);
+    router.push(`/dashboard/trade?${qs.toString()}`);
+  };
   
   // Load market data from CoinGecko
   const loadMarketData = async () => {
@@ -504,7 +552,7 @@ export default function TrendingPage() {
                 <tr 
                   key={token.id} 
                   className="hover:bg-gray-700 cursor-pointer transition-colors"
-                  onClick={() => console.log(`Navigate to token details: ${token.symbol}`)}
+                  onClick={() => navigateToTrade(token.symbol)}
                 >
                   <td className="px-4 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium">#{token.rank}</div>
@@ -548,7 +596,10 @@ export default function TrendingPage() {
                       >
                         {token.favorite ? <FaStar /> : <FaRegStar />}
                       </button>
-                      <button className="text-blue-500 focus:outline-none">
+                      <button 
+                        className="text-blue-500 focus:outline-none"
+                        onClick={(e) => { e.stopPropagation(); navigateToTrade(token.symbol); }}
+                      >
                         <FaExternalLinkAlt />
                       </button>
                     </div>
