@@ -104,7 +104,7 @@ const Footer = () => {
                 <Link href="/general-statement" className="text-gray-300 hover:text-white">General Statement</Link>
                 <Link href="/legal-advice" className="text-gray-300 hover:text-white">Legal Advice</Link>
                 <Link href="/about-us" className="text-gray-300 hover:text-white">About us</Link>
-                <Link href="/Nyaltx-token" className="text-gray-300 hover:text-white">Nyaltx Token</Link>
+                <Link href="/pro-signup" className="text-gray-300 hover:text-white">Nyaltx Pro</Link>
                 <Link href="/team" className="text-gray-300 hover:text-white">Team</Link>
                 <Link href="/contact" className="text-gray-300 hover:text-white">Contact</Link>
                 <Link href="/privacy-policy" className="text-gray-300 hover:text-white">Privacy policy</Link>
