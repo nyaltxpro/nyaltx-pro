@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
+import { getAdminFromRequest } from '@/lib/adminAuth';
 import { promises as fs } from 'fs';
 import path from 'path';
 
@@ -32,15 +32,15 @@ async function writeAll(data: Profile[]) {
 }
 
 export async function GET() {
-  const c = await cookies();
-  if (c.get('admin_auth')?.value !== '1') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const admin = await getAdminFromRequest();
+  if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const data = await readAll();
   return NextResponse.json({ data });
 }
 
 export async function POST(req: NextRequest) {
-  const c = await cookies();
-  if (c.get('admin_auth')?.value !== '1') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const admin = await getAdminFromRequest();
+  if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { projectName, contactEmail, website, paidTier, status, notes } = await req.json();
   if (!projectName) return NextResponse.json({ error: 'projectName required' }, { status: 400 });
@@ -65,8 +65,8 @@ export async function POST(req: NextRequest) {
 }
 
 export async function PUT(req: NextRequest) {
-  const c = await cookies();
-  if (c.get('admin_auth')?.value !== '1') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const admin = await getAdminFromRequest();
+  if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { id, ...patch } = await req.json();
   if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
@@ -80,8 +80,8 @@ export async function PUT(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-  const c = await cookies();
-  if (c.get('admin_auth')?.value !== '1') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const admin = await getAdminFromRequest();
+  if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const id = req.nextUrl.searchParams.get('id');
   if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });

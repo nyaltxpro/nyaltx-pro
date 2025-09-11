@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useAccount } from 'wagmi';
 import { FaInfoCircle, FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import ConnectWalletButton from '@/components/ConnectWalletButton';
 
@@ -11,6 +12,7 @@ interface FAQ {
 }
 
 export default function RegisterTokenPage() {
+  const { isConnected, address } = useAccount();
   const [activeTab, setActiveTab] = useState('basic');
   const [tokenName, setTokenName] = useState('');
   const [tokenSymbol, setTokenSymbol] = useState('');
@@ -22,6 +24,9 @@ export default function RegisterTokenPage() {
   const [discord, setDiscord] = useState('');
   const [github, setGithub] = useState('');
   const [imageUri, setImageUri] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [faqs, setFaqs] = useState<FAQ[]>([
     {
       question: 'What is token registration?',
@@ -46,22 +51,53 @@ export default function RegisterTokenPage() {
     setFaqs(updated);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Hook this up to your backend or on-chain verification as needed
-    console.log({ 
-      tokenName, 
-      tokenSymbol, 
-      blockchain, 
-      contractAddress,
-      website,
-      twitter,
-      telegram,
-      discord,
-      github,
-      imageUri,
-    });
-    alert('Token registration submitted!');
+    setSubmitting(true);
+    setError(null);
+    setSuccess(null);
+    try {
+      if (!isConnected || !address) {
+        throw new Error('Please connect your wallet before submitting.');
+      }
+      const res = await fetch('/api/tokens/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tokenName,
+          tokenSymbol,
+          blockchain,
+          contractAddress,
+          website,
+          twitter,
+          telegram,
+          discord,
+          github,
+          imageUri,
+          submittedByAddress: address,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data?.error || 'Submission failed');
+      }
+      setSuccess('Submitted! Your token is now pending admin approval.');
+      // Reset form
+      setTokenName('');
+      setTokenSymbol('');
+      setBlockchain('ethereum');
+      setContractAddress('');
+      setWebsite('');
+      setTwitter('');
+      setTelegram('');
+      setDiscord('');
+      setGithub('');
+      setImageUri('');
+    } catch (err: any) {
+      setError(err?.message || 'Something went wrong');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -130,6 +166,17 @@ export default function RegisterTokenPage() {
 
               {/* Form */}
               <form onSubmit={handleSubmit}>
+                {!isConnected && (
+                  <div className="mb-4 text-amber-300 text-sm bg-amber-900/30 border border-amber-700 rounded p-3">
+                    Please connect your wallet to submit a token registration.
+                  </div>
+                )}
+                {error && (
+                  <div className="mb-4 text-red-400 text-sm bg-red-950/30 border border-red-700 rounded p-2">{error}</div>
+                )}
+                {success && (
+                  <div className="mb-4 text-emerald-300 text-sm bg-emerald-950/30 border border-emerald-700 rounded p-2">{success}</div>
+                )}
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-gray-300 mb-1">
                     Name*
@@ -275,9 +322,10 @@ export default function RegisterTokenPage() {
                 <div className="text-center">
                   <button
                     type="submit"
-                    className="bg-[#00b8d8] hover:bg-[#00a6c4] text-white font-medium py-2 px-6 rounded-md transition duration-200"
+                    disabled={submitting || !isConnected}
+                    className={`bg-[#00b8d8] hover:bg-[#00a6c4] text-white font-medium py-2 px-6 rounded-md transition duration-200 ${(submitting || !isConnected) ? 'opacity-60 cursor-not-allowed' : ''}`}
                   >
-                    Submit
+                    {submitting ? 'Submitting…' : (isConnected ? 'Submit' : 'Connect wallet to submit')}
                   </button>
                 </div>
               </form>

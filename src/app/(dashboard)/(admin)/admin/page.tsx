@@ -3,171 +3,223 @@
 import React, { useEffect, useState } from "react";
 
 export default function AdminHomePage() {
-  const [stripeCount, setStripeCount] = useState<number | null>(null);
-  const [onchainCount, setOnchainCount] = useState<number | null>(null);
-  const [sessionId, setSessionId] = useState("");
-  const [sessionInfo, setSessionInfo] = useState<any | null>(null);
-  const [sessionError, setSessionError] = useState<string | null>(null);
+  const [membershipsCount, setMembershipsCount] = useState<number | null>(null);
+  const [tokensRegisteredCount, setTokensRegisteredCount] = useState<number | null>(null);
+  const [usersCount, setUsersCount] = useState<number | null>(null);
+  const [listingsCount, setListingsCount] = useState<number | null>(null);
+  const [pendingTokens, setPendingTokens] = useState<TokenRegistration[] | null>(null);
+  const [pendingError, setPendingError] = useState<string | null>(null);
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [total, setTotal] = useState(0);
 
-  type Campaign = {
+  type Status = "pending" | "approved" | "rejected";
+  type TokenRegistration = {
     id: string;
-    projectName: string;
-    tierId: 'paddle' | 'motor' | 'helicopter';
-    startDate: string;
-    endDate: string;
-    notes?: string;
+    tokenName: string;
+    tokenSymbol: string;
+    blockchain: string;
+    contractAddress: string;
+    imageUri?: string;
+    website?: string;
+    twitter?: string;
+    telegram?: string;
+    discord?: string;
+    github?: string;
+    status: Status;
     createdAt: string;
+    updatedAt: string;
   };
-  const [campaigns, setCampaigns] = useState<Campaign[] | null>(null);
-  const [newCampaign, setNewCampaign] = useState<{ projectName: string; tierId: Campaign['tierId']; startDate: string; notes?: string }>({ projectName: "", tierId: 'paddle', startDate: "", notes: "" });
-  const [campaignError, setCampaignError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    fetch("/api/admin/orders/stripe")
-      .then(async (r) => (r.ok ? r.json() : { data: [] }))
-      .then((d) => setStripeCount((d?.data || []).length))
-      .catch(() => setStripeCount(0));
+    fetch("/api/admin/dashboard-stats")
+      .then(async (r) => (r.ok ? r.json() : { data: {} }))
+      .then((d) => {
+        setMembershipsCount(d?.data?.membershipsCount ?? 0);
+        setTokensRegisteredCount(d?.data?.tokensRegisteredCount ?? 0);
+        setUsersCount(d?.data?.usersCount ?? 0);
+        setListingsCount(d?.data?.listingsCount ?? 0);
+      })
+      .catch(() => {
+        setMembershipsCount(0);
+        setTokensRegisteredCount(0);
+        setUsersCount(0);
+        setListingsCount(0);
+      });
 
-    fetch("/api/admin/orders/onchain")
-      .then(async (r) => (r.ok ? r.json() : { data: [] }))
-      .then((d) => setOnchainCount((d?.data || []).length))
-      .catch(() => setOnchainCount(0));
-
-    fetch("/api/admin/campaigns")
-      .then(async (r) => (r.ok ? r.json() : { data: [] }))
-      .then((d) => setCampaigns(d?.data || []))
-      .catch(() => setCampaigns([]));
   }, []);
+
+  // Load paginated pending tokens whenever page/limit changes
+  useEffect(() => {
+    setPendingError(null);
+    setPendingTokens(null);
+    fetch(`/api/admin/tokens?status=pending&page=${page}&limit=${limit}`)
+      .then(async (r) => (r.ok ? r.json() : Promise.reject(await r.json())))
+      .then((d) => {
+        setPendingTokens(d?.data || []);
+        setTotal(d?.total || 0);
+      })
+      .catch(() => {
+        setPendingTokens([]);
+        setTotal(0);
+      });
+  }, [page, limit]);
+
+  async function updateStatus(id: string, status: Status) {
+    try {
+      setBusyId(id);
+      setPendingError(null);
+      const r = await fetch('/api/admin/tokens', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, status }),
+      });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d?.error || 'Update failed');
+      // After update, refetch current page
+      fetch(`/api/admin/tokens?status=pending&page=${page}&limit=${limit}`)
+        .then(async (r) => (r.ok ? r.json() : Promise.reject(await r.json())))
+        .then((dd) => {
+          setPendingTokens(dd?.data || []);
+          setTotal(dd?.total || 0);
+        })
+        .catch(() => setPendingTokens([]));
+    } catch (e: any) {
+      setPendingError(e?.message || 'Error updating status');
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function remove(id: string) {
+    try {
+      setBusyId(id);
+      setPendingError(null);
+      const r = await fetch(`/api/admin/tokens?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d?.error || 'Delete failed');
+      // After delete, if current page becomes empty, move back a page
+      const nextTotal = Math.max(0, total - 1);
+      const maxPage = Math.max(1, Math.ceil(nextTotal / limit));
+      const nextPage = Math.min(page, maxPage);
+      setPage(nextPage);
+      // Refetch list
+      fetch(`/api/admin/tokens?status=pending&page=${nextPage}&limit=${limit}`)
+        .then(async (r) => (r.ok ? r.json() : Promise.reject(await r.json())))
+        .then((dd) => {
+          setPendingTokens(dd?.data || []);
+          setTotal(dd?.total || 0);
+        })
+        .catch(() => setPendingTokens([]));
+    } catch (e: any) {
+      setPendingError(e?.message || 'Error deleting');
+    } finally {
+      setBusyId(null);
+    }
+  }
 
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-semibold">Dashboard</h2>
-      <div className="flex gap-3 text-sm">
-        <a href="/admin/orders" className="underline">Orders</a>
-        <a href="/admin/profiles" className="underline">Profiles</a>
-        <a href="/admin/stats" className="underline">Stats</a>
-      </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className="rounded-xl border border-gray-800 p-4">
-          <div className="text-gray-400 text-sm">Stripe Orders</div>
-          <div className="text-3xl font-bold">{stripeCount ?? '—'}</div>
+          <div className="text-gray-400 text-sm">Total Memberships</div>
+          <div className="text-3xl font-bold">{membershipsCount ?? '—'}</div>
         </div>
         <div className="rounded-xl border border-gray-800 p-4">
-          <div className="text-gray-400 text-sm">On-chain Orders</div>
-          <div className="text-3xl font-bold">{onchainCount ?? '—'}</div>
+          <div className="text-gray-400 text-sm">Total Registered Tokens</div>
+          <div className="text-3xl font-bold">{tokensRegisteredCount ?? '—'}</div>
         </div>
         <div className="rounded-xl border border-gray-800 p-4">
-          <div className="text-gray-400 text-sm">Users</div>
-          <div className="text-3xl font-bold">—</div>
+          <div className="text-gray-400 text-sm">Total Users</div>
+          <div className="text-3xl font-bold">{usersCount ?? '—'}</div>
         </div>
         <div className="rounded-xl border border-gray-800 p-4">
           <div className="text-gray-400 text-sm">Listings</div>
-          <div className="text-3xl font-bold">—</div>
+          <div className="text-3xl font-bold">{listingsCount ?? '—'}</div>
         </div>
       </div>
+
       <div className="rounded-xl border border-gray-800 p-6">
-        <h3 className="font-semibold mb-2">Getting Started</h3>
-        <ul className="list-disc pl-5 text-gray-300 space-y-1 text-sm">
-          <li>Use this area to build admin tools and metrics.</li>
-          <li>Protects all routes under <code>/admin</code> via middleware.</li>
-          <li>Configure the password via the <code>ADMIN_PASSWORD</code> environment variable.</li>
-        </ul>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-semibold text-lg">Pending Token Approvals</h3>
+          <a href="/admin/tokens" className="text-sm underline text-gray-300">View all</a>
+        </div>
+        {pendingError && <div className="text-sm text-red-400 mb-2">{pendingError}</div>}
+        {!pendingTokens ? (
+          <div className="text-gray-400">Loading…</div>
+        ) : pendingTokens.length === 0 ? (
+          <div className="text-gray-400">No pending registrations.</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-sm">
+              <thead className="text-left text-gray-300">
+                <tr>
+                  <th className="px-2 py-1">Created</th>
+                  <th className="px-2 py-1">Token</th>
+                  <th className="px-2 py-1">Chain</th>
+                  <th className="px-2 py-1">Contract</th>
+                  <th className="px-2 py-1">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pendingTokens.map((t) => (
+                  <tr key={t.id} className="border-t border-gray-800">
+                    <td className="px-2 py-1 whitespace-nowrap">{new Date(t.createdAt).toLocaleString()}</td>
+                    <td className="px-2 py-1">
+                      <div className="flex items-center gap-2">
+                        {t.imageUri && <img src={t.imageUri} alt="logo" className="w-6 h-6 rounded" />}
+                        <div className="min-w-0">
+                          <div className="font-medium">{t.tokenName} <span className="text-gray-400">({t.tokenSymbol})</span></div>
+                          <div className="text-xs text-gray-400 truncate max-w-[280px]">{t.website || t.twitter || t.github || '—'}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-2 py-1">{t.blockchain}</td>
+                    <td className="px-2 py-1"><code className="text-xs">{t.contractAddress}</code></td>
+                    <td className="px-2 py-1">
+                      <div className="flex gap-2">
+                        <button disabled={busyId === t.id} onClick={() => updateStatus(t.id, 'approved')} className="rounded bg-emerald-600 hover:bg-emerald-500 px-3 py-1 text-xs">Approve</button>
+                        <button disabled={busyId === t.id} onClick={() => updateStatus(t.id, 'rejected')} className="rounded bg-rose-600 hover:bg-rose-500 px-3 py-1 text-xs">Reject</button>
+                        <button disabled={busyId === t.id} onClick={() => remove(t.id)} className="rounded border border-gray-700 px-3 py-1 text-xs">Delete</button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <div className="flex items-center justify-between mt-3 text-sm text-gray-300">
+              <div>
+                Page {page} of {Math.max(1, Math.ceil(total / limit))} • Total {total}
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  className="rounded border border-gray-700 px-3 py-1 disabled:opacity-50"
+                  disabled={page <= 1}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                >
+                  Prev
+                </button>
+                <button
+                  className="rounded border border-gray-700 px-3 py-1 disabled:opacity-50"
+                  disabled={page >= Math.max(1, Math.ceil(total / limit))}
+                  onClick={() => setPage((p) => p + 1)}
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
-      <div className="rounded-xl border border-gray-800 p-6 space-y-6">
-        <h3 className="font-semibold text-lg">Admin Operations</h3>
-        {/* Stripe session verifier */}
-        <div>
-          <h4 className="font-medium mb-2">Verify Stripe Checkout Session</h4>
-          <form className="flex flex-col md:flex-row gap-2" onSubmit={async (e) => {
-            e.preventDefault();
-            setSessionError(null);
-            setSessionInfo(null);
-            if (!sessionId) { setSessionError('Enter a session ID'); return; }
-            try {
-              const r = await fetch(`/api/admin/stripe-session?id=${encodeURIComponent(sessionId)}`);
-              if (!r.ok) throw new Error('Lookup failed');
-              const d = await r.json();
-              setSessionInfo(d);
-            } catch (err: any) {
-              setSessionError(err?.message || 'Error');
-            }
-          }}>
-            <input value={sessionId} onChange={(e) => setSessionId(e.target.value)} placeholder="cs_test_... or cs_..." className="bg-black border border-gray-800 rounded px-3 py-2 w-full md:w-96" />
-            <button className="rounded bg-indigo-600 hover:bg-indigo-500 px-4 py-2 text-sm" type="submit">Check</button>
-          </form>
-          {sessionError && <div className="text-sm text-red-400 mt-2">{sessionError}</div>}
-          {sessionInfo && (
-            <pre className="mt-3 text-xs bg-black/40 border border-gray-800 p-3 rounded overflow-x-auto">{JSON.stringify(sessionInfo, null, 2)}</pre>
-          )}
-        </div>
-
-        {/* Campaign scheduler */}
-        <div>
-          <h4 className="font-medium mb-2">Schedule Campaign (Placement)</h4>
-          <form className="grid grid-cols-1 md:grid-cols-5 gap-2 items-end" onSubmit={async (e) => {
-            e.preventDefault();
-            setCampaignError(null);
-            setBusy(true);
-            try {
-              const r = await fetch('/api/admin/campaigns', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newCampaign),
-              });
-              if (!r.ok) throw new Error('Failed to create');
-              const d = await r.json();
-              setCampaigns(d?.data || []);
-              setNewCampaign({ projectName: '', tierId: 'paddle', startDate: '', notes: '' });
-            } catch (err: any) {
-              setCampaignError(err?.message || 'Error');
-            } finally {
-              setBusy(false);
-            }
-          }}>
-            <input required value={newCampaign.projectName} onChange={(e) => setNewCampaign({ ...newCampaign, projectName: e.target.value })} placeholder="Project name" className="bg-black border border-gray-800 rounded px-3 py-2" />
-            <select value={newCampaign.tierId} onChange={(e) => setNewCampaign({ ...newCampaign, tierId: e.target.value as any })} className="bg-black border border-gray-800 rounded px-3 py-2">
-              <option value="paddle">Paddle ($300, 1 week)</option>
-              <option value="motor">Motor ($500, 1 month)</option>
-              <option value="helicopter">Helicopter ($700, 3 months)</option>
-            </select>
-            <input required type="date" value={newCampaign.startDate} onChange={(e) => setNewCampaign({ ...newCampaign, startDate: e.target.value })} className="bg-black border border-gray-800 rounded px-3 py-2" />
-            <input value={newCampaign.notes} onChange={(e) => setNewCampaign({ ...newCampaign, notes: e.target.value })} placeholder="Notes (optional)" className="bg-black border border-gray-800 rounded px-3 py-2" />
-            <button disabled={busy} className="rounded bg-emerald-600 hover:bg-emerald-500 px-4 py-2 text-sm">Create</button>
-          </form>
-          {campaignError && <div className="text-sm text-red-400 mt-2">{campaignError}</div>}
-          <div className="mt-4 overflow-x-auto">
-            {!campaigns ? (
-              <div className="text-gray-400">Loading campaigns…</div>
-            ) : campaigns.length === 0 ? (
-              <div className="text-gray-400">No campaigns scheduled.</div>
-            ) : (
-              <table className="min-w-full text-sm">
-                <thead className="text-left text-gray-300">
-                  <tr>
-                    <th className="px-2 py-1">Project</th>
-                    <th className="px-2 py-1">Tier</th>
-                    <th className="px-2 py-1">Start</th>
-                    <th className="px-2 py-1">End</th>
-                    <th className="px-2 py-1">Notes</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {campaigns.map((c) => (
-                    <tr key={c.id} className="border-t border-gray-800">
-                      <td className="px-2 py-1">{c.projectName}</td>
-                      <td className="px-2 py-1">{c.tierId}</td>
-                      <td className="px-2 py-1">{new Date(c.startDate).toLocaleDateString()}</td>
-                      <td className="px-2 py-1">{new Date(c.endDate).toLocaleDateString()}</td>
-                      <td className="px-2 py-1">{c.notes || '—'}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
-        </div>
+      <div className="rounded-xl border border-gray-800 p-6">
+        <h3 className="font-semibold mb-2">Welcome</h3>
+        <ul className="list-disc pl-5 text-gray-300 space-y-1 text-sm">
+          <li>This dashboard shows key platform totals.</li>
+          <li>All admin routes under <code>/admin</code> are protected.</li>
+        </ul>
       </div>
     </div>
   );

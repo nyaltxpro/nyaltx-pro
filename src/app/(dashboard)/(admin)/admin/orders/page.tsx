@@ -3,17 +3,6 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 
-type StripeOrder = {
-  id: string;
-  amount_total: number | null;
-  currency: string | null;
-  status: string | null;
-  customer_email?: string | null;
-  created: number;
-  metadata?: Record<string, string> | null;
-  url?: string | null;
-};
-
 type OnchainOrder = {
   id: string;
   method: "ETH" | "NYAX";
@@ -26,7 +15,6 @@ type OnchainOrder = {
 };
 
 export default function AdminOrdersPage() {
-  const [stripeOrders, setStripeOrders] = useState<StripeOrder[] | null>(null);
   const [onchainOrders, setOnchainOrders] = useState<OnchainOrder[] | null>(null);
   const [form, setForm] = useState<Omit<OnchainOrder, "id" | "createdAt">>({
     method: "ETH",
@@ -40,12 +28,6 @@ export default function AdminOrdersPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/api/admin/orders/stripe").then(async (r) => {
-      if (!r.ok) throw new Error("Stripe fetch error");
-      const d = await r.json();
-      setStripeOrders(d?.data || []);
-    }).catch(() => setStripeOrders([]));
-
     fetch("/api/admin/orders/onchain").then(async (r) => {
       if (!r.ok) throw new Error("Onchain fetch error");
       const d = await r.json();
@@ -80,42 +62,6 @@ export default function AdminOrdersPage() {
         <h2 className="text-2xl font-semibold">Orders</h2>
         <Link href="/admin" className="text-sm underline text-gray-300">Back to Dashboard</Link>
       </div>
-
-      <section className="rounded-xl border border-gray-800 p-4">
-        <h3 className="font-semibold mb-3">Stripe Payments</h3>
-        {!stripeOrders ? (
-          <div className="text-gray-400">Loading…</div>
-        ) : stripeOrders.length === 0 ? (
-          <div className="text-gray-400">No Stripe orders found.</div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
-              <thead className="text-left text-gray-300">
-                <tr>
-                  <th className="px-2 py-1">ID</th>
-                  <th className="px-2 py-1">Tier</th>
-                  <th className="px-2 py-1">Amount</th>
-                  <th className="px-2 py-1">Status</th>
-                  <th className="px-2 py-1">Email</th>
-                  <th className="px-2 py-1">Created</th>
-                </tr>
-              </thead>
-              <tbody>
-                {stripeOrders.map((s) => (
-                  <tr key={s.id} className="border-t border-gray-800">
-                    <td className="px-2 py-1">{s.id}</td>
-                    <td className="px-2 py-1">{s.metadata?.tierId ?? "—"}</td>
-                    <td className="px-2 py-1">{s.amount_total ? `$${(s.amount_total / 100).toFixed(2)}` : "—"}</td>
-                    <td className="px-2 py-1">{s.status ?? "—"}</td>
-                    <td className="px-2 py-1">{s.customer_email ?? "—"}</td>
-                    <td className="px-2 py-1">{new Date(s.created * 1000).toLocaleString()}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </section>
 
       <section className="rounded-xl border border-gray-800 p-4">
         <h3 className="font-semibold mb-3">On-chain Payments (ETH/NYAX)</h3>

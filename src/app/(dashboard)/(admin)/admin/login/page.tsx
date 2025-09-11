@@ -30,7 +30,8 @@ function AdminLoginInner() {
       const res = await fetch("/api/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        // API expects { identifier, password } where identifier can be email or username
+        body: JSON.stringify({ identifier: email, password }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));

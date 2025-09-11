@@ -9,7 +9,7 @@ import { parseEther, erc20Abi, parseUnits } from "viem";
 import PublicHeader from "@/components/PublicHeader";
 import { useAppKit } from "@reown/appkit/react";
 import ConnectWalletButton from "@/components/ConnectWalletButton";
-import { TokenETH, TokenIcon, TokenUSDC } from "@web3icons/react";
+import { TokenETH, TokenIcon } from "@web3icons/react";
 
 // Pricing tiers in USD
 const TIERS = [
@@ -21,12 +21,13 @@ const TIERS = [
 // Payment configuration (with sensible defaults per request)
 const DEFAULT_RECEIVER: `0x${string}` = "0x81bA7b98E49014Bff22F811E9405640bC2B39cC0";
 const DEFAULT_NYAX: `0x${string}` = "0x5eed5621b92be4473f99bacac77acfa27deb57d9"; // NYAX on Ethereum
-const DEFAULT_USDC: `0x${string}` = (process.env.NEXT_PUBLIC_USDC_TOKEN_ADDRESS as `0x${string}` | undefined) ??
-  ("0xA0b86991c6218b36c1d19d4a2e9eb0ce3606eb48" as `0x${string}`); // USDC on Ethereum mainnet
+// Default USDT (Tether) on Ethereum mainnet
+const DEFAULT_USDT: `0x${string}` = (process.env.NEXT_PUBLIC_USDT_TOKEN_ADDRESS as `0x${string}` | undefined) ??
+  ("0xdAC17F958D2ee523a2206206994597C13D831ec7" as `0x${string}`);
 
 const RECEIVER = (process.env.NEXT_PUBLIC_PAYMENT_RECEIVER_ADDRESS as `0x${string}` | undefined) ?? DEFAULT_RECEIVER;
 const NYAX_TOKEN = (process.env.NEXT_PUBLIC_NYAX_TOKEN_ADDRESS as `0x${string}` | undefined) ?? DEFAULT_NYAX;
-const USDC_TOKEN = DEFAULT_USDC;
+const USDT_TOKEN = DEFAULT_USDT;
 const PAYMENT_CHAIN_ID = process.env.NEXT_PUBLIC_PAYMENT_CHAIN_ID ? Number(process.env.NEXT_PUBLIC_PAYMENT_CHAIN_ID) : undefined;
 const FALLBACK_ETH_PRICE = process.env.NEXT_PUBLIC_FALLBACK_ETH_PRICE ? Number(process.env.NEXT_PUBLIC_FALLBACK_ETH_PRICE) : 3000; // USD per ETH fallback
 
@@ -209,9 +210,9 @@ export default function PricingPage() {
     }
   }, [chain?.id, isConnected, writeContractAsync]);
 
-  const handlePayUSDC = useCallback(async (tierId: string, priceUSD: number) => {
+  const handlePayUSDT = useCallback(async (tierId: string, priceUSD: number) => {
     if (!RECEIVER) { setError("Receiver address not configured"); return; }
-    if (!USDC_TOKEN) { setError("USDC token address not configured"); return; }
+    if (!USDT_TOKEN) { setError("USDT token address not configured"); return; }
     if (!isConnected) { try { open({ view: 'Connect' }); } catch {} return; }
     if (PAYMENT_CHAIN_ID && chain?.id !== PAYMENT_CHAIN_ID) {
       try { await switchChainAsync({ chainId: PAYMENT_CHAIN_ID }); }
@@ -219,19 +220,19 @@ export default function PricingPage() {
     }
 
     setError(null);
-    setBusy(tierId + ":usdc");
+    setBusy(tierId + ":usdt");
     try {
-      // USDC uses 6 decimals on Ethereum
+      // USDT uses 6 decimals on Ethereum
       const value = parseUnits(priceUSD.toFixed(2), 6);
       const hash = await writeContractAsync({
         abi: erc20Abi,
-        address: USDC_TOKEN,
+        address: USDT_TOKEN,
         functionName: "transfer",
         args: [RECEIVER, value],
       });
-      console.log("USDC payment tx:", hash);
+      console.log("USDT payment tx:", hash);
     } catch (e: any) {
-      setError(e?.shortMessage || e?.message || "USDC payment failed");
+      setError(e?.shortMessage || e?.message || "USDT payment failed");
     } finally {
       setBusy(null);
     }
@@ -300,7 +301,7 @@ export default function PricingPage() {
                 <div className="text-3xl font-bold">${t.priceUSD.toLocaleString()}</div>
                 <div className="mt-1 grid grid-cols-1 gap-1 text-xs text-gray-400">
                   <div className="flex items-center gap-2"><TokenETH/> <span>ETH est.: {ethAmt ? `${ethAmt.toFixed(5)} ETH` : "—"}</span></div>
-                  <div className="flex items-center gap-2"><TokenUSDC/> <span>USDC: ${t.priceUSD.toFixed(2)}</span></div>
+                  <div className="flex items-center gap-2"><Image src="/crypto-icons/color/usdt.svg" alt="USDT" width={20} height={20} className="opacity-60"/> <span>USDT: ${t.priceUSD.toFixed(2)}</span></div>
                   <div className="flex items-center gap-2"><Image src="/logo.png" alt="NYAX" width={20} height={20} className="opacity-60"/> <span>NYAX discounted: ${nyaxUSD.toFixed(2)} (−20%)</span></div>
                 </div>
               </div>
@@ -353,10 +354,10 @@ export default function PricingPage() {
                 </button>
                 <button
                   disabled={busy !== null}
-                  onClick={() => router.push(`/pricing/checkout/${t.id}?method=usdc`)}
+                  onClick={() => router.push(`/pricing/checkout/${t.id}?method=usdt`)}
                   className="w-full py-2 rounded-lg border border-zinc-600 text-white font-medium hover:bg-emerald-500 disabled:opacity-50"
                 >
-                  <span className="inline-flex items-center gap-2"><TokenUSDC />  Pay with USDC</span>
+                  <span className="inline-flex items-center gap-2"><Image src="/crypto-icons/color/usdt.svg" width={16} height={16} alt="usdt"/>  Pay with USDT</span>
                 </button>
                 <button
                   disabled={busy !== null}
@@ -372,7 +373,7 @@ export default function PricingPage() {
       </div>
 
       <div className="mt-10 text-sm text-gray-400">
-        <p>Accepted payment methods: major credit cards (via Stripe), ETH, USDC, or NYAX token (with 20% discount).</p>
+        <p>Accepted payment methods: major credit cards (via Stripe), ETH, USDT, or NYAX token (with 20% discount).</p>
         <p className="mt-1">On-chain payments are sent to {RECEIVER}. Default NYAX token: {NYAX_TOKEN}. You can override via env vars.</p>
         <p className="mt-1">Note: Network fees apply to on-chain payments. Ensure you are on the correct chain. Configure receiver address, tokens, and chain via env.</p>
       </div>

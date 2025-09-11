@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useAccount } from 'wagmi';
 import Image from 'next/image';
 import { FaEthereum, FaWallet, FaRegCopy, FaCheck, FaTwitter, FaDiscord } from 'react-icons/fa';
 import { BiEdit, BiLogOut, BiTransfer } from 'react-icons/bi';
@@ -10,9 +11,12 @@ import { RiExchangeFill } from 'react-icons/ri';
 import ConnectWalletButton from '../../../../components/ConnectWalletButton';
 
 export default function ProfilePage() {
+  const { isConnected: isWagmiConnected, address } = useAccount();
   const [activeTab, setActiveTab] = useState('collections');
   const [copied, setCopied] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
+  const [myRegisteredTokens, setMyRegisteredTokens] = useState<any[] | null>(null);
+  const [myRegError, setMyRegError] = useState<string | null>(null);
   
   // Mock user data
   const mockUser = {
@@ -87,12 +91,30 @@ export default function ProfilePage() {
     ]
   };
 
+  // Combined connected state (prefer real wallet connection if present)
+  const derivedConnected = isWagmiConnected || isConnected;
+  const userAddress = address || mockUser.walletAddress;
+
   // Set default active tab to tokens
   React.useEffect(() => {
-    if (isConnected && activeTab === 'collections') {
+    if (derivedConnected && activeTab === 'collections') {
       setActiveTab('tokens');
     }
-  }, [isConnected, activeTab]);
+  }, [derivedConnected, activeTab]);
+
+  // Load user's registered tokens when connected
+  React.useEffect(() => {
+    if (!derivedConnected || !userAddress) {
+      setMyRegisteredTokens(null);
+      return;
+    }
+    setMyRegError(null);
+    setMyRegisteredTokens(null);
+    fetch(`/api/tokens/by-user?address=${encodeURIComponent(userAddress)}`)
+      .then(async (r) => (r.ok ? r.json() : Promise.reject(await r.json())))
+      .then((d) => setMyRegisteredTokens(d?.data || []))
+      .catch((e) => setMyRegError(e?.error || 'Failed to load submissions'));
+  }, [derivedConnected, userAddress]);
 
   // Handle wallet connection
   const handleConnectWallet = () => {
@@ -146,11 +168,11 @@ export default function ProfilePage() {
         <div>
           <h1 className="text-2xl font-bold text-white mb-2">{mockUser.name}</h1>
           
-          {isConnected ? (
+          {derivedConnected ? (
             <div className="flex items-center">
               <div className="flex items-center bg-gray-800 rounded-lg px-3 py-1">
                 <FaEthereum className="text-blue-400 mr-1" />
-                <span className="text-gray-300 text-sm mr-2">{formatWalletAddress(mockUser.walletAddress)}</span>
+                <span className="text-gray-300 text-sm mr-2">{formatWalletAddress(userAddress)}</span>
                 <button 
                   onClick={copyToClipboard} 
                   className="text-gray-400 hover:text-white transition-colors"
@@ -175,7 +197,7 @@ export default function ProfilePage() {
           )}
         </div>
         
-        {isConnected && (
+        {derivedConnected && (
           <div className="mt-4 md:mt-0 flex items-center">
             <div className="bg-gray-800 rounded-lg px-4 py-2 flex items-center">
               <FaEthereum className="text-blue-400 mr-2 text-xl" />
@@ -229,7 +251,7 @@ export default function ProfilePage() {
       </div>
       
       {/* My Tokens Tab */}
-      {isConnected && activeTab === 'tokens' && (
+      {derivedConnected && activeTab === 'tokens' && (
         <div>
           <div className="bg-gray-800 rounded-xl overflow-hidden mb-6">
             <div className="p-4 border-b border-gray-700">
@@ -290,11 +312,54 @@ export default function ProfilePage() {
               <RiExchangeFill className="mr-2" /> Swap Tokens
             </button>
           </div>
+
+          {/* My Registered Token Submissions */}
+          <div className="bg-gray-800 rounded-xl overflow-hidden mt-6">
+            <div className="p-4 border-b border-gray-700 flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-white">My Registered Tokens</h3>
+              <a href="/dashboard/register-token" className="text-sm underline text-blue-400">Submit new</a>
+            </div>
+            <div className="p-4">
+              {!myRegisteredTokens ? (
+                <div className="text-gray-400 text-sm">Loading…</div>
+              ) : myRegisteredTokens.length === 0 ? (
+                <div className="text-gray-400 text-sm">You have not submitted any tokens yet.</div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full text-sm">
+                    <thead className="text-left text-gray-300">
+                      <tr>
+                        <th className="px-2 py-1">Name</th>
+                        <th className="px-2 py-1">Symbol</th>
+                        <th className="px-2 py-1">Chain</th>
+                        <th className="px-2 py-1">Contract</th>
+                        <th className="px-2 py-1">Status</th>
+                        <th className="px-2 py-1">Submitted</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {myRegisteredTokens.map((t) => (
+                        <tr key={t.id} className="border-t border-gray-700">
+                          <td className="px-2 py-1 text-white">{t.tokenName}</td>
+                          <td className="px-2 py-1 text-white">{t.tokenSymbol}</td>
+                          <td className="px-2 py-1 text-white">{t.blockchain}</td>
+                          <td className="px-2 py-1 text-white"><code className="text-xs">{t.contractAddress}</code></td>
+                          <td className="px-2 py-1 capitalize text-white">{t.status}</td>
+                          <td className="px-2 py-1 text-gray-300">{new Date(t.createdAt).toLocaleString()}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+              {myRegError && <div className="text-red-400 text-sm mt-2">{myRegError}</div>}
+            </div>
+          </div>
         </div>
       )}
       
       {/* Not Connected State */}
-      {!isConnected && (
+      {!derivedConnected && (
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <div className="bg-gray-800 p-6 rounded-xl max-w-md">
             <FaWallet className="text-5xl text-blue-400 mx-auto mb-4" />

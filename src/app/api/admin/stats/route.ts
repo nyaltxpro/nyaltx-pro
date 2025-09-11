@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { promises as fs } from 'fs';
 import path from 'path';
-import Stripe from 'stripe';
 
 const dataPath = (file: string) => path.join(process.cwd(), 'src', 'app', 'data', file);
 
@@ -26,32 +25,12 @@ export async function GET() {
     readJson('admin-campaigns.json'),
   ]);
 
-  // Stripe totals (best-effort)
-  let stripeTotalCents = 0;
-  let stripeCount = 0;
-  try {
-    const stripeSecret = process.env.STRIPE_SECRET_KEY;
-    if (stripeSecret) {
-      const stripe = new Stripe(stripeSecret, { apiVersion: '2024-06-20' as any });
-      // You can use created and limit filters as needed
-      const sessions = await stripe.checkout.sessions.list({ limit: 100 });
-      stripeCount = sessions.data.length;
-      stripeTotalCents = sessions.data.reduce((sum, s) => sum + (s.amount_total || 0), 0);
-    }
-  } catch {
-    // ignore stripe errors in stats to avoid breaking the dashboard
-  }
-
   const result = {
     profiles: {
       count: Array.isArray(profiles) ? profiles.length : 0,
       active: Array.isArray(profiles) ? profiles.filter((p: any) => p.status === 'active').length : 0,
     },
     orders: {
-      stripe: {
-        count: stripeCount,
-        totalUSD: +(stripeTotalCents / 100).toFixed(2),
-      },
       onchain: {
         count: Array.isArray(onchainOrders) ? onchainOrders.length : 0,
       },

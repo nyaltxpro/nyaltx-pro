@@ -8,7 +8,7 @@ export function middleware(req: NextRequest) {
 
   if (!isAdminRoute) return NextResponse.next();
 
-  const isAuthed = req.cookies.get("admin_auth")?.value === "1";
+  const isAuthed = Boolean(req.cookies.get("admin_jwt")?.value);
 
   // If not authed and trying to access any admin route except login -> redirect to login
   if (!isAuthed && !isLoginRoute) {
