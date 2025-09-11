@@ -1,4 +1,6 @@
-import React from 'react';
+"use client";
+
+import React, { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 export interface BannerItem {
@@ -14,77 +16,58 @@ export interface BannerItem {
   tags: string[];
 }
 
-const bannerItems: BannerItem[] = [
-    { 
-      id: 1, 
-      title: "NYALTX x Nibiru Chain AMA", 
-      subtitle: "Join Us Here!",
-      image: "/banner/1.png",
-      description: "Exclusive AMA session with Nibiru Chain discussing the future of DeFi and cross-chain interoperability.",
-      fullDescription: "Join us for an exclusive Ask Me Anything session with the Nibiru Chain team. We'll be discussing the latest developments in DeFi, cross-chain interoperability, and how NYALTX is partnering with Nibiru to bring innovative solutions to the crypto space. This is your chance to ask questions directly to the team and learn about upcoming features, partnerships, and the roadmap ahead. Don't miss this opportunity to be part of the conversation shaping the future of decentralized finance.",
-      category: "AMA",
-      date: "2024-01-15",
-      link: "https://twitter.com/spaces/nyaltx-nibiru-ama",
-      tags: ["AMA", "Nibiru Chain", "DeFi", "Partnership"]
-    },
-    { 
-      id: 2, 
-      title: "NYALTX API V2", 
-      subtitle: "Powering The Future Of DeFi",
-      image: "/banner/2.png",
-      description: "Revolutionary API V2 launch with enhanced performance, new endpoints, and advanced trading features.",
-      fullDescription: "NYALTX API V2 represents a major leap forward in DeFi infrastructure. Our new API offers lightning-fast response times, comprehensive market data, advanced trading algorithms, and seamless integration capabilities. With over 50 new endpoints, real-time WebSocket connections, and enterprise-grade security, API V2 is designed to power the next generation of DeFi applications. Whether you're building trading bots, portfolio trackers, or DeFi protocols, our API provides the robust foundation you need.",
-      category: "Product Launch",
-      date: "2024-01-10",
-      link: "https://docs.nyaltx.com/api/v2",
-      tags: ["API", "V2", "DeFi", "Infrastructure", "Trading"]
-    },
-    { 
-      id: 3, 
-      title: "NYALTX Meme Board", 
-      subtitle: "Discover Hottest Meme Tokens",
-      image: "/banner/3.png",
-      description: "Interactive meme token discovery platform with real-time trending analysis and community voting.",
-      fullDescription: "The NYALTX Meme Board is your ultimate destination for discovering the hottest meme tokens in the crypto space. Our platform features real-time trending analysis, community-driven voting, and advanced filtering options to help you find the next big meme coin before it explodes. With integrated social sentiment analysis, price alerts, and direct trading capabilities, the Meme Board combines entertainment with serious trading tools. Join thousands of users who are already using our platform to stay ahead of meme token trends.",
-      category: "Platform Feature",
-      date: "2024-01-08",
-      link: "/meme-board",
-      tags: ["Meme Tokens", "Community", "Trending", "Discovery"]
-    },
-    { 
-      id: 4, 
-      title: "Follow Us On TikTok!", 
-      subtitle: "Official NYALTX Account",
-      image: "/banner/4.png",
-      description: "Get the latest crypto insights, market analysis, and NYALTX updates through engaging TikTok content.",
-      fullDescription: "Stay connected with NYALTX on TikTok for the most engaging crypto content! Our official TikTok account brings you daily market insights, quick trading tips, platform tutorials, and behind-the-scenes content from the NYALTX team. We break down complex DeFi concepts into easy-to-understand videos, share market analysis in bite-sized formats, and keep you updated on all the latest features and partnerships. Follow us for a fresh take on crypto education and entertainment.",
-      category: "Social Media",
-      date: "2024-01-05",
-      link: "https://tiktok.com/@nyaltx",
-      tags: ["TikTok", "Social Media", "Education", "Updates"]
-    },
-    { 
-      id: 5, 
-      title: "Follow Us On X!", 
-      subtitle: "Official NYALTX Account",
-      image: "/banner/5.png",
-      description: "Real-time updates, market insights, and community discussions on our official X (Twitter) account.",
-      fullDescription: "Connect with the NYALTX community on X (formerly Twitter) for real-time updates, market insights, and engaging discussions about the future of DeFi. Our X account is your go-to source for breaking news, feature announcements, market analysis, and direct communication with our team. We share daily insights, respond to community questions, and provide exclusive previews of upcoming features. Join our growing community of DeFi enthusiasts and stay at the forefront of the crypto revolution.",
-      category: "Social Media",
-      date: "2024-01-03",
-      link: "https://x.com/nyaltx",
-      tags: ["Twitter", "X", "Social Media", "Community", "Updates"]
-    },
-];
+type Listing = {
+  id: string;
+  tokenName: string;
+  tokenSymbol: string;
+  blockchain: string;
+  contractAddress: string;
+  imageUri?: string;
+  website?: string;
+  status: 'pending' | 'approved' | 'rejected';
+  createdAt: string;
+};
 
 const Ads = () => {
   const router = useRouter();
+  const [listings, setListings] = useState<Listing[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [speedMs, setSpeedMs] = useState<number>(30);
   
-  // Triple the items for seamless infinite scroll
-  const infiniteItems = [...bannerItems, ...bannerItems, ...bannerItems];
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        // Fetch all tokens regardless of status (API will include approved/pending/rejected as applicable)
+        const res = await fetch('/api/tokens/list?all=1&limit=1000');
+        const d = await res.json();
+        const data: Listing[] = d?.data || [];
+        if (active) setListings(data);
+      } catch (e: any) {
+        if (active) setError(e?.message || 'Failed to load listings');
+      } finally {
+        if (active) setLoading(false);
+      }
+    };
+    load();
+    const id = setInterval(load, 60_000);
+    return () => { active = false; clearInterval(id); };
+  }, []);
 
-  const handleAdClick = (item: BannerItem) => {
-    router.push(`/ad/${item.id}`);
+  // Duplicate items for seamless scroll
+  const infiniteItems = useMemo(() => {
+    return [...listings, ...listings, ...listings];
+  }, [listings]);
+
+  const handleClick = (t: Listing) => {
+    const params = new URLSearchParams();
+    params.set('base', (t.tokenSymbol || t.tokenName || '').toUpperCase());
+    if (t.blockchain) params.set('chain', t.blockchain);
+    if (t.contractAddress) params.set('address', t.contractAddress);
+    router.push(`/dashboard/trade?${params.toString()}`);
   };
 
   return (
@@ -96,22 +79,24 @@ const Ads = () => {
               <div 
                 key={`${item.id}-${index}`} 
                 className="rounded-lg overflow-hidden shadow-lg flex-shrink-0 w-80 flex flex-col hover:scale-105 transition-transform duration-300 cursor-pointer"
-                onClick={() => handleAdClick(item)}
+                onClick={() => handleClick(item as unknown as Listing)}
               >
                 <div className="h-48 w-full relative">
-                  <img 
-                    src={item.image} 
-                    alt={item.title}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={(item as any).imageUri || '/crypto-icons/color/generic.svg'}
+                    alt={(item as any).tokenName || (item as any).tokenSymbol || 'token'}
                     className="w-full h-full object-cover"
+                    onError={(e) => { (e.target as HTMLImageElement).src = '/crypto-icons/color/generic.svg'; }}
                   />
                   <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-                    {item.category}
+                    {(item as any).blockchain || 'token'}
                   </div>
                 </div>
                 <div className="p-4 flex-grow">
-                  <h3 className="text-lg font-semibold text-white mb-2">{item.title}</h3>
-                  <p className="text-gray-400 text-sm mb-2">{item.subtitle}</p>
-                  {/* <p className="text-gray-500 text-xs line-clamp-2">{item.description}</p> */}
+                  <h3 className="text-lg font-semibold text-white mb-1">{(item as any).tokenSymbol || (item as any).tokenName}</h3>
+                  <p className="text-gray-400 text-sm mb-1">{(item as any).tokenName || ''}</p>
+                  <p className="text-gray-500 text-xs truncate">{(item as any).contractAddress}</p>
                 </div>
               </div>
             ))}
@@ -125,12 +110,12 @@ const Ads = () => {
             transform: translateX(0);
           }
           100% {
-            transform: translateX(calc(-320px * ${bannerItems.length} - ${bannerItems.length * 16}px));
+            transform: translateX(calc(-320px * ${listings.length} - ${listings.length * 16}px));
           }
         }
         
         .animate-scroll {
-          animation: scroll 30s linear infinite;
+          animation: scroll ${speedMs}s linear infinite;
         }
         
         .animate-scroll:hover {

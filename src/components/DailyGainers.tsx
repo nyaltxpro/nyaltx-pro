@@ -4,9 +4,13 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import { useMarketData } from '../api/websocket/useMarketData';
 import { MarketData } from '../api/websocket/marketData';
+import { useRouter } from 'next/navigation';
+import tokens from '@/data/tokens.json';
+import { fetchCoinPlatforms } from '@/api/coingecko/api';
 
 export default function DailyGainers() {
     const [activeTab, setActiveTab] = useState<'gainers' | 'losers'>('gainers');
+    const router = useRouter();
     
     // Use our new websocket hook to get market data
     const { 
@@ -43,6 +47,63 @@ export default function DailyGainers() {
         }
     };
 
+    const handleNavigate = async (coin: any) => {
+        const base = coin.symbol?.toUpperCase() || coin.name?.toUpperCase();
+        if (!base) return;
+    
+        const list = tokens as Array<{ symbol: string; chain: string; address: string; name: string }>;
+        const matches = list.filter(t => t.symbol.toUpperCase() === base);
+        let selected = matches.find(t => t.chain.toLowerCase() === 'ethereum') || matches[0];
+        let chain = selected?.chain;
+        let address = selected?.address;
+    
+        if (!chain || !address) {
+          try {
+            const platforms = await fetchCoinPlatforms(coin.id);
+            if (platforms) {
+              const platformToChain: Record<string, string> = {
+                'ethereum': 'ethereum',
+                'binance-smart-chain': 'binance',
+                'polygon-pos': 'polygon',
+                'avalanche': 'avalanche',
+                'fantom': 'fantom',
+                'base': 'base',
+                'arbitrum-one': 'arbitrum',
+                'optimistic-ethereum': 'optimism',
+                'solana': 'solana',
+              };
+              const preference = [
+                'ethereum',
+                'arbitrum-one',
+                'optimistic-ethereum',
+                'base',
+                'polygon-pos',
+                'binance-smart-chain',
+                'avalanche',
+                'fantom',
+                'solana',
+              ];
+              for (const key of preference) {
+                const addr = (platforms as any)[key];
+                if (addr) {
+                  chain = platformToChain[key] || key;
+                  address = addr;
+                  break;
+                }
+              }
+            }
+          } catch (e) {
+            console.error('Failed to fetch platforms for', coin.id, e);
+          }
+        }
+    
+        const params = new URLSearchParams({ base });
+        if (chain) params.set('chain', chain);
+        if (address) params.set('address', address);
+    
+        router.push(`/dashboard/trade?${params.toString()}`);
+      };
+
     return (
         <>
             <div className="section-header flex justify-between items-center">
@@ -70,8 +131,8 @@ export default function DailyGainers() {
             ) : (
                 <div>
                     {displayData.map((coin, index) => (
-                        <div key={coin.id} className="flex justify-between items-center p-2">
-                                                        <div className="flex items-center">
+                        <div key={coin.id ?? coin.symbol} className="flex justify-between items-center p-2 cursor-pointer hover:bg-gray-800/40" onClick={() => handleNavigate(coin)}>
+                            <div className="flex items-center">
                                 <div className="relative h-8 w-8 mr-3 flex-shrink-0">
                                     <Image
                                         src={coin.image}

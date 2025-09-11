@@ -70,7 +70,7 @@ export default function TrendingCoins() {
     return price.toFixed(6);
   };
 
-  const handleNavigate = async (coin: TrendingCoin) => {
+  const handleNavigate = async (coin: any) => {
     const base = coin.symbol?.toUpperCase() || coin.name?.toUpperCase();
     if (!base) return;
 
@@ -80,12 +80,10 @@ export default function TrendingCoins() {
     let chain = selected?.chain;
     let address = selected?.address;
 
-    // If not found in local tokens, fetch platforms from CoinGecko by ID
     if (!chain || !address) {
       try {
         const platforms = await fetchCoinPlatforms(coin.id);
         if (platforms) {
-          // Map CoinGecko platform keys to our chain slugs
           const platformToChain: Record<string, string> = {
             'ethereum': 'ethereum',
             'binance-smart-chain': 'binance',
