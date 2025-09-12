@@ -67,7 +67,7 @@ export default function Page() {
               <div className="relative">
                 <div className="absolute -inset-6 rounded-3xl bg-gradient-to-tr from-cyan-500/10 to-indigo-500/10 blur-2xl" />
                 <Image
-                  src="/hero.png"
+                  src="/hero2.png"
                   alt="NYALTX Logo"
                   width={500}
                   height={500}
