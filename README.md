@@ -92,3 +92,4 @@ npm install stripe
 2. Install dependencies: `npm install`.
 3. Run the app: `npm run dev`.
 4. Navigate to `/pro-signup` to activate Pro (demo cookie), then go to `/pricing` to purchase a tier with your preferred method.
+# nyaltx-pro
