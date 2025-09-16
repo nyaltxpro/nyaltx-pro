@@ -250,14 +250,18 @@ export default function Home() {
   const [isLoadingTokens, setIsLoadingTokens] = useState<boolean>(false);
   const [darkMode, setDarkMode] = useState<boolean>(false);
 
-  // Fetch race tokens from admin panel
+  // Fetch race tokens with points from admin panel
   useEffect(() => {
     const fetchRaceTokens = async () => {
       try {
         const response = await fetch('/api/tokens/race');
         const result = await response.json();
         if (result.success && result.data.length > 0) {
-          setTokenRaceData(result.data);
+          // Sort by points (highest first)
+          const sortedTokens = result.data.sort((a: TokenRaceItem, b: TokenRaceItem) => 
+            (b.points || 0) - (a.points || 0)
+          );
+          setTokenRaceData(sortedTokens);
         }
       } catch (error) {
         console.error('Failed to fetch race tokens:', error);
@@ -460,37 +464,43 @@ export default function Home() {
             <span className="text-xl font-bold">TOKEN RACE</span>
           </div>
           <div className="flex space-x-2 items-center">
-            <button className="py-1 px-3 bg-[#00c3ff] text-black font-bold rounded-md">NITRO</button>
+
             <button className="py-1 px-3 bg-gray-700 text-white font-bold rounded-md">RANKING</button>
           </div>
         </div>
 
         <div className="relative overflow-hidden pb-4 rounded-lg p-4">
-          <div className="slider-container relative">
+          <div className="relative  h-36 overflow-hidden">
             <div 
-              className="flex gap-3 transition-transform duration-500 ease-in-out"
+              className="flex gap-4 animate-pulse"
               style={{
-                transform: `translateX(-${currentSlideIndex * 20}%)`,
-                width: `${Math.max(tokenRaceData.length * 20, 100)}%`
+                display: 'flex',
+                width: `${tokenRaceData.length * 200}px`,
+                animation: 'ticker 60s linear infinite',
+                animationFillMode: 'forwards'
               }}
             >
-              {tokenRaceData.map((token, index) => (
+              {/* Duplicate the array for seamless loop */}
+              {[...tokenRaceData, ...tokenRaceData].map((token, index) => (
                 <div 
-                  key={token.id || `token-${index}`}
-                  className="flex-shrink-0 w-1/5 min-w-[180px] px-1"
+                  key={`${token.id || `token-${index}`}-${Math.floor(index / tokenRaceData.length)}`}
+                  className="flex-shrink-0 min-w-[280px] px-1"
                 >
                   <div className="relative flex flex-col items-center p-3 bg-gradient-to-br from-gray-800 to-gray-700 rounded-lg shadow-lg border border-gray-600 h-32 transform hover:scale-105 transition-transform duration-300">
-                    {/* Position tag on top right */}
+                    {/* Position tag on top right based on points ranking */}
                     <div className={`absolute -top-1 -right-1 px-2 py-1 rounded-full text-xs font-bold ${
-                      index === 0 ? 'bg-yellow-500 text-black' : 
-                      index === 1 ? 'bg-gray-400 text-black' : 
-                      index === 2 ? 'bg-orange-500 text-black' : 
+                      (index % tokenRaceData.length) === 0 ? 'bg-yellow-500 text-black' : 
+                      (index % tokenRaceData.length) === 1 ? 'bg-gray-400 text-black' : 
+                      (index % tokenRaceData.length) === 2 ? 'bg-orange-500 text-black' : 
                       'bg-blue-500 text-white'
                     }`}>
-                      {index === 0 ? '1st' : index === 1 ? '2nd' : index === 2 ? '3rd' : `${index + 1}th`}
+                      {(index % tokenRaceData.length) === 0 ? '1st' : 
+                       (index % tokenRaceData.length) === 1 ? '2nd' : 
+                       (index % tokenRaceData.length) === 2 ? '3rd' : 
+                       `${(index % tokenRaceData.length) + 1}th`}
                     </div>
                     
-                    <div className="flex items-center gap-2 mb-2">
+                    <div className="flex items-center gap-2 mb-1">
                       {(token.image || token.logoUrl) && (
                         <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-500">
                           <Image
@@ -507,11 +517,18 @@ export default function Home() {
                         {token.symbol || token.name || 'Unknown'}
                       </div>
                     </div>
-                    <div className="token-price text-sm font-semibold text-center">
+                    
+                    {/* Points display */}
+                    <div className="text-center mb-1">
+                      <div className="text-lg font-bold text-[#00c3ff]">
+                        {token.points || 0} pts
+                      </div>
+                    </div>
+                    
+                    <div className="token-price text-xs font-semibold text-center">
                       <span className="text-green-400">
                         ${token.price || (token.current_price ? token.current_price.toFixed(4) : 'N/A')}
                       </span>
-                      <div className="text-xs text-[#00c3ff] mt-1">NITRO</div>
                     </div>
                   </div>
                 </div>
@@ -519,32 +536,13 @@ export default function Home() {
             </div>
           </div>
           
-          {/* Navigation arrows */}
-          <div className="flex justify-center items-center mt-4 space-x-4">
-            <button
-              onClick={() => {
-                const maxIndex = Math.max(0, tokenRaceData.length - 5);
-                setCurrentSlideIndex(currentSlideIndex <= 0 ? maxIndex : currentSlideIndex - 1);
-              }}
-              className="p-2 rounded-full bg-gray-700 hover:bg-gray-600 transition-all"
-            >
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-            
-            <button
-              onClick={() => {
-                const maxIndex = Math.max(0, tokenRaceData.length - 5);
-                setCurrentSlideIndex(currentSlideIndex >= maxIndex ? 0 : currentSlideIndex + 1);
-              }}
-              className="p-2 rounded-full bg-gray-700 hover:bg-gray-600 transition-all"
-            >
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-          </div>
+          {/* Add inline keyframes */}
+          <style jsx>{`
+            @keyframes ticker {
+              0% { transform: translateX(0); }
+              100% { transform: translateX(-50%); }
+            }
+          `}</style>
         </div>
       </div>
 
