@@ -1,45 +1,62 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { promises as fs } from 'fs';
-import path from 'path';
+import { supabaseAdmin } from '@/lib/supabase';
 
-const BANNER_DIR = path.join(process.cwd(), 'public', 'banner');
+const BUCKET_NAME = 'banners';
 
-// Ensure banner directory exists
-async function ensureBannerDir() {
-  try {
-    await fs.access(BANNER_DIR);
-  } catch {
-    await fs.mkdir(BANNER_DIR, { recursive: true });
+// Ensure bucket exists
+async function ensureBucket() {
+  if (!supabaseAdmin) {
+    throw new Error('Supabase admin client not configured');
+  }
+
+  const { data: buckets } = await supabaseAdmin.storage.listBuckets();
+  const bucketExists = buckets?.some(bucket => bucket.name === BUCKET_NAME);
+  
+  if (!bucketExists) {
+    const { error } = await supabaseAdmin.storage.createBucket(BUCKET_NAME, {
+      public: true,
+      allowedMimeTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
+      fileSizeLimit: 10485760, // 10MB
+    });
+    if (error) {
+      console.error('Error creating bucket:', error);
+    }
   }
 }
 
 // GET - List all banners
 export async function GET() {
   try {
-    await ensureBannerDir();
+    await ensureBucket();
     
-    const files = await fs.readdir(BANNER_DIR);
-    const imageFiles = files.filter(file => 
-      /\.(jpg|jpeg|png|gif|webp)$/i.test(file)
-    );
+    if (!supabaseAdmin) {
+      throw new Error('Supabase admin client not configured');
+    }
 
-    const banners = await Promise.all(
-      imageFiles.map(async (file) => {
-        const filePath = path.join(BANNER_DIR, file);
-        const stats = await fs.stat(filePath);
-        
-        return {
-          name: file,
-          path: `/banner/${file}`,
-          url: `/banner/${file}`,
-          size: stats.size,
-          lastModified: stats.mtime.toISOString(),
-        };
-      })
-    );
+    const { data: files, error } = await supabaseAdmin.storage
+      .from(BUCKET_NAME)
+      .list('', {
+        limit: 100,
+        sortBy: { column: 'created_at', order: 'desc' }
+      });
 
-    // Sort by last modified (newest first)
-    banners.sort((a, b) => new Date(b.lastModified).getTime() - new Date(a.lastModified).getTime());
+    if (error) {
+      throw new Error(`Failed to list files: ${error.message}`);
+    }
+
+    const banners = files?.map((file) => {
+      const { data: publicUrl } = supabaseAdmin!.storage
+        .from(BUCKET_NAME)
+        .getPublicUrl(file.name);
+
+      return {
+        name: file.name,
+        path: file.name,
+        url: publicUrl.publicUrl,
+        size: file.metadata?.size || 0,
+        lastModified: file.created_at || new Date().toISOString(),
+      };
+    }) || [];
 
     return NextResponse.json({ banners });
   } catch (error: any) {
@@ -54,8 +71,12 @@ export async function GET() {
 // POST - Upload banners
 export async function POST(request: NextRequest) {
   try {
-    await ensureBannerDir();
+    await ensureBucket();
     
+    if (!supabaseAdmin) {
+      throw new Error('Supabase admin client not configured');
+    }
+
     const formData = await request.formData();
     const files = formData.getAll('banners') as File[];
 
@@ -77,16 +98,27 @@ export async function POST(request: NextRequest) {
 
       // Sanitize filename
       const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-      const filePath = path.join(BANNER_DIR, sanitizedName);
+      const timestamp = Date.now();
+      const uniqueName = `${timestamp}_${sanitizedName}`;
 
       try {
         const buffer = Buffer.from(await file.arrayBuffer());
-        await fs.writeFile(filePath, buffer);
         
-        uploaded++;
-        results.push({ filename: sanitizedName, status: 'uploaded' });
-      } catch (error) {
-        results.push({ filename: file.name, status: 'failed', reason: 'Write error' });
+        const { error } = await supabaseAdmin.storage
+          .from(BUCKET_NAME)
+          .upload(uniqueName, buffer, {
+            contentType: file.type,
+            upsert: false
+          });
+
+        if (error) {
+          results.push({ filename: file.name, status: 'failed', reason: error.message });
+        } else {
+          uploaded++;
+          results.push({ filename: uniqueName, status: 'uploaded' });
+        }
+      } catch (error: any) {
+        results.push({ filename: file.name, status: 'failed', reason: error.message || 'Upload error' });
       }
     }
 
@@ -108,6 +140,10 @@ export async function POST(request: NextRequest) {
 // DELETE - Remove a banner
 export async function DELETE(request: NextRequest) {
   try {
+    if (!supabaseAdmin) {
+      throw new Error('Supabase admin client not configured');
+    }
+
     const { filename } = await request.json();
 
     if (!filename) {
@@ -117,26 +153,21 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Sanitize filename to prevent directory traversal
-    const sanitizedFilename = path.basename(filename);
-    const filePath = path.join(BANNER_DIR, sanitizedFilename);
+    // Delete the file from Supabase storage
+    const { error } = await supabaseAdmin.storage
+      .from(BUCKET_NAME)
+      .remove([filename]);
 
-    // Check if file exists
-    try {
-      await fs.access(filePath);
-    } catch {
+    if (error) {
       return NextResponse.json(
-        { error: 'File not found' },
-        { status: 404 }
+        { error: `Failed to delete banner: ${error.message}` },
+        { status: 500 }
       );
     }
 
-    // Delete the file
-    await fs.unlink(filePath);
-
     return NextResponse.json({ 
       success: true, 
-      message: `Banner ${sanitizedFilename} deleted successfully` 
+      message: `Banner ${filename} deleted successfully` 
     });
 
   } catch (error: any) {

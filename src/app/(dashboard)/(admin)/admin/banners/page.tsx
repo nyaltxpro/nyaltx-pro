@@ -230,14 +230,20 @@ export default function BannerManagementPage() {
         <h3 className="font-semibold mb-2">Usage Examples</h3>
         <div className="text-sm text-gray-400 space-y-2">
           <div>
+            <strong>Using Supabase URLs:</strong>
+          </div>
+          <div>
             <code className="bg-gray-800 px-2 py-1 rounded text-xs">
-              &lt;Image src="/banner/your-banner.png" alt="Banner" width={1920} height={1080} /&gt;
+              &lt;Image src="[SUPABASE_URL]" alt="Banner" width={1920} height={1080} /&gt;
             </code>
           </div>
           <div>
             <code className="bg-gray-800 px-2 py-1 rounded text-xs">
-              background-image: url('/banner/your-banner.png')
+              background-image: url('[SUPABASE_URL]')
             </code>
+          </div>
+          <div className="text-xs text-gray-500 mt-2">
+            Copy the full URL from the banner cards above to use in your components.
           </div>
         </div>
       </div>
