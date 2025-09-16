@@ -45,6 +45,22 @@ export default function BannerManagementPage() {
     setSuccess(null);
 
     try {
+      // Validate each file before upload
+      for (const file of Array.from(files)) {
+        const validationFormData = new FormData();
+        validationFormData.append('file', file);
+
+        const validationResponse = await fetch('/api/admin/banners/validate', {
+          method: 'POST',
+          body: validationFormData,
+        });
+
+        const validationResult = await validationResponse.json();
+        if (!validationResult.valid) {
+          throw new Error(`${file.name}: ${validationResult.error}`);
+        }
+      }
+
       const formData = new FormData();
       Array.from(files).forEach(file => {
         formData.append('banners', file);

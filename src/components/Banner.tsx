@@ -75,6 +75,15 @@ export default function Banner() {
             height={200}
             className="w-full h-[100px] md:h-[140px] object-cover transition-opacity duration-500"
             priority
+            unoptimized={uploadedBanners.length > 0}
+            onError={(e) => {
+              console.error('Banner image failed to load:', images[index]);
+              // Fallback to next image or default
+              if (uploadedBanners.length > 0 && index < fallbackImages.length) {
+                setIndex(0); // Reset to first fallback image
+                setUploadedBanners([]); // Clear uploaded banners to use fallback
+              }
+            }}
           />
         </Link>
 

@@ -15,7 +15,7 @@ async function ensureBucket() {
   if (!bucketExists) {
     const { error } = await supabaseAdmin.storage.createBucket(BUCKET_NAME, {
       public: true,
-      allowedMimeTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
+      allowedMimeTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'],
       fileSizeLimit: 10485760, // 10MB
     });
     if (error) {
@@ -102,12 +102,14 @@ export async function POST(request: NextRequest) {
       const uniqueName = `${timestamp}_${sanitizedName}`;
 
       try {
-        const buffer = Buffer.from(await file.arrayBuffer());
+        const arrayBuffer = await file.arrayBuffer();
+        const buffer = new Uint8Array(arrayBuffer);
         
         const { error } = await supabaseAdmin.storage
           .from(BUCKET_NAME)
           .upload(uniqueName, buffer, {
             contentType: file.type,
+            cacheControl: '3600',
             upsert: false
           });
 
