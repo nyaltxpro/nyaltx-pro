@@ -22,6 +22,7 @@ import RecentlyAddedCoins from '@/components/RecentlyAddedCoins';
 import TrendingCoins from '@/components/TrendingCoins';
 import Ads from '@/components/Ads';
 import PumpFunLive from '@/components/PumpFunLive';
+import DashboardBanners from '@/components/DashboardBanners';
 
 // SortConfig type will be used when we reimplement the token sorting functionality
 // type SortConfig = {
@@ -432,6 +433,11 @@ export default function Home() {
       ) : (
         <>
           <Ads />
+
+          {/* Dashboard Banners */}
+          <div className="mx-4 mt-4">
+            <DashboardBanners />
+          </div>
 
           {/* Stats Bar */}
           <div className="stats-bar mx-4 flex flex-col w-[90%] md:w-full  md:flex-row md:justify-between md:items-center gap-4">

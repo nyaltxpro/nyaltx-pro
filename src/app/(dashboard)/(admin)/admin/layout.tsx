@@ -83,6 +83,8 @@ function SidebarLinks() {
               <Item href="/admin/profiles">Profiles</Item>
               <Item href="/admin/stats">Stats</Item>
               <Item href="/admin/tokens">Tokens</Item>
+              <Item href="/admin/banners">Banners</Item>
+              <Item href="/admin/points">Token Points</Item>
             </ul>
             <div className="mt-4 px-2 pb-2 text-gray-400 uppercase tracking-wide text-[11px]">Operations</div>
             <ul className="space-y-1">
