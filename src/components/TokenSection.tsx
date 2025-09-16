@@ -167,7 +167,7 @@ const Row: React.FC<{ item: any; onInspect: (o: any) => void }> = ({ item, onIns
     const params = new URLSearchParams();
     params.set('base', (t.symbol || t.name || '').toUpperCase());
     params.set('chain', 'solana');
-    if (t.contractAddress) params.set('address', t.mint);
+    if (t.mint) params.set('address', t.mint);
     router.push(`/dashboard/trade?${params.toString()}`);
   };
   
