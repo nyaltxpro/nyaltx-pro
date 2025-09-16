@@ -249,7 +249,7 @@ export default function Home() {
   // State for BSC tokens
   const [bscTokens, setBscTokens] = useState<any[]>([]);
   const [isLoadingBscTokens, setIsLoadingBscTokens] = useState<boolean>(false);
-  
+
   // State for meme tokens and loading
   const [memeTokens, setMemeTokens] = useState<any[]>([]);
   const [isLoadingTokens, setIsLoadingTokens] = useState<boolean>(false);
@@ -271,7 +271,7 @@ export default function Home() {
         const result = await response.json();
         if (result.success && result.data.length > 0) {
           // Sort by points (highest first)
-          const sortedTokens = result.data.sort((a: TokenRaceItem, b: TokenRaceItem) => 
+          const sortedTokens = result.data.sort((a: TokenRaceItem, b: TokenRaceItem) =>
             (b.points || 0) - (a.points || 0)
           );
           setTokenRaceData(sortedTokens);
@@ -367,8 +367,8 @@ export default function Home() {
               ))}
             </div>
 
-      {/* Pump.fun Live Section */}
-      {/* <div className="p-4">
+            {/* Pump.fun Live Section */}
+            {/* <div className="p-4">
         <PumpFunLive />
       </div> */}
             <div className="h-5 bg-gray-700 rounded animate-pulse w-40"></div>
@@ -440,156 +440,155 @@ export default function Home() {
           </div> */}
 
           {/* Stats Bar */}
-          <div className="stats-bar mx-4 flex flex-col w-[90%] md:w-full  md:flex-row md:justify-between md:items-center gap-4">
-        <div className="flex justify-between items-center mb-2 md:mb-0">
-          <div className="text-xl font-bold">NYALTX board</div>
-        </div>
-        <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
-          <div className="stats-item">
-            <span className="stats-label">Networks:</span>
-            <span className="stats-value">132</span>
-          </div>
-          <div className="stats-item">
-            <span className="stats-label">Dexes:</span>
-            <span className="stats-value">21,586</span>
-          </div>
-          <div className="stats-item">
-            <span className="stats-label">Pools:</span>
-            <span className="stats-value">19,440,364</span>
-          </div>
-          <div className="stats-item">
-            <span className="stats-label">Tokens:</span>
-            <span className="stats-value">29,055,602</span>
-          </div>
-          <div className="stats-item">
-            <span className="stats-label">Next token burn:</span>
-            <span className="stats-value text-primary">1,897,863 DXT</span>
-          </div>
-        </div>
-        <div className="flex items-center mt-2 md:mt-0">
-          <span className="text-xs mr-2">Today&apos;s trending tokens</span>
-          <label className="relative inline-flex items-center cursor-pointer">
-            <input type="checkbox" className="sr-only peer" checked={true} readOnly />
-            <div className="w-9 h-5 bg-gray-700 rounded-full peer peer-checked:bg-primary peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
-          </label>
-        </div>
-      </div>
-
-      {/* Token Race Section */}
-      <div className="token-race mx-4 mt-4">
-        <div className="token-race-header flex-col md:flex-row">
-          <div className="flex items-center gap-2 mb-2 md:mb-0">
-            <span className="text-xl font-bold">TOKEN RACE</span>
-          </div>
-          <div className="flex space-x-2 items-center">
-
-            <button className="py-1 px-3 bg-gray-700 text-white font-bold rounded-md">RANKING</button>
-          </div>
-        </div>
-
-        <div className="relative overflow-hidden pb-4 rounded-lg p-4">
-          <div className="relative  h-36 overflow-hidden">
-            <div 
-              className="flex gap-4 animate-pulse"
-              style={{
-                display: 'flex',
-                width: `${tokenRaceData.length * 200}px`,
-                animation: 'ticker 60s linear infinite',
-                animationFillMode: 'forwards'
-              }}
-            >
-              
-              {/* Duplicate the array for seamless loop */}
-              {[...tokenRaceData, ...tokenRaceData].map((token, index) => (
-                <div 
-                  key={`${token.id || `token-${index}`}-${Math.floor(index / tokenRaceData.length)}`}
-                  className="flex-shrink-0 min-w-[280px] px-1"
-                >
-                  <div 
-                    onClick={() => handleClick(token)}
-                    className="relative flex flex-col items-center p-3 bg-gradient-to-br from-gray-800 to-gray-700 rounded-lg shadow-lg border border-gray-600 h-32 transform hover:scale-105 transition-transform duration-300 cursor-pointer hover:border-[#00c3ff]"
-                  >
-                    {/* Position tag on top right based on points ranking */}
-                    <div className={`absolute -top-1 -right-1 px-2 py-1 rounded-full text-xs font-bold ${
-                      (index % tokenRaceData.length) === 0 ? 'bg-yellow-500 text-black' : 
-                      (index % tokenRaceData.length) === 1 ? 'bg-gray-400 text-black' : 
-                      (index % tokenRaceData.length) === 2 ? 'bg-orange-500 text-black' : 
-                      'bg-blue-500 text-white'
-                    }`}>
-                      {(index % tokenRaceData.length) === 0 ? '1st' : 
-                       (index % tokenRaceData.length) === 1 ? '2nd' : 
-                       (index % tokenRaceData.length) === 2 ? '3rd' : 
-                       `${(index % tokenRaceData.length) + 1}th`}
-                    </div>
-                    
-                    <div className="flex items-center gap-2 mb-1">
-                      {(token.image || token.logoUrl) && (
-                        <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-500">
-                          <Image
-                            src={token.image || token.logoUrl || '/placeholder-token.png'}
-                            alt={token.symbol || token.name || 'Token'}
-                            width={32}
-                            height={32}
-                            unoptimized
-                            className="object-cover"
-                          />
-                        </div>
-                      )}
-                      <div className="token-symbol text-sm font-bold text-white truncate">
-                        {token.symbol || token.name || 'Unknown'}
-                      </div>
-                    </div>
-                    
-                    {/* Points display */}
-                    <div className="text-center mb-1">
-                      <div className="text-lg font-bold text-[#00c3ff]">
-                        {token.points || 0} pts
-                      </div>
-                    </div>
-                    
-                    <div className="token-price text-xs font-semibold text-center">
-                      <span className="text-green-400">
-                        ${token.price || (token.current_price ? token.current_price.toFixed(4) : 'N/A')}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
+          {/* <div className="stats-bar mx-4 flex flex-col w-[90%] md:w-full  md:flex-row md:justify-between md:items-center gap-4">
+            <div className="flex justify-between items-center mb-2 md:mb-0">
+              <div className="text-xl font-bold">NYALTX board</div>
             </div>
-          </div>
-          
-          {/* Add inline keyframes */}
-          <style jsx>{`
+            <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
+              <div className="stats-item">
+                <span className="stats-label">Networks:</span>
+                <span className="stats-value">132</span>
+              </div>
+              <div className="stats-item">
+                <span className="stats-label">Dexes:</span>
+                <span className="stats-value">21,586</span>
+              </div>
+              <div className="stats-item">
+                <span className="stats-label">Pools:</span>
+                <span className="stats-value">19,440,364</span>
+              </div>
+              <div className="stats-item">
+                <span className="stats-label">Tokens:</span>
+                <span className="stats-value">29,055,602</span>
+              </div>
+              <div className="stats-item">
+                <span className="stats-label">Next token burn:</span>
+                <span className="stats-value text-primary">1,897,863 DXT</span>
+              </div>
+            </div>
+            <div className="flex items-center mt-2 md:mt-0">
+              <span className="text-xs mr-2">Today&apos;s trending tokens</span>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" className="sr-only peer" checked={true} readOnly />
+                <div className="w-9 h-5 bg-gray-700 rounded-full peer peer-checked:bg-primary peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
+              </label>
+            </div>
+          </div> */}
+
+          {/* Token Race Section */}
+          <div className="token-race mx-4 mt-4">
+            <div className="token-race-header flex-col md:flex-row">
+              <div className="flex items-center gap-2 mb-2 md:mb-0">
+                <span className="text-xl font-bold">TOKEN RACE</span>
+              </div>
+              <div className="flex space-x-2 items-center">
+
+                <button className="py-1 px-3 bg-gray-700 text-white font-bold rounded-md">RANKING</button>
+              </div>
+            </div>
+
+            <div className="relative overflow-hidden pb-4 rounded-lg p-4">
+              <div className="relative  h-36 overflow-hidden">
+                <div
+                  className="flex gap-4 animate-pulse"
+                  style={{
+                    display: 'flex',
+                    width: `${tokenRaceData.length * 200}px`,
+                    animation: 'ticker 60s linear infinite',
+                    animationFillMode: 'forwards'
+                  }}
+                >
+
+                  {/* Duplicate the array for seamless loop */}
+                  {[...tokenRaceData, ...tokenRaceData].map((token, index) => (
+                    <div
+                      key={`${token.id || `token-${index}`}-${Math.floor(index / tokenRaceData.length)}`}
+                      className="flex-shrink-0 min-w-[280px] px-1"
+                    >
+                      <div
+                        onClick={() => handleClick(token)}
+                        className="relative flex flex-col items-center p-3 bg-gradient-to-br from-gray-800 to-gray-700 rounded-lg shadow-lg border border-gray-600 h-32 transform hover:scale-105 transition-transform duration-300 cursor-pointer hover:border-[#00c3ff]"
+                      >
+                        {/* Position tag on top right based on points ranking */}
+                        <div className={`absolute -top-1 -right-1 px-2 py-1 rounded-full text-xs font-bold ${(index % tokenRaceData.length) === 0 ? 'bg-yellow-500 text-black' :
+                            (index % tokenRaceData.length) === 1 ? 'bg-gray-400 text-black' :
+                              (index % tokenRaceData.length) === 2 ? 'bg-orange-500 text-black' :
+                                'bg-blue-500 text-white'
+                          }`}>
+                          {(index % tokenRaceData.length) === 0 ? '1st' :
+                            (index % tokenRaceData.length) === 1 ? '2nd' :
+                              (index % tokenRaceData.length) === 2 ? '3rd' :
+                                `${(index % tokenRaceData.length) + 1}th`}
+                        </div>
+
+                        <div className="flex items-center gap-2 mb-1">
+                          {(token.image || token.logoUrl) && (
+                            <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-500">
+                              <Image
+                                src={token.image || token.logoUrl || '/placeholder-token.png'}
+                                alt={token.symbol || token.name || 'Token'}
+                                width={32}
+                                height={32}
+                                unoptimized
+                                className="object-cover"
+                              />
+                            </div>
+                          )}
+                          <div className="token-symbol text-sm font-bold text-white truncate">
+                            {token.symbol || token.name || 'Unknown'}
+                          </div>
+                        </div>
+
+                        {/* Points display */}
+                        <div className="text-center mb-1">
+                          <div className="text-lg font-bold text-[#00c3ff]">
+                            {token.points || 0} pts
+                          </div>
+                        </div>
+
+                        <div className="token-price text-xs font-semibold text-center">
+                          <span className="text-green-400">
+                            ${token.price || (token.current_price ? token.current_price.toFixed(4) : 'N/A')}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Add inline keyframes */}
+              <style jsx>{`
             @keyframes ticker {
               0% { transform: translateX(0); }
               100% { transform: translateX(-50%); }
             }
           `}</style>
-        </div>
-      </div>
+            </div>
+          </div>
 
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4">
-        {/* Daily Gainers Section */}
-        <div className="max-h-[400px] overflow-auto section-card">
-          <DailyGainers />
-        </div>
+          {/* Main Content Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4">
+            {/* Daily Gainers Section */}
+            <div className="max-h-[400px] overflow-auto section-card">
+              <DailyGainers />
+            </div>
 
-        {/* Token Creator Section */}
-        <div className="max-h-[400px] overflow-auto section-card">
-          <RecentlyAddedCoins />
-        </div>
+            {/* Token Creator Section */}
+            <div className="max-h-[400px] overflow-auto section-card">
+              <RecentlyAddedCoins />
+            </div>
 
-        {/* Recently Updated Socials */}
-        <div className="max-h-[400px] overflow-auto section-card">
-          <TrendingCoins />
-        </div>
-      </div>
+            {/* Recently Updated Socials */}
+            <div className="max-h-[400px] overflow-auto section-card">
+              <TrendingCoins />
+            </div>
+          </div>
 
-      {/* Token Categories Section */}
-      <div className="token-categories flex flex-col mx-4 mt-6">
-        {/* <div className="flex items-center py-2 rounded-lg card-bg border-gray-700 overflow-x-auto">
+          {/* Token Categories Section */}
+          <div className="token-categories flex flex-col mx-4 mt-6">
+            {/* <div className="flex items-center py-2 rounded-lg card-bg border-gray-700 overflow-x-auto">
           <div className="flex space-x-4 text-sm font-medium whitespace-nowrap">
             <button className="py-2 px-4 text-white">Hot Pairs</button>
             <button className="py-2 px-4 text-gray-400">Token Race</button>
@@ -606,11 +605,11 @@ export default function Home() {
           </div>
         </div> */}
 
-        {/* Token section  */}
-        <TokenSection
+            {/* Token section  */}
+            <TokenSection
 
-        />
-      </div>
+            />
+          </div>
         </>
       )}
     </div>
