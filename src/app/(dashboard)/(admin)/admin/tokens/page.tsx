@@ -18,6 +18,12 @@ type TokenRegistration = {
   discord?: string;
   github?: string;
   status: Status;
+  paused?: boolean;
+  showWebsite?: boolean;
+  showTwitter?: boolean;
+  showTelegram?: boolean;
+  showDiscord?: boolean;
+  showGithub?: boolean;
   createdAt: string;
   updatedAt: string;
 };
@@ -79,6 +85,26 @@ export default function AdminTokensPage() {
         .catch(() => setTokens([]));
     } catch (e: any) {
       setError(e?.message || 'Error updating status');
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function patchToken(id: string, payload: Record<string, unknown>) {
+    try {
+      setBusyId(id);
+      setError(null);
+      const r = await fetch('/api/admin/tokens', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, ...payload }),
+      });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d?.error || 'Update failed');
+      // optimistically update local state without refetch
+      setTokens((prev) => (prev || []).map(t => t.id === id ? { ...t, ...(d.record || {}) } : t));
+    } catch (e: any) {
+      setError(e?.message || 'Error updating');
     } finally {
       setBusyId(null);
     }
@@ -205,6 +231,8 @@ export default function AdminTokensPage() {
                 <Th onClick={() => toggleSort('blockchain')} active={sortKey==='blockchain'} dir={sortDir}>Chain</Th>
                 <th className="px-3 py-2">Contract</th>
                 <th className="px-3 py-2">Status</th>
+                <th className="px-3 py-2">Paused</th>
+                <th className="px-3 py-2">Socials</th>
                 <th className="px-3 py-2">Actions</th>
               </tr>
             </thead>
@@ -224,6 +252,27 @@ export default function AdminTokensPage() {
                   <td className="px-3 py-2">{t.blockchain}</td>
                   <td className="px-3 py-2"><code className="text-xs">{t.contractAddress}</code></td>
                   <td className="px-3 py-2 capitalize">{t.status}</td>
+                  <td className="px-3 py-2">
+                    <label className="inline-flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="accent-cyan-600"
+                        checked={Boolean(t.paused)}
+                        disabled={busyId === t.id}
+                        onChange={(e) => patchToken(t.id, { paused: e.target.checked })}
+                      />
+                      <span className="text-xs text-gray-400">{t.paused ? 'Paused' : 'Active'}</span>
+                    </label>
+                  </td>
+                  <td className="px-3 py-2">
+                    <div className="flex flex-col gap-1">
+                      <SocialSwitch label="Website" checked={t.showWebsite ?? true} disabled={busyId === t.id} onChange={(val) => patchToken(t.id, { socials: { website: val } })} />
+                      <SocialSwitch label="Twitter" checked={t.showTwitter ?? true} disabled={busyId === t.id} onChange={(val) => patchToken(t.id, { socials: { twitter: val } })} />
+                      <SocialSwitch label="Telegram" checked={t.showTelegram ?? true} disabled={busyId === t.id} onChange={(val) => patchToken(t.id, { socials: { telegram: val } })} />
+                      <SocialSwitch label="Discord" checked={t.showDiscord ?? true} disabled={busyId === t.id} onChange={(val) => patchToken(t.id, { socials: { discord: val } })} />
+                      <SocialSwitch label="Github" checked={t.showGithub ?? true} disabled={busyId === t.id} onChange={(val) => patchToken(t.id, { socials: { github: val } })} />
+                    </div>
+                  </td>
                   <td className="px-3 py-2">
                     <div className="flex gap-2">
                       <button disabled={busyId === t.id} onClick={() => updateStatus(t.id, 'approved')} className="rounded bg-emerald-600 hover:bg-emerald-500 px-3 py-1 text-xs">Approve</button>
@@ -260,5 +309,20 @@ function Th({ children, onClick, active, dir }: { children: React.ReactNode; onC
         <span className="text-xs opacity-70">{active ? (dir === 'asc' ? '▲' : '▼') : ''}</span>
       </span>
     </th>
+  );
+}
+
+function SocialSwitch({ label, checked, disabled, onChange }: { label: string; checked: boolean; disabled?: boolean; onChange: (value: boolean) => void }) {
+  return (
+    <label className="flex items-center justify-between gap-3 text-xs">
+      <span className="text-gray-300">{label}</span>
+      <input
+        type="checkbox"
+        className="accent-cyan-600"
+        checked={checked}
+        disabled={disabled}
+        onChange={(e) => onChange(e.target.checked)}
+      />
+    </label>
   );
 }

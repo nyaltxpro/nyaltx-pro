@@ -49,8 +49,8 @@ const Ads = () => {
       try {
         setLoading(true);
         setError(null);
-        // Fetch all tokens regardless of status (API will include approved/pending/rejected as applicable)
-        const res = await fetch('/api/tokens/list?all=1&limit=1000');
+        // Fetch approved tokens only; paused tokens are excluded by API by default
+        const res = await fetch('/api/tokens/list?status=approved&limit=1000');
         const d = await res.json();
         const data: Listing[] = d?.data || [];
         if (active) setListings(data);
@@ -107,7 +107,7 @@ const Ads = () => {
     if (autoplayRef.current) window.clearInterval(autoplayRef.current);
     autoplayRef.current = window.setInterval(() => {
       setCurrent((c) => (c + 1) % total);
-    }, 4000);
+    }, 2000);
     return () => {
       if (autoplayRef.current) window.clearInterval(autoplayRef.current);
     };

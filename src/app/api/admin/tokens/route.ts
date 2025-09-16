@@ -16,7 +16,15 @@ export type TokenRegistration = {
   telegram?: string;
   discord?: string;
   github?: string;
+  // moderation
   status: Status;
+  paused?: boolean;
+  // social visibility flags (default true unless explicitly set false)
+  showWebsite?: boolean;
+  showTwitter?: boolean;
+  showTelegram?: boolean;
+  showDiscord?: boolean;
+  showGithub?: boolean;
   createdAt: string;
   updatedAt: string;
 };
@@ -77,4 +85,40 @@ export async function DELETE(req: NextRequest) {
   await col.deleteOne({ id });
   const data = await col.find({}).sort({ createdAt: -1 }).toArray();
   return NextResponse.json({ data });
+}
+
+// Partial updates: pause/unpause, social visibility toggles
+export async function PATCH(req: NextRequest) {
+  const unauth = await requireAdmin();
+  if (unauth) return unauth;
+
+  const body = await req.json().catch(() => ({} as any));
+  const { id } = body as { id?: string };
+  if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
+
+  const set: Record<string, any> = {};
+  const now = new Date().toISOString();
+  set.updatedAt = now;
+
+  if (typeof body.paused === 'boolean') set.paused = body.paused;
+  if (body.socials && typeof body.socials === 'object') {
+    const s = body.socials as Record<string, any>;
+    if (typeof s.website === 'boolean') set.showWebsite = s.website;
+    if (typeof s.twitter === 'boolean') set.showTwitter = s.twitter;
+    if (typeof s.telegram === 'boolean') set.showTelegram = s.telegram;
+    if (typeof s.discord === 'boolean') set.showDiscord = s.discord;
+    if (typeof s.github === 'boolean') set.showGithub = s.github;
+  }
+
+  if (Object.keys(set).length <= 1) {
+    return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 });
+  }
+
+  const col = await getCollection<TokenRegistration>('token_registrations');
+  const upd = await col.updateOne({ id }, { $set: set });
+  if (upd.matchedCount === 0) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
+  const record = await col.findOne({ id });
+  return NextResponse.json({ record });
 }

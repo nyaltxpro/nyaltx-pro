@@ -16,6 +16,8 @@ export async function GET(req: NextRequest) {
     const query: any = {};
     if (!all && ['approved', 'pending', 'rejected'].includes(status)) {
       query.status = status;
+      // Hide paused tokens by default on public feeds
+      query.paused = { $ne: true };
     }
 
     const data = await col
