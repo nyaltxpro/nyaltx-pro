@@ -958,7 +958,7 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
           </div>
         </div>
         {/* YouTube Video (below favorites) */}
-        <div className="bg-[#0f1923] rounded-xl p-4">
+        {/* <div className="bg-[#0f1923] rounded-xl p-4">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-lg font-semibold">Video</h2>
             <FaInfoCircle className="text-gray-400" size={16} />
@@ -974,6 +974,22 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
               allowFullScreen
             />
           </div>
+        </div> */}
+        <div>
+        <div className="w-full min-h-[500px] aspect-video">
+  <video
+    className="w-full h-full rounded-lg object-cover"
+    autoPlay
+    muted
+    loop
+    playsInline
+    preload="metadata"
+    poster="/video/nyaltx-poster.jpg"
+  >
+    <source src="/video/NYALTX Intro.mp4" type="video/mp4" />
+    Your browser does not support the video tag.
+  </video>
+</div>
         </div>
       </div>
       </div>
