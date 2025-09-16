@@ -24,6 +24,9 @@ type TokenRegistration = {
   showTelegram?: boolean;
   showDiscord?: boolean;
   showGithub?: boolean;
+  inRace?: boolean;
+  racePromotedAt?: string;
+  raceRank?: number;
   createdAt: string;
   updatedAt: string;
 };
@@ -155,6 +158,32 @@ export default function AdminTokensPage() {
     }
   }
 
+  async function toggleRaceStatus(id: string, promote: boolean) {
+    try {
+      setBusyId(id);
+      setError(null);
+      const r = await fetch('/api/admin/tokens/race', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tokenId: id, action: promote ? 'promote' : 'remove' }),
+      });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d?.message || 'Race update failed');
+      
+      // Update local state
+      setTokens((prev) => (prev || []).map(t => 
+        t.id === id ? { ...t, inRace: promote, racePromotedAt: promote ? new Date().toISOString() : undefined } : t
+      ));
+      
+      showToast('success', promote ? 'Token promoted to race!' : 'Token removed from race');
+    } catch (e: any) {
+      setError(e?.message || 'Error updating race status');
+      showToast('error', e?.message || 'Error updating race status');
+    } finally {
+      setBusyId(null);
+    }
+  }
+
   // Unique chains from current page (for quick filter)
   const chains = useMemo(() => {
     const set = new Set<string>();
@@ -257,6 +286,7 @@ export default function AdminTokensPage() {
                 <Th onClick={() => toggleSort('blockchain')} active={sortKey==='blockchain'} dir={sortDir}>Chain</Th>
                 <th className="px-3 py-2">Contract</th>
                 <th className="px-3 py-2">Status</th>
+                <th className="px-3 py-2">Race</th>
                 <th className="px-3 py-2">Paused</th>
                 <th className="px-3 py-2">Socials</th>
                 <th className="px-3 py-2">Actions</th>
@@ -278,6 +308,28 @@ export default function AdminTokensPage() {
                   <td className="px-3 py-2">{t.blockchain}</td>
                   <td className="px-3 py-2"><code className="text-xs">{t.contractAddress}</code></td>
                   <td className="px-3 py-2 capitalize">{t.status}</td>
+                  <td className="px-3 py-2">
+                    {t.status === 'approved' ? (
+                      <div className="flex flex-col gap-1">
+                        <div className={`text-xs px-2 py-1 rounded ${t.inRace ? 'bg-yellow-900/50 text-yellow-300' : 'bg-gray-800 text-gray-400'}`}>
+                          {t.inRace ? '🏁 In Race' : 'Not in Race'}
+                        </div>
+                        <button
+                          disabled={busyId === t.id}
+                          onClick={() => toggleRaceStatus(t.id, !t.inRace)}
+                          className={`text-xs px-2 py-1 rounded transition-colors ${
+                            t.inRace 
+                              ? 'bg-red-600 hover:bg-red-500 text-white' 
+                              : 'bg-yellow-600 hover:bg-yellow-500 text-black font-medium'
+                          }`}
+                        >
+                          {t.inRace ? 'Remove' : 'Add to Race'}
+                        </button>
+                      </div>
+                    ) : (
+                      <span className="text-xs text-gray-500">Approve first</span>
+                    )}
+                  </td>
                   <td className="px-3 py-2">
                     <label className="inline-flex items-center gap-2 cursor-pointer">
                       <input

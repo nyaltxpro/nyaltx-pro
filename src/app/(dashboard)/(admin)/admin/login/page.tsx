@@ -58,29 +58,18 @@ function AdminLoginInner() {
     
     try {
       // Step 1: Connect wallet if not connected
-      if (!isConnected) {
+      if (!isConnected || !address) {
         await open();
-        // Wait for connection to complete
-        await new Promise((resolve) => {
-          const checkConnection = () => {
-            if (isConnected && address) {
-              resolve(true);
-            } else {
-              setTimeout(checkConnection, 100);
-            }
-          };
-          checkConnection();
-        });
-      }
-
-      // Ensure we have an address after connection
-      const currentAddress = address;
-      if (!currentAddress) {
-        throw new Error("Please connect your wallet to continue");
+        // Return early and let the user try again after connection
+        setWLoading(false);
+        return;
       }
 
       // Step 2: Get nonce for signing
-      const nonceRes = await fetch("/api/admin/login/nonce", { method: "GET" });
+      const nonceRes = await fetch("/api/admin/login/nonce", { 
+        method: "GET",
+        credentials: 'include' // Important for cookies
+      });
       if (!nonceRes.ok) {
         throw new Error("Failed to get authentication nonce");
       }
@@ -89,7 +78,7 @@ function AdminLoginInner() {
       // Step 3: Create and sign message
       const domain = process.env.NEXT_PUBLIC_APP_DOMAIN || "nyax-admin";
       const ts = Date.now();
-      const addrLower = currentAddress.toLowerCase();
+      const addrLower = address.toLowerCase();
       const message = `NYAX Admin Login\nDomain: ${domain}\nAddress: ${addrLower}\nNonce: ${nonce}\nTimestamp: ${ts}`;
       
       const signature = await signMessageAsync({ message });
@@ -98,6 +87,7 @@ function AdminLoginInner() {
       const verifyRes = await fetch("/api/admin/login/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: 'include', // Important for cookies
         body: JSON.stringify({ address: addrLower, signature, nonce, timestamp: ts }),
       });
       
@@ -110,8 +100,10 @@ function AdminLoginInner() {
       router.replace(from);
     } catch (err: any) {
       // Handle user rejection gracefully
-      if (err.message?.includes("User rejected") || err.message?.includes("rejected")) {
-        setWError("Wallet connection was cancelled");
+      if (err.message?.includes("User rejected") || err.message?.includes("rejected") || err.message?.includes("denied")) {
+        setWError("Wallet signature was cancelled");
+      } else if (err.message?.includes("Address not allowed")) {
+        setWError("Your wallet address is not authorized for admin access");
       } else {
         setWError(err.message || "Authentication failed");
       }
@@ -199,13 +191,18 @@ function AdminLoginInner() {
 
           {/* Web3 Wallet Login */}
           <div className="space-y-2">
+            {isConnected && address && (
+              <div className="text-xs text-gray-400 bg-gray-900/50 rounded px-3 py-2 border border-gray-800">
+                <span className="text-green-400">●</span> Connected: {address.slice(0, 6)}...{address.slice(-4)}
+              </div>
+            )}
             <button
               type="button"
               onClick={handleWalletLogin}
               disabled={wLoading}
               className="w-full rounded-md border border-cyan-700/60 bg-cyan-900/20 hover:bg-cyan-900/30 disabled:opacity-50 px-4 py-2 font-medium transition-colors"
             >
-              {wLoading ? "Processing..." : isConnected ? "Sign in with Wallet" : "Connect Wallet to Sign In"}
+              {wLoading ? "Processing..." : (isConnected && address) ? "Sign Message to Authenticate" : "Connect Wallet"}
             </button>
             <div className="text-[11px] text-gray-500">
               Only pre-approved admin wallet addresses can access. Configure via <code>ADMIN_WALLET_ADDRESSES</code>.
