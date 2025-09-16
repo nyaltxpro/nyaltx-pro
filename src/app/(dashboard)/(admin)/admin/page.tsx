@@ -238,6 +238,13 @@ export default function AdminHomePage() {
             <h4 className="font-medium mb-2">Orders</h4>
             <p className="text-sm text-gray-400">View and manage user orders</p>
           </a>
+          <a 
+            href="/admin/banners" 
+            className="block p-4 bg-gray-800 hover:bg-gray-700 rounded-lg border border-gray-700 transition-colors"
+          >
+            <h4 className="font-medium mb-2">Banner Management</h4>
+            <p className="text-sm text-gray-400">Upload and manage banner images</p>
+          </a>
         </div>
       </div>
     </div>

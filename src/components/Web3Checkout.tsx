@@ -146,6 +146,20 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
     setError(null);
 
     try {
+      // Connect wallet first if not connected
+      if (!isConnected) {
+        await open({ view: 'Connect' });
+        setProcessing(false);
+        return;
+      }
+
+      // Wait a moment for address to be available after connection
+      if (!address) {
+        setError('Wallet connected but address not available. Please try again.');
+        setProcessing(false);
+        return;
+      }
+
       const response = await fetch('/api/promo/redeem', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -164,7 +178,7 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
       const result = await response.json();
       
       if (result.success) {
-        setSuccess(result.message);
+        setSuccess(`${result.message} (Wallet: ${address})`);
         // Set cookie for pro status if nyaltxpro
         if ((selectedTier || 'nyaltxpro').toLowerCase() === 'nyaltxpro') {
           document.cookie = "nyaltx_pro=1; path=/; max-age=31536000"; // 1 year
@@ -303,6 +317,16 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
               {success}
             </div>
           )}
+          
+          {/* Wallet Connection Status */}
+          {promoValidation?.isFree && !isConnected && (
+            <div className="mb-4 p-3 rounded-md border border-yellow-500 bg-yellow-900/30 text-yellow-200">
+              <div className="flex items-center gap-2">
+                <FaWallet />
+                <span>Please connect your wallet to activate the free subscription with promo code.</span>
+              </div>
+            </div>
+          )}
 
           {/* Customer */}
           <div className="mb-6">
@@ -401,7 +425,7 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
                 disabled={processing}
                 className={`px-6 py-3 rounded-md font-medium transition-colors ${processing ? 'bg-gray-600' : 'bg-green-600 hover:bg-green-500'} text-white`}
               >
-                {processing ? 'Activating…' : 'Activate Free Subscription'}
+                {processing ? 'Activating…' : isConnected ? 'Activate Free Subscription' : 'Connect Wallet & Activate'}
               </button>
             ) : (
               <button
