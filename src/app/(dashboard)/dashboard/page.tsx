@@ -28,13 +28,25 @@ import PumpFunLive from '@/components/PumpFunLive';
 //   direction: 'ascending' | 'descending';
 // } | null;
 
-// Get top 10 coins from memetoken.json sorted by market_cap_rank
+// Get top 10 coins from memetoken.json sorted by market_cap_rank (fallback data)
 const topTokens = [...memeTokensData]
   .sort((a, b) => (a.market_cap_rank || Infinity) - (b.market_cap_rank || Infinity))
   .slice(0, 10);
 
-// Format tokens for token race display
-const tokenRaceData = topTokens.map((token, index) => ({
+// Type for token race data
+type TokenRaceItem = {
+  id: string;
+  symbol?: string;
+  name?: string;
+  price?: string;
+  current_price?: number;
+  rank?: number;
+  image?: string;
+  logoUrl?: string;
+};
+
+// Fallback token race data
+const fallbackTokenRaceData: TokenRaceItem[] = topTokens.map((token, index) => ({
   id: token.id,
   symbol: token.symbol.toUpperCase(),
   price: token.current_price.toString(),
@@ -211,11 +223,11 @@ type TronPreLaunchedToken = {
 };
 
 export default function Home() {
-  // Default to dark mode as shown in the image
-  const [darkMode] = useState(true);
-  const [selectedBlockchain, setSelectedBlockchain] = useState<Blockchain | null>(supportedBlockchains[0]);
-  const [memeTokens, setMemeTokens] = useState<Token[]>([]);
-  const [isLoadingTokens, setIsLoadingTokens] = useState<boolean>(false);
+  const [selectedBlockchain, setSelectedBlockchain] = useState<Blockchain | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<'new' | 'pre-launched' | 'launched'>('new');
+  const [isLoading, setIsLoading] = useState(false);
+  const [tokenRaceData, setTokenRaceData] = useState<TokenRaceItem[]>(fallbackTokenRaceData);
+  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const [selectedChain, setSelectedChain] = useState<string>('ethereum');
   const [isPageLoading, setIsPageLoading] = useState<boolean>(true);
 
@@ -231,16 +243,42 @@ export default function Home() {
   // State for BSC tokens
   const [bscTokens, setBscTokens] = useState<any[]>([]);
   const [isLoadingBscTokens, setIsLoadingBscTokens] = useState<boolean>(false);
+  
+  // State for meme tokens and loading
+  const [memeTokens, setMemeTokens] = useState<any[]>([]);
+  const [isLoadingTokens, setIsLoadingTokens] = useState<boolean>(false);
+  const [darkMode, setDarkMode] = useState<boolean>(false);
 
-
-  // Toggle dark mode
+  // Fetch race tokens from admin panel
   useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [darkMode]);
+    const fetchRaceTokens = async () => {
+      try {
+        const response = await fetch('/api/tokens/race');
+        const result = await response.json();
+        if (result.success && result.data.length > 0) {
+          setTokenRaceData(result.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch race tokens:', error);
+        // Keep fallback data if API fails
+      }
+    };
+
+    fetchRaceTokens();
+  }, []);
+
+  // Auto-slider for token race (2-second intervals)
+  useEffect(() => {
+    if (tokenRaceData.length <= 1) return;
+
+    const interval = setInterval(() => {
+      setCurrentSlideIndex((prevIndex) => 
+        prevIndex >= tokenRaceData.length - 1 ? 0 : prevIndex + 1
+      );
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [tokenRaceData.length]);
 
   // Update selected blockchain when chain is selected from All Chains dropdown
   useEffect(() => {
@@ -437,27 +475,58 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="overflow-x-auto pb-4">
-          <div className="flex gap-2">
-            {tokenRaceData.map((token) => (
-              <div key={token.id} className="token-race-item flex-shrink-0">
-                <div className={`token-race-rank rank-${token.rank}`}>{token.rank}{token.rank === 1 ? 'ST' : token.rank === 2 ? 'ND' : token.rank === 3 ? 'RD' : 'TH'}</div>
-                <div className="flex items-center gap-2">
-                  {token.image && (
-                    <div className="w-5 h-5 rounded-full overflow-hidden">
-                      <Image
-                        src={token.image}
-                        alt={token.symbol}
-                        width={20}
-                        height={20}
-                        unoptimized
-                      />
+        <div className="relative overflow-hidden pb-4">
+          <div 
+            className="flex gap-2 transition-transform duration-500 ease-in-out"
+            style={{
+              transform: `translateX(-${currentSlideIndex * 100}%)`,
+              width: `${tokenRaceData.length * 100}%`
+            }}
+          >
+            {tokenRaceData.map((token, index) => (
+              <div 
+                key={token.id || `token-${index}`} 
+                className="token-race-item flex-shrink-0 w-full flex justify-center"
+                style={{ width: `${100 / tokenRaceData.length}%` }}
+              >
+                <div className="flex flex-col items-center p-4 bg-gray-800 rounded-lg min-w-[200px]">
+                  <div className={`token-race-rank rank-${index + 1} text-2xl font-bold mb-2`}>
+                    {index + 1}{index === 0 ? 'ST' : index === 1 ? 'ND' : index === 2 ? 'RD' : 'TH'}
+                  </div>
+                  <div className="flex items-center gap-2 mb-2">
+                    {(token.image || token.logoUrl) && (
+                      <div className="w-8 h-8 rounded-full overflow-hidden">
+                        <Image
+                          src={token.image || token.logoUrl || '/placeholder-token.png'}
+                          alt={token.symbol || token.name || 'Token'}
+                          width={32}
+                          height={32}
+                          unoptimized
+                        />
+                      </div>
+                    )}
+                    <div className="token-symbol text-lg font-semibold">
+                      {token.symbol || token.name || 'Unknown'}
                     </div>
-                  )}
-                  <div className="token-symbol">{token.symbol}</div>
+                  </div>
+                  <div className="token-price text-sm">
+                    {token.price || (token.current_price ? token.current_price.toString() : 'N/A')} <span className="text-[#00c3ff]">NITRO</span>
+                  </div>
                 </div>
-                <div className="token-price">{token.price} <span className="text-[#00c3ff]">NITRO</span></div>
               </div>
+            ))}
+          </div>
+          
+          {/* Slider indicators */}
+          <div className="flex justify-center mt-4 space-x-2">
+            {tokenRaceData.map((_, index) => (
+              <button
+                key={index}
+                className={`w-2 h-2 rounded-full transition-colors ${
+                  index === currentSlideIndex ? 'bg-[#00c3ff]' : 'bg-gray-600'
+                }`}
+                onClick={() => setCurrentSlideIndex(index)}
+              />
             ))}
           </div>
         </div>
