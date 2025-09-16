@@ -38,6 +38,7 @@ export default function SwapPage() {
   const [quotes, setQuotes] = useState<PriceQuote[]>([]);
   const [bestQuote, setBestQuote] = useState<PriceQuote | null>(null);
   const [isLoadingQuotes, setIsLoadingQuotes] = useState(false);
+  const [activeTab, setActiveTab] = useState<'swap' | 'uniswap' | 'raydium'>('swap');
 
   // Token selection state
   const [fromToken, setFromToken] = useState<Token>({
@@ -188,279 +189,352 @@ export default function SwapPage() {
   return (
     <div className="min-h-screen bg-[#0b1217] text-white">
       {/* Banner */}
-      {/* <Header/> */}
-      
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
-       
         
-        {/* Swap Card */}
-        <div className="max-w-md mx-auto">
-          <div className="bg-[#0f1923] rounded-lg shadow-lg p-6">
-            <div className="flex justify-between items-center mb-4">
+        {/* Tab Navigation */}
+        <div className="max-w-md mx-auto mb-6">
+          <div className="bg-[#0f1923] rounded-lg p-1 shadow-lg">
+            <div className="flex space-x-1">
           
-              <div className="flex space-x-2">
-                <button 
-                  onClick={toggleSettings}
-                  className="p-2 rounded-full hover:bg-gray-800 transition-colors"
-                >
-                  <FaCog className="text-gray-400" />
-                </button>
-                <button className="p-2 rounded-full hover:bg-gray-800 transition-colors">
-                  <FaSync className="text-gray-400" />
-                </button>
-              </div>
-            </div>
-            
-            {/* Settings Panel */}
-            {showSettings && (
-              <div className="mb-4 p-4 bg-gray-800 rounded-lg">
-                <h3 className="text-sm font-medium mb-2">Transaction Settings</h3>
-                <div className="mb-3">
-                  <label className="flex justify-between text-sm mb-1">
-                    <span>Slippage Tolerance</span>
-                    <span>{slippage}%</span>
-                  </label>
-                  <input
-                    type="range"
-                    min="0.1"
-                    max="5"
-                    step="0.1"
-                    value={slippage}
-                    onChange={handleSlippageChange}
-                    className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
-                  />
-                  <div className="flex justify-between text-xs text-gray-400 mt-1">
-                    <span>0.1%</span>
-                    <span>5%</span>
-                  </div>
-                </div>
-                <div>
-                  <label className="text-sm mb-1 block">Transaction Deadline</label>
-                  <div className="flex items-center">
-                    <input
-                      type="number"
-                      className="bg-gray-700 rounded-lg p-2 w-20 text-sm"
-                      defaultValue={20}
-                      min={1}
-                    />
-                    <span className="ml-2 text-sm text-gray-400">minutes</span>
-                  </div>
-                </div>
-              </div>
-            )}
-            
-            {/* From Token */}
-            <div className="mb-2">
-              <div className="flex justify-between text-sm mb-1">
-                <span>From</span>
-                <span>Balance: 0.0</span>
-              </div>
-              <div className="bg-gray-800 rounded-lg p-4">
-                <div className="flex justify-between">
-                  <input
-                    type="text"
-                    placeholder="0.0"
-                    value={fromAmount}
-                    onChange={handleFromAmountChange}
-                    className="bg-transparent text-2xl w-full focus:outline-none"
-                  />
-                  <button 
-                    className="flex items-center bg-gray-700 hover:bg-gray-600 rounded-lg px-3 py-2 transition-colors"
-                    onClick={() => {
-                      setSelectingToken('from');
-                      setShowTokenModal(true);
-                    }}
-                  >
-                    {fromToken.logoURI && (
-                      <div className="w-6 h-6 mr-2 relative">
-                        <Image 
-                          src={fromToken.logoURI} 
-                          alt={fromToken.symbol} 
-                          width={24} 
-                          height={24} 
-                        />
-                      </div>
-                    )}
-                    <span>{fromToken.symbol}</span>
-                    <FaChevronDown className="ml-2 text-sm" />
-                  </button>
-                </div>
-              </div>
-            </div>
-            
-            {/* Swap Button */}
-            <div className="flex justify-center -my-3 z-10 relative">
-              <button 
-                onClick={swapTokens}
-                className="bg-gray-800 hover:bg-gray-700 rounded-full p-2 border border-gray-700"
+              <button
+                onClick={() => setActiveTab('uniswap')}
+                className={`flex-1 py-3 px-4 rounded-lg font-medium text-sm transition-all duration-300 ${
+                  activeTab === 'uniswap'
+                    ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-lg shadow-pink-500/25'
+                    : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                }`}
               >
-                <FaExchangeAlt className="text-blue-400" />
+                Uniswap
               </button>
-            </div>
-            
-            {/* To Token */}
-            <div className="mb-4">
-              <div className="flex justify-between text-sm mb-1">
-                <span>To</span>
-                <span>Balance: 0.0</span>
-              </div>
-              <div className="bg-gray-800 rounded-lg p-4">
-                <div className="flex justify-between">
-                  <input
-                    type="text"
-                    placeholder="0.0"
-                    value={toAmount}
-                    onChange={handleToAmountChange}
-                    className="bg-transparent text-2xl w-full focus:outline-none"
-                  />
-                  <button 
-                    className="flex items-center bg-gray-700 hover:bg-gray-600 rounded-lg px-3 py-2 transition-colors"
-                    onClick={() => {
-                      setSelectingToken('to');
-                      setShowTokenModal(true);
-                    }}
-                  >
-                    {toToken.logoURI ? (
-                      <div className="w-6 h-6 mr-2 relative">
-                        <Image 
-                          src={toToken.logoURI} 
-                          alt={toToken.symbol} 
-                          width={24} 
-                          height={24} 
-                        />
-                      </div>
-                    ) : null}
-                    <span>{toToken.symbol}</span>
-                    <FaChevronDown className="ml-2 text-sm" />
-                  </button>
-                </div>
-              </div>
-            </div>
-            
-            {/* Price Info */}
-            {fromAmount && toAmount && (
-              <div className="bg-gray-800 rounded-lg p-3 mb-4 text-sm">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-400">Price</span>
-                  <span>1 {fromToken.symbol} = 1950 {toToken.symbol || '...'}</span>
-                </div>
-              </div>
-            )}
-            
-            {/* Network Selector */}
-            <div className="mb-4">
-              <div className="text-sm mb-2">Select Network</div>
-              <NetworkSelector
-                selectedChainId={chainId}
-                onSelectNetwork={(newChainId) => {
-                  setChainId(newChainId);
-                  // Update token chainIds
-                  setFromToken(prev => ({ ...prev, chainId: newChainId }));
-                  setToToken(prev => ({ ...prev, chainId: newChainId }));
-                }}
-              />
-            </div>
-            
-            {/* Connect Wallet Button */}
-            <button className="w-full bg-[#00b8d8] hover:bg-blue-600 text-white font-medium py-3 px-4 rounded-lg transition-colors">
-              Connect wallet
-            </button>
-            
-            {/* Exchange Selector */}
-            <div className="mt-4 mb-4">
-              <div className="text-sm mb-2">Select Exchange</div>
-              <ExchangeSelector
-                exchanges={availableExchanges}
-                selectedExchange={selectedExchange}
-                onSelectExchange={handleExchangeSelect}
-                chainId={chainId}
-              />
-            </div>
-            
-            {/* Available Quotes */}
-            {quotes.length > 0 && (
-              <div className="mt-4 mb-4 bg-gray-800 rounded-lg p-3">
-                <div className="text-sm font-medium mb-2">Available Routes</div>
-                {quotes.map((quote, index) => {
-                  const exchange = availableExchanges.find(ex => ex.config.name === quote.protocol);
-                  const isSelected = selectedExchange?.config.name === quote.protocol;
-                  
-                  return (
-                    <div 
-                      key={index} 
-                      className={`flex justify-between items-center p-2 rounded-lg mb-1 cursor-pointer ${isSelected ? 'bg-gray-700' : 'hover:bg-gray-700'}`}
-                      onClick={() => {
-                        if (exchange) {
-                          handleExchangeSelect(exchange);
-                        }
-                      }}
-                    >
-                      <div className="flex items-center">
-                        <div className="w-5 h-5 mr-2">
-                          <Image 
-                            src={exchange?.config.logoURI || '/placeholder.svg'} 
-                            alt={quote.protocol} 
-                            width={20} 
-                            height={20} 
-                          />
-                        </div>
-                        <div>
-                          <span>{quote.protocol}</span>
-                          <div className="flex mt-1">
-                            {exchange?.config.supportedChains.map(supportedChain => (
-                              <div 
-                                key={supportedChain}
-                                className={`w-2 h-2 rounded-full mr-1 ${supportedChain === chainId ? 'bg-green-500' : 'bg-gray-500'}`} 
-                                title={`${networks.find(n => n.id === supportedChain)?.name || 'Unknown'} ${supportedChain === chainId ? '(active)' : ''}`}
-                              />
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div>{parseFloat(quote.outputAmount).toFixed(6)}</div>
-                        <div className="text-xs text-gray-400">Fee: {quote.fee}%</div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-            
-            {/* Provider Info */}
-            <div className="mt-4">
-              <div className="flex justify-between items-center text-sm text-gray-400">
-                <span>Slippage Tolerance</span>
-                <span>{slippage}%</span>
-              </div>
-              
-              {selectedExchange && (
-                <div className="flex justify-between items-center mt-2">
-                  <span className="text-sm text-gray-400">Provider</span>
-                  <div className="flex items-center">
-                    <div className="w-5 h-5 mr-1">
-                      <Image 
-                        src={selectedExchange.config.logoURI} 
-                        alt={selectedExchange.config.name} 
-                        width={20} 
-                        height={20} 
-                      />
-                    </div>
-                    <span className="text-sm">{selectedExchange.config.name}</span>
-                  </div>
-                </div>
-              )}
-              
-              {bestQuote && selectedExchange && bestQuote.protocol !== selectedExchange.config.name && (
-                <div className="flex items-center mt-2 p-2 bg-yellow-800 bg-opacity-30 rounded-lg text-xs">
-                  <FaInfoCircle className="text-yellow-500 mr-2" />
-                  <span>Better rate available on {bestQuote.protocol}</span>
-                </div>
-              )}
+              <button
+                onClick={() => setActiveTab('raydium')}
+                className={`flex-1 py-3 px-4 rounded-lg font-medium text-sm transition-all duration-300 ${
+                  activeTab === 'raydium'
+                    ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg shadow-green-500/25'
+                    : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                }`}
+              >
+                Raydium
+              </button>
             </div>
           </div>
         </div>
+        
+        {/* Tab Content */}
+        {activeTab === 'swap' && (
+          <div className="max-w-md mx-auto">
+            <div className="bg-[#0f1923] rounded-lg shadow-lg p-6">
+              <div className="flex justify-between items-center mb-4">
+            
+                <div className="flex space-x-2">
+                  <button 
+                    onClick={toggleSettings}
+                    className="p-2 rounded-full hover:bg-gray-800 transition-colors"
+                  >
+                    <FaCog className="text-gray-400" />
+                  </button>
+                  <button className="p-2 rounded-full hover:bg-gray-800 transition-colors">
+                    <FaSync className="text-gray-400" />
+                  </button>
+                </div>
+              </div>
+              
+              {/* Settings Panel */}
+              {showSettings && (
+                <div className="mb-4 p-4 bg-gray-800 rounded-lg">
+                  <h3 className="text-sm font-medium mb-2">Transaction Settings</h3>
+                  <div className="mb-3">
+                    <label className="flex justify-between text-sm mb-1">
+                      <span>Slippage Tolerance</span>
+                      <span>{slippage}%</span>
+                    </label>
+                    <input
+                      type="range"
+                      min="0.1"
+                      max="5"
+                      step="0.1"
+                      value={slippage}
+                      onChange={handleSlippageChange}
+                      className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
+                    />
+                    <div className="flex justify-between text-xs text-gray-400 mt-1">
+                      <span>0.1%</span>
+                      <span>5%</span>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-sm mb-1 block">Transaction Deadline</label>
+                    <div className="flex items-center">
+                      <input
+                        type="number"
+                        className="bg-gray-700 rounded-lg p-2 w-20 text-sm"
+                        defaultValue={20}
+                        min={1}
+                      />
+                      <span className="ml-2 text-sm text-gray-400">minutes</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {/* From Token */}
+              <div className="mb-2">
+                <div className="flex justify-between text-sm mb-1">
+                  <span>From</span>
+                  <span>Balance: 0.0</span>
+                </div>
+                <div className="bg-gray-800 rounded-lg p-4">
+                  <div className="flex justify-between">
+                    <input
+                      type="text"
+                      placeholder="0.0"
+                      value={fromAmount}
+                      onChange={handleFromAmountChange}
+                      className="bg-transparent text-2xl w-full focus:outline-none"
+                    />
+                    <button 
+                      className="flex items-center bg-gray-700 hover:bg-gray-600 rounded-lg px-3 py-2 transition-colors"
+                      onClick={() => {
+                        setSelectingToken('from');
+                        setShowTokenModal(true);
+                      }}
+                    >
+                      {fromToken.logoURI && (
+                        <div className="w-6 h-6 mr-2 relative">
+                          <Image 
+                            src={fromToken.logoURI} 
+                            alt={fromToken.symbol} 
+                            width={24} 
+                            height={24} 
+                          />
+                        </div>
+                      )}
+                      <span>{fromToken.symbol}</span>
+                      <FaChevronDown className="ml-2 text-sm" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Swap Button */}
+              <div className="flex justify-center -my-3 z-10 relative">
+                <button 
+                  onClick={swapTokens}
+                  className="bg-gray-800 hover:bg-gray-700 rounded-full p-2 border border-gray-700"
+                >
+                  <FaExchangeAlt className="text-blue-400" />
+                </button>
+              </div>
+              
+              {/* To Token */}
+              <div className="mb-4">
+                <div className="flex justify-between text-sm mb-1">
+                  <span>To</span>
+                  <span>Balance: 0.0</span>
+                </div>
+                <div className="bg-gray-800 rounded-lg p-4">
+                  <div className="flex justify-between">
+                    <input
+                      type="text"
+                      placeholder="0.0"
+                      value={toAmount}
+                      onChange={handleToAmountChange}
+                      className="bg-transparent text-2xl w-full focus:outline-none"
+                    />
+                    <button 
+                      className="flex items-center bg-gray-700 hover:bg-gray-600 rounded-lg px-3 py-2 transition-colors"
+                      onClick={() => {
+                        setSelectingToken('to');
+                        setShowTokenModal(true);
+                      }}
+                    >
+                      {toToken.logoURI ? (
+                        <div className="w-6 h-6 mr-2 relative">
+                          <Image 
+                            src={toToken.logoURI} 
+                            alt={toToken.symbol} 
+                            width={24} 
+                            height={24} 
+                          />
+                        </div>
+                      ) : null}
+                      <span>{toToken.symbol}</span>
+                      <FaChevronDown className="ml-2 text-sm" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Price Info */}
+              {fromAmount && toAmount && (
+                <div className="bg-gray-800 rounded-lg p-3 mb-4 text-sm">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-400">Price</span>
+                    <span>1 {fromToken.symbol} = 1950 {toToken.symbol || '...'}</span>
+                  </div>
+                </div>
+              )}
+              
+              {/* Network Selector */}
+              <div className="mb-4">
+                <div className="text-sm mb-2">Select Network</div>
+                <NetworkSelector
+                  selectedChainId={chainId}
+                  onSelectNetwork={(newChainId) => {
+                    setChainId(newChainId);
+                    // Update token chainIds
+                    setFromToken(prev => ({ ...prev, chainId: newChainId }));
+                    setToToken(prev => ({ ...prev, chainId: newChainId }));
+                  }}
+                />
+              </div>
+              
+              {/* Connect Wallet Button */}
+              <button className="w-full bg-[#00b8d8] hover:bg-blue-600 text-white font-medium py-3 px-4 rounded-lg transition-colors">
+                Connect wallet
+              </button>
+              
+              {/* Exchange Selector */}
+              <div className="mt-4 mb-4">
+                <div className="text-sm mb-2">Select Exchange</div>
+                <ExchangeSelector
+                  exchanges={availableExchanges}
+                  selectedExchange={selectedExchange}
+                  onSelectExchange={handleExchangeSelect}
+                  chainId={chainId}
+                />
+              </div>
+              
+              {/* Available Quotes */}
+              {quotes.length > 0 && (
+                <div className="mt-4 mb-4 bg-gray-800 rounded-lg p-3">
+                  <div className="text-sm font-medium mb-2">Available Routes</div>
+                  {quotes.map((quote, index) => {
+                    const exchange = availableExchanges.find(ex => ex.config.name === quote.protocol);
+                    const isSelected = selectedExchange?.config.name === quote.protocol;
+                    
+                    return (
+                      <div 
+                        key={index} 
+                        className={`flex justify-between items-center p-2 rounded-lg mb-1 cursor-pointer ${isSelected ? 'bg-gray-700' : 'hover:bg-gray-700'}`}
+                        onClick={() => {
+                          if (exchange) {
+                            handleExchangeSelect(exchange);
+                          }
+                        }}
+                      >
+                        <div className="flex items-center">
+                          <div className="w-5 h-5 mr-2">
+                            <Image 
+                              src={exchange?.config.logoURI || '/placeholder.svg'} 
+                              alt={quote.protocol} 
+                              width={20} 
+                              height={20} 
+                            />
+                          </div>
+                          <div>
+                            <span>{quote.protocol}</span>
+                            <div className="flex mt-1">
+                              {exchange?.config.supportedChains.map(supportedChain => (
+                                <div 
+                                  key={supportedChain}
+                                  className={`w-2 h-2 rounded-full mr-1 ${supportedChain === chainId ? 'bg-green-500' : 'bg-gray-500'}`} 
+                                  title={`${networks.find(n => n.id === supportedChain)?.name || 'Unknown'} ${supportedChain === chainId ? '(active)' : ''}`}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div>{parseFloat(quote.outputAmount).toFixed(6)}</div>
+                          <div className="text-xs text-gray-400">Fee: {quote.fee}%</div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+              
+              {/* Provider Info */}
+              <div className="mt-4">
+                <div className="flex justify-between items-center text-sm text-gray-400">
+                  <span>Slippage Tolerance</span>
+                  <span>{slippage}%</span>
+                </div>
+                
+                {selectedExchange && (
+                  <div className="flex justify-between items-center mt-2">
+                    <span className="text-sm text-gray-400">Provider</span>
+                    <div className="flex items-center">
+                      <div className="w-5 h-5 mr-1">
+                        <Image 
+                          src={selectedExchange.config.logoURI} 
+                          alt={selectedExchange.config.name} 
+                          width={20} 
+                          height={20} 
+                        />
+                      </div>
+                      <span className="text-sm">{selectedExchange.config.name}</span>
+                    </div>
+                  </div>
+                )}
+                
+                {bestQuote && selectedExchange && bestQuote.protocol !== selectedExchange.config.name && (
+                  <div className="flex items-center mt-2 p-2 bg-yellow-800 bg-opacity-30 rounded-lg text-xs">
+                    <FaInfoCircle className="text-yellow-500 mr-2" />
+                    <span>Better rate available on {bestQuote.protocol}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Uniswap Tab */}
+        {activeTab === 'uniswap' && (
+          <div className="max-w-4xl mx-auto">
+       
+       <iframe
+            src={`https://app.uniswap.org/#/swap?field=input&value=10&inputCurrency=USDC`}
+            height="660px"
+            width="100%"
+            style={{
+              border: 0,
+              margin: "0 auto",
+              marginBottom: ".5rem",
+              display: "block",
+              borderRadius: "10px",
+              maxWidth: "560px",
+              minWidth: "300px",
+            }}
+            title="Uniswap Swap Widget"
+          />
+              
+           
+          </div>
+        )}
+
+        {/* Raydium Tab */}
+        {activeTab === 'raydium' && (
+          <div className="max-w-4xl mx-auto">
+           
+           <iframe
+            src={`https://raydium.io/swap/?inputCurrency=USDT&outputCurrency=USDC`}
+            height="660px"
+            width="100%"
+            style={{
+              border: 0,
+              margin: " 0 auto",
+              marginBottom: "0.5rem",
+              display: "block",
+              borderRadius: "10px",
+              maxWidth: "560px",
+            }}
+          ></iframe>
+       
+          </div>
+        )}
       </div>
 
       {/* Token Selection Modal */}
@@ -527,7 +601,7 @@ export default function SwapPage() {
             </div>
           </div>
         </div>
-      )}
+      )} 
     </div>
   );
 }

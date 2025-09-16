@@ -487,7 +487,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="relative overflow-hidden pb-4 rounded-lg p-4">
+            <div className="relative overflow-hidden  rounded-lg p-4">
               <div className="relative  h-36 overflow-hidden">
                 <div
                   className="flex gap-4 animate-pulse"
@@ -507,7 +507,7 @@ export default function Home() {
                     >
                       <div
                         onClick={() => handleClick(token)}
-                        className="relative flex flex-col items-center p-3 bg-gradient-to-br from-gray-800 to-gray-700 rounded-lg shadow-lg border border-gray-600 h-32 transform hover:scale-105 transition-transform duration-300 cursor-pointer hover:border-[#00c3ff]"
+                        className="relative flex flex-row justify-between items-center mt-3 p-3 bg-gradient-to-br from-gray-800 to-gray-700 rounded-lg shadow-lg border border-gray-600 h-32 transform hover:scale-105 transition-transform duration-300 cursor-pointer hover:border-[#00c3ff]"
                       >
                         {/* Position tag on top right based on points ranking */}
                         <div className={`absolute -top-1 -right-1 px-2 py-1 rounded-full text-xs font-bold ${(index % tokenRaceData.length) === 0 ? 'bg-yellow-500 text-black' :
@@ -534,10 +534,15 @@ export default function Home() {
                               />
                             </div>
                           )}
-                          <div className="token-symbol text-sm font-bold text-white truncate">
+                          <div className="token-symbol flex flex-col text-sm font-bold text-white truncate">
                             {token.symbol || token.name || 'Unknown'}
+                            <span className="text-green-400">
+                            ${token.price || (token.current_price ? token.current_price.toFixed(4) : 'N/A')}
+                          </span>
                           </div>
                         </div>
+
+                        <div className='flex flex-col items-center'>
 
                         {/* Points display */}
                         <div className="text-center mb-1">
@@ -547,9 +552,8 @@ export default function Home() {
                         </div>
 
                         <div className="token-price text-xs font-semibold text-center">
-                          <span className="text-green-400">
-                            ${token.price || (token.current_price ? token.current_price.toFixed(4) : 'N/A')}
-                          </span>
+                       
+                        </div>
                         </div>
                       </div>
                     </div>
