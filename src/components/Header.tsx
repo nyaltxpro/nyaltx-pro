@@ -7,6 +7,7 @@ import ConnectWalletButton from './ConnectWalletButton';
 import BlockchainDropdown from './BlockchainDropdown';
 import './animations.css';
 import { SlStar } from 'react-icons/sl';
+import { AiFillStar } from 'react-icons/ai';
 import { BiSearch } from 'react-icons/bi';
 import { FiSettings } from 'react-icons/fi';
 import { MdOutlineCollections } from 'react-icons/md';
@@ -29,6 +30,7 @@ const Header = () => {
   const router = useRouter();
   const pathname = usePathname();
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+  const [isBookmarked, setIsBookmarked] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   
   // Open search modal
@@ -40,6 +42,37 @@ const Header = () => {
   const closeSearchModal = () => {
     setIsSearchModalOpen(false);
   };
+
+  // Trigger native browser bookmark functionality
+  // const addToBookmarks = () => {
+  //   if (typeof window !== 'undefined') {
+  //     // Use keyboard shortcut to trigger native bookmark dialog
+  //     const event = new KeyboardEvent('keydown', {
+  //       key: 'd',
+  //       code: 'KeyD',
+  //       ctrlKey: true,
+  //       metaKey: navigator.platform.includes('Mac'), // Use Cmd on Mac, Ctrl on others
+  //       bubbles: true
+  //     });
+      
+  //     document.dispatchEvent(event);
+      
+  //     // Fallback: Try to use the deprecated but still working method
+  //     if ('addToHomescreen' in window || 'sidebar' in window) {
+  //       try {
+  //         // For older browsers or specific cases
+  //         if (window.sidebar && window.sidebar.addPanel) {
+  //           window.sidebar.addPanel(document.title, window.location.href, '');
+  //         } else if (window.external && window.external.AddFavorite) {
+  //           window.external.AddFavorite(window.location.href, document.title);
+  //         }
+  //       } catch (e) {
+  //         // If all else fails, show instructions
+  //         alert('Please use Ctrl+D (or Cmd+D on Mac) to bookmark this page');
+  //       }
+  //     }
+  //   }
+  // };
   
   return (
     <div className='flex flex-col w-full items-center justify-center'>
@@ -87,12 +120,16 @@ const Header = () => {
                 {/* <Link href="/profile" className="p-2 rounded-full hover:bg-gray-700">
                   <CgProfile className={pathname?.startsWith('/profile') ? 'text-blue-400' : ''} />
                 </Link> */}
-                <Link href="/settings" className="p-2 rounded-full hover:bg-gray-700">
+                <Link href="/dashboard/settings" className="p-2 cursor-pointer rounded-full hover:bg-gray-700">
                   <FiSettings className={pathname?.startsWith('/settings') ? 'text-blue-400' : ''} />
                 </Link>
-                <button className="p-2 rounded-full hover:bg-gray-700">
-                  <SlStar/>
-                </button>
+                {/* <button 
+                  className="p-2 rounded-full hover:bg-gray-700 transition-colors"
+                  onClick={addToBookmarks}
+                  title="Bookmark this page"
+                >
+                  <SlStar className="text-gray-400 hover:text-yellow-400" />
+                </button> */}
                 <ConnectWalletButton />
               </div>
             </div>
