@@ -43,6 +43,7 @@ type TokenRaceItem = {
   rank?: number;
   image?: string;
   logoUrl?: string;
+  points?: number;
 };
 
 // Fallback token race data
@@ -267,18 +268,7 @@ export default function Home() {
     fetchRaceTokens();
   }, []);
 
-  // Auto-slider for token race (2-second intervals)
-  useEffect(() => {
-    if (tokenRaceData.length <= 1) return;
-
-    const interval = setInterval(() => {
-      setCurrentSlideIndex((prevIndex) => 
-        prevIndex >= tokenRaceData.length - 1 ? 0 : prevIndex + 1
-      );
-    }, 2000);
-
-    return () => clearInterval(interval);
-  }, [tokenRaceData.length]);
+  // Removed auto-slider - now manual navigation only
 
   // Update selected blockchain when chain is selected from All Chains dropdown
   useEffect(() => {
@@ -378,7 +368,7 @@ export default function Home() {
             </div>
             <div className="flex gap-2 overflow-x-auto pb-4">
               {[...Array(10)].map((_, i) => (
-                <div key={i} className="flex-shrink-0 bg-gray-800 rounded-lg p-3 w-32">
+                <div key={i} className="flex-shrink-0  rounded-lg p-3 w-32">
                   <div className="h-4 bg-gray-700 rounded animate-pulse mb-2 w-8"></div>
                   <div className="flex items-center gap-2 mb-2">
                     <div className="w-5 h-5 bg-gray-700 rounded-full animate-pulse"></div>
@@ -475,59 +465,85 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="relative overflow-hidden pb-4">
-          <div 
-            className="flex gap-2 transition-transform duration-500 ease-in-out"
-            style={{
-              transform: `translateX(-${currentSlideIndex * 100}%)`,
-              width: `${tokenRaceData.length * 100}%`
-            }}
-          >
-            {tokenRaceData.map((token, index) => (
-              <div 
-                key={token.id || `token-${index}`} 
-                className="token-race-item flex-shrink-0 w-full flex justify-center"
-                style={{ width: `${100 / tokenRaceData.length}%` }}
-              >
-                <div className="flex flex-col items-center p-4 bg-gray-800 rounded-lg min-w-[200px]">
-                  <div className={`token-race-rank rank-${index + 1} text-2xl font-bold mb-2`}>
-                    {index + 1}{index === 0 ? 'ST' : index === 1 ? 'ND' : index === 2 ? 'RD' : 'TH'}
-                  </div>
-                  <div className="flex items-center gap-2 mb-2">
-                    {(token.image || token.logoUrl) && (
-                      <div className="w-8 h-8 rounded-full overflow-hidden">
-                        <Image
-                          src={token.image || token.logoUrl || '/placeholder-token.png'}
-                          alt={token.symbol || token.name || 'Token'}
-                          width={32}
-                          height={32}
-                          unoptimized
-                        />
+        <div className="relative overflow-hidden pb-4 rounded-lg p-4">
+          <div className="slider-container relative">
+            <div 
+              className="flex gap-3 transition-transform duration-500 ease-in-out"
+              style={{
+                transform: `translateX(-${currentSlideIndex * 20}%)`,
+                width: `${Math.max(tokenRaceData.length * 20, 100)}%`
+              }}
+            >
+              {tokenRaceData.map((token, index) => (
+                <div 
+                  key={token.id || `token-${index}`}
+                  className="flex-shrink-0 w-1/5 min-w-[180px] px-1"
+                >
+                  <div className="relative flex flex-col items-center p-3 bg-gradient-to-br from-gray-800 to-gray-700 rounded-lg shadow-lg border border-gray-600 h-32 transform hover:scale-105 transition-transform duration-300">
+                    {/* Position tag on top right */}
+                    <div className={`absolute -top-1 -right-1 px-2 py-1 rounded-full text-xs font-bold ${
+                      index === 0 ? 'bg-yellow-500 text-black' : 
+                      index === 1 ? 'bg-gray-400 text-black' : 
+                      index === 2 ? 'bg-orange-500 text-black' : 
+                      'bg-blue-500 text-white'
+                    }`}>
+                      {index === 0 ? '1st' : index === 1 ? '2nd' : index === 2 ? '3rd' : `${index + 1}th`}
+                    </div>
+                    
+                    <div className="flex items-center gap-2 mb-2">
+                      {(token.image || token.logoUrl) && (
+                        <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-500">
+                          <Image
+                            src={token.image || token.logoUrl || '/placeholder-token.png'}
+                            alt={token.symbol || token.name || 'Token'}
+                            width={32}
+                            height={32}
+                            unoptimized
+                            className="object-cover"
+                          />
+                        </div>
+                      )}
+                      <div className="token-symbol text-sm font-bold text-white truncate">
+                        {token.symbol || token.name || 'Unknown'}
                       </div>
-                    )}
-                    <div className="token-symbol text-lg font-semibold">
-                      {token.symbol || token.name || 'Unknown'}
+                    </div>
+                    <div className="token-price text-sm font-semibold text-center">
+                      <span className="text-green-400">
+                        ${token.price || (token.current_price ? token.current_price.toFixed(4) : 'N/A')}
+                      </span>
+                      <div className="text-xs text-[#00c3ff] mt-1">NITRO</div>
                     </div>
                   </div>
-                  <div className="token-price text-sm">
-                    {token.price || (token.current_price ? token.current_price.toString() : 'N/A')} <span className="text-[#00c3ff]">NITRO</span>
-                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
           
-          {/* Slider indicators */}
-          <div className="flex justify-center mt-4 space-x-2">
-            {tokenRaceData.map((_, index) => (
-              <button
-                key={index}
-                className={`w-2 h-2 rounded-full transition-colors ${
-                  index === currentSlideIndex ? 'bg-[#00c3ff]' : 'bg-gray-600'
-                }`}
-                onClick={() => setCurrentSlideIndex(index)}
-              />
-            ))}
+          {/* Navigation arrows */}
+          <div className="flex justify-center items-center mt-4 space-x-4">
+            <button
+              onClick={() => {
+                const maxIndex = Math.max(0, tokenRaceData.length - 5);
+                setCurrentSlideIndex(currentSlideIndex <= 0 ? maxIndex : currentSlideIndex - 1);
+              }}
+              className="p-2 rounded-full bg-gray-700 hover:bg-gray-600 transition-all"
+            >
+              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            
+            <button
+              onClick={() => {
+                const maxIndex = Math.max(0, tokenRaceData.length - 5);
+                setCurrentSlideIndex(currentSlideIndex >= maxIndex ? 0 : currentSlideIndex + 1);
+              }}
+              className="p-2 rounded-full bg-gray-700 hover:bg-gray-600 transition-all"
+            >
+              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
           </div>
         </div>
       </div>
