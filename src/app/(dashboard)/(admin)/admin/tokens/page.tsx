@@ -40,6 +40,12 @@ export default function AdminTokensPage() {
   const [tokens, setTokens] = useState<TokenRegistration[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
+  // Toast notifications
+  const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  function showToast(type: 'success' | 'error', message: string) {
+    setToast({ type, message });
+    setTimeout(() => setToast(null), 2500);
+  }
 
   const query = useMemo(() => {
     const parts: string[] = [];
@@ -81,10 +87,12 @@ export default function AdminTokensPage() {
         .then((dd) => {
           setTokens(dd?.data || []);
           setTotal(dd?.total || 0);
+          showToast('success', `Status updated to ${status}`);
         })
-        .catch(() => setTokens([]));
+        .catch(() => { setTokens([]); });
     } catch (e: any) {
       setError(e?.message || 'Error updating status');
+      showToast('error', e?.message || 'Error updating status');
     } finally {
       setBusyId(null);
     }
@@ -103,8 +111,17 @@ export default function AdminTokensPage() {
       if (!r.ok) throw new Error(d?.error || 'Update failed');
       // optimistically update local state without refetch
       setTokens((prev) => (prev || []).map(t => t.id === id ? { ...t, ...(d.record || {}) } : t));
+      const isPauseToggle = Object.prototype.hasOwnProperty.call(payload, 'paused');
+      if (isPauseToggle) {
+        showToast('success', d.record?.paused ? 'Token paused' : 'Token unpaused');
+      } else if (payload.socials) {
+        showToast('success', 'Social visibility updated');
+      } else {
+        showToast('success', 'Updated');
+      }
     } catch (e: any) {
       setError(e?.message || 'Error updating');
+      showToast('error', e?.message || 'Error updating');
     } finally {
       setBusyId(null);
     }
@@ -127,10 +144,12 @@ export default function AdminTokensPage() {
         .then((dd) => {
           setTokens(dd?.data || []);
           setTotal(dd?.total || 0);
+          showToast('success', 'Token deleted');
         })
         .catch(() => setTokens([]));
     } catch (e: any) {
       setError(e?.message || 'Error deleting');
+      showToast('error', e?.message || 'Error deleting');
     } finally {
       setBusyId(null);
     }
@@ -171,6 +190,13 @@ export default function AdminTokensPage() {
 
   return (
     <div className="space-y-6">
+      {/* Toast */}
+      {toast && (
+        <div className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-md shadow-lg border text-sm ${toast.type === 'success' ? 'bg-emerald-900/70 border-emerald-700 text-emerald-200' : 'bg-rose-900/70 border-rose-700 text-rose-200'}`}
+             role="status" aria-live="polite">
+          {toast.message}
+        </div>
+      )}
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -275,7 +301,13 @@ export default function AdminTokensPage() {
                   </td>
                   <td className="px-3 py-2">
                     <div className="flex gap-2">
-                      <button disabled={busyId === t.id} onClick={() => updateStatus(t.id, 'approved')} className="rounded bg-emerald-600 hover:bg-emerald-500 px-3 py-1 text-xs">Approve</button>
+                      <button
+                        disabled={busyId === t.id || t.status === 'approved'}
+                        onClick={() => updateStatus(t.id, 'approved')}
+                        className={`rounded px-3 py-1 text-xs ${t.status === 'approved' ? 'bg-emerald-700/50 text-emerald-300 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-500'}`}
+                      >
+                        {t.status === 'approved' ? 'Approved' : 'Approve'}
+                      </button>
                       <button disabled={busyId === t.id} onClick={() => updateStatus(t.id, 'rejected')} className="rounded bg-rose-600 hover:bg-rose-500 px-3 py-1 text-xs">Reject</button>
                       <button disabled={busyId === t.id} onClick={() => remove(t.id)} className="rounded border border-gray-700 px-3 py-1 text-xs">Delete</button>
                     </div>
