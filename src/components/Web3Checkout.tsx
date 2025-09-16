@@ -95,12 +95,14 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
   // Auto-open wallet and initiate payment when component loads with specific conditions
   useEffect(() => {
     if (paymentMethod === 'usdt' && selectedTier === 'nyaltxpro') {
-      // Auto-trigger wallet connection and payment flow
+      // Auto-trigger wallet connection and payment flow only if no promo code is being used
       setTimeout(() => {
-        handlePayment();
+        if (!promo.trim()) {
+          handlePayment();
+        }
       }, 1000);
     }
-  }, [paymentMethod, selectedTier]);
+  }, [paymentMethod, selectedTier, promo]);
 
   const validatePromoCode = async () => {
     if (!promo.trim()) {
@@ -116,17 +118,22 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
         body: JSON.stringify({ promoCode: promo.trim(), tier: selectedTier || 'nyaltxpro' })
       });
 
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
       const result = await response.json();
       setPromoValidation(result);
       setPromoApplied(result.valid);
       
       if (!result.valid) {
-        setError(result.message);
+        setError(result.message || 'Invalid promo code');
       } else {
         setError(null);
       }
-    } catch (err) {
-      setError('Failed to validate promo code');
+    } catch (err: any) {
+      console.error('Promo validation error:', err);
+      setError(`Failed to validate promo code: ${err.message}`);
       setPromoValidation(null);
       setPromoApplied(false);
     }
@@ -150,15 +157,24 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
         })
       });
 
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
       const result = await response.json();
       
       if (result.success) {
         setSuccess(result.message);
+        // Set cookie for pro status if nyaltxpro
+        if ((selectedTier || 'nyaltxpro').toLowerCase() === 'nyaltxpro') {
+          document.cookie = "nyaltx_pro=1; path=/; max-age=31536000"; // 1 year
+        }
       } else {
-        setError(result.message);
+        setError(result.message || 'Failed to activate subscription');
       }
-    } catch (err) {
-      setError('Failed to activate free subscription');
+    } catch (err: any) {
+      console.error('Free subscription error:', err);
+      setError(`Failed to activate free subscription: ${err.message}`);
     } finally {
       setProcessing(false);
     }
@@ -313,7 +329,8 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
                   />
                   <button 
                     onClick={validatePromoCode}
-                    className="px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-gray-300 hover:text-white"
+                    disabled={processing}
+                    className="px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-gray-300 hover:text-white disabled:opacity-50"
                   >
                     Apply
                   </button>

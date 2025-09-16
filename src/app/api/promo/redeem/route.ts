@@ -12,14 +12,69 @@ export async function POST(req: Request) {
       }, { status: 400 });
     }
 
-    // Validate promo code first
-    const validateRes = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/promo/validate`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ promoCode, tier })
-    });
+    // Validate promo code first - use direct validation instead of fetch to avoid URL issues
+    const PROMO_CODES = {
+      'FREEPRO': {
+        type: 'free_subscription',
+        description: 'Free NyaltxPro Membership',
+        discount: 100,
+        validFor: ['nyaltxpro'],
+        maxUses: null,
+        active: true
+      },
+      'FREERACE': {
+        type: 'free_subscription', 
+        description: 'Free Race to Liberty Access',
+        discount: 100,
+        validFor: ['paddle', 'motor', 'helicopter'],
+        maxUses: null,
+        active: true
+      },
+      'ADMIN2024': {
+        type: 'free_subscription',
+        description: 'Admin Free Access',
+        discount: 100,
+        validFor: ['nyaltxpro', 'paddle', 'motor', 'helicopter'],
+        maxUses: null,
+        active: true
+      },
+      'NYAX10': {
+        type: 'percentage_discount',
+        description: '10% Discount',
+        discount: 10,
+        validFor: ['nyaltxpro', 'paddle', 'motor', 'helicopter'],
+        maxUses: null,
+        active: true
+      },
+      'NYAX50': {
+        type: 'percentage_discount',
+        description: '50% Discount',
+        discount: 50,
+        validFor: ['nyaltxpro', 'paddle', 'motor', 'helicopter'],
+        maxUses: null,
+        active: true
+      }
+    };
 
-    const validation = await validateRes.json();
+    const code = promoCode.trim().toUpperCase();
+    const promo = PROMO_CODES[code as keyof typeof PROMO_CODES];
+
+    let validation;
+    if (!promo) {
+      validation = { valid: false, message: "Invalid promo code" };
+    } else if (!promo.active) {
+      validation = { valid: false, message: "This promo code has expired" };
+    } else if (!promo.validFor.includes(tier.toLowerCase())) {
+      validation = { valid: false, message: `This promo code is not valid for ${tier}` };
+    } else {
+      validation = { 
+        valid: true,
+        type: promo.type,
+        discount: promo.discount,
+        description: promo.description,
+        isFree: promo.discount === 100
+      };
+    }
     
     if (!validation.valid || !validation.isFree) {
       return NextResponse.json({ 
