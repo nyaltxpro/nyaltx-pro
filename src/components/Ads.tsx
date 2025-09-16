@@ -63,6 +63,15 @@ const Ads = () => {
     return () => { active = false; clearInterval(id); };
   }, []);
 
+  // Apply filters and duplicate items for seamless scroll
+  const filtered = useMemo(() => {
+    return listings.filter((t) => {
+      const sym = (t.tokenSymbol || '').toUpperCase();
+      const name = (t.tokenName || '').toUpperCase();
+      return !EXCLUDE_SYMBOLS.has(sym) && !EXCLUDE_SYMBOLS.has(name);
+    });
+  }, [listings, EXCLUDE_SYMBOLS]);
+
   // Ticker animation setup
   useEffect(() => {
     if (!tickerRef.current || filtered.length === 0) return;
@@ -91,15 +100,6 @@ const Ads = () => {
       if (animationId) cancelAnimationFrame(animationId);
     };
   }, [filtered.length, isHovering]);
-
-  // Apply filters and duplicate items for seamless scroll
-  const filtered = useMemo(() => {
-    return listings.filter((t) => {
-      const sym = (t.tokenSymbol || '').toUpperCase();
-      const name = (t.tokenName || '').toUpperCase();
-      return !EXCLUDE_SYMBOLS.has(sym) && !EXCLUDE_SYMBOLS.has(name);
-    });
-  }, [listings, EXCLUDE_SYMBOLS]);
 
   // Duplicate items for seamless ticker effect
   const tickerItems = useMemo(() => {
