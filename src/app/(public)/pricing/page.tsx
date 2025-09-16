@@ -11,7 +11,7 @@ import { useAppKit } from "@reown/appkit/react";
 import ConnectWalletButton from "@/components/ConnectWalletButton";
 import { TokenETH, TokenIcon } from "@web3icons/react";
 
-// Pricing tiers in USD
+// Pricing tiers in USD (Race to Liberty tiers)
 const TIERS = [
   { id: "paddle", name: "Paddle Boat", description: "1 week on Recently Updated.", priceUSD: 300 },
   { id: "motor", name: "Motor Boat", description: "1 month placement.", priceUSD: 500 },
@@ -253,8 +253,7 @@ export default function PricingPage() {
         <div className="flex items-start justify-between gap-4 mb-6">
           <div>
             <h1 className="text-7xl md:text-7xl font-extrabold tracking-tight bg-clip-text my-5 p-2 text-transparent bg-gradient-to-r from-cyan-400 to-indigo-400">Pricing</h1>
-
-            <p className="text-gray-300 mt-2 max-w-2xl">A Statue of Liberty–themed campaign where crypto projects compete in the "Race to Liberty" to gain visibility. All participants are eligible to appear on the popular podcast Off Road.</p>
+            <p className="text-gray-300 mt-2 max-w-2xl">Start with <strong>NyaltxPro</strong> to unlock your project profile and media. Then upgrade to the <strong>Race to Liberty</strong> campaign for broader visibility.</p>
           </div>
           <div className="flex items-center gap-2">
             {chain?.name && (
@@ -264,16 +263,80 @@ export default function PricingPage() {
           </div>
         </div>
 
-      {!isPro && (
-        <div className="p-4 mb-6 rounded-md border border-amber-400 bg-amber-950/30 text-amber-200">
-          <strong>NYALTX Pro required:</strong> You must sign up for <strong>NYALTX Pro</strong> before joining the Race or purchasing a tier.
-          <div className="mt-2">
-            <Link className="underline text-amber-300" href="/pro-signup">Sign up for NYALTX Pro</Link>
+      {/* NyaltxPro primary offer */}
+      <section aria-labelledby="nyaltxpro" className="mb-10">
+        <h2 id="nyaltxpro" className="text-2xl font-bold text-white mb-4">NyaltxPro</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className={`group relative border border-white/10 rounded-2xl p-5 bg-gradient-to-b from-white/5 to-white/[0.03] backdrop-blur-md flex flex-col min-h-[360px] transition-all duration-500 ease-out hover:-translate-y-1 hover:shadow-[0_0_40px_-10px_rgba(6,182,212,0.4)]`}>
+            <span className="absolute -top-2 right-4 text-[10px] uppercase tracking-wider px-2 py-1 rounded-full bg-cyan-600 text-black font-bold shadow shadow-cyan-500/30">Start Here</span>
+            <h3 className="text-xl font-semibold mb-1">NyaltxPro Membership</h3>
+            <p className="text-gray-400 text-sm mb-4">Unlock your project profile on NYALTX.</p>
+            <div className="mb-4">
+              <div className="text-3xl font-bold">$200</div>
+            </div>
+            <ul className="text-sm text-gray-300 space-y-1 mb-4 list-disc pl-5">
+              <li>Dedicated project profile page</li>
+              <li>Social media links (Twitter/X, Telegram, Website, etc.)</li>
+              <li>Embedded project video
+                <span className="text-gray-400"> — default video provided if none purchased</span>
+              </li>
+            </ul>
+            <div className="mt-auto flex flex-col gap-2">
+              <button
+                onClick={() => router.push(`/pricing/checkout/nyaltxpro?method=eth`)}
+                className="w-full py-2 rounded-lg border border-zinc-600 text-white font-medium hover:bg-indigo-500"
+              >
+                <span className="inline-flex items-center gap-2"><Image src="/crypto-icons/color/eth.svg" width={16} height={16} alt="eth"/> Pay $200 with ETH</span>
+              </button>
+              <button
+                onClick={() => router.push(`/pricing/checkout/nyaltxpro?method=usdt`)}
+                className="w-full py-2 rounded-lg border border-zinc-600 text-white font-medium hover:bg-emerald-500"
+              >
+                <span className="inline-flex items-center gap-2"><Image src="/crypto-icons/color/usdt.svg" width={16} height={16} alt="usdt"/> Pay $200 with USDT</span>
+              </button>
+              <button
+                onClick={() => router.push(`/pricing/checkout/nyaltxpro?method=nyax`)}
+                className="w-full py-2 rounded-lg border border-zinc-600 text-white font-medium hover:bg-cyan-500"
+              >
+                <span className="inline-flex items-center gap-2"><Image src="/logo.png" width={16} height={16} alt="nyax"/> Pay $160 with NYAX (20% off)</span>
+              </button>
+            </div>
+            {isPro && (
+              <div className="mt-3 text-sm text-cyan-300">
+                You have NyaltxPro! Ready to gain more visibility? <a href="#race" className="underline">Upgrade to Race to Liberty</a>.
+              </div>
+            )}
+          </div>
+
+          {/* Visual or banner teaser */}
+          <div className="relative border border-white/10 rounded-2xl overflow-hidden">
+            <Image src="/banner/1.png" alt="Race to Liberty" fill className="object-cover opacity-80" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+            <div className="absolute bottom-4 left-4 right-4">
+              <div className="text-white text-xl font-semibold">Race to Liberty</div>
+              <p className="text-gray-200 text-sm">After NyaltxPro, boost your exposure with our Statue of Liberty–themed campaign.</p>
+            </div>
           </div>
         </div>
-      )}
+      </section>
 
-      {/* Cards */}
+      {/* Race to Liberty Section */}
+      <section id="race" aria-labelledby="race-title" className="mt-12">
+        <div className="flex items-center justify-between mb-4">
+          <h2 id="race-title" className="text-2xl font-bold text-white">Race to Liberty</h2>
+        </div>
+        <div className="relative w-full h-40 rounded-xl overflow-hidden mb-6 border border-white/10">
+          <Image src="/banner/2.png" alt="Race to Liberty Banner" fill className="object-cover" />
+          <div className="absolute inset-0 bg-black/30" />
+        </div>
+
+        {!isPro && (
+          <div className="p-4 mb-6 rounded-md border border-amber-400 bg-amber-950/30 text-amber-200">
+            <strong>NyaltxPro required:</strong> Please purchase <strong>NyaltxPro</strong> to participate in Race to Liberty tiers.
+          </div>
+        )}
+
+        {/* Cards */}
 
       {error && (
         <div className="mb-6 p-3 rounded-md border border-red-500 bg-red-900/30 text-red-200">
@@ -346,21 +409,21 @@ export default function PricingPage() {
                   <span className="inline-flex items-center gap-2"><Image src="/file.svg" width={16} height={16} alt="card"/> Pay with Card (Stripe)</span>
                 </button> */}
                 <button
-                  disabled={busy !== null}
+                  disabled={!isPro || busy !== null}
                   onClick={() => router.push(`/pricing/checkout/${t.id}?method=eth`)}
                   className="w-full py-2 rounded-lg border border-zinc-600 text-white font-medium hover:bg-indigo-500 disabled:opacity-50"
                 >
                   <span className="inline-flex items-center gap-2"><TokenETH  /> Pay with ETH</span>
                 </button>
                 <button
-                  disabled={busy !== null}
+                  disabled={!isPro || busy !== null}
                   onClick={() => router.push(`/pricing/checkout/${t.id}?method=usdt`)}
                   className="w-full py-2 rounded-lg border border-zinc-600 text-white font-medium hover:bg-emerald-500 disabled:opacity-50"
                 >
                   <span className="inline-flex items-center gap-2"><Image src="/crypto-icons/color/usdt.svg" width={16} height={16} alt="usdt"/>  Pay with USDT</span>
                 </button>
                 <button
-                  disabled={busy !== null}
+                  disabled={!isPro || busy !== null}
                   onClick={() => router.push(`/pricing/checkout/${t.id}?method=nyax`)}
                   className="w-full py-2 rounded-lg border border-zinc-600 text-white font-medium hover:bg-cyan-500 disabled:opacity-50"
                 >
@@ -371,6 +434,8 @@ export default function PricingPage() {
           );
         })}
       </div>
+
+      </section>
 
       <div className="mt-10 text-sm text-gray-400">
         <p>Accepted payment methods: major credit cards (via Stripe), ETH, USDT, or NYAX token (with 20% discount).</p>

@@ -8,19 +8,22 @@ import { FaWallet, FaShieldAlt, FaCheckCircle, FaInfoCircle } from 'react-icons/
 type Product = { id: number; name: string; desc: string; priceUsd: number; image: string; qty: number };
 
 export default function Web3Checkout({ selectedTier }: { selectedTier?: string }) {
-  // Example products; could be dynamic based on selectedTier
+  // Products for pricing flow
   const baseProducts: Record<string, Product[]> = {
-    free: [{ id: 1, name: 'Free Plan', desc: 'Basic access', priceUsd: 0, image: '/logo.png', qty: 1 }],
-    pro: [
-      { id: 1, name: 'Pro Plan', desc: 'Advanced analytics and alerts', priceUsd: 19.99, image: '/logo.png', qty: 1 },
+    nyaltxpro: [
+      { id: 1, name: 'NyaltxPro Membership', desc: 'Project profile + socials + video', priceUsd: 200, image: '/logo.png', qty: 1 },
     ],
-    premium: [
-      { id: 1, name: 'Premium Plan', desc: 'All Pro features + Signals', priceUsd: 39.99, image: '/logo.png', qty: 1 },
-      { id: 2, name: 'Premium Support', desc: '24/7 concierge support', priceUsd: 9.99, image: '/logo.png', qty: 1 },
+    paddle: [
+      { id: 1, name: 'Race to Liberty — Paddle Boat', desc: '1 week on Recently Updated', priceUsd: 300, image: '/banner/1.png', qty: 1 },
+    ],
+    motor: [
+      { id: 1, name: 'Race to Liberty — Motor Boat', desc: '1 month placement', priceUsd: 500, image: '/banner/2.png', qty: 1 },
+    ],
+    helicopter: [
+      { id: 1, name: 'Race to Liberty — Helicopter', desc: '3 months placement', priceUsd: 700, image: '/banner/3.png', qty: 1 },
     ],
     default: [
-      { id: 1, name: 'Pro Plan', desc: 'Advanced analytics and alerts', priceUsd: 19.99, image: '/logo.png', qty: 1 },
-      { id: 2, name: 'Premium Support', desc: '24/7 concierge support', priceUsd: 9.99, image: '/logo.png', qty: 1 },
+      { id: 1, name: 'NyaltxPro Membership', desc: 'Project profile + socials + video', priceUsd: 200, image: '/logo.png', qty: 1 },
     ],
   };
 

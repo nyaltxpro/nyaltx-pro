@@ -22,7 +22,8 @@ import {
   FaFire,
   FaCoins,
   FaChartLine,
-  FaCog
+  FaCog,
+  FaNewspaper
 } from 'react-icons/fa';
 import Image from 'next/image';
 
@@ -103,6 +104,7 @@ export default function Sidebar({ isMobileMenuOpen, toggleMobileMenu }: SidebarP
     // { icon: <FaExchangeAlt />, text: 'Pairs', href: '/pairs' },
     { icon: <FaGift />, text: 'Airdrops', href: '/dashboard/airdrops' },
     { icon: <FaRocket />, text: 'Trending', href: '/dashboard/trending' },
+    { icon: <FaNewspaper />, text: 'News', href: '/dashboard/news' },
     { icon: <FaCoins />, text: 'Create Token', href: '/dashboard/create-token' },
     { icon: <FaPlus />, text: 'Register Token', href: '/dashboard/register-token' },
     { icon: <FaShoppingCart />, text: 'Checkout', href: '/dashboard/checkout' },

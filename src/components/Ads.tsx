@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 export interface BannerItem {
@@ -33,7 +33,10 @@ const Ads = () => {
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [speedMs, setSpeedMs] = useState<number>(30);
+  const [current, setCurrent] = useState(0);
+  const [isHovering, setIsHovering] = useState(false);
+  const [itemsPerSlide, setItemsPerSlide] = useState(3);
+  const autoplayRef = useRef<number | null>(null);
 
   // Exclusion list (by symbol or name). Add more symbols here as needed.
   const EXCLUDE_SYMBOLS = useMemo(() => new Set<string>([
@@ -62,6 +65,19 @@ const Ads = () => {
     return () => { active = false; clearInterval(id); };
   }, []);
 
+  // Responsive items per slide
+  useEffect(() => {
+    const compute = () => {
+      const w = window.innerWidth;
+      if (w < 640) setItemsPerSlide(1);
+      else if (w < 1024) setItemsPerSlide(2);
+      else setItemsPerSlide(3);
+    };
+    compute();
+    window.addEventListener('resize', compute);
+    return () => window.removeEventListener('resize', compute);
+  }, []);
+
   // Apply filters and duplicate items for seamless scroll
   const filtered = useMemo(() => {
     return listings.filter((t) => {
@@ -71,9 +87,38 @@ const Ads = () => {
     });
   }, [listings, EXCLUDE_SYMBOLS]);
 
-  const infiniteItems = useMemo(() => {
-    return [...filtered, ...filtered, ...filtered];
-  }, [filtered]);
+  // Chunk into slides
+  const slides = useMemo(() => {
+    const chunks: Listing[][] = [];
+    if (filtered.length === 0) return chunks;
+    for (let i = 0; i < filtered.length; i += itemsPerSlide) {
+      chunks.push(filtered.slice(i, i + itemsPerSlide));
+    }
+    // Ensure at least 1 slide
+    return chunks.length ? chunks : [filtered.slice(0, itemsPerSlide)];
+  }, [filtered, itemsPerSlide]);
+
+  const total = slides.length;
+
+  // Autoplay
+  useEffect(() => {
+    if (total <= 1) return; // nothing to autoplay
+    if (isHovering) return; // paused
+    if (autoplayRef.current) window.clearInterval(autoplayRef.current);
+    autoplayRef.current = window.setInterval(() => {
+      setCurrent((c) => (c + 1) % total);
+    }, 4000);
+    return () => {
+      if (autoplayRef.current) window.clearInterval(autoplayRef.current);
+    };
+  }, [total, isHovering]);
+
+  // Clamp current if total shrinks
+  useEffect(() => {
+    if (current > 0 && current >= total) {
+      setCurrent(total - 1);
+    }
+  }, [total]);
 
   const handleClick = (t: Listing) => {
     const params = new URLSearchParams();
@@ -83,62 +128,96 @@ const Ads = () => {
     router.push(`/dashboard/trade?${params.toString()}`);
   };
 
+  // Empty state safeguard
+  if (total === 0) {
+    return null;
+  }
+
   return (
     <div className="w-full py-4 overflow-hidden">
       <div className="mx-auto px-4">
-        <div className="relative">
-          <div className="flex animate-scroll gap-4">
-            {infiniteItems.map((item, index) => (
-              <div 
-                key={`${item.id}-${index}`} 
-                className="rounded-lg overflow-hidden shadow-lg flex-shrink-0 w-80 flex flex-col hover:scale-105 transition-transform duration-300 cursor-pointer"
-                onClick={() => handleClick(item as unknown as Listing)}
-              >
-                <div className="h-48 w-full relative">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={(item as any).imageUri || '/crypto-icons/color/generic.svg'}
-                    alt={(item as any).tokenName || (item as any).tokenSymbol || 'token'}
-                    className="w-full h-full object-cover"
-                    onError={(e) => { (e.target as HTMLImageElement).src = '/crypto-icons/color/generic.svg'; }}
-                  />
-                  <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-                    {(item as any).blockchain || 'token'}
+        <div
+          className="relative"
+          onMouseEnter={() => setIsHovering(true)}
+          onMouseLeave={() => setIsHovering(false)}
+        >
+          {/* Slides viewport */}
+          <div className="overflow-hidden">
+            <div
+              className="flex transition-transform duration-500 ease-out"
+              style={{ transform: `translateX(-${(current * 100) / total}%)`, width: `${total * 100}%` }}
+            >
+              {slides.map((slide, i) => (
+                <div key={i} className="w-full flex-shrink-0 px-1" style={{ width: `${100 / total}%` }}>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {slide.map((item) => (
+                      <div
+                        key={item.id}
+                        className="rounded-lg overflow-hidden shadow-lg w-full flex flex-col hover:scale-[1.01] transition-transform duration-300 cursor-pointer bg-black/30 border border-gray-800"
+                        onClick={() => handleClick(item)}
+                      >
+                        <div className="h-44 w-full relative">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={item.imageUri || '/crypto-icons/color/generic.svg'}
+                            alt={item.tokenName || item.tokenSymbol || 'token'}
+                            className="w-full h-full object-cover"
+                            onError={(e) => { (e.target as HTMLImageElement).src = '/crypto-icons/color/generic.svg'; }}
+                          />
+                          <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                            {item.blockchain || 'token'}
+                          </div>
+                        </div>
+                        <div className="p-4 flex-grow">
+                          <h3 className="text-base font-semibold text-white mb-1">{item.tokenSymbol || item.tokenName}</h3>
+                          <p className="text-gray-400 text-sm mb-1">{item.tokenName || ''}</p>
+                          <p className="text-gray-500 text-xs truncate">{item.contractAddress}</p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
-                <div className="p-4 flex-grow">
-                  <h3 className="text-lg font-semibold text-white mb-1">{(item as any).tokenSymbol || (item as any).tokenName}</h3>
-                  <p className="text-gray-400 text-sm mb-1">{(item as any).tokenName || ''}</p>
-                  <p className="text-gray-500 text-xs truncate">{(item as any).contractAddress}</p>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
+
+          {/* Arrows */}
+          {total > 1 && (
+            <>
+              <button
+                aria-label="Previous"
+                onClick={() => setCurrent((c) => (c - 1 + total) % total)}
+                className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-black/60 hover:bg-black/80 text-white w-9 h-9 flex items-center justify-center border border-white/10"
+              >
+                ‹
+              </button>
+              <button
+                aria-label="Next"
+                onClick={() => setCurrent((c) => (c + 1) % total)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-black/60 hover:bg-black/80 text-white w-9 h-9 flex items-center justify-center border border-white/10"
+              >
+                ›
+              </button>
+            </>
+          )}
+
+          {/* Dots */}
+          {total > 1 && (
+            <div className="mt-3 flex items-center justify-center gap-2">
+              {Array.from({ length: total }).map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrent(i)}
+                  aria-label={`Go to slide ${i + 1}`}
+                  className={`h-2.5 rounded-full transition-all ${
+                    current === i ? 'bg-cyan-500 w-6' : 'bg-gray-700 w-2.5 hover:bg-gray-600'
+                  }`}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
-      
-      <style jsx>{`
-        @keyframes scroll {
-          0% {
-            transform: translateX(0);
-          }
-          100% {
-            transform: translateX(calc(-320px * ${listings.length} - ${listings.length * 16}px));
-          }
-        }
-        
-        .animate-scroll {
-          animation: scroll ${speedMs}s linear infinite;
-        }
-        
-        .animate-scroll:hover {
-          animation-play-state: paused;
-        }
-        
-        div::-webkit-scrollbar {
-          display: none;
-        }
-      `}</style>
     </div>
   );
 }

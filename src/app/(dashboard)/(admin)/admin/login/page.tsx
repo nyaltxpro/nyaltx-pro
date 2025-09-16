@@ -2,6 +2,8 @@
 
 import { Suspense, useState, FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useAccount, useSignMessage } from "wagmi";
+import { useAppKit } from "@reown/appkit/react";
 
 export default function AdminLoginPage() {
   return (
@@ -19,6 +21,11 @@ function AdminLoginInner() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [show, setShow] = useState(false);
+  const [wError, setWError] = useState<string | null>(null);
+  const [wLoading, setWLoading] = useState(false);
+  const { address, isConnected } = useAccount();
+  const { open } = useAppKit();
+  const { signMessageAsync } = useSignMessage();
 
   const from = params.get("from") || "/admin";
 
@@ -45,6 +52,51 @@ function AdminLoginInner() {
     }
   }
 
+  async function handleWalletLogin() {
+    setWError(null);
+    try {
+      // If not connected, open wallet modal
+      if (!isConnected) {
+        await open();
+      }
+      if (!address) {
+        throw new Error("Wallet not connected");
+      }
+
+      setWLoading(true);
+      // 1) Fetch nonce (sets HttpOnly cookie)
+      const nonceRes = await fetch("/api/admin/login/nonce", { method: "GET" });
+      if (!nonceRes.ok) {
+        throw new Error("Failed to get nonce");
+      }
+      const { nonce } = await nonceRes.json();
+
+      // 2) Build message and sign
+      const domain = process.env.NEXT_PUBLIC_APP_DOMAIN || "nyax-admin";
+      const ts = Date.now();
+      const addrLower = address.toLowerCase();
+      const message = `NYAX Admin Login\nDomain: ${domain}\nAddress: ${addrLower}\nNonce: ${nonce}\nTimestamp: ${ts}`;
+      const signature = await signMessageAsync({ message });
+
+      // 3) Verify server-side, which sets the admin cookie
+      const verifyRes = await fetch("/api/admin/login/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ address: addrLower, signature, nonce, timestamp: ts }),
+      });
+      if (!verifyRes.ok) {
+        const data = await verifyRes.json().catch(() => ({}));
+        throw new Error(data?.message || "Wallet login failed");
+      }
+
+      router.replace(from);
+    } catch (err: any) {
+      setWError(err.message || "Wallet login failed");
+    } finally {
+      setWLoading(false);
+    }
+  }
+
   return (
     <div className="relative min-h-[80vh] flex items-center justify-center px-4 py-10">
       {/* Background */}
@@ -63,6 +115,11 @@ function AdminLoginInner() {
           {error && (
             <div className="mb-4 rounded-md border border-red-500/30 bg-red-500/10 text-red-300 px-3 py-2 text-sm">
               {error}
+            </div>
+          )}
+          {wError && (
+            <div className="mb-4 rounded-md border border-red-500/30 bg-red-500/10 text-red-300 px-3 py-2 text-sm">
+              {wError}
             </div>
           )}
 
@@ -109,6 +166,28 @@ function AdminLoginInner() {
               {loading ? "Signing in..." : "Sign In"}
             </button>
           </form>
+
+          {/* Divider */}
+          <div className="my-5 flex items-center gap-3">
+            <div className="h-px flex-1 bg-gray-800" />
+            <span className="text-xs text-gray-400">or</span>
+            <div className="h-px flex-1 bg-gray-800" />
+          </div>
+
+          {/* Web3 Wallet Login */}
+          <div className="space-y-2">
+            <button
+              type="button"
+              onClick={handleWalletLogin}
+              disabled={wLoading}
+              className="w-full rounded-md border border-cyan-700/60 bg-cyan-900/20 hover:bg-cyan-900/30 disabled:opacity-50 px-4 py-2 font-medium transition-colors"
+            >
+              {wLoading ? "Processing..." : isConnected ? "Sign in with Wallet" : "Connect Wallet to Sign In"}
+            </button>
+            <div className="text-[11px] text-gray-500">
+              Only pre-approved admin wallet addresses can access. Configure via <code>ADMIN_WALLET_ADDRESSES</code>.
+            </div>
+          </div>
 
           <div className="mt-4 text-[12px] text-gray-500">
             By continuing you agree to the acceptable use of this dashboard.
