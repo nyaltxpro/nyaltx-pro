@@ -187,12 +187,14 @@ const Header = ({ toggleMobileMenu }: HeaderProps) => {
                 {/* <Link href="/pricing" className="p-2 rounded-full hover:bg-gray-700 text-sm font-medium">
                   Pricing
                 </Link> */}
-                <button className="p-2 rounded-full hover:bg-gray-700">
+                <Link href="/dashboard/settings" className="p-2 rounded-full hover:bg-gray-700">
                   <FiSettings/>
-                </button>
-                <button className="p-2 rounded-full hover:bg-gray-700">
+                  </Link>
+               
+                <Link href="/dashboard/favorites"className="p-2 rounded-full hover:bg-gray-700">
                   <SlStar/>
-                </button>
+                </Link>
+               
                 <ConnectWalletButton />
               </div>
             </div>

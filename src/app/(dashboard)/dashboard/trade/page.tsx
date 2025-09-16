@@ -4,6 +4,8 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
+import { useAccount } from 'wagmi';
+import toast, { Toaster } from 'react-hot-toast';
 import tokens from '@/data/tokens.json';
 import {
   FaChartLine,
@@ -45,7 +47,42 @@ import { getCryptoIconUrl } from '@/utils/cryptoIcons';
 import { getCryptoName } from '@/utils/cryptoNames';
 import nyaxTokensData from '../../../../../nyax-tokens-data.json';
 
-// Dynamically import ApexCharts to avoid SSR issues
+// Chain name mapping utility
+const getChainName = (chainId: number): string => {
+  const chainNames: { [key: number]: string } = {
+    1: 'ethereum',
+    56: 'bsc',
+    137: 'polygon',
+    42161: 'arbitrum',
+    10: 'optimism',
+    8453: 'base',
+    43114: 'avalanche',
+    250: 'fantom',
+    25: 'cronos',
+    100: 'xdai',
+    1284: 'moonbeam',
+    1285: 'moonriver',
+    42220: 'celo',
+    1666600000: 'harmony',
+    128: 'heco',
+    66: 'okex',
+    321: 'kcc',
+    1313161554: 'aurora',
+    2000: 'dogechain',
+    199: 'bttc',
+    1088: 'metis',
+    1101: 'polygon-zkevm',
+    324: 'zksync',
+    59144: 'linea',
+    534352: 'scroll',
+    5000: 'mantle',
+    7777777: 'zora',
+    81457: 'blast'
+  };
+  return chainNames[chainId] || 'ethereum';
+};
+
+// Dynamic import for TradingView widget to avoid SSR issues
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
 // TradingView Chart component is imported from react-ts-tradingview-widgets
@@ -267,12 +304,14 @@ export default function Page() {
 
 // Main component that accepts params directly
 function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam, videoId }: { baseToken: string, quoteToken: string, chainParam?: string, addressParam?: string, videoId?: string }) {
+  const { address, isConnected } = useAccount();
 
   const [activeTimeframe, setActiveTimeframe] = useState('15m');
   const [chartData, setChartData] = useState(candlestickData);
   const [chartVolume, setChartVolume] = useState(volumeData);
   const [chartMA, setChartMA] = useState(maData);
   const [favorited, setFavorited] = useState(false);
+  const [isLoadingFavorite, setIsLoadingFavorite] = useState(false);
   const [activeTab, setActiveTab] = useState('trades');
   const [orderType, setOrderType] = useState('buy');
   const [selectedIndicators, setSelectedIndicators] = useState(['MA20']);
@@ -291,6 +330,149 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
   const [headerImageUrl, setHeaderImageUrl] = useState<string | null>(null);
   const [dexPriceUsd, setDexPriceUsd] = useState<string | null>(null);
   const [dexChange24h, setDexChange24h] = useState<number | null>(null);
+  const [userFavorites, setUserFavorites] = useState<any[]>([]);
+  const [isLoadingFavorites, setIsLoadingFavorites] = useState(false);
+
+  // Fetch user favorites
+  useEffect(() => {
+    const fetchUserFavorites = async () => {
+      if (!isConnected || !address) {
+        setUserFavorites([]);
+        return;
+      }
+      
+      setIsLoadingFavorites(true);
+      try {
+        const response = await fetch(`/api/favorites?wallet=${address}`);
+        if (response.ok) {
+          const { favorites } = await response.json();
+          setUserFavorites(favorites.slice(0, 4)); // Limit to 4 items
+        }
+      } catch (error) {
+        console.error('Error fetching user favorites:', error);
+      } finally {
+        setIsLoadingFavorites(false);
+      }
+    };
+
+    fetchUserFavorites();
+  }, [isConnected, address]);
+
+  // Check if token is favorited on component mount
+  useEffect(() => {
+    const checkFavoriteStatus = async () => {
+      if (!isConnected || !address || !addressParam) return;
+      
+      try {
+        const response = await fetch(`/api/favorites?wallet=${address}`);
+        if (response.ok) {
+          const { favorites } = await response.json();
+          const isFavorited = favorites.some((fav: any) => 
+            fav.token_address.toLowerCase() === addressParam.toLowerCase()
+          );
+          setFavorited(isFavorited);
+        }
+      } catch (error) {
+        console.error('Error checking favorite status:', error);
+      }
+    };
+
+    checkFavoriteStatus();
+  }, [isConnected, address, addressParam]);
+
+  // Handle favorite toggle
+  const handleFavorite = async () => {
+    if (!isConnected) {
+      toast.error('Please connect your wallet to add favorites');
+      return;
+    }
+
+    if (!address || !addressParam) {
+      toast.error('Missing wallet or token information');
+      return;
+    }
+
+    setIsLoadingFavorite(true);
+
+    try {
+      const resolvedToken = resolveToken();
+      const tokenName = resolvedToken?.name || getCryptoName(baseToken);
+      const chainId = chainParam ? getChainId(chainParam) : 1;
+
+      if (favorited) {
+        // Remove from favorites
+        const response = await fetch(`/api/favorites?wallet=${address}&token=${addressParam}&chain=${chainId}`, {
+          method: 'DELETE',
+        });
+
+        if (response.ok) {
+          setFavorited(false);
+          toast.success('Removed from favorites');
+          // Refresh favorites list
+          const favResponse = await fetch(`/api/favorites?wallet=${address}`);
+          if (favResponse.ok) {
+            const { favorites } = await favResponse.json();
+            setUserFavorites(favorites.slice(0, 4));
+          }
+        } else {
+          const { error } = await response.json();
+          toast.error(error || 'Failed to remove favorite');
+        }
+      } else {
+        // Add to favorites
+        const response = await fetch('/api/favorites', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            walletAddress: address,
+            tokenAddress: addressParam,
+            tokenSymbol: baseToken,
+            tokenName: tokenName,
+            chainId: chainId,
+          }),
+        });
+
+        if (response.ok) {
+          setFavorited(true);
+          toast.success('Added to favorites');
+          // Refresh favorites list
+          const favResponse = await fetch(`/api/favorites?wallet=${address}`);
+          if (favResponse.ok) {
+            const { favorites } = await favResponse.json();
+            setUserFavorites(favorites.slice(0, 4));
+          }
+        } else {
+          const { error } = await response.json();
+          if (response.status === 409) {
+            toast.error('Token already in favorites');
+          } else {
+            toast.error(error || 'Failed to add favorite');
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+      toast.error('Something went wrong');
+    } finally {
+      setIsLoadingFavorite(false);
+    }
+  };
+
+  // Helper function to get chain ID from chain parameter
+  const getChainId = (chain: string): number => {
+    const chainMap: { [key: string]: number } = {
+      'ethereum': 1,
+      'polygon': 137,
+      'bsc': 56,
+      'arbitrum': 42161,
+      'optimism': 10,
+      'avalanche': 43114,
+      'solana': 101,
+    };
+    return chainMap[chain.toLowerCase()] || 1;
+  };
 
   // Helper: pick token metadata from catalog
   const resolveToken = React.useCallback(() => {
@@ -604,11 +786,16 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
 
               <div className="flex items-center gap-3">
                 <button
-                  className={`p-2 rounded-full ${favorited ? 'text-yellow-400 bg-yellow-400/10' : 'text-gray-400 hover:text-white bg-[#1a2932]'}`}
-                  onClick={() => setFavorited(!favorited)}
-                  title={favorited ? 'Unfavorite' : 'Favorite'}
+                  className={`p-2 rounded-full transition-all duration-200 ${
+                    favorited 
+                      ? 'text-yellow-400 bg-yellow-400/10 hover:bg-yellow-400/20' 
+                      : 'text-gray-400 hover:text-white bg-[#1a2932] hover:bg-[#243540]'
+                  } ${isLoadingFavorite ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  onClick={handleFavorite}
+                  disabled={isLoadingFavorite}
+                  title={favorited ? 'Remove from favorites' : 'Add to favorites'}
                 >
-                  <FaStar />
+                  <FaStar className={isLoadingFavorite ? 'animate-pulse' : ''} />
                 </button>
                 <button
                   className="p-2 rounded-full text-gray-400 hover:text-white bg-[#1a2932]"
@@ -755,39 +942,7 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
                     />
                   </div>
 
-                  {/* <table className="min-w-full">
-                    <thead>
-                      <tr className="text-left text-gray-400 text-sm">
-                        <th className="pb-3 font-medium">Time</th>
-                        <th className="pb-3 font-medium">Type</th>
-                        <th className="pb-3 font-medium">Price</th>
-                        <th className="pb-3 font-medium">Amount ($)</th>
-                        <th className="pb-3 font-medium">Amount (Token)</th>
-                        <th className="pb-3 font-medium">Tx Hash</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {tradingHistory.map((trade) => (
-                        <tr key={trade.id} className="border-t border-gray-800">
-                          <td className="py-3 flex items-center">
-                            <FaRegClock className="text-gray-500 mr-2" />
-                            {trade.time}
-                          </td>
-                          <td className={`py-3 ${trade.type === 'Buy' ? 'text-green-500' : 'text-red-500'}`}>
-                            {trade.type}
-                          </td>
-                          <td className="py-3">{trade.price}</td>
-                          <td className="py-3">{trade.amount}</td>
-                          <td className="py-3">{trade.amountToken}</td>
-                          <td className="py-3">
-                            <a href="#" className="text-blue-400 hover:underline">
-                              {trade.txHash}
-                            </a>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table> */}
+               
                 </div>
               </div>
             )}
@@ -961,31 +1116,79 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
               </div>
             </div>
 
-            <div className="bg-[#1a2932] rounded-lg p-3 mb-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center mr-2 overflow-hidden">
-                    <img src="/logo.png" alt="Token Logo" className="w-full h-full object-cover" />
-                  </div>
-                  <div>
-                    <div className="flex items-center">
-                      <span className="font-medium">MAR...</span>
-                      <span className="text-gray-400 ml-2">/ Meet Martin.</span>
+            {isLoadingFavorites ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-400 mx-auto mb-4"></div>
+                <p className="text-gray-400">Loading favorites...</p>
+              </div>
+            ) : userFavorites.length > 0 ? (
+              <div className="space-y-3">
+                {userFavorites.map((favorite, index) => (
+                  <div 
+                    key={favorite._id || index}
+                    className="bg-[#1a2932] rounded-lg p-3 hover:bg-[#243540] transition-colors cursor-pointer"
+                    onClick={() => {
+                      const params = new URLSearchParams();
+                      params.set('base', favorite.tokenSymbol);
+                      params.set('address', favorite.tokenAddress);
+                      if (favorite.chainId !== 1) {
+                        const chainName = getChainName(favorite.chainId);
+                        if (chainName) params.set('chain', chainName);
+                      }
+                      window.location.href = `/dashboard/trade?${params.toString()}`;
+                    }}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center mr-3 overflow-hidden bg-[#0f1923]">
+                          <Image
+                            src={getCryptoIconUrl(favorite.tokenSymbol)}
+                            alt={favorite.tokenSymbol}
+                            width={32}
+                            height={32}
+                            unoptimized
+                          />
+                        </div>
+                        <div>
+                          <div className="flex items-center">
+                            <span className="font-medium text-white">{favorite.tokenSymbol}</span>
+                            <span className="text-gray-400 ml-2 text-sm">/ {favorite.tokenName}</span>
+                          </div>
+                          <div className="text-xs text-gray-500 mt-1">
+                            {getChainName(favorite.chainId) || 'Ethereum'}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center">
+                        <FaStar className="text-yellow-400 text-sm" />
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div>
-                  <button className="bg-indigo-600 hover:bg-indigo-700 text-sm px-3 py-1 rounded">
-                    Ad
-                  </button>
-                </div>
+                ))}
+                {userFavorites.length >= 4 && (
+                  <div className="text-center pt-2">
+                    <button 
+                      onClick={() => window.location.href = '/dashboard/favorites'}
+                      className="text-cyan-400 hover:text-cyan-300 text-sm font-medium"
+                    >
+                      View all favorites →
+                    </button>
+                  </div>
+                )}
               </div>
-            </div>
-
-            <div className="text-center py-8">
-              <p className="text-xl mb-2">Your favorite list is empty!</p>
-              <p className="text-gray-400">Start building your favorite list by adding this pair.</p>
-            </div>
+            ) : !isConnected ? (
+              <div className="text-center py-8">
+                <FaWallet className="mx-auto text-4xl text-gray-400 mb-4" />
+                <p className="text-xl mb-2">Connect your wallet</p>
+                <p className="text-gray-400">Connect your wallet to view your favorite tokens</p>
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <FaStar className="mx-auto text-4xl text-gray-400 mb-4" />
+                <p className="text-xl mb-2">Your favorite list is empty!</p>
+                <p className="text-gray-400">Start building your favorite list by adding tokens.</p>
+              </div>
+            )}
           </div>
           {/* YouTube Video (below favorites) */}
           {/* <div className="bg-[#0f1923] rounded-xl p-4">
@@ -1024,8 +1227,34 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
           </div>
         </div>
       </div>
+      <Toaster 
+      position="top-right"
+      toastOptions={{
+        duration: 3000,
+        style: {
+          background: '#1a2932',
+          color: '#fff',
+          border: '1px solid #374151',
+        },
+        success: {
+          iconTheme: {
+            primary: '#10b981',
+            secondary: '#fff',
+          },
+        },
+        error: {
+          iconTheme: {
+            primary: '#ef4444',
+            secondary: '#fff',
+          },
+        },
+      }}
+    />
     </div >
-
+    
+ 
+ 
+    
   );
 }
 

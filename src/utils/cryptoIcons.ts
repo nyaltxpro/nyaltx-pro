@@ -42,8 +42,13 @@ const ccLogoMap: Record<string, string> = {
  * @returns The URL to the icon
  */
 export function getCryptoIconUrl(symbol: string): string {
+  // Handle undefined or null symbol
+  if (!symbol) {
+    return `/crypto-icons/color/generic.svg`;
+  }
+  
   // Convert symbol to uppercase for the map lookup
-  const upperSymbol = symbol;
+  const upperSymbol = symbol.toUpperCase();
   
   // Check if we have a custom PNG logo in the /cc directory
   if (ccLogoMap[upperSymbol]) {

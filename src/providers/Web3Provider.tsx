@@ -27,11 +27,11 @@ const metadata = {
 const modal = createAppKit({
     adapters: [wagmiAdapter],
     projectId,
-    networks: [mainnet, arbitrum,base,scroll,polygon],
+    networks: [mainnet, arbitrum, base, scroll, polygon],
     defaultNetwork: mainnet,
     metadata: metadata,
     features: {
-        analytics: true, // Optional - defaults to your Cloud configuration
+        analytics: true,
         connectMethodsOrder: ['wallet', 'social'],
         onramp: false
     },
@@ -39,10 +39,19 @@ const modal = createAppKit({
     enableInjected: true,
     enableEIP6963: true,
     enableCoinbase: true,
-    allWallets: 'HIDE',
+    allWallets: 'SHOW',
+    featuredWalletIds: [
+        'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96', // MetaMask
+        'fd20dc426fb37566d803205b19bbc1d4096b248ac04548e3cfb6b3a38bd033aa', // Coinbase
+        '4622a2b2d6af1c9844944291e5e7351a6aa24cd7b23099efac1b2fd875da31a0', // Trust Wallet
+    ],
+    themeMode: 'dark',
     themeVariables: {
         '--w3m-font-family': 'Roboto, sans-serif',
-      }
+        '--w3m-accent': '#00b8d8',
+        '--w3m-color-mix': '#00b8d8',
+        '--w3m-color-mix-strength': 20
+    }
 })
 
 function ContextProvider({ children, cookies }: { children: ReactNode; cookies: string | null }) {
