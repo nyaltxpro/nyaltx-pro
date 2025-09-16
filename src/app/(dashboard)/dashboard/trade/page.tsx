@@ -739,7 +739,7 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
             title="Uniswap Swap Widget"
           />
 
-          <iframe
+          {/* <iframe
             src={`https://raydium.io/swap/?inputCurrency=${addressParam}&outputCurrency=USDC`}
             height="660px"
             width="100%"
@@ -751,7 +751,7 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
               borderRadius: "10px",
               maxWidth: "960px",
             }}
-          ></iframe>
+          ></iframe> */}
 
         </div>
 
