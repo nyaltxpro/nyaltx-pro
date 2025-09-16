@@ -984,9 +984,9 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
     loop
     playsInline
     preload="metadata"
-    poster="/video/nyaltx-poster.jpg"
+    poster="https://drive.google.com/file/d/1NR2jHymQheSC7pE20yZI26lsEBmYX6nd/view?usp=sharing"
   >
-    <source src="/video/NYALTX Intro.mp4" type="video/mp4" />
+    <source src="https://drive.google.com/file/d/1NR2jHymQheSC7pE20yZI26lsEBmYX6nd/view?usp=sharing" type="video/mp4" />
     Your browser does not support the video tag.
   </video>
 </div>
