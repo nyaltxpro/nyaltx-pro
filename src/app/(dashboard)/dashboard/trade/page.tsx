@@ -540,7 +540,22 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
               More info <FaChevronDown className="inline ml-1" />
             </button>
           </div>
-          <SwapPage />
+          {/* <SwapPage /> */}
+          <iframe
+            src={`https://app.uniswap.org/#/swap?field=input&value=10&inputCurrency=${addressParam}`}
+            height="660px"
+            width="100%"
+            style={{
+              border: 0,
+              margin: "0 auto",
+              marginBottom: ".5rem",
+              display: "block",
+              borderRadius: "10px",
+              maxWidth: "960px",
+              minWidth: "300px",
+            }}
+            title="Uniswap Swap Widget"
+          />
         </div>
 
         {/* Right Column - Chart and Trades */}
@@ -978,16 +993,16 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
           <div>
             <div>
               <div className="w-full min-h-[500px] aspect-video">
-               
-               <iframe
-               className=" min-h-[500px] inset-0 w-full h-full rounded-lg"
-               src="https://www.youtube.com/embed/z8uiTA1cdWA?autoplay=1&mute=1"
-               title="YouTube video player"
-               frameBorder="0"
-               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-               referrerPolicy="strict-origin-when-cross-origin"
-               allowFullScreen
-             />
+
+                <iframe
+                  className=" min-h-[500px] inset-0 w-full h-full rounded-lg"
+                  src="https://www.youtube.com/embed/z8uiTA1cdWA?autoplay=1&mute=1"
+                  title="YouTube video player"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  allowFullScreen
+                />
               </div>
             </div>
 
