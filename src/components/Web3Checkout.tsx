@@ -114,7 +114,11 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
 
       // Switch to Sepolia if not already on it
       if (chain?.id !== SEPOLIA_CHAIN_ID) {
-        await switchChainAsync({ chainId: SEPOLIA_CHAIN_ID });
+        try {
+          await switchChainAsync({ chainId: SEPOLIA_CHAIN_ID });
+        } catch (switchError: any) {
+          throw new Error(`Failed to switch to Sepolia network: ${switchError?.message || 'Please add Sepolia network to your wallet'}`);
+        }
       }
 
       let txHash: string;
