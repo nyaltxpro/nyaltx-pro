@@ -540,7 +540,7 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
               More info <FaChevronDown className="inline ml-1" />
             </button>
           </div>
-            <SwapPage />
+          <SwapPage />
         </div>
 
         {/* Right Column - Chart and Trades */}
@@ -665,67 +665,67 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
             </div>
 
           </div>
-       
 
-        {/* Trades/Info Tabs */}
-        <div className="bg-[#0f1923] rounded-xl overflow-hidden">
-          <div className="flex border-b border-gray-800">
-            <button
-              className={`px-6 py-3 text-sm font-medium ${activeTab === 'trades'
-                ? 'text-blue-400 border-b-2 border-blue-400'
-                : 'text-gray-400 hover:text-gray-300'
-                }`}
-              onClick={() => setActiveTab('trades')}
-            >
-              Trades
-            </button>
-            <button
-              className={`px-6 py-3 text-sm font-medium ${activeTab === 'info'
-                ? 'text-blue-400 border-b-2 border-blue-400'
-                : 'text-gray-400 hover:text-gray-300'
-                }`}
-              onClick={() => setActiveTab('info')}
-            >
-              Info
-            </button>
-            <button
-              className={`px-6 py-3 text-sm font-medium ${activeTab === 'analytics'
-                ? 'text-blue-400 border-b-2 border-blue-400'
-                : 'text-gray-400 hover:text-gray-300'
-                }`}
-              onClick={() => setActiveTab('analytics')}
-            >
-              Analytics
-            </button>
-          </div>
 
-          {activeTab === 'trades' && (
-            <div className="p-4">
-              <div className="flex justify-between items-center mb-4">
-                <div className="relative">
-                  <input
-                    type="text"
-                    placeholder="Search transactions..."
-                    className="pl-9 pr-4 py-2 bg-[#1a2932] rounded-md text-white w-64 focus:outline-none"
-                  />
-                  <FaSearch className="absolute left-3 top-3 text-gray-400" />
-                </div>
-                <button className="p-2 bg-[#1a2932] rounded hover:bg-[#253440]">
-                  <FaFilter className="text-gray-400" />
-                </button>
-              </div>
+          {/* Trades/Info Tabs */}
+          <div className="bg-[#0f1923] rounded-xl overflow-hidden">
+            <div className="flex border-b border-gray-800">
+              <button
+                className={`px-6 py-3 text-sm font-medium ${activeTab === 'trades'
+                  ? 'text-blue-400 border-b-2 border-blue-400'
+                  : 'text-gray-400 hover:text-gray-300'
+                  }`}
+                onClick={() => setActiveTab('trades')}
+              >
+                Trades
+              </button>
+              <button
+                className={`px-6 py-3 text-sm font-medium ${activeTab === 'info'
+                  ? 'text-blue-400 border-b-2 border-blue-400'
+                  : 'text-gray-400 hover:text-gray-300'
+                  }`}
+                onClick={() => setActiveTab('info')}
+              >
+                Info
+              </button>
+              <button
+                className={`px-6 py-3 text-sm font-medium ${activeTab === 'analytics'
+                  ? 'text-blue-400 border-b-2 border-blue-400'
+                  : 'text-gray-400 hover:text-gray-300'
+                  }`}
+                onClick={() => setActiveTab('analytics')}
+              >
+                Analytics
+              </button>
+            </div>
 
-              <div className="overflow-x-auto">
-                <div style={{ backgroundColor: "#0f1923", padding: "0px", borderRadius: "8px" }}>
-                  <iframe
-                    src={transactionDexEmbedUrl}
-                    width="100%"
-                    height="300"
-                    style={{ border: 0, display: "block", width: "100%" }}
-                  />
+            {activeTab === 'trades' && (
+              <div className="p-4">
+                <div className="flex justify-between items-center mb-4">
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Search transactions..."
+                      className="pl-9 pr-4 py-2 bg-[#1a2932] rounded-md text-white w-64 focus:outline-none"
+                    />
+                    <FaSearch className="absolute left-3 top-3 text-gray-400" />
+                  </div>
+                  <button className="p-2 bg-[#1a2932] rounded hover:bg-[#253440]">
+                    <FaFilter className="text-gray-400" />
+                  </button>
                 </div>
 
-                {/* <table className="min-w-full">
+                <div className="overflow-x-auto">
+                  <div style={{ backgroundColor: "#0f1923", padding: "0px", borderRadius: "8px" }}>
+                    <iframe
+                      src={transactionDexEmbedUrl}
+                      width="100%"
+                      height="300"
+                      style={{ border: 0, display: "block", width: "100%" }}
+                    />
+                  </div>
+
+                  {/* <table className="min-w-full">
                     <thead>
                       <tr className="text-left text-gray-400 text-sm">
                         <th className="pb-3 font-medium">Time</th>
@@ -758,240 +758,241 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
                       ))}
                     </tbody>
                   </table> */}
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'info' && (
-            <div className="p-4">
-              <h3 className="text-lg font-semibold mb-3">Token Information</h3>
-              <p className="text-gray-300 mb-4">
-                {baseToken === 'USDT' ?
-                  `Tether USD (USDT) is a stablecoin pegged to the US Dollar. Each USDT token is backed by one US dollar, maintaining a 1:1 ratio with the USD. It enables users to transfer value globally without the volatility associated with cryptocurrencies.` :
-                  baseToken === 'BTC' ?
-                    `Bitcoin (BTC) is the first decentralized cryptocurrency, created in 2009 by an unknown person or group using the pseudonym Satoshi Nakamoto. It operates on a blockchain, a distributed ledger that records all transactions across a network of computers.` :
-                    baseToken === 'ETH' ?
-                      `Ethereum (ETH) is a decentralized, open-source blockchain with smart contract functionality. Ether is the native cryptocurrency of the platform. It is the second-largest cryptocurrency by market capitalization, after Bitcoin.` :
-                      `${getCryptoName(baseToken)} (${baseToken}) is a cryptocurrency traded against ${getCryptoName(quoteToken)} (${quoteToken}). View the chart for real-time price information.`
-                }
-              </p>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <h4 className="font-medium mb-2">Contract Details</h4>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">Network</span>
-                      <span>Ethereum</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">Contract</span>
-                      <a href="#" className="text-blue-400 hover:underline">0xdAC17...4DD0</a>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">Decimals</span>
-                      <span>6</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">Issuer</span>
-                      <span>Tether Limited</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <h4 className="font-medium mb-2">Social Links</h4>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">Website</span>
-                      <a href="#" className="text-blue-400 hover:underline">tether.to</a>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">Twitter</span>
-                      <a href="#" className="text-blue-400 hover:underline">@Tether_to</a>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">Support</span>
-                      <a href="#" className="text-blue-400 hover:underline">support@tether.to</a>
-                    </div>
-                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {activeTab === 'analytics' && (
-            <div className="p-4">
-              <h3 className="text-lg font-semibold mb-3">Token Analytics</h3>
+            {activeTab === 'info' && (
+              <div className="p-4">
+                <h3 className="text-lg font-semibold mb-3">Token Information</h3>
+                <p className="text-gray-300 mb-4">
+                  {baseToken === 'USDT' ?
+                    `Tether USD (USDT) is a stablecoin pegged to the US Dollar. Each USDT token is backed by one US dollar, maintaining a 1:1 ratio with the USD. It enables users to transfer value globally without the volatility associated with cryptocurrencies.` :
+                    baseToken === 'BTC' ?
+                      `Bitcoin (BTC) is the first decentralized cryptocurrency, created in 2009 by an unknown person or group using the pseudonym Satoshi Nakamoto. It operates on a blockchain, a distributed ledger that records all transactions across a network of computers.` :
+                      baseToken === 'ETH' ?
+                        `Ethereum (ETH) is a decentralized, open-source blockchain with smart contract functionality. Ether is the native cryptocurrency of the platform. It is the second-largest cryptocurrency by market capitalization, after Bitcoin.` :
+                        `${getCryptoName(baseToken)} (${baseToken}) is a cryptocurrency traded against ${getCryptoName(quoteToken)} (${quoteToken}). View the chart for real-time price information.`
+                  }
+                </p>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div>
-                  <h4 className="font-medium mb-3">Price Performance</h4>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">1h Change</span>
-                      <span className="text-green-500">+0.01%</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">24h Change</span>
-                      <span className="text-green-500">+0.01%</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">7d Change</span>
-                      <span className="text-red-500">-0.02%</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">30d Change</span>
-                      <span className="text-green-500">+0.05%</span>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <h4 className="font-medium mb-2">Contract Details</h4>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Network</span>
+                        <span>Ethereum</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Contract</span>
+                        <a href="#" className="text-blue-400 hover:underline">0xdAC17...4DD0</a>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Decimals</span>
+                        <span>6</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Issuer</span>
+                        <span>Tether Limited</span>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div>
-                  <h4 className="font-medium mb-3">Trading Volume</h4>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">24h Volume</span>
-                      <span>$42.7B</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">7d Volume</span>
-                      <span>$298.4B</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">Market Cap Rank</span>
-                      <span>#3</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">Volume/Market Cap</span>
-                      <span>0.413</span>
+                  <div>
+                    <h4 className="font-medium mb-2">Social Links</h4>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Website</span>
+                        <a href="#" className="text-blue-400 hover:underline">tether.to</a>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Twitter</span>
+                        <a href="#" className="text-blue-400 hover:underline">@Tether_to</a>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Support</span>
+                        <a href="#" className="text-blue-400 hover:underline">support@tether.to</a>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
+            )}
 
-              <h4 className="font-medium mb-3">Holder Distribution</h4>
-              <div className="w-full bg-[#1a2932] rounded-lg p-4 h-48 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="text-gray-400">USDT Holder Distribution</div>
-                  <div className="mt-2 flex justify-center space-x-4">
-                    <div className="text-center">
-                      <div className="text-xl font-bold">65%</div>
-                      <div className="text-xs text-gray-500">Exchanges</div>
+            {activeTab === 'analytics' && (
+              <div className="p-4">
+                <h3 className="text-lg font-semibold mb-3">Token Analytics</h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                  <div>
+                    <h4 className="font-medium mb-3">Price Performance</h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">1h Change</span>
+                        <span className="text-green-500">+0.01%</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">24h Change</span>
+                        <span className="text-green-500">+0.01%</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">7d Change</span>
+                        <span className="text-red-500">-0.02%</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">30d Change</span>
+                        <span className="text-green-500">+0.05%</span>
+                      </div>
                     </div>
-                    <div className="text-center">
-                      <div className="text-xl font-bold">20%</div>
-                      <div className="text-xs text-gray-500">Institutions</div>
+                  </div>
+
+                  <div>
+                    <h4 className="font-medium mb-3">Trading Volume</h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">24h Volume</span>
+                        <span>$42.7B</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">7d Volume</span>
+                        <span>$298.4B</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Market Cap Rank</span>
+                        <span>#3</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Volume/Market Cap</span>
+                        <span>0.413</span>
+                      </div>
                     </div>
-                    <div className="text-center">
-                      <div className="text-xl font-bold">15%</div>
-                      <div className="text-xs text-gray-500">Retail</div>
+                  </div>
+                </div>
+
+                <h4 className="font-medium mb-3">Holder Distribution</h4>
+                <div className="w-full bg-[#1a2932] rounded-lg p-4 h-48 flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="text-gray-400">USDT Holder Distribution</div>
+                    <div className="mt-2 flex justify-center space-x-4">
+                      <div className="text-center">
+                        <div className="text-xl font-bold">65%</div>
+                        <div className="text-xs text-gray-500">Exchanges</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-xl font-bold">20%</div>
+                        <div className="text-xs text-gray-500">Institutions</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-xl font-bold">15%</div>
+                        <div className="text-xs text-gray-500">Retail</div>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          )}
-        </div>
-        
-        <div className="mt-4">
-          <Faq baseToken={baseToken} quoteToken={quoteToken} />
-        </div>
-      </div>
-     
-      <div className=" col-span-1 lg:col-span-1">
-        <div className="bg-[#0f1923] rounded-xl p-4 mb-4">
-          <div className="flex justify-between items-center mb-4">
-            <div className="flex items-center">
-              <h2 className="text-lg font-semibold">FAVORITES</h2>
-              <FaInfoCircle className="text-gray-400 ml-2" size={16} />
-            </div>
-            <div className="flex items-center">
-              <button className="p-2 text-gray-400 hover:text-white">
-                <FaChartBar size={18} />
-              </button>
-              <button className="p-2 text-gray-400 hover:text-white">
-                <FaTimes size={18} />
-              </button>
-            </div>
+            )}
           </div>
 
-          <div className="flex justify-between mb-4">
-            <div className="bg-[#1a2932] rounded-md px-4 py-2 flex-grow mr-2">
-              <div className="flex items-center">
-                <span className="text-gray-400">Last added</span>
-                <FaChevronDown className="ml-1 text-gray-400" size={12} />
-              </div>
-            </div>
-            <div className="bg-[#1a2932] rounded-md px-4 py-2 w-24">
-              <div className="flex items-center justify-between">
-                <span>All</span>
-                <FaChevronDown className="text-gray-400" size={12} />
-              </div>
-            </div>
+          <div className="mt-4">
+            <Faq baseToken={baseToken} quoteToken={quoteToken} />
           </div>
+        </div>
 
-          <div className="bg-[#1a2932] rounded-lg p-3 mb-4">
-            <div className="flex items-center justify-between">
+        <div className=" col-span-1 lg:col-span-1">
+          <div className="bg-[#0f1923] rounded-xl p-4 mb-4">
+            <div className="flex justify-between items-center mb-4">
               <div className="flex items-center">
-                <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center mr-2 overflow-hidden">
-                  <img src="/logo.png" alt="Token Logo" className="w-full h-full object-cover" />
-                </div>
-                <div>
-                  <div className="flex items-center">
-                    <span className="font-medium">MAR...</span>
-                    <span className="text-gray-400 ml-2">/ Meet Martin.</span>
-                  </div>
-                </div>
+                <h2 className="text-lg font-semibold">FAVORITES</h2>
+                <FaInfoCircle className="text-gray-400 ml-2" size={16} />
               </div>
-              <div>
-                <button className="bg-indigo-600 hover:bg-indigo-700 text-sm px-3 py-1 rounded">
-                  Ad
+              <div className="flex items-center">
+                <button className="p-2 text-gray-400 hover:text-white">
+                  <FaChartBar size={18} />
+                </button>
+                <button className="p-2 text-gray-400 hover:text-white">
+                  <FaTimes size={18} />
                 </button>
               </div>
             </div>
-          </div>
 
-          <div className="text-center py-8">
-            <p className="text-xl mb-2">Your favorite list is empty!</p>
-            <p className="text-gray-400">Start building your favorite list by adding this pair.</p>
+            <div className="flex justify-between mb-4">
+              <div className="bg-[#1a2932] rounded-md px-4 py-2 flex-grow mr-2">
+                <div className="flex items-center">
+                  <span className="text-gray-400">Last added</span>
+                  <FaChevronDown className="ml-1 text-gray-400" size={12} />
+                </div>
+              </div>
+              <div className="bg-[#1a2932] rounded-md px-4 py-2 w-24">
+                <div className="flex items-center justify-between">
+                  <span>All</span>
+                  <FaChevronDown className="text-gray-400" size={12} />
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-[#1a2932] rounded-lg p-3 mb-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center mr-2 overflow-hidden">
+                    <img src="/logo.png" alt="Token Logo" className="w-full h-full object-cover" />
+                  </div>
+                  <div>
+                    <div className="flex items-center">
+                      <span className="font-medium">MAR...</span>
+                      <span className="text-gray-400 ml-2">/ Meet Martin.</span>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <button className="bg-indigo-600 hover:bg-indigo-700 text-sm px-3 py-1 rounded">
+                    Ad
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="text-center py-8">
+              <p className="text-xl mb-2">Your favorite list is empty!</p>
+              <p className="text-gray-400">Start building your favorite list by adding this pair.</p>
+            </div>
+          </div>
+          {/* YouTube Video (below favorites) */}
+          {/* <div className="bg-[#0f1923] rounded-xl p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-lg font-semibold">Video</h2>
+              <FaInfoCircle className="text-gray-400" size={16} />
+            </div>
+            <div className="relative w-full" style={{ paddingTop: '56.25%' }}>
+              <iframe
+                className="absolute min-h-[500px] inset-0 w-full h-full rounded-lg"
+                src="https://www.youtube.com/embed/z8uiTA1cdWA?autoplay=1&mute=1"
+                title="YouTube video player"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerPolicy="strict-origin-when-cross-origin"
+                allowFullScreen
+              />
+            </div>
+          </div> */}
+          <div>
+            <div>
+              <div className="w-full min-h-[500px] aspect-video">
+               
+               <iframe
+               className=" min-h-[500px] inset-0 w-full h-full rounded-lg"
+               src="https://www.youtube.com/embed/z8uiTA1cdWA?autoplay=1&mute=1"
+               title="YouTube video player"
+               frameBorder="0"
+               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+               referrerPolicy="strict-origin-when-cross-origin"
+               allowFullScreen
+             />
+              </div>
+            </div>
+
           </div>
         </div>
-        {/* YouTube Video (below favorites) */}
-        {/* <div className="bg-[#0f1923] rounded-xl p-4">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-semibold">Video</h2>
-            <FaInfoCircle className="text-gray-400" size={16} />
-          </div>
-          <div className="relative w-full" style={{ paddingTop: '56.25%' }}>
-            <iframe
-              className="absolute inset-0 w-full h-full rounded-lg"
-              src={`https://www.youtube.com/embed/${videoId || 'VNTK2Bwyq7s'}`}
-              title="YouTube video player"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              referrerPolicy="strict-origin-when-cross-origin"
-              allowFullScreen
-            />
-          </div>
-        </div> */}
-        <div>
-        <div className="w-full min-h-[500px] aspect-video">
-  <video
-    className="w-full h-full rounded-lg object-cover"
-    autoPlay
-    muted
-    loop
-    playsInline
-    preload="metadata"
-    poster="https://drive.google.com/file/d/1NR2jHymQheSC7pE20yZI26lsEBmYX6nd/view?usp=sharing"
-  >
-    <source src="https://drive.google.com/file/d/1NR2jHymQheSC7pE20yZI26lsEBmYX6nd/view?usp=sharing" type="video/mp4" />
-    Your browser does not support the video tag.
-  </video>
-</div>
-        </div>
-      </div>
       </div>
     </div>
 
