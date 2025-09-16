@@ -4,6 +4,7 @@ import { Suspense, useState, FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAccount, useSignMessage } from "wagmi";
 import { useAppKit } from "@reown/appkit/react";
+import Image from "next/image";
 
 export default function AdminLoginPage() {
   return (
@@ -120,7 +121,15 @@ function AdminLoginInner() {
       <div className="relative w-full max-w-md">
         <div className="rounded-2xl border border-gray-800/80 bg-black/40 backdrop-blur-md shadow-[0_0_0_1px_rgba(255,255,255,0.04)] p-6 md:p-7">
           <div className="mb-4 flex items-center gap-2">
-            <span className="inline-flex h-8 w-8 items-center justify-center rounded bg-cyan-500 text-black text-sm font-bold">N</span>
+           <div className="h-7 w-7 relative">
+                          <Image 
+                            src="/logo.png" 
+                            alt="NYAX Logo" 
+                            width={28} 
+                            height={28} 
+                            className="rounded"
+                          />
+                        </div>
             <div>
               <h1 className="text-xl font-semibold leading-tight">NYAX Admin</h1>
               <p className="text-[12px] text-gray-400">Restricted area – authentication required</p>

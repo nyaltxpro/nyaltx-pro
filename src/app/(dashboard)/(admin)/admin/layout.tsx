@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
@@ -24,15 +25,20 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         <div className="mx-auto max-w-7xl px-4 h-14 flex items-center justify-between gap-4">
           <div className="flex items-center gap-6 min-w-0">
             <div className="flex items-center gap-2 shrink-0">
-              <span className="inline-flex h-7 w-7 items-center justify-center rounded bg-cyan-500 text-black text-sm font-bold">N</span>
+              <div className="h-7 w-7 relative">
+                <Image 
+                  src="/logo.png" 
+                  alt="NYAX Logo" 
+                  width={28} 
+                  height={28} 
+                  className="rounded"
+                />
+              </div>
               <h1 className="text-base md:text-lg font-semibold tracking-tight">NYAX Admin</h1>
               <span className="ml-1 rounded-full border border-gray-700 px-2 py-0.5 text-[10px] uppercase text-gray-400">Dashboard</span>
             </div>
             <nav className="hidden md:flex items-center gap-1 text-sm">
-              <TopLink href="/admin">Dashboard</TopLink>
-              <TopLink href="/admin/orders">Orders</TopLink>
-              <TopLink href="/admin/profiles">Profiles</TopLink>
-              <TopLink href="/admin/stats">Stats</TopLink>
+          
             </nav>
           </div>
           <form action="/api/admin/logout" method="post" className="shrink-0">
