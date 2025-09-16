@@ -5,6 +5,7 @@ import Banner from '@/components/Banner';
 import ConnectWalletButton from '@/components/ConnectWalletButton';
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from 'next/navigation';
 import BlockchainSelector from '@/components/BlockchainSelector';
 import TokenSection from '@/components/TokenSection';
 import MemeTokenDisplay from '@/components/MemeTokenDisplay';
@@ -44,6 +45,8 @@ type TokenRaceItem = {
   image?: string;
   logoUrl?: string;
   points?: number;
+  blockchain?: string;
+  contractAddress?: string;
 };
 
 // Fallback token race data
@@ -224,6 +227,7 @@ type TronPreLaunchedToken = {
 };
 
 export default function Home() {
+  const router = useRouter();
   const [selectedBlockchain, setSelectedBlockchain] = useState<Blockchain | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<'new' | 'pre-launched' | 'launched'>('new');
   const [isLoading, setIsLoading] = useState(false);
@@ -249,6 +253,14 @@ export default function Home() {
   const [memeTokens, setMemeTokens] = useState<any[]>([]);
   const [isLoadingTokens, setIsLoadingTokens] = useState<boolean>(false);
   const [darkMode, setDarkMode] = useState<boolean>(false);
+
+  const handleClick = (t: any) => {
+    const params = new URLSearchParams();
+    params.set('base', (t.tokenSymbol || t.tokenName || '').toUpperCase());
+    if (t.blockchain) params.set('chain', t.blockchain);
+    if (t.contractAddress) params.set('address', t.contractAddress);
+    router.push(`/dashboard/trade?${params.toString()}`);
+  };
 
   // Fetch race tokens with points from admin panel
   useEffect(() => {
@@ -480,13 +492,17 @@ export default function Home() {
                 animationFillMode: 'forwards'
               }}
             >
+              
               {/* Duplicate the array for seamless loop */}
               {[...tokenRaceData, ...tokenRaceData].map((token, index) => (
                 <div 
                   key={`${token.id || `token-${index}`}-${Math.floor(index / tokenRaceData.length)}`}
                   className="flex-shrink-0 min-w-[280px] px-1"
                 >
-                  <div className="relative flex flex-col items-center p-3 bg-gradient-to-br from-gray-800 to-gray-700 rounded-lg shadow-lg border border-gray-600 h-32 transform hover:scale-105 transition-transform duration-300">
+                  <div 
+                    onClick={() => handleClick(token)}
+                    className="relative flex flex-col items-center p-3 bg-gradient-to-br from-gray-800 to-gray-700 rounded-lg shadow-lg border border-gray-600 h-32 transform hover:scale-105 transition-transform duration-300 cursor-pointer hover:border-[#00c3ff]"
+                  >
                     {/* Position tag on top right based on points ranking */}
                     <div className={`absolute -top-1 -right-1 px-2 py-1 rounded-full text-xs font-bold ${
                       (index % tokenRaceData.length) === 0 ? 'bg-yellow-500 text-black' : 

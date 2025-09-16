@@ -215,11 +215,30 @@ export default function AdminHomePage() {
       </div>
 
       <div className="rounded-xl border border-gray-800 p-6">
-        <h3 className="font-semibold mb-2">Welcome</h3>
-        <ul className="list-disc pl-5 text-gray-300 space-y-1 text-sm">
-          <li>This dashboard shows key platform totals.</li>
-          <li>All admin routes under <code>/admin</code> are protected.</li>
-        </ul>
+        <h3 className="font-semibold mb-2">Quick Actions</h3>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <a 
+            href="/admin/tokens" 
+            className="block p-4 bg-gray-800 hover:bg-gray-700 rounded-lg border border-gray-700 transition-colors"
+          >
+            <h4 className="font-medium mb-2">Manage Tokens</h4>
+            <p className="text-sm text-gray-400">View and manage all token registrations</p>
+          </a>
+          <a 
+            href="/admin/points" 
+            className="block p-4 bg-gray-800 hover:bg-gray-700 rounded-lg border border-gray-700 transition-colors"
+          >
+            <h4 className="font-medium mb-2">Token Points</h4>
+            <p className="text-sm text-gray-400">Manage points for token race ranking</p>
+          </a>
+          <a 
+            href="/admin/orders" 
+            className="block p-4 bg-gray-800 hover:bg-gray-700 rounded-lg border border-gray-700 transition-colors"
+          >
+            <h4 className="font-medium mb-2">Orders</h4>
+            <p className="text-sm text-gray-400">View and manage user orders</p>
+          </a>
+        </div>
       </div>
     </div>
   );

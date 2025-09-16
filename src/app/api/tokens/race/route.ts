@@ -22,13 +22,17 @@ export async function GET() {
       image: token.imageUri || '/crypto-icons/color/generic.svg',
       contractAddress: token.contractAddress,
       blockchain: token.blockchain,
-      racePromotedAt: token.racePromotedAt
+      racePromotedAt: token.racePromotedAt,
+      points: token.points || 0
     }));
 
-    // Sort by promotion date (newest first) and limit to 10
-    formattedTokens.sort((a, b) => 
-      new Date(b.racePromotedAt || 0).getTime() - new Date(a.racePromotedAt || 0).getTime()
-    );
+    // Sort by points (highest first), then by promotion date
+    formattedTokens.sort((a, b) => {
+      if (b.points !== a.points) {
+        return b.points - a.points;
+      }
+      return new Date(b.racePromotedAt || 0).getTime() - new Date(a.racePromotedAt || 0).getTime();
+    });
 
     return NextResponse.json({ 
       success: true, 
