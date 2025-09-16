@@ -435,9 +435,9 @@ export default function Home() {
           <Ads />
 
           {/* Dashboard Banners */}
-          <div className="mx-4 mt-4">
+          {/* <div className="mx-4 mt-4">
             <DashboardBanners />
-          </div>
+          </div> */}
 
           {/* Stats Bar */}
           <div className="stats-bar mx-4 flex flex-col w-[90%] md:w-full  md:flex-row md:justify-between md:items-center gap-4">

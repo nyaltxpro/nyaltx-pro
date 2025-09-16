@@ -4,19 +4,59 @@ import React, { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
+interface BannerFile {
+  name: string;
+  path: string;
+  size: number;
+  lastModified: string;
+  url: string;
+}
+
 export default function Banner() {
-  const images = useMemo(() => [
+  const [uploadedBanners, setUploadedBanners] = useState<BannerFile[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fallbackImages = useMemo(() => [
     "/banner.jpg",
     "/banner3.jpg",
   ], []);
 
+  // Use uploaded banners if available, otherwise use fallback images
+  const images = useMemo(() => {
+    if (uploadedBanners.length > 0) {
+      return uploadedBanners.map(banner => banner.url);
+    }
+    return fallbackImages;
+  }, [uploadedBanners, fallbackImages]);
+
   const [index, setIndex] = useState(0);
 
+  // Load banners from admin panel
   useEffect(() => {
-    const id = setInterval(() => {
-      setIndex((prev) => (prev + 1) % images.length);
-    }, 4000);
-    return () => clearInterval(id);
+    const loadBanners = async () => {
+      try {
+        const response = await fetch('/api/admin/banners');
+        if (response.ok) {
+          const data = await response.json();
+          setUploadedBanners(data.banners || []);
+        }
+      } catch (error) {
+        console.error('Failed to load banners:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadBanners();
+  }, []);
+
+  useEffect(() => {
+    if (images.length > 0) {
+      const id = setInterval(() => {
+        setIndex((prev) => (prev + 1) % images.length);
+      }, 4000);
+      return () => clearInterval(id);
+    }
   }, [images.length]);
 
   const goTo = (i: number) => setIndex(i % images.length);
