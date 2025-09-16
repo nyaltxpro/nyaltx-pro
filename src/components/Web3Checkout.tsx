@@ -1,13 +1,16 @@
 "use client";
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import Image from 'next/image';
 import ConnectWalletButton from '@/components/ConnectWalletButton';
 import { FaWallet, FaShieldAlt, FaCheckCircle, FaInfoCircle } from 'react-icons/fa';
+import { useAccount, useSendTransaction, useWriteContract, useSwitchChain } from 'wagmi';
+import { parseEther, erc20Abi, parseUnits } from 'viem';
+import { useAppKit } from '@reown/appkit/react';
 
 type Product = { id: number; name: string; desc: string; priceUsd: number; image: string; qty: number };
 
-export default function Web3Checkout({ selectedTier }: { selectedTier?: string }) {
+export default function Web3Checkout({ selectedTier, paymentMethod }: { selectedTier?: string; paymentMethod?: string }) {
   // Products for pricing flow
   const baseProducts: Record<string, Product[]> = {
     nyaltxpro: [
@@ -51,11 +54,25 @@ export default function Web3Checkout({ selectedTier }: { selectedTier?: string }
   ];
 
   const [network, setNetwork] = useState('ethereum');
-  const [token, setToken] = useState('USDT');
+  const [token, setToken] = useState(paymentMethod?.toUpperCase() || 'USDT');
   const [email, setEmail] = useState('');
   const [promo, setPromo] = useState('');
   const [agree, setAgree] = useState(true);
   const [processing, setProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  // Wagmi hooks
+  const { isConnected, address, chain } = useAccount();
+  const { open } = useAppKit();
+  const { sendTransactionAsync } = useSendTransaction();
+  const { writeContractAsync } = useWriteContract();
+  const { switchChainAsync } = useSwitchChain();
+
+  // Sepolia testnet configuration
+  const SEPOLIA_CHAIN_ID = 11155111;
+  const RECEIVER_ADDRESS = '0x81bA7b98E49014Bff22F811E9405640bC2B39cC0' as `0x${string}`;
+  const USDT_SEPOLIA = '0x7169D38820dfd117C3FA1f22a697dBA58d90BA06' as `0x${string}`; // Example USDT on Sepolia
 
   const filteredTokens = useMemo(() => tokens.filter(t => {
     if (network === 'solana') return t.chain === 'solana';
@@ -68,15 +85,104 @@ export default function Web3Checkout({ selectedTier }: { selectedTier?: string }
   const fees = useMemo(() => Math.max(0.3, subtotal * 0.015), [subtotal]);
   const total = useMemo(() => Math.max(0, subtotal - discount) + fees, [subtotal, discount, fees]);
 
-  const handlePay = async () => {
-    if (!agree) return alert('Please accept Terms to continue.');
+  // Auto-open wallet and initiate payment when component loads with specific conditions
+  useEffect(() => {
+    if (paymentMethod === 'usdt' && selectedTier === 'nyaltxpro') {
+      // Auto-trigger wallet connection and payment flow
+      setTimeout(() => {
+        handlePayment();
+      }, 1000);
+    }
+  }, [paymentMethod, selectedTier]);
+
+  const handlePayment = async () => {
+    if (!agree) {
+      setError('Please accept Terms to continue.');
+      return;
+    }
+
+    setError(null);
+    setSuccess(null);
     setProcessing(true);
-    // TODO: Integrate on-chain or payment API
-    setTimeout(() => {
+
+    try {
+      // Connect wallet if not connected
+      if (!isConnected) {
+        await open({ view: 'Connect' });
+        return;
+      }
+
+      // Switch to Sepolia if not already on it
+      if (chain?.id !== SEPOLIA_CHAIN_ID) {
+        await switchChainAsync({ chainId: SEPOLIA_CHAIN_ID });
+      }
+
+      let txHash: string;
+
+      if (token === 'ETH') {
+        // Send 0.1 ETH as requested
+        const ethAmount = '0.1';
+        txHash = await sendTransactionAsync({
+          to: RECEIVER_ADDRESS,
+          value: parseEther(ethAmount)
+        });
+      } else if (token === 'USDT') {
+        // Send USDT equivalent (assuming $200 worth)
+        const usdtAmount = total.toString();
+        txHash = await writeContractAsync({
+          abi: erc20Abi,
+          address: USDT_SEPOLIA,
+          functionName: 'transfer',
+          args: [RECEIVER_ADDRESS, parseUnits(usdtAmount, 6)]
+        });
+      } else {
+        throw new Error('Unsupported payment method');
+      }
+
+      // Place order in admin panel
+      await placeOrder(txHash);
+      
+      setSuccess(`Payment successful! Transaction: ${txHash}`);
+      
+    } catch (err: any) {
+      console.error('Payment error:', err);
+      setError(err?.shortMessage || err?.message || 'Payment failed');
+    } finally {
       setProcessing(false);
-      alert(`Payment initiated: ${token} on ${network} for $${total.toFixed(2)}${selectedTier ? ` (tier: ${selectedTier})` : ''}`);
-    }, 1000);
+    }
   };
+
+  const placeOrder = async (txHash: string) => {
+    try {
+      const orderData = {
+        method: token as 'ETH' | 'NYAX',
+        tierId: selectedTier as 'paddle' | 'motor' | 'helicopter',
+        wallet: address,
+        txHash,
+        amount: token === 'ETH' ? '0.1' : total.toString(),
+        chainId: SEPOLIA_CHAIN_ID
+      };
+
+      const response = await fetch('/api/admin/orders/onchain', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(orderData)
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to place order in admin panel');
+      }
+
+      console.log('Order placed successfully in admin panel');
+    } catch (err) {
+      console.error('Failed to place order:', err);
+      // Don't throw here as the payment was successful
+    }
+  };
+
+  const handlePay = handlePayment;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -90,9 +196,24 @@ export default function Web3Checkout({ selectedTier }: { selectedTier?: string }
               {selectedTier && (
                 <p className="text-gray-400 text-sm mt-1">Selected plan: <span className="text-white font-medium">{selectedTier}</span></p>
               )}
+              {paymentMethod === 'usdt' && selectedTier === 'nyaltxpro' && (
+                <p className="text-cyan-400 text-sm mt-1">Auto-payment mode: 0.1 Sepolia ETH</p>
+              )}
             </div>
             <ConnectWalletButton />
           </div>
+
+          {/* Error/Success Messages */}
+          {error && (
+            <div className="mb-4 p-3 rounded-md border border-red-500 bg-red-900/30 text-red-200">
+              {error}
+            </div>
+          )}
+          {success && (
+            <div className="mb-4 p-3 rounded-md border border-green-500 bg-green-900/30 text-green-200">
+              {success}
+            </div>
+          )}
 
           {/* Customer */}
           <div className="mb-6">

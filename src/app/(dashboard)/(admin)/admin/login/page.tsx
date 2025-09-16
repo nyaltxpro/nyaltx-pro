@@ -54,44 +54,67 @@ function AdminLoginInner() {
 
   async function handleWalletLogin() {
     setWError(null);
+    setWLoading(true);
+    
     try {
-      // If not connected, open wallet modal
+      // Step 1: Connect wallet if not connected
       if (!isConnected) {
         await open();
-      }
-      if (!address) {
-        throw new Error("Wallet not connected");
+        // Wait for connection to complete
+        await new Promise((resolve) => {
+          const checkConnection = () => {
+            if (isConnected && address) {
+              resolve(true);
+            } else {
+              setTimeout(checkConnection, 100);
+            }
+          };
+          checkConnection();
+        });
       }
 
-      setWLoading(true);
-      // 1) Fetch nonce (sets HttpOnly cookie)
+      // Ensure we have an address after connection
+      const currentAddress = address;
+      if (!currentAddress) {
+        throw new Error("Please connect your wallet to continue");
+      }
+
+      // Step 2: Get nonce for signing
       const nonceRes = await fetch("/api/admin/login/nonce", { method: "GET" });
       if (!nonceRes.ok) {
-        throw new Error("Failed to get nonce");
+        throw new Error("Failed to get authentication nonce");
       }
       const { nonce } = await nonceRes.json();
 
-      // 2) Build message and sign
+      // Step 3: Create and sign message
       const domain = process.env.NEXT_PUBLIC_APP_DOMAIN || "nyax-admin";
       const ts = Date.now();
-      const addrLower = address.toLowerCase();
+      const addrLower = currentAddress.toLowerCase();
       const message = `NYAX Admin Login\nDomain: ${domain}\nAddress: ${addrLower}\nNonce: ${nonce}\nTimestamp: ${ts}`;
+      
       const signature = await signMessageAsync({ message });
 
-      // 3) Verify server-side, which sets the admin cookie
+      // Step 4: Verify signature and complete login
       const verifyRes = await fetch("/api/admin/login/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ address: addrLower, signature, nonce, timestamp: ts }),
       });
+      
       if (!verifyRes.ok) {
         const data = await verifyRes.json().catch(() => ({}));
-        throw new Error(data?.message || "Wallet login failed");
+        throw new Error(data?.message || "Authentication failed");
       }
 
+      // Success - redirect to admin dashboard
       router.replace(from);
     } catch (err: any) {
-      setWError(err.message || "Wallet login failed");
+      // Handle user rejection gracefully
+      if (err.message?.includes("User rejected") || err.message?.includes("rejected")) {
+        setWError("Wallet connection was cancelled");
+      } else {
+        setWError(err.message || "Authentication failed");
+      }
     } finally {
       setWLoading(false);
     }

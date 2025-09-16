@@ -310,7 +310,7 @@ export default function PricingPage() {
 
           {/* Visual or banner teaser */}
           <div className="relative border border-white/10 rounded-2xl overflow-hidden">
-            <Image src="/banner/1.png" alt="Race to Liberty" fill className="object-cover opacity-80" />
+            <Image src="/banner2.png" alt="Race to Liberty" fill className="object-cover opacity-90" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
             <div className="absolute bottom-4 left-4 right-4">
               <div className="text-white text-xl font-semibold">Race to Liberty</div>
@@ -325,16 +325,16 @@ export default function PricingPage() {
         <div className="flex items-center justify-between mb-4">
           <h2 id="race-title" className="text-2xl font-bold text-white">Race to Liberty</h2>
         </div>
-        <div className="relative w-full h-40 rounded-xl overflow-hidden mb-6 border border-white/10">
-          <Image src="/banner/2.png" alt="Race to Liberty Banner" fill className="object-cover" />
+        {/* <div className="relative w-full h-40 rounded-xl overflow-hidden mb-6 border border-white/10">
+          <Image src="/banner4.png" alt="Race to Liberty Banner" fill className="object-cover" />
           <div className="absolute inset-0 bg-black/30" />
-        </div>
+        </div> */}
 
-        {!isPro && (
+        {/* {!isPro && (
           <div className="p-4 mb-6 rounded-md border border-amber-400 bg-amber-950/30 text-amber-200">
             <strong>NyaltxPro required:</strong> Please purchase <strong>NyaltxPro</strong> to participate in Race to Liberty tiers.
           </div>
-        )}
+        )} */}
 
         {/* Cards */}
 

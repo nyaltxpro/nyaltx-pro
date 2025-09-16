@@ -7,7 +7,7 @@ import Link from "next/link";
 export default function Banner() {
   const images = useMemo(() => [
     "/banner.jpg",
-    "/banner2.png",
+    "/banner3.jpg",
   ], []);
 
   const [index, setIndex] = useState(0);
