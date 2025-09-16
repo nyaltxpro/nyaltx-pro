@@ -1,4 +1,5 @@
 'use client'
+import { useRouter } from "next/navigation";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
 function formatTime(ts: number | string | undefined) {
@@ -159,6 +160,16 @@ const Row: React.FC<{ item: any; onInspect: (o: any) => void }> = ({ item, onIns
     
     loadMetadata();
   }, [tokenData.uri]);
+
+  const router = useRouter()
+
+  const handleClick = (t: any) => {
+    const params = new URLSearchParams();
+    params.set('base', (t.symbol || t.name || '').toUpperCase());
+    params.set('chain', 'solana');
+    if (t.contractAddress) params.set('address', t.mint);
+    router.push(`/dashboard/trade?${params.toString()}`);
+  };
   
   return (
     <div className="grid grid-cols-6 gap-2 items-center border-b border-gray-700 py-2">
@@ -175,7 +186,7 @@ const Row: React.FC<{ item: any; onInspect: (o: any) => void }> = ({ item, onIns
         )}
         <span className="font-medium truncate">{tokenData.name || "—"}</span>
         <div className="text-sm opacity-80">{tokenData.symbol || "—"}</div>
-        <button onClick={() => onInspect(item)} className="col-span-6 mt-2 text-xs px-2 py-1 rounded bg-cyan-400 hover:bg-gray-700 w-max">Trade</button>
+        <button onClick={() => handleClick(item)} className="col-span-6 mt-2 text-xs px-2 py-1 rounded bg-cyan-400 hover:bg-gray-700 w-max">Trade</button>
         <div className="text-xs text-right opacity-60">{formatTime(tokenData.ts)}</div>
         
       </div>
