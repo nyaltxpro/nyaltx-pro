@@ -484,7 +484,7 @@ export default function Home() {
 
       {/* Token Categories Section */}
       <div className="token-categories flex flex-col mx-4 mt-6">
-        <div className="flex items-center py-2 rounded-lg card-bg border-gray-700 overflow-x-auto">
+        {/* <div className="flex items-center py-2 rounded-lg card-bg border-gray-700 overflow-x-auto">
           <div className="flex space-x-4 text-sm font-medium whitespace-nowrap">
             <button className="py-2 px-4 text-white">Hot Pairs</button>
             <button className="py-2 px-4 text-gray-400">Token Race</button>
@@ -499,7 +499,7 @@ export default function Home() {
           <div className="ml-auto">
 
           </div>
-        </div>
+        </div> */}
 
         {/* Token section  */}
         <TokenSection
