@@ -22,7 +22,7 @@ import RecentlyAddedCoins from '@/components/RecentlyAddedCoins';
 import TrendingCoins from '@/components/TrendingCoins';
 import Ads from '@/components/Ads';
 import PumpFunLive from '@/components/PumpFunLive';
-import DashboardBanners from '@/components/DashboardBanners';
+// import DashboardBanners from '@/components/DashboardBanners';
 
 // SortConfig type will be used when we reimplement the token sorting functionality
 // type SortConfig = {
