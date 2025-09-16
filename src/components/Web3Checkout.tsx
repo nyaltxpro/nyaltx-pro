@@ -57,6 +57,8 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
   const [token, setToken] = useState(paymentMethod?.toUpperCase() || 'USDT');
   const [email, setEmail] = useState('');
   const [promo, setPromo] = useState('');
+  const [promoApplied, setPromoApplied] = useState(false);
+  const [promoValidation, setPromoValidation] = useState<any>(null);
   const [agree, setAgree] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -81,8 +83,13 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
   }), [network]);
 
   const subtotal = useMemo(() => products.reduce((s, p) => s + p.priceUsd * p.qty, 0), [products]);
-  const discount = useMemo(() => promo.trim().toUpperCase() === 'NYAX10' ? subtotal * 0.1 : 0, [promo, subtotal]);
-  const fees = useMemo(() => Math.max(0.3, subtotal * 0.015), [subtotal]);
+  const discount = useMemo(() => {
+    if (promoValidation?.valid && promoValidation?.discount) {
+      return subtotal * (promoValidation.discount / 100);
+    }
+    return 0;
+  }, [promoValidation, subtotal]);
+  const fees = useMemo(() => promoValidation?.isFree ? 0 : Math.max(0.3, subtotal * 0.015), [subtotal, promoValidation]);
   const total = useMemo(() => Math.max(0, subtotal - discount) + fees, [subtotal, discount, fees]);
 
   // Auto-open wallet and initiate payment when component loads with specific conditions
@@ -94,6 +101,68 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
       }, 1000);
     }
   }, [paymentMethod, selectedTier]);
+
+  const validatePromoCode = async () => {
+    if (!promo.trim()) {
+      setPromoValidation(null);
+      setPromoApplied(false);
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/promo/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ promoCode: promo.trim(), tier: selectedTier || 'nyaltxpro' })
+      });
+
+      const result = await response.json();
+      setPromoValidation(result);
+      setPromoApplied(result.valid);
+      
+      if (!result.valid) {
+        setError(result.message);
+      } else {
+        setError(null);
+      }
+    } catch (err) {
+      setError('Failed to validate promo code');
+      setPromoValidation(null);
+      setPromoApplied(false);
+    }
+  };
+
+  const handleFreeSubscription = async () => {
+    if (!promoValidation?.isFree) return;
+
+    setProcessing(true);
+    setError(null);
+
+    try {
+      const response = await fetch('/api/promo/redeem', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          promoCode: promo.trim(),
+          tier: selectedTier || 'nyaltxpro',
+          email: email.trim() || undefined,
+          walletAddress: address
+        })
+      });
+
+      const result = await response.json();
+      
+      if (result.success) {
+        setSuccess(result.message);
+      } else {
+        setError(result.message);
+      }
+    } catch (err) {
+      setError('Failed to activate free subscription');
+    } finally {
+      setProcessing(false);
+    }
+  };
 
   const handlePayment = async () => {
     if (!agree) {
@@ -239,12 +308,25 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
                     type="text"
                     value={promo}
                     onChange={(e) => setPromo(e.target.value)}
-                    placeholder="NYAX10"
+                    placeholder="FREEPRO, ADMIN2024, NYAX10"
                     className="flex-1 px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
                   />
-                  <button className="px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-gray-300 hover:text-white">Apply</button>
+                  <button 
+                    onClick={validatePromoCode}
+                    className="px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-gray-300 hover:text-white"
+                  >
+                    Apply
+                  </button>
                 </div>
-                <p className="text-xs text-gray-500 mt-1">Use NYAX10 to get 10% off</p>
+                {promoValidation?.valid && (
+                  <p className="text-xs text-green-400 mt-1">
+                    ✓ {promoValidation.description} ({promoValidation.discount}% off)
+                  </p>
+                )}
+                {!promoValidation?.valid && promo && promoApplied === false && (
+                  <p className="text-xs text-red-400 mt-1">Invalid promo code</p>
+                )}
+                <p className="text-xs text-gray-500 mt-1">Try: FREEPRO (free), ADMIN2024 (free), NYAX10 (10% off)</p>
               </div>
             </div>
           </div>
@@ -296,13 +378,23 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
               <FaShieldAlt />
               <span>Secure checkout — your payment is protected</span>
             </div>
-            <button
-              onClick={handlePay}
-              disabled={processing}
-              className={`px-6 py-3 rounded-md font-medium transition-colors ${processing ? 'bg-gray-600' : 'bg-[#00b8d8] hover:bg-[#00a6c4]'} text-white`}
-            >
-              {processing ? 'Processing…' : `Pay $${total.toFixed(2)}`}
-            </button>
+            {promoValidation?.isFree ? (
+              <button
+                onClick={handleFreeSubscription}
+                disabled={processing}
+                className={`px-6 py-3 rounded-md font-medium transition-colors ${processing ? 'bg-gray-600' : 'bg-green-600 hover:bg-green-500'} text-white`}
+              >
+                {processing ? 'Activating…' : 'Activate Free Subscription'}
+              </button>
+            ) : (
+              <button
+                onClick={handlePayment}
+                disabled={processing}
+                className={`px-6 py-3 rounded-md font-medium transition-colors ${processing ? 'bg-gray-600' : 'bg-[#00b8d8] hover:bg-[#00a6c4]'} text-white`}
+              >
+                {processing ? 'Processing…' : `Pay $${total.toFixed(2)}`}
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -330,9 +422,24 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
 
           <div className="border-t border-gray-800 pt-3 space-y-2 text-sm">
             <div className="flex justify-between text-gray-300"><span>Subtotal</span><span>${subtotal.toFixed(2)}</span></div>
-            <div className="flex justify-between text-gray-300"><span>Discount</span><span>-${discount.toFixed(2)}</span></div>
+            {discount > 0 && (
+              <div className="flex justify-between text-green-400">
+                <span>Discount ({promoValidation?.description})</span>
+                <span>-${discount.toFixed(2)}</span>
+              </div>
+            )}
             <div className="flex justify-between text-gray-300"><span>Fees</span><span>${fees.toFixed(2)}</span></div>
-            <div className="flex justify-between text-white font-semibold text-base pt-2"><span>Total</span><span>${total.toFixed(2)}</span></div>
+            <div className="flex justify-between text-white font-semibold text-base pt-2">
+              <span>Total</span>
+              <span className={promoValidation?.isFree ? 'text-green-400' : ''}>
+                {promoValidation?.isFree ? 'FREE' : `$${total.toFixed(2)}`}
+              </span>
+            </div>
+            {promoValidation?.isFree && (
+              <div className="text-xs text-green-400 text-center pt-2">
+                🎉 Free subscription with promo code: {promo.toUpperCase()}
+              </div>
+            )}
           </div>
 
           <div className="mt-4 p-3 rounded-md bg-[#102530] border border-gray-800 text-gray-300 text-xs">
