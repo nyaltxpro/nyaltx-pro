@@ -23,6 +23,7 @@ export default function RegisterTokenPage() {
   const [telegram, setTelegram] = useState('');
   const [discord, setDiscord] = useState('');
   const [github, setGithub] = useState('');
+  const [youtube, setYoutube] = useState('');
   const [imageUri, setImageUri] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -73,6 +74,7 @@ export default function RegisterTokenPage() {
           telegram,
           discord,
           github,
+          youtube,
           imageUri,
           submittedByAddress: address,
         }),
@@ -92,6 +94,7 @@ export default function RegisterTokenPage() {
       setTelegram('');
       setDiscord('');
       setGithub('');
+      setYoutube('');
       setImageUri('');
     } catch (err: any) {
       setError(err?.message || 'Something went wrong');
@@ -307,7 +310,7 @@ export default function RegisterTokenPage() {
                       onChange={(e) => setDiscord(e.target.value)}
                     />
                   </div>
-                  <div className="md:col-span-2">
+                  <div>
                     <label className="block text-sm font-medium text-gray-300 mb-1">GitHub</label>
                     <input
                       type="url"
@@ -316,6 +319,17 @@ export default function RegisterTokenPage() {
                       value={github}
                       onChange={(e) => setGithub(e.target.value)}
                     />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1">YouTube</label>
+                    <input
+                      type="url"
+                      className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
+                      placeholder="https://youtube.com/channel/..."
+                      value={youtube}
+                      onChange={(e) => setYoutube(e.target.value)}
+                    />
+                    <p className="text-xs text-gray-500 mt-1">YouTube channel or video URL for your token</p>
                   </div>
                 </div>
 
