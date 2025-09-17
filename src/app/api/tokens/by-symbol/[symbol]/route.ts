@@ -5,10 +5,11 @@ import path from 'path';
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { symbol: string } }
+  { params }: { params: Promise<{ symbol: string }> }
 ) {
   try {
-    const symbol = params.symbol?.toUpperCase();
+    const { symbol: symbolParam } = await params;
+    const symbol = symbolParam?.toUpperCase();
     
     if (!symbol) {
       return NextResponse.json({ error: 'Symbol parameter is required' }, { status: 400 });

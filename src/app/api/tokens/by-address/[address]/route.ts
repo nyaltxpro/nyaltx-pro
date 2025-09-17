@@ -5,10 +5,11 @@ import path from 'path';
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { address: string } }
+  { params }: { params: Promise<{ address: string }> }
 ) {
   try {
-    const address = params.address?.toLowerCase();
+    const { address: addressParam } = await params;
+    const address = addressParam?.toLowerCase();
     
     if (!address) {
       return NextResponse.json({ error: 'Address parameter is required' }, { status: 400 });
