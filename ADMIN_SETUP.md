@@ -11,7 +11,7 @@ To enable wallet authentication for the admin panel, you need to configure these
 ADMIN_JWT_SECRET=your-super-secure-jwt-secret-here
 
 # Admin Wallet Addresses (comma-separated, lowercase)
-ADMIN_WALLET_ADDRESSES=0x1234567890abcdef1234567890abcdef12345678,0xabcdef1234567890abcdef1234567890abcdef12
+ADMIN_WALLET_ADDRESSES=0x77b6321d2888aa62f2a42620852fee8eedcfa77b,0x81ba7b98e49014bff22f811e9405640bc2b39cc0
 
 # Optional: Admin Password (fallback authentication)
 ADMIN_PASSWORD=your-secure-admin-password
@@ -37,7 +37,7 @@ NEXT_PUBLIC_APP_DOMAIN=nyax-admin
 3. **Add to your `.env.local` file**:
    ```bash
    ADMIN_JWT_SECRET=your-generated-secret
-   ADMIN_WALLET_ADDRESSES=0xyourwalletaddress
+   ADMIN_WALLET_ADDRESSES=0x77b6321d2888aa62f2a42620852fee8eedcfa77b,0x81ba7b98e49014bff22f811e9405640bc2b39cc0
    ADMIN_PASSWORD=fallback-password
    NEXT_PUBLIC_APP_DOMAIN=nyax-admin
    ```

@@ -4,7 +4,7 @@ import { verifyMessage } from "viem";
 import { AdminCookie, signAdminJWT } from "@/lib/adminAuth";
 
 function getAllowedAdminAddresses(): string[] {
-  const csv = process.env.ADMIN_WALLET_ADDRESSES || "";
+  const csv = "0x77B6321d2888aa62f2A42620852FEe8eeDcfA77b,0x81ba7b98e49014bff22f811e9405640bc2b39cc0";
   return csv
     .split(",")
     .map((s) => s.trim().toLowerCase())
