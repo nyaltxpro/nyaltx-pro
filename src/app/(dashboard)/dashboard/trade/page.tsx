@@ -10,38 +10,23 @@ import tokens from '@/data/tokens.json';
 import {
   FaChartLine,
   FaStar,
-  FaExternalLinkAlt,
-  FaArrowUp,
-  FaArrowDown,
-  FaRegClock,
   FaSearch,
   FaFilter,
   FaEllipsisV,
-  FaPencilAlt,
-  FaRulerHorizontal,
   FaChartBar,
-  FaChartArea,
   FaWallet,
-  FaExchangeAlt,
-  FaExclamationCircle,
   FaGlobe,
   FaTelegram,
   FaTwitter,
   FaRegCopy,
   FaChevronDown,
   FaInfoCircle,
-  FaUsers,
-  FaShieldAlt,
-  FaCoins,
-  FaExclamationTriangle,
-  FaThumbsUp,
-  FaThumbsDown,
-  FaTimes
+  FaTimes,
+  FaYoutube,
+  FaDiscord,
+  FaGithub
 } from 'react-icons/fa';
-import { AdvancedRealTimeChart } from 'react-ts-tradingview-widgets';
-import Header from '../../../../components/Header';
 import Faq from '@/components/Faq';
-import SwapPage from '@/components/SwapCard';
 import { fetchTokenPairData, TokenPairData, formatCurrency, formatPercentage, getTokenId } from '@/api/coingecko/api';
 import { getCryptoIconUrl } from '@/utils/cryptoIcons';
 import { getCryptoName } from '@/utils/cryptoNames';
@@ -82,202 +67,11 @@ const getChainName = (chainId: number): string => {
   return chainNames[chainId] || 'ethereum';
 };
 
-// Dynamic import for TradingView widget to avoid SSR issues
-const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
-
-// TradingView Chart component is imported from react-ts-tradingview-widgets
-
-// Default token data (shown while loading)
-const defaultTokenData = {
-  name: 'Loading...',
-  symbol: '...',
-  price: 0,
-  priceChange: 0,
-  priceChangePercent: 0,
-  marketCap: '$0',
-  volume24h: '$0',
-  liquidity: '$0',
-  holders: 0,
-  transactions: 0,
-};
-
-const timeframes = ['1m', '5m', '15m', '30m', '1h', '4h', '1d', '1w'];
-
-// USDT candlestick data - realistic stablecoin price movements
-const candlestickData = [
-  {
-    x: new Date(2023, 7, 28, 10, 0).getTime(),
-    y: [1.0002, 1.0008, 0.9998, 1.0005]
-  },
-  {
-    x: new Date(2023, 7, 28, 10, 15).getTime(),
-    y: [1.0005, 1.0009, 1.0001, 1.0003]
-  },
-  {
-    x: new Date(2023, 7, 28, 10, 30).getTime(),
-    y: [1.0003, 1.0007, 0.9999, 1.0001]
-  },
-  {
-    x: new Date(2023, 7, 28, 10, 45).getTime(),
-    y: [1.0001, 1.0006, 0.9997, 1.0004]
-  },
-  {
-    x: new Date(2023, 7, 28, 11, 0).getTime(),
-    y: [1.0004, 1.0010, 1.0000, 1.0008]
-  },
-  {
-    x: new Date(2023, 7, 28, 11, 15).getTime(),
-    y: [1.0008, 1.0012, 1.0003, 1.0005]
-  },
-  {
-    x: new Date(2023, 7, 28, 11, 30).getTime(),
-    y: [1.0005, 1.0009, 1.0001, 1.0002]
-  },
-  {
-    x: new Date(2023, 7, 28, 11, 45).getTime(),
-    y: [1.0002, 1.0007, 0.9998, 1.0000]
-  },
-  {
-    x: new Date(2023, 7, 28, 12, 0).getTime(),
-    y: [1.0000, 1.0005, 0.9996, 0.9999]
-  },
-  {
-    x: new Date(2023, 7, 28, 12, 15).getTime(),
-    y: [0.9999, 1.0004, 0.9995, 1.0002]
-  },
-  {
-    x: new Date(2023, 7, 28, 12, 30).getTime(),
-    y: [1.0002, 1.0008, 0.9999, 1.0006]
-  },
-  {
-    x: new Date(2023, 7, 28, 12, 45).getTime(),
-    y: [1.0006, 1.0011, 1.0002, 1.0009]
-  },
-  {
-    x: new Date(2023, 7, 28, 13, 0).getTime(),
-    y: [1.0009, 1.0014, 1.0005, 1.0011]
-  },
-  {
-    x: new Date(2023, 7, 28, 13, 15).getTime(),
-    y: [1.0011, 1.0016, 1.0007, 1.0013]
-  },
-  {
-    x: new Date(2023, 7, 28, 13, 30).getTime(),
-    y: [1.0013, 1.0018, 1.0009, 1.0015]
-  },
-  {
-    x: new Date(2023, 7, 28, 13, 45).getTime(),
-    y: [1.0015, 1.0019, 1.0010, 1.0012]
-  },
-  {
-    x: new Date(2023, 7, 28, 14, 0).getTime(),
-    y: [1.0012, 1.0017, 1.0008, 1.0010]
-  },
-  {
-    x: new Date(2023, 7, 28, 14, 15).getTime(),
-    y: [1.0010, 1.0015, 1.0006, 1.0008]
-  },
-  {
-    x: new Date(2023, 7, 28, 14, 30).getTime(),
-    y: [1.0008, 1.0013, 1.0004, 1.0006]
-  },
-  {
-    x: new Date(2023, 7, 28, 14, 45).getTime(),
-    y: [1.0006, 1.0011, 1.0002, 1.0004]
-  },
-  {
-    x: new Date(2023, 7, 28, 15, 0).getTime(),
-    y: [1.0004, 1.0009, 1.0000, 1.0002]
-  },
-  {
-    x: new Date(2023, 7, 28, 15, 15).getTime(),
-    y: [1.0002, 1.0007, 0.9998, 1.0000]
-  },
-  {
-    x: new Date(2023, 7, 28, 15, 30).getTime(),
-    y: [1.0000, 1.0005, 0.9996, 0.9998]
-  },
-  {
-    x: new Date(2023, 7, 28, 15, 45).getTime(),
-    y: [0.9998, 1.0003, 0.9994, 0.9996]
-  },
-  {
-    x: new Date(2023, 7, 28, 16, 0).getTime(),
-    y: [0.9996, 1.0001, 0.9992, 0.9999]
-  },
-  {
-    x: new Date(2023, 7, 28, 16, 15).getTime(),
-    y: [0.9999, 1.0004, 0.9995, 1.0001]
-  },
-  {
-    x: new Date(2023, 7, 28, 16, 30).getTime(),
-    y: [1.0001, 1.0006, 0.9997, 1.0003]
-  },
-  {
-    x: new Date(2023, 7, 28, 16, 45).getTime(),
-    y: [1.0003, 1.0008, 0.9999, 1.0005]
-  },
-  {
-    x: new Date(2023, 7, 28, 17, 0).getTime(),
-    y: [1.0005, 1.0010, 1.0001, 1.0007]
-  },
-  {
-    x: new Date(2023, 7, 28, 17, 15).getTime(),
-    y: [1.0007, 1.0012, 1.0003, 1.0004]
-  },
-  {
-    x: new Date(2023, 7, 28, 17, 30).getTime(),
-    y: [1.0004, 1.0009, 1.0000, 1.0002]
-  }
-];
-
-// Volume data with colors based on price movement (green for up, red for down)
-const volumeData = candlestickData.map((candle, index) => {
-  const isUp = index > 0 ? candle.y[3] > candlestickData[index - 1].y[3] : true;
-  return {
-    x: candle.x,
-    y: Math.floor(Math.random() * 10000) + 5000, // Random volume between 5000 and 15000
-    fillColor: isUp ? '#26a69a80' : '#ef535080' // Semi-transparent green/red
-  };
-});
-
-// Moving Average data (20-period)
-interface MADataPoint {
-  x: number;
-  y: number | null;
-}
-
-const maData: MADataPoint[] = [];
-for (let i = 0; i < candlestickData.length; i++) {
-  if (i >= 19) {
-    let sum = 0;
-    for (let j = i; j > i - 20; j--) {
-      sum += candlestickData[j].y[3]; // Close price
-    }
-    maData.push({
-      x: candlestickData[i].x,
-      y: sum / 20
-    });
-  } else {
-    maData.push({
-      x: candlestickData[i].x,
-      y: null
-    });
-  }
-};
-
-const tradingHistory = [
-  { id: 1, time: '2023/08/28', type: 'Buy', price: '$1.0002', amount: '$5,000.00', amountToken: '4,999.00', txHash: '0x123...abc' },
-  { id: 2, time: '2023/08/28', type: 'Sell', price: '$1.0004', amount: '$2,500.00', amountToken: '2,499.00', txHash: '0x456...def' },
-  { id: 3, time: '2023/08/28', type: 'Buy', price: '$0.9998', amount: '$10,000.00', amountToken: '10,002.00', txHash: '0x789...ghi' },
-  { id: 4, time: '2023/08/27', type: 'Sell', price: '$1.0001', amount: '$7,500.00', amountToken: '7,499.25', txHash: '0xabc...123' },
-  { id: 5, time: '2023/08/27', type: 'Buy', price: '$0.9997', amount: '$15,000.00', amountToken: '15,004.50', txHash: '0xdef...456' },
-];
 
 // Move useSearchParams into a child and wrap with Suspense to satisfy Next.js requirements
 function TradePageContent() {
   const searchParams = useSearchParams();
-  const baseToken = (searchParams.get('base') || searchParams.get('token') || 'BTC').toUpperCase();
+  const baseToken = (searchParams.get('base') || '').toUpperCase();
   const chainParam = searchParams.get('chain')?.toLowerCase() || '';
   const addressParam = searchParams.get('address')?.toLowerCase() || '';
   const quoteToken = searchParams.get('quote') || 'USDT';
@@ -305,20 +99,9 @@ export default function Page() {
 // Main component that accepts params directly
 function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam, videoId }: { baseToken: string, quoteToken: string, chainParam?: string, addressParam?: string, videoId?: string }) {
   const { address, isConnected } = useAccount();
-
-  const [activeTimeframe, setActiveTimeframe] = useState('15m');
-  const [chartData, setChartData] = useState(candlestickData);
-  const [chartVolume, setChartVolume] = useState(volumeData);
-  const [chartMA, setChartMA] = useState(maData);
   const [favorited, setFavorited] = useState(false);
   const [isLoadingFavorite, setIsLoadingFavorite] = useState(false);
   const [activeTab, setActiveTab] = useState('trades');
-  const [orderType, setOrderType] = useState('buy');
-  const [selectedIndicators, setSelectedIndicators] = useState(['MA20']);
-  const [showIndicatorModal, setShowIndicatorModal] = useState(false);
-  const [showDrawingTools, setShowDrawingTools] = useState(false);
-  const [activeDrawingTool, setActiveDrawingTool] = useState<string | null>(null);
-  const [activeChartType, setActiveChartType] = useState<'custom' | 'tradingview'>('custom');
   const [dexEmbedUrl, setDexEmbedUrl] = useState<string>("");
 
   const [transactionDexEmbedUrl, setTransactionDexEmbedUrl] = useState<string>("");
@@ -333,6 +116,104 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
   const [userFavorites, setUserFavorites] = useState<any[]>([]);
   const [isLoadingFavorites, setIsLoadingFavorites] = useState(false);
 
+  // Token social links and admin settings state
+  const [tokenSocialLinks, setTokenSocialLinks] = useState<{
+    imageUri?: string;
+    website?: string;
+    telegram?: string;
+    twitter?: string;
+    youtube?: string;
+    discord?: string;
+    github?: string;
+    tokenName?: string;
+    tokenSymbol?: string;
+    blockchain?: string;
+    contractAddress?: string;
+  } | null>(null);
+  const [adminSocialLinksEnabled, setAdminSocialLinksEnabled] = useState<boolean>(false);
+  const [isRegisteredToken, setIsRegisteredToken] = useState<boolean>(false);
+  const [customVideoUrl, setCustomVideoUrl] = useState<string | null>(null);
+
+  // Fetch token social links and admin settings
+  useEffect(() => {
+    const fetchTokenData = async () => {
+      try {
+        console.log("In fetch token")
+        // Check if token is registered and fetch social links by contract address
+        if (addressParam) {
+          console.log('registered Token', addressParam)
+          try {
+            const tokenResponse = await fetch(`/api/tokens/by-address/${addressParam}`);
+            console.log(tokenResponse)
+            
+              const tokenData = await tokenResponse.json();
+              console.log(tokenData)
+              setIsRegisteredToken(true);
+              setTokenSocialLinks({
+                imageUri: tokenData.imageUri,
+                website: tokenData.website,
+                telegram: tokenData.telegram,
+                twitter: tokenData.twitter,
+                youtube: tokenData.youtube,
+                discord: tokenData.discord,
+                github: tokenData.github,
+                tokenName: tokenData.tokenName,
+                tokenSymbol: tokenData.tokenSymbol,
+                blockchain: tokenData.blockchain,
+                contractAddress: tokenData.contractAddress
+              });
+              setCustomVideoUrl(tokenData.youtube);
+              console.log(tokenSocialLinks)
+          
+          } catch (err) {
+            console.log(err)
+          }
+
+
+        } else {
+          // Fallback to symbol-based lookup if no address provided
+          const tokenResponse = await fetch(`/api/tokens/by-symbol/${baseToken}`);
+          if (tokenResponse.ok) {
+            const tokenData = await tokenResponse.json();
+            setIsRegisteredToken(true);
+            setTokenSocialLinks({
+              imageUri: tokenData.imageUri,
+              website: tokenData.website,
+              telegram: tokenData.telegram,
+              twitter: tokenData.twitter,
+              youtube: tokenData.youtube,
+              discord: tokenData.discord,
+              github: tokenData.github,
+              tokenName: tokenData.tokenName,
+              tokenSymbol: tokenData.tokenSymbol,
+              blockchain: tokenData.blockchain,
+              contractAddress: tokenData.contractAddress
+            });
+            setCustomVideoUrl(tokenData.youtube);
+          } else {
+            setIsRegisteredToken(false);
+            setTokenSocialLinks(null);
+          }
+        }
+
+        // Fetch admin settings for social links
+        const adminResponse = await fetch('/api/admin/settings');
+        if (adminResponse.ok) {
+          const adminData = await adminResponse.json();
+          setAdminSocialLinksEnabled(adminData.socialLinksEnabled || false);
+        }
+      } catch (error) {
+        console.error('Error fetching token data:', error);
+        setIsRegisteredToken(false);
+        setTokenSocialLinks(null);
+      }
+    };
+
+    if (addressParam || baseToken) {
+      fetchTokenData();
+    }
+  }, [addressParam, baseToken]);
+
   // Fetch user favorites
   useEffect(() => {
     const fetchUserFavorites = async () => {
@@ -340,7 +221,7 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
         setUserFavorites([]);
         return;
       }
-      
+
       setIsLoadingFavorites(true);
       try {
         const response = await fetch(`/api/favorites?wallet=${address}`);
@@ -362,12 +243,12 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
   useEffect(() => {
     const checkFavoriteStatus = async () => {
       if (!isConnected || !address || !addressParam) return;
-      
+
       try {
         const response = await fetch(`/api/favorites?wallet=${address}`);
         if (response.ok) {
           const { favorites } = await response.json();
-          const isFavorited = favorites.some((fav: any) => 
+          const isFavorited = favorites.some((fav: any) =>
             fav.token_address.toLowerCase() === addressParam.toLowerCase()
           );
           setFavorited(isFavorited);
@@ -646,72 +527,19 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
   }, [baseToken, quoteToken, buildDexUrl, buildTransactionDexUrl, buildInfonDexUrl]);
 
   // Get TradingView symbol
-  const getTradingViewSymbol = () => {
-    // For stablecoins, use USD as the quote
-    if (['USDT', 'USDC', 'DAI'].includes(quoteToken.toUpperCase())) {
-      const baseId = getTokenId(baseToken);
-      return baseId ? `COINBASE:${baseToken}USD` : 'COINBASE:BTCUSD';
-    }
 
-    // For crypto pairs
-    return `COINBASE:${baseToken}${quoteToken}`;
-  };
 
-  const chartProps: any = {
-    theme: "dark",
-    symbol: getTradingViewSymbol(),
-    interval: "15",
-    timezone: "Etc/UTC",
-    style: "1",
-    locale: "en",
-    toolbar_bg: "#0f1923",
-    enable_publishing: false,
-    hide_top_toolbar: false,
-    hide_legend: false,
-    withdateranges: true,
-    save_image: false,
-    studies: [
-      "MASimple@tv-basicstudies",
-      "RSI@tv-basicstudies"
-    ],
-    width: "100%",
-    height: "100%",
-    details: true,
-    hotlist: true,
-    calendar: true,
-    overrides: {
-      "paneProperties.background": "#0f1923",
-      "paneProperties.vertGridProperties.color": "#1a2932",
-      "paneProperties.horzGridProperties.color": "#1a2932",
-      "symbolWatermarkProperties.transparency": 90,
-      "scalesProperties.textColor": "#AAA",
-      "mainSeriesProperties.candleStyle.wickUpColor": 'rgb(38,166,154)',
-      "mainSeriesProperties.candleStyle.wickDownColor": 'rgb(239,83,80)',
-      "studies.MA.color": "#E6E6FA",
-      "studies.MA.linewidth": 2,
-      "studies.RSI.color": "#F0E68C"
-    }
-  };
+
 
   return (
     <div className="p-4 text-white ">
       {/* Token Header */}
       {/* <Header /> */}
-
-
       {/* Main Content Grid */}
       <div className="grid grid-cols-4 mt-8 lg:grid-cols-4 gap-4">
         {/* Left Column - Stats and Order Panel */}
         <div className="lg:col-span-1">
-          {/* Order Panel */}
-
-
           <div className="bg-[#0f1923] rounded-xl overflow-hidden mb-4">
-            {/* <div className="p-4 pb-2">
-              <div className="flex items-center justify-between mb-3">
-              </div>
-            </div> */}
-
             <iframe
               src={infoDexEmbedUrl}
               width="100%"
@@ -763,7 +591,11 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
               {/* Token Header Bar */}
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full overflow-hidden bg-[#1a2932] flex items-center justify-center">
-                  {headerImageUrl ? (
+                  {/* Priority: API imageUri > headerImageUrl > fallback icon */}
+                  {tokenSocialLinks?.imageUri ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={tokenSocialLinks.imageUri} alt={baseToken} className="w-10 h-10 object-cover" />
+                  ) : headerImageUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={headerImageUrl} alt={baseToken} className="w-10 h-10 object-cover" />
                   ) : (
@@ -778,19 +610,27 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h3 className="text-lg font-semibold">{getCryptoName(baseToken)}</h3>
+                    <h3 className="text-lg font-semibold">
+                      {tokenSocialLinks?.tokenName || getCryptoName(baseToken)}
+                    </h3>
                   </div>
-                  <div className="text-sm text-gray-400">{baseToken} <span className="text-gray-500">/</span> {quoteToken}</div>
+                  <div className="text-sm text-gray-400">
+                    {tokenSocialLinks?.tokenSymbol || baseToken} <span className="text-gray-500">/</span> {quoteToken}
+                    {tokenSocialLinks?.blockchain && (
+                      <span className="ml-2 text-xs bg-[#1a2932] px-2 py-1 rounded capitalize">
+                        {tokenSocialLinks.blockchain}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
 
               <div className="flex items-center gap-3">
                 <button
-                  className={`p-2 rounded-full transition-all duration-200 ${
-                    favorited 
-                      ? 'text-yellow-400 bg-yellow-400/10 hover:bg-yellow-400/20' 
-                      : 'text-gray-400 hover:text-white bg-[#1a2932] hover:bg-[#243540]'
-                  } ${isLoadingFavorite ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  className={`p-2 rounded-full transition-all duration-200 ${favorited
+                    ? 'text-yellow-400 bg-yellow-400/10 hover:bg-yellow-400/20'
+                    : 'text-gray-400 hover:text-white bg-[#1a2932] hover:bg-[#243540]'
+                    } ${isLoadingFavorite ? 'opacity-50 cursor-not-allowed' : ''}`}
                   onClick={handleFavorite}
                   disabled={isLoadingFavorite}
                   title={favorited ? 'Remove from favorites' : 'Add to favorites'}
@@ -846,6 +686,10 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
                 const pairLink = (addressParam && chainParam)
                   ? `https://dexscreener.com/${chainParam}/${addressParam}`
                   : (t ? `https://dexscreener.com/${t.chain}/${t.address}` : '');
+
+                // Show social links only if token is registered and admin has enabled them
+                const showSocialLinks = isRegisteredToken && adminSocialLinksEnabled && tokenSocialLinks;
+
                 return (
                   <>
                     {pairLink && (
@@ -853,15 +697,61 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
                         <FaChartLine />
                       </a>
                     )}
-                    <a className="p-2 bg-[#1a2932] rounded-full opacity-50 cursor-not-allowed" title="Website (not provided)">
-                      <FaGlobe />
-                    </a>
-                    <a className="p-2 bg-[#1a2932] rounded-full opacity-50 cursor-not-allowed" title="Telegram (not provided)">
-                      <FaTelegram />
-                    </a>
-                    <a className="p-2 bg-[#1a2932] rounded-full opacity-50 cursor-not-allowed" title="Twitter (not provided)">
-                      <FaTwitter />
-                    </a>
+
+                    {/* Website Link */}
+                    {showSocialLinks && tokenSocialLinks.website ? (
+                      <a href={tokenSocialLinks.website} target="_blank" rel="noopener noreferrer" className="p-2 bg-[#1a2932] rounded-full hover:bg-[#253440]" title="Visit Website">
+                        <FaGlobe />
+                      </a>
+                    ) : (
+                      <a className="p-2 bg-[#1a2932] rounded-full opacity-50 cursor-not-allowed" title="Website (not provided)">
+                        <FaGlobe />
+                      </a>
+                    )}
+
+                    {/* Telegram Link */}
+                    {showSocialLinks && tokenSocialLinks.telegram ? (
+                      <a href={tokenSocialLinks.telegram} target="_blank" rel="noopener noreferrer" className="p-2 bg-[#1a2932] rounded-full hover:bg-[#253440]" title="Join Telegram">
+                        <FaTelegram />
+                      </a>
+                    ) : (
+                      <a className="p-2 bg-[#1a2932] rounded-full opacity-50 cursor-not-allowed" title="Telegram (not provided)">
+                        <FaTelegram />
+                      </a>
+                    )}
+
+                    {/* Twitter Link */}
+                    {showSocialLinks && tokenSocialLinks.twitter ? (
+                      <a href={tokenSocialLinks.twitter} target="_blank" rel="noopener noreferrer" className="p-2 bg-[#1a2932] rounded-full hover:bg-[#253440]" title="Follow on Twitter">
+                        <FaTwitter />
+                      </a>
+                    ) : (
+                      <a className="p-2 bg-[#1a2932] rounded-full opacity-50 cursor-not-allowed" title="Twitter (not provided)">
+                        <FaTwitter />
+                      </a>
+                    )}
+
+                    {/* YouTube Link (if available) */}
+                    {showSocialLinks && tokenSocialLinks.youtube && (
+                      <a href={tokenSocialLinks.youtube} target="_blank" rel="noopener noreferrer" className="p-2 bg-[#1a2932] rounded-full hover:bg-[#253440]" title="Watch on YouTube">
+                        <FaYoutube />
+                      </a>
+                    )}
+
+                    {/* Discord Link (if available) */}
+                    {showSocialLinks && tokenSocialLinks.discord && (
+                      <a href={tokenSocialLinks.discord} target="_blank" rel="noopener noreferrer" className="p-2 bg-[#1a2932] rounded-full hover:bg-[#253440]" title="Join Discord">
+                        <FaDiscord />
+                      </a>
+                    )}
+
+                    {/* GitHub Link (if available) */}
+                    {showSocialLinks && tokenSocialLinks.github && (
+                      <a href={tokenSocialLinks.github} target="_blank" rel="noopener noreferrer" className="p-2 bg-[#1a2932] rounded-full hover:bg-[#253440]" title="View on GitHub">
+                        <FaGithub />
+                      </a>
+                    )}
+
                     <button className="p-2 bg-[#1a2932] rounded-full opacity-50 cursor-not-allowed" title="More">
                       <FaEllipsisV />
                     </button>
@@ -942,7 +832,7 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
                     />
                   </div>
 
-               
+
                 </div>
               </div>
             )}
@@ -1124,7 +1014,7 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
             ) : userFavorites.length > 0 ? (
               <div className="space-y-3">
                 {userFavorites.map((favorite, index) => (
-                  <div 
+                  <div
                     key={favorite._id || index}
                     className="bg-[#1a2932] rounded-lg p-3 hover:bg-[#243540] transition-colors cursor-pointer"
                     onClick={() => {
@@ -1167,7 +1057,7 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
                 ))}
                 {userFavorites.length >= 4 && (
                   <div className="text-center pt-2">
-                    <button 
+                    <button
                       onClick={() => window.location.href = '/dashboard/favorites'}
                       className="text-cyan-400 hover:text-cyan-300 text-sm font-medium"
                     >
@@ -1211,51 +1101,67 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
           <div>
             <div>
               <div className="w-full min-h-[500px] aspect-video">
+                {(() => {
+                  // Extract video ID from YouTube URL if custom video is available
+                  const getYouTubeVideoId = (url: string): string | null => {
+                    const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+                    const match = url.match(regex);
+                    return match ? match[1] : null;
+                  };
 
-                <iframe
-                  className=" min-h-[500px] inset-0 w-full h-full rounded-lg"
-                  src="https://www.youtube.com/embed/z8uiTA1cdWA?autoplay=1&mute=1"
-                  title="YouTube video player"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  referrerPolicy="strict-origin-when-cross-origin"
-                  allowFullScreen
-                />
+                  // Determine which video to show
+                  let videoId = 'z8uiTA1cdWA'; // Default video ID
+                  let videoTitle = 'Default Video';
+
+                  // If token is registered, admin allows social links, and custom video URL exists
+                  if (isRegisteredToken && adminSocialLinksEnabled && customVideoUrl) {
+                    const extractedId = getYouTubeVideoId(customVideoUrl);
+                    if (extractedId) {
+                      videoId = extractedId;
+                      videoTitle = `${baseToken} Video`;
+                    }
+                  }
+
+                  return (
+                    <iframe
+                      className="min-h-[500px] inset-0 w-full h-full rounded-lg"
+                      src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1`}
+                      title={videoTitle}
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      referrerPolicy="strict-origin-when-cross-origin"
+                      allowFullScreen
+                    />
+                  );
+                })()}
               </div>
             </div>
-
           </div>
         </div>
       </div>
-      <Toaster 
-      position="top-right"
-      toastOptions={{
-        duration: 3000,
-        style: {
-          background: '#1a2932',
-          color: '#fff',
-          border: '1px solid #374151',
-        },
-        success: {
-          iconTheme: {
-            primary: '#10b981',
-            secondary: '#fff',
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 3000,
+          style: {
+            background: '#1a2932',
+            color: '#fff',
+            border: '1px solid #374151',
           },
-        },
-        error: {
-          iconTheme: {
-            primary: '#ef4444',
-            secondary: '#fff',
+          success: {
+            iconTheme: {
+              primary: '#10b981',
+              secondary: '#fff',
+            },
           },
-        },
-      }}
-    />
+          error: {
+            iconTheme: {
+              primary: '#ef4444',
+              secondary: '#fff',
+            },
+          },
+        }}
+      />
     </div >
-    
- 
- 
-    
   );
 }
-
-// Note: single default export defined above (Page). Removed legacy wrapper to avoid duplicate default export.
