@@ -85,7 +85,7 @@ function SidebarLinks() {
             <div className="px-2 pb-2 text-gray-400 uppercase tracking-wide text-[11px]">Overview</div>
             <ul className="space-y-1">
               <Item href="/admin">Dashboard</Item>
-              <Item href="/admin/orders">Orders</Item>
+              <Item href="/admin/orders">Subscriptions</Item>
               <Item href="/admin/profiles">Profiles</Item>
               <Item href="/admin/stats">Stats</Item>
               <Item href="/admin/tokens">Tokens</Item>
