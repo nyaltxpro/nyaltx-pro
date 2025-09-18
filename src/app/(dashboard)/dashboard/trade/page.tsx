@@ -31,6 +31,7 @@ import { fetchTokenPairData, TokenPairData, formatCurrency, formatPercentage, ge
 import { getCryptoIconUrl } from '@/utils/cryptoIcons';
 import { getCryptoName } from '@/utils/cryptoNames';
 import nyaxTokensData from '../../../../../nyax-tokens-data.json';
+import SwapPage from '@/components/SwapCard';
 
 // Chain name mapping utility
 const getChainName = (chainId: number): string => {
@@ -560,8 +561,8 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
               More info <FaChevronDown className="inline ml-1" />
             </button>
           </div>
-          {/* <SwapPage /> */}
-          <iframe
+          <SwapPage />
+          {/* <iframe
             src={`https://app.uniswap.org/#/swap?field=input&value=10&inputCurrency=${addressParam}`}
             height="660px"
             width="100%"
@@ -575,7 +576,7 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
               minWidth: "300px",
             }}
             title="Uniswap Swap Widget"
-          />
+          /> */}
 
           {/* <iframe
             src={`https://raydium.io/swap/?inputCurrency=${addressParam}&outputCurrency=USDC`}
