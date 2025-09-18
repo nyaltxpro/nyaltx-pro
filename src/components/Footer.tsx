@@ -17,18 +17,19 @@ const Footer = () => {
         <div className="absolute bottom-0 right-10 h-44 w-44 rounded-full bg-indigo-500/10 blur-3xl" />
         <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent_0,transparent_95%,rgba(255,255,255,0.04)_95%,rgba(255,255,255,0.04)_100%),linear-gradient(to_bottom,transparent_0,transparent_95%,rgba(255,255,255,0.04)_95%,rgba(255,255,255,0.04)_100%)] bg-[length:22px_22px] opacity-10" />
       </div>
-      <div className="container mx-auto">
+      <div className="container  mx-auto">
         {/* Top section */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
           {/* Left column */}
           <div className='md:col-span-1 lg:col-span-2'>
+            <div className=' p-5'>
             <h2 className="text-xl font-medium mb-4">Get news about cryptocurrencies every day!</h2>
             <h3 className="text-lg font-medium mb-4">Be part of Nyaltx Force community! The premium community of Nyaltx</h3>
-            <p className="text-sm mb-4">
+            <p className="text-sm text-justify mb-4">
               A group of elite traders and investors focused on DEFI. You can join now our exclusive Telegram and get all community benefits including
               contests, investing tips and advanced market info. There are 3 tiers:
             </p>
-
+            </div>
           </div>
 
           {/* Right column */}
@@ -77,23 +78,23 @@ const Footer = () => {
           {/* Bottom section with links and app store badges */}
           <div className="flex flex-col md:flex-row justify-between items-center pt-4">
             {/* Social icons */}
-            <div className="flex flex-wrap justify-center items-center gap-4 mb-4 md:mb-0">
+            {/* <div className="flex flex-wrap justify-center items-center gap-4 mb-4 md:mb-0">
               <Link href="https://x.com/nyaltx" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors"><FaXTwitter /></Link>
               <Link href="https://t.me/nyaltx" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors"><FaTelegram /></Link>
               <Link href="https://medium.com/@Nyaltx" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors"><BsMedium /></Link>
               <Link href="https://www.instagram.com/Nyaltx" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors"><BsInstagram /></Link>
               <Link href="https://www.youtube.com/c/Nyaltx" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors"><FaYoutube /></Link>
-            </div>
+            </div> */}
 
             {/* App store badges */}
-            <div className="flex w-full md:w-auto justify-center gap-4 my-4 md:my-0">
+            {/* <div className="flex w-full md:w-auto justify-center gap-4 my-4 md:my-0">
               <Link href="https://apps.apple.com/app/Nyaltx" target="_blank" rel="noopener noreferrer">
                 <Image src="/app-store-badge.svg" alt="App Store" width={120} height={40} />
               </Link>
               <Link href="https://play.google.com/store/apps/details?id=com.Nyaltx" target="_blank" rel="noopener noreferrer">
                 <Image src="/google-play-badge.svg" alt="Google Play" width={135} height={40} />
               </Link>
-            </div>
+            </div> */}
 
             <div className="flex flex-col w-full items-center justify-center mt-6 text-sm space-y-4">
               <div className="flex flex-wrap justify-center gap-x-4 gap-y-2">
