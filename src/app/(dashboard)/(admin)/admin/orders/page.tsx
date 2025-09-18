@@ -26,6 +26,9 @@ type SubscriptionOrder = {
   currency?: string;
   createdAt: string;
   expiresAt?: string;
+  refundStatus?: 'none' | 'requested' | 'processing' | 'completed' | 'failed';
+  refundAmount?: string;
+  refundDate?: string;
 };
 
 export default function AdminOrdersPage() {
@@ -53,6 +56,7 @@ export default function AdminOrdersPage() {
   const [subBusy, setSubBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [subError, setSubError] = useState<string | null>(null);
+  const [refundingIds, setRefundingIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     // Fetch onchain orders
@@ -118,6 +122,41 @@ export default function AdminOrdersPage() {
       setSubError(e?.message || "Error saving subscription");
     } finally {
       setSubBusy(false);
+    }
+  };
+
+  const handleRefund = async (subscriptionId: string, amount?: string) => {
+    if (!confirm('Are you sure you want to process a refund for this subscription?')) {
+      return;
+    }
+
+    setRefundingIds(prev => new Set(prev).add(subscriptionId));
+    try {
+      const res = await fetch(`/api/admin/orders/subscriptions/${subscriptionId}/refund`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount })
+      });
+      
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Failed to process refund');
+      }
+      
+      // Refresh subscription orders
+      const refreshRes = await fetch('/api/admin/orders/subscriptions');
+      if (refreshRes.ok) {
+        const refreshData = await refreshRes.json();
+        setSubscriptionOrders(refreshData?.data || []);
+      }
+    } catch (e: any) {
+      alert(`Refund failed: ${e.message}`);
+    } finally {
+      setRefundingIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(subscriptionId);
+        return newSet;
+      });
     }
   };
 
@@ -229,6 +268,8 @@ export default function AdminOrdersPage() {
                   <th className="px-2 py-1">Amount</th>
                   <th className="px-2 py-1">Created</th>
                   <th className="px-2 py-1">Expires</th>
+                  <th className="px-2 py-1">Refund Status</th>
+                  <th className="px-2 py-1">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -250,6 +291,39 @@ export default function AdminOrdersPage() {
                     <td className="px-2 py-1">{s.amount ? `${s.amount} ${s.currency || ''}` : '—'}</td>
                     <td className="px-2 py-1">{new Date(s.createdAt).toLocaleString()}</td>
                     <td className="px-2 py-1">{s.expiresAt ? new Date(s.expiresAt).toLocaleString() : '—'}</td>
+                    <td className="px-2 py-1">
+                      {s.refundStatus ? (
+                        <span className={`px-2 py-1 rounded text-xs ${
+                          s.refundStatus === 'completed' ? 'bg-green-900 text-green-300' :
+                          s.refundStatus === 'processing' ? 'bg-yellow-900 text-yellow-300' :
+                          s.refundStatus === 'failed' ? 'bg-red-900 text-red-300' :
+                          s.refundStatus === 'requested' ? 'bg-blue-900 text-blue-300' :
+                          'bg-gray-900 text-gray-300'
+                        }`}>
+                          {s.refundStatus === 'none' ? 'No Refund' : s.refundStatus}
+                        </span>
+                      ) : (
+                        <span className="text-gray-400">—</span>
+                      )}
+                      {s.refundAmount && s.refundDate && (
+                        <div className="text-xs text-gray-400 mt-1">
+                          ${s.refundAmount} on {new Date(s.refundDate).toLocaleDateString()}
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-2 py-1">
+                      {s.amount && s.paymentMethod === 'stripe' && (!s.refundStatus || s.refundStatus === 'none' || s.refundStatus === 'failed') ? (
+                        <button
+                          onClick={() => handleRefund(s.id, s.amount)}
+                          disabled={refundingIds.has(s.id)}
+                          className="bg-red-600 hover:bg-red-500 disabled:bg-red-800 disabled:cursor-not-allowed px-2 py-1 rounded text-xs text-white"
+                        >
+                          {refundingIds.has(s.id) ? 'Processing...' : 'Refund'}
+                        </button>
+                      ) : (
+                        <span className="text-gray-400 text-xs">—</span>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>

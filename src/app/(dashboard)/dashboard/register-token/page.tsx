@@ -13,7 +13,6 @@ interface FAQ {
 
 export default function RegisterTokenPage() {
   const { isConnected, address } = useAccount();
-  const [activeTab, setActiveTab] = useState('basic');
   const [tokenName, setTokenName] = useState('');
   const [tokenSymbol, setTokenSymbol] = useState('');
   const [blockchain, setBlockchain] = useState('ethereum');
@@ -24,10 +23,24 @@ export default function RegisterTokenPage() {
   const [discord, setDiscord] = useState('');
   const [github, setGithub] = useState('');
   const [youtube, setYoutube] = useState('');
+  const [videoLink, setVideoLink] = useState('');
   const [imageUri, setImageUri] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [activeTab, setActiveTab] = useState('basic');
+
+  // Check for payment success from URL params
+  React.useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const paymentStatus = urlParams.get('payment');
+    if (paymentStatus === 'success' || paymentStatus === 'free') {
+      setPaymentSuccess(true);
+      setSuccess('🎉 Payment successful! You can now register your token with NyaltxPro benefits.');
+    }
+  }, []);
+
   const [faqs, setFaqs] = useState<FAQ[]>([
     {
       question: 'What is token registration?',
@@ -75,6 +88,7 @@ export default function RegisterTokenPage() {
           discord,
           github,
           youtube,
+          videoLink,
           imageUri,
           submittedByAddress: address,
         }),
@@ -95,6 +109,7 @@ export default function RegisterTokenPage() {
       setDiscord('');
       setGithub('');
       setYoutube('');
+      setVideoLink('');
       setImageUri('');
     } catch (err: any) {
       setError(err?.message || 'Something went wrong');
@@ -109,6 +124,21 @@ export default function RegisterTokenPage() {
         <h1 className="text-2xl font-bold text-white">Register Token</h1>
         <ConnectWalletButton />
       </div>
+
+      {/* Payment Success Banner */}
+      {paymentSuccess && (
+        <div className="mb-6 p-4 bg-green-500/20 border border-green-500/50 rounded-lg">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center">
+              <span className="text-white text-sm">✓</span>
+            </div>
+            <div>
+              <h3 className="text-green-400 font-semibold">NyaltxPro Activated!</h3>
+              <p className="text-green-300 text-sm">Your payment was successful. You now have access to premium token registration features.</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column - Form */}
@@ -268,68 +298,81 @@ export default function RegisterTokenPage() {
                   <p className="text-xs text-gray-500 mt-1">Direct URL to your token logo (PNG/SVG recommended)</p>
                 </div>
 
-                {/* Socials */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1">Website</label>
-                    <input
-                      type="url"
-                      className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
-                      placeholder="https://example.com"
-                      value={website}
-                      onChange={(e) => setWebsite(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1">Twitter</label>
-                    <input
-                      type="url"
-                      className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
-                      placeholder="https://twitter.com/yourhandle"
-                      value={twitter}
-                      onChange={(e) => setTwitter(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1">Telegram</label>
-                    <input
-                      type="url"
-                      className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
-                      placeholder="https://t.me/yourchannel"
-                      value={telegram}
-                      onChange={(e) => setTelegram(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1">Discord</label>
-                    <input
-                      type="url"
-                      className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
-                      placeholder="https://discord.gg/yourinvite"
-                      value={discord}
-                      onChange={(e) => setDiscord(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1">GitHub</label>
-                    <input
-                      type="url"
-                      className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
-                      placeholder="https://github.com/org/repo"
-                      value={github}
-                      onChange={(e) => setGithub(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1">YouTube</label>
-                    <input
-                      type="url"
-                      className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
-                      placeholder="https://youtube.com/channel/..."
-                      value={youtube}
-                      onChange={(e) => setYoutube(e.target.value)}
-                    />
-                    <p className="text-xs text-gray-500 mt-1">YouTube channel or video URL for your token</p>
+                {/* Social Links (Optional) */}
+                <div className="mb-6">
+                  <h3 className="text-sm font-medium text-gray-300 mb-3">Social Links (Optional)</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-400 mb-1">Website</label>
+                      <input
+                        type="url"
+                        className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
+                        placeholder="https://example.com"
+                        value={website}
+                        onChange={(e) => setWebsite(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-400 mb-1">Twitter</label>
+                      <input
+                        type="url"
+                        className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
+                        placeholder="https://twitter.com/yourhandle"
+                        value={twitter}
+                        onChange={(e) => setTwitter(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-400 mb-1">Telegram</label>
+                      <input
+                        type="url"
+                        className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
+                        placeholder="https://t.me/yourchannel"
+                        value={telegram}
+                        onChange={(e) => setTelegram(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-400 mb-1">Discord</label>
+                      <input
+                        type="url"
+                        className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
+                        placeholder="https://discord.gg/yourinvite"
+                        value={discord}
+                        onChange={(e) => setDiscord(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-400 mb-1">GitHub</label>
+                      <input
+                        type="url"
+                        className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
+                        placeholder="https://github.com/org/repo"
+                        value={github}
+                        onChange={(e) => setGithub(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-400 mb-1">YouTube</label>
+                      <input
+                        type="url"
+                        className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
+                        placeholder="https://youtube.com/channel/..."
+                        value={youtube}
+                        onChange={(e) => setYoutube(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-400 mb-1">Video Link</label>
+                      <input
+                        type="url"
+                        className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
+                        placeholder="https://youtube.com/watch?v=... or other video URL"
+                        value={videoLink}
+                        onChange={(e) => setVideoLink(e.target.value)}
+                      />
+                      <p className="text-xs text-gray-500 mt-1">Demo video, tutorial, or promotional content</p>
+                    </div>
                   </div>
                 </div>
 

@@ -473,9 +473,10 @@ export default function PumpPortalSimpleUI() {
       <div className=" mx-auto px-2 py-6">
         <header className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
           <div>
-              <p className={`text-xs mt-1 ${connected ? "text-green-400" : "text-red-400"}`}>
+              {/* <p className={`text-xs mt-1 ${connected ? "text-green-400" : "text-red-400"}`}>
               WebSocket: {connected ? "connected" : "disconnected"} · {messagesPerSec} msg/s
-            </p>
+            </p> */}
+                <h1 className="font-semibold text-2xl">Newest Memes</h1>
           </div>
         
         </header>
@@ -496,6 +497,8 @@ export default function PumpPortalSimpleUI() {
               {newTokens.length === 0 && <p className="text-sm opacity-60">Listening for new tokens…</p>}
             </div>
           </section>
+
+      
 
           {/* <section className="bg-gray-950 rounded-2xl p-4 border border-gray-800">
             <h2 className="text-lg font-semibold mb-3">

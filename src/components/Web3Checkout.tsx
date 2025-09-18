@@ -182,6 +182,11 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
         // Set cookie for pro status if nyaltxpro
         if ((selectedTier || 'nyaltxpro').toLowerCase() === 'nyaltxpro') {
           document.cookie = "nyaltx_pro=1; path=/; max-age=31536000"; // 1 year
+          
+          // Redirect to register token page after successful free activation
+          setTimeout(() => {
+            window.location.href = '/dashboard/register-token?payment=free';
+          }, 2000);
         }
       } else {
         setError(result.message || 'Failed to activate subscription');
@@ -245,8 +250,17 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
       // Place order in admin panel
       await placeOrder(txHash);
       
-      setSuccess(`Payment successful! Transaction: ${txHash}`);
+      // Set pro status cookie for nyaltxpro purchases
+      if ((selectedTier || 'nyaltxpro').toLowerCase() === 'nyaltxpro') {
+        document.cookie = "nyaltx_pro=1; path=/; max-age=31536000"; // 1 year
+        
+        // Redirect to register token page after successful payment
+        setTimeout(() => {
+          window.location.href = '/dashboard/register-token?payment=success';
+        }, 2000);
+      }
       
+      setSuccess(`Payment successful! Transaction: ${txHash}. Redirecting to register token...`);
     } catch (err: any) {
       console.error('Payment error:', err);
       setError(err?.shortMessage || err?.message || 'Payment failed');

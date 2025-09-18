@@ -14,6 +14,9 @@ type SubscriptionOrder = {
   currency?: string;
   createdAt: string;
   expiresAt?: string;
+  refundStatus?: 'none' | 'requested' | 'processing' | 'completed' | 'failed';
+  refundAmount?: string;
+  refundDate?: string;
 };
 
 export async function GET() {

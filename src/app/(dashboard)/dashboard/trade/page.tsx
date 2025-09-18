@@ -77,6 +77,11 @@ function TradePageContent() {
   const quoteToken = searchParams.get('quote') || 'USDT';
   const videoId = searchParams.get('video') || 'VNTK2Bwyq7s';
 
+  // Scroll to top when route changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [baseToken, chainParam, addressParam]);
+
   return (
     <TradingViewWithParams
       baseToken={baseToken}
@@ -531,8 +536,13 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
 
 
 
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
-    <div className="p-4 text-white ">
+    <div className="p-4 text-white min-h-screen">
       {/* Token Header */}
       {/* <Header /> */}
       {/* Main Content Grid */}

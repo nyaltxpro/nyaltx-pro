@@ -19,9 +19,9 @@ const Footer = () => {
       </div>
       <div className="container mx-auto">
         {/* Top section */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
           {/* Left column */}
-          <div className='lg:col-span-2'>
+          <div className='md:col-span-1 lg:col-span-2'>
             <h2 className="text-xl font-medium mb-4">Get news about cryptocurrencies every day!</h2>
             <h3 className="text-lg font-medium mb-4">Be part of Nyaltx Force community! The premium community of Nyaltx</h3>
             <p className="text-sm mb-4">
@@ -29,21 +29,17 @@ const Footer = () => {
               contests, investing tips and advanced market info. There are 3 tiers:
             </p>
 
-            
-           
-
-
           </div>
 
           {/* Right column */}
-          <div className='lg:col-span-1'>
+          <div className='md:col-span-1 lg:col-span-1'>
             <h3 className="text-lg font-medium mb-4">Follow us on social media!</h3>
             <p className="text-sm mb-6">
               Follow us on social media and find all you need to know about crypto world!
             </p>
 
             {/* Social media icons */}
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               <Link href="https://x.com/nyaltx" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center rounded-xl border border-white/10 bg-white/[0.03] p-3 hover:border-white/20 transition-colors">
                 <FaXTwitter className="text-xl mb-1 opacity-90" />
                 <span className="text-xs text-gray-300/90">Twitter</span>
@@ -74,7 +70,7 @@ const Footer = () => {
 
         <div className='  flex w-full flex-col backdrop-blur'>
           {/* Disclaimer */}
-          <div className="text-xs text-justify text-gray-400/90 mb-6 max-w-8xl mx-auto px-4">
+          <div className="text-xs text-justify text-gray-400/90 mb-6 max-w-6xl mx-auto px-4 leading-relaxed">
             All content available on our website, on hyperlinked websites, and on applications, forums, blogs, social media accounts and other platforms associated with Nyaltxools is intended solely to provide you with general information. We make no warranties of any kind with respect to our content, including, but not limited to, the accuracy and currency of the information. None of the content we provide should be construed as financial, legal or any other type of advice on which you may rely. Nothing on our Site should be considered an invitation or offer to take any action.
           </div>
 
@@ -99,8 +95,8 @@ const Footer = () => {
               </Link>
             </div>
 
-            <div className="flex flex-col md:flex-row w-full lg:w-[60%] items-center justify-center md:justify-between mt-6 text-sm">
-              <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 mb-4 md:mb-0">
+            <div className="flex flex-col w-full items-center justify-center mt-6 text-sm space-y-4">
+              <div className="flex flex-wrap justify-center gap-x-4 gap-y-2">
                 <Link href="/general-statement" className="text-gray-300 hover:text-white">General Statement</Link>
                 <Link href="/legal-advice" className="text-gray-300 hover:text-white">Legal Advice</Link>
                 <Link href="/about-us" className="text-gray-300 hover:text-white">About us</Link>
@@ -111,7 +107,7 @@ const Footer = () => {
                 <Link href="/cookies-settings" className="text-gray-300 hover:text-white">Cookie Settings</Link>
               </div>
 
-              <div className="text-xs text-gray-400/90 text-center md:text-right">
+              <div className="text-xs text-gray-400/90 text-center px-4">
                 © Nyaltx.io 2025 - 2149.0 - info@Nyaltx.io | Ads & Marketing: marketing@Nyaltx.io
               </div>
             </div>

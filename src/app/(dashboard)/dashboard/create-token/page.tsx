@@ -1,8 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
-import { FaInfoCircle, FaChevronDown, FaChevronUp } from 'react-icons/fa';
+import React, { useState, useRef } from 'react';
+import { FaInfoCircle, FaChevronDown, FaChevronUp, FaUpload, FaRocket } from 'react-icons/fa';
 import ConnectWalletButton from '@/components/ConnectWalletButton';
+import SolanaWalletButton from '@/components/SolanaWalletButton';
+import TransactionMonitor, { useTransactionMonitor } from '@/components/TransactionMonitor';
 
 interface FAQ {
   question: string;
@@ -14,32 +16,47 @@ export default function CreateTokenPage() {
   const [activeTab, setActiveTab] = useState('basic');
   const [tokenName, setTokenName] = useState('');
   const [tokenSymbol, setTokenSymbol] = useState('');
-  const [blockchain, setBlockchain] = useState('ethereum');
+  const [description, setDescription] = useState('');
+  const [blockchain, setBlockchain] = useState('solana');
+  const [platform, setPlatform] = useState('pump');
   const [totalSupply, setTotalSupply] = useState('');
+  const [website, setWebsite] = useState('');
+  const [twitter, setTwitter] = useState('');
+  const [telegram, setTelegram] = useState('');
+  const [devBuyAmount, setDevBuyAmount] = useState('1');
+  const [slippage, setSlippage] = useState('10');
+  const [priorityFee, setPriorityFee] = useState('0.0005');
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>('');
+  const [isCreating, setIsCreating] = useState(false);
+  const [error, setError] = useState<string>('');
+  const [success, setSuccess] = useState<string>('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { currentTransaction, startMonitoring, setStatus } = useTransactionMonitor();
   const [faqs, setFaqs] = useState<FAQ[]>([
     {
-      question: 'What are the benefits of using our platform?',
-      answer: 'Our platform is easy to use, has low fees, and is trusted by thousands of projects. It makes creating a token simple and accessible to everyone.',
+      question: 'What is Pump.fun token creation?',
+      answer: 'Pump.fun is a popular Solana token launchpad that allows you to create meme tokens with automatic liquidity and trading. No additional fees for creation - only standard trading fees apply.',
       isOpen: false
     },
     {
-      question: 'How does token creation cost?',
-      answer: 'Token creation costs vary by network. Ethereum has higher gas fees compared to other networks like BSC or Polygon. We charge a small platform fee in addition to network gas fees.',
+      question: 'What do I need to create a token?',
+      answer: 'You need a Solana wallet with SOL for the dev buy (minimum 0.1 SOL recommended), token metadata (name, symbol, description), and an image for your token logo.',
       isOpen: false
     },
     {
-      question: 'What is chain/network selection?',
-      answer: 'Chain selection refers to choosing which blockchain your token will be deployed on. Different chains have different features, costs, and user bases.',
+      question: 'What is a dev buy?',
+      answer: 'A dev buy is an initial purchase of your own token that happens during creation. This provides initial liquidity and shows confidence in your project.',
       isOpen: false
     },
     {
-      question: "What should I do once I've created a token?",
-      answer: "After creating your token, you can add liquidity to a DEX, create a website, build a community, and start marketing your project.",
+      question: 'How long does token creation take?',
+      answer: 'Token creation is usually instant once the transaction is confirmed on Solana. The token will immediately be available for trading on Pump.fun.',
       isOpen: false
     },
     {
-      question: 'How can I get help?',
-      answer: 'You can reach out to our support team via Discord or Telegram. We also have extensive documentation and guides available.',
+      question: 'Can I create tokens on other platforms?',
+      answer: 'Yes! We support Pump.fun, Bonk.fun, and Moonshot platforms. Each has different features and requirements.',
       isOpen: false
     }
   ]);
@@ -50,23 +67,97 @@ export default function CreateTokenPage() {
     setFaqs(updatedFaqs);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        setError('Image file must be less than 5MB');
+        return;
+      }
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+      setError('');
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, this would connect to a blockchain and create the token
-    console.log({
-      tokenName,
-      tokenSymbol,
-      blockchain,
-      totalSupply
-    });
-    alert('Token creation initiated! This would connect to the blockchain in a real app.');
+    setIsCreating(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      if (!tokenName || !tokenSymbol || !description) {
+        throw new Error('Please fill in all required fields');
+      }
+
+      if (!imageFile) {
+        throw new Error('Please upload a token image');
+      }
+
+      const formData = new FormData();
+      formData.append('file', imageFile);
+      formData.append('name', tokenName);
+      formData.append('symbol', tokenSymbol);
+      formData.append('description', description);
+      formData.append('website', website);
+      formData.append('twitter', twitter);
+      formData.append('telegram', telegram);
+      formData.append('platform', platform);
+      formData.append('devBuyAmount', devBuyAmount);
+      formData.append('slippage', slippage);
+      formData.append('priorityFee', priorityFee);
+
+      const response = await fetch('/api/tokens/create-pump', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create token');
+      }
+
+      setSuccess(`Token created successfully! Transaction: ${data.signature}`);
+      
+      // Start monitoring the transaction
+      if (data.signature) {
+        startMonitoring(data.signature);
+      }
+      
+      // Reset form
+      setTokenName('');
+      setTokenSymbol('');
+      setDescription('');
+      setWebsite('');
+      setTwitter('');
+      setTelegram('');
+      setImageFile(null);
+      setImagePreview('');
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+
+    } catch (err: any) {
+      setError(err.message || 'Failed to create token');
+    } finally {
+      setIsCreating(false);
+    }
   };
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-white">Create Token</h1>
-        <ConnectWalletButton />
+        <div className="flex items-center space-x-4">
+          <SolanaWalletButton />
+          <ConnectWalletButton />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -166,43 +257,161 @@ export default function CreateTokenPage() {
 
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-gray-300 mb-1">
-                    Blockchain*
+                    Description*
+                  </label>
+                  <textarea
+                    className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
+                    placeholder="Describe your token..."
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    required
+                    rows={3}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Brief description of your token</p>
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                    Platform*
                   </label>
                   <select
                     className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
-                    value={blockchain}
-                    onChange={(e) => setBlockchain(e.target.value)}
+                    value={platform}
+                    onChange={(e) => setPlatform(e.target.value)}
                     required
                   >
-                    <option value="ethereum">Ethereum</option>
-                    <option value="bsc">BSC</option>
-                    <option value="polygon">Polygon</option>
-                    <option value="avalanche">Avalanche</option>
-                    <option value="arbitrum">Arbitrum</option>
+                    <option value="pump">Pump.fun</option>
+                    <option value="bonk">Bonk.fun</option>
+                    <option value="moonshot">Moonshot</option>
                   </select>
+                  <p className="text-xs text-gray-500 mt-1">Choose your token launch platform</p>
                 </div>
 
-                <div className="mb-6">
+                <div className="mb-4">
                   <label className="block text-sm font-medium text-gray-300 mb-1">
-                    Total Supply*
+                    Token Image*
                   </label>
-                  <input
-                    type="number"
-                    className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
-                    placeholder="1000000"
-                    value={totalSupply}
-                    onChange={(e) => setTotalSupply(e.target.value)}
-                    required
-                  />
-                  <p className="text-xs text-gray-500 mt-1">Maximum amount of tokens available</p>
+                  <div className="flex items-center space-x-4">
+                    <div className="flex-1">
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white hover:bg-[#243441] focus:outline-none focus:ring-1 focus:ring-[#00b8d8] flex items-center justify-center space-x-2"
+                      >
+                        <FaUpload />
+                        <span>{imageFile ? imageFile.name : 'Upload Image'}</span>
+                      </button>
+                    </div>
+                    {imagePreview && (
+                      <div className="w-16 h-16 rounded-lg overflow-hidden border border-gray-700">
+                        <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">PNG, JPG, or GIF (max 5MB)</p>
                 </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1">Website</label>
+                    <input
+                      type="url"
+                      className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
+                      placeholder="https://example.com"
+                      value={website}
+                      onChange={(e) => setWebsite(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1">Twitter</label>
+                    <input
+                      type="url"
+                      className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
+                      placeholder="https://twitter.com/handle"
+                      value={twitter}
+                      onChange={(e) => setTwitter(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-300 mb-1">Telegram</label>
+                  <input
+                    type="url"
+                    className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
+                    placeholder="https://t.me/channel"
+                    value={telegram}
+                    onChange={(e) => setTelegram(e.target.value)}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1">Dev Buy (SOL)</label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      min="0.1"
+                      className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
+                      placeholder="1"
+                      value={devBuyAmount}
+                      onChange={(e) => setDevBuyAmount(e.target.value)}
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Initial buy amount</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1">Slippage (%)</label>
+                    <input
+                      type="number"
+                      min="1"
+                      max="50"
+                      className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
+                      placeholder="10"
+                      value={slippage}
+                      onChange={(e) => setSlippage(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1">Priority Fee</label>
+                    <input
+                      type="number"
+                      step="0.00001"
+                      min="0.00001"
+                      className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
+                      placeholder="0.0005"
+                      value={priorityFee}
+                      onChange={(e) => setPriorityFee(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                {error && (
+                  <div className="mb-4 p-3 bg-red-900/30 border border-red-700 rounded-md text-red-300 text-sm">
+                    {error}
+                  </div>
+                )}
+
+                {success && (
+                  <div className="mb-4 p-3 bg-green-900/30 border border-green-700 rounded-md text-green-300 text-sm">
+                    {success}
+                  </div>
+                )}
 
                 <div className="text-center">
                   <button
                     type="submit"
-                    className="bg-[#00b8d8] hover:bg-[#00a6c4] text-white font-medium py-2 px-6 rounded-md transition duration-200"
+                    disabled={isCreating}
+                    className={`bg-[#00b8d8] hover:bg-[#00a6c4] text-white font-medium py-3 px-8 rounded-md transition duration-200 flex items-center justify-center space-x-2 mx-auto ${isCreating ? 'opacity-60 cursor-not-allowed' : ''}`}
                   >
-                    Next
+                    <FaRocket />
+                    <span>{isCreating ? 'Creating Token...' : 'Create Token'}</span>
                   </button>
                 </div>
               </form>
@@ -210,14 +419,23 @@ export default function CreateTokenPage() {
           </div>
         </div>
 
-        {/* Right Column - FAQ */}
-        <div className="lg:col-span-1">
+        {/* Right Column - FAQ & Transaction Monitor */}
+        <div className="lg:col-span-1 space-y-6">
+          {/* Transaction Monitor */}
+          {currentTransaction && (
+            <TransactionMonitor 
+              signature={currentTransaction}
+              onStatusChange={(status) => setStatus(status)}
+            />
+          )}
+
+          {/* FAQ Section */}
           <div className="bg-[#0f1923] rounded-lg shadow-lg p-6">
-            <h2 className="text-xl font-semibold text-white mb-4">What are the benefits of using our platform?</h2>
+            <h2 className="text-xl font-semibold text-white mb-4">🚀 Pump.fun Token Creator</h2>
             
             <p className="text-gray-300 mb-4">
-              Our platform is easy to use, has low fees, and is trusted by thousands of projects. 
-              It makes creating a token simple and accessible to everyone.
+              Create meme tokens instantly on Solana with automatic liquidity and trading. 
+              No coding required - just upload your image and launch!
             </p>
 
             <div className="space-y-4 mt-6">

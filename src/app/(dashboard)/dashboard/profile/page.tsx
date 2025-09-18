@@ -9,6 +9,7 @@ import { MdOutlineCollections, MdOutlineAccountBalanceWallet } from 'react-icons
 import { BsGrid3X3Gap, BsHeart, BsClockHistory, BsCoin } from 'react-icons/bs';
 import { RiExchangeFill } from 'react-icons/ri';
 import ConnectWalletButton from '../../../../components/ConnectWalletButton';
+import SocialLinksEditor from '../../../../components/SocialLinksEditor';
 
 export default function ProfilePage() {
   const { isConnected: isWagmiConnected, address } = useAccount();
@@ -17,6 +18,8 @@ export default function ProfilePage() {
   const [isConnected, setIsConnected] = useState(false);
   const [myRegisteredTokens, setMyRegisteredTokens] = useState<any[] | null>(null);
   const [myRegError, setMyRegError] = useState<string | null>(null);
+  const [myCreatedTokens, setMyCreatedTokens] = useState<any[] | null>(null);
+  const [myCreatedError, setMyCreatedError] = useState<string | null>(null);
   
   // Mock user data
   const mockUser = {
@@ -116,6 +119,20 @@ export default function ProfilePage() {
       .catch((e) => setMyRegError(e?.error || 'Failed to load submissions'));
   }, [derivedConnected, userAddress]);
 
+  // Load user's created tokens when connected
+  React.useEffect(() => {
+    if (!derivedConnected || !userAddress) {
+      setMyCreatedTokens(null);
+      return;
+    }
+    setMyCreatedError(null);
+    setMyCreatedTokens(null);
+    fetch(`/api/tokens/created?address=${encodeURIComponent(userAddress)}`)
+      .then(async (r) => (r.ok ? r.json() : Promise.reject(await r.json())))
+      .then((d) => setMyCreatedTokens(d?.data || []))
+      .catch((e) => setMyCreatedError(e?.error || 'Failed to load created tokens'));
+  }, [derivedConnected, userAddress]);
+
   // Handle wallet connection
   const handleConnectWallet = () => {
     setIsConnected(true);
@@ -137,6 +154,23 @@ export default function ProfilePage() {
   // Format wallet address for display
   const formatWalletAddress = (address: string) => {
     return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
+  };
+
+  // Handle token update from SocialLinksEditor
+  const handleTokenUpdate = (tokenId: string, updatedToken: any) => {
+    // Update registered tokens
+    if (myRegisteredTokens) {
+      setMyRegisteredTokens(prev => 
+        prev?.map(token => token.id === tokenId ? updatedToken : token) || []
+      );
+    }
+    
+    // Update created tokens
+    if (myCreatedTokens) {
+      setMyCreatedTokens(prev => 
+        prev?.map(token => token.id === tokenId ? updatedToken : token) || []
+      );
+    }
   };
 
   return (
@@ -217,6 +251,12 @@ export default function ProfilePage() {
           className={`px-4 py-3 font-medium text-sm whitespace-nowrap ${activeTab === 'tokens' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-gray-400 hover:text-gray-300'}`}
         >
           My Tokens
+        </button>
+        <button
+          onClick={() => setActiveTab('social-links')}
+          className={`px-4 py-3 font-medium text-sm whitespace-nowrap ${activeTab === 'social-links' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-gray-400 hover:text-gray-300'}`}
+        >
+          Social Links
         </button>
         <button
           onClick={() => setActiveTab('nfts')}
@@ -353,6 +393,121 @@ export default function ProfilePage() {
                 </div>
               )}
               {myRegError && <div className="text-red-400 text-sm mt-2">{myRegError}</div>}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Social Links Management Tab */}
+      {derivedConnected && activeTab === 'social-links' && (
+        <div>
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-white mb-4">Manage Token Social Links</h2>
+            <p className="text-gray-400 mb-6">
+              Update social media links and promotional content for your registered and created tokens. 
+              These links help users discover more about your projects.
+            </p>
+          </div>
+
+          {/* Registered Tokens Section */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-semibold text-white">Registered Tokens</h3>
+              <a 
+                href="/dashboard/register-token" 
+                className="text-sm text-blue-400 hover:text-blue-300 underline"
+              >
+                Register New Token
+              </a>
+            </div>
+            
+            {!myRegisteredTokens ? (
+              <div className="bg-gray-800 rounded-lg p-4">
+                <div className="text-gray-400 text-sm">Loading registered tokens...</div>
+              </div>
+            ) : myRegisteredTokens.length === 0 ? (
+              <div className="bg-gray-800 rounded-lg p-6 text-center">
+                <div className="text-gray-400 mb-2">No registered tokens found</div>
+                <div className="text-sm text-gray-500">
+                  Register your first token to manage its social links here.
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {myRegisteredTokens.map((token) => (
+                  <SocialLinksEditor
+                    key={token.id}
+                    token={token}
+                    tokenType="registered"
+                    userAddress={userAddress}
+                    onUpdate={handleTokenUpdate}
+                  />
+                ))}
+              </div>
+            )}
+            
+            {myRegError && (
+              <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-4 mt-4">
+                <div className="text-red-400 text-sm">{myRegError}</div>
+              </div>
+            )}
+          </div>
+
+          {/* Created Tokens Section */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-semibold text-white">Created Tokens</h3>
+              <a 
+                href="/dashboard/create-token" 
+                className="text-sm text-blue-400 hover:text-blue-300 underline"
+              >
+                Create New Token
+              </a>
+            </div>
+            
+            {!myCreatedTokens ? (
+              <div className="bg-gray-800 rounded-lg p-4">
+                <div className="text-gray-400 text-sm">Loading created tokens...</div>
+              </div>
+            ) : myCreatedTokens.length === 0 ? (
+              <div className="bg-gray-800 rounded-lg p-6 text-center">
+                <div className="text-gray-400 mb-2">No created tokens found</div>
+                <div className="text-sm text-gray-500">
+                  Create your first token using our pump.fun integration to manage its social links here.
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {myCreatedTokens.map((token) => (
+                  <SocialLinksEditor
+                    key={token.id}
+                    token={token}
+                    tokenType="created"
+                    userAddress={userAddress}
+                    onUpdate={handleTokenUpdate}
+                  />
+                ))}
+              </div>
+            )}
+            
+            {myCreatedError && (
+              <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-4 mt-4">
+                <div className="text-red-400 text-sm">{myCreatedError}</div>
+              </div>
+            )}
+          </div>
+
+          {/* Help Section */}
+          <div className="bg-gray-800 rounded-lg p-6">
+            <h4 className="text-lg font-semibold text-white mb-3">Social Links Help</h4>
+            <div className="space-y-2 text-sm text-gray-400">
+              <p>• <strong>Website:</strong> Your project's official website or landing page</p>
+              <p>• <strong>Twitter:</strong> Official Twitter/X account for announcements and updates</p>
+              <p>• <strong>Telegram:</strong> Community chat or announcement channel</p>
+              <p>• <strong>Discord:</strong> Community server for discussions and support</p>
+              <p>• <strong>GitHub:</strong> Source code repository (for open-source projects)</p>
+              <p>• <strong>YouTube:</strong> Channel with tutorials, updates, or promotional content</p>
+              <p>• <strong>Video Link:</strong> Demo video, tutorial, or promotional content</p>
             </div>
           </div>
         </div>
