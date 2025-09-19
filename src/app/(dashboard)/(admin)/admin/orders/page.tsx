@@ -57,6 +57,9 @@ export default function AdminOrdersPage() {
   const [error, setError] = useState<string | null>(null);
   const [subError, setSubError] = useState<string | null>(null);
   const [refundingIds, setRefundingIds] = useState<Set<string>>(new Set());
+  const [refundModalOpen, setRefundModalOpen] = useState(false);
+  const [selectedSubscription, setSelectedSubscription] = useState<SubscriptionOrder | null>(null);
+  const [customRefundAmount, setCustomRefundAmount] = useState('');
 
   useEffect(() => {
     // Fetch onchain orders
@@ -125,11 +128,19 @@ export default function AdminOrdersPage() {
     }
   };
 
-  const handleRefund = async (subscriptionId: string, amount?: string) => {
-    if (!confirm('Are you sure you want to process a refund for this subscription?')) {
-      return;
-    }
+  const openRefundModal = (subscription: SubscriptionOrder) => {
+    setSelectedSubscription(subscription);
+    setCustomRefundAmount(subscription.amount || '');
+    setRefundModalOpen(true);
+  };
 
+  const closeRefundModal = () => {
+    setRefundModalOpen(false);
+    setSelectedSubscription(null);
+    setCustomRefundAmount('');
+  };
+
+  const handleRefund = async (subscriptionId: string, amount?: string) => {
     setRefundingIds(prev => new Set(prev).add(subscriptionId));
     try {
       const res = await fetch(`/api/admin/orders/subscriptions/${subscriptionId}/refund`, {
@@ -149,6 +160,8 @@ export default function AdminOrdersPage() {
         const refreshData = await refreshRes.json();
         setSubscriptionOrders(refreshData?.data || []);
       }
+      
+      closeRefundModal();
     } catch (e: any) {
       alert(`Refund failed: ${e.message}`);
     } finally {
@@ -312,17 +325,30 @@ export default function AdminOrdersPage() {
                       )}
                     </td>
                     <td className="px-2 py-1">
-                      {s.amount && s.paymentMethod === 'stripe' && (!s.refundStatus || s.refundStatus === 'none' || s.refundStatus === 'failed') ? (
-                        <button
-                          onClick={() => handleRefund(s.id, s.amount)}
-                          disabled={refundingIds.has(s.id)}
-                          className="bg-red-600 hover:bg-red-500 disabled:bg-red-800 disabled:cursor-not-allowed px-2 py-1 rounded text-xs text-white"
-                        >
-                          {refundingIds.has(s.id) ? 'Processing...' : 'Refund'}
-                        </button>
-                      ) : (
-                        <span className="text-gray-400 text-xs">—</span>
-                      )}
+                      <div className="flex gap-2">
+                        {s.amount && (!s.refundStatus || s.refundStatus === 'none' || s.refundStatus === 'failed') ? (
+                          <>
+                            <button
+                              onClick={() => openRefundModal(s)}
+                              disabled={refundingIds.has(s.id)}
+                              className="bg-red-600 hover:bg-red-500 disabled:bg-red-800 disabled:cursor-not-allowed px-2 py-1 rounded text-xs text-white"
+                            >
+                              {refundingIds.has(s.id) ? 'Processing...' : '💰 Refund'}
+                            </button>
+                            {s.paymentMethod === 'stripe' && (
+                              <button
+                                onClick={() => handleRefund(s.id, s.amount)}
+                                disabled={refundingIds.has(s.id)}
+                                className="bg-orange-600 hover:bg-orange-500 disabled:bg-orange-800 disabled:cursor-not-allowed px-2 py-1 rounded text-xs text-white"
+                              >
+                                Quick Refund
+                              </button>
+                            )}
+                          </>
+                        ) : (
+                          <span className="text-gray-400 text-xs">—</span>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -331,6 +357,70 @@ export default function AdminOrdersPage() {
           </div>
         )}
       </section>
+
+      {/* Refund Modal */}
+      {refundModalOpen && selectedSubscription && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-gray-900 border border-gray-700 rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold mb-4 text-white">💰 Process Refund</h3>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm text-gray-300 mb-1">Subscription ID:</label>
+                <div className="text-sm text-gray-400 bg-gray-800 p-2 rounded">{selectedSubscription.id}</div>
+              </div>
+              
+              <div>
+                <label className="block text-sm text-gray-300 mb-1">Customer:</label>
+                <div className="text-sm text-gray-400 bg-gray-800 p-2 rounded">
+                  {selectedSubscription.email || selectedSubscription.userId || 'N/A'}
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm text-gray-300 mb-1">Original Amount:</label>
+                <div className="text-sm text-gray-400 bg-gray-800 p-2 rounded">
+                  ${selectedSubscription.amount} {selectedSubscription.currency}
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm text-gray-300 mb-1">Refund Amount:</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={customRefundAmount}
+                  onChange={(e) => setCustomRefundAmount(e.target.value)}
+                  className="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white"
+                  placeholder="Enter refund amount"
+                />
+              </div>
+              
+              <div className="bg-yellow-900 border border-yellow-600 rounded p-3">
+                <p className="text-yellow-200 text-sm">
+                  ⚠️ This will process a refund for the specified amount. This action cannot be undone.
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => handleRefund(selectedSubscription.id, customRefundAmount)}
+                disabled={refundingIds.has(selectedSubscription.id) || !customRefundAmount}
+                className="flex-1 bg-red-600 hover:bg-red-500 disabled:bg-red-800 disabled:cursor-not-allowed px-4 py-2 rounded text-white font-medium"
+              >
+                {refundingIds.has(selectedSubscription.id) ? 'Processing...' : 'Process Refund'}
+              </button>
+              <button
+                onClick={closeRefundModal}
+                className="flex-1 bg-gray-600 hover:bg-gray-500 px-4 py-2 rounded text-white font-medium"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
