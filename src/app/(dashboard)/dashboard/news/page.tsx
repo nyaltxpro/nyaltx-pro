@@ -28,13 +28,13 @@ export default async function NewsPage() {
     <div className="min-h-screen bg-gradient-to-br from-[#0a0e1a] via-[#0f1419] to-[#1a1f2e] px-4 py-6 md:px-6 lg:px-8">
       {/* Header Section */}
       <div className="relative mb-8">
-        <div className="absolute inset-0 bg-gradient-to-r from-[#00c3ff]/10 via-[#7c3aed]/10 to-[#f59e0b]/10 rounded-2xl blur-xl"></div>
+        <div className="absolute inset-0  rounded-2xl blur-xl"></div>
         <div className="relative bg-black/40 backdrop-blur-sm border border-gray-800/50 rounded-2xl p-6">
           <div className="flex items-center gap-4 mb-4">
             <div className="w-12 h-12 bg-gradient-to-br from-[#00c3ff] to-[#7c3aed] rounded-xl flex items-center justify-center">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              {/* <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
-              </svg>
+              </svg> */}
             </div>
             <div>
               <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-white via-[#00c3ff] to-[#7c3aed] bg-clip-text text-transparent">

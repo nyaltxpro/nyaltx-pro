@@ -190,7 +190,7 @@ export default function Sidebar({ isMobileMenuOpen, toggleMobileMenu }: SidebarP
         </div>
 
         <div className="mt-4 p-2">
-          <div className="px-3 py-1">
+          {/* <div className="px-3 py-1">
             <AnimatePresence>
               {sidebarExpanded ? (
                 <motion.span 
@@ -215,7 +215,7 @@ export default function Sidebar({ isMobileMenuOpen, toggleMobileMenu }: SidebarP
                 )
               )}
             </AnimatePresence>
-          </div>
+          </div> */}
           
           {/* {extraItems.map((item) => (
             <SidebarItem
