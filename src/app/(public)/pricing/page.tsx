@@ -280,8 +280,20 @@ export default function PricingPage() {
               <li>Embedded project video
                 <span className="text-gray-400"> — default video provided if none purchased</span>
               </li>
+              <li className="text-cyan-400 font-medium">Valid for 1 year</li>
             </ul>
             <div className="mt-auto flex flex-col gap-2">
+              <button
+                onClick={() => router.push(`/pricing/checkout/nyaltxpro?method=paypal`)}
+                className="w-full py-2 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors"
+              >
+                <span className="inline-flex items-center gap-2">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a9.124 9.124 0 0 1-.077.437c-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287z"/>
+                  </svg>
+                  Pay $200 with PayPal
+                </span>
+              </button>
               <button
                 onClick={() => router.push(`/pricing/checkout/nyaltxpro?method=eth`)}
                 className="w-full py-2 rounded-lg border border-zinc-600 text-white font-medium hover:bg-indigo-500"
@@ -401,13 +413,18 @@ export default function PricingPage() {
               )}
 
               <div className="mt-auto flex flex-col gap-2">
-                {/* <button
+                <button
                   disabled={!isPro || busy !== null}
-                  onClick={() => handleStripeCheckout(t.id)}
-                  className="w-full py-2 rounded-lg bg-white text-black font-medium hover:opacity-90 disabled:opacity-50"
+                  onClick={() => router.push(`/pricing/checkout/${t.id}?method=paypal`)}
+                  className="w-full py-2 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
                 >
-                  <span className="inline-flex items-center gap-2"><Image src="/file.svg" width={16} height={16} alt="card"/> Pay with Card (Stripe)</span>
-                </button> */}
+                  <span className="inline-flex items-center gap-2">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a9.124 9.124 0 0 1-.077.437c-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287z"/>
+                    </svg>
+                    Pay with PayPal
+                  </span>
+                </button>
                 <button
                   disabled={!isPro || busy !== null}
                   onClick={() => router.push(`/pricing/checkout/${t.id}?method=eth`)}
@@ -438,9 +455,10 @@ export default function PricingPage() {
       </section>
 
       <div className="mt-10 text-sm text-gray-400">
-        <p>Accepted payment methods: major credit cards (via Stripe), ETH, USDT, or NYAX token (with 20% discount).</p>
+        <p>Accepted payment methods: PayPal, ETH, USDT, or NYAX token (with 20% discount).</p>
         <p className="mt-1">On-chain payments are sent to {RECEIVER}. Default NYAX token: {NYAX_TOKEN}. You can override via env vars.</p>
         <p className="mt-1">Note: Network fees apply to on-chain payments. Ensure you are on the correct chain. Configure receiver address, tokens, and chain via env.</p>
+        <p className="mt-1">PayPal payments are processed securely through PayPal's payment system.</p>
       </div>
       </div>
     </div>

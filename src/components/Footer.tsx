@@ -54,7 +54,7 @@ const Footer = () => {
                 <FaYoutube className="text-xl mb-1 opacity-90" />
                 <span className="text-xs text-gray-300/90">Youtube</span>
               </Link>
-              <Link href="https://t.me/NyaltxCommunity" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center rounded-xl border border-white/10 bg-white/[0.03] p-3 hover:border-white/20 transition-colors">
+              <Link href="https://t.me/nyaltx" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center rounded-xl border border-white/10 bg-white/[0.03] p-3 hover:border-white/20 transition-colors">
                 <FaTelegram className="text-xl mb-1 opacity-90" />
                 <span className="text-xs text-gray-300/90">Telegram</span>
               </Link>
