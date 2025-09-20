@@ -105,30 +105,10 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h3 className="font-medium text-white/80">Email</h3>
-                    <p className="text-sky-300">support@cryptic.com</p>
+                    <p className="text-sky-300">info@nyaltx.com</p>
                   </div>
                 </div>
-                
-                <div className="flex items-start">
-                  <div className="bg-sky-600/30 ring-1 ring-sky-500/30 p-3 rounded-full mr-4">
-                    <FaPhone className="text-white" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-white/80">Phone</h3>
-                    <p>+1 (555) 123-4567</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start">
-                  <div className="bg-sky-600/30 ring-1 ring-sky-500/30 p-3 rounded-full mr-4">
-                    <FaMapMarkerAlt className="text-white" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-white/80">Address</h3>
-                    <p>123 Blockchain Street</p>
-                    <p>Crypto Valley, CA 94103</p>
-                  </div>
-                </div>
+              
               </div>
               </div>
             </div>
