@@ -3,6 +3,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import Image from 'next/image';
 import ConnectWalletButton from '@/components/ConnectWalletButton';
+import PayPalCheckout from '@/components/PayPalCheckout';
 import { FaWallet, FaShieldAlt, FaCheckCircle, FaInfoCircle } from 'react-icons/fa';
 import { useAccount, useSendTransaction, useWriteContract, useSwitchChain } from 'wagmi';
 import { parseEther, erc20Abi, parseUnits } from 'viem';
@@ -63,7 +64,6 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [paypalLoading, setPaypalLoading] = useState(false);
 
   // Wagmi hooks
   const { isConnected, address, chain } = useAccount();
@@ -300,48 +300,14 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
     }
   };
 
-  const handlePayPalCheckout = async () => {
-    if (!agree) {
-      setError('Please accept Terms to continue.');
-      return;
-    }
-
+  const handlePayPalSuccess = (details: any) => {
+    setSuccess(`Payment successful! Transaction ID: ${details?.id}. Redirecting...`);
     setError(null);
+  };
+
+  const handlePayPalError = (error: any) => {
+    setError(error?.message || 'PayPal payment failed');
     setSuccess(null);
-    setPaypalLoading(true);
-
-    try {
-      const response = await fetch('/api/paypal/create-order', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          amount: total.toFixed(2),
-          currency: 'USD',
-          tier: selectedTier || 'nyaltxpro',
-          email: email.trim() || undefined,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to create PayPal order');
-      }
-
-      const data = await response.json();
-      
-      if (data.approvalUrl) {
-        // Redirect to PayPal for payment approval
-        window.location.href = data.approvalUrl;
-      } else {
-        throw new Error('No approval URL received from PayPal');
-      }
-    } catch (err: any) {
-      console.error('PayPal checkout error:', err);
-      setError(err?.message || 'PayPal checkout failed');
-    } finally {
-      setPaypalLoading(false);
-    }
   };
 
   const handlePay = handlePayment;
@@ -435,13 +401,29 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
           {paymentMethod === 'paypal' ? (
             <div className="mb-6">
               <div className="p-4 rounded-lg bg-blue-900/30 border border-blue-500/30">
-                <div className="flex items-center gap-3 mb-2">
+                <div className="flex items-center gap-3 mb-4">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className="text-blue-400">
                     <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a9.124 9.124 0 0 1-.077.437c-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287z"/>
                   </svg>
                   <h3 className="text-lg font-semibold text-blue-400">PayPal Payment</h3>
                 </div>
-                <p className="text-gray-300 text-sm">You will be redirected to PayPal to complete your payment securely.</p>
+                <p className="text-gray-300 text-sm mb-4">Complete your payment securely with PayPal.</p>
+                
+                {agree && !promoValidation?.isFree && (
+                  <PayPalCheckout
+                    amount={total.toFixed(2)}
+                    tier={selectedTier || 'nyaltxpro'}
+                    email={email.trim() || undefined}
+                    onSuccess={handlePayPalSuccess}
+                    onError={handlePayPalError}
+                  />
+                )}
+                
+                {!agree && (
+                  <div className="text-yellow-400 text-sm">
+                    Please accept the Terms of Service to continue with PayPal payment.
+                  </div>
+                )}
               </div>
             </div>
           ) : (
@@ -501,13 +483,9 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
                 {processing ? 'Activating…' : isConnected ? 'Activate Free Subscription' : 'Connect Wallet & Activate'}
               </button>
             ) : paymentMethod === 'paypal' ? (
-              <button
-                onClick={handlePayPalCheckout}
-                disabled={paypalLoading || processing}
-                className={`px-6 py-3 rounded-md font-medium transition-colors ${paypalLoading || processing ? 'bg-gray-600' : 'bg-blue-600 hover:bg-blue-700'} text-white`}
-              >
-                {paypalLoading ? 'Redirecting to PayPal…' : `Pay $${total.toFixed(2)} with PayPal`}
-              </button>
+              <div className="text-center text-sm text-gray-400">
+                PayPal payment button is displayed above
+              </div>
             ) : (
               <button
                 onClick={handlePayment}

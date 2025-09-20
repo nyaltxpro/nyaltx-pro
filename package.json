@@ -11,6 +11,7 @@
     "seed:nyax": "node scripts/seedNyaxTokens.js"
   },
   "dependencies": {
+    "@paypal/react-paypal-js": "^8.9.1",
     "@radix-ui/react-dropdown-menu": "^2.1.16",
     "@reown/appkit": "^1.8.1",
     "@reown/appkit-adapter-wagmi": "^1.8.1",

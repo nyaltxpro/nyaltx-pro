@@ -9,6 +9,7 @@ import Sidebar from "../components/Sidebar";
 import Header from "../components/HeaderUpdated"; // Assuming HeaderUpdated is the one to use
 import Footer from "../components/Footer";
 import Providers from "./providers";
+import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 import "./globals.css";
 
 // Removed duplicate web3modal import - already imported in providers
@@ -53,17 +54,19 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${poppins.variable} ${roboto.variable}`}>
       <body className={inter.className}>
-        <Providers>
-          {/* <Sidebar isMobileMenuOpen={isMobileMenuOpen} toggleMobileMenu={toggleMobileMenu} /> */}
-          {/* Apply margin-left for desktop, none for mobile */}
-          <div className=" transition-all duration-300 flex flex-col min-h-screen">
-            {/* <Header toggleMobileMenu={toggleMobileMenu} /> */}
-            <main className="flex-grow">
-              {children}
-            </main>
-            <Footer />
-          </div>
-        </Providers>
+        <PayPalScriptProvider options={{ clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID! }}>
+          <Providers>
+            {/* <Sidebar isMobileMenuOpen={isMobileMenuOpen} toggleMobileMenu={toggleMobileMenu} /> */}
+            {/* Apply margin-left for desktop, none for mobile */}
+            <div className=" transition-all duration-300 flex flex-col min-h-screen">
+              {/* <Header toggleMobileMenu={toggleMobileMenu} /> */}
+              <main className="flex-grow">
+                {children}
+              </main>
+              <Footer />
+            </div>
+          </Providers>
+        </PayPalScriptProvider>
       </body>
     </html>
   );
