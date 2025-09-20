@@ -337,17 +337,7 @@ export default function PricingPage() {
         <div className="flex items-center justify-between mb-4">
           <h2 id="race-title" className="text-2xl font-bold text-white">Race to Liberty</h2>
         </div>
-        {/* <div className="relative w-full h-40 rounded-xl overflow-hidden mb-6 border border-white/10">
-          <Image src="/banner4.png" alt="Race to Liberty Banner" fill className="object-cover" />
-          <div className="absolute inset-0 bg-black/30" />
-        </div> */}
-
-        {/* {!isPro && (
-          <div className="p-4 mb-6 rounded-md border border-amber-400 bg-amber-950/30 text-amber-200">
-            <strong>NyaltxPro required:</strong> Please purchase <strong>NyaltxPro</strong> to participate in Race to Liberty tiers.
-          </div>
-        )} */}
-
+    
         {/* Cards */}
 
       {error && (
@@ -415,37 +405,16 @@ export default function PricingPage() {
               <div className="mt-auto flex flex-col gap-2">
                 <button
                   disabled={!isPro || busy !== null}
-                  onClick={() => router.push(`/pricing/checkout/${t.id}?method=paypal`)}
-                  className="w-full py-2 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                  onClick={() => router.push(`/pricing/race-to-liberty/${t.id}`)}
+                  className="w-full py-3 rounded-lg bg-gradient-to-r from-cyan-600 to-indigo-600 text-white font-medium hover:from-cyan-700 hover:to-indigo-700 disabled:opacity-50 transition-all transform hover:scale-105"
                 >
                   <span className="inline-flex items-center gap-2">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a9.124 9.124 0 0 1-.077.437c-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287z"/>
-                    </svg>
-                    Pay with PayPal
+                    🏆 Select Coin & Enter Race
                   </span>
                 </button>
-                <button
-                  disabled={!isPro || busy !== null}
-                  onClick={() => router.push(`/pricing/checkout/${t.id}?method=eth`)}
-                  className="w-full py-2 rounded-lg border border-zinc-600 text-white font-medium hover:bg-indigo-500 disabled:opacity-50"
-                >
-                  <span className="inline-flex items-center gap-2"><TokenETH  /> Pay with ETH</span>
-                </button>
-                <button
-                  disabled={!isPro || busy !== null}
-                  onClick={() => router.push(`/pricing/checkout/${t.id}?method=usdt`)}
-                  className="w-full py-2 rounded-lg border border-zinc-600 text-white font-medium hover:bg-emerald-500 disabled:opacity-50"
-                >
-                  <span className="inline-flex items-center gap-2"><Image src="/crypto-icons/color/usdt.svg" width={16} height={16} alt="usdt"/>  Pay with USDT</span>
-                </button>
-                <button
-                  disabled={!isPro || busy !== null}
-                  onClick={() => router.push(`/pricing/checkout/${t.id}?method=nyax`)}
-                  className="w-full py-2 rounded-lg border border-zinc-600 text-white font-medium hover:bg-cyan-500 disabled:opacity-50"
-                >
-                  <span className="inline-flex items-center gap-2"><Image src="/logo.png" width={16} height={16} alt="nyax"/> Pay with NYAX (20% off)</span>
-                </button>
+                <div className="text-xs text-center text-gray-400 mt-2">
+                  Choose your coin • Earn points • Boost visibility
+                </div>
               </div>
             </div>
           );

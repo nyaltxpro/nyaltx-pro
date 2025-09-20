@@ -26,10 +26,10 @@ const Footer = () => {
             <h1 className="text-2xl  font-medium mb-4">NYALTX</h1> 
             <h2 className="text-xl font-medium mb-4">Get news about cryptocurrencies every day!</h2>
             <h3 className="text-lg font-medium mb-4">Be part of Nyaltx Force community! The premium community of Nyaltx</h3>
-            <p className="text-sm text-justify mb-4">
+            {/* <p className="text-sm text-justify mb-4">
               A group of elite traders and investors focused on DEFI. You can join now our exclusive Telegram and get all community benefits including
               contests, investing tips and advanced market info. There are 3 tiers:
-            </p>
+            </p> */}
             </div>
           </div>
 
