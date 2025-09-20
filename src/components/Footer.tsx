@@ -86,7 +86,7 @@ const Footer = () => {
                 <Link href="/legal-advice" className="text-gray-300 hover:text-white text-xs sm:text-sm">Legal Advice</Link>
                 <Link href="/about-us" className="text-gray-300 hover:text-white text-xs sm:text-sm">About us</Link>
                 <Link href="/pro-signup" className="text-gray-300 hover:text-white text-xs sm:text-sm">Nyaltx Pro</Link>
-                <Link href="/team" className="text-gray-300 hover:text-white text-xs sm:text-sm">Team</Link>
+                {/* <Link href="/team" className="text-gray-300 hover:text-white text-xs sm:text-sm">Team</Link> */}
                 <Link href="/contact" className="text-gray-300 hover:text-white text-xs sm:text-sm">Contact</Link>
                 <Link href="/privacy-policy" className="text-gray-300 hover:text-white text-xs sm:text-sm">Privacy policy</Link>
                 <Link href="/cookies-settings" className="text-gray-300 hover:text-white text-xs sm:text-sm">Cookie Settings</Link>

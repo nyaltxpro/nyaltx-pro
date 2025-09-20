@@ -94,7 +94,7 @@ export default function ContactPage() {
             className="md:col-span-1"
           >
             <div className="p-6 rounded-2xl h-full border border-white/10 bg-white/5 backdrop-blur-xl relative overflow-hidden">
-              <div className="pointer-events-none absolute -inset-px rounded-2xl bg-gradient-to-r from-cyan-500/20 via-sky-500/10 to-indigo-500/20 blur-[10px]" />
+              <div className="pointer-events-none absolute -inset-px rounded-2xl  blur-[10px]" />
               <div className="relative">
                 <h2 className="text-xl font-semibold mb-6">Get In Touch</h2>
               
@@ -142,7 +142,7 @@ export default function ContactPage() {
             className="md:col-span-2"
           >
             <div className="p-6 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl relative overflow-hidden">
-              <div className="pointer-events-none absolute -inset-px rounded-2xl bg-gradient-to-r from-cyan-500/20 via-sky-500/10 to-indigo-500/20 blur-[10px]" />
+              <div className="pointer-events-none absolute -inset-px rounded-2xl  blur-[10px]" />
               <div className="relative">
                 <h2 className="text-xl font-semibold mb-6">Send Us a Message</h2>
               
