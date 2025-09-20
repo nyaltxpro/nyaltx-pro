@@ -137,7 +137,7 @@ export default function RaceToLibertyCheckout({ tier, amount, onBack }: RaceToLi
         </div>
       </div> */}
 
-      <div className="relative z-10 p-6">
+      <div className="relative z-0 p-6">
         <div className="max-w-6xl mx-auto">
           {/* Modern Header */}
           <div className="mb-12">
