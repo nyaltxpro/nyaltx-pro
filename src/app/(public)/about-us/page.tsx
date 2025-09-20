@@ -48,7 +48,7 @@ export default function AboutUs() {
           transition={{ duration: 0.5, delay: 0.05 }}
           className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl"
         >
-          <div className="pointer-events-none absolute -inset-px rounded-2xl bg-gradient-to-r from-cyan-500/20 via-sky-500/10 to-indigo-500/20 blur-[10px]" />
+          <div className="pointer-events-none absolute -inset-px rounded-2xl  blur-[10px]" />
           <div className="relative p-6 md:p-10">
             <div className="mb-6 inline-flex items-center gap-2 text-sm">
               <FiTarget className="h-5 w-5 text-cyan-300" />
@@ -66,7 +66,7 @@ export default function AboutUs() {
         </motion.div>
 
         {/* Team */}
-        <motion.div
+        {/* <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
@@ -107,7 +107,7 @@ export default function AboutUs() {
               </div>
             </div>
           </div>
-        </motion.div>
+        </motion.div> */}
 
         {/* Technology */}
         <motion.div
@@ -116,7 +116,7 @@ export default function AboutUs() {
           transition={{ duration: 0.5, delay: 0.15 }}
           className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl"
         >
-          <div className="pointer-events-none absolute -inset-px rounded-2xl bg-gradient-to-r from-cyan-500/20 via-sky-500/10 to-indigo-500/20 blur-[10px]" />
+          <div className="pointer-events-none absolute -inset-px rounded-2xlblur-[10px]" />
           <div className="relative p-6 md:p-10">
             <div className="mb-6 inline-flex items-center gap-2 text-sm">
               <FiCpu className="h-5 w-5 text-cyan-300" />
@@ -140,20 +140,20 @@ export default function AboutUs() {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl"
         >
-          <div className="pointer-events-none absolute -inset-px rounded-2xl bg-gradient-to-r from-cyan-500/20 via-sky-500/10 to-indigo-500/20 blur-[10px]" />
+          <div className="pointer-events-none absolute -inset-px rounded-2xl  blur-[10px]" />
           <div className="relative p-6 md:p-10">
             <h2 className="text-2xl font-semibold mb-4">Contact Us</h2>
             <p className="mb-4">Have questions, suggestions, or just want to say hello? We'd love to hear from you!</p>
             <div className="flex flex-col space-y-2 text-white/80">
               <p>
-                <span className="font-semibold">Email:</span> hello@cryptic.finance
+                <span className="font-semibold">Email:</span> info@nyaltx.com
               </p>
-              <p>
+              {/* <p>
                 <span className="font-semibold">Twitter:</span> @CrypticFinance
               </p>
               <p>
                 <span className="font-semibold">Discord:</span> discord.gg/cryptic
-              </p>
+              </p> */}
             </div>
           </div>
         </motion.div>
