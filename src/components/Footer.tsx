@@ -23,6 +23,7 @@ const Footer = () => {
           {/* Left column */}
           <div className='xl:col-span-2'>
             <div className='p-5'>
+            <h1 className="text-2xl  font-medium mb-4">NYALTX</h1> 
             <h2 className="text-xl font-medium mb-4">Get news about cryptocurrencies every day!</h2>
             <h3 className="text-lg font-medium mb-4">Be part of Nyaltx Force community! The premium community of Nyaltx</h3>
             <p className="text-sm text-justify mb-4">
@@ -77,24 +78,7 @@ const Footer = () => {
 
           {/* Bottom section with links and app store badges */}
           <div className="flex flex-col items-center pt-4 w-full">
-            {/* Social icons */}
-            {/* <div className="flex flex-wrap justify-center items-center gap-4 mb-4 md:mb-0">
-              <Link href="https://x.com/nyaltx" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors"><FaXTwitter /></Link>
-              <Link href="https://t.me/nyaltx" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors"><FaTelegram /></Link>
-              <Link href="https://medium.com/@Nyaltx" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors"><BsMedium /></Link>
-              <Link href="https://www.instagram.com/Nyaltx" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors"><BsInstagram /></Link>
-              <Link href="https://www.youtube.com/c/Nyaltx" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors"><FaYoutube /></Link>
-            </div> */}
-
-            {/* App store badges */}
-            {/* <div className="flex w-full md:w-auto justify-center gap-4 my-4 md:my-0">
-              <Link href="https://apps.apple.com/app/Nyaltx" target="_blank" rel="noopener noreferrer">
-                <Image src="/app-store-badge.svg" alt="App Store" width={120} height={40} />
-              </Link>
-              <Link href="https://play.google.com/store/apps/details?id=com.Nyaltx" target="_blank" rel="noopener noreferrer">
-                <Image src="/google-play-badge.svg" alt="Google Play" width={135} height={40} />
-              </Link>
-            </div> */}
+       
 
             <div className="flex flex-col w-full items-center justify-center mt-6 text-sm space-y-4 px-2">
               <div className="flex flex-wrap justify-center gap-x-3 gap-y-2 max-w-4xl">

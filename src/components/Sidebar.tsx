@@ -101,7 +101,7 @@ export default function Sidebar({ isMobileMenuOpen, toggleMobileMenu }: SidebarP
 
   const navItems = [
     { icon: <FaHome />, text: 'Home', href: '/dashboard' },
-    { icon: <FaChartLine />, text: 'Trading', href: '/dashboard/trade?base=NYAX&chain=ethereum&address=0x5eed5621b92be4473f99bacac77acfa27deb57d9' },
+    { icon: <FaChartLine />, text: 'NYAX', href: '/dashboard/trade?base=NYAX&chain=ethereum&address=0x5eed5621b92be4473f99bacac77acfa27deb57d9' },
     // { icon: <FaExchangeAlt />, text: 'Pairs', href: '/pairs' },
     // { icon: <FaStar />, text: 'Favorites', href: '/dashboard/favorites' },
     { icon: <FaGift />, text: 'Airdrops', href: '/dashboard/airdrops' },
