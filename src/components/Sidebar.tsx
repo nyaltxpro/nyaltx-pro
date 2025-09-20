@@ -109,7 +109,7 @@ export default function Sidebar({ isMobileMenuOpen, toggleMobileMenu }: SidebarP
     { icon: <FaNewspaper />, text: 'News', href: '/dashboard/news' },
     { icon: <FaCoins />, text: 'Create Token', href: '/dashboard/create-token' },
     { icon: <FaPlus />, text: 'Register Token', href: '/dashboard/register-token' },
-    { icon: <FaShoppingCart />, text: 'Checkout', href: '/dashboard/checkout' },
+    // { icon: <FaShoppingCart />, text: 'Checkout', href: '/dashboard/checkout' },
     { icon: <FaWallet />, text: 'Connect', href: '/dashboard/connect' },
     { icon: <FaSyncAlt />, text: 'Swap', href: '/dashboard/swap' },
   ];
@@ -217,7 +217,7 @@ export default function Sidebar({ isMobileMenuOpen, toggleMobileMenu }: SidebarP
             </AnimatePresence>
           </div>
           
-          {extraItems.map((item) => (
+          {/* {extraItems.map((item) => (
             <SidebarItem
               key={item.href}
               icon={item.icon}
@@ -226,7 +226,7 @@ export default function Sidebar({ isMobileMenuOpen, toggleMobileMenu }: SidebarP
               isActive={pathname === item.href}
               isExpanded={sidebarExpanded}
             />
-          ))}
+          ))} */}
           
           {/* <Link href="/profile" className="flex items-center py-3 px-3 mt-4 rounded-md text-gray-400 hover:bg-[#1a2932] hover:text-white cursor-pointer">
             <div className="text-xl"><FaUser /></div>
