@@ -113,7 +113,6 @@ export default function ContactPage() {
               </div>
             </div>
           </motion.div>
-          
           {/* Contact Form */}
           <motion.div 
             initial={{ opacity: 0, y: 12 }}
@@ -200,7 +199,7 @@ export default function ContactPage() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="inline-flex items-center px-6 py-3 bg-sky-600 hover:bg-sky-700 text-white font-medium rounded-lg transition-colors duration-200 disabled:opacity-70"
+                  className="inline-flex items-center px-6 py-3 bg-cyan-300 text-white font-medium rounded-lg transition-colors duration-200 disabled:opacity-70"
                 >
                   {isSubmitting ? (
                     <>
@@ -212,7 +211,7 @@ export default function ContactPage() {
                     </>
                   ) : (
                     <>
-                      <FaPaperPlane className="mr-2" />
+                  
                       Send Message
                     </>
                   )}
