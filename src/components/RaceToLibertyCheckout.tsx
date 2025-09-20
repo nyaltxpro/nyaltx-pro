@@ -1,24 +1,33 @@
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Image from 'next/image';
-import { FaSearch, FaTrophy, FaCoins, FaArrowRight } from 'react-icons/fa';
+import { FaSearch, FaTrophy, FaCoins, FaArrowRight, FaStar } from 'react-icons/fa';
+import { useAccount } from 'wagmi';
 import PayPalCheckout from '@/components/PayPalCheckout';
 import ConnectWalletButton from '@/components/ConnectWalletButton';
+import { RegisteredToken } from '@/types/token';
 
-// Sample coin data - this would typically come from an API
-const AVAILABLE_COINS = [
-  { id: 'btc', name: 'Bitcoin', symbol: 'BTC', logo: '/crypto-icons/color/btc.svg', basePoints: 100 },
-  { id: 'eth', name: 'Ethereum', symbol: 'ETH', logo: '/crypto-icons/color/eth.svg', basePoints: 85 },
-  { id: 'sol', name: 'Solana', symbol: 'SOL', logo: '/crypto-icons/color/sol.svg', basePoints: 75 },
-  { id: 'ada', name: 'Cardano', symbol: 'ADA', logo: '/crypto-icons/color/ada.svg', basePoints: 60 },
-  { id: 'dot', name: 'Polkadot', symbol: 'DOT', logo: '/crypto-icons/color/dot.svg', basePoints: 55 },
-  { id: 'matic', name: 'Polygon', symbol: 'MATIC', logo: '/crypto-icons/color/matic.svg', basePoints: 50 },
-  { id: 'avax', name: 'Avalanche', symbol: 'AVAX', logo: '/crypto-icons/color/avax.svg', basePoints: 45 },
-  { id: 'link', name: 'Chainlink', symbol: 'LINK', logo: '/crypto-icons/color/link.svg', basePoints: 40 },
-  { id: 'uni', name: 'Uniswap', symbol: 'UNI', logo: '/crypto-icons/color/uni.svg', basePoints: 35 },
-  { id: 'atom', name: 'Cosmos', symbol: 'ATOM', logo: '/crypto-icons/color/atom.svg', basePoints: 30 },
-];
+// Default message for when no wallet is connected
+const NO_WALLET_MESSAGE = {
+  id: 'no-wallet',
+  name: 'Connect Wallet Required',
+  symbol: 'WALLET',
+  logo: '/crypto-icons/color/generic.svg',
+  basePoints: 0,
+  isUserToken: false
+};
+
+interface CoinOption {
+  id: string;
+  name: string;
+  symbol: string;
+  logo: string;
+  basePoints: number;
+  isUserToken: boolean;
+  boostMultiplier?: number;
+  tokenId?: string;
+}
 
 const TIER_MULTIPLIERS = {
   paddle: { name: 'Paddle Boat', multiplier: 1, duration: '1 week' },
@@ -33,28 +42,77 @@ interface RaceToLibertyCheckoutProps {
 }
 
 export default function RaceToLibertyCheckout({ tier, amount, onBack }: RaceToLibertyCheckoutProps) {
+  const { address, isConnected } = useAccount();
   const [selectedCoin, setSelectedCoin] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'paypal' | 'crypto'>('paypal');
   const [email, setEmail] = useState('');
   const [agree, setAgree] = useState(true);
+  const [availableCoins, setAvailableCoins] = useState<CoinOption[]>([]);
+  const [userTokens, setUserTokens] = useState<RegisteredToken[]>([]);
 
   const tierInfo = TIER_MULTIPLIERS[tier];
 
+  // Load user's approved tokens
+  useEffect(() => {
+    if (isConnected && address) {
+      loadUserTokens();
+    } else {
+      // Clear tokens when wallet disconnected
+      setAvailableCoins([]);
+      setUserTokens([]);
+      setSelectedCoin(null);
+    }
+  }, [isConnected, address]);
+
+  const loadUserTokens = () => {
+    try {
+      const storedTokens = JSON.parse(localStorage.getItem('registeredTokens') || '[]') as RegisteredToken[];
+      const approvedTokens = storedTokens.filter(
+        token => token.status === 'approved' && token.walletAddress.toLowerCase() === address?.toLowerCase()
+      );
+      setUserTokens(approvedTokens);
+
+      // Convert approved tokens to coin options
+      const userCoinOptions: CoinOption[] = approvedTokens.map(token => ({
+        id: `user-${token.id}`,
+        name: token.name,
+        symbol: token.symbol,
+        logo: token.logo || '/crypto-icons/color/generic.svg',
+        basePoints: Math.round(100 * token.boostMultiplier), // Convert multiplier to base points
+        isUserToken: true,
+        boostMultiplier: token.boostMultiplier,
+        tokenId: token.id,
+      }));
+
+      // Only show user's registered tokens
+      setAvailableCoins(userCoinOptions);
+    } catch (error) {
+      console.error('Error loading user tokens:', error);
+    }
+  };
+
   const filteredCoins = useMemo(() => {
-    return AVAILABLE_COINS.filter(coin =>
+    return availableCoins.filter(coin =>
       coin.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       coin.symbol.toLowerCase().includes(searchTerm.toLowerCase())
     );
-  }, [searchTerm]);
+  }, [searchTerm, availableCoins]);
 
   const selectedCoinData = useMemo(() => {
-    return AVAILABLE_COINS.find(coin => coin.id === selectedCoin);
-  }, [selectedCoin]);
+    return availableCoins.find(coin => coin.id === selectedCoin);
+  }, [selectedCoin, availableCoins]);
 
   const totalPoints = useMemo(() => {
     if (!selectedCoinData) return 0;
-    return selectedCoinData.basePoints * tierInfo.multiplier;
+    let points = selectedCoinData.basePoints * tierInfo.multiplier;
+    
+    // Apply additional boost if it's a user token
+    if (selectedCoinData.isUserToken && selectedCoinData.boostMultiplier) {
+      points = Math.round(points * selectedCoinData.boostMultiplier);
+    }
+    
+    return points;
   }, [selectedCoinData, tierInfo.multiplier]);
 
   const handlePayPalSuccess = (details: any) => {
@@ -82,7 +140,20 @@ export default function RaceToLibertyCheckout({ tier, amount, onBack }: RaceToLi
           <h1 className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-indigo-400 bg-clip-text text-transparent">
             Race to Liberty - {tierInfo.name}
           </h1>
-          <p className="text-gray-300 mt-2">Select your coin and boost your points in the race!</p>
+          <p className="text-gray-300 mt-2">
+            {!isConnected ? (
+              'Connect your wallet to access your registered tokens with boost multipliers!'
+            ) : userTokens.length > 0 ? (
+              <>
+                Select your registered token and boost your points in the race!
+                <span className="block text-cyan-400 text-sm mt-1">
+                  🎉 You have {userTokens.length} approved token{userTokens.length > 1 ? 's' : ''} with extra boosts!
+                </span>
+              </>
+            ) : (
+              'Register your tokens first to unlock boost multipliers in the race!'
+            )}
+          </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -106,31 +177,72 @@ export default function RaceToLibertyCheckout({ tier, amount, onBack }: RaceToLi
                 />
               </div>
 
-              {/* Coin Grid */}
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-96 overflow-y-auto">
-                {filteredCoins.map((coin) => (
-                  <button
-                    key={coin.id}
-                    onClick={() => setSelectedCoin(coin.id)}
-                    className={`p-4 rounded-lg border transition-all ${
-                      selectedCoin === coin.id
-                        ? 'border-cyan-400 bg-cyan-900/30'
-                        : 'border-gray-700 bg-[#1a2932] hover:border-gray-600'
-                    }`}
-                  >
-                    <div className="flex flex-col items-center gap-2">
-                      <Image src={coin.logo} alt={coin.name} width={32} height={32} />
-                      <div className="text-center">
-                        <div className="font-medium text-sm">{coin.symbol}</div>
-                        <div className="text-xs text-gray-400">{coin.name}</div>
-                        <div className="text-xs text-yellow-400 mt-1">
-                          {coin.basePoints * tierInfo.multiplier} pts
+              {/* Wallet Connection Check */}
+              {!isConnected ? (
+                <div className="text-center py-8">
+                  <div className="mb-4">
+                    <ConnectWalletButton />
+                  </div>
+                  <p className="text-gray-400 text-sm">
+                    Connect your wallet to view your registered tokens for Race to Liberty boosts.
+                  </p>
+                </div>
+              ) : userTokens.length > 0 ? (
+                /* User's Registered Tokens */
+                <div>
+                  <h4 className="text-sm font-medium text-cyan-400 mb-3 flex items-center gap-2">
+                    <FaStar className="text-yellow-400" />
+                    Your Registered Tokens ({userTokens.length})
+                  </h4>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-96 overflow-y-auto">
+                    {filteredCoins.map((coin) => (
+                      <button
+                        key={coin.id}
+                        onClick={() => setSelectedCoin(coin.id)}
+                        className={`p-4 rounded-lg border transition-all relative ${
+                          selectedCoin === coin.id
+                            ? 'border-cyan-400 bg-cyan-900/30'
+                            : 'border-yellow-500/50 bg-yellow-900/20 hover:border-yellow-400'
+                        }`}
+                      >
+                        <div className="absolute top-1 right-1">
+                          <FaStar className="text-yellow-400 text-xs" />
                         </div>
-                      </div>
-                    </div>
-                  </button>
-                ))}
-              </div>
+                        <div className="flex flex-col items-center gap-2">
+                          <Image src={coin.logo} alt={coin.name} width={32} height={32} />
+                          <div className="text-center">
+                            <div className="font-medium text-sm">{coin.symbol}</div>
+                            <div className="text-xs text-gray-400">{coin.name}</div>
+                            <div className="text-xs text-yellow-400 mt-1">
+                              {Math.round(coin.basePoints * tierInfo.multiplier * (coin.boostMultiplier || 1))} pts
+                            </div>
+                            <div className="text-xs text-cyan-400">
+                              {coin.boostMultiplier}x boost
+                            </div>
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                /* No Registered Tokens */
+                <div className="text-center py-8">
+                  <div className="mb-4">
+                    <FaCoins className="text-4xl text-gray-600 mx-auto mb-4" />
+                    <h4 className="text-lg font-semibold text-white mb-2">No Registered Tokens</h4>
+                    <p className="text-gray-400 mb-4">
+                      You haven't registered any tokens yet. Register your tokens to unlock boost multipliers!
+                    </p>
+                    <a 
+                      href="/dashboard/register-token" 
+                      className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                    >
+                      Register Tokens
+                    </a>
+                  </div>
+                </div>
+              )}
 
               {/* Payment Method Selection */}
               {selectedCoin && (
@@ -245,7 +357,10 @@ export default function RaceToLibertyCheckout({ tier, amount, onBack }: RaceToLi
 
               {/* Points Calculation */}
               <div className="mb-4 p-3 bg-yellow-900/20 border border-yellow-500/30 rounded-lg">
-                <div className="text-yellow-400 font-medium mb-2">Points Earned</div>
+                <div className="text-yellow-400 font-medium mb-2 flex items-center gap-2">
+                  Points Earned
+                  {selectedCoinData?.isUserToken && <FaStar className="text-yellow-400 text-sm" />}
+                </div>
                 {selectedCoinData ? (
                   <div className="space-y-1 text-sm">
                     <div className="flex justify-between">
@@ -256,12 +371,23 @@ export default function RaceToLibertyCheckout({ tier, amount, onBack }: RaceToLi
                       <span>Tier Multiplier:</span>
                       <span>{tierInfo.multiplier}x</span>
                     </div>
+                    {selectedCoinData.isUserToken && selectedCoinData.boostMultiplier && (
+                      <div className="flex justify-between text-cyan-400">
+                        <span>Token Boost:</span>
+                        <span>{selectedCoinData.boostMultiplier}x</span>
+                      </div>
+                    )}
                     <div className="border-t border-yellow-500/30 pt-1 mt-2">
                       <div className="flex justify-between font-bold text-yellow-400">
                         <span>Total Points:</span>
                         <span>{totalPoints}</span>
                       </div>
                     </div>
+                    {selectedCoinData.isUserToken && (
+                      <div className="text-xs text-cyan-400 mt-1">
+                        🎉 Boosted by your registered token!
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div className="text-gray-400 text-sm">Select a coin to see points</div>
@@ -282,6 +408,11 @@ export default function RaceToLibertyCheckout({ tier, amount, onBack }: RaceToLi
                 <div>✓ Points boost in Race to Liberty</div>
                 <div>✓ Enhanced project visibility</div>
                 <div>✓ Priority support</div>
+                {userTokens.length > 0 && (
+                  <div className="text-cyan-400 mt-2 pt-2 border-t border-gray-700">
+                    ✓ Extra boost from your {userTokens.length} approved token{userTokens.length > 1 ? 's' : ''}
+                  </div>
+                )}
               </div>
             </div>
           </div>

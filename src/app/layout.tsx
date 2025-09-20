@@ -54,7 +54,11 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${poppins.variable} ${roboto.variable}`}>
       <body className={inter.className}>
-        <PayPalScriptProvider options={{ clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID! }}>
+        <PayPalScriptProvider options={{ 
+          clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "test",
+          currency: "USD",
+          intent: "capture"
+        }}>
           <Providers>
             {/* <Sidebar isMobileMenuOpen={isMobileMenuOpen} toggleMobileMenu={toggleMobileMenu} /> */}
             {/* Apply margin-left for desktop, none for mobile */}

@@ -19,6 +19,12 @@ export default function PayPalCheckout({
   onError 
 }: PayPalCheckoutProps) {
   const [processing, setProcessing] = useState(false);
+  const [sdkReady, setSdkReady] = useState(false);
+  
+  // Check if PayPal SDK is properly configured
+  const isPayPalConfigured = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID && 
+    process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID !== 'your-paypal-client-id-here' &&
+    process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID !== 'test';
 
   const handleSuccess = async (details: any) => {
     try {
@@ -42,6 +48,20 @@ export default function PayPalCheckout({
       }
     }
   };
+
+  if (!isPayPalConfigured) {
+    return (
+      <div className="w-full p-4 bg-yellow-900/30 border border-yellow-500/50 rounded-lg">
+        <div className="text-yellow-400 font-medium mb-2">PayPal Not Configured</div>
+        <div className="text-sm text-gray-300 mb-3">
+          PayPal payments are not available. Please configure your PayPal Client ID in environment variables.
+        </div>
+        <div className="text-xs text-gray-400">
+          Add <code className="bg-gray-800 px-1 rounded">NEXT_PUBLIC_PAYPAL_CLIENT_ID</code> to your .env.local file
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full">

@@ -40,3 +40,33 @@ export interface PumpFunTrade {
   image?: string;
   marketCap?: number; // if provided by feed
 }
+
+// User registered token for Race to Liberty
+export interface RegisteredToken {
+  id: string;
+  name: string;
+  symbol: string;
+  contractAddress: string;
+  chain: string;
+  logo?: string;
+  description?: string;
+  website?: string;
+  twitter?: string;
+  telegram?: string;
+  userId: string;
+  walletAddress: string;
+  status: 'pending' | 'approved' | 'rejected';
+  boostMultiplier: number; // 1.0 = no boost, 1.5 = 50% boost, etc.
+  submittedAt: number;
+  approvedAt?: number;
+  approvedBy?: string; // admin wallet address
+  rejectionReason?: string;
+}
+
+// Token boost configuration
+export interface TokenBoost {
+  tokenId: string;
+  multiplier: number;
+  maxBoost: number;
+  category: 'community' | 'utility' | 'defi' | 'gaming' | 'meme';
+}
