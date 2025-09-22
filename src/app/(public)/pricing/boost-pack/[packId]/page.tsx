@@ -59,29 +59,44 @@ const TOKEN_CATEGORIES = {
   ai: { name: 'AI', multiplier: 1.5, color: 'text-cyan-400' }
 };
 
-// Get user's registered and approved tokens
-const getUserRegisteredTokens = () => {
-  if (typeof window === 'undefined') return [];
-  
-  const registeredTokens = JSON.parse(localStorage.getItem('registeredTokens') || '[]');
-  const tokenBoosts = JSON.parse(localStorage.getItem('tokenBoosts') || '{}');
-  
-  // Only show tokens that are approved (status === 'approved')
-  return registeredTokens
-    .filter((token: any) => token.status === 'approved')
-    .map((token: any) => ({
-      id: token.id,
-      symbol: token.symbol,
-      name: token.name,
-      address: token.contractAddress,
-      balance: Math.floor(Math.random() * 1000000) + 10000, // Mock balance
-      logo: `/crypto-icons/color/${token.symbol.toLowerCase()}.svg`,
-      currentBoost: tokenBoosts[token.id] || 0,
-      isRegistered: true,
-      category: token.category || 'defi',
-      blockchain: token.blockchain || 'ethereum',
-      multiplier: TOKEN_CATEGORIES[token.category as keyof typeof TOKEN_CATEGORIES]?.multiplier || 1.0
-    }));
+// Fetch user's registered and approved tokens from database
+const fetchUserRegisteredTokens = async (walletAddress: string) => {
+  try {
+    const response = await fetch(`/api/tokens/by-user?address=${walletAddress}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch user tokens');
+    }
+    
+    const { data } = await response.json();
+    const tokenBoosts = JSON.parse(localStorage.getItem('tokenBoosts') || '{}');
+    
+    // Only return approved tokens with boost data
+    return data
+      .filter((token: any) => token.status === 'approved')
+      .map((token: any) => ({
+        id: token.id,
+        symbol: token.tokenSymbol,
+        name: token.tokenName,
+        address: token.contractAddress,
+        balance: Math.floor(Math.random() * 1000000) + 10000, // Mock balance
+        logo: token.imageUri || `/crypto-icons/color/${token.tokenSymbol.toLowerCase()}.svg`,
+        currentBoost: tokenBoosts[token.id] || 0,
+        isRegistered: true,
+        category: token.category || 'defi',
+        blockchain: token.blockchain || 'ethereum',
+        multiplier: TOKEN_CATEGORIES[token.category as keyof typeof TOKEN_CATEGORIES]?.multiplier || 1.0,
+        website: token.website,
+        twitter: token.twitter,
+        telegram: token.telegram,
+        discord: token.discord,
+        github: token.github,
+        createdAt: token.createdAt,
+        updatedAt: token.updatedAt
+      }));
+  } catch (error) {
+    console.error('Error fetching user tokens:', error);
+    return [];
+  }
 };
 
 // Payment configuration
@@ -92,7 +107,7 @@ const DEFAULT_USDT: `0x${string}` = "0xdAC17F958D2ee523a2206206994597C13D831ec7"
 export default function BoostPackCheckout() {
   const params = useParams();
   const router = useRouter();
-  const { isConnected, chain } = useAccount();
+  const { isConnected, chain, address } = useAccount();
   const { switchChainAsync } = useSwitchChain();
   const { open } = useAppKit();
   const { sendTransactionAsync } = useSendTransaction();
@@ -108,15 +123,30 @@ export default function BoostPackCheckout() {
   const [error, setError] = useState<string | null>(null);
   const [ethPrice, setEthPrice] = useState<number>(3000);
   const [userTokens, setUserTokens] = useState<any[]>([]);
+  const [isLoadingTokens, setIsLoadingTokens] = useState(false);
 
-  // Load user tokens on mount and refresh when needed
-  const refreshUserTokens = () => {
-    setUserTokens(getUserRegisteredTokens());
+  // Load user tokens from database
+  const refreshUserTokens = async () => {
+    if (!address) {
+      setUserTokens([]);
+      return;
+    }
+    
+    setIsLoadingTokens(true);
+    try {
+      const tokens = await fetchUserRegisteredTokens(address);
+      setUserTokens(tokens);
+    } catch (error) {
+      console.error('Failed to load user tokens:', error);
+      setUserTokens([]);
+    } finally {
+      setIsLoadingTokens(false);
+    }
   };
 
   useEffect(() => {
     refreshUserTokens();
-  }, []);
+  }, [address]);
 
   // Listen for storage changes to refresh tokens when boosts are updated
   useEffect(() => {
@@ -230,6 +260,9 @@ export default function BoostPackCheckout() {
       // Save updated boosts to localStorage
       localStorage.setItem('tokenBoosts', JSON.stringify(tokenBoosts));
       
+      // Refresh token list to show updated boost values
+      await refreshUserTokens();
+      
       // Log the transaction for debugging
       console.log('Boost applied to tokens:', {
         packName: boostPack.name,
@@ -317,9 +350,28 @@ export default function BoostPackCheckout() {
                   />
                 </div>
 
+                {/* Loading State */}
+                {isLoadingTokens && (
+                  <div className="space-y-3">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="p-4 rounded-lg border border-gray-700 bg-gray-800/50 animate-pulse">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-gray-600 rounded-full"></div>
+                          <div className="flex-1">
+                            <div className="h-4 bg-gray-600 rounded w-20 mb-2"></div>
+                            <div className="h-3 bg-gray-700 rounded w-32"></div>
+                          </div>
+                          <div className="w-6 h-6 bg-gray-600 rounded-full"></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
                 {/* Token List */}
-                <div className="space-y-3">
-                  {filteredTokens.map((token: any) => {
+                {!isLoadingTokens && (
+                  <div className="space-y-3">
+                    {filteredTokens.map((token: any) => {
                     const category = TOKEN_CATEGORIES[token.category as keyof typeof TOKEN_CATEGORIES];
                     const boostedPoints = Math.floor(boostPack.points * token.multiplier);
                     
@@ -389,21 +441,36 @@ export default function BoostPackCheckout() {
                       </div>
                     );
                   })}
-                </div>
+                  </div>
+                )}
 
-                {filteredTokens.length === 0 && (
+                {!isLoadingTokens && filteredTokens.length === 0 && (
                   <div className="text-center py-8">
                     <FaCoins className="text-gray-500 text-4xl mx-auto mb-4" />
                     <div className="text-gray-500 mb-2">
-                      {searchQuery ? 'No tokens found' : 'No approved tokens available'}
-                    </div>
-                    <div className="text-gray-600 text-sm mb-4">
-                      {searchQuery 
-                        ? 'Try a different search term' 
-                        : 'Register your tokens and get them approved by admins to use boost packs'
+                      {!isConnected 
+                        ? 'Connect wallet to view your tokens'
+                        : searchQuery 
+                          ? 'No tokens found' 
+                          : 'No approved tokens available'
                       }
                     </div>
-                    {!searchQuery && (
+                    <div className="text-gray-600 text-sm mb-4">
+                      {!isConnected
+                        ? 'Connect your wallet to see registered tokens available for boosting'
+                        : searchQuery 
+                          ? 'Try a different search term' 
+                          : 'Register your tokens and get them approved by admins to use boost packs'
+                      }
+                    </div>
+                    {!isConnected ? (
+                      <button
+                        onClick={() => open({ view: 'Connect' })}
+                        className="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition-colors"
+                      >
+                        Connect Wallet
+                      </button>
+                    ) : !searchQuery && (
                       <div className="space-y-2">
                         <button
                           onClick={() => router.push('/dashboard/register-token')}
@@ -412,7 +479,7 @@ export default function BoostPackCheckout() {
                           Register Tokens
                         </button>
                         <div className="text-xs text-gray-500">
-                          Connect wallet → Register tokens → Wait for approval → Boost tokens
+                          Register tokens → Wait for approval → Boost tokens
                         </div>
                       </div>
                     )}
