@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useAccount } from 'wagmi';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FaPlus, FaCheck, FaTimes, FaCoins, FaExternalLinkAlt, FaInfoCircle, FaChevronUp, FaChevronDown } from 'react-icons/fa';
@@ -14,7 +14,7 @@ interface FAQ {
   isOpen: boolean;
 }
 
-export default function RegisterTokenPage() {
+function RegisterTokenContent() {
   const { isConnected, address } = useAccount();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -445,5 +445,25 @@ export default function RegisterTokenPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function RegisterTokenPage() {
+  return (
+    <Suspense fallback={
+      <div className="p-6 max-w-7xl mx-auto">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold text-white">Register Token</h1>
+          <ConnectWalletButton />
+        </div>
+        <div className="animate-pulse">
+          <div className="h-4 bg-gray-700 rounded w-3/4 mb-4"></div>
+          <div className="h-4 bg-gray-700 rounded w-1/2 mb-4"></div>
+          <div className="h-32 bg-gray-700 rounded mb-4"></div>
+        </div>
+      </div>
+    }>
+      <RegisterTokenContent />
+    </Suspense>
   );
 }

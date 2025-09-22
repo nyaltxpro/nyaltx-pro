@@ -46,7 +46,8 @@ class TwitchApiService {
   constructor() {
     this.clientId = process.env.NEXT_PUBLIC_TWITCH_CLIENT_ID || '';
     this.clientSecret = process.env.TWITCH_CLIENT_SECRET || '';
-    this.redirectUri = process.env.NEXT_PUBLIC_TWITCH_REDIRECT_URI || `${window?.location?.origin}/auth/twitch/callback`;
+    this.redirectUri = process.env.NEXT_PUBLIC_TWITCH_REDIRECT_URI || 
+      (typeof window !== 'undefined' ? `${window.location.origin}/auth/twitch/callback` : 'http://localhost:3000/auth/twitch/callback');
   }
 
   // OAuth URL for Twitch authentication

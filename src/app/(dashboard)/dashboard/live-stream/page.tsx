@@ -3,8 +3,10 @@
 import { useState, useEffect } from 'react';
 import { useAccount } from 'wagmi';
 import LiveStream from '@/components/LiveStream';
-import CreateLiveStream from '@/components/CreateLiveStream';
-import LiveStreamViewer from '@/components/LiveStreamViewer';
+import dynamic from 'next/dynamic';
+
+const CreateLiveStream = dynamic(() => import('@/components/CreateLiveStream'), { ssr: false });
+const LiveStreamViewer = dynamic(() => import('@/components/LiveStreamViewer'), { ssr: false });
 import { FaRocket, FaFire, FaUsers, FaChartLine, FaGlobe, FaArrowUp, FaPlay, FaPlus, FaEye } from 'react-icons/fa';
 import Image from 'next/image';
 

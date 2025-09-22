@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import PublicHeader from '@/components/PublicHeader';
 import { FaCheck, FaRocket, FaCoins, FaArrowRight, FaHome } from 'react-icons/fa';
@@ -44,7 +44,7 @@ const TOKEN_SYMBOLS = {
   '4': 'FLOKI'
 };
 
-export default function BoostPackSuccess() {
+function BoostPackSuccessContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
@@ -235,5 +235,17 @@ export default function BoostPackSuccess() {
         </div>
       </div>
     </>
+  );
+}
+
+export default function BoostPackSuccess() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-500"></div>
+      </div>
+    }>
+      <BoostPackSuccessContent />
+    </Suspense>
   );
 }
