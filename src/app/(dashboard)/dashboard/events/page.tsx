@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { FaCalendarAlt, FaExternalLinkAlt, FaCoins, FaClock, FaFilter } from 'react-icons/fa';
+import { FaCalendarAlt, FaExternalLinkAlt, FaCoins, FaClock, FaFilter, FaTimes, FaExpand } from 'react-icons/fa';
 import Image from 'next/image';
 
 interface Event {
@@ -47,6 +47,7 @@ export default function EventsPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [filter, setFilter] = useState<'all' | 'important' | 'today'>('all');
+  const [selectedImage, setSelectedImage] = useState<{ src: string; title: string } | null>(null);
 
   const fetchEvents = async (pageNum: number = 1) => {
     try {
@@ -185,7 +186,7 @@ export default function EventsPage() {
           >
             {/* Event Image */}
             {event.proof && (
-              <div className="relative h-48 overflow-hidden">
+              <div className="relative h-48 overflow-hidden cursor-pointer group/image" onClick={() => setSelectedImage({ src: event.proof, title: event.title.en })}>
                 <Image
                   src={event.proof}
                   alt={event.title.en}
@@ -196,6 +197,13 @@ export default function EventsPage() {
                   }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                
+                {/* View Image Overlay */}
+                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/image:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                  <div className="bg-white/20 backdrop-blur-sm rounded-full p-3 border border-white/30">
+                    <FaExpand className="w-5 h-5 text-white" />
+                  </div>
+                </div>
                 
                 {/* Event Type Badge */}
                 {event.categories && event.categories.length > 0 && (
@@ -366,6 +374,58 @@ export default function EventsPage() {
           <div className="bg-gray-800 rounded-lg p-6 flex items-center gap-3">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-cyan-500"></div>
             <span className="text-white">Loading events...</span>
+          </div>
+        </div>
+      )}
+
+      {/* Image Modal */}
+      {selectedImage && (
+        <div 
+          className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          onClick={() => setSelectedImage(null)}
+        >
+          <div className="relative max-w-4xl max-h-full w-full h-full flex flex-col">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between mb-4 bg-black/50 backdrop-blur-sm rounded-t-lg p-4">
+              <h3 className="text-white font-semibold text-lg truncate pr-4">
+                {selectedImage.title}
+              </h3>
+              <button
+                onClick={() => setSelectedImage(null)}
+                className="text-white hover:text-gray-300 transition-colors p-2 hover:bg-white/10 rounded-full"
+              >
+                <FaTimes className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Image */}
+            <div className="relative flex-1 bg-black/30 backdrop-blur-sm rounded-b-lg overflow-hidden">
+              <Image
+                src={selectedImage.src}
+                alt={selectedImage.title}
+                fill
+                className="object-contain"
+                onClick={(e) => e.stopPropagation()}
+                onError={(e) => {
+                  console.error('Failed to load image:', selectedImage.src);
+                }}
+              />
+            </div>
+
+            {/* Download Button */}
+            <div className="absolute bottom-4 right-4">
+              <a
+                href={selectedImage.src}
+                download
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2 backdrop-blur-sm"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <FaExternalLinkAlt className="w-4 h-4" />
+                <span>Download</span>
+              </a>
+            </div>
           </div>
         </div>
       )}
