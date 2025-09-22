@@ -5,33 +5,32 @@ import { FaCalendarAlt, FaExternalLinkAlt, FaCoins, FaClock, FaFilter } from 're
 import Image from 'next/image';
 
 interface Event {
-  id: string;
+  id: number;
   title: {
     en: string;
-  };
-  description: {
-    en: string;
-  };
-  date_event: string;
-  created_date: string;
-  source: {
-    name: string;
-    source: string;
   };
   coins: Array<{
     id: string;
     name: string;
+    rank: number;
     symbol: string;
     fullname: string;
   }>;
+  date_event: string;
+  can_occur_before: boolean;
+  created_date: string;
+  displayed_date: string;
   categories: Array<{
-    id: string;
+    id: number;
     name: string;
   }>;
-  can_occur_before: boolean;
-  percentage: number;
-  important: boolean;
-  screenshot: string;
+  proof: string;
+  source: string;
+  description?: {
+    en: string;
+  };
+  percentage?: number;
+  important?: boolean;
 }
 
 interface EventsResponse {
@@ -182,86 +181,142 @@ export default function EventsPage() {
         {filteredEvents.map((event) => (
           <div
             key={event.id}
-            className="bg-gradient-to-b from-white/5 to-white/[0.03] backdrop-blur-md border border-white/10 rounded-xl p-6 hover:border-cyan-500/30 transition-all duration-300 hover:-translate-y-1"
+            className="group bg-gradient-to-b from-white/5 to-white/[0.03] backdrop-blur-md border border-white/10 rounded-xl overflow-hidden hover:border-cyan-500/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-cyan-500/10"
           >
-            {/* Event Header */}
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold text-white mb-2 line-clamp-2">
+            {/* Event Image */}
+            {event.proof && (
+              <div className="relative h-48 overflow-hidden">
+                <Image
+                  src={event.proof}
+                  alt={event.title.en}
+                  fill
+                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = 'none';
+                  }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                
+                {/* Event Type Badge */}
+                {event.categories && event.categories.length > 0 && (
+                  <div className="absolute top-3 left-3">
+                    <span className="bg-black/70 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-medium border border-white/20">
+                      {event.categories[0].name}
+                    </span>
+                  </div>
+                )}
+
+                {/* Important Badge */}
+                {event.important && (
+                  <div className="absolute top-3 right-3">
+                    <div className="bg-yellow-500/90 backdrop-blur-sm text-black px-3 py-1 rounded-full text-xs font-bold">
+                      ⭐ Important
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="p-6">
+              {/* Event Header */}
+              <div className="mb-4">
+                <h3 className="text-lg font-bold text-white mb-3 line-clamp-2 group-hover:text-cyan-400 transition-colors">
                   {event.title.en}
                 </h3>
-                <div className="flex items-center gap-2 text-sm text-gray-400 mb-2">
-                  <FaCalendarAlt className="w-4 h-4" />
-                  <span>{formatDate(event.date_event)}</span>
+                
+                {/* Date Display */}
+                <div className="flex items-center gap-2 text-sm text-gray-400 mb-3">
+                  <FaCalendarAlt className="w-4 h-4 text-cyan-400" />
+                  <span className="font-medium">{event.displayed_date || formatDate(event.date_event)}</span>
                 </div>
+
+                {/* Can Occur Before Indicator */}
+                {event.can_occur_before && (
+                  <div className="flex items-center gap-2 text-xs text-amber-400 mb-3">
+                    <FaClock className="w-3 h-3" />
+                    <span>Can occur before scheduled date</span>
+                  </div>
+                )}
               </div>
-              
-              {event.important && (
-                <div className="bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded-full text-xs font-medium">
-                  Important
+
+              {/* Description */}
+              {event.description?.en && (
+                <p className="text-gray-300 text-sm mb-4 line-clamp-3">
+                  {event.description.en}
+                </p>
+              )}
+
+              {/* Coins Section */}
+              {event.coins && event.coins.length > 0 && (
+                <div className="mb-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <FaCoins className="w-4 h-4 text-cyan-400" />
+                    <span className="text-sm font-semibold text-gray-300">Related Coins</span>
+                  </div>
+                  <div className="space-y-2">
+                    {event.coins.slice(0, 2).map((coin) => (
+                      <div key={coin.id} className="flex items-center justify-between bg-gray-800/50 rounded-lg p-3 border border-gray-700/50">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                            {coin.symbol.charAt(0)}
+                          </div>
+                          <div>
+                            <div className="text-white font-medium text-sm">{coin.symbol}</div>
+                            <div className="text-gray-400 text-xs">{coin.name}</div>
+                          </div>
+                        </div>
+                        {coin.rank && (
+                          <div className="text-xs text-gray-500 bg-gray-700 px-2 py-1 rounded">
+                            #{coin.rank}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                    {event.coins.length > 2 && (
+                      <div className="text-center text-gray-400 text-xs py-2">
+                        +{event.coins.length - 2} more coins
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
-            </div>
 
-            {/* Description */}
-            {event.description?.en && (
-              <p className="text-gray-300 text-sm mb-4 line-clamp-3">
-                {event.description.en}
-              </p>
-            )}
-
-            {/* Coins */}
-            {event.coins && event.coins.length > 0 && (
-              <div className="mb-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <FaCoins className="w-4 h-4 text-cyan-400" />
-                  <span className="text-sm font-medium text-gray-300">Related Coins:</span>
+              {/* Additional Categories */}
+              {event.categories && event.categories.length > 1 && (
+                <div className="mb-4">
+                  <div className="flex flex-wrap gap-2">
+                    {event.categories.slice(1, 3).map((category) => (
+                      <span
+                        key={category.id}
+                        className="bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full text-xs font-medium border border-indigo-500/30"
+                      >
+                        {category.name}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  {event.coins.slice(0, 3).map((coin) => (
-                    <span
-                      key={coin.id}
-                      className="bg-cyan-500/20 text-cyan-300 px-2 py-1 rounded-full text-xs font-medium"
+              )}
+
+              {/* Footer */}
+              <div className="flex items-center justify-between pt-4 border-t border-white/10">
+                <div className="flex items-center gap-2">
+                  {event.source && (
+                    <a
+                      href={event.source}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 text-xs text-cyan-400 hover:text-cyan-300 transition-colors"
                     >
-                      {coin.symbol}
-                    </span>
-                  ))}
-                  {event.coins.length > 3 && (
-                    <span className="text-gray-400 text-xs px-2 py-1">
-                      +{event.coins.length - 3} more
-                    </span>
+                      <FaExternalLinkAlt className="w-3 h-3" />
+                      <span>View Source</span>
+                    </a>
                   )}
                 </div>
-              </div>
-            )}
-
-            {/* Categories */}
-            {event.categories && event.categories.length > 0 && (
-              <div className="mb-4">
-                <div className="flex flex-wrap gap-2">
-                  {event.categories.slice(0, 2).map((category) => (
-                    <span
-                      key={category.id}
-                      className="bg-indigo-500/20 text-indigo-300 px-2 py-1 rounded-full text-xs"
-                    >
-                      {category.name}
-                    </span>
-                  ))}
+                
+                <div className="text-xs text-gray-500">
+                  ID: {event.id}
                 </div>
               </div>
-            )}
-
-            {/* Footer */}
-            <div className="flex items-center justify-between pt-4 border-t border-white/10">
-              <div className="flex items-center gap-2 text-xs text-gray-400">
-                <span>Source: {event.source?.name || 'Unknown'}</span>
-              </div>
-              
-              {event.percentage && (
-                <div className="text-xs text-gray-400">
-                  Confidence: {event.percentage}%
-                </div>
-              )}
             </div>
           </div>
         ))}
