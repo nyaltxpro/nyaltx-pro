@@ -514,37 +514,14 @@ export default function PricingPage() {
                 <div className="mt-auto flex flex-col gap-2">
                   <button
                     disabled={busy !== null}
-                    onClick={() => handleStripeCheckout(`boost-${pack.id}`)}
+                    onClick={() => router.push(`/pricing/boost-pack/${pack.id}`)}
                     className="w-full py-2 rounded-lg bg-emerald-600 text-white font-medium hover:bg-emerald-700 disabled:opacity-50 transition-colors"
                   >
-                    Purchase Boost Pack
+                    Select Tokens & Purchase
                   </button>
                   
-                  <div className="grid grid-cols-3 gap-1">
-                    <button
-                      disabled={!isConnected || busy !== null}
-                      onClick={() => handlePayETH(`boost-${pack.id}`, pack.priceUSD)}
-                      className="py-1 px-2 text-xs rounded border border-zinc-600 text-white hover:bg-indigo-500 disabled:opacity-50"
-                      title="Pay with ETH"
-                    >
-                      ETH
-                    </button>
-                    <button
-                      disabled={!isConnected || busy !== null}
-                      onClick={() => handlePayUSDT(`boost-${pack.id}`, pack.priceUSD)}
-                      className="py-1 px-2 text-xs rounded border border-zinc-600 text-white hover:bg-emerald-500 disabled:opacity-50"
-                      title="Pay with USDC"
-                    >
-                      USDC
-                    </button>
-                    <button
-                      disabled={!isConnected || busy !== null}
-                      onClick={() => handlePayNYAX(`boost-${pack.id}`, pack.priceUSD)}
-                      className="py-1 px-2 text-xs rounded border border-zinc-600 text-white hover:bg-cyan-500 disabled:opacity-50"
-                      title="Pay with NYAX (bonus points)"
-                    >
-                      NYAX
-                    </button>
+                  <div className="text-center text-xs text-gray-400">
+                    Choose tokens to boost • Multiple payment options
                   </div>
                 </div>
               </div>
