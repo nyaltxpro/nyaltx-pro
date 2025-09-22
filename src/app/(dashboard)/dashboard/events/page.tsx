@@ -203,14 +203,13 @@ export default function EventsPage() {
           >
             {/* Event Image */}
             {event.proof && (
-              <div className="relative h-48 overflow-hidden cursor-pointer group/image" onClick={() => setSelectedImage({ src: getViewableImageUrl(event.proof), title: event.title.en })}>
-                <Image
-                  src={getViewableImageUrl(event.proof)}
-                  alt={event.title.en}
-                  fill
-                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+              <div className="relative h-48 overflow-hidden cursor-pointer group/image" onClick={() => setSelectedImage({ src: event.proof, title: event.title.en })}>
+                <iframe
+                  src={event.proof}
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 border-0"
+                  style={{ pointerEvents: 'none' }}
                   onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = 'none';
+                    (e.target as HTMLIFrameElement).style.display = 'none';
                   }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
@@ -417,19 +416,18 @@ export default function EventsPage() {
 
             {/* Modal Image */}
             <div className="relative flex-1 bg-black/30 backdrop-blur-sm rounded-b-lg overflow-hidden">
-              <Image
+              <iframe
                 src={selectedImage.src}
-                alt={selectedImage.title}
-                fill
-                className="object-contain"
+                className="w-full h-full border-0"
                 onClick={(e) => e.stopPropagation()}
                 onError={(e) => {
                   console.error('Failed to load image:', selectedImage.src);
                 }}
+                title={selectedImage.title}
               />
             </div>
 
-            {/* Download Button */}
+            {/* Action Buttons */}
             <div className="absolute bottom-4 right-4 flex gap-2">
               <a
                 href={selectedImage.src}
@@ -442,7 +440,7 @@ export default function EventsPage() {
                 <span>Open</span>
               </a>
               <a
-                href={selectedImage.src.replace('?raw=true', '').replace('?preview=1', '')}
+                href={selectedImage.src}
                 download
                 target="_blank"
                 rel="noopener noreferrer"
