@@ -103,20 +103,16 @@ export default function EventsPage() {
     }
   };
 
-  // Helper function to convert CDN URLs to viewable format
-  const getViewableImageUrl = (url: string) => {
+  // Helper function to get proxied image URL for viewing
+  const getProxiedImageUrl = (url: string) => {
     if (!url) return url;
     
-    // Check if it's a CloudFront URL and doesn't already have query params
-    if (url.includes('d32bfp67k1q0s7.cloudfront.net') && !url.includes('?')) {
-      return `${url}?raw=true`;
+    // Check if it's a CloudFront URL that needs proxying
+    if (url.includes('d32bfp67k1q0s7.cloudfront.net')) {
+      return `/api/proxy-image?url=${encodeURIComponent(url)}`;
     }
     
-    // For other CDNs, try adding preview parameter
-    if (!url.includes('?')) {
-      return `${url}?preview=1`;
-    }
-    
+    // For other URLs, return as-is
     return url;
   };
 
@@ -203,13 +199,14 @@ export default function EventsPage() {
           >
             {/* Event Image */}
             {event.proof && (
-              <div className="relative h-48 overflow-hidden cursor-pointer group/image" onClick={() => setSelectedImage({ src: event.proof, title: event.title.en })}>
-                <iframe
-                  src={event.proof}
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 border-0"
-                  style={{ pointerEvents: 'none' }}
+              <div className="relative h-48 overflow-hidden cursor-pointer group/image" onClick={() => setSelectedImage({ src: getProxiedImageUrl(event.proof), title: event.title.en })}>
+                <Image
+                  src={getProxiedImageUrl(event.proof)}
+                  alt={event.title.en}
+                  fill
+                  className="object-cover transition-transform duration-300 group-hover:scale-105"
                   onError={(e) => {
-                    (e.target as HTMLIFrameElement).style.display = 'none';
+                    (e.target as HTMLImageElement).style.display = 'none';
                   }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
@@ -416,14 +413,15 @@ export default function EventsPage() {
 
             {/* Modal Image */}
             <div className="relative flex-1 bg-black/30 backdrop-blur-sm rounded-b-lg overflow-hidden">
-              <iframe
+              <Image
                 src={selectedImage.src}
-                className="w-full h-full border-0"
+                alt={selectedImage.title}
+                fill
+                className="object-contain"
                 onClick={(e) => e.stopPropagation()}
                 onError={(e) => {
                   console.error('Failed to load image:', selectedImage.src);
                 }}
-                title={selectedImage.title}
               />
             </div>
 
@@ -438,17 +436,6 @@ export default function EventsPage() {
               >
                 <FaExternalLinkAlt className="w-4 h-4" />
                 <span>Open</span>
-              </a>
-              <a
-                href={selectedImage.src}
-                download
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2 backdrop-blur-sm"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <FaExternalLinkAlt className="w-4 h-4" />
-                <span>Download</span>
               </a>
             </div>
           </div>
