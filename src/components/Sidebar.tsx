@@ -25,7 +25,8 @@ import {
   FaCog,
   FaNewspaper,
   FaStar,
-  FaCalendarAlt
+  FaCalendarAlt,
+  FaPlay
 } from 'react-icons/fa';
 import Image from 'next/image';
 
@@ -105,6 +106,7 @@ export default function Sidebar({ isMobileMenuOpen, toggleMobileMenu }: SidebarP
     { icon: <FaChartLine />, text: 'NYAX', href: '/dashboard/trade?base=NYAX&chain=ethereum&address=0x5eed5621b92be4473f99bacac77acfa27deb57d9' },
     // { icon: <FaExchangeAlt />, text: 'Pairs', href: '/pairs' },
     // { icon: <FaStar />, text: 'Favorites', href: '/dashboard/favorites' },
+    { icon: <FaPlay />, text: 'Live Stream', href: '/dashboard/live-stream' },
     { icon: <FaGift />, text: 'Airdrops', href: '/dashboard/airdrops' },
     { icon: <FaRocket />, text: 'Trending', href: '/dashboard/trending' },
     { icon: <FaNewspaper />, text: 'News', href: '/dashboard/news' },
