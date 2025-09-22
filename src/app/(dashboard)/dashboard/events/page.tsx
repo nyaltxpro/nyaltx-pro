@@ -103,6 +103,23 @@ export default function EventsPage() {
     }
   };
 
+  // Helper function to convert CDN URLs to viewable format
+  const getViewableImageUrl = (url: string) => {
+    if (!url) return url;
+    
+    // Check if it's a CloudFront URL and doesn't already have query params
+    if (url.includes('d32bfp67k1q0s7.cloudfront.net') && !url.includes('?')) {
+      return `${url}?raw=true`;
+    }
+    
+    // For other CDNs, try adding preview parameter
+    if (!url.includes('?')) {
+      return `${url}?preview=1`;
+    }
+    
+    return url;
+  };
+
   if (loading && events.length === 0) {
     return (
       <div className="p-6">
@@ -186,9 +203,9 @@ export default function EventsPage() {
           >
             {/* Event Image */}
             {event.proof && (
-              <div className="relative h-48 overflow-hidden cursor-pointer group/image" onClick={() => setSelectedImage({ src: event.proof, title: event.title.en })}>
+              <div className="relative h-48 overflow-hidden cursor-pointer group/image" onClick={() => setSelectedImage({ src: getViewableImageUrl(event.proof), title: event.title.en })}>
                 <Image
-                  src={event.proof}
+                  src={getViewableImageUrl(event.proof)}
                   alt={event.title.en}
                   fill
                   className="object-cover transition-transform duration-300 group-hover:scale-105"
@@ -413,9 +430,19 @@ export default function EventsPage() {
             </div>
 
             {/* Download Button */}
-            <div className="absolute bottom-4 right-4">
+            <div className="absolute bottom-4 right-4 flex gap-2">
               <a
                 href={selectedImage.src}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2 backdrop-blur-sm"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <FaExternalLinkAlt className="w-4 h-4" />
+                <span>Open</span>
+              </a>
+              <a
+                href={selectedImage.src.replace('?raw=true', '').replace('?preview=1', '')}
                 download
                 target="_blank"
                 rel="noopener noreferrer"
