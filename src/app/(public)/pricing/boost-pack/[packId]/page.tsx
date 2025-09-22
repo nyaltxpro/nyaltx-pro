@@ -64,12 +64,11 @@ const getUserRegisteredTokens = () => {
   if (typeof window === 'undefined') return [];
   
   const registeredTokens = JSON.parse(localStorage.getItem('registeredTokens') || '[]');
-  const approvedTokens = JSON.parse(localStorage.getItem('approvedTokens') || '[]');
   const tokenBoosts = JSON.parse(localStorage.getItem('tokenBoosts') || '{}');
   
-  // Filter for approved tokens only
+  // Only show tokens that are approved (status === 'approved')
   return registeredTokens
-    .filter((token: any) => token.status === 'approved' || approvedTokens.some((approved: any) => approved.id === token.id))
+    .filter((token: any) => token.status === 'approved')
     .map((token: any) => ({
       id: token.id,
       symbol: token.symbol,
@@ -110,50 +109,25 @@ export default function BoostPackCheckout() {
   const [ethPrice, setEthPrice] = useState<number>(3000);
   const [userTokens, setUserTokens] = useState<any[]>([]);
 
-  // Initialize sample tokens for testing (remove in production)
-  const initializeSampleTokens = () => {
-    const existingTokens = localStorage.getItem('registeredTokens');
-    if (!existingTokens) {
-      const sampleTokens = [
-        {
-          id: 'sample-1',
-          name: 'Pepe Coin',
-          symbol: 'PEPE',
-          blockchain: 'ethereum',
-          contractAddress: '0x6982508145454Ce325dDbE47a25d4ec3d2311933',
-          category: 'meme',
-          status: 'approved',
-          submittedAt: new Date().toISOString()
-        },
-        {
-          id: 'sample-2',
-          name: 'Uniswap',
-          symbol: 'UNI',
-          blockchain: 'ethereum',
-          contractAddress: '0x1f9840a85d5af5bf1d1762f925bdaddc4201f984',
-          category: 'defi',
-          status: 'approved',
-          submittedAt: new Date().toISOString()
-        },
-        {
-          id: 'sample-3',
-          name: 'Chainlink',
-          symbol: 'LINK',
-          blockchain: 'ethereum',
-          contractAddress: '0x514910771af9ca656af840dff83e8264ecf986ca',
-          category: 'infrastructure',
-          status: 'approved',
-          submittedAt: new Date().toISOString()
-        }
-      ];
-      localStorage.setItem('registeredTokens', JSON.stringify(sampleTokens));
-    }
+  // Load user tokens on mount and refresh when needed
+  const refreshUserTokens = () => {
+    setUserTokens(getUserRegisteredTokens());
   };
 
-  // Load user tokens on mount
   useEffect(() => {
-    initializeSampleTokens();
-    setUserTokens(getUserRegisteredTokens());
+    refreshUserTokens();
+  }, []);
+
+  // Listen for storage changes to refresh tokens when boosts are updated
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'tokenBoosts' || e.key === 'registeredTokens') {
+        refreshUserTokens();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   // Fetch ETH price
@@ -237,17 +211,36 @@ export default function BoostPackCheckout() {
           break;
       }
 
-      // Apply boost to selected tokens
+      // Apply boost to selected user-registered tokens
       const tokenBoosts = JSON.parse(localStorage.getItem('tokenBoosts') || '{}');
       const selectedTokenData = userTokens.filter(token => selectedTokens.includes(token.id));
       
+      // Update boost points for each selected token
       selectedTokenData.forEach(token => {
         const baseBoost = boostPack.points;
-        const multipliedBoost = Math.floor(baseBoost * token.multiplier);
-        tokenBoosts[token.id] = (tokenBoosts[token.id] || 0) + multipliedBoost;
+        const categoryMultiplier = token.multiplier;
+        const finalBoost = Math.floor(baseBoost * categoryMultiplier);
+        
+        // Add to existing boost or create new entry
+        tokenBoosts[token.id] = (tokenBoosts[token.id] || 0) + finalBoost;
+        
+        console.log(`Applied ${finalBoost} boost points to ${token.symbol} (${token.name})`);
       });
       
+      // Save updated boosts to localStorage
       localStorage.setItem('tokenBoosts', JSON.stringify(tokenBoosts));
+      
+      // Log the transaction for debugging
+      console.log('Boost applied to tokens:', {
+        packName: boostPack.name,
+        basePoints: boostPack.points,
+        selectedTokens: selectedTokenData.map(t => ({
+          symbol: t.symbol,
+          multiplier: t.multiplier,
+          finalBoost: Math.floor(boostPack.points * t.multiplier)
+        })),
+        totalBoostApplied: selectedTokenData.reduce((sum, t) => sum + Math.floor(boostPack.points * t.multiplier), 0)
+      });
       
       console.log('Payment successful:', txHash);
       router.push(`/pricing/boost-pack/success?pack=${packId}&tokens=${selectedTokens.join(',')}&tx=${txHash}`);
@@ -400,22 +393,28 @@ export default function BoostPackCheckout() {
 
                 {filteredTokens.length === 0 && (
                   <div className="text-center py-8">
+                    <FaCoins className="text-gray-500 text-4xl mx-auto mb-4" />
                     <div className="text-gray-500 mb-2">
                       {searchQuery ? 'No tokens found' : 'No approved tokens available'}
                     </div>
                     <div className="text-gray-600 text-sm mb-4">
                       {searchQuery 
                         ? 'Try a different search term' 
-                        : 'You need to register and get tokens approved first'
+                        : 'Register your tokens and get them approved by admins to use boost packs'
                       }
                     </div>
                     {!searchQuery && (
-                      <button
-                        onClick={() => router.push('/dashboard/register-token')}
-                        className="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition-colors"
-                      >
-                        Register Tokens
-                      </button>
+                      <div className="space-y-2">
+                        <button
+                          onClick={() => router.push('/dashboard/register-token')}
+                          className="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition-colors"
+                        >
+                          Register Tokens
+                        </button>
+                        <div className="text-xs text-gray-500">
+                          Connect wallet → Register tokens → Wait for approval → Boost tokens
+                        </div>
+                      </div>
                     )}
                   </div>
                 )}
