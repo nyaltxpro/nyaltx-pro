@@ -18,6 +18,42 @@ const TIERS = [
   { id: "helicopter", name: "Helicopter", description: "3 months placement.", priceUSD: 700 },
 ];
 
+// Boost Packs for projects to climb the board
+const BOOST_PACKS = [
+  { 
+    id: "starter", 
+    name: "Starter Boost", 
+    points: 250, 
+    priceUSD: 199, 
+    description: "Gain entry into the Boosted Zone",
+    icon: "🔹"
+  },
+  { 
+    id: "growth", 
+    name: "Growth Boost", 
+    points: 750, 
+    priceUSD: 499, 
+    description: "Highlighted in daily \"Top Movers\" feed",
+    icon: "🔹"
+  },
+  { 
+    id: "pro", 
+    name: "Pro Boost", 
+    points: 1500, 
+    priceUSD: 899, 
+    description: "Unlocks \"Turbo Highlight\" (color frames, 48h push)",
+    icon: "🔹"
+  },
+  { 
+    id: "elite", 
+    name: "Elite Boost", 
+    points: 7500, 
+    priceUSD: 3999, 
+    description: "Premium: Top of board + Featured Video slot",
+    icon: "🔹"
+  },
+];
+
 // Payment configuration (with sensible defaults per request)
 const DEFAULT_RECEIVER: `0x${string}` = "0x81bA7b98E49014Bff22F811E9405640bC2B39cC0";
 const DEFAULT_NYAX: `0x${string}` = "0x5eed5621b92be4473f99bacac77acfa27deb57d9"; // NYAX on Ethereum
@@ -421,6 +457,100 @@ export default function PricingPage() {
         })}
       </div>
 
+      </section>
+
+      {/* Boost Packs Section */}
+      <section id="boost-packs" aria-labelledby="boost-packs-title" className="mt-16">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 id="boost-packs-title" className="text-2xl font-bold text-white">Boost Packs</h2>
+            <p className="text-gray-300 mt-2">Projects can purchase Boost Packs to climb the board.</p>
+            <p className="text-sm text-cyan-400 mt-1">(Pay in ETH, USDC, or NYAX for bonus points.)</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {BOOST_PACKS.map((pack, idx) => {
+            const ethAmt = ethPrice ? computeEthAmount(pack.priceUSD) : null;
+            const nyaxUSD = pack.priceUSD * 0.8; // 20% discount for NYAX
+            return (
+              <div
+                key={pack.id}
+                className={`group relative border border-white/10 rounded-2xl p-5 bg-gradient-to-b from-white/5 to-white/[0.03] backdrop-blur-md flex flex-col min-h-[380px] transition-all duration-500 ease-out hover:-translate-y-1 hover:shadow-[0_0_40px_-10px_rgba(34,197,94,0.4)] ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}`}
+                style={{ transitionDelay: mounted ? `${idx * 100}ms` as any : undefined }}
+              >
+                {/* Popular badge for Growth Boost */}
+                {pack.id === 'growth' && (
+                  <span className="absolute -top-2 right-4 text-[10px] uppercase tracking-wider px-2 py-1 rounded-full bg-emerald-600 text-black font-bold shadow shadow-emerald-500/30">Popular</span>
+                )}
+                
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-2xl">{pack.icon}</span>
+                  <h3 className="text-lg font-semibold">{pack.name}</h3>
+                </div>
+                
+                <div className="mb-4">
+                  <div className="text-2xl font-bold text-emerald-400">{pack.points} pts</div>
+                  <div className="text-3xl font-bold">${pack.priceUSD.toLocaleString()}</div>
+                </div>
+
+                <p className="text-gray-300 text-sm mb-4 flex-grow">{pack.description}</p>
+
+                <div className="mb-4 text-xs text-gray-400 space-y-1">
+                  <div className="flex items-center gap-2">
+                    <TokenETH className="w-4 h-4"/>
+                    <span>ETH: {ethAmt ? `${ethAmt.toFixed(5)} ETH` : "—"}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Image src="/crypto-icons/color/usdt.svg" alt="USDC" width={16} height={16} className="opacity-60"/>
+                    <span>USDC: ${pack.priceUSD.toFixed(2)}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Image src="/logo.png" alt="NYAX" width={16} height={16} className="opacity-60"/>
+                    <span>NYAX: ${nyaxUSD.toFixed(2)} + bonus pts</span>
+                  </div>
+                </div>
+
+                <div className="mt-auto flex flex-col gap-2">
+                  <button
+                    disabled={busy !== null}
+                    onClick={() => handleStripeCheckout(`boost-${pack.id}`)}
+                    className="w-full py-2 rounded-lg bg-emerald-600 text-white font-medium hover:bg-emerald-700 disabled:opacity-50 transition-colors"
+                  >
+                    Purchase Boost Pack
+                  </button>
+                  
+                  <div className="grid grid-cols-3 gap-1">
+                    <button
+                      disabled={!isConnected || busy !== null}
+                      onClick={() => handlePayETH(`boost-${pack.id}`, pack.priceUSD)}
+                      className="py-1 px-2 text-xs rounded border border-zinc-600 text-white hover:bg-indigo-500 disabled:opacity-50"
+                      title="Pay with ETH"
+                    >
+                      ETH
+                    </button>
+                    <button
+                      disabled={!isConnected || busy !== null}
+                      onClick={() => handlePayUSDT(`boost-${pack.id}`, pack.priceUSD)}
+                      className="py-1 px-2 text-xs rounded border border-zinc-600 text-white hover:bg-emerald-500 disabled:opacity-50"
+                      title="Pay with USDC"
+                    >
+                      USDC
+                    </button>
+                    <button
+                      disabled={!isConnected || busy !== null}
+                      onClick={() => handlePayNYAX(`boost-${pack.id}`, pack.priceUSD)}
+                      className="py-1 px-2 text-xs rounded border border-zinc-600 text-white hover:bg-cyan-500 disabled:opacity-50"
+                      title="Pay with NYAX (bonus points)"
+                    >
+                      NYAX
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </section>
 
       <div className="mt-10 text-sm text-gray-400">
