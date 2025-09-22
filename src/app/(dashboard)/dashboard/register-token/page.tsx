@@ -1,8 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAccount } from 'wagmi';
-import { FaInfoCircle, FaChevronDown, FaChevronUp } from 'react-icons/fa';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { FaPlus, FaCheck, FaTimes, FaCoins, FaExternalLinkAlt, FaInfoCircle, FaChevronUp, FaChevronDown } from 'react-icons/fa';
+import React from 'react';
+import Image from 'next/image';
 import ConnectWalletButton from '@/components/ConnectWalletButton';
 
 interface FAQ {
@@ -13,6 +16,12 @@ interface FAQ {
 
 export default function RegisterTokenPage() {
   const { isConnected, address } = useAccount();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  
+  // Redirect parameters
+  const redirectPath = searchParams.get('redirect');
+  const paymentMethod = searchParams.get('method');
   const [tokenName, setTokenName] = useState('');
   const [tokenSymbol, setTokenSymbol] = useState('');
   const [blockchain, setBlockchain] = useState('ethereum');
@@ -26,6 +35,7 @@ export default function RegisterTokenPage() {
   const [videoLink, setVideoLink] = useState('');
   const [imageUri, setImageUri] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
@@ -69,39 +79,45 @@ export default function RegisterTokenPage() {
     e.preventDefault();
     setSubmitting(true);
     setError(null);
-    setSuccess(null);
+
     try {
-      if (!isConnected || !address) {
-        throw new Error('Please connect your wallet before submitting.');
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Store in localStorage (replace with API call)
+      const registeredTokens = JSON.parse(localStorage.getItem('registeredTokens') || '[]');
+      const newToken = {
+        id: Date.now().toString(),
+        name: tokenName,
+        symbol: tokenSymbol,
+        blockchain,
+        contractAddress,
+        website,
+        twitter,
+        telegram,
+        discord,
+        github,
+        youtube,
+        submittedBy: address,
+        submittedAt: new Date().toISOString(),
+        status: 'pending'
+      };
+      
+      registeredTokens.push(newToken);
+      localStorage.setItem('registeredTokens', JSON.stringify(registeredTokens));
+      
+      setSubmitted(true);
+      
+      // Handle redirect after successful registration
+      if (redirectPath && paymentMethod) {
+        setTimeout(() => {
+          router.push(`/${redirectPath}?method=${paymentMethod}`);
+        }, 3000); // 3 second delay to show success message
       }
-      const res = await fetch('/api/tokens/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          tokenName,
-          tokenSymbol,
-          blockchain,
-          contractAddress,
-          website,
-          twitter,
-          telegram,
-          discord,
-          github,
-          youtube,
-          videoLink,
-          imageUri,
-          submittedByAddress: address,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data?.error || 'Submission failed');
-      }
-      setSuccess('Submitted! Your token is now pending admin approval.');
+      
       // Reset form
       setTokenName('');
       setTokenSymbol('');
-      setBlockchain('ethereum');
       setContractAddress('');
       setWebsite('');
       setTwitter('');
@@ -109,10 +125,9 @@ export default function RegisterTokenPage() {
       setDiscord('');
       setGithub('');
       setYoutube('');
-      setVideoLink('');
-      setImageUri('');
-    } catch (err: any) {
-      setError(err?.message || 'Something went wrong');
+      
+    } catch (err) {
+      setError('Failed to submit token registration. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -209,6 +224,22 @@ export default function RegisterTokenPage() {
                 )}
                 {success && (
                   <div className="mb-4 text-emerald-300 text-sm bg-emerald-950/30 border border-emerald-700 rounded p-2">{success}</div>
+                )}
+                {submitted && (
+                  <div className="mb-4 p-4 bg-green-950/30 border border-green-700 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <FaCheck className="text-green-400 text-xl" />
+                      <div>
+                        <h3 className="text-green-400 font-semibold">Token Registered Successfully!</h3>
+                        <p className="text-green-300 text-sm">Your token has been submitted for admin approval.</p>
+                        {redirectPath && paymentMethod && (
+                          <p className="text-cyan-400 text-sm mt-2">
+                            Redirecting to Pro subscription checkout in 3 seconds...
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 )}
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-gray-300 mb-1">

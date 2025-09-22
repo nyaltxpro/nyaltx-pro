@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useAccount } from 'wagmi';
-import { FaHeart, FaComment, FaShare, FaUsers, FaEye, FaPaperPlane, FaGift } from 'react-icons/fa';
+import { FaHeart, FaShare, FaUsers, FaPaperPlane, FaEye, FaTwitch, FaComment, FaGift } from 'react-icons/fa';
 import Image from 'next/image';
 
 interface Comment {
@@ -23,17 +23,22 @@ interface LiveStreamData {
   title: string;
   description: string;
   category: string;
-  streamerAddress: string;
-  streamerName: string;
-  startTime: number;
+  twitchCategory?: string;
+  streamer: string;
+  streamerName?: string;
+  twitchUser?: string;
   viewerCount: number;
-  isLive: boolean;
   likes: number;
-  stream?: MediaStream;
+  isLive: boolean;
+  startedAt: string;
+  thumbnail: string;
+  startTime: number;
+  streamKey?: string;
+  streamUrl?: string;
 }
 
 interface LiveStreamViewerProps {
-  streamData: LiveStreamData;
+  streamData: any;
   onClose: () => void;
 }
 
@@ -79,27 +84,22 @@ export default function LiveStreamViewer({ streamData, onClose }: LiveStreamView
   };
 
   useEffect(() => {
-    // Set up video stream if available
-    if (streamData.stream && videoRef.current) {
-      videoRef.current.srcObject = streamData.stream;
-    }
-
     // Generate mock comments periodically
     const commentInterval = setInterval(() => {
       const newComment = generateMockComment();
-      setComments(prev => [newComment, ...prev.slice(0, 49)]);
+      setComments((prev: Comment[]) => [newComment, ...prev.slice(0, 49)]);
     }, Math.random() * 5000 + 3000);
 
     // Update viewer count periodically
     const viewerInterval = setInterval(() => {
-      setViewerCount(prev => prev + Math.floor(Math.random() * 10) - 5);
+      setViewerCount((prev:any) => prev + Math.floor(Math.random() * 10) - 5);
     }, 10000);
 
     return () => {
       clearInterval(commentInterval);
       clearInterval(viewerInterval);
     };
-  }, [streamData.stream]);
+  }, [streamData.id]);
 
   // Auto-scroll comments
   useEffect(() => {
@@ -137,7 +137,7 @@ export default function LiveStreamViewer({ streamData, onClose }: LiveStreamView
     }
 
     setHasLiked(!hasLiked);
-    setLikes(prev => hasLiked ? prev - 1 : prev + 1);
+    setLikes((prev:any) => hasLiked ? prev - 1 : prev + 1);
   };
 
   const formatTimeAgo = (timestamp: number) => {
@@ -157,16 +157,40 @@ export default function LiveStreamViewer({ streamData, onClose }: LiveStreamView
   return (
     <div className="fixed inset-0 bg-black z-50 flex">
       {/* Main Video Area */}
-      <div className="flex-1 flex flex-col">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Video Player */}
-        <div className="relative flex-1 bg-black">
-          <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            className="w-full h-full object-cover"
-          />
-          
+        <div className="lg:col-span-2">
+          <div className="relative aspect-video bg-gray-900 rounded-lg overflow-hidden">
+            {streamData.twitchUser ? (
+              // Twitch Embed
+              <div className="w-full h-full">
+                <iframe
+                  src={`https://player.twitch.tv/?channel=${streamData.twitchUser}&parent=${window.location.hostname}&autoplay=false`}
+                  height="100%"
+                  width="100%"
+                  allowFullScreen
+                  className="w-full h-full"
+                />
+                <div className="absolute top-4 left-4 flex items-center gap-2 bg-purple-600 px-3 py-1 rounded-full">
+                  <FaTwitch className="text-white text-sm" />
+                  <span className="text-white text-sm font-medium">Twitch</span>
+                </div>
+              </div>
+            ) : (
+              // Fallback video player
+              <video
+                ref={videoRef}
+                autoPlay
+                controls
+                className="w-full h-full object-cover"
+                poster="/api/placeholder/800/450"
+              >
+                <source src="/api/placeholder/video.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            )}
+          </div>
+
           {/* Stream Overlay */}
           <div className="absolute top-0 left-0 right-0 bg-gradient-to-b from-black/70 to-transparent p-4">
             <div className="flex items-center justify-between">

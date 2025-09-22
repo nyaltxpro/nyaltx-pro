@@ -64,19 +64,6 @@ export default function LiveStreamPage() {
       thumbnail: '/stream-thumbnails/bitcoin-trading.jpg'
     },
     {
-      id: '2',
-      title: 'DeFi Education: Understanding Yield Farming',
-      description: 'Learn about yield farming, liquidity pools, and how to maximize your DeFi returns safely.',
-      category: 'education',
-      streamerAddress: '0x9876543210987654321098765432109876543210',
-      streamerName: 'DeFiTeacher',
-      startTime: Date.now() - 1800000, // 30 minutes ago
-      viewerCount: 156,
-      isLive: true,
-      likes: 67,
-      thumbnail: '/stream-thumbnails/defi-education.jpg'
-    },
-    {
       id: '3',
       title: 'Meme Coin Hunting - Finding the Next 100x',
       description: 'Searching for the next big meme coin! Come join the hunt and let\'s find some gems together.',
