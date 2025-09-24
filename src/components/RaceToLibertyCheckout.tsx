@@ -139,8 +139,8 @@ export default function RaceToLibertyCheckout({ tier, amount, onBack }: RaceToLi
       const searchLower = searchTerm;
       return availableCoins.filter(coin => {
         try {
-          return (coin.name && typeof coin.name === 'string' && coin.name.toLowerCase().includes(searchLower)) ||
-                 (coin.symbol && typeof coin.symbol === 'string' && coin.symbol.toLowerCase().includes(searchLower));
+          return (coin.name && typeof coin.name === 'string' && coin.name ||
+                 (coin.symbol && typeof coin.symbol === 'string' && coin.symbol));
         } catch (err) {
           console.error('Error filtering coin:', coin, err);
           return false;
