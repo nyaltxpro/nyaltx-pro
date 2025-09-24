@@ -77,6 +77,15 @@ const USDT_TOKEN = DEFAULT_USDT;
 const PAYMENT_CHAIN_ID = process.env.NEXT_PUBLIC_PAYMENT_CHAIN_ID ? Number(process.env.NEXT_PUBLIC_PAYMENT_CHAIN_ID) : undefined;
 const FALLBACK_ETH_PRICE = process.env.NEXT_PUBLIC_FALLBACK_ETH_PRICE ? Number(process.env.NEXT_PUBLIC_FALLBACK_ETH_PRICE) : 3000;
 
+// Promo codes configuration
+const PROMO_CODES = {
+  'LAUNCH10': { discount: 0.1, description: '10% Launch Discount' },
+  'EARLY20': { discount: 0.2, description: '20% Early Bird Discount' },
+  'LIBERTY15': { discount: 0.15, description: '15% Liberty Special' },
+  'NYAX25': { discount: 0.25, description: '25% NYAX Community Discount' },
+  'FREEDOM30': { discount: 0.3, description: '30% Freedom Discount' },
+} as const;
+
 // Fetch ETH price from multiple sources
 async function fetchETHPriceUSD(): Promise<number> {
   // Try CoinGecko first
@@ -124,6 +133,10 @@ export default function RaceToLibertyCheckout({ tier, amount, onBack }: RaceToLi
   const [ethPrice, setEthPrice] = useState<number | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [promoCode, setPromoCode] = useState('');
+  const [promoDiscount, setPromoDiscount] = useState(0);
+  const [promoError, setPromoError] = useState<string | null>(null);
+  const [promoApplied, setPromoApplied] = useState(false);
 
   const tierInfo = TIER_MULTIPLIERS[tier];
 
@@ -258,12 +271,12 @@ export default function RaceToLibertyCheckout({ tier, amount, onBack }: RaceToLi
       catch { setError("Please switch to the correct chain to pay"); return; }
     }
 
-    let ethAmt = computeEthAmount(amount);
+    let ethAmt = computeEthAmount(finalAmount);
     if (!ethAmt) {
       try {
         const latest = await fetchETHPriceUSD();
         setEthPrice(latest);
-        ethAmt = latest > 0 ? amount / latest : null;
+        ethAmt = latest > 0 ? finalAmount / latest : null;
       } catch {}
     }
     if (!ethAmt) {
@@ -296,8 +309,8 @@ export default function RaceToLibertyCheckout({ tier, amount, onBack }: RaceToLi
       catch { setError("Please switch to the correct chain to pay"); return; }
     }
 
-    // 20% discount for NYAX
-    const discountedUSD = amount * 0.8;
+    // 20% discount for NYAX (applied after promo discount)
+    const discountedUSD = finalAmount * 0.8;
     
     setError(null);
     setBusy("nyax");
@@ -331,7 +344,7 @@ export default function RaceToLibertyCheckout({ tier, amount, onBack }: RaceToLi
     setBusy("usdt");
     try {
       // USDT uses 6 decimals on Ethereum
-      const value = parseUnits(amount.toFixed(2), 6);
+      const value = parseUnits(finalAmount.toFixed(2), 6);
       const hash = await writeContractAsync({
         abi: erc20Abi,
         address: USDT_TOKEN,
@@ -346,6 +359,47 @@ export default function RaceToLibertyCheckout({ tier, amount, onBack }: RaceToLi
       setBusy(null);
     }
   };
+
+  // Promo code handlers
+  const validatePromoCode = (code: string) => {
+    const upperCode = code.toUpperCase().trim();
+    if (PROMO_CODES[upperCode as keyof typeof PROMO_CODES]) {
+      const promoData = PROMO_CODES[upperCode as keyof typeof PROMO_CODES];
+      setPromoDiscount(promoData.discount);
+      setPromoApplied(true);
+      setPromoError(null);
+      return true;
+    }
+    return false;
+  };
+
+  const handleApplyPromo = () => {
+    if (!promoCode.trim()) {
+      setPromoError('Please enter a promo code');
+      return;
+    }
+
+    if (validatePromoCode(promoCode)) {
+      const promoData = PROMO_CODES[promoCode.toUpperCase().trim() as keyof typeof PROMO_CODES];
+      setPromoError(null);
+      // Show success message briefly
+      setTimeout(() => setPromoError(null), 3000);
+    } else {
+      setPromoError('Invalid promo code');
+      setPromoDiscount(0);
+      setPromoApplied(false);
+    }
+  };
+
+  const handleRemovePromo = () => {
+    setPromoCode('');
+    setPromoDiscount(0);
+    setPromoApplied(false);
+    setPromoError(null);
+  };
+
+  // Calculate final amount with promo discount
+  const finalAmount = amount * (1 - promoDiscount);
 
   // PayPal handlers
   const handlePayPalSuccess = (details: any) => {
@@ -392,16 +446,6 @@ export default function RaceToLibertyCheckout({ tier, amount, onBack }: RaceToLi
     return points;
   }, [selectedCoinData, tierInfo.multiplier]);
 
-  const handlePayPalSuccess = (details: any) => {
-    // Handle successful PayPal payment
-    console.log('PayPal payment successful:', details);
-    // Here you would typically save the coin selection and points to your backend
-    alert(`Payment successful! Your ${selectedCoinData?.name} will earn ${totalPoints} points in the Race to Liberty!`);
-  };
-
-  const handlePayPalError = (error: any) => {
-    console.error('PayPal payment failed:', error);
-  };
 
   return (
     <div className="min-h-screen  text-white">
@@ -633,8 +677,68 @@ export default function RaceToLibertyCheckout({ tier, amount, onBack }: RaceToLi
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="your@email.com"
-                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all"
+                        className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all duration-300"
                       />
+                    </div>
+
+                    {/* Promo Code Section */}
+                    <div className="mb-6">
+                      <label className="block text-sm font-medium text-gray-300 mb-3">
+                        Promo Code <span className="text-gray-500">(Optional)</span>
+                      </label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={promoCode}
+                          onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                          placeholder="Enter promo code"
+                          disabled={promoApplied}
+                          className="flex-1 px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                        />
+                        {!promoApplied ? (
+                          <button
+                            onClick={handleApplyPromo}
+                            disabled={!promoCode.trim()}
+                            className="px-6 py-3 rounded-xl bg-cyan-600 text-white font-medium hover:bg-cyan-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                          >
+                            Apply
+                          </button>
+                        ) : (
+                          <button
+                            onClick={handleRemovePromo}
+                            className="px-6 py-3 rounded-xl bg-red-600 text-white font-medium hover:bg-red-700 transition-all duration-300"
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </div>
+                      
+                      {/* Promo Status Messages */}
+                      {promoError && (
+                        <div className="mt-2 text-sm text-red-400">
+                          {promoError}
+                        </div>
+                      )}
+                      
+                      {promoApplied && (
+                        <div className="mt-2 p-3 rounded-lg bg-green-500/20 border border-green-500/30">
+                          <div className="flex items-center justify-between">
+                            <div className="text-sm text-green-400">
+                              ✅ {PROMO_CODES[promoCode.toUpperCase().trim() as keyof typeof PROMO_CODES]?.description}
+                            </div>
+                            <div className="text-sm font-bold text-green-400">
+                              -{(promoDiscount * 100).toFixed(0)}%
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Available Promo Codes Hint */}
+                      {!promoApplied && (
+                        <div className="mt-2 text-xs text-gray-500">
+                          Try: LAUNCH10, EARLY20, LIBERTY15, NYAX25, FREEDOM30
+                        </div>
+                      )}
                     </div>
 
                     {/* Terms */}
@@ -654,7 +758,7 @@ export default function RaceToLibertyCheckout({ tier, amount, onBack }: RaceToLi
                     {paymentMethod === 'paypal' && agree && (
                       <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-2xl p-6 backdrop-blur-sm">
                         <PayPalCheckout
-                          amount={amount.toString()}
+                          amount={finalAmount.toString()}
                           tier={`race-${tier}-${selectedCoin}`}
                           email={email}
                           onSuccess={handlePayPalSuccess}
@@ -695,7 +799,7 @@ export default function RaceToLibertyCheckout({ tier, amount, onBack }: RaceToLi
                                   <Image src="/crypto-icons/color/eth.svg" alt="ETH" width={32} height={32} />
                                   <div className="text-sm font-medium">Pay with ETH</div>
                                   <div className="text-xs text-gray-400">
-                                    {ethPrice ? `≈ ${computeEthAmount(amount)?.toFixed(5)} ETH` : 'Loading...'}
+                                    {ethPrice ? `≈ ${computeEthAmount(finalAmount)?.toFixed(5)} ETH` : 'Loading...'}
                                   </div>
                                   {busy === 'eth' && (
                                     <div className="text-xs text-cyan-400">Processing...</div>
@@ -713,7 +817,7 @@ export default function RaceToLibertyCheckout({ tier, amount, onBack }: RaceToLi
                                   <Image src="/crypto-icons/color/usdt.svg" alt="USDT" width={32} height={32} />
                                   <div className="text-sm font-medium">Pay with USDT</div>
                                   <div className="text-xs text-gray-400">
-                                    ${amount.toFixed(2)} USDT
+                                    ${finalAmount.toFixed(2)} USDT
                                   </div>
                                   {busy === 'usdt' && (
                                     <div className="text-xs text-cyan-400">Processing...</div>
@@ -731,7 +835,7 @@ export default function RaceToLibertyCheckout({ tier, amount, onBack }: RaceToLi
                                   <Image src="/logo.png" alt="NYAX" width={32} height={32} />
                                   <div className="text-sm font-medium">Pay with NYAX</div>
                                   <div className="text-xs text-cyan-400">
-                                    ${(amount * 0.8).toFixed(2)} NYAX (20% off)
+                                    ${(finalAmount * 0.8).toFixed(2)} NYAX (20% off)
                                   </div>
                                   {busy === 'nyax' && (
                                     <div className="text-xs text-cyan-400">Processing...</div>
@@ -842,11 +946,41 @@ export default function RaceToLibertyCheckout({ tier, amount, onBack }: RaceToLi
 
                 {/* Price */}
                 <div className="mb-6 p-4 bg-white/5 rounded-xl border border-white/10">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-300 font-medium">Total Price:</span>
-                    <span className="text-2xl font-bold bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent">
-                      ${amount}
-                    </span>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-300 font-medium">Base Price:</span>
+                      <span className={`font-bold ${promoApplied ? 'text-gray-400 line-through' : 'text-white'}`}>
+                        ${amount}
+                      </span>
+                    </div>
+                    
+                    {promoApplied && (
+                      <>
+                        <div className="flex justify-between items-center">
+                          <span className="text-green-400 font-medium">Promo Discount:</span>
+                          <span className="text-green-400 font-bold">
+                            -{(promoDiscount * 100).toFixed(0)}%
+                          </span>
+                        </div>
+                        <div className="border-t border-white/10 pt-2">
+                          <div className="flex justify-between items-center">
+                            <span className="text-gray-300 font-medium">Final Price:</span>
+                            <span className="text-2xl font-bold bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent">
+                              ${finalAmount.toFixed(2)}
+                            </span>
+                          </div>
+                        </div>
+                      </>
+                    )}
+                    
+                    {!promoApplied && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-300 font-medium">Total Price:</span>
+                        <span className="text-2xl font-bold bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent">
+                          ${amount}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
