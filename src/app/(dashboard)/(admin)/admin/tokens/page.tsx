@@ -277,26 +277,28 @@ export default function AdminTokensPage() {
       ) : viewRows.length === 0 ? (
         <div className="text-gray-400">No records found.</div>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-gray-800">
-          <table className="min-w-full text-sm">
-            <thead className="sticky top-0 bg-black/60 backdrop-blur text-left text-gray-300">
+        <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
+          <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+            <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
               <tr>
                 <Th onClick={() => toggleSort('createdAt')} active={sortKey==='createdAt'} dir={sortDir}>Created</Th>
                 <Th onClick={() => toggleSort('tokenName')} active={sortKey==='tokenName'} dir={sortDir}>Token</Th>
                 <Th onClick={() => toggleSort('blockchain')} active={sortKey==='blockchain'} dir={sortDir}>Chain</Th>
-                <th className="px-3 py-2">Contract</th>
-                <th className="px-3 py-2">Status</th>
-                <th className="px-3 py-2">Race</th>
-                <th className="px-3 py-2">Paused</th>
-                <th className="px-3 py-2">Socials</th>
-                <th className="px-3 py-2">Actions</th>
+                <th scope="col" className="px-6 py-3">Contract</th>
+                <th scope="col" className="px-6 py-3">Status</th>
+                <th scope="col" className="px-6 py-3">Race</th>
+                <th scope="col" className="px-6 py-3">Paused</th>
+                <th scope="col" className="px-6 py-3">Socials</th>
+                <th scope="col" className="px-6 py-3">
+                  <span className="sr-only">Actions</span>
+                </th>
               </tr>
             </thead>
             <tbody>
               {viewRows.map((t) => (
-                <tr key={t.id} className="border-t border-gray-800 hover:bg-gray-900/40">
-                  <td className="px-3 py-2 whitespace-nowrap">{new Date(t.createdAt).toLocaleString()}</td>
-                  <td className="px-3 py-2">
+                <tr key={t.id} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
+                  <td className="px-6 py-4 whitespace-nowrap">{new Date(t.createdAt).toLocaleString()}</td>
+                  <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                     <div className="flex items-center gap-2">
                       {t.imageUri && <img src={t.imageUri} alt="logo" className="w-6 h-6 rounded" />}
                       <div className="min-w-0">
@@ -304,11 +306,11 @@ export default function AdminTokensPage() {
                         <div className="text-xs text-gray-400 truncate max-w-[320px]">{t.website || t.twitter || t.github || '—'}</div>
                       </div>
                     </div>
-                  </td>
-                  <td className="px-3 py-2">{t.blockchain}</td>
-                  <td className="px-3 py-2"><code className="text-xs">{t.contractAddress}</code></td>
-                  <td className="px-3 py-2 capitalize">{t.status}</td>
-                  <td className="px-3 py-2">
+                  </th>
+                  <td className="px-6 py-4">{t.blockchain}</td>
+                  <td className="px-6 py-4"><code className="text-xs">{t.contractAddress}</code></td>
+                  <td className="px-6 py-4 capitalize">{t.status}</td>
+                  <td className="px-6 py-4">
                     {t.status === 'approved' ? (
                       <div className="flex flex-col gap-1">
                         <div className={`text-xs px-2 py-1 rounded ${t.inRace ? 'bg-yellow-900/50 text-yellow-300' : 'bg-gray-800 text-gray-400'}`}>
@@ -330,7 +332,7 @@ export default function AdminTokensPage() {
                       <span className="text-xs text-gray-500">Approve first</span>
                     )}
                   </td>
-                  <td className="px-3 py-2">
+                  <td className="px-6 py-4">
                     <label className="inline-flex items-center gap-2 cursor-pointer">
                       <input
                         type="checkbox"
@@ -342,7 +344,7 @@ export default function AdminTokensPage() {
                       <span className="text-xs text-gray-400">{t.paused ? 'Paused' : 'Active'}</span>
                     </label>
                   </td>
-                  <td className="px-3 py-2">
+                  <td className="px-6 py-4">
                     <div className="flex flex-col gap-1">
                       <SocialSwitch label="Website" checked={t.showWebsite ?? true} disabled={busyId === t.id} onChange={(val) => patchToken(t.id, { socials: { website: val } })} />
                       <SocialSwitch label="Twitter" checked={t.showTwitter ?? true} disabled={busyId === t.id} onChange={(val) => patchToken(t.id, { socials: { twitter: val } })} />
@@ -351,7 +353,7 @@ export default function AdminTokensPage() {
                       <SocialSwitch label="Github" checked={t.showGithub ?? true} disabled={busyId === t.id} onChange={(val) => patchToken(t.id, { socials: { github: val } })} />
                     </div>
                   </td>
-                  <td className="px-3 py-2">
+                  <td className="px-6 py-4 text-right">
                     <div className="flex gap-2">
                       <button
                         disabled={busyId === t.id || t.status === 'approved'}
@@ -387,7 +389,7 @@ export default function AdminTokensPage() {
 
 function Th({ children, onClick, active, dir }: { children: React.ReactNode; onClick: () => void; active: boolean; dir: 'asc' | 'desc' }) {
   return (
-    <th className={`px-3 py-2 select-none cursor-pointer ${active ? 'text-cyan-300' : ''}`} onClick={onClick}>
+    <th scope="col" className={`px-6 py-3 select-none cursor-pointer ${active ? 'text-cyan-300' : ''}`} onClick={onClick}>
       <span className="inline-flex items-center gap-1">
         {children}
         <span className="text-xs opacity-70">{active ? (dir === 'asc' ? '▲' : '▼') : ''}</span>

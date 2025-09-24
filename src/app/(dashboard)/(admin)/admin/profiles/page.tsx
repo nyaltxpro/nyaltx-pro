@@ -138,31 +138,33 @@ export default function AdminProfilesPage() {
         ) : profiles.length === 0 ? (
           <div className="text-gray-400">No profiles yet.</div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
-              <thead className="text-left text-gray-300">
+          <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
+            <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+              <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                 <tr>
-                  <th className="px-2 py-1">Project</th>
-                  <th className="px-2 py-1">Contact</th>
-                  <th className="px-2 py-1">Website</th>
-                  <th className="px-2 py-1">Tier</th>
-                  <th className="px-2 py-1">Status</th>
-                  <th className="px-2 py-1">Updated</th>
-                  <th className="px-2 py-1">Actions</th>
+                  <th scope="col" className="px-6 py-3">Project</th>
+                  <th scope="col" className="px-6 py-3">Contact</th>
+                  <th scope="col" className="px-6 py-3">Website</th>
+                  <th scope="col" className="px-6 py-3">Tier</th>
+                  <th scope="col" className="px-6 py-3">Status</th>
+                  <th scope="col" className="px-6 py-3">Updated</th>
+                  <th scope="col" className="px-6 py-3">
+                    <span className="sr-only">Actions</span>
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {profiles.map((p) => (
-                  <tr key={p.id} className="border-t border-gray-800">
-                    <td className="px-2 py-1">{p.projectName}</td>
-                    <td className="px-2 py-1">{p.contactEmail || '—'}</td>
-                    <td className="px-2 py-1"><a className="underline" href={p.website || '#'} target="_blank" rel="noreferrer">{p.website || '—'}</a></td>
-                    <td className="px-2 py-1">{p.paidTier || '—'}</td>
-                    <td className="px-2 py-1">{p.status}</td>
-                    <td className="px-2 py-1">{new Date(p.updatedAt).toLocaleString()}</td>
-                    <td className="px-2 py-1 space-x-2">
-                      <button className="underline" onClick={() => setEditing(p)}>Edit</button>
-                      <button className="underline text-red-400" onClick={() => remove(p.id)}>Delete</button>
+                  <tr key={p.id} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
+                    <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">{p.projectName}</th>
+                    <td className="px-6 py-4">{p.contactEmail || '—'}</td>
+                    <td className="px-6 py-4"><a className="font-medium text-blue-600 dark:text-blue-500 hover:underline" href={p.website || '#'} target="_blank" rel="noreferrer">{p.website || '—'}</a></td>
+                    <td className="px-6 py-4">{p.paidTier || '—'}</td>
+                    <td className="px-6 py-4">{p.status}</td>
+                    <td className="px-6 py-4">{new Date(p.updatedAt).toLocaleString()}</td>
+                    <td className="px-6 py-4 text-right space-x-2">
+                      <button className="font-medium text-blue-600 dark:text-blue-500 hover:underline" onClick={() => setEditing(p)}>Edit</button>
+                      <button className="font-medium text-red-600 dark:text-red-500 hover:underline" onClick={() => remove(p.id)}>Delete</button>
                     </td>
                   </tr>
                 ))}

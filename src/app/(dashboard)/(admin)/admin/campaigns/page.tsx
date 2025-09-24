@@ -238,41 +238,43 @@ export default function CampaignsPage() {
         ) : !campaigns || campaigns.length === 0 ? (
           <div className="text-gray-400 py-8 text-center">No campaigns found.</div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
-              <thead className="text-left text-gray-300 border-b border-gray-800">
+          <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
+            <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+              <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                 <tr>
-                  <th className="px-3 py-3 font-medium">Campaign</th>
-                  <th className="px-3 py-3 font-medium">Status</th>
-                  <th className="px-3 py-3 font-medium">Duration</th>
-                  <th className="px-3 py-3 font-medium">Budget</th>
-                  <th className="px-3 py-3 font-medium">Performance</th>
-                  <th className="px-3 py-3 font-medium">Actions</th>
+                  <th scope="col" className="px-6 py-3">Campaign</th>
+                  <th scope="col" className="px-6 py-3">Status</th>
+                  <th scope="col" className="px-6 py-3">Duration</th>
+                  <th scope="col" className="px-6 py-3">Budget</th>
+                  <th scope="col" className="px-6 py-3">Performance</th>
+                  <th scope="col" className="px-6 py-3">
+                    <span className="sr-only">Actions</span>
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {campaigns.map((campaign) => (
-                  <tr key={campaign.id} className="border-b border-gray-800/50">
-                    <td className="px-3 py-4">
+                  <tr key={campaign.id} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
+                    <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                       <div>
                         <div className="font-medium">{campaign.name}</div>
                         <div className="text-xs text-gray-400 mt-1 max-w-xs truncate">
                           {campaign.description}
                         </div>
                       </div>
-                    </td>
-                    <td className="px-3 py-4">
+                    </th>
+                    <td className="px-6 py-4">
                       <span className={getStatusBadge(campaign.status)}>
                         {campaign.status.charAt(0).toUpperCase() + campaign.status.slice(1)}
                       </span>
                     </td>
-                    <td className="px-3 py-4">
+                    <td className="px-6 py-4">
                       <div className="text-xs">
                         <div>{new Date(campaign.startDate).toLocaleDateString()}</div>
                         <div className="text-gray-400">to {new Date(campaign.endDate).toLocaleDateString()}</div>
                       </div>
                     </td>
-                    <td className="px-3 py-4">
+                    <td className="px-6 py-4">
                       <div className="text-xs">
                         <div>{formatCurrency(campaign.spent)} / {formatCurrency(campaign.budget)}</div>
                         <div className="text-gray-400">
@@ -280,14 +282,14 @@ export default function CampaignsPage() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-3 py-4">
+                    <td className="px-6 py-4">
                       <div className="text-xs space-y-1">
                         <div>{formatNumber(campaign.impressions)} impressions</div>
                         <div>{formatNumber(campaign.clicks)} clicks ({calculateCTR(campaign.clicks, campaign.impressions)})</div>
                         <div>{formatNumber(campaign.conversions)} conversions ({calculateConversionRate(campaign.conversions, campaign.clicks)})</div>
                       </div>
                     </td>
-                    <td className="px-3 py-4">
+                    <td className="px-6 py-4 text-right">
                       <div className="flex gap-2">
                         {campaign.status === "active" && (
                           <button

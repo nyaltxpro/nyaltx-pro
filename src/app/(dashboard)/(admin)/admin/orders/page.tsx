@@ -207,31 +207,31 @@ export default function AdminOrdersPage() {
         ) : onchainOrders.length === 0 ? (
           <div className="text-gray-400">No on-chain orders recorded.</div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
-              <thead className="text-left text-gray-300">
+          <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
+            <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+              <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                 <tr>
-                  <th className="px-2 py-1">ID</th>
-                  <th className="px-2 py-1">Method</th>
-                  <th className="px-2 py-1">Tier</th>
-                  <th className="px-2 py-1">Wallet</th>
-                  <th className="px-2 py-1">Tx Hash</th>
-                  <th className="px-2 py-1">Amount</th>
-                  <th className="px-2 py-1">Chain</th>
-                  <th className="px-2 py-1">Created</th>
+                  <th scope="col" className="px-6 py-3">ID</th>
+                  <th scope="col" className="px-6 py-3">Method</th>
+                  <th scope="col" className="px-6 py-3">Tier</th>
+                  <th scope="col" className="px-6 py-3">Wallet</th>
+                  <th scope="col" className="px-6 py-3">Tx Hash</th>
+                  <th scope="col" className="px-6 py-3">Amount</th>
+                  <th scope="col" className="px-6 py-3">Chain</th>
+                  <th scope="col" className="px-6 py-3">Created</th>
                 </tr>
               </thead>
               <tbody>
                 {onchainOrders.map((o) => (
-                  <tr key={o.id} className="border-t border-gray-800">
-                    <td className="px-2 py-1">{o.id}</td>
-                    <td className="px-2 py-1">{o.method}</td>
-                    <td className="px-2 py-1">{o.tierId}</td>
-                    <td className="px-2 py-1">{o.wallet}</td>
-                    <td className="px-2 py-1"><a className="underline" href={`https://etherscan.io/tx/${o.txHash}`} target="_blank" rel="noreferrer">{o.txHash.slice(0,10)}…</a></td>
-                    <td className="px-2 py-1">{o.amount}</td>
-                    <td className="px-2 py-1">{o.chainId}</td>
-                    <td className="px-2 py-1">{new Date(o.createdAt).toLocaleString()}</td>
+                  <tr key={o.id} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
+                    <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">{o.id}</th>
+                    <td className="px-6 py-4">{o.method}</td>
+                    <td className="px-6 py-4">{o.tierId}</td>
+                    <td className="px-6 py-4">{o.wallet}</td>
+                    <td className="px-6 py-4"><a className="font-medium text-blue-600 dark:text-blue-500 hover:underline" href={`https://etherscan.io/tx/${o.txHash}`} target="_blank" rel="noreferrer">{o.txHash.slice(0,10)}…</a></td>
+                    <td className="px-6 py-4">{o.amount}</td>
+                    <td className="px-6 py-4">{o.chainId}</td>
+                    <td className="px-6 py-4">{new Date(o.createdAt).toLocaleString()}</td>
                   </tr>
                 ))}
               </tbody>
@@ -269,28 +269,30 @@ export default function AdminOrdersPage() {
         ) : subscriptionOrders.length === 0 ? (
           <div className="text-gray-400">No subscription orders recorded.</div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
-              <thead className="text-left text-gray-300">
+          <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
+            <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+              <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                 <tr>
-                  <th className="px-2 py-1">ID</th>
-                  <th className="px-2 py-1">Plan</th>
-                  <th className="px-2 py-1">Status</th>
-                  <th className="px-2 py-1">Payment Method</th>
-                  <th className="px-2 py-1">User/Email</th>
-                  <th className="px-2 py-1">Amount</th>
-                  <th className="px-2 py-1">Created</th>
-                  <th className="px-2 py-1">Expires</th>
-                  <th className="px-2 py-1">Refund Status</th>
-                  <th className="px-2 py-1">Actions</th>
+                  <th scope="col" className="px-6 py-3">ID</th>
+                  <th scope="col" className="px-6 py-3">Plan</th>
+                  <th scope="col" className="px-6 py-3">Status</th>
+                  <th scope="col" className="px-6 py-3">Payment Method</th>
+                  <th scope="col" className="px-6 py-3">User/Email</th>
+                  <th scope="col" className="px-6 py-3">Amount</th>
+                  <th scope="col" className="px-6 py-3">Created</th>
+                  <th scope="col" className="px-6 py-3">Expires</th>
+                  <th scope="col" className="px-6 py-3">Refund Status</th>
+                  <th scope="col" className="px-6 py-3">
+                    <span className="sr-only">Actions</span>
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {subscriptionOrders.map((s) => (
-                  <tr key={s.id} className="border-t border-gray-800">
-                    <td className="px-2 py-1">{s.id}</td>
-                    <td className="px-2 py-1 capitalize">{s.plan}</td>
-                    <td className="px-2 py-1">
+                  <tr key={s.id} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
+                    <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">{s.id}</th>
+                    <td className="px-6 py-4 capitalize">{s.plan}</td>
+                    <td className="px-6 py-4">
                       <span className={`px-2 py-1 rounded text-xs ${
                         s.status === 'active' ? 'bg-green-900 text-green-300' :
                         s.status === 'pending' ? 'bg-yellow-900 text-yellow-300' :
@@ -299,12 +301,12 @@ export default function AdminOrdersPage() {
                         {s.status}
                       </span>
                     </td>
-                    <td className="px-2 py-1 capitalize">{s.paymentMethod}</td>
-                    <td className="px-2 py-1">{s.email || s.userId || '—'}</td>
-                    <td className="px-2 py-1">{s.amount ? `${s.amount} ${s.currency || ''}` : '—'}</td>
-                    <td className="px-2 py-1">{new Date(s.createdAt).toLocaleString()}</td>
-                    <td className="px-2 py-1">{s.expiresAt ? new Date(s.expiresAt).toLocaleString() : '—'}</td>
-                    <td className="px-2 py-1">
+                    <td className="px-6 py-4 capitalize">{s.paymentMethod}</td>
+                    <td className="px-6 py-4">{s.email || s.userId || '—'}</td>
+                    <td className="px-6 py-4">{s.amount ? `${s.amount} ${s.currency || ''}` : '—'}</td>
+                    <td className="px-6 py-4">{new Date(s.createdAt).toLocaleString()}</td>
+                    <td className="px-6 py-4">{s.expiresAt ? new Date(s.expiresAt).toLocaleString() : '—'}</td>
+                    <td className="px-6 py-4">
                       {s.refundStatus ? (
                         <span className={`px-2 py-1 rounded text-xs ${
                           s.refundStatus === 'completed' ? 'bg-green-900 text-green-300' :
@@ -324,7 +326,7 @@ export default function AdminOrdersPage() {
                         </div>
                       )}
                     </td>
-                    <td className="px-2 py-1">
+                    <td className="px-6 py-4 text-right">
                       <div className="flex gap-2">
                         {s.amount && (!s.refundStatus || s.refundStatus === 'none' || s.refundStatus === 'failed') ? (
                           <>
