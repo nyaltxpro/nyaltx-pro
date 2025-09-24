@@ -503,7 +503,7 @@ export default function RaceToLibertyCheckout({ tier, amount, onBack }: RaceToLi
           </div>
 
           {/* Debug Component - Remove in production */}
-          <TokenDebugger />
+          {/* <TokenDebugger /> */}
 
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
             {/* Token Selection */}
