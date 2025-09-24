@@ -70,7 +70,9 @@ export default function RaceToLibertyCheckout({ tier, amount, onBack }: RaceToLi
     try {
       const storedTokens = JSON.parse(localStorage.getItem('registeredTokens') || '[]') as RegisteredToken[];
       const approvedTokens = storedTokens.filter(
-        token => token.status === 'approved' && token.walletAddress.toLowerCase() === address?.toLowerCase()
+        token => token.status === 'approved' && 
+        token.walletAddress && address && 
+        token.walletAddress.toLowerCase() === address.toLowerCase()
       );
       setUserTokens(approvedTokens);
 
@@ -95,8 +97,8 @@ export default function RaceToLibertyCheckout({ tier, amount, onBack }: RaceToLi
 
   const filteredCoins = useMemo(() => {
     return availableCoins.filter(coin =>
-      coin.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      coin.symbol.toLowerCase().includes(searchTerm.toLowerCase())
+      (coin.name && coin.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (coin.symbol && coin.symbol.toLowerCase().includes(searchTerm.toLowerCase()))
     );
   }, [searchTerm, availableCoins]);
 

@@ -53,7 +53,7 @@ export default function DailyGainers() {
     
         const list = tokens as Array<{ symbol: string; chain: string; address: string; name: string }>;
         const matches = list.filter(t => t.symbol.toUpperCase() === base);
-        let selected = matches.find(t => t.chain.toLowerCase() === 'ethereum') || matches[0];
+        let selected = matches.find(t => t.chain && t.chain.toLowerCase() === 'ethereum') || matches[0];
         let chain = selected?.chain;
         let address = selected?.address;
     

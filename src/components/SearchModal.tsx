@@ -163,20 +163,20 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
       // Exact address match first
       const isAddr = /^0x[a-fA-F0-9]{40}$/.test(value.trim());
       if (isAddr) {
-        const exact = list.find(t => t.address.toLowerCase() === value.trim().toLowerCase());
+        const exact = list.find(t => t.address && t.address.toLowerCase() === value.trim().toLowerCase());
         if (exact) {
           results.push({ type: 'catalog', data: exact });
         }
       }
       // Exact symbol match next
-      const exactSym = list.find(t => t.symbol.toLowerCase() === value.toLowerCase());
+      const exactSym = list.find(t => t.symbol && t.symbol.toLowerCase() === value.toLowerCase());
       if (exactSym) {
         results.push({ type: 'catalog', data: exactSym });
       }
       const match = list.filter(t =>
-        t.symbol.toLowerCase().includes(value.toLowerCase()) ||
-        t.name.toLowerCase().includes(value.toLowerCase()) ||
-        t.address.toLowerCase().includes(value.toLowerCase())
+        (t.symbol && t.symbol.toLowerCase().includes(value.toLowerCase())) ||
+        (t.name && t.name.toLowerCase().includes(value.toLowerCase())) ||
+        (t.address && t.address.toLowerCase().includes(value.toLowerCase()))
       );
       match.forEach(item => {
         // avoid duplicating exact pushes above

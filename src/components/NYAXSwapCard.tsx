@@ -276,8 +276,8 @@ const NYAXSwapCard: React.FC<NYAXSwapCardProps> = ({ token }) => {
   };
 
   const filteredTokens = popularTokens.filter(t =>
-    t.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    t.symbol.toLowerCase().includes(searchTerm.toLowerCase())
+    (t.name && t.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (t.symbol && t.symbol.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   // if (!isAvailable) {

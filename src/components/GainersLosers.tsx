@@ -60,7 +60,7 @@ const GainersLosers = () => {
 
     const list = tokens as Array<{ symbol: string; chain: string; address: string; name: string }>;
     const matches = list.filter(t => t.symbol.toUpperCase() === base);
-    const selected = matches.find(t => t.chain.toLowerCase() === 'ethereum') || matches[0];
+    const selected = matches.find(t => t.chain && t.chain.toLowerCase() === 'ethereum') || matches[0];
     const chain = selected?.chain;
     const address = selected?.address;
 
