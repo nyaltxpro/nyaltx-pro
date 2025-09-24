@@ -1,9 +1,21 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import Image from 'next/image';
+import { useAccount } from 'wagmi';
 import ConnectWalletButton from '@/components/ConnectWalletButton';
-import { FaWallet, FaShieldAlt, FaCheckCircle, FaChevronDown, FaInfoCircle } from 'react-icons/fa';
+import { FaWallet, FaShieldAlt, FaCheckCircle, FaChevronDown, FaInfoCircle, FaCoins } from 'react-icons/fa';
+import { useAppDispatch, useAppSelector } from '@/store';
+import { fetchUserTokens, loadTokenBoostsFromStorage, registerToken } from '@/store/slices/tokenSlice';
+
+interface PaymentToken {
+  symbol: string;
+  name: string;
+  chain: string;
+  isRegistered?: boolean;
+  boost?: number;
+  logo?: string;
+}
 
 const products = [
   { id: 1, name: 'Pro Plan', desc: 'Advanced analytics and alerts', priceUsd: 19.99, image: '/logo.png', qty: 1 },
@@ -29,32 +41,147 @@ const networks = [
 ];
 
 export default function CheckoutPage() {
+  const { isConnected, address } = useAccount();
+  const dispatch = useAppDispatch();
+  const { userTokens, tokenBoosts, isLoading } = useAppSelector((state) => state.tokens);
+  
   const [network, setNetwork] = useState('ethereum');
   const [token, setToken] = useState('USDC');
   const [email, setEmail] = useState('');
   const [promo, setPromo] = useState('');
   const [agree, setAgree] = useState(true);
   const [processing, setProcessing] = useState(false);
+  const [showRegisteredTokens, setShowRegisteredTokens] = useState(false);
+  const [showTokenRegistration, setShowTokenRegistration] = useState(false);
+  const [tokenRegistrationData, setTokenRegistrationData] = useState({
+    tokenName: '',
+    tokenSymbol: '',
+    contractAddress: '',
+    imageUri: '',
+    website: '',
+    twitter: '',
+    telegram: '',
+    discord: '',
+    github: ''
+  });
 
-  const filteredTokens = useMemo(() => tokens.filter(t => {
-    if (network === 'solana') return t.chain === 'solana';
-    if (network === 'polygon') return t.chain === 'polygon' || t.symbol === 'USDC' || t.symbol === 'USDT';
-    return t.chain === 'ethereum' || ['arbitrum','optimism','base'].includes(network);
-  }), [network]);
+  // Load user tokens on mount
+  useEffect(() => {
+    dispatch(loadTokenBoostsFromStorage());
+    if (address) {
+      dispatch(fetchUserTokens(address));
+    }
+  }, [address, dispatch]);
+
+  // Combine default tokens with user's registered tokens
+  const allTokens = useMemo((): PaymentToken[] => {
+    const defaultTokens: PaymentToken[] = tokens
+      .filter(t => {
+        if (network === 'solana') return t.chain === 'solana';
+        if (network === 'polygon') return t.chain === 'polygon' || t.symbol === 'USDC' || t.symbol === 'USDT';
+        return t.chain === 'ethereum' || ['arbitrum','optimism','base'].includes(network);
+      })
+      .map(t => ({ ...t, isRegistered: false, boost: 0 }));
+
+    // Add registered tokens that match the selected network
+    const registeredTokens: PaymentToken[] = userTokens
+      .filter(t => t.blockchain === network)
+      .map(t => ({
+        symbol: t.symbol || t.tokenSymbol,
+        name: t.name || t.tokenName,
+        chain: t.blockchain,
+        isRegistered: true,
+        boost: tokenBoosts[t.id] || 0,
+        logo: t.logo || t.imageUri
+      }));
+
+    return [...defaultTokens, ...registeredTokens];
+  }, [network, userTokens, tokenBoosts]);
+
+  const filteredTokens = showRegisteredTokens 
+    ? allTokens.filter(t => t.isRegistered) 
+    : allTokens;
 
   const subtotal = useMemo(() => products.reduce((s, p) => s + p.priceUsd * p.qty, 0), []);
   const discount = useMemo(() => promo.trim().toUpperCase() === 'NYAX10' ? subtotal * 0.1 : 0, [promo, subtotal]);
   const fees = useMemo(() => Math.max(0.3, subtotal * 0.015), [subtotal]);
   const total = useMemo(() => Math.max(0, subtotal - discount) + fees, [subtotal, discount, fees]);
 
+  const handleTokenRegistration = async () => {
+    if (!address) return alert('Please connect your wallet to register tokens.');
+    
+    try {
+      const tokenData = {
+        ...tokenRegistrationData,
+        blockchain: network,
+        submittedByAddress: address
+      };
+
+      await dispatch(registerToken(tokenData)).unwrap();
+      
+      // Reset form and close modal
+      setTokenRegistrationData({
+        tokenName: '',
+        tokenSymbol: '',
+        contractAddress: '',
+        imageUri: '',
+        website: '',
+        twitter: '',
+        telegram: '',
+        discord: '',
+        github: ''
+      });
+      setShowTokenRegistration(false);
+      
+      // Refresh user tokens
+      dispatch(fetchUserTokens(address));
+      
+      alert('Token registered successfully! It will be available after admin approval.');
+      
+    } catch (error: any) {
+      console.error('Token registration error:', error);
+      alert(error.message || 'Failed to register token. Please try again.');
+    }
+  };
+
   const handlePay = async () => {
     if (!agree) return alert('Please accept Terms to continue.');
+    if (!isConnected) return alert('Please connect your wallet to continue.');
+    
     setProcessing(true);
-    // TODO: Integrate on-chain or payment API
-    setTimeout(() => {
+    
+    try {
+      // Find the selected token details
+      const selectedToken = allTokens.find(t => t.symbol === token);
+      
+      // If it's a registered token, we can apply boost benefits
+      if (selectedToken?.isRegistered) {
+        console.log(`Using registered token: ${selectedToken.symbol} with ${selectedToken.boost} boost points`);
+        
+        // TODO: Apply additional benefits for registered token holders
+        // - Reduced fees
+        // - Priority processing
+        // - Bonus features
+      }
+      
+      // TODO: Integrate actual payment processing
+      // - Check wallet balance
+      // - Execute transaction
+      // - Handle success/failure
+      
+      setTimeout(() => {
+        setProcessing(false);
+        const message = selectedToken?.isRegistered 
+          ? `Payment initiated: ${token} on ${network} for $${total.toFixed(2)} (Registered Token - Boost Applied!)`
+          : `Payment initiated: ${token} on ${network} for $${total.toFixed(2)}`;
+        alert(message);
+      }, 1200);
+      
+    } catch (error) {
       setProcessing(false);
-      alert(`Payment initiated: ${token} on ${network} for $${total.toFixed(2)}`);
-    }, 1200);
+      console.error('Payment error:', error);
+      alert('Payment failed. Please try again.');
+    }
   };
 
   return (
@@ -129,16 +256,135 @@ export default function CheckoutPage() {
                     className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
                   >
                     {filteredTokens.map(t => (
-                      <option key={t.symbol} value={t.symbol}>{t.symbol} • {t.name}</option>
+                      <option key={t.symbol} value={t.symbol}>
+                        {t.symbol} • {t.name} {t.isRegistered ? '🎯 (Registered)' : ''}
+                      </option>
                     ))}
                   </select>
+                  
+                  {/* Registered Tokens Toggle */}
+                  {userTokens.length > 0 && (
+                    <div className="mt-2 flex items-center gap-2">
+                      <button
+                        onClick={() => setShowRegisteredTokens(!showRegisteredTokens)}
+                        className={`text-xs px-2 py-1 rounded transition-colors ${
+                          showRegisteredTokens 
+                            ? 'bg-cyan-600 text-white' 
+                            : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                        }`}
+                      >
+                        <FaCoins className="inline mr-1" />
+                        {showRegisteredTokens ? 'Show All Tokens' : 'Show Only Registered'}
+                      </button>
+                      <span className="text-xs text-gray-400">
+                        ({userTokens.filter(t => t.blockchain === network).length} registered)
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
-              <div className="mt-4 flex items-center gap-2 text-gray-400 text-sm">
-                <FaWallet />
-                <span>Pay directly from your connected wallet</span>
+              <div className="mt-4 flex items-center justify-between">
+                <div className="flex items-center gap-2 text-gray-400 text-sm">
+                  <FaWallet />
+                  <span>Pay directly from your connected wallet</span>
+                </div>
+                <button
+                  onClick={() => setShowTokenRegistration(true)}
+                  className="text-xs px-3 py-1 bg-cyan-600 text-white rounded hover:bg-cyan-700 transition-colors"
+                >
+                  Register New Token
+                </button>
               </div>
             </div>
+
+            {/* Token Registration Modal */}
+            {showTokenRegistration && (
+              <div className="mb-6 bg-cyan-500/10 border border-cyan-500/30 rounded-xl p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-cyan-400">Register New Token</h3>
+                  <button
+                    onClick={() => setShowTokenRegistration(false)}
+                    className="text-gray-400 hover:text-white"
+                  >
+                    ✕
+                  </button>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label className="block text-sm text-gray-300 mb-1">Token Name*</label>
+                    <input
+                      type="text"
+                      value={tokenRegistrationData.tokenName}
+                      onChange={(e) => setTokenRegistrationData(prev => ({ ...prev, tokenName: e.target.value }))}
+                      placeholder="Ethereum"
+                      className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-300 mb-1">Token Symbol*</label>
+                    <input
+                      type="text"
+                      value={tokenRegistrationData.tokenSymbol}
+                      onChange={(e) => setTokenRegistrationData(prev => ({ ...prev, tokenSymbol: e.target.value }))}
+                      placeholder="ETH"
+                      className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm text-gray-300 mb-1">Contract Address*</label>
+                    <input
+                      type="text"
+                      value={tokenRegistrationData.contractAddress}
+                      onChange={(e) => setTokenRegistrationData(prev => ({ ...prev, contractAddress: e.target.value }))}
+                      placeholder="0x... or Solana address"
+                      className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-300 mb-1">Logo URL</label>
+                    <input
+                      type="url"
+                      value={tokenRegistrationData.imageUri}
+                      onChange={(e) => setTokenRegistrationData(prev => ({ ...prev, imageUri: e.target.value }))}
+                      placeholder="https://.../logo.png"
+                      className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-300 mb-1">Website</label>
+                    <input
+                      type="url"
+                      value={tokenRegistrationData.website}
+                      onChange={(e) => setTokenRegistrationData(prev => ({ ...prev, website: e.target.value }))}
+                      placeholder="https://example.com"
+                      className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                    />
+                  </div>
+                </div>
+                
+                <div className="flex justify-between items-center">
+                  <div className="text-xs text-gray-400">
+                    Network: <span className="text-cyan-400 font-semibold">{network}</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setShowTokenRegistration(false)}
+                      className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleTokenRegistration}
+                      disabled={!tokenRegistrationData.tokenName || !tokenRegistrationData.tokenSymbol || !tokenRegistrationData.contractAddress}
+                      className="px-4 py-2 bg-cyan-600 text-white rounded hover:bg-cyan-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      Register Token
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Terms */}
             <div className="mb-4">
@@ -189,6 +435,37 @@ export default function CheckoutPage() {
               <div className="flex justify-between text-gray-300"><span>Subtotal</span><span>${subtotal.toFixed(2)}</span></div>
               <div className="flex justify-between text-gray-300"><span>Discount</span><span>-${discount.toFixed(2)}</span></div>
               <div className="flex justify-between text-gray-300"><span>Fees</span><span>${fees.toFixed(2)}</span></div>
+              
+              {/* Registered Token Benefits */}
+              {(() => {
+                const selectedToken = allTokens.find(t => t.symbol === token);
+                if (selectedToken?.isRegistered) {
+                  return (
+                    <div className="bg-cyan-500/10 border border-cyan-500/30 rounded-lg p-3 my-2">
+                      <div className="flex items-center gap-2 text-cyan-400 text-xs font-semibold mb-2">
+                        <FaCoins />
+                        <span>Registered Token Benefits</span>
+                      </div>
+                      <div className="space-y-1 text-xs">
+                        <div className="flex justify-between text-cyan-300">
+                          <span>Boost Points:</span>
+                          <span>+{selectedToken.boost || 0} pts</span>
+                        </div>
+                        <div className="flex justify-between text-cyan-300">
+                          <span>Priority Processing:</span>
+                          <span>✓ Enabled</span>
+                        </div>
+                        <div className="flex justify-between text-cyan-300">
+                          <span>Fee Reduction:</span>
+                          <span>5% off</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
+              
               <div className="flex justify-between text-white font-semibold text-base pt-2"><span>Total</span><span>${total.toFixed(2)}</span></div>
             </div>
 

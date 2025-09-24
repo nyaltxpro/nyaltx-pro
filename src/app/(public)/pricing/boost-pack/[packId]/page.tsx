@@ -3,11 +3,19 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAccount, useSendTransaction, useWriteContract, useSwitchChain } from 'wagmi';
-import { parseEther, erc20Abi, parseUnits } from 'viem';
 import { useAppKit } from '@reown/appkit/react';
-import PublicHeader from '@/components/PublicHeader';
-import { FaRocket, FaSearch, FaCheck, FaTimes, FaArrowLeft, FaCoins, FaFire } from 'react-icons/fa';
+import { parseUnits, formatUnits, parseEther } from 'viem';
+import { erc20Abi } from 'viem';
+import { FaCoins, FaCheck, FaSearch, FaTimes, FaExternalLinkAlt, FaArrowLeft, FaRocket } from 'react-icons/fa';
 import Image from 'next/image';
+import PublicHeader from '@/components/PublicHeader';
+import { useAppDispatch, useAppSelector } from '@/store';
+import { 
+  fetchUserTokens, 
+  addTokenBoost, 
+  loadTokenBoostsFromStorage, 
+  saveTokenBoostsToStorage 
+} from '@/store/slices/tokenSlice';
 
 // Boost pack configurations
 const BOOST_PACKS = {
@@ -107,11 +115,15 @@ const DEFAULT_USDT: `0x${string}` = "0xdAC17F958D2ee523a2206206994597C13D831ec7"
 export default function BoostPackCheckout() {
   const params = useParams();
   const router = useRouter();
+  const dispatch = useAppDispatch();
   const { isConnected, chain, address } = useAccount();
   const { switchChainAsync } = useSwitchChain();
   const { open } = useAppKit();
   const { sendTransactionAsync } = useSendTransaction();
   const { writeContractAsync } = useWriteContract();
+
+  // Redux state
+  const { userTokens, tokenBoosts, isLoading } = useAppSelector((state) => state.tokens);
 
   const packId = params.packId as string;
   const boostPack = BOOST_PACKS[packId as keyof typeof BOOST_PACKS];
@@ -122,31 +134,27 @@ export default function BoostPackCheckout() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [ethPrice, setEthPrice] = useState<number>(3000);
-  const [userTokens, setUserTokens] = useState<any[]>([]);
-  const [isLoadingTokens, setIsLoadingTokens] = useState(false);
 
-  // Load user tokens from database
+  // Load user tokens from database using Redux
   const refreshUserTokens = async () => {
-    if (!address) {
-      setUserTokens([]);
-      return;
-    }
+    if (!address) return;
     
-    setIsLoadingTokens(true);
     try {
-      const tokens = await fetchUserRegisteredTokens(address);
-      setUserTokens(tokens);
+      await dispatch(fetchUserTokens(address));
     } catch (error) {
       console.error('Failed to load user tokens:', error);
-      setUserTokens([]);
-    } finally {
-      setIsLoadingTokens(false);
     }
   };
 
   useEffect(() => {
-    refreshUserTokens();
-  }, [address]);
+    // Load token boosts from localStorage on mount
+    dispatch(loadTokenBoostsFromStorage());
+    
+    // Fetch user tokens if connected
+    if (address) {
+      refreshUserTokens();
+    }
+  }, [address, dispatch]);
 
   // Listen for storage changes to refresh tokens when boosts are updated
   useEffect(() => {
@@ -241,24 +249,23 @@ export default function BoostPackCheckout() {
           break;
       }
 
-      // Apply boost to selected user-registered tokens
-      const tokenBoosts = JSON.parse(localStorage.getItem('tokenBoosts') || '{}');
+      // Apply boost to selected user-registered tokens using Redux
       const selectedTokenData = userTokens.filter(token => selectedTokens.includes(token.id));
       
       // Update boost points for each selected token
       selectedTokenData.forEach(token => {
         const baseBoost = boostPack.points;
-        const categoryMultiplier = token.multiplier;
+        const categoryMultiplier = token.multiplier || 1.0;
         const finalBoost = Math.floor(baseBoost * categoryMultiplier);
         
-        // Add to existing boost or create new entry
-        tokenBoosts[token.id] = (tokenBoosts[token.id] || 0) + finalBoost;
+        // Dispatch Redux action to add token boost
+        dispatch(addTokenBoost({ tokenId: token.id, points: finalBoost }));
         
-        console.log(`Applied ${finalBoost} boost points to ${token.symbol} (${token.name})`);
+        console.log(`Applied ${finalBoost} boost points to ${token.symbol || token.tokenSymbol} (${token.name || token.tokenName})`);
       });
       
-      // Save updated boosts to localStorage
-      localStorage.setItem('tokenBoosts', JSON.stringify(tokenBoosts));
+      // Save token boosts to localStorage via Redux
+      dispatch(saveTokenBoostsToStorage());
       
       // Refresh token list to show updated boost values
       await refreshUserTokens();
@@ -268,11 +275,11 @@ export default function BoostPackCheckout() {
         packName: boostPack.name,
         basePoints: boostPack.points,
         selectedTokens: selectedTokenData.map(t => ({
-          symbol: t.symbol,
-          multiplier: t.multiplier,
-          finalBoost: Math.floor(boostPack.points * t.multiplier)
+          symbol: t.symbol || t.tokenSymbol,
+          multiplier: t.multiplier || 1.0,
+          finalBoost: Math.floor(boostPack.points * (t.multiplier || 1.0))
         })),
-        totalBoostApplied: selectedTokenData.reduce((sum, t) => sum + Math.floor(boostPack.points * t.multiplier), 0)
+        totalBoostApplied: selectedTokenData.reduce((sum, t) => sum + Math.floor(boostPack.points * (t.multiplier || 1.0)), 0)
       });
       
       console.log('Payment successful:', txHash);
@@ -351,7 +358,7 @@ export default function BoostPackCheckout() {
                 </div>
 
                 {/* Loading State */}
-                {isLoadingTokens && (
+                {isLoading && (
                   <div className="space-y-3">
                     {[1, 2, 3].map((i) => (
                       <div key={i} className="p-4 rounded-lg border border-gray-700 bg-gray-800/50 animate-pulse">
@@ -369,11 +376,11 @@ export default function BoostPackCheckout() {
                 )}
 
                 {/* Token List */}
-                {!isLoadingTokens && (
+                {!isLoading && (
                   <div className="space-y-3">
                     {filteredTokens.map((token: any) => {
                     const category = TOKEN_CATEGORIES[token.category as keyof typeof TOKEN_CATEGORIES];
-                    const boostedPoints = Math.floor(boostPack.points * token.multiplier);
+                    const boostedPoints = Math.floor(boostPack.points * (token.multiplier || 1.0));
                     
                     return (
                       <div
@@ -444,7 +451,7 @@ export default function BoostPackCheckout() {
                   </div>
                 )}
 
-                {!isLoadingTokens && filteredTokens.length === 0 && (
+                {!isLoading && filteredTokens.length === 0 && (
                   <div className="text-center py-8">
                     <FaCoins className="text-gray-500 text-4xl mx-auto mb-4" />
                     <div className="text-gray-500 mb-2">
@@ -515,11 +522,11 @@ export default function BoostPackCheckout() {
                       {selectedTokens.map(tokenId => {
                         const token = userTokens.find(t => t.id === tokenId);
                         if (!token) return null;
-                        const boostedPoints = Math.floor(boostPack.points * token.multiplier);
+                        const boostedPoints = Math.floor(boostPack.points * (token.multiplier || 1.0));
                         return (
                           <div key={tokenId} className="flex justify-between text-xs">
                             <span className="text-gray-400">{token.symbol}:</span>
-                            <span className="text-cyan-400">+{boostedPoints} pts ({token.multiplier}x)</span>
+                            <span className="text-cyan-400">+{boostedPoints} pts ({token.multiplier || 1.0}x)</span>
                           </div>
                         );
                       })}
@@ -530,7 +537,7 @@ export default function BoostPackCheckout() {
                     <span className="text-cyan-400 font-semibold">
                       {selectedTokens.reduce((total, tokenId) => {
                         const token = userTokens.find(t => t.id === tokenId);
-                        return total + (token ? Math.floor(boostPack.points * token.multiplier) : 0);
+                        return total + (token ? Math.floor(boostPack.points * (token.multiplier || 1.0)) : 0);
                       }, 0).toLocaleString()} pts
                     </span>
                   </div>

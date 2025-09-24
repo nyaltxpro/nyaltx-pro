@@ -7,6 +7,15 @@ import { FaPlus, FaCheck, FaTimes, FaCoins, FaExternalLinkAlt, FaInfoCircle, FaC
 import React from 'react';
 import Image from 'next/image';
 import ConnectWalletButton from '@/components/ConnectWalletButton';
+import { useAppDispatch, useAppSelector } from '@/store';
+import { 
+  updateFormField, 
+  resetForm, 
+  registerToken, 
+  clearError, 
+  clearSuccess,
+  loadTokenBoostsFromStorage 
+} from '@/store/slices/tokenSlice';
 
 interface FAQ {
   question: string;
@@ -18,28 +27,26 @@ function RegisterTokenContent() {
   const { isConnected, address } = useAccount();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const dispatch = useAppDispatch();
+  
+  // Redux state
+  const { 
+    formData, 
+    isSubmitting, 
+    error, 
+    success 
+  } = useAppSelector((state) => state.tokens);
   
   // Redirect parameters
   const redirectPath = searchParams.get('redirect');
   const paymentMethod = searchParams.get('method');
-  const [tokenName, setTokenName] = useState('');
-  const [tokenSymbol, setTokenSymbol] = useState('');
-  const [blockchain, setBlockchain] = useState('ethereum');
-  const [contractAddress, setContractAddress] = useState('');
-  const [website, setWebsite] = useState('');
-  const [twitter, setTwitter] = useState('');
-  const [telegram, setTelegram] = useState('');
-  const [discord, setDiscord] = useState('');
-  const [github, setGithub] = useState('');
-  const [youtube, setYoutube] = useState('');
-  const [videoLink, setVideoLink] = useState('');
-  const [imageUri, setImageUri] = useState('');
-  const [submitting, setSubmitting] = useState(false);
+  
+  // Local UI state (not managed by Redux)
   const [submitted, setSubmitted] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [activeTab, setActiveTab] = useState('basic');
+  const [youtube, setYoutube] = useState('');
+  const [videoLink, setVideoLink] = useState('');
 
   // Check for payment success from URL params
   React.useEffect(() => {
@@ -47,9 +54,9 @@ function RegisterTokenContent() {
     const paymentStatus = urlParams.get('payment');
     if (paymentStatus === 'success' || paymentStatus === 'free') {
       setPaymentSuccess(true);
-      setSuccess('🎉 Payment successful! You can now register your token with NyaltxPro benefits.');
+      dispatch({ type: 'tokens/setSuccess', payload: '🎉 Payment successful! You can now register your token with NyaltxPro benefits.' });
     }
-  }, []);
+  }, [dispatch]);
 
   const [faqs, setFaqs] = useState<FAQ[]>([
     {
@@ -77,59 +84,64 @@ function RegisterTokenContent() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitting(true);
-    setError(null);
+    dispatch(clearError());
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Store in localStorage (replace with API call)
-      const registeredTokens = JSON.parse(localStorage.getItem('registeredTokens') || '[]');
-      const newToken = {
-        id: Date.now().toString(),
-        name: tokenName,
-        symbol: tokenSymbol,
-        blockchain,
-        contractAddress,
-        website,
-        twitter,
-        telegram,
-        discord,
-        github,
-        youtube,
-        submittedBy: address,
-        submittedAt: new Date().toISOString(),
-        status: 'pending'
-      };
-      
-      registeredTokens.push(newToken);
-      localStorage.setItem('registeredTokens', JSON.stringify(registeredTokens));
-      
-      setSubmitted(true);
-      
-      // Handle redirect after successful registration
+      // If redirecting to checkout, store in database; otherwise use localStorage
       if (redirectPath && paymentMethod) {
+        // Store in database via Redux action
+        const tokenData = {
+          tokenName: formData.tokenName,
+          tokenSymbol: formData.tokenSymbol,
+          blockchain: formData.blockchain,
+          contractAddress: formData.contractAddress,
+          imageUri: formData.imageUri,
+          website: formData.website,
+          twitter: formData.twitter,
+          telegram: formData.telegram,
+          discord: formData.discord,
+          github: formData.github,
+          submittedByAddress: address
+        };
+
+        await dispatch(registerToken(tokenData)).unwrap();
+        
+        setSubmitted(true);
+        
+        // Redirect to checkout after successful database registration
         setTimeout(() => {
           router.push(`/${redirectPath}?method=${paymentMethod}`);
-        }, 3000); // 3 second delay to show success message
+        }, 3000);
+      } else {
+        // Store in localStorage for regular registration
+        const registeredTokens = JSON.parse(localStorage.getItem('registeredTokens') || '[]');
+        const newToken = {
+          id: Date.now().toString(),
+          name: formData.tokenName,
+          symbol: formData.tokenSymbol,
+          blockchain: formData.blockchain,
+          contractAddress: formData.contractAddress,
+          imageUri: formData.imageUri,
+          website: formData.website,
+          twitter: formData.twitter,
+          telegram: formData.telegram,
+          discord: formData.discord,
+          github: formData.github,
+          youtube,
+          submittedBy: address,
+          submittedAt: new Date().toISOString(),
+          status: 'pending'
+        };
+        
+        registeredTokens.push(newToken);
+        localStorage.setItem('registeredTokens', JSON.stringify(registeredTokens));
+        
+        setSubmitted(true);
+        dispatch(resetForm());
       }
       
-      // Reset form
-      setTokenName('');
-      setTokenSymbol('');
-      setContractAddress('');
-      setWebsite('');
-      setTwitter('');
-      setTelegram('');
-      setDiscord('');
-      setGithub('');
-      setYoutube('');
-      
-    } catch (err) {
-      setError('Failed to submit token registration. Please try again.');
-    } finally {
-      setSubmitting(false);
+    } catch (err: any) {
+      console.error('Token registration error:', err);
     }
   };
 
@@ -231,7 +243,12 @@ function RegisterTokenContent() {
                       <FaCheck className="text-green-400 text-xl" />
                       <div>
                         <h3 className="text-green-400 font-semibold">Token Registered Successfully!</h3>
-                        <p className="text-green-300 text-sm">Your token has been submitted for admin approval.</p>
+                        <p className="text-green-300 text-sm">
+                          {redirectPath && paymentMethod 
+                            ? 'Your token has been saved to the database and submitted for admin approval.'
+                            : 'Your token has been submitted for admin approval.'
+                          }
+                        </p>
                         {redirectPath && paymentMethod && (
                           <p className="text-cyan-400 text-sm mt-2">
                             Redirecting to Pro subscription checkout in 3 seconds...
@@ -249,8 +266,8 @@ function RegisterTokenContent() {
                     type="text"
                     className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
                     placeholder="Ethereum"
-                    value={tokenName}
-                    onChange={(e) => setTokenName(e.target.value)}
+                    value={formData.tokenName}
+                    onChange={(e) => dispatch(updateFormField({ field: 'tokenName', value: e.target.value }))}
                     required
                   />
                   <p className="text-xs text-gray-500 mt-1">Official token name</p>
@@ -265,8 +282,8 @@ function RegisterTokenContent() {
                       type="text"
                       className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
                       placeholder="ETH"
-                      value={tokenSymbol}
-                      onChange={(e) => setTokenSymbol(e.target.value)}
+                      value={formData.tokenSymbol}
+                      onChange={(e) => dispatch(updateFormField({ field: 'tokenSymbol', value: e.target.value }))}
                       required
                       maxLength={8}
                     />
@@ -283,8 +300,8 @@ function RegisterTokenContent() {
                   </label>
                   <select
                     className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
-                    value={blockchain}
-                    onChange={(e) => setBlockchain(e.target.value)}
+                    value={formData.blockchain}
+                    onChange={(e) => dispatch(updateFormField({ field: 'blockchain', value: e.target.value }))}
                     required
                   >
                     <option value="ethereum">Ethereum</option>
@@ -307,8 +324,8 @@ function RegisterTokenContent() {
                     type="text"
                     className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
                     placeholder="0x... or Solana address"
-                    value={contractAddress}
-                    onChange={(e) => setContractAddress(e.target.value)}
+                    value={formData.contractAddress}
+                    onChange={(e) => dispatch(updateFormField({ field: 'contractAddress', value: e.target.value }))}
                     required
                   />
                   <p className="text-xs text-gray-500 mt-1">Paste the verified contract address</p>
@@ -323,8 +340,8 @@ function RegisterTokenContent() {
                     type="url"
                     className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
                     placeholder="https://.../logo.png"
-                    value={imageUri}
-                    onChange={(e) => setImageUri(e.target.value)}
+                    value={formData.imageUri}
+                    onChange={(e) => dispatch(updateFormField({ field: 'imageUri', value: e.target.value }))}
                   />
                   <p className="text-xs text-gray-500 mt-1">Direct URL to your token logo (PNG/SVG recommended)</p>
                 </div>
@@ -339,8 +356,8 @@ function RegisterTokenContent() {
                         type="url"
                         className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
                         placeholder="https://example.com"
-                        value={website}
-                        onChange={(e) => setWebsite(e.target.value)}
+                        value={formData.website}
+                        onChange={(e) => dispatch(updateFormField({ field: 'website', value: e.target.value }))}
                       />
                     </div>
                     <div>
@@ -349,8 +366,8 @@ function RegisterTokenContent() {
                         type="url"
                         className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
                         placeholder="https://twitter.com/yourhandle"
-                        value={twitter}
-                        onChange={(e) => setTwitter(e.target.value)}
+                        value={formData.twitter}
+                        onChange={(e) => dispatch(updateFormField({ field: 'twitter', value: e.target.value }))}
                       />
                     </div>
                     <div>
@@ -359,8 +376,8 @@ function RegisterTokenContent() {
                         type="url"
                         className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
                         placeholder="https://t.me/yourchannel"
-                        value={telegram}
-                        onChange={(e) => setTelegram(e.target.value)}
+                        value={formData.telegram}
+                        onChange={(e) => dispatch(updateFormField({ field: 'telegram', value: e.target.value }))}
                       />
                     </div>
                     <div>
@@ -369,8 +386,8 @@ function RegisterTokenContent() {
                         type="url"
                         className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
                         placeholder="https://discord.gg/yourinvite"
-                        value={discord}
-                        onChange={(e) => setDiscord(e.target.value)}
+                        value={formData.discord}
+                        onChange={(e) => dispatch(updateFormField({ field: 'discord', value: e.target.value }))}
                       />
                     </div>
                     <div>
@@ -379,8 +396,8 @@ function RegisterTokenContent() {
                         type="url"
                         className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
                         placeholder="https://github.com/org/repo"
-                        value={github}
-                        onChange={(e) => setGithub(e.target.value)}
+                        value={formData.github}
+                        onChange={(e) => dispatch(updateFormField({ field: 'github', value: e.target.value }))}
                       />
                     </div>
                     <div>
@@ -410,10 +427,10 @@ function RegisterTokenContent() {
                 <div className="text-center">
                   <button
                     type="submit"
-                    disabled={submitting || !isConnected}
-                    className={`bg-[#00b8d8] hover:bg-[#00a6c4] text-white font-medium py-2 px-6 rounded-md transition duration-200 ${(submitting || !isConnected) ? 'opacity-60 cursor-not-allowed' : ''}`}
+                    disabled={isSubmitting || !isConnected}
+                    className={`bg-[#00b8d8] hover:bg-[#00a6c4] text-white font-medium py-2 px-6 rounded-md transition duration-200 ${(isSubmitting || !isConnected) ? 'opacity-60 cursor-not-allowed' : ''}`}
                   >
-                    {submitting ? 'Submitting…' : (isConnected ? 'Submit' : 'Connect wallet to submit')}
+                    {isSubmitting ? 'Submitting…' : (isConnected ? 'Submit' : 'Connect wallet to submit')}
                   </button>
                 </div>
               </form>

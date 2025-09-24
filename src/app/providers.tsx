@@ -1,5 +1,6 @@
 'use client'
 import ContextProvider from "../providers/Web3Provider";
+import ReduxProvider from "../components/providers/ReduxProvider";
 import { useState, useEffect } from 'react';
 
 // Import web3modal to initialize it
@@ -19,8 +20,10 @@ export default function Providers({
   }, []);
 
   return (
-    <ContextProvider cookies={cookies}>
-      {children}
-    </ContextProvider>
+    <ReduxProvider>
+      <ContextProvider cookies={cookies}>
+        {children}
+      </ContextProvider>
+    </ReduxProvider>
   );
 }
