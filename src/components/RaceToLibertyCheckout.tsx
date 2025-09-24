@@ -85,7 +85,7 @@ export default function RaceToLibertyCheckout({ tier, amount, onBack }: RaceToLi
             }
             
             return token.status === 'approved' && 
-              tokenAddress.toLowerCase() === address.toLowerCase();
+              tokenAddress;
           } catch (err) {
             console.error('Error filtering token:', token, err);
             return false;
@@ -136,7 +136,7 @@ export default function RaceToLibertyCheckout({ tier, amount, onBack }: RaceToLi
 
   const filteredCoins = useMemo(() => {
     try {
-      const searchLower = searchTerm.toLowerCase();
+      const searchLower = searchTerm;
       return availableCoins.filter(coin => {
         try {
           return (coin.name && typeof coin.name === 'string' && coin.name.toLowerCase().includes(searchLower)) ||
