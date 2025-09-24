@@ -1,14 +1,44 @@
 'use client';
 
-import React from 'react';
-import Link from 'next/link';
+import React, { useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { FaTwitter, FaTelegram, FaTiktok, FaYoutube } from 'react-icons/fa';
 import { SiMedium } from 'react-icons/si';
 import { BsInstagram, BsMedium } from 'react-icons/bs';
 import { FaXTwitter } from 'react-icons/fa6';
 
 const Footer = () => {
+  const [email, setEmail] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [message, setMessage] = useState('');
+
+  const handleNewsletterSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!email.trim()) {
+      setMessage('Please enter a valid email address');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setMessage('');
+
+    try {
+      // TODO: Replace with actual API call to your newsletter service
+      // For now, we'll simulate the signup
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      console.log('Newsletter signup:', email);
+      setMessage('Thank you for signing up! Welcome to the NYALTX community.');
+      setEmail('');
+    } catch (error) {
+      setMessage('Something went wrong. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <footer className="relative text-white border-t border-white/10 py-10 px-4 mt-8 font-poppins md:ml-16">
       {/* subtle aurora background */}
@@ -23,13 +53,36 @@ const Footer = () => {
           {/* Left column */}
           <div className='xl:col-span-2'>
             <div className='p-5'>
-            <h1 className="text-2xl  font-medium mb-4">NYALTX</h1> 
-            <h2 className="text-xl font-medium mb-4">Get news about cryptocurrencies every day!</h2>
-            <h3 className="text-lg font-medium mb-4">Be part of Nyaltx Force community! The premium community of Nyaltx</h3>
-            {/* <p className="text-sm text-justify mb-4">
-              A group of elite traders and investors focused on DEFI. You can join now our exclusive Telegram and get all community benefits including
-              contests, investing tips and advanced market info. There are 3 tiers:
-            </p> */}
+              <h1 className="text-2xl  font-medium mb-4">NYALTX</h1> 
+              {/* <h2 className="text-xl font-medium mb-4">Get news about cryptocurrencies every day!</h2> */}
+              <h3 className="text-lg font-medium mb-4">Stay Ahead in Crypto – Join NYALTX Venture Access Network
+                Get daily insights, market news, and exclusive invites to networking events.</h3>
+              
+              {/* Newsletter Signup */}
+              <div className="mt-6 p-4 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/20 rounded-xl backdrop-blur-sm">
+                <h4 className="text-lg font-semibold mb-3 text-cyan-400">Join Our Community</h4>
+                <p className="text-sm text-gray-300 mb-4">
+                  Get exclusive crypto insights, market updates, and early access to new features.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <input
+                    type="email"
+                    placeholder="Enter your email address"
+                    className="flex-1 px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all duration-300"
+                  />
+                  <button className="px-6 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-semibold rounded-lg hover:from-cyan-700 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-cyan-500/25">
+                    Sign Up
+                  </button>
+                </div>
+                <p className="text-xs text-gray-400 mt-2">
+                  By signing up, you agree to our Terms of Service and Privacy Policy.
+                </p>
+              </div>
+              
+              {/* <p className="text-sm text-justify mb-4">
+                A group of elite traders and investors focused on DEFI. You can join now our exclusive Telegram and get all community benefits including
+                contests, investing tips and advanced market info. There are 3 tiers:
+              </p> */}
             </div>
           </div>
 
@@ -63,7 +116,7 @@ const Footer = () => {
                 <span className="text-xs text-gray-300/90">TikTok</span>
               </Link>
               <Link href="https://medium.com/@NyaltxOfficial" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center rounded-xl border border-white/10 bg-white/[0.03] p-3 hover:border-white/20 transition-colors">
-                <BsMedium  className="text-xl mb-1 opacity-90" />
+                <BsMedium className="text-xl mb-1 opacity-90" />
                 <span className="text-xs text-gray-300/90">Medium</span>
               </Link>
             </div>
@@ -73,12 +126,12 @@ const Footer = () => {
         <div className='flex w-full flex-col backdrop-blur'>
           {/* Disclaimer */}
           <div className="text-xs text-justify text-gray-400/90 mb-6 max-w-full mx-auto px-2 sm:px-4 leading-relaxed">
-            All content available on our website, on hyperlinked websites, and on applications, forums, blogs, social media accounts and other platforms associated with Nyaltxools is intended solely to provide you with general information. We make no warranties of any kind with respect to our content, including, but not limited to, the accuracy and currency of the information. None of the content we provide should be construed as financial, legal or any other type of advice on which you may rely. Nothing on our Site should be considered an invitation or offer to take any action.
+            All content available on our website, on hyperlinked websites, and on applications, forums, blogs, social media accounts and other platforms associated with Nyaltx is intended solely to provide you with general information. We make no warranties of any kind with respect to our content, including, but not limited to, the accuracy and currency of the information. None of the content we provide should be construed as financial, legal or any other type of advice on which you may rely. Nothing on our Site should be considered an invitation or offer to take any action.
           </div>
 
           {/* Bottom section with links and app store badges */}
           <div className="flex flex-col items-center pt-4 w-full">
-       
+
 
             <div className="flex flex-col w-full items-center justify-center mt-6 text-sm space-y-4 px-2">
               <div className="flex flex-wrap justify-center gap-x-3 gap-y-2 max-w-4xl">
