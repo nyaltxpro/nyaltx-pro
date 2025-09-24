@@ -71,8 +71,15 @@ function useIsPro() {
   const [isPro, setIsPro] = useState<boolean>(false);
   useEffect(() => {
     try {
+      // Check for pro cookie
       const value = document.cookie.split(";").map((c) => c.trim()).find((c) => c.startsWith("nyaltx_pro="));
-      setIsPro(!!value && value.split("=")[1] === "1");
+      const hasProCookie = !!value && value.split("=")[1] === "1";
+      
+      // Allow access on localhost for development
+      const isLocalhost = typeof window !== 'undefined' && 
+        (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+      
+      setIsPro(hasProCookie || isLocalhost);
     } catch {
       setIsPro(false);
     }
@@ -351,7 +358,12 @@ export default function PricingPage() {
             </div>
             {isPro && (
               <div className="mt-3 text-sm text-cyan-300">
-                You have NyaltxPro! Ready to gain more visibility? <a href="#race" className="underline">Upgrade to Race to Liberty</a>.
+                {typeof window !== 'undefined' && 
+                 (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 
+                  'Development Mode: Race to Liberty unlocked! ' : 
+                  'You have NyaltxPro! '
+                }
+                Ready to gain more visibility? <a href="#race" className="underline">Upgrade to Race to Liberty</a>.
               </div>
             )}
           </div>
