@@ -9,6 +9,35 @@ import ConnectWalletButton from '@/components/ConnectWalletButton';
 import TokenDebugger from '@/components/TokenDebugger';
 import { RegisteredToken } from '@/types/token';
 
+// Component to handle image loading with fallback
+const TokenImage = ({ src, alt, width, height, className }: { 
+  src: string; 
+  alt: string; 
+  width: number; 
+  height: number; 
+  className?: string; 
+}) => {
+  const [imgSrc, setImgSrc] = useState(src);
+  const [hasError, setHasError] = useState(false);
+
+  const handleError = () => {
+    setHasError(true);
+    setImgSrc('/crypto-icons/color/generic.svg');
+  };
+
+  return (
+    <Image 
+      src={imgSrc} 
+      alt={alt} 
+      width={width} 
+      height={height} 
+      className={className}
+      onError={handleError}
+      unoptimized={hasError} // Use unoptimized for fallback images
+    />
+  );
+};
+
 // Default message for when no wallet is connected
 const NO_WALLET_MESSAGE = {
   id: 'no-wallet',
