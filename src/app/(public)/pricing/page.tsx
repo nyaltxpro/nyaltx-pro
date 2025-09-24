@@ -370,7 +370,7 @@ export default function PricingPage() {
 
           {/* Visual or banner teaser */}
           <div className="relative border border-white/10 rounded-2xl overflow-hidden">
-            <Image src="/banner23.png" alt="Race to Liberty" fill className="object-cover opacity-90" />
+            <Image src="/banner23.png" alt="Race to Liberty" fill className="object-contain opacity-90" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
             <div className="absolute bottom-4 left-4 right-4">
               <div className="text-white text-xl font-semibold">Race to Liberty</div>
