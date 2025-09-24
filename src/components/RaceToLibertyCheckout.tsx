@@ -367,7 +367,7 @@ export default function RaceToLibertyCheckout({ tier, amount, onBack }: RaceToLi
                           {/* Token Info */}
                           <div className="flex flex-col items-center text-center">
                             <div className="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center mb-4 group-hover:bg-white/20 transition-colors">
-                              <Image src={coin.logo} alt={coin.name} width={40} height={40} className="rounded-xl" />
+                              <TokenImage src={coin.logo} alt={coin.name} width={40} height={40} className="rounded-xl" />
                             </div>
                             
                             <h4 className="font-bold text-lg mb-1">{coin.symbol}</h4>

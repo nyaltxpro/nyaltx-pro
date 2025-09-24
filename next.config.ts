@@ -12,7 +12,13 @@ const nextConfig: NextConfig = {
       "ipfs.io",
       "gateway.ipfs.io",
       "cloudflare-ipfs.com",
-      "dweb.link"
+      "dweb.link",
+      "assets.coingecko.com",
+      "s2.coinmarketcap.com",
+      "raw.githubusercontent.com",
+      "github.com",
+      "imgur.com",
+      "i.imgur.com"
     ],
     remotePatterns: [
       {
@@ -43,6 +49,36 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "dweb.link",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "assets.coingecko.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "s2.coinmarketcap.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "raw.githubusercontent.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "github.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "imgur.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "i.imgur.com",
         pathname: "/**",
       },
     ],
