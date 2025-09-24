@@ -1,13 +1,18 @@
 "use client";
 
 import type { ReactNode } from "react";
-import Link from "next/link";
-import Image from "next/image";
+import { useState } from "react";
 import { usePathname } from "next/navigation";
+import AdminSidebar from "@/components/AdminSidebar";
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const isLogin = pathname === "/admin/login";
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
 
   if (isLogin) {
     return (
@@ -20,93 +25,36 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen w-full">
-      <header className="sticky top-0 z-40 bg-[#0b0f14]/95 backdrop-blur supports-[backdrop-filter]:bg-[#0b0f14]/80 shadow-[0_1px_0_0_rgba(255,255,255,0.06)]">
-        <div className="mx-auto max-w-7xl px-4 h-14 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-6 min-w-0">
-            <div className="flex items-center gap-2 shrink-0">
-              <div className="h-7 w-7 relative">
-                <Image 
-                  src="/logo.png" 
-                  alt="NYAX Logo" 
-                  width={28} 
-                  height={28} 
-                  className="rounded"
-                />
-              </div>
-              <h1 className="text-base md:text-lg font-semibold tracking-tight">NYAX Admin</h1>
-              <span className="ml-1 rounded-full border border-gray-700 px-2 py-0.5 text-[10px] uppercase text-gray-400">Dashboard</span>
-            </div>
-            <nav className="hidden md:flex items-center gap-1 text-sm">
-          
-            </nav>
-          </div>
-          <form action="/api/admin/logout" method="post" className="shrink-0">
-            <button className="rounded-md border border-gray-700/80 px-3 py-1.5 text-sm hover:bg-gray-800/60 transition-colors" type="submit">
-              Log out
-            </button>
-          </form>
-        </div>
-      </header>
-      <div className="mx-auto max-w-7xl px-4 py-8 flex gap-6">
-        {/* Sidebar */}
-        <aside className="w-56 shrink-0">
-          <nav className="rounded-lg border border-gray-800 bg-black/40 p-3 text-sm">
-            <SidebarLinks />
-          </nav>
-        </aside>
+    <div className="min-h-screen bg-[#0b0f14] text-white">
+      {/* Admin Sidebar */}
+      <AdminSidebar 
+        isMobileMenuOpen={isMobileMenuOpen}
+        toggleMobileMenu={toggleMobileMenu}
+      />
 
-        {/* Main content */}
-        <main className="flex-1 min-w-0">
+      {/* Main Content Area */}
+      <div className="md:ml-16 transition-all duration-300">
+        {/* Mobile Header */}
+        <header className="md:hidden sticky top-0 z-30 bg-[#0b0f14]/95 backdrop-blur border-b border-gray-800">
+          <div className="flex items-center justify-between px-4 h-14">
+            <button
+              onClick={toggleMobileMenu}
+              className="p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            <h1 className="text-lg font-semibold">NYAX Admin</h1>
+            <div className="w-10"></div> {/* Spacer for centering */}
+          </div>
+        </header>
+
+        {/* Main Content */}
+        <main className="p-6">
           {children}
         </main>
       </div>
     </div>
-  );
-}
-
-function SidebarLinks() {
-  const pathname = usePathname();
-  const baseClass = "block rounded px-2 py-1 hover:bg-gray-800";
-
-  const Item = ({ href, children }: { href: string; children: React.ReactNode }) => (
-    <li>
-      <Link
-        href={href}
-        className={pathname === href || (href !== '/admin' && pathname?.startsWith(href)) ? `${baseClass} bg-gray-800 text-cyan-300` : baseClass}
-      >
-        {children}
-      </Link>
-    </li>
-  );
-
-  return (
-    <div>
-            <div className="px-2 pb-2 text-gray-400 uppercase tracking-wide text-[11px]">Overview</div>
-            <ul className="space-y-1">
-              <Item href="/admin">Dashboard</Item>
-              <Item href="/admin/orders">Subscriptions</Item>
-              <Item href="/admin/profiles">Profiles</Item>
-              <Item href="/admin/stats">Stats</Item>
-              <Item href="/admin/tokens">Tokens</Item>
-              <Item href="/admin/banners">Banners</Item>
-              <Item href="/admin/points">Token Points</Item>
-            </ul>
-            <div className="mt-4 px-2 pb-2 text-gray-400 uppercase tracking-wide text-[11px]">Operations</div>
-            <ul className="space-y-1">
-              <Item href="/admin#ops">Admin Operations</Item>
-              <Item href="/admin/campaigns">Campaigns</Item>
-            </ul>
-    </div>
-  );
-}
-
-function TopLink({ href, children }: { href: string; children: React.ReactNode }) {
-  const pathname = usePathname();
-  const active = pathname === href || (href !== '/admin' && pathname?.startsWith(href));
-  return (
-    <Link href={href} className={active ? "text-cyan-300" : "text-gray-300 hover:text-white"}>
-      {children}
-    </Link>
   );
 }
