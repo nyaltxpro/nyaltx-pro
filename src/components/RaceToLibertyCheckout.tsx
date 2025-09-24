@@ -66,34 +66,34 @@ export default function RaceToLibertyCheckout({ tier, amount, onBack }: RaceToLi
     }
   }, [isConnected, address]);
 
-  const loadUserTokens = () => {
+  const loadUserTokens = async () => {
+    if (!address) {
+      console.log('No wallet address provided');
+      setAvailableCoins([]);
+      setUserTokens([]);
+      return;
+    }
+
     try {
-      const storedTokens = JSON.parse(localStorage.getItem('registeredTokens') || '[]') as RegisteredToken[];
-      console.log('Stored tokens:', storedTokens);
-      console.log('Current address:', address);
+      console.log('Fetching tokens for address:', address);
       
-      const approvedTokens = storedTokens.filter(
-        token => {
-          try {
-            // Check both submittedByAddress (preferred) and walletAddress (fallback)
-            const tokenAddress = token.submittedByAddress || token.walletAddress;
-            console.log('Token:', token.name, 'tokenAddress:', tokenAddress, 'status:', token.status);
-            
-            if (!token.status || !tokenAddress || !address) {
-              console.log('Missing required fields for token:', token.name);
-              return false;
-            }
-            
-            return token.status === 'approved' && 
-              tokenAddress.toLowerCase() === address.toLowerCase();
-          } catch (err) {
-            console.error('Error filtering token:', token, err);
-            return false;
-          }
-        }
-      );
+      const response = await fetch(`/api/tokens/by-wallet?address=${encodeURIComponent(address)}`);
+      const data = await response.json();
       
+      if (!data.success) {
+        console.error('API error:', data.error);
+        setAvailableCoins([]);
+        setUserTokens([]);
+        return;
+      }
+
+      console.log('API response:', data);
+      const allTokens = data.tokens as RegisteredToken[];
+      
+      // Filter for approved tokens only
+      const approvedTokens = allTokens.filter(token => token.status === 'approved');
       console.log('Approved tokens:', approvedTokens);
+      
       setUserTokens(approvedTokens);
 
       // Convert approved tokens to coin options
@@ -125,12 +125,43 @@ export default function RaceToLibertyCheckout({ tier, amount, onBack }: RaceToLi
       });
 
       console.log('User coin options:', userCoinOptions);
-      // Only show user's registered tokens
       setAvailableCoins(userCoinOptions);
+      
     } catch (error) {
-      console.error('Error loading user tokens:', error);
-      setAvailableCoins([]);
-      setUserTokens([]);
+      console.error('Error loading user tokens from API:', error);
+      
+      // Fallback to localStorage if API fails
+      try {
+        console.log('Falling back to localStorage...');
+        const storedTokens = JSON.parse(localStorage.getItem('registeredTokens') || '[]') as RegisteredToken[];
+        const approvedTokens = storedTokens.filter(
+          token => {
+            const tokenAddress = token.submittedByAddress || token.walletAddress;
+            return token.status === 'approved' && 
+              tokenAddress && address && 
+              tokenAddress.toLowerCase() === address.toLowerCase();
+          }
+        );
+        
+        setUserTokens(approvedTokens);
+        
+        const userCoinOptions: CoinOption[] = approvedTokens.map(token => ({
+          id: `user-${token.id}`,
+          name: token.name || 'Unknown Token',
+          symbol: token.symbol || 'UNKNOWN',
+          logo: token.logo || '/crypto-icons/color/generic.svg',
+          basePoints: Math.round(100 * (token.boostMultiplier || 1)),
+          isUserToken: true,
+          boostMultiplier: token.boostMultiplier || 1,
+          tokenId: token.id,
+        }));
+        
+        setAvailableCoins(userCoinOptions);
+      } catch (fallbackError) {
+        console.error('Fallback to localStorage also failed:', fallbackError);
+        setAvailableCoins([]);
+        setUserTokens([]);
+      }
     }
   };
 

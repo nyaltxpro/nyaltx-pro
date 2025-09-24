@@ -21,20 +21,49 @@ export default function UserTokenDashboard() {
     }
   }, [isConnected, address]);
 
-  const loadUserTokens = () => {
+  const loadUserTokens = async () => {
+    if (!address) {
+      setLoading(false);
+      return;
+    }
+
     try {
-      const storedTokens = JSON.parse(localStorage.getItem('registeredTokens') || '[]') as RegisteredToken[];
-      const myTokens = storedTokens.filter(
-        token => {
-          // Check both submittedByAddress (preferred) and walletAddress (fallback)
-          const tokenAddress = token.submittedByAddress || token.walletAddress;
-          return tokenAddress && address && 
-            tokenAddress.toLowerCase() === address.toLowerCase();
-        }
-      );
-      setUserTokens(myTokens);
+      console.log('Fetching tokens for dashboard address:', address);
+      
+      const response = await fetch(`/api/tokens/by-wallet?address=${encodeURIComponent(address)}`);
+      const data = await response.json();
+      
+      if (data.success) {
+        setUserTokens(data.tokens as RegisteredToken[]);
+      } else {
+        console.error('API error:', data.error);
+        // Fallback to localStorage
+        const storedTokens = JSON.parse(localStorage.getItem('registeredTokens') || '[]') as RegisteredToken[];
+        const myTokens = storedTokens.filter(
+          token => {
+            const tokenAddress = token.submittedByAddress || token.walletAddress;
+            return tokenAddress && address && 
+              tokenAddress.toLowerCase() === address.toLowerCase();
+          }
+        );
+        setUserTokens(myTokens);
+      }
     } catch (error) {
-      console.error('Error loading user tokens:', error);
+      console.error('Error loading user tokens from API:', error);
+      // Fallback to localStorage
+      try {
+        const storedTokens = JSON.parse(localStorage.getItem('registeredTokens') || '[]') as RegisteredToken[];
+        const myTokens = storedTokens.filter(
+          token => {
+            const tokenAddress = token.submittedByAddress || token.walletAddress;
+            return tokenAddress && address && 
+              tokenAddress.toLowerCase() === address.toLowerCase();
+          }
+        );
+        setUserTokens(myTokens);
+      } catch (fallbackError) {
+        console.error('Fallback to localStorage also failed:', fallbackError);
+      }
     } finally {
       setLoading(false);
     }
