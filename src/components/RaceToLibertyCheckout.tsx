@@ -6,6 +6,7 @@ import { FaSearch, FaTrophy, FaCoins, FaArrowRight, FaStar } from 'react-icons/f
 import { useAccount } from 'wagmi';
 import PayPalCheckout from '@/components/PayPalCheckout';
 import ConnectWalletButton from '@/components/ConnectWalletButton';
+import TokenDebugger from '@/components/TokenDebugger';
 import { RegisteredToken } from '@/types/token';
 
 // Default message for when no wallet is connected
@@ -180,6 +181,9 @@ export default function RaceToLibertyCheckout({ tier, amount, onBack }: RaceToLi
               </p>
             </div>
           </div>
+
+          {/* Debug Component - Remove in production */}
+          <TokenDebugger />
 
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
             {/* Token Selection */}
