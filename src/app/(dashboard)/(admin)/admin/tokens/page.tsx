@@ -235,38 +235,78 @@ export default function AdminTokensPage() {
         <Link href="/admin" className="text-sm underline text-gray-300">Back to Dashboard</Link>
       </div>
 
-      {/* Controls */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-3 text-sm">
-        <div className="flex items-center gap-2">
-          <label className="text-gray-300">Status</label>
-          <select className="bg-black border border-gray-800 rounded px-2 py-2 flex-1" value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value as any); setPage(1); }}>
-            <option value="pending">Pending</option>
-            <option value="approved">Approved</option>
-            <option value="rejected">Rejected</option>
-            <option value="all">All</option>
-          </select>
-        </div>
-        <div className="flex items-center gap-2">
-          <label className="text-gray-300">Chain</label>
-          <select className="bg-black border border-gray-800 rounded px-2 py-2 flex-1" value={chainFilter} onChange={(e) => setChainFilter(e.target.value)}>
-            {chains.map(c => <option key={c} value={c}>{c}</option>)}
-          </select>
-        </div>
-        <div className="md:col-span-2">
-          <input
-            className="w-full bg-black border border-gray-800 rounded px-3 py-2"
-            placeholder="Search by name, symbol, or contract..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
-        <div className="flex items-center justify-end gap-2">
-          <label className="text-gray-300">Per page</label>
-          <select className="bg-black border border-gray-800 rounded px-2 py-2" value={limit} onChange={(e) => { setLimit(parseInt(e.target.value, 10)); setPage(1); }}>
-            <option value={10}>10</option>
-            <option value={25}>25</option>
-            <option value={50}>50</option>
-          </select>
+      {/* Filters & Controls */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 border border-gray-200 dark:border-gray-700">
+        <div className="flex flex-col lg:flex-row lg:items-center gap-4">
+          {/* Status Filter */}
+          <div className="flex items-center gap-3">
+            <label htmlFor="status-filter" className="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
+              Status:
+            </label>
+            <select 
+              id="status-filter"
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
+              value={statusFilter} 
+              onChange={(e) => { setStatusFilter(e.target.value as any); setPage(1); }}
+            >
+              <option value="pending">Pending</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+              <option value="all">All</option>
+            </select>
+          </div>
+
+          {/* Chain Filter */}
+          <div className="flex items-center gap-3">
+            <label htmlFor="chain-filter" className="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
+              Chain:
+            </label>
+            <select 
+              id="chain-filter"
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
+              value={chainFilter} 
+              onChange={(e) => setChainFilter(e.target.value)}
+            >
+              {chains.map(c => <option key={c} value={c}>{c === 'all' ? 'All Chains' : c}</option>)}
+            </select>
+          </div>
+
+          {/* Search Input */}
+          <div className="flex-1 max-w-md">
+            <label htmlFor="table-search" className="sr-only">Search</label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                  <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                </svg>
+              </div>
+              <input 
+                type="text" 
+                id="table-search" 
+                className="block p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-full bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
+                placeholder="Search by name, symbol, or contract..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+          </div>
+
+          {/* Items Per Page */}
+          <div className="flex items-center gap-3">
+            <label htmlFor="per-page" className="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
+              Show:
+            </label>
+            <select 
+              id="per-page"
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
+              value={limit} 
+              onChange={(e) => { setLimit(parseInt(e.target.value, 10)); setPage(1); }}
+            >
+              <option value={10}>10</option>
+              <option value={25}>25</option>
+              <option value={50}>50</option>
+            </select>
+          </div>
         </div>
       </div>
 

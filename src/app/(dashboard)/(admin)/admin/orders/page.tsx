@@ -183,19 +183,19 @@ export default function AdminOrdersPage() {
       <section className="rounded-xl border border-gray-800 p-4">
         <h3 className="font-semibold mb-3">On-chain Payments (ETH/NYAX)</h3>
         <form onSubmit={submitOnchain} className="grid grid-cols-1 md:grid-cols-6 gap-3 mb-4">
-          <select className="bg-black border border-gray-800 rounded px-2 py-1" value={form.method} onChange={(e) => setForm({ ...form, method: e.target.value as any })}>
+          <select className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" value={form.method} onChange={(e) => setForm({ ...form, method: e.target.value as any })}>
             <option value="ETH">ETH</option>
             <option value="NYAX">NYAX</option>
           </select>
-          <select className="bg-black border border-gray-800 rounded px-2 py-1" value={form.tierId} onChange={(e) => setForm({ ...form, tierId: e.target.value as any })}>
+          <select className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" value={form.tierId} onChange={(e) => setForm({ ...form, tierId: e.target.value as any })}>
             <option value="paddle">Paddle</option>
             <option value="motor">Motor</option>
             <option value="helicopter">Helicopter</option>
           </select>
-          <input required placeholder="Wallet (0x...)" className="bg-black border border-gray-800 rounded px-2 py-1" value={form.wallet} onChange={(e) => setForm({ ...form, wallet: e.target.value })} />
-          <input required placeholder="Tx Hash (0x...)" className="bg-black border border-gray-800 rounded px-2 py-1" value={form.txHash} onChange={(e) => setForm({ ...form, txHash: e.target.value })} />
-          <input required placeholder="Amount" className="bg-black border border-gray-800 rounded px-2 py-1" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} />
-          <input required type="number" placeholder="Chain ID" className="bg-black border border-gray-800 rounded px-2 py-1" value={form.chainId} onChange={(e) => setForm({ ...form, chainId: Number(e.target.value) })} />
+          <input required placeholder="Wallet (0x...)" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" value={form.wallet} onChange={(e) => setForm({ ...form, wallet: e.target.value })} />
+          <input required placeholder="Tx Hash (0x...)" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" value={form.txHash} onChange={(e) => setForm({ ...form, txHash: e.target.value })} />
+          <input required placeholder="Amount" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} />
+          <input required type="number" placeholder="Chain ID" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" value={form.chainId} onChange={(e) => setForm({ ...form, chainId: Number(e.target.value) })} />
           <div className="md:col-span-6 flex items-center gap-2">
             <button disabled={busy} className="rounded bg-emerald-600 hover:bg-emerald-500 px-3 py-1 text-sm">Save Record</button>
             {error && <span className="text-red-400 text-sm">{error}</span>}
@@ -244,20 +244,20 @@ export default function AdminOrdersPage() {
       <section className="rounded-xl border border-gray-800 p-4">
         <h3 className="font-semibold mb-3">Pro Subscriptions</h3>
         <form onSubmit={submitSubscription} className="grid grid-cols-1 md:grid-cols-6 gap-3 mb-4">
-          <input placeholder="User ID (optional)" className="bg-black border border-gray-800 rounded px-2 py-1" value={subForm.userId} onChange={(e) => setSubForm({ ...subForm, userId: e.target.value })} />
-          <input placeholder="Email (optional)" className="bg-black border border-gray-800 rounded px-2 py-1" value={subForm.email} onChange={(e) => setSubForm({ ...subForm, email: e.target.value })} />
-          <select className="bg-black border border-gray-800 rounded px-2 py-1" value={subForm.status} onChange={(e) => setSubForm({ ...subForm, status: e.target.value as any })}>
+          <input placeholder="User ID (optional)" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" value={subForm.userId} onChange={(e) => setSubForm({ ...subForm, userId: e.target.value })} />
+          <input placeholder="Email (optional)" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" value={subForm.email} onChange={(e) => setSubForm({ ...subForm, email: e.target.value })} />
+          <select className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" value={subForm.status} onChange={(e) => setSubForm({ ...subForm, status: e.target.value as any })}>
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
             <option value="pending">Pending</option>
           </select>
-          <select className="bg-black border border-gray-800 rounded px-2 py-1" value={subForm.paymentMethod} onChange={(e) => setSubForm({ ...subForm, paymentMethod: e.target.value as any })}>
+          <select className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" value={subForm.paymentMethod} onChange={(e) => setSubForm({ ...subForm, paymentMethod: e.target.value as any })}>
             <option value="demo">Demo</option>
             <option value="stripe">Stripe</option>
             <option value="other">Other</option>
           </select>
-          <input placeholder="Amount (optional)" className="bg-black border border-gray-800 rounded px-2 py-1" value={subForm.amount} onChange={(e) => setSubForm({ ...subForm, amount: e.target.value })} />
-          <input placeholder="Expires At (ISO)" className="bg-black border border-gray-800 rounded px-2 py-1" value={subForm.expiresAt} onChange={(e) => setSubForm({ ...subForm, expiresAt: e.target.value })} />
+          <input placeholder="Amount (optional)" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" value={subForm.amount} onChange={(e) => setSubForm({ ...subForm, amount: e.target.value })} />
+          <input placeholder="Expires At (ISO)" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" value={subForm.expiresAt} onChange={(e) => setSubForm({ ...subForm, expiresAt: e.target.value })} />
           <div className="md:col-span-6 flex items-center gap-2">
             <button disabled={subBusy} className="rounded bg-blue-600 hover:bg-blue-500 px-3 py-1 text-sm">Save Subscription</button>
             {subError && <span className="text-red-400 text-sm">{subError}</span>}

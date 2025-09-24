@@ -203,21 +203,44 @@ export default function CampaignsPage() {
       </div>
 
       {/* Filters */}
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-2">
-          <label htmlFor="status-filter" className="text-sm text-gray-400">Status:</label>
-          <select
-            id="status-filter"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="rounded border border-gray-700 bg-gray-900 px-3 py-1 text-sm"
-          >
-            <option value="all">All</option>
-            <option value="active">Active</option>
-            <option value="paused">Paused</option>
-            <option value="completed">Completed</option>
-            <option value="draft">Draft</option>
-          </select>
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 border border-gray-200 dark:border-gray-700">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+          <div className="flex items-center gap-3">
+            <label htmlFor="status-filter" className="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
+              Status:
+            </label>
+            <select
+              id="status-filter"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            >
+              <option value="all">All Campaigns</option>
+              <option value="active">Active</option>
+              <option value="paused">Paused</option>
+              <option value="completed">Completed</option>
+              <option value="draft">Draft</option>
+            </select>
+          </div>
+          
+          {/* Search Input for future enhancement */}
+          <div className="flex-1 max-w-md">
+            <label htmlFor="campaign-search" className="sr-only">Search campaigns</label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                  <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                </svg>
+              </div>
+              <input 
+                type="text" 
+                id="campaign-search" 
+                className="block p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-full bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
+                placeholder="Search campaigns..."
+                disabled
+              />
+            </div>
+          </div>
         </div>
       </div>
 

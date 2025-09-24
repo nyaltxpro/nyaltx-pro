@@ -110,20 +110,20 @@ export default function AdminProfilesPage() {
       <div className="rounded-xl border border-gray-800 p-4">
         <h3 className="font-semibold mb-2">Create Profile</h3>
         <form onSubmit={submitCreate} className="grid grid-cols-1 md:grid-cols-6 gap-2">
-          <input required placeholder="Project name" className="bg-black border border-gray-800 rounded px-3 py-2" value={form.projectName} onChange={e => setForm({ ...form, projectName: e.target.value })} />
-          <input type="email" placeholder="Contact email" className="bg-black border border-gray-800 rounded px-3 py-2" value={form.contactEmail} onChange={e => setForm({ ...form, contactEmail: e.target.value })} />
-          <input placeholder="Website" className="bg-black border border-gray-800 rounded px-3 py-2" value={form.website} onChange={e => setForm({ ...form, website: e.target.value })} />
-          <select className="bg-black border border-gray-800 rounded px-3 py-2" value={form.paidTier ?? ''} onChange={e => setForm({ ...form, paidTier: (e.target.value || null) as any })}>
+          <input required placeholder="Project name" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" value={form.projectName} onChange={e => setForm({ ...form, projectName: e.target.value })} />
+          <input type="email" placeholder="Contact email" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" value={form.contactEmail} onChange={e => setForm({ ...form, contactEmail: e.target.value })} />
+          <input placeholder="Website" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" value={form.website} onChange={e => setForm({ ...form, website: e.target.value })} />
+          <select className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" value={form.paidTier ?? ''} onChange={e => setForm({ ...form, paidTier: (e.target.value || null) as any })}>
             <option value="">No tier</option>
             <option value="paddle">Paddle</option>
             <option value="motor">Motor</option>
             <option value="helicopter">Helicopter</option>
           </select>
-          <select className="bg-black border border-gray-800 rounded px-3 py-2" value={form.status} onChange={e => setForm({ ...form, status: e.target.value as any })}>
+          <select className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" value={form.status} onChange={e => setForm({ ...form, status: e.target.value as any })}>
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
           </select>
-          <input placeholder="Notes" className="bg-black border border-gray-800 rounded px-3 py-2" value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} />
+          <input placeholder="Notes" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} />
           <div className="md:col-span-6">
             <button disabled={busy} className="rounded bg-emerald-600 hover:bg-emerald-500 px-4 py-2 text-sm">Create</button>
           </div>
@@ -179,20 +179,20 @@ export default function AdminProfilesPage() {
         <div className="rounded-xl border border-gray-800 p-4">
           <h3 className="font-semibold mb-2">Edit Profile</h3>
           <form onSubmit={submitEdit} className="grid grid-cols-1 md:grid-cols-6 gap-2">
-            <input required placeholder="Project name" className="bg-black border border-gray-800 rounded px-3 py-2" value={editing.projectName} onChange={e => setEditing({ ...editing, projectName: e.target.value })} />
-            <input type="email" placeholder="Contact email" className="bg-black border border-gray-800 rounded px-3 py-2" value={editing.contactEmail || ''} onChange={e => setEditing({ ...editing, contactEmail: e.target.value })} />
-            <input placeholder="Website" className="bg-black border border-gray-800 rounded px-3 py-2" value={editing.website || ''} onChange={e => setEditing({ ...editing, website: e.target.value })} />
-            <select className="bg-black border border-gray-800 rounded px-3 py-2" value={editing.paidTier ?? ''} onChange={e => setEditing({ ...editing, paidTier: (e.target.value || null) as any })}>
+            <input required placeholder="Project name" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" value={editing.projectName} onChange={e => setEditing({ ...editing, projectName: e.target.value })} />
+            <input type="email" placeholder="Contact email" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" value={editing.contactEmail || ''} onChange={e => setEditing({ ...editing, contactEmail: e.target.value })} />
+            <input placeholder="Website" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" value={editing.website || ''} onChange={e => setEditing({ ...editing, website: e.target.value })} />
+            <select className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" value={editing.paidTier ?? ''} onChange={e => setEditing({ ...editing, paidTier: (e.target.value || null) as any })}>
               <option value="">No tier</option>
               <option value="paddle">Paddle</option>
               <option value="motor">Motor</option>
               <option value="helicopter">Helicopter</option>
             </select>
-            <select className="bg-black border border-gray-800 rounded px-3 py-2" value={editing.status} onChange={e => setEditing({ ...editing, status: e.target.value as any })}>
+            <select className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" value={editing.status} onChange={e => setEditing({ ...editing, status: e.target.value as any })}>
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
             </select>
-            <input placeholder="Notes" className="bg-black border border-gray-800 rounded px-3 py-2" value={editing.notes || ''} onChange={e => setEditing({ ...editing, notes: e.target.value })} />
+            <input placeholder="Notes" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" value={editing.notes || ''} onChange={e => setEditing({ ...editing, notes: e.target.value })} />
             <div className="md:col-span-6 flex items-center gap-2">
               <button disabled={busy} className="rounded bg-emerald-600 hover:bg-emerald-500 px-4 py-2 text-sm">Save</button>
               <button type="button" className="rounded bg-gray-700 hover:bg-gray-600 px-4 py-2 text-sm" onClick={() => setEditing(null)}>Cancel</button>
