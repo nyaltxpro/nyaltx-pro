@@ -87,8 +87,12 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const status = searchParams.get('status') || 'scheduled';
+    const statusParam = searchParams.get('status') || 'scheduled';
     const limit = parseInt(searchParams.get('limit') || '20');
+
+    // Validate status parameter
+    const validStatuses: Array<'scheduled' | 'aired' | 'cancelled'> = ['scheduled', 'aired', 'cancelled'];
+    const status = validStatuses.includes(statusParam as any) ? statusParam as 'scheduled' | 'aired' | 'cancelled' : 'scheduled';
 
     const crossPromoCollection = await getCollection<CrossPromotion>('cross_promotions');
     const tokenCollection = await getCollection('token_registrations');
@@ -130,15 +134,25 @@ export async function GET(req: NextRequest) {
 // Update cross-promotion status (mark as aired)
 export async function PUT(req: NextRequest) {
   try {
-    const { crossPromotionId, status, engagementMetrics } = await req.json();
+    const { crossPromotionId, status: statusParam, engagementMetrics } = await req.json();
 
-    if (!crossPromotionId || !status) {
+    if (!crossPromotionId || !statusParam) {
       return NextResponse.json({ 
         success: false, 
         error: 'Cross-promotion ID and status are required' 
       }, { status: 400 });
     }
 
+    // Validate status parameter
+    const validStatuses: Array<'scheduled' | 'aired' | 'cancelled'> = ['scheduled', 'aired', 'cancelled'];
+    if (!validStatuses.includes(statusParam)) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Invalid status. Must be one of: scheduled, aired, cancelled' 
+      }, { status: 400 });
+    }
+
+    const status = statusParam as 'scheduled' | 'aired' | 'cancelled';
     const crossPromoCollection = await getCollection<CrossPromotion>('cross_promotions');
 
     const updateData: any = { status };

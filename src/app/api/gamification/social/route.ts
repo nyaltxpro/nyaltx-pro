@@ -76,8 +76,12 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const status = searchParams.get('status') || 'pending';
+    const statusParam = searchParams.get('status') || 'pending';
     const limit = parseInt(searchParams.get('limit') || '20');
+
+    // Validate status parameter
+    const validStatuses: Array<'pending' | 'sent' | 'failed'> = ['pending', 'sent', 'failed'];
+    const status = validStatuses.includes(statusParam as any) ? statusParam as 'pending' | 'sent' | 'failed' : 'pending';
 
     const socialCollection = await getCollection<SocialAnnouncement>('social_announcements');
     
@@ -146,7 +150,7 @@ export async function PUT(req: NextRequest) {
           { id: announcement.id },
           { $set: { status: 'failed' } }
         );
-        results.push({ id: announcement.id, status: 'failed', error: error.message });
+        results.push({ id: announcement.id, status: 'failed', error: error instanceof Error ? error.message : 'Unknown error' });
       }
     }
 
