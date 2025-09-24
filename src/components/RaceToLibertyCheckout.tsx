@@ -3,7 +3,8 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import Image from 'next/image';
 import { FaSearch, FaTrophy, FaCoins, FaArrowRight, FaStar } from 'react-icons/fa';
-import { useAccount } from 'wagmi';
+import { useAccount, useSendTransaction, useWriteContract, useSwitchChain } from 'wagmi';
+import { parseEther, erc20Abi, parseUnits } from 'viem';
 import PayPalCheckout from '@/components/PayPalCheckout';
 import ConnectWalletButton from '@/components/ConnectWalletButton';
 import TokenDebugger from '@/components/TokenDebugger';
@@ -65,6 +66,42 @@ const TIER_MULTIPLIERS = {
   helicopter: { name: 'Helicopter', multiplier: 3, duration: '3 months' },
 };
 
+// Payment configuration
+const DEFAULT_RECEIVER: `0x${string}` = "0x81bA7b98E49014Bff22F811E9405640bC2B39cC0";
+const DEFAULT_NYAX: `0x${string}` = "0x5eed5621b92be4473f99bacac77acfa27deb57d9";
+const DEFAULT_USDT: `0x${string}` = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
+
+const RECEIVER = (process.env.NEXT_PUBLIC_PAYMENT_RECEIVER_ADDRESS as `0x${string}` | undefined) ?? DEFAULT_RECEIVER;
+const NYAX_TOKEN = (process.env.NEXT_PUBLIC_NYAX_TOKEN_ADDRESS as `0x${string}` | undefined) ?? DEFAULT_NYAX;
+const USDT_TOKEN = DEFAULT_USDT;
+const PAYMENT_CHAIN_ID = process.env.NEXT_PUBLIC_PAYMENT_CHAIN_ID ? Number(process.env.NEXT_PUBLIC_PAYMENT_CHAIN_ID) : undefined;
+const FALLBACK_ETH_PRICE = process.env.NEXT_PUBLIC_FALLBACK_ETH_PRICE ? Number(process.env.NEXT_PUBLIC_FALLBACK_ETH_PRICE) : 3000;
+
+// Fetch ETH price from multiple sources
+async function fetchETHPriceUSD(): Promise<number> {
+  // Try CoinGecko first
+  try {
+    const res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd", { cache: "no-store" });
+    if (res.ok) {
+      const data = await res.json();
+      const price = data?.ethereum?.usd;
+      if (typeof price === 'number' && price > 0) return price;
+    }
+  } catch {}
+
+  // Fallback to Coinbase
+  try {
+    const res = await fetch("https://api.coinbase.com/v2/prices/ETH-USD/spot", { cache: "no-store" });
+    if (res.ok) {
+      const data = await res.json();
+      const price = parseFloat(data?.data?.amount);
+      if (!Number.isNaN(price) && price > 0) return price;
+    }
+  } catch {}
+
+  return FALLBACK_ETH_PRICE;
+}
+
 interface RaceToLibertyCheckoutProps {
   tier: 'paddle' | 'motor' | 'helicopter';
   amount: number;
@@ -72,7 +109,11 @@ interface RaceToLibertyCheckoutProps {
 }
 
 export default function RaceToLibertyCheckout({ tier, amount, onBack }: RaceToLibertyCheckoutProps) {
-  const { address, isConnected } = useAccount();
+  const { address, isConnected, chain } = useAccount();
+  const { switchChainAsync } = useSwitchChain();
+  const { sendTransactionAsync } = useSendTransaction();
+  const { writeContractAsync } = useWriteContract();
+  
   const [selectedCoin, setSelectedCoin] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'paypal' | 'crypto'>('paypal');
@@ -80,8 +121,16 @@ export default function RaceToLibertyCheckout({ tier, amount, onBack }: RaceToLi
   const [agree, setAgree] = useState(true);
   const [availableCoins, setAvailableCoins] = useState<CoinOption[]>([]);
   const [userTokens, setUserTokens] = useState<RegisteredToken[]>([]);
+  const [ethPrice, setEthPrice] = useState<number | null>(null);
+  const [busy, setBusy] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const tierInfo = TIER_MULTIPLIERS[tier];
+
+  // Fetch ETH price
+  useEffect(() => {
+    fetchETHPriceUSD().then(setEthPrice).catch(() => setEthPrice(null));
+  }, []);
 
   // Load user's approved tokens
   useEffect(() => {
@@ -192,6 +241,121 @@ export default function RaceToLibertyCheckout({ tier, amount, onBack }: RaceToLi
         setUserTokens([]);
       }
     }
+  };
+
+  // Crypto payment handlers
+  const computeEthAmount = (usd: number) => {
+    const ref = ethPrice && ethPrice > 0 ? ethPrice : FALLBACK_ETH_PRICE;
+    if (!ref) return null;
+    return usd / ref;
+  };
+
+  const handlePayETH = async () => {
+    if (!RECEIVER) { setError("Receiver address not configured"); return; }
+    if (!isConnected) { setError("Please connect your wallet first"); return; }
+    if (PAYMENT_CHAIN_ID && chain?.id !== PAYMENT_CHAIN_ID) {
+      try { await switchChainAsync({ chainId: PAYMENT_CHAIN_ID }); }
+      catch { setError("Please switch to the correct chain to pay"); return; }
+    }
+
+    let ethAmt = computeEthAmount(amount);
+    if (!ethAmt) {
+      try {
+        const latest = await fetchETHPriceUSD();
+        setEthPrice(latest);
+        ethAmt = latest > 0 ? amount / latest : null;
+      } catch {}
+    }
+    if (!ethAmt) {
+      setError("Unable to compute ETH amount. Please try again in a moment.");
+      return;
+    }
+
+    setError(null);
+    setBusy("eth");
+    try {
+      const hash = await sendTransactionAsync({ 
+        to: RECEIVER, 
+        value: parseEther(ethAmt.toFixed(6)) 
+      });
+      console.log("ETH payment tx:", hash);
+      // TODO: Handle successful payment
+    } catch (e: any) {
+      setError(e?.shortMessage || e?.message || "ETH payment failed");
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const handlePayNYAX = async () => {
+    if (!RECEIVER) { setError("Receiver address not configured"); return; }
+    if (!NYAX_TOKEN) { setError("NYAX token address not configured"); return; }
+    if (!isConnected) { setError("Please connect your wallet first"); return; }
+    if (PAYMENT_CHAIN_ID && chain?.id !== PAYMENT_CHAIN_ID) {
+      try { await switchChainAsync({ chainId: PAYMENT_CHAIN_ID }); }
+      catch { setError("Please switch to the correct chain to pay"); return; }
+    }
+
+    // 20% discount for NYAX
+    const discountedUSD = amount * 0.8;
+    
+    setError(null);
+    setBusy("nyax");
+    try {
+      const value = parseUnits(discountedUSD.toFixed(6), 18);
+      const hash = await writeContractAsync({
+        abi: erc20Abi,
+        address: NYAX_TOKEN,
+        functionName: "transfer",
+        args: [RECEIVER, value],
+      });
+      console.log("NYAX payment tx:", hash);
+      // TODO: Handle successful payment
+    } catch (e: any) {
+      setError(e?.shortMessage || e?.message || "NYAX payment failed");
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const handlePayUSDT = async () => {
+    if (!RECEIVER) { setError("Receiver address not configured"); return; }
+    if (!USDT_TOKEN) { setError("USDT token address not configured"); return; }
+    if (!isConnected) { setError("Please connect your wallet first"); return; }
+    if (PAYMENT_CHAIN_ID && chain?.id !== PAYMENT_CHAIN_ID) {
+      try { await switchChainAsync({ chainId: PAYMENT_CHAIN_ID }); }
+      catch { setError("Please switch to the correct chain to pay"); return; }
+    }
+
+    setError(null);
+    setBusy("usdt");
+    try {
+      // USDT uses 6 decimals on Ethereum
+      const value = parseUnits(amount.toFixed(2), 6);
+      const hash = await writeContractAsync({
+        abi: erc20Abi,
+        address: USDT_TOKEN,
+        functionName: "transfer",
+        args: [RECEIVER, value],
+      });
+      console.log("USDT payment tx:", hash);
+      // TODO: Handle successful payment
+    } catch (e: any) {
+      setError(e?.shortMessage || e?.message || "USDT payment failed");
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  // PayPal handlers
+  const handlePayPalSuccess = (details: any) => {
+    console.log('PayPal payment successful:', details);
+    // TODO: Handle successful PayPal payment
+  };
+
+  const handlePayPalError = (error: any) => {
+    console.error('PayPal payment error:', error);
+    setError('PayPal payment failed. Please try again.');
   };
 
   const filteredCoins = useMemo(() => {
@@ -500,13 +664,88 @@ export default function RaceToLibertyCheckout({ tier, amount, onBack }: RaceToLi
                     )}
 
                     {paymentMethod === 'crypto' && agree && (
-                      <div className="bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/20 rounded-2xl p-6 backdrop-blur-sm text-center">
-                        <div className="mb-4">
-                          <ConnectWalletButton />
-                        </div>
-                        <p className="text-gray-400">
-                          Connect your wallet to pay with cryptocurrency
-                        </p>
+                      <div className="bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/20 rounded-2xl p-6 backdrop-blur-sm">
+                        {!isConnected ? (
+                          <div className="text-center">
+                            <div className="mb-4">
+                              <ConnectWalletButton />
+                            </div>
+                            <p className="text-gray-400">
+                              Connect your wallet to pay with cryptocurrency
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="space-y-4">
+                            <h4 className="text-lg font-semibold text-center mb-4">Choose Payment Method</h4>
+                            
+                            {error && (
+                              <div className="p-3 rounded-lg bg-red-500/20 border border-red-500/30 text-red-200 text-sm">
+                                {error}
+                              </div>
+                            )}
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                              {/* ETH Payment */}
+                              <button
+                                onClick={handlePayETH}
+                                disabled={busy !== null}
+                                className="p-4 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                <div className="flex flex-col items-center space-y-2">
+                                  <Image src="/crypto-icons/color/eth.svg" alt="ETH" width={32} height={32} />
+                                  <div className="text-sm font-medium">Pay with ETH</div>
+                                  <div className="text-xs text-gray-400">
+                                    {ethPrice ? `≈ ${computeEthAmount(amount)?.toFixed(5)} ETH` : 'Loading...'}
+                                  </div>
+                                  {busy === 'eth' && (
+                                    <div className="text-xs text-cyan-400">Processing...</div>
+                                  )}
+                                </div>
+                              </button>
+
+                              {/* USDT Payment */}
+                              <button
+                                onClick={handlePayUSDT}
+                                disabled={busy !== null}
+                                className="p-4 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                <div className="flex flex-col items-center space-y-2">
+                                  <Image src="/crypto-icons/color/usdt.svg" alt="USDT" width={32} height={32} />
+                                  <div className="text-sm font-medium">Pay with USDT</div>
+                                  <div className="text-xs text-gray-400">
+                                    ${amount.toFixed(2)} USDT
+                                  </div>
+                                  {busy === 'usdt' && (
+                                    <div className="text-xs text-cyan-400">Processing...</div>
+                                  )}
+                                </div>
+                              </button>
+
+                              {/* NYAX Payment */}
+                              <button
+                                onClick={handlePayNYAX}
+                                disabled={busy !== null}
+                                className="p-4 rounded-xl border border-cyan-500/30 bg-cyan-500/10 hover:bg-cyan-500/20 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                <div className="flex flex-col items-center space-y-2">
+                                  <Image src="/logo.png" alt="NYAX" width={32} height={32} />
+                                  <div className="text-sm font-medium">Pay with NYAX</div>
+                                  <div className="text-xs text-cyan-400">
+                                    ${(amount * 0.8).toFixed(2)} NYAX (20% off)
+                                  </div>
+                                  {busy === 'nyax' && (
+                                    <div className="text-xs text-cyan-400">Processing...</div>
+                                  )}
+                                </div>
+                              </button>
+                            </div>
+
+                            <div className="text-xs text-gray-400 text-center mt-4">
+                              <p>Network fees apply. Ensure you're on the correct chain.</p>
+                              <p className="mt-1">Payments are sent to: {RECEIVER}</p>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
