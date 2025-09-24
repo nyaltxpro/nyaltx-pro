@@ -55,6 +55,7 @@ export interface RegisteredToken {
   telegram?: string;
   userId: string;
   walletAddress: string;
+  submittedByAddress?: string; // The wallet address that submitted the token
   status: 'pending' | 'approved' | 'rejected';
   boostMultiplier: number; // 1.0 = no boost, 1.5 = 50% boost, etc.
   submittedAt: number;

@@ -25,8 +25,12 @@ export default function UserTokenDashboard() {
     try {
       const storedTokens = JSON.parse(localStorage.getItem('registeredTokens') || '[]') as RegisteredToken[];
       const myTokens = storedTokens.filter(
-        token => token.walletAddress && address && 
-        token.walletAddress.toLowerCase() === address.toLowerCase()
+        token => {
+          // Check both submittedByAddress (preferred) and walletAddress (fallback)
+          const tokenAddress = token.submittedByAddress || token.walletAddress;
+          return tokenAddress && address && 
+            tokenAddress.toLowerCase() === address.toLowerCase();
+        }
       );
       setUserTokens(myTokens);
     } catch (error) {

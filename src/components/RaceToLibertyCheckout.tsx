@@ -69,37 +69,87 @@ export default function RaceToLibertyCheckout({ tier, amount, onBack }: RaceToLi
   const loadUserTokens = () => {
     try {
       const storedTokens = JSON.parse(localStorage.getItem('registeredTokens') || '[]') as RegisteredToken[];
+      console.log('Stored tokens:', storedTokens);
+      console.log('Current address:', address);
+      
       const approvedTokens = storedTokens.filter(
-        token => token.status === 'approved' && 
-        token.walletAddress && address && 
-        token.walletAddress.toLowerCase() === address.toLowerCase()
+        token => {
+          try {
+            // Check both submittedByAddress (preferred) and walletAddress (fallback)
+            const tokenAddress = token.submittedByAddress || token.walletAddress;
+            console.log('Token:', token.name, 'tokenAddress:', tokenAddress, 'status:', token.status);
+            
+            if (!token.status || !tokenAddress || !address) {
+              console.log('Missing required fields for token:', token.name);
+              return false;
+            }
+            
+            return token.status === 'approved' && 
+              tokenAddress.toLowerCase() === address.toLowerCase();
+          } catch (err) {
+            console.error('Error filtering token:', token, err);
+            return false;
+          }
+        }
       );
+      
+      console.log('Approved tokens:', approvedTokens);
       setUserTokens(approvedTokens);
 
       // Convert approved tokens to coin options
-      const userCoinOptions: CoinOption[] = approvedTokens.map(token => ({
-        id: `user-${token.id}`,
-        name: token.name,
-        symbol: token.symbol,
-        logo: token.logo || '/crypto-icons/color/generic.svg',
-        basePoints: Math.round(100 * token.boostMultiplier), // Convert multiplier to base points
-        isUserToken: true,
-        boostMultiplier: token.boostMultiplier,
-        tokenId: token.id,
-      }));
+      const userCoinOptions: CoinOption[] = approvedTokens.map(token => {
+        try {
+          return {
+            id: `user-${token.id}`,
+            name: token.name || 'Unknown Token',
+            symbol: token.symbol || 'UNKNOWN',
+            logo: token.logo || '/crypto-icons/color/generic.svg',
+            basePoints: Math.round(100 * (token.boostMultiplier || 1)), // Convert multiplier to base points
+            isUserToken: true,
+            boostMultiplier: token.boostMultiplier || 1,
+            tokenId: token.id,
+          };
+        } catch (err) {
+          console.error('Error mapping token to coin option:', token, err);
+          return {
+            id: `user-${token.id || 'unknown'}`,
+            name: 'Error Token',
+            symbol: 'ERROR',
+            logo: '/crypto-icons/color/generic.svg',
+            basePoints: 100,
+            isUserToken: true,
+            boostMultiplier: 1,
+            tokenId: token.id || 'unknown',
+          };
+        }
+      });
 
+      console.log('User coin options:', userCoinOptions);
       // Only show user's registered tokens
       setAvailableCoins(userCoinOptions);
     } catch (error) {
       console.error('Error loading user tokens:', error);
+      setAvailableCoins([]);
+      setUserTokens([]);
     }
   };
 
   const filteredCoins = useMemo(() => {
-    return availableCoins.filter(coin =>
-      (coin.name && coin.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (coin.symbol && coin.symbol.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
+    try {
+      const searchLower = searchTerm.toLowerCase();
+      return availableCoins.filter(coin => {
+        try {
+          return (coin.name && typeof coin.name === 'string' && coin.name.toLowerCase().includes(searchLower)) ||
+                 (coin.symbol && typeof coin.symbol === 'string' && coin.symbol.toLowerCase().includes(searchLower));
+        } catch (err) {
+          console.error('Error filtering coin:', coin, err);
+          return false;
+        }
+      });
+    } catch (error) {
+      console.error('Error in filteredCoins:', error);
+      return availableCoins;
+    }
   }, [searchTerm, availableCoins]);
 
   const selectedCoinData = useMemo(() => {
