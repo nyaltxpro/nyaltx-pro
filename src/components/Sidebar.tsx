@@ -26,7 +26,9 @@ import {
   FaNewspaper,
   FaStar,
   FaCalendarAlt,
-  FaPlay
+  FaPlay,
+  FaTrophy,
+  FaGamepad
 } from 'react-icons/fa';
 import Image from 'next/image';
 
@@ -112,6 +114,8 @@ export default function Sidebar({ isMobileMenuOpen, toggleMobileMenu }: SidebarP
     { icon: <FaRocket />, text: 'Trending', href: '/dashboard/trending' },
     { icon: <FaNewspaper />, text: 'News', href: '/dashboard/news' },
     { icon: <FaCalendarAlt />, text: 'Events', href: '/dashboard/events' },
+    { icon: <FaGamepad />, text: 'Gamification', href: '/dashboard/gamification' },
+    { icon: <FaTrophy />, text: 'Race to Liberty', href: '/dashboard/race-to-liberty' },
     { icon: <FaCoins />, text: 'Create Token', href: '/dashboard/create-token' },
     { icon: <FaPlus />, text: 'Register Token', href: '/dashboard/register-token' },
     // { icon: <FaShoppingCart />, text: 'Checkout', href: '/dashboard/checkout' },
