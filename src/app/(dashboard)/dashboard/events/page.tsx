@@ -427,7 +427,7 @@ export default function EventsPage() {
 
             {/* Action Buttons */}
             <div className="absolute bottom-4 right-4 flex gap-2">
-              <a
+              {/* <a
                 href={selectedImage.src}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -436,7 +436,7 @@ export default function EventsPage() {
               >
                 <FaExternalLinkAlt className="w-4 h-4" />
                 <span>Open</span>
-              </a>
+              </a> */}
             </div>
           </div>
         </div>
