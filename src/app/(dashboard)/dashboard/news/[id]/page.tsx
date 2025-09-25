@@ -13,8 +13,8 @@ function formatDate(d?: Date): string {
   }
 }
 
-export default async function NewsDetailPage({ params }: { params: { id: string } }) {
-  const { id } = params;
+export default async function NewsDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
 
   let items: Awaited<ReturnType<typeof getNews>> = [];
   try {

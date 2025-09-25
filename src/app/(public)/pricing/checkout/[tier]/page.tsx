@@ -1,15 +1,15 @@
 import PublicHeader from '@/components/PublicHeader';
 import Web3Checkout from '@/components/Web3Checkout';
 
-export default function CheckoutPage({ 
+export default async function CheckoutPage({ 
   params, 
   searchParams 
 }: { 
-  params: { tier: string };
-  searchParams: { method?: string };
+  params: Promise<{ tier: string }>;
+  searchParams: Promise<{ method?: string }>;
 }) {
-  const { tier } = params;
-  const { method } = searchParams;
+  const { tier } = await params;
+  const { method } = await searchParams;
 
   return (
     <div className="min-h-screen bg-[#0a0b0f] text-white">
