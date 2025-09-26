@@ -135,10 +135,15 @@ class GeckoTerminalAPI {
     market_cap: string;
   } | null> {
     try {
+      console.log(`🔍 GeckoTerminal: Input network="${network}", address="${address}"`);
+      
       // Map network name
       const geckoNetwork = this.mapNetworkName(network);
+      console.log(`🔍 GeckoTerminal: Mapped "${network}" -> "${geckoNetwork}"`);
+      
       if (!geckoNetwork) {
-        console.warn(`Unsupported network for GeckoTerminal: ${network}`);
+        console.warn(`❌ Unsupported network for GeckoTerminal: ${network}`);
+        console.log('📋 Supported networks:', Object.keys(this.NETWORK_MAPPING));
         return null;
       }
 

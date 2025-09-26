@@ -460,30 +460,10 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
 
       console.log(`🔄 Fetching price for ${chain}:${address} ${isManualRefresh ? '(Manual Refresh)' : ''}`);
 
-      // Method 1: Try DexScreener first (existing method)
-      try {
-        console.log('🟦 Trying DexScreener API...');
-        const res = await fetch(`https://api.dexscreener.com/latest/dex/pairs/${chain}/${address}`);
-        if (res.ok) {
-          const data = await res.json();
-          const pair = data?.pairs?.[0];
-          if (pair && pair.priceUsd) {
-            if (aborted) return;
-            console.log('✅ DexScreener: Price found', pair.priceUsd);
-            setDexPriceUsd(pair.priceUsd);
-            setPriceSource('dexscreener');
-            const ch = pair?.priceChange?.h24;
-            setDexChange24h(typeof ch === 'number' ? ch : (typeof ch === 'string' ? parseFloat(ch) : null));
-            return; // Success, exit early
-          }
-        }
-      } catch (e) {
-        console.log('❌ DexScreener failed:', e);
-      }
-
       // Method 2: Try GeckoTerminal as fallback
       try {
         console.log('🟩 Trying GeckoTerminal API...');
+        console.log(`🔍 Trade Page: Calling GeckoTerminal with chain="${chain}", address="${address}"`);
         const geckoData = await geckoTerminalAPI.getTokenPrice(chain, address);
         if (geckoData && geckoData.price_usd && geckoData.price_usd !== '0') {
           if (aborted) return;
