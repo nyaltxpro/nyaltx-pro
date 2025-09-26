@@ -30,6 +30,7 @@ import Faq from '@/components/Faq';
 import { fetchTokenPairData, TokenPairData, formatCurrency, formatPercentage, getTokenId } from '@/api/coingecko/api';
 import { getCryptoIconUrl } from '@/utils/cryptoIcons';
 import { getCryptoName } from '@/utils/cryptoNames';
+import { geckoTerminalAPI } from '@/utils/geckoTerminalApi';
 import nyaxTokensData from '../../../../../nyax-tokens-data.json';
 import SwapPage from '@/components/SwapCard';
 
@@ -848,7 +849,7 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
               </div>
             )}
 
-            {activeTab === 'info' && (
+            {/* {activeTab === 'info' && (
               <div className="p-4">
                 <h3 className="text-lg font-semibold mb-3">Token Information</h3>
                 <p className="text-gray-300 mb-4">
@@ -904,9 +905,9 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
                   </div>
                 </div>
               </div>
-            )}
+            )} */}
 
-            {activeTab === 'analytics' && (
+            {/* {activeTab === 'analytics' && (
               <div className="p-4">
                 <h3 className="text-lg font-semibold mb-3">Token Analytics</h3>
 
@@ -977,7 +978,7 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
                   </div>
                 </div>
               </div>
-            )}
+            )} */}
           </div>
 
           <div className="mt-4">
