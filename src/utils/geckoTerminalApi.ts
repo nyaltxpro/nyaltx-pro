@@ -5,25 +5,23 @@ interface GeckoTerminalTokenData {
     address: string;
     name: string;
     symbol: string;
-    image_url: string;
-    coingecko_coin_id: string;
+    image_url: string | null;
+    coingecko_coin_id: string | null;
     decimals: number;
     total_supply: string;
+    normalized_total_supply: string;
     price_usd: string;
     fdv_usd: string;
-    market_cap_usd: string;
+    market_cap_usd: string | null;
     total_reserve_in_usd: string;
     volume_usd: {
       h24: string;
-      h6: string;
-      h1: string;
-      m5: string;
     };
-    price_change_percentage: {
-      h24: string;
-      h6: string;
-      h1: string;
-      m5: string;
+    price_change_percentage?: {
+      h24?: string;
+      h6?: string;
+      h1?: string;
+      m5?: string;
     };
   };
 }
@@ -190,10 +188,10 @@ class GeckoTerminalAPI {
       if (cachedData) {
         console.log(`GeckoTerminal: Using cached data for ${geckoNetwork}:${address}`);
         return {
-          price_usd: cachedData.attributes.price_usd,
-          price_change_24h: cachedData.attributes.price_change_percentage.h24,
-          volume_24h: cachedData.attributes.volume_usd.h24,
-          market_cap: cachedData.attributes.market_cap_usd
+          price_usd: cachedData.attributes.price_usd || '0',
+          price_change_24h: cachedData.attributes.price_change_percentage?.h24 || '0',
+          volume_24h: cachedData.attributes.volume_usd.h24 || '0',
+          market_cap: cachedData.attributes.market_cap_usd || '0'
         };
       }
 
@@ -228,6 +226,7 @@ class GeckoTerminalAPI {
       }
 
       const data: GeckoTerminalResponse = await response.json();
+      console.log('🔍 GeckoTerminal API Response:', JSON.stringify(data, null, 2));
       
       if (!data.data || !data.data.attributes) {
         console.warn('GeckoTerminal: Invalid response format');
@@ -237,12 +236,15 @@ class GeckoTerminalAPI {
       // Cache the data
       this.setCachedData(cacheKey, data.data);
 
-      return {
-        price_usd: data.data.attributes.price_usd,
-        price_change_24h: data.data.attributes.price_change_percentage.h24,
-        volume_24h: data.data.attributes.volume_usd.h24,
-        market_cap: data.data.attributes.market_cap_usd
+      const result = {
+        price_usd: data.data.attributes.price_usd || '0',
+        price_change_24h: data.data.attributes.price_change_percentage?.h24 || '0',
+        volume_24h: data.data.attributes.volume_usd.h24 || '0',
+        market_cap: data.data.attributes.market_cap_usd || '0'
       };
+
+      console.log('✅ GeckoTerminal: Processed result:', result);
+      return result;
 
     } catch (error) {
       console.error('GeckoTerminal API error:', error);
