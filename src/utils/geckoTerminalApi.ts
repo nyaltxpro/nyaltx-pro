@@ -58,18 +58,54 @@ class GeckoTerminalAPI {
 
   // Network mapping for GeckoTerminal
   private readonly NETWORK_MAPPING: { [key: string]: string } = {
+    // Ethereum variants
     'ethereum': 'eth',
+    'eth': 'eth',
+    'mainnet': 'eth',
+    '1': 'eth',
+    
+    // BSC variants
     'bsc': 'bsc',
     'binance': 'bsc',
+    'binance smart chain': 'bsc',
+    'bnb': 'bsc',
+    '56': 'bsc',
+    
+    // Polygon variants
     'polygon': 'polygon_pos',
     'matic': 'polygon_pos',
+    'polygon_pos': 'polygon_pos',
+    '137': 'polygon_pos',
+    
+    // Arbitrum variants
     'arbitrum': 'arbitrum',
+    'arbitrum one': 'arbitrum',
+    'arb': 'arbitrum',
+    '42161': 'arbitrum',
+    
+    // Optimism variants
     'optimism': 'optimism',
+    'op': 'optimism',
+    '10': 'optimism',
+    
+    // Base variants
     'base': 'base',
+    '8453': 'base',
+    
+    // Avalanche variants
     'avalanche': 'avax',
     'avax': 'avax',
+    'avalanche c-chain': 'avax',
+    '43114': 'avax',
+    
+    // Fantom variants
     'fantom': 'fantom',
-    'solana': 'solana'
+    'ftm': 'fantom',
+    '250': 'fantom',
+    
+    // Solana variants
+    'solana': 'solana',
+    'sol': 'solana'
   };
 
   private isRateLimited(): boolean {
@@ -251,13 +287,28 @@ class GeckoTerminalAPI {
       windowResetIn: Math.max(0, windowResetIn)
     };
   }
+
+  // Test network mapping - for debugging
+  testNetworkMapping(network: string): string | null {
+    const result = this.mapNetworkName(network);
+    console.log(`🧪 Network mapping test: "${network}" -> "${result}"`);
+    return result;
+  }
+
+  // Get all supported networks - for debugging
+  getSupportedNetworks(): string[] {
+    return Object.keys(this.NETWORK_MAPPING);
+  }
 }
 
 // Export singleton instance
 export const geckoTerminalAPI = new GeckoTerminalAPI();
 
-// Clean up expired cache entries every 5 minutes
+// Make available globally for debugging
 if (typeof window !== 'undefined') {
+  (window as any).geckoTerminalAPI = geckoTerminalAPI;
+  
+  // Clean up expired cache entries every 5 minutes
   setInterval(() => {
     geckoTerminalAPI.clearExpiredCache();
   }, 5 * 60 * 1000);
