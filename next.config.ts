@@ -18,7 +18,9 @@ const nextConfig: NextConfig = {
       "raw.githubusercontent.com",
       "github.com",
       "imgur.com",
-      "i.imgur.com"
+      "i.imgur.com",
+      "www.nyaltx.com",
+      "api.geckoterminal.com"
     ],
     remotePatterns: [
       {
@@ -79,6 +81,16 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "i.imgur.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "www.nyaltx.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "api.geckoterminal.com",
         pathname: "/**",
       },
     ],
