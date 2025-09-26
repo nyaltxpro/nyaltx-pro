@@ -6,7 +6,7 @@ import { useAccount, useSendTransaction, useWriteContract, useSwitchChain } from
 import { useAppKit } from '@reown/appkit/react';
 import { parseUnits, formatUnits, parseEther } from 'viem';
 import { erc20Abi } from 'viem';
-import { FaCoins, FaCheck, FaSearch, FaTimes, FaExternalLinkAlt, FaArrowLeft, FaRocket } from 'react-icons/fa';
+import { FaCoins, FaCheck, FaSearch, FaTimes, FaExternalLinkAlt, FaArrowLeft, FaRocket, FaTag, FaGift } from 'react-icons/fa';
 import Image from 'next/image';
 import PublicHeader from '@/components/PublicHeader';
 import { useAppDispatch, useAppSelector } from '@/store';
@@ -65,6 +65,42 @@ const TOKEN_CATEGORIES = {
   nft: { name: 'NFT', multiplier: 1.25, color: 'text-pink-400' },
   infrastructure: { name: 'Infrastructure', multiplier: 1.4, color: 'text-green-400' },
   ai: { name: 'AI', multiplier: 1.5, color: 'text-cyan-400' }
+};
+
+// Promo code configurations
+const PROMO_CODES = {
+  'FREE2024': { 
+    type: 'free', 
+    discount: 100, 
+    description: 'Free boost pack - 100% off',
+    isActive: true,
+    maxUses: 1000,
+    currentUses: 0
+  },
+  'WELCOME50': { 
+    type: 'discount', 
+    discount: 50, 
+    description: '50% off your first boost pack',
+    isActive: true,
+    maxUses: 500,
+    currentUses: 0
+  },
+  'SAVE20': { 
+    type: 'discount', 
+    discount: 20, 
+    description: '20% off boost pack',
+    isActive: true,
+    maxUses: 1000,
+    currentUses: 0
+  },
+  'HOLIDAY': { 
+    type: 'discount', 
+    discount: 30, 
+    description: 'Holiday special - 30% off',
+    isActive: true,
+    maxUses: 200,
+    currentUses: 0
+  }
 };
 
 // Fetch user's registered and approved tokens from database
@@ -134,6 +170,12 @@ export default function BoostPackCheckout() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [ethPrice, setEthPrice] = useState<number>(3000);
+  
+  // Promo code state
+  const [promoCode, setPromoCode] = useState('');
+  const [appliedPromo, setAppliedPromo] = useState<any>(null);
+  const [promoError, setPromoError] = useState<string | null>(null);
+  const [promoSuccess, setPromoSuccess] = useState<string | null>(null);
 
   // Load user tokens from database using Redux
   const refreshUserTokens = async () => {
@@ -192,10 +234,62 @@ export default function BoostPackCheckout() {
     );
   }, [searchQuery, userTokens]);
 
-  // Calculate pricing
-  const totalPrice = boostPack ? boostPack.priceUSD : 0;
-  const nyaxPrice = totalPrice * 0.8; // 20% discount for NYAX
+  // Promo code validation function
+  const validatePromoCode = (code: string) => {
+    const upperCode = code.toUpperCase();
+    const promo = PROMO_CODES[upperCode as keyof typeof PROMO_CODES];
+    
+    if (!promo) {
+      return { isValid: false, error: 'Invalid promo code' };
+    }
+    
+    if (!promo.isActive) {
+      return { isValid: false, error: 'Promo code is no longer active' };
+    }
+    
+    if (promo.currentUses >= promo.maxUses) {
+      return { isValid: false, error: 'Promo code has reached maximum uses' };
+    }
+    
+    return { isValid: true, promo };
+  };
+
+  const applyPromoCode = () => {
+    if (!promoCode.trim()) {
+      setPromoError('Please enter a promo code');
+      return;
+    }
+    
+    const validation = validatePromoCode(promoCode);
+    
+    if (!validation.isValid) {
+      setPromoError(validation.error || 'Invalid promo code');
+      setPromoSuccess(null);
+      setAppliedPromo(null);
+      return;
+    }
+    
+    if (validation.promo) {
+      setAppliedPromo(validation.promo);
+      setPromoError(null);
+      setPromoSuccess(`${validation.promo.description} applied!`);
+    }
+  };
+
+  const removePromoCode = () => {
+    setAppliedPromo(null);
+    setPromoCode('');
+    setPromoError(null);
+    setPromoSuccess(null);
+  };
+
+  // Calculate pricing with promo code
+  const basePrice = boostPack ? boostPack.priceUSD : 0;
+  const promoDiscount = appliedPromo ? (basePrice * appliedPromo.discount) / 100 : 0;
+  const totalPrice = Math.max(0, basePrice - promoDiscount);
+  const nyaxPrice = totalPrice * 0.8; // 20% discount for NYAX (applied after promo)
   const ethAmount = totalPrice / ethPrice;
+  const isFree = appliedPromo?.type === 'free' || totalPrice === 0;
 
   const handleTokenToggle = (tokenId: string) => {
     setSelectedTokens(prev => 
@@ -220,33 +314,36 @@ export default function BoostPackCheckout() {
     setError(null);
 
     try {
-      let txHash;
+      let txHash = null;
       
-      switch (paymentMethod) {
-        case 'eth':
-          txHash = await sendTransactionAsync({
-            to: DEFAULT_RECEIVER,
-            value: parseEther(ethAmount.toFixed(6))
-          });
-          break;
-          
-        case 'usdt':
-          txHash = await writeContractAsync({
-            abi: erc20Abi,
-            address: DEFAULT_USDT,
-            functionName: "transfer",
-            args: [DEFAULT_RECEIVER, parseUnits(totalPrice.toFixed(2), 6)]
-          });
-          break;
-          
-        case 'nyax':
-          txHash = await writeContractAsync({
-            abi: erc20Abi,
-            address: DEFAULT_NYAX,
-            functionName: "transfer",
-            args: [DEFAULT_RECEIVER, parseUnits(nyaxPrice.toFixed(6), 18)]
-          });
-          break;
+      // Skip payment if it's free (promo code makes it free)
+      if (!isFree) {
+        switch (paymentMethod) {
+          case 'eth':
+            txHash = await sendTransactionAsync({
+              to: DEFAULT_RECEIVER,
+              value: parseEther(ethAmount.toFixed(6))
+            });
+            break;
+            
+          case 'usdt':
+            txHash = await writeContractAsync({
+              abi: erc20Abi,
+              address: DEFAULT_USDT,
+              functionName: "transfer",
+              args: [DEFAULT_RECEIVER, parseUnits(totalPrice.toFixed(2), 6)]
+            });
+            break;
+            
+          case 'nyax':
+            txHash = await writeContractAsync({
+              abi: erc20Abi,
+              address: DEFAULT_NYAX,
+              functionName: "transfer",
+              args: [DEFAULT_RECEIVER, parseUnits(nyaxPrice.toFixed(6), 18)]
+            });
+            break;
+        }
       }
 
       // Apply boost to selected user-registered tokens using Redux
@@ -283,7 +380,14 @@ export default function BoostPackCheckout() {
       });
       
       console.log('Payment successful:', txHash);
-      router.push(`/pricing/boost-pack/success?pack=${packId}&tokens=${selectedTokens.join(',')}&tx=${txHash}`);
+      const params = new URLSearchParams({
+        pack: packId,
+        tokens: selectedTokens.join(','),
+        ...(txHash && { tx: txHash }),
+        ...(appliedPromo && { promo: promoCode.toUpperCase() }),
+        ...(isFree && { free: 'true' })
+      });
+      router.push(`/pricing/boost-pack/success?${params.toString()}`);
       
     } catch (error: any) {
       setError(error?.shortMessage || error?.message || 'Payment failed');
@@ -544,65 +648,177 @@ export default function BoostPackCheckout() {
                 </div>
               </div>
 
+              {/* Promo Code */}
+              <div className="bg-gradient-to-b from-white/5 to-white/[0.03] backdrop-blur-md border border-white/10 rounded-xl p-6">
+                <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                  <FaTag className="text-cyan-400" />
+                  Promo Code
+                </h3>
+                
+                {!appliedPromo ? (
+                  <div className="space-y-3">
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        placeholder="Enter promo code..."
+                        value={promoCode}
+                        onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                        className="flex-1 px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:border-cyan-500 focus:outline-none"
+                        onKeyPress={(e) => e.key === 'Enter' && applyPromoCode()}
+                      />
+                      <button
+                        onClick={applyPromoCode}
+                        className="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition-colors"
+                      >
+                        Apply
+                      </button>
+                    </div>
+                    
+                    {promoError && (
+                      <div className="text-red-400 text-sm flex items-center gap-2">
+                        <FaTimes />
+                        {promoError}
+                      </div>
+                    )}
+                    
+                    <div className="text-gray-400 text-xs">
+                      Try: FREE2024, WELCOME50, SAVE20, HOLIDAY
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <FaGift className="text-green-400" />
+                        <div>
+                          <div className="text-green-400 font-semibold">{promoCode.toUpperCase()}</div>
+                          <div className="text-green-300 text-sm">{appliedPromo.description}</div>
+                        </div>
+                      </div>
+                      <button
+                        onClick={removePromoCode}
+                        className="text-gray-400 hover:text-red-400 transition-colors"
+                      >
+                        <FaTimes />
+                      </button>
+                    </div>
+                    
+                    {promoSuccess && (
+                      <div className="text-green-400 text-sm flex items-center gap-2">
+                        <FaCheck />
+                        {promoSuccess}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
               {/* Payment Method */}
               <div className="bg-gradient-to-b from-white/5 to-white/[0.03] backdrop-blur-md border border-white/10 rounded-xl p-6">
                 <h3 className="text-lg font-bold text-white mb-4">Payment Method</h3>
                 
-                <div className="space-y-3">
-                  <button
-                    onClick={() => setPaymentMethod('eth')}
-                    className={`w-full p-3 rounded-lg border transition-colors ${
-                      paymentMethod === 'eth'
-                        ? 'border-cyan-500 bg-cyan-500/10'
-                        : 'border-gray-700 hover:border-gray-600'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <Image src="/crypto-icons/color/eth.svg" width={24} height={24} alt="ETH" />
-                        <span className="text-white">ETH</span>
-                      </div>
-                      <span className="text-gray-300">{ethAmount.toFixed(5)} ETH</span>
-                    </div>
-                  </button>
-
-                  <button
-                    onClick={() => setPaymentMethod('usdt')}
-                    className={`w-full p-3 rounded-lg border transition-colors ${
-                      paymentMethod === 'usdt'
-                        ? 'border-cyan-500 bg-cyan-500/10'
-                        : 'border-gray-700 hover:border-gray-600'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <Image src="/crypto-icons/color/usdt.svg" width={24} height={24} alt="USDT" />
-                        <span className="text-white">USDT</span>
-                      </div>
-                      <span className="text-gray-300">${totalPrice}</span>
-                    </div>
-                  </button>
-
-                  <button
-                    onClick={() => setPaymentMethod('nyax')}
-                    className={`w-full p-3 rounded-lg border transition-colors ${
-                      paymentMethod === 'nyax'
-                        ? 'border-cyan-500 bg-cyan-500/10'
-                        : 'border-gray-700 hover:border-gray-600'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <Image src="/logo.png" width={24} height={24} alt="NYAX" />
-                        <div>
-                          <span className="text-white">NYAX</span>
-                          <div className="text-green-400 text-xs">20% OFF + Bonus Points</div>
+{isFree ? (
+                  <div className="p-4 bg-green-500/10 border border-green-500/30 rounded-lg text-center">
+                    <FaGift className="text-green-400 text-2xl mx-auto mb-2" />
+                    <div className="text-green-400 font-semibold">FREE with Promo Code!</div>
+                    <div className="text-green-300 text-sm">No payment required</div>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {/* Pricing Summary */}
+                    {appliedPromo && (
+                      <div className="p-3 bg-gray-800/50 rounded-lg space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">Original Price:</span>
+                          <span className="text-gray-400 line-through">${basePrice}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-green-400">Promo Discount ({appliedPromo.discount}%):</span>
+                          <span className="text-green-400">-${promoDiscount.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between font-semibold border-t border-gray-700 pt-2">
+                          <span className="text-white">Final Price:</span>
+                          <span className="text-cyan-400">${totalPrice.toFixed(2)}</span>
                         </div>
                       </div>
-                      <span className="text-gray-300">${nyaxPrice.toFixed(2)}</span>
-                    </div>
-                  </button>
-                </div>
+                    )}
+                    
+                    <button
+                      onClick={() => setPaymentMethod('eth')}
+                      className={`w-full p-3 rounded-lg border transition-colors ${
+                        paymentMethod === 'eth'
+                          ? 'border-cyan-500 bg-cyan-500/10'
+                          : 'border-gray-700 hover:border-gray-600'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <Image src="/crypto-icons/color/eth.svg" width={24} height={24} alt="ETH" />
+                          <span className="text-white">ETH</span>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-gray-300">{ethAmount.toFixed(5)} ETH</span>
+                          {appliedPromo && (
+                            <div className="text-xs text-green-400">
+                              Was: {(basePrice / ethPrice).toFixed(5)} ETH
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={() => setPaymentMethod('usdt')}
+                      className={`w-full p-3 rounded-lg border transition-colors ${
+                        paymentMethod === 'usdt'
+                          ? 'border-cyan-500 bg-cyan-500/10'
+                          : 'border-gray-700 hover:border-gray-600'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <Image src="/crypto-icons/color/usdt.svg" width={24} height={24} alt="USDT" />
+                          <span className="text-white">USDT</span>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-gray-300">${totalPrice.toFixed(2)}</span>
+                          {appliedPromo && (
+                            <div className="text-xs text-green-400">
+                              Was: ${basePrice}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={() => setPaymentMethod('nyax')}
+                      className={`w-full p-3 rounded-lg border transition-colors ${
+                        paymentMethod === 'nyax'
+                          ? 'border-cyan-500 bg-cyan-500/10'
+                          : 'border-gray-700 hover:border-gray-600'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <Image src="/logo.png" width={24} height={24} alt="NYAX" />
+                          <div>
+                            <span className="text-white">NYAX</span>
+                            <div className="text-green-400 text-xs">20% OFF + Bonus Points</div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-gray-300">${nyaxPrice.toFixed(2)}</span>
+                          {appliedPromo && (
+                            <div className="text-xs text-green-400">
+                              Was: ${(basePrice * 0.8).toFixed(2)}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Error Display */}
@@ -619,23 +835,30 @@ export default function BoostPackCheckout() {
               <button
                 onClick={handlePayment}
                 disabled={selectedTokens.length === 0 || isProcessing}
-                className="w-full py-4 bg-gradient-to-r from-cyan-600 to-indigo-600 text-white font-bold rounded-lg hover:from-cyan-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+                className={`w-full py-4 text-white font-bold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 ${
+                  isFree 
+                    ? 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700'
+                    : 'bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-700 hover:to-indigo-700'
+                }`}
               >
                 {isProcessing ? (
                   <>
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    Processing...
+                    {isFree ? 'Claiming...' : 'Processing...'}
                   </>
                 ) : (
                   <>
-                    <FaRocket />
-                    Purchase Boost Pack
+                    {isFree ? <FaGift /> : <FaRocket />}
+                    {isFree ? 'Claim Free Boost Pack' : 'Purchase Boost Pack'}
                   </>
                 )}
               </button>
 
               <div className="text-center text-gray-400 text-xs">
-                By purchasing, you agree to apply the boost to selected tokens
+                {isFree 
+                  ? 'By claiming, you agree to apply the boost to selected tokens'
+                  : 'By purchasing, you agree to apply the boost to selected tokens'
+                }
               </div>
             </div>
           </div>
