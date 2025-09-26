@@ -44,6 +44,7 @@ export const tokenIdMap: Record<string, string> = {
   'OP': 'optimism',
   'SEI': 'sei-network',
   'SUI': 'sui',
+  // Note: NYAX may not be available on CoinGecko, will be handled by fallback logic
 };
 
 // Interface for token price data
@@ -134,7 +135,8 @@ export async function fetchTokenPairData(
     const quoteTokenId = getTokenId(quoteToken);
     
     if (!baseTokenId || !quoteTokenId) {
-      throw new Error(`Invalid token symbols: ${baseToken}/${quoteToken}`);
+      console.warn(`Token mapping not found for: ${baseToken}/${quoteToken}. Available tokens:`, Object.keys(tokenIdMap));
+      return null; // Return null instead of throwing error
     }
     
     // For most pairs, we'll use USD as the reference and calculate the pair price

@@ -96,7 +96,13 @@ export default function LeaderboardPage() {
     return points.toString();
   };
 
-  const formatAddress = (address: string) => {
+  const formatAddress = (address: string | null | undefined) => {
+    if (!address || typeof address !== 'string') {
+      return 'N/A';
+    }
+    if (address.length < 10) {
+      return address; // Return as-is if too short to truncate
+    }
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
 

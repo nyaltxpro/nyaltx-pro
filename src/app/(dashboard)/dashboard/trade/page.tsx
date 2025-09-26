@@ -580,7 +580,9 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
           }
           setError(null);
         } else if (isMounted) {
-          setError('Failed to fetch token data');
+          console.log(`CoinGecko data not available for ${baseToken}/${quoteToken}, will rely on other price sources`);
+          setPairData(null);
+          setError(null); // Don't show error, just rely on other price sources
         }
       } catch (err) {
         if (isMounted) {
