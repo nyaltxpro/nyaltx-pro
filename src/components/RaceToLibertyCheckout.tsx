@@ -140,108 +140,31 @@ export default function RaceToLibertyCheckout({ tier, amount, userTokens }: { ti
     fetchETHPriceUSD().then(setEthPrice).catch(() => setEthPrice(null));
   }, []);
 
-  // Load user's approved tokens
+  // Clear tokens when wallet disconnected
   useEffect(() => {
-    if (isConnected && address) {
-      loadUserTokens();
-    } else {
-      // Clear tokens when wallet disconnected
+    if (!isConnected) {
       setAvailableCoins([]);
       setSelectedCoin(null);
     }
-  }, [isConnected, address]);
+  }, [isConnected]);
 
-  const loadUserTokens = async () => {
-    if (!address) {
-      console.log('No wallet address provided');
-      setAvailableCoins([]);
-      return;
-    }
-
-    try {
-      console.log('Fetching tokens for address:', address);
-      
-      const response = await fetch(`/api/tokens/by-wallet?address=${encodeURIComponent(address)}`);
-      const data = await response.json();
-      
-      if (!data.success) {
-        console.error('API error:', data.error);
-        setAvailableCoins([]);
-        return;
-      }
-
-      console.log('API response:', data);
-      const allTokens = data.tokens as RegisteredToken[];
-      
-      // Filter for approved tokens only
-      const approvedTokens = allTokens.filter(token => token.status === 'approved');
-      console.log('Approved tokens:', approvedTokens);
-
-      // Convert approved tokens to coin options
-      const userCoinOptions: CoinOption[] = approvedTokens.map(token => {
-        try {
-          return {
-            id: `user-${token.id}`,
-            name: token.name || 'Unknown Token',
-            symbol: token.symbol || 'UNKNOWN',
-            logo: token.logo || '/crypto-icons/color/generic.svg',
-            basePoints: Math.round(100 * (token.boostMultiplier || 1)), // Convert multiplier to base points
-            isUserToken: true,
-            boostMultiplier: token.boostMultiplier || 1,
-            tokenId: token.id,
-          };
-        } catch (err) {
-          console.error('Error mapping token to coin option:', token, err);
-          return {
-            id: `user-${token.id || 'unknown'}`,
-            name: 'Error Token',
-            symbol: 'ERROR',
-            logo: '/crypto-icons/color/generic.svg',
-            basePoints: 100,
-            isUserToken: true,
-            boostMultiplier: 1,
-            tokenId: token.id || 'unknown',
-          };
-        }
-      });
-
-      console.log('User coin options:', userCoinOptions);
+  // Update available coins when userTokens prop changes
+  useEffect(() => {
+    if (userTokens && userTokens.length > 0) {
+      const userCoinOptions: CoinOption[] = userTokens.map(token => ({
+        id: `user-${token.id}`,
+        name: token.name || 'Unknown Token',
+        symbol: token.symbol || 'UNKNOWN',
+        logo: token.logo || '/crypto-icons/color/generic.svg',
+        basePoints: Math.round(100 * (token.boostMultiplier || 1)),
+        isUserToken: true,
+        boostMultiplier: token.boostMultiplier || 1,
+        tokenId: token.id,
+      }));
       setAvailableCoins(userCoinOptions);
-      
-    } catch (error) {
-      console.error('Error loading user tokens from API:', error);
-      
-      // Fallback to localStorage if API fails
-      try {
-        console.log('Falling back to localStorage...');
-        const storedTokens = JSON.parse(localStorage.getItem('registeredTokens') || '[]') as RegisteredToken[];
-        const approvedTokens = storedTokens.filter(
-          token => {
-            const tokenAddress = token.submittedByAddress || token.walletAddress;
-            return token.status === 'approved' && 
-              tokenAddress && address && 
-              tokenAddress.toLowerCase() === address.toLowerCase();
-          }
-        );
-        
-        const userCoinOptions: CoinOption[] = approvedTokens.map(token => ({
-          id: `user-${token.id}`,
-          name: token.name || 'Unknown Token',
-          symbol: token.symbol || 'UNKNOWN',
-          logo: token.logo || '/crypto-icons/color/generic.svg',
-          basePoints: Math.round(100 * (token.boostMultiplier || 1)),
-          isUserToken: true,
-          boostMultiplier: token.boostMultiplier || 1,
-          tokenId: token.id,
-        }));
-        
-        setAvailableCoins(userCoinOptions);
-      } catch (fallbackError) {
-        console.error('Fallback to localStorage also failed:', fallbackError);
-        setAvailableCoins([]);
-      }
     }
-  };
+  }, [userTokens]);
+
 
   // Crypto payment handlers
   const computeEthAmount = (usd: number) => {
