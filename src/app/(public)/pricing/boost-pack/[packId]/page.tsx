@@ -65,22 +65,34 @@ const PROMO_CODES = {
     description: 'Free boost pack - 100% off',
     isActive: true
   },
-  'SAVE50': { 
+  'LAUNCH10': { 
     type: 'percentage', 
-    discount: 50, 
-    description: '50% off boost pack',
+    discount: 10, 
+    description: '10% off launch special',
     isActive: true
   },
-  'WELCOME25': { 
+  'EARLY20': { 
+    type: 'percentage', 
+    discount: 20, 
+    description: '20% off early adopter discount',
+    isActive: true
+  },
+  'LIBERTY15': { 
+    type: 'percentage', 
+    discount: 15, 
+    description: '15% off Race to Liberty special',
+    isActive: true
+  },
+  'NYAX25': { 
     type: 'percentage', 
     discount: 25, 
-    description: '25% off for new users',
+    description: '25% off NYAX community discount',
     isActive: true
   },
-  'FIXED100': { 
-    type: 'fixed', 
-    discount: 100, 
-    description: '$100 off boost pack',
+  'FREEDOM30': { 
+    type: 'percentage', 
+    discount: 30, 
+    description: '30% off freedom special',
     isActive: true
   }
 };
@@ -226,7 +238,11 @@ export default function BoostPackCheckout() {
   // Promo code validation function
   const validatePromoCode = (code: string) => {
     const upperCode = code.toUpperCase();
+    console.log('Validating promo code:', upperCode);
+    console.log('Available promo codes:', Object.keys(PROMO_CODES));
+    
     const promo = PROMO_CODES[upperCode as keyof typeof PROMO_CODES];
+    console.log('Found promo:', promo);
     
     if (!promo) {
       return { isValid: false, error: 'Invalid promo code' };
@@ -785,7 +801,7 @@ export default function BoostPackCheckout() {
                     )}
                     
                     <div className="text-gray-400 text-xs">
-                      Try: FREEBOOST, SAVE50, WELCOME25, FIXED100
+                      Try: LAUNCH10, EARLY20, LIBERTY15, NYAX25, FREEDOM30, FREEBOOST
                     </div>
                   </div>
                 ) : (
