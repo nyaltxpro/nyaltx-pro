@@ -721,7 +721,7 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
                           ? formatCurrency(pairData.price, 'USD', pairData.price < 1 ? 6 : 2)
                           : '$0.00'}
                     </div>
-                    {priceSource && (
+                    {/* {priceSource && (
                       <div className={`text-xs px-2 py-1 rounded-full font-medium ${
                         priceSource === 'dexscreener' 
                           ? 'bg-blue-500/20 text-blue-400' 
@@ -732,7 +732,7 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
                         {priceSource === 'dexscreener' ? 'DexScreener' : 
                          priceSource === 'geckoterminal' ? 'GeckoTerminal' : 'CoinGecko'}
                       </div>
-                    )}
+                    )} */}
                     <button
                       onClick={handleRefreshPrice}
                       disabled={isRefreshingPrice}
