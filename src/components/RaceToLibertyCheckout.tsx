@@ -2,9 +2,10 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import Image from 'next/image';
-import { FaSearch, FaTrophy, FaCoins, FaArrowRight, FaStar } from 'react-icons/fa';
+import { FaSearch, FaTrophy, FaCoins, FaArrowRight, FaStar, FaGift } from 'react-icons/fa';
 import { useAccount, useSendTransaction, useWriteContract, useSwitchChain } from 'wagmi';
 import { parseEther, erc20Abi, parseUnits } from 'viem';
+import { useRouter } from 'next/navigation';
 import PayPalCheckout from '@/components/PayPalCheckout';
 import ConnectWalletButton from '@/components/ConnectWalletButton';
 import TokenDebugger from '@/components/TokenDebugger';
@@ -112,25 +113,18 @@ async function fetchETHPriceUSD(): Promise<number> {
   return FALLBACK_ETH_PRICE;
 }
 
-interface RaceToLibertyCheckoutProps {
-  tier: 'paddle' | 'motor' | 'helicopter';
-  amount: number;
-  onBack?: () => void;
-}
-
-export default function RaceToLibertyCheckout({ tier, amount, onBack }: RaceToLibertyCheckoutProps) {
-  const { address, isConnected, chain } = useAccount();
-  const { switchChainAsync } = useSwitchChain();
+export default function RaceToLibertyCheckout({ tier, amount, userTokens }: { tier: 'paddle' | 'motor' | 'helicopter', amount: number, userTokens: RegisteredToken[] }) {
+  const { isConnected, address, chain } = useAccount();
   const { sendTransactionAsync } = useSendTransaction();
   const { writeContractAsync } = useWriteContract();
-  
+  const { switchChainAsync } = useSwitchChain();
+  const router = useRouter();
   const [selectedCoin, setSelectedCoin] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'paypal' | 'crypto'>('paypal');
   const [email, setEmail] = useState('');
   const [agree, setAgree] = useState(true);
   const [availableCoins, setAvailableCoins] = useState<CoinOption[]>([]);
-  const [userTokens, setUserTokens] = useState<RegisteredToken[]>([]);
   const [ethPrice, setEthPrice] = useState<number | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -153,7 +147,6 @@ export default function RaceToLibertyCheckout({ tier, amount, onBack }: RaceToLi
     } else {
       // Clear tokens when wallet disconnected
       setAvailableCoins([]);
-      setUserTokens([]);
       setSelectedCoin(null);
     }
   }, [isConnected, address]);
@@ -162,7 +155,6 @@ export default function RaceToLibertyCheckout({ tier, amount, onBack }: RaceToLi
     if (!address) {
       console.log('No wallet address provided');
       setAvailableCoins([]);
-      setUserTokens([]);
       return;
     }
 
@@ -175,7 +167,6 @@ export default function RaceToLibertyCheckout({ tier, amount, onBack }: RaceToLi
       if (!data.success) {
         console.error('API error:', data.error);
         setAvailableCoins([]);
-        setUserTokens([]);
         return;
       }
 
@@ -185,8 +176,6 @@ export default function RaceToLibertyCheckout({ tier, amount, onBack }: RaceToLi
       // Filter for approved tokens only
       const approvedTokens = allTokens.filter(token => token.status === 'approved');
       console.log('Approved tokens:', approvedTokens);
-      
-      setUserTokens(approvedTokens);
 
       // Convert approved tokens to coin options
       const userCoinOptions: CoinOption[] = approvedTokens.map(token => {
@@ -235,8 +224,6 @@ export default function RaceToLibertyCheckout({ tier, amount, onBack }: RaceToLi
           }
         );
         
-        setUserTokens(approvedTokens);
-        
         const userCoinOptions: CoinOption[] = approvedTokens.map(token => ({
           id: `user-${token.id}`,
           name: token.name || 'Unknown Token',
@@ -252,7 +239,6 @@ export default function RaceToLibertyCheckout({ tier, amount, onBack }: RaceToLi
       } catch (fallbackError) {
         console.error('Fallback to localStorage also failed:', fallbackError);
         setAvailableCoins([]);
-        setUserTokens([]);
       }
     }
   };
@@ -397,6 +383,49 @@ export default function RaceToLibertyCheckout({ tier, amount, onBack }: RaceToLi
     setPromoDiscount(0);
     setPromoApplied(false);
     setPromoError(null);
+  };
+
+  // Handle free promo code claim
+  const handleFreePromoClaim = async () => {
+    if (!selectedCoin) {
+      setError('Please select a token first');
+      return;
+    }
+
+    if (!promoApplied || promoDiscount !== 1) {
+      setError('Please apply a valid free promo code first');
+      return;
+    }
+
+    setBusy('free-claim');
+    setError(null);
+
+    try {
+      // Simulate adding the token to Race to Liberty with boost points
+      const selectedCoinData = availableCoins.find(coin => coin.id === selectedCoin);
+      const basePoints = selectedCoinData?.basePoints || 100;
+      const tierMultiplier = tierInfo.multiplier;
+      const boostMultiplier = selectedCoinData?.boostMultiplier || 1;
+      const totalPoints = Math.round(basePoints * tierMultiplier * boostMultiplier);
+
+      // Log the free claim
+      console.log('Free promo claim:', {
+        tier,
+        token: selectedCoinData,
+        promoCode: promoCode.toUpperCase(),
+        totalPoints,
+        timestamp: new Date().toISOString()
+      });
+
+      // Redirect to success page with free promo parameters
+      router.push(`/pricing/race-to-liberty/success?tier=${tier}&token=${selectedCoin}&promo=${promoCode.toUpperCase()}&points=${totalPoints}&free=true`);
+      
+    } catch (error) {
+      console.error('Free claim error:', error);
+      setError('Failed to claim free boost. Please try again.');
+    } finally {
+      setBusy(null);
+    }
   };
 
   // Calculate final amount with promo discount
@@ -737,7 +766,7 @@ export default function RaceToLibertyCheckout({ tier, amount, onBack }: RaceToLi
                       {/* Available Promo Codes Hint */}
                       {!promoApplied && (
                         <div className="mt-2 text-xs text-gray-500">
-                          Try: LAUNCH10, EARLY20, LIBERTY15, NYAX25, FREEDOM30
+                          Try: FREE, LAUNCH10, EARLY20, LIBERTY15, NYAX25, FREEDOM30
                         </div>
                       )}
                     </div>
@@ -851,6 +880,49 @@ export default function RaceToLibertyCheckout({ tier, amount, onBack }: RaceToLi
                             </div>
                           </div>
                         )}
+                      </div>
+                    )}
+
+                    {/* Free Promo Code Claim Button */}
+                    {promoApplied && promoDiscount === 1 && selectedCoin && agree && (
+                      <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20 rounded-2xl p-6 backdrop-blur-sm">
+                        <div className="text-center">
+                          <div className="mb-4">
+                            <FaGift className="w-12 h-12 text-green-400 mx-auto mb-3" />
+                            <h4 className="text-xl font-bold text-green-400 mb-2">🎉 Free Race to Liberty!</h4>
+                            <p className="text-gray-300 text-sm">
+                              Your promo code "{promoCode.toUpperCase()}" gives you 100% off!
+                            </p>
+                          </div>
+                          
+                          {error && (
+                            <div className="p-3 rounded-lg bg-red-500/20 border border-red-500/30 text-red-200 text-sm mb-4">
+                              {error}
+                            </div>
+                          )}
+
+                          <button
+                            onClick={handleFreePromoClaim}
+                            disabled={busy !== null}
+                            className="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold text-lg hover:from-green-700 hover:to-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center gap-3"
+                          >
+                            {busy === 'free-claim' ? (
+                              <>
+                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                                Claiming Free Boost...
+                              </>
+                            ) : (
+                              <>
+                                <FaGift />
+                                Claim Free Race to Liberty
+                              </>
+                            )}
+                          </button>
+                          
+                          <div className="text-xs text-gray-400 text-center mt-3">
+                            No payment required with your promo code!
+                          </div>
+                        </div>
                       </div>
                     )}
                   </div>
