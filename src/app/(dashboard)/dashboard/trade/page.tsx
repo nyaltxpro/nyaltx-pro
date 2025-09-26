@@ -21,10 +21,10 @@ import {
   FaRegCopy,
   FaChevronDown,
   FaInfoCircle,
-  FaTimes,
   FaYoutube,
   FaDiscord,
-  FaGithub
+  FaGithub,
+  FaSyncAlt
 } from 'react-icons/fa';
 import Faq from '@/components/Faq';
 import { fetchTokenPairData, TokenPairData, formatCurrency, formatPercentage, getTokenId } from '@/api/coingecko/api';
@@ -120,6 +120,8 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
   const [headerImageUrl, setHeaderImageUrl] = useState<string | null>(null);
   const [dexPriceUsd, setDexPriceUsd] = useState<string | null>(null);
   const [dexChange24h, setDexChange24h] = useState<number | null>(null);
+  const [priceSource, setPriceSource] = useState<'dexscreener' | 'geckoterminal' | 'coingecko' | null>(null);
+  const [isRefreshingPrice, setIsRefreshingPrice] = useState(false);
   const [userFavorites, setUserFavorites] = useState<any[]>([]);
   const [isLoadingFavorites, setIsLoadingFavorites] = useState(false);
 
@@ -433,35 +435,92 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
     }
   }, [baseToken, chainParam, addressParam]);
 
-  // Fetch DexScreener price using chain/address (or resolved token)
-  useEffect(() => {
+  // Extract price fetching logic into a reusable function
+  const fetchPriceData = React.useCallback(async (isManualRefresh = false) => {
     let aborted = false;
-    const fetchDex = async () => {
-      try {
-        let chain = chainParam;
-        let address = addressParam;
-        if (!chain || !address) {
-          const t = resolveToken();
-          chain = chain || t?.chain;
-          address = address || t?.address;
-        }
-        if (!chain || !address) return;
-        const res = await fetch(`https://api.dexscreener.com/latest/dex/pairs/${chain}/${address}`);
-        if (!res.ok) return;
-        const data = await res.json();
-        const pair = data?.pairs?.[0];
-        if (!pair) return;
-        if (aborted) return;
-        setDexPriceUsd(pair.priceUsd || null);
-        const ch = pair?.priceChange?.h24;
-        setDexChange24h(typeof ch === 'number' ? ch : (typeof ch === 'string' ? parseFloat(ch) : null));
-      } catch (e) {
-        // ignore
+    
+    if (isManualRefresh) {
+      setIsRefreshingPrice(true);
+    }
+    
+    try {
+      // Reset price data when starting new fetch
+      setDexPriceUsd(null);
+      setDexChange24h(null);
+      setPriceSource(null);
+      
+      let chain = chainParam;
+      let address = addressParam;
+      if (!chain || !address) {
+        const t = resolveToken();
+        chain = chain || t?.chain;
+        address = address || t?.address;
       }
-    };
-    fetchDex();
+      if (!chain || !address) return;
+
+      console.log(`🔄 Fetching price for ${chain}:${address} ${isManualRefresh ? '(Manual Refresh)' : ''}`);
+
+      // Method 1: Try DexScreener first (existing method)
+      try {
+        console.log('🟦 Trying DexScreener API...');
+        const res = await fetch(`https://api.dexscreener.com/latest/dex/pairs/${chain}/${address}`);
+        if (res.ok) {
+          const data = await res.json();
+          const pair = data?.pairs?.[0];
+          if (pair && pair.priceUsd) {
+            if (aborted) return;
+            console.log('✅ DexScreener: Price found', pair.priceUsd);
+            setDexPriceUsd(pair.priceUsd);
+            setPriceSource('dexscreener');
+            const ch = pair?.priceChange?.h24;
+            setDexChange24h(typeof ch === 'number' ? ch : (typeof ch === 'string' ? parseFloat(ch) : null));
+            return; // Success, exit early
+          }
+        }
+      } catch (e) {
+        console.log('❌ DexScreener failed:', e);
+      }
+
+      // Method 2: Try GeckoTerminal as fallback
+      try {
+        console.log('🟩 Trying GeckoTerminal API...');
+        const geckoData = await geckoTerminalAPI.getTokenPrice(chain, address);
+        if (geckoData && geckoData.price_usd && geckoData.price_usd !== '0') {
+          if (aborted) return;
+          console.log('✅ GeckoTerminal: Price found', geckoData.price_usd);
+          setDexPriceUsd(geckoData.price_usd);
+          setPriceSource('geckoterminal');
+          const change24h = parseFloat(geckoData.price_change_24h);
+          setDexChange24h(isNaN(change24h) ? null : change24h);
+          return; // Success, exit early
+        }
+      } catch (e) {
+        console.log('❌ GeckoTerminal failed:', e);
+      }
+
+      // Method 3: If both fail, the existing CoinGecko fallback in pairData will be used
+      console.log('⚠️ All price APIs failed, falling back to CoinGecko pair data');
+
+    } catch (e) {
+      console.error('💥 Price fetching error:', e);
+    } finally {
+      if (isManualRefresh) {
+        setIsRefreshingPrice(false);
+      }
+    }
+
     return () => { aborted = true; };
   }, [chainParam, addressParam, resolveToken]);
+
+  // Manual refresh function
+  const handleRefreshPrice = () => {
+    fetchPriceData(true);
+  };
+
+  // Fetch price data with multiple fallbacks: DexScreener -> GeckoTerminal -> CoinGecko
+  useEffect(() => {
+    fetchPriceData();
+  }, [fetchPriceData]);
 
   // Build dexscreener embed URL for token address
   const buildDexUrl = React.useCallback(() => {
@@ -503,6 +562,10 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
 
         if (isMounted && data) {
           setPairData(data);
+          // Only set CoinGecko as source if no other price source is available
+          if (!dexPriceUsd) {
+            setPriceSource('coingecko');
+          }
           setError(null);
         } else if (isMounted) {
           setError('Failed to fetch token data');
@@ -678,6 +741,30 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
                           ? formatCurrency(pairData.price, 'USD', pairData.price < 1 ? 6 : 2)
                           : '$0.00'}
                     </div>
+                    {priceSource && (
+                      <div className={`text-xs px-2 py-1 rounded-full font-medium ${
+                        priceSource === 'dexscreener' 
+                          ? 'bg-blue-500/20 text-blue-400' 
+                          : priceSource === 'geckoterminal'
+                          ? 'bg-green-500/20 text-green-400'
+                          : 'bg-purple-500/20 text-purple-400'
+                      }`}>
+                        {priceSource === 'dexscreener' ? 'DexScreener' : 
+                         priceSource === 'geckoterminal' ? 'GeckoTerminal' : 'CoinGecko'}
+                      </div>
+                    )}
+                    <button
+                      onClick={handleRefreshPrice}
+                      disabled={isRefreshingPrice}
+                      className={`p-1 rounded-full transition-all duration-200 ${
+                        isRefreshingPrice 
+                          ? 'text-gray-500 cursor-not-allowed' 
+                          : 'text-gray-400 hover:text-[#00b8d8] hover:bg-[#00b8d8]/10'
+                      }`}
+                      title="Refresh price data"
+                    >
+                      <FaSyncAlt className={`text-sm ${isRefreshingPrice ? 'animate-spin' : ''}`} />
+                    </button>
                     <FaInfoCircle className="text-gray-500" />
                   </div>
                   <div className={`${(dexChange24h ?? pairData?.priceChangePercentage24h ?? 0) >= 0 ? 'text-green-500' : 'text-red-500'} text-sm`}>
@@ -997,9 +1084,9 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
                 <button className="p-2 text-gray-400 hover:text-white">
                   <FaChartBar size={18} />
                 </button>
-                <button className="p-2 text-gray-400 hover:text-white">
+                {/* <button className="p-2 text-gray-400 hover:text-white">
                   <FaTimes size={18} />
-                </button>
+                </button> */}
               </div>
             </div>
 
@@ -1151,12 +1238,13 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
           </div>
         </div>
       </div>
+
+
       <Toaster
         position="top-right"
         toastOptions={{
-          duration: 3000,
           style: {
-            background: '#1a2932',
+            background: '#1f2937',
             color: '#fff',
             border: '1px solid #374151',
           },
