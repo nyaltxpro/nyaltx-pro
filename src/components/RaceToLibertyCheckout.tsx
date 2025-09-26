@@ -493,7 +493,7 @@ export default function RaceToLibertyCheckout({ tier, amount, userTokens }: { ti
           {/* Modern Header */}
           <div className="mb-12">
             <button
-              onClick={onBack}
+              onClick={() => router.back()}
               className="mb-6 group flex items-center gap-2 text-gray-400 hover:text-white transition-all duration-300 hover:translate-x-1"
             >
               <div className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center group-hover:bg-white/20 transition-colors">
