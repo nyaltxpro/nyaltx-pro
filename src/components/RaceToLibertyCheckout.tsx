@@ -79,6 +79,7 @@ const FALLBACK_ETH_PRICE = process.env.NEXT_PUBLIC_FALLBACK_ETH_PRICE ? Number(p
 
 // Promo codes configuration
 const PROMO_CODES = {
+  'FREE': { discount: 1, description: '100% Launch Discount' },
   'LAUNCH10': { discount: 0.1, description: '10% Launch Discount' },
   'EARLY20': { discount: 0.2, description: '20% Early Bird Discount' },
   'LIBERTY15': { discount: 0.15, description: '15% Liberty Special' },
