@@ -885,7 +885,7 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
               >
                 Trades
               </button>
-              <button
+              {/* <button
                 className={`px-6 py-3 text-sm font-medium ${activeTab === 'info'
                   ? 'text-blue-400 border-b-2 border-blue-400'
                   : 'text-gray-400 hover:text-gray-300'
@@ -902,7 +902,7 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
                 onClick={() => setActiveTab('analytics')}
               >
                 Analytics
-              </button>
+              </button> */}
             </div>
 
             {activeTab === 'trades' && (
