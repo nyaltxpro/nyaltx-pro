@@ -28,7 +28,7 @@ import {
 } from 'react-icons/fa';
 import Faq from '@/components/Faq';
 import { fetchTokenPairData, TokenPairData, formatCurrency, formatPercentage, getTokenId } from '@/api/coingecko/api';
-import { getCryptoIconUrl } from '@/utils/cryptoIcons';
+import { getCryptoIconUrl, getCryptoIconUrlWithFallback } from '@/utils/cryptoIcons';
 import { getCryptoName } from '@/utils/cryptoNames';
 import { geckoTerminalAPI } from '@/utils/geckoTerminalApi';
 import nyaxTokensData from '../../../../../nyax-tokens-data.json';
@@ -415,24 +415,56 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
     return mapping[key];
   };
 
-  // Resolve NYAX image URL for the current token
+  // Resolve NYAX image URL for the current token with GeckoTerminal fallback
   useEffect(() => {
-    try {
-      const nyaxList = (nyaxTokensData as any).tokens as Array<{ symbol?: string; network?: string; contractAddress?: string; logo?: string }>;
-      if (!nyaxList || nyaxList.length === 0) return;
-      let found: any = null;
-      if (addressParam) {
-        const lower = addressParam.toLowerCase();
-        found = nyaxList.find(t => (t.contractAddress || '').toLowerCase() === lower);
+    const fetchHeaderImage = async () => {
+      try {
+        const nyaxList = (nyaxTokensData as any).tokens as Array<{ symbol?: string; network?: string; contractAddress?: string; logo?: string }>;
+        if (nyaxList && nyaxList.length > 0) {
+          let found: any = null;
+          if (addressParam) {
+            const lower = addressParam.toLowerCase();
+            found = nyaxList.find(t => (t.contractAddress || '').toLowerCase() === lower);
+          }
+          if (!found) {
+            const desiredChain = chainParam;
+            found = nyaxList.find(t => (t.symbol || '').toUpperCase() === baseToken.toUpperCase() && (!desiredChain || mapNetworkToChain(t.network) === desiredChain));
+          }
+          
+          // If found in local data, use that
+          if (found?.logo) {
+            setHeaderImageUrl(found.logo);
+            return;
+          }
+        }
+        
+        // Try GeckoTerminal fallback if we have chain and address
+        if (chainParam && addressParam) {
+          console.log(`🔍 Trade Page: Trying GeckoTerminal for token icon ${baseToken}`);
+          try {
+            const iconUrl = await getCryptoIconUrlWithFallback(baseToken, chainParam, addressParam);
+            if (iconUrl && !iconUrl.includes('/crypto-icons/')) {
+              console.log(`✅ Trade Page: Using GeckoTerminal icon for ${baseToken}:`, iconUrl);
+              setHeaderImageUrl(iconUrl);
+              return;
+            }
+          } catch (error) {
+            console.warn('Failed to get icon from GeckoTerminal:', error);
+          }
+        }
+        
+        // Fallback to local crypto icons
+        const fallbackIcon = getCryptoIconUrl(baseToken);
+        setHeaderImageUrl(fallbackIcon);
+        
+      } catch (e) {
+        console.warn('Error fetching header image:', e);
+        // Final fallback
+        setHeaderImageUrl(getCryptoIconUrl(baseToken));
       }
-      if (!found) {
-        const desiredChain = chainParam;
-        found = nyaxList.find(t => (t.symbol || '').toUpperCase() === baseToken.toUpperCase() && (!desiredChain || mapNetworkToChain(t.network) === desiredChain));
-      }
-      setHeaderImageUrl(found?.logo || null);
-    } catch (e) {
-      // ignore
-    }
+    };
+
+    fetchHeaderImage();
   }, [baseToken, chainParam, addressParam]);
 
   // Extract price fetching logic into a reusable function

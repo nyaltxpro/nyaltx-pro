@@ -32,13 +32,12 @@ const ccLogoMap: Record<string, string> = {
   'OP': 'optimism',
   'RON': 'ronin',
   'SEI': 'sei',
-  'SUI': 'sui',
   'XAI': 'xai'
 };
 
 /**
  * Get the URL for a cryptocurrency icon
- * @param symbol The cryptocurrency symbol (e.g., 'BTC', 'ETH')
+ * @param symbol - The cryptocurrency symbol (e.g., 'BTC', 'ETH')
  * @returns The URL to the icon
  */
 export function getCryptoIconUrl(symbol: string): string {
@@ -60,6 +59,43 @@ export function getCryptoIconUrl(symbol: string): string {
   
   // Fallback to the cryptocurrency-icons package
   return `/crypto-icons/color/${normalizedSymbol}.svg`;
+}
+
+/**
+ * Get the URL for a cryptocurrency icon with GeckoTerminal API fallback
+ * @param symbol - The cryptocurrency symbol (e.g., 'BTC', 'ETH')
+ * @param network - The network/chain (e.g., 'ethereum', 'bsc')
+ * @param address - The contract address (optional)
+ * @returns Promise<string> - The URL to the icon
+ */
+export async function getCryptoIconUrlWithFallback(
+  symbol: string, 
+  network?: string, 
+  address?: string
+): Promise<string> {
+  // First try the local icons
+  const localIconUrl = getCryptoIconUrl(symbol);
+  
+  // If we have network and address, try to get from GeckoTerminal
+  if (network && address) {
+    try {
+      // Dynamic import to avoid circular dependencies
+      const { geckoTerminalAPI } = await import('./geckoTerminalApi');
+      
+      console.log(`🔍 Trying to get icon from GeckoTerminal for ${symbol} on ${network}`);
+      const metadata = await geckoTerminalAPI.getTokenMetadata(network, address);
+      
+      if (metadata?.image_url) {
+        console.log(`✅ Found GeckoTerminal icon for ${symbol}:`, metadata.image_url);
+        return metadata.image_url;
+      }
+    } catch (error) {
+      console.warn('Failed to fetch icon from GeckoTerminal:', error);
+    }
+  }
+  
+  // Return local icon as fallback
+  return localIconUrl;
 }
 
 /**

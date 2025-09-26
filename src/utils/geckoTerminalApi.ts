@@ -301,6 +301,90 @@ class GeckoTerminalAPI {
   getSupportedNetworks(): string[] {
     return Object.keys(this.NETWORK_MAPPING);
   }
+
+  // Get token metadata including image URL
+  async getTokenMetadata(network: string, address: string): Promise<{
+    name: string;
+    symbol: string;
+    image_url: string | null;
+    coingecko_coin_id: string | null;
+  } | null> {
+    try {
+      console.log(`🔍 GeckoTerminal: Getting metadata for ${network}:${address}`);
+      
+      // Map network name
+      const geckoNetwork = this.mapNetworkName(network);
+      if (!geckoNetwork) {
+        console.warn(`❌ Unsupported network for GeckoTerminal metadata: ${network}`);
+        return null;
+      }
+
+      const cacheKey = this.getCacheKey(geckoNetwork, address);
+      
+      // Check cache first
+      const cachedData = this.getCachedData(cacheKey);
+      if (cachedData) {
+        console.log(`✅ GeckoTerminal: Using cached metadata for ${geckoNetwork}:${address}`);
+        return {
+          name: cachedData.attributes.name,
+          symbol: cachedData.attributes.symbol,
+          image_url: cachedData.attributes.image_url,
+          coingecko_coin_id: cachedData.attributes.coingecko_coin_id
+        };
+      }
+
+      // Check rate limiting
+      if (this.isRateLimited()) {
+        console.warn('GeckoTerminal: Rate limited, skipping metadata request');
+        return null;
+      }
+
+      // Record the request
+      this.recordRequest();
+
+      const url = `${this.BASE_URL}/networks/${geckoNetwork}/tokens/${address.toLowerCase()}`;
+      console.log(`GeckoTerminal: Fetching metadata from ${url}`);
+
+      const response = await fetch(url, {
+        headers: {
+          'Accept': 'application/json',
+          'User-Agent': 'NYALTX-Trading-Platform/1.0'
+        }
+      });
+
+      if (!response.ok) {
+        if (response.status === 429) {
+          console.warn('GeckoTerminal: Rate limited by server');
+        }
+        console.warn(`GeckoTerminal metadata API returned ${response.status}: ${response.statusText}`);
+        return null;
+      }
+
+      const data: GeckoTerminalResponse = await response.json();
+      
+      if (!data.data || !data.data.attributes) {
+        console.warn('GeckoTerminal: Invalid metadata response format');
+        return null;
+      }
+
+      // Cache the data
+      this.setCachedData(cacheKey, data.data);
+
+      const result = {
+        name: data.data.attributes.name,
+        symbol: data.data.attributes.symbol,
+        image_url: data.data.attributes.image_url,
+        coingecko_coin_id: data.data.attributes.coingecko_coin_id
+      };
+
+      console.log('✅ GeckoTerminal: Metadata found:', result);
+      return result;
+
+    } catch (error) {
+      console.error('GeckoTerminal metadata error:', error);
+      return null;
+    }
+  }
 }
 
 // Export singleton instance
