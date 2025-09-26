@@ -3,7 +3,7 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import PublicHeader from '@/components/PublicHeader';
-import { FaCheck, FaRocket, FaCoins, FaArrowRight, FaHome } from 'react-icons/fa';
+import { FaCheck, FaRocket, FaCoins, FaArrowRight, FaHome, FaGift, FaTag } from 'react-icons/fa';
 import Image from 'next/image';
 
 const BOOST_PACKS = {
@@ -52,6 +52,9 @@ function BoostPackSuccessContent() {
   const packId = searchParams.get('pack') as keyof typeof BOOST_PACKS;
   const tokenIds = searchParams.get('tokens')?.split(',') || [];
   const txHash = searchParams.get('tx');
+  const promoCode = searchParams.get('promo');
+  const discountAmount = searchParams.get('discount');
+  const isFree = searchParams.get('free') === 'true';
 
   const boostPack = BOOST_PACKS[packId];
 
@@ -88,12 +91,23 @@ function BoostPackSuccessContent() {
             </div>
             
             <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-emerald-400 mb-4">
-              Boost Pack Purchased Successfully!
+              {isFree ? 'Free Boost Pack Claimed Successfully!' : 'Boost Pack Purchased Successfully!'}
             </h1>
             
             <p className="text-gray-300 text-lg">
-              Your tokens have been boosted and are now climbing the leaderboard
+              {isFree 
+                ? 'Your tokens have been boosted for free and are now climbing the leaderboard!'
+                : 'Your tokens have been boosted and are now climbing the leaderboard'
+              }
             </p>
+            
+            {promoCode && (
+              <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-green-500/20 border border-green-500/30 rounded-full">
+                <FaTag className="text-green-400" />
+                <span className="text-green-400 font-semibold">Promo Code: {promoCode}</span>
+                {isFree && <FaGift className="text-yellow-400" />}
+              </div>
+            )}
           </div>
 
           {/* Purchase Summary */}
@@ -123,6 +137,14 @@ function BoostPackSuccessContent() {
                     <span className="text-gray-400">Tokens Boosted:</span>
                     <span className="text-white font-semibold">{tokenIds.length}</span>
                   </div>
+                  {promoCode && discountAmount && (
+                    <div className="flex justify-between">
+                      <span className="text-green-400">Discount Applied:</span>
+                      <span className="text-green-400 font-semibold">
+                        {isFree ? 'FREE' : `-$${discountAmount}`}
+                      </span>
+                    </div>
+                  )}
                   <div className="flex justify-between border-t border-gray-700 pt-3">
                     <span className="text-gray-400">Total Boost Applied:</span>
                     <span className="text-green-400 font-bold text-lg">
@@ -168,16 +190,30 @@ function BoostPackSuccessContent() {
           </div>
 
           {/* Transaction Details */}
-          {txHash && (
+          {(txHash || isFree) && (
             <div className="bg-gradient-to-b from-white/5 to-white/[0.03] backdrop-blur-md border border-white/10 rounded-xl p-6 mb-8">
-              <h3 className="text-lg font-bold text-white mb-3">Transaction Details</h3>
+              <h3 className="text-lg font-bold text-white mb-3">
+                {isFree ? 'Promo Code Details' : 'Transaction Details'}
+              </h3>
               <div className="flex items-center gap-3 p-3 bg-gray-800/50 rounded-lg">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <div className={`w-2 h-2 rounded-full animate-pulse ${isFree ? 'bg-yellow-500' : 'bg-green-500'}`}></div>
                 <div>
-                  <div className="text-gray-400 text-sm">Transaction Hash:</div>
-                  <div className="text-white font-mono text-sm break-all">
-                    {txHash}
-                  </div>
+                  {isFree ? (
+                    <>
+                      <div className="text-gray-400 text-sm">Free Promo Code Applied:</div>
+                      <div className="text-white font-semibold text-sm flex items-center gap-2">
+                        <FaGift className="text-yellow-400" />
+                        {promoCode} - 100% Discount
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="text-gray-400 text-sm">Transaction Hash:</div>
+                      <div className="text-white font-mono text-sm break-all">
+                        {txHash}
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -229,7 +265,12 @@ function BoostPackSuccessContent() {
           {/* Footer Message */}
           <div className="text-center mt-12">
             <p className="text-gray-400">
-              Thank you for choosing NYALTX Boost Packs! Your tokens are now supercharged. 🚀
+              {isFree 
+                ? `Thank you for using promo code ${promoCode}! Your tokens are now supercharged for free. 🎉`
+                : promoCode 
+                  ? `Thank you for choosing NYALTX Boost Packs! You saved with promo code ${promoCode}. Your tokens are now supercharged. 🚀`
+                  : 'Thank you for choosing NYALTX Boost Packs! Your tokens are now supercharged. 🚀'
+              }
             </p>
           </div>
         </div>
