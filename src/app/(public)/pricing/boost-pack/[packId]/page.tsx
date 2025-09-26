@@ -107,6 +107,34 @@ const TOKEN_CATEGORIES = {
   ai: { name: 'AI', multiplier: 1.5, color: 'text-cyan-400' }
 };
 
+// Update token points in database via API
+const updateTokenPoints = async (tokenId: string, points: number) => {
+  try {
+    const response = await fetch('/api/admin/tokens/points', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        tokenId,
+        points
+      })
+    });
+
+    const data = await response.json();
+    if (data.success) {
+      console.log(`Successfully updated ${tokenId} with ${points} points in database`);
+      return true;
+    } else {
+      console.error('Failed to update token points:', data.error);
+      return false;
+    }
+  } catch (error) {
+    console.error('Error updating token points:', error);
+    return false;
+  }
+};
+
 // Fetch user's registered and approved tokens from database
 const fetchUserRegisteredTokens = async (walletAddress: string) => {
   try {
@@ -129,6 +157,7 @@ const fetchUserRegisteredTokens = async (walletAddress: string) => {
         balance: Math.floor(Math.random() * 1000000) + 10000, // Mock balance
         logo: token.imageUri || `/crypto-icons/color/${token.tokenSymbol.toLowerCase()}.svg`,
         currentBoost: tokenBoosts[token.id] || 0,
+        points: token.points || 0, // Current points from database
         isRegistered: true,
         category: token.category || 'defi',
         blockchain: token.blockchain || 'ethereum',
@@ -346,14 +375,39 @@ export default function BoostPackCheckout() {
         // Apply boost to selected tokens without payment
         const selectedTokenData = userTokens.filter(token => selectedTokens.includes(token.id));
         
-        selectedTokenData.forEach(token => {
+        // Update points in database for each selected token
+        const pointsUpdatePromises = selectedTokenData.map(async (token) => {
           const baseBoost = boostPack.points;
           const categoryMultiplier = token.multiplier || 1.0;
           const finalBoost = Math.floor(baseBoost * categoryMultiplier);
           
-          dispatch(addTokenBoost({ tokenId: token.id, points: finalBoost }));
-          console.log(`Applied ${finalBoost} boost points to ${token.symbol || token.tokenSymbol} (${token.name || token.tokenName}) - FREE PROMO`);
+          // Get current points from token
+          const currentPoints = (token as any).points || 0;
+          const newTotalPoints = currentPoints + finalBoost;
+          
+          // Update points in database via API
+          const success = await updateTokenPoints(token.id, newTotalPoints);
+          
+          if (success) {
+            // Also update Redux store for immediate UI feedback
+            dispatch(addTokenBoost({ tokenId: token.id, points: finalBoost }));
+            console.log(`Applied ${finalBoost} boost points to ${token.symbol || token.tokenSymbol} (${token.name || token.tokenName}) - FREE PROMO. New total: ${newTotalPoints}`);
+          } else {
+            console.error(`Failed to update points for ${token.symbol || token.tokenSymbol} - FREE PROMO`);
+          }
+          
+          return success;
         });
+        
+        // Wait for all points updates to complete
+        const updateResults = await Promise.all(pointsUpdatePromises);
+        const successfulUpdates = updateResults.filter(result => result).length;
+        
+        if (successfulUpdates === 0) {
+          throw new Error('Failed to update points for any tokens with free promo code');
+        } else if (successfulUpdates < selectedTokenData.length) {
+          console.warn(`Only ${successfulUpdates}/${selectedTokenData.length} tokens were updated successfully with free promo`);
+        }
         
         dispatch(saveTokenBoostsToStorage());
         await refreshUserTokens();
@@ -391,22 +445,44 @@ export default function BoostPackCheckout() {
           break;
       }
 
-      // Apply boost to selected user-registered tokens using Redux
+      // Apply boost to selected user-registered tokens
       const selectedTokenData = userTokens.filter(token => selectedTokens.includes(token.id));
       
-      // Update boost points for each selected token
-      selectedTokenData.forEach(token => {
+      // Update boost points for each selected token in database
+      const pointsUpdatePromises = selectedTokenData.map(async (token) => {
         const baseBoost = boostPack.points;
         const categoryMultiplier = token.multiplier || 1.0;
         const finalBoost = Math.floor(baseBoost * categoryMultiplier);
         
-        // Dispatch Redux action to add token boost
-        dispatch(addTokenBoost({ tokenId: token.id, points: finalBoost }));
+        // Get current points from token
+        const currentPoints = (token as any).points || 0;
+        const newTotalPoints = currentPoints + finalBoost;
         
-        console.log(`Applied ${finalBoost} boost points to ${token.symbol || token.tokenSymbol} (${token.name || token.tokenName})`);
+        // Update points in database via API
+        const success = await updateTokenPoints(token.id, newTotalPoints);
+        
+        if (success) {
+          // Also update Redux store for immediate UI feedback
+          dispatch(addTokenBoost({ tokenId: token.id, points: finalBoost }));
+          console.log(`Applied ${finalBoost} boost points to ${token.symbol || token.tokenSymbol} (${token.name || token.tokenName}). New total: ${newTotalPoints}`);
+        } else {
+          console.error(`Failed to update points for ${token.symbol || token.tokenSymbol}`);
+        }
+        
+        return success;
       });
       
-      // Save token boosts to localStorage via Redux
+      // Wait for all points updates to complete
+      const updateResults = await Promise.all(pointsUpdatePromises);
+      const successfulUpdates = updateResults.filter(result => result).length;
+      
+      if (successfulUpdates === 0) {
+        throw new Error('Failed to update points for any tokens');
+      } else if (successfulUpdates < selectedTokenData.length) {
+        console.warn(`Only ${successfulUpdates}/${selectedTokenData.length} tokens were updated successfully`);
+      }
+      
+      // Save token boosts to localStorage via Redux (for UI consistency)
       dispatch(saveTokenBoostsToStorage());
       
       // Refresh token list to show updated boost values
