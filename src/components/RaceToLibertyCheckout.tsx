@@ -62,9 +62,10 @@ interface CoinOption {
 }
 
 const TIER_MULTIPLIERS = {
-  paddle: { name: 'Paddle Boat', multiplier: 1, duration: '1 week' },
-  motor: { name: 'Motor Boat', multiplier: 2, duration: '1 month' },
-  helicopter: { name: 'Helicopter', multiplier: 3, duration: '3 months' },
+  kayak: { name: 'Kayak', multiplier: 0.5, duration: '3 days' },
+  speedboat: { name: 'Speed Boat', multiplier: 1, duration: '1 week' },
+  helicopter: { name: 'Helicopter', multiplier: 2, duration: '1 month' },
+  submarine: { name: 'Submarine', multiplier: 3, duration: '3 months' },
 };
 
 // Payment configuration
@@ -113,7 +114,7 @@ async function fetchETHPriceUSD(): Promise<number> {
   return FALLBACK_ETH_PRICE;
 }
 
-export default function RaceToLibertyCheckout({ tier, amount, userTokens }: { tier: 'paddle' | 'motor' | 'helicopter', amount: number, userTokens: RegisteredToken[] }) {
+export default function RaceToLibertyCheckout({ tier, amount, userTokens }: { tier: 'kayak' | 'speedboat' | 'helicopter' | 'submarine', amount: number, userTokens: RegisteredToken[] }) {
   const { isConnected, address, chain } = useAccount();
   const { sendTransactionAsync } = useSendTransaction();
   const { writeContractAsync } = useWriteContract();

@@ -315,7 +315,7 @@ export default function PricingPage() {
             <h3 className="text-xl font-semibold mb-1">NyaltxPro Membership</h3>
             <p className="text-gray-400 text-sm mb-4">Unlock your project profile on NYALTX.</p>
             <div className="mb-4">
-              <div className="text-3xl font-bold">$200</div>
+              <div className="text-3xl font-bold">$199</div>
             </div>
             <ul className="text-sm text-gray-300 space-y-1 mb-4 list-disc pl-5">
               <li>Dedicated project profile page</li>
@@ -334,20 +334,20 @@ export default function PricingPage() {
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a9.124 9.124 0 0 1-.077.437c-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287z"/>
                   </svg>
-                  Register Token & Pay $200 with PayPal
+                  Register Token & Pay $199 with PayPal
                 </span>
               </button>
               <button
                 onClick={() => router.push(`/dashboard/register-token?redirect=pricing/checkout/nyaltxpro&method=eth`)}
                 className="w-full py-2 rounded-lg border border-zinc-600 text-white font-medium hover:bg-indigo-500"
               >
-                <span className="inline-flex items-center gap-2"><Image src="/crypto-icons/color/eth.svg" width={16} height={16} alt="eth"/> Register Token & Pay $200 with ETH</span>
+                <span className="inline-flex items-center gap-2"><Image src="/crypto-icons/color/eth.svg" width={16} height={16} alt="eth"/> Register Token & Pay $199 with ETH</span>
               </button>
               <button
                 onClick={() => router.push(`/dashboard/register-token?redirect=pricing/checkout/nyaltxpro&method=usdt`)}
                 className="w-full py-2 rounded-lg border border-zinc-600 text-white font-medium hover:bg-emerald-500"
               >
-                <span className="inline-flex items-center gap-2"><Image src="/crypto-icons/color/usdt.svg" width={16} height={16} alt="usdt"/> Register Token & Pay $200 with USDT</span>
+                <span className="inline-flex items-center gap-2"><Image src="/crypto-icons/color/usdt.svg" width={16} height={16} alt="usdt"/> Register Token & Pay $199 with USDT</span>
               </button>
               <button
                 onClick={() => router.push(`/dashboard/register-token?redirect=pricing/checkout/nyaltxpro&method=nyax`)}

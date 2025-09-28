@@ -8,7 +8,7 @@ export interface BoostPoints {
   decayRate: number; // Points lost per hour
   isActive: boolean;
   transactionHash?: string;
-  boostPackType: 'paddle' | 'motor' | 'helicopter';
+  boostPackType: 'kayak' | 'starter' | 'growth' | 'pro' | 'elite';
 }
 
 export interface WeeklyWinner {
@@ -41,7 +41,7 @@ export interface LeaderboardEntry {
 }
 
 export interface BoostPack {
-  id: 'paddle' | 'motor' | 'helicopter';
+  id: 'kayak' | 'starter' | 'growth' | 'pro' | 'elite';
   name: string;
   basePoints: number;
   duration: string;
@@ -52,7 +52,7 @@ export interface BoostPack {
     nyax: number; // 20% discount
   };
   features: string[];
-  decayHours: number; // 24, 36, or 48 hours
+  decayHours: number; // 6, 24, 36, or 48 hours
 }
 
 export interface SocialAnnouncement {

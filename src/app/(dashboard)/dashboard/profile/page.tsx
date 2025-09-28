@@ -10,6 +10,7 @@ import { BsGrid3X3Gap, BsHeart, BsClockHistory, BsCoin } from 'react-icons/bs';
 import { RiExchangeFill } from 'react-icons/ri';
 import ConnectWalletButton from '../../../../components/ConnectWalletButton';
 import SocialLinksEditor from '../../../../components/SocialLinksEditor';
+import ProfileBoostSelector from '../../../../components/ProfileBoostSelector';
 
 export default function ProfilePage() {
   const { isConnected: isWagmiConnected, address } = useAccount();
@@ -287,6 +288,12 @@ export default function ProfilePage() {
           className={`px-4 py-3 font-medium text-sm whitespace-nowrap ${activeTab === 'activity' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-gray-400 hover:text-gray-300'}`}
         >
           Activity
+        </button>
+        <button
+          onClick={() => setActiveTab('boost')}
+          className={`px-4 py-3 font-medium text-sm whitespace-nowrap ${activeTab === 'boost' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-gray-400 hover:text-gray-300'}`}
+        >
+          Profile Boost
         </button>
       </div>
       

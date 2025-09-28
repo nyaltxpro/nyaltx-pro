@@ -240,7 +240,7 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
           value: parseEther(ethAmount)
         });
       } else if (token === 'USDT') {
-        // Send USDT equivalent (assuming $200 worth)
+        // Send USDT equivalent (assuming $199 worth)
         const usdtAmount = total.toString();
         txHash = await writeContractAsync({
           abi: erc20Abi,

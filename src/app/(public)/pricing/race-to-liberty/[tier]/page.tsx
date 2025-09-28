@@ -6,18 +6,19 @@ import { useAccount } from 'wagmi';
 import { RegisteredToken } from '@/types/token';
 
 const TIER_PRICES = {
-  paddle: 300,
-  motor: 500,
-  helicopter: 700,
+  kayak: 1,
+  speedboat: 199,
+  helicopter: 349,
+  submarine: 599,
 };
 
 export default function RaceToLibertyPage({ 
   params 
 }: { 
-  params: Promise<{ tier: 'paddle' | 'motor' | 'helicopter' }>;
+  params: Promise<{ tier: 'kayak' | 'speedboat' | 'helicopter' | 'submarine' }>;
 }) {
   const { tier } = use(params);
-  const amount = TIER_PRICES[tier] || 300;
+  const amount = TIER_PRICES[tier] || 199;
   const { address, isConnected } = useAccount();
   const [userTokens, setUserTokens] = useState<RegisteredToken[]>([]);
 

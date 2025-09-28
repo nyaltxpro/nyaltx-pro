@@ -2,34 +2,33 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { FaRocket, FaFire, FaClock, FaCoins, FaTwitter, FaTelegram, FaMicrophone } from 'react-icons/fa';
+import { FaRocket, FaFire, FaClock, FaCoins, FaTwitter, FaTelegram, FaMicrophone, FaStar, FaCrown } from 'react-icons/fa';
 import { useAccount, useSendTransaction, useWriteContract, useSwitchChain } from 'wagmi';
 import { parseEther, erc20Abi, parseUnits } from 'viem';
-import { BoostPack } from '@/types/gamification';
 
-interface BoostPackSelectorProps {
-  tokenId: string;
-  tokenName: string;
-  tokenSymbol: string;
+interface ProfileBoostPack {
+  id: 'starter' | 'growth' | 'pro' | 'elite';
+  name: string;
+  basePoints: number;
+  duration: string;
+  price: {
+    usd: number;
+    eth: number;
+    usdc: number;
+    nyax: number; // 20% discount
+  };
+  features: string[];
+  decayHours: number;
+}
+
+interface ProfileBoostSelectorProps {
+  profileAddress: string;
+  profileName?: string;
   onBoostSuccess?: (boostData: any) => void;
   className?: string;
 }
 
-const BOOST_PACKS: BoostPack[] = [
-  {
-    id: 'kayak',
-    name: 'Kayak',
-    basePoints: 25,
-    duration: '6 hours',
-    price: { usd: 1, eth: 0.0003, usdc: 1, nyax: 0.8 },
-    features: [
-      '25 Boost Points',
-      '6h visibility boost',
-      'Entry-level leaderboard placement',
-      'Points decay over 6h'
-    ],
-    decayHours: 6
-  },
+const PROFILE_BOOST_PACKS: ProfileBoostPack[] = [
   {
     id: 'starter',
     name: 'Starter Boost',
@@ -38,10 +37,10 @@ const BOOST_PACKS: BoostPack[] = [
     price: { usd: 199, eth: 0.066, usdc: 199, nyax: 159 },
     features: [
       '200 Boost Points',
-      '1 week visibility boost',
-      'Basic leaderboard placement',
+      '1 week profile visibility',
+      'Enhanced profile placement',
       'Social media eligibility',
-      'Points decay over 7 days'
+      'Profile badge upgrade'
     ],
     decayHours: 168
   },
@@ -53,11 +52,11 @@ const BOOST_PACKS: BoostPack[] = [
     price: { usd: 399, eth: 0.133, usdc: 399, nyax: 319 },
     features: [
       '500 Boost Points',
-      '2 weeks visibility boost',
-      'Enhanced leaderboard placement',
+      '2 weeks profile visibility',
+      'Premium profile placement',
       'Social media priority',
       'Cross-promotion eligibility',
-      'Points decay over 14 days'
+      'Featured profile badge'
     ],
     decayHours: 336
   },
@@ -69,12 +68,12 @@ const BOOST_PACKS: BoostPack[] = [
     price: { usd: 599, eth: 0.2, usdc: 599, nyax: 479 },
     features: [
       '1000 Boost Points',
-      '1 month visibility boost',
-      'Featured leaderboard placement',
+      '1 month profile visibility',
+      'Featured profile placement',
       'Premium social media priority',
       'Cross-promotion eligibility',
       'Priority support',
-      'Points decay over 30 days'
+      'Pro profile badge'
     ],
     decayHours: 720
   },
@@ -86,19 +85,19 @@ const BOOST_PACKS: BoostPack[] = [
     price: { usd: 2999, eth: 1.0, usdc: 2999, nyax: 2399 },
     features: [
       '5000 Boost Points',
-      '3 months visibility boost',
+      '3 months profile visibility',
       'Premium featured placement',
       'Maximum social media priority',
       'Guaranteed cross-promotion',
       'Podcast appearance opportunity',
       'Dedicated account manager',
-      'Points decay over 90 days'
+      'Elite profile badge'
     ],
     decayHours: 2160
   }
 ];
 
-// Payment configuration (same as Race to Liberty)
+// Payment configuration
 const DEFAULT_RECEIVER: `0x${string}` = "0x81bA7b98E49014Bff22F811E9405640bC2B39cC0";
 const DEFAULT_NYAX: `0x${string}` = "0x5eed5621b92be4473f99bacac77acfa27deb57d9";
 const DEFAULT_USDC: `0x${string}` = "0xA0b86a33E6441c8C06DD2b7c94b7E0c8f8c8b8c8";
@@ -107,19 +106,18 @@ const RECEIVER = (process.env.NEXT_PUBLIC_PAYMENT_RECEIVER_ADDRESS as `0x${strin
 const NYAX_TOKEN = (process.env.NEXT_PUBLIC_NYAX_TOKEN_ADDRESS as `0x${string}` | undefined) ?? DEFAULT_NYAX;
 const USDC_TOKEN = DEFAULT_USDC;
 
-export default function BoostPackSelector({ 
-  tokenId, 
-  tokenName, 
-  tokenSymbol, 
+export default function ProfileBoostSelector({ 
+  profileAddress, 
+  profileName = 'Profile',
   onBoostSuccess,
   className = '' 
-}: BoostPackSelectorProps) {
+}: ProfileBoostSelectorProps) {
   const { address, isConnected, chain } = useAccount();
   const { switchChainAsync } = useSwitchChain();
   const { sendTransactionAsync } = useSendTransaction();
   const { writeContractAsync } = useWriteContract();
 
-  const [selectedPack, setSelectedPack] = useState<BoostPack | null>(null);
+  const [selectedPack, setSelectedPack] = useState<ProfileBoostPack | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<'eth' | 'usdc' | 'nyax'>('eth');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -179,12 +177,12 @@ export default function BoostPackSelector({
         transactionHash = hash;
       }
 
-      // Register the boost
-      const boostResponse = await fetch('/api/gamification/boost', {
+      // Register the profile boost
+      const boostResponse = await fetch('/api/gamification/profile-boost', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          tokenId,
+          profileAddress,
           boostPackType: selectedPack.id,
           transactionHash,
           walletAddress: address
@@ -194,11 +192,11 @@ export default function BoostPackSelector({
       const boostData = await boostResponse.json();
 
       if (boostData.success) {
-        setSuccess(`🚀 ${selectedPack.name} boost activated! ${selectedPack.basePoints} points added to ${tokenSymbol}.`);
+        setSuccess(`🚀 ${selectedPack.name} activated for ${profileName}! ${selectedPack.basePoints} points added.`);
         onBoostSuccess?.(boostData);
         setSelectedPack(null);
       } else {
-        throw new Error(boostData.error || 'Failed to activate boost');
+        throw new Error(boostData.error || 'Failed to activate profile boost');
       }
 
     } catch (err: any) {
@@ -210,7 +208,6 @@ export default function BoostPackSelector({
 
   const getPackIcon = (packId: string) => {
     switch (packId) {
-      case 'kayak': return '🛶';
       case 'starter': return '🚀';
       case 'growth': return '📈';
       case 'pro': return '⭐';
@@ -221,7 +218,6 @@ export default function BoostPackSelector({
 
   const getPackColor = (packId: string) => {
     switch (packId) {
-      case 'kayak': return 'from-green-500/20 to-teal-500/20 border-green-500/30';
       case 'starter': return 'from-blue-500/20 to-cyan-500/20 border-blue-500/30';
       case 'growth': return 'from-purple-500/20 to-pink-500/20 border-purple-500/30';
       case 'pro': return 'from-yellow-500/20 to-orange-500/20 border-yellow-500/30';
@@ -233,12 +229,12 @@ export default function BoostPackSelector({
   return (
     <div className={`bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10 ${className}`}>
       <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 flex items-center justify-center">
-          <FaRocket className="text-white" />
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
+          <FaStar className="text-white" />
         </div>
         <div>
-          <h3 className="text-xl font-bold">Boost {tokenSymbol}</h3>
-          <p className="text-sm text-gray-400">Select a boost pack to race to the top</p>
+          <h3 className="text-xl font-bold">Boost {profileName}</h3>
+          <p className="text-sm text-gray-400">Enhance profile visibility and ranking</p>
         </div>
       </div>
 
@@ -254,15 +250,15 @@ export default function BoostPackSelector({
         </div>
       )}
 
-      {/* Boost Packs */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-6">
-        {BOOST_PACKS.map((pack) => (
+      {/* Profile Boost Packs */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        {PROFILE_BOOST_PACKS.map((pack) => (
           <div
             key={pack.id}
             onClick={() => setSelectedPack(pack)}
             className={`p-4 rounded-xl border cursor-pointer transition-all duration-300 hover:scale-105 ${
               selectedPack?.id === pack.id
-                ? `bg-gradient-to-r ${getPackColor(pack.id)} ring-2 ring-cyan-500/50`
+                ? `bg-gradient-to-r ${getPackColor(pack.id)} ring-2 ring-purple-500/50`
                 : `bg-gradient-to-r ${getPackColor(pack.id)} hover:border-white/30`
             }`}
           >
@@ -275,7 +271,7 @@ export default function BoostPackSelector({
             <div className="space-y-2 mb-4">
               {pack.features.map((feature, index) => (
                 <div key={index} className="flex items-center gap-2 text-sm">
-                  <div className="w-1.5 h-1.5 rounded-full bg-cyan-400"></div>
+                  <div className="w-1.5 h-1.5 rounded-full bg-purple-400"></div>
                   <span className="text-gray-300">{feature}</span>
                 </div>
               ))}
@@ -310,7 +306,7 @@ export default function BoostPackSelector({
               onClick={() => setPaymentMethod('eth')}
               className={`p-3 rounded-lg border transition-all ${
                 paymentMethod === 'eth'
-                  ? 'border-cyan-500 bg-cyan-500/20'
+                  ? 'border-purple-500 bg-purple-500/20'
                   : 'border-white/10 bg-white/5 hover:border-white/20'
               }`}
             >
@@ -327,7 +323,7 @@ export default function BoostPackSelector({
               onClick={() => setPaymentMethod('usdc')}
               className={`p-3 rounded-lg border transition-all ${
                 paymentMethod === 'usdc'
-                  ? 'border-cyan-500 bg-cyan-500/20'
+                  ? 'border-purple-500 bg-purple-500/20'
                   : 'border-white/10 bg-white/5 hover:border-white/20'
               }`}
             >
@@ -344,14 +340,14 @@ export default function BoostPackSelector({
               onClick={() => setPaymentMethod('nyax')}
               className={`p-3 rounded-lg border transition-all ${
                 paymentMethod === 'nyax'
-                  ? 'border-cyan-500 bg-cyan-500/20'
+                  ? 'border-purple-500 bg-purple-500/20'
                   : 'border-white/10 bg-white/5 hover:border-white/20'
               }`}
             >
               <div className="text-center">
                 <Image src="/logo.png" alt="NYAX" width={24} height={24} className="mx-auto mb-2" />
                 <div className="text-sm font-medium">NYAX</div>
-                <div className="text-xs text-cyan-400">
+                <div className="text-xs text-purple-400">
                   ${selectedPack.price.nyax} (20% off)
                 </div>
               </div>
@@ -361,14 +357,14 @@ export default function BoostPackSelector({
           <button
             onClick={handlePayment}
             disabled={loading || !isConnected}
-            className="w-full py-3 bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-semibold rounded-lg hover:from-cyan-700 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+            className="w-full py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-lg hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
           >
             {loading ? (
               'Processing...'
             ) : !isConnected ? (
               'Connect Wallet'
             ) : (
-              `Boost ${tokenSymbol} with ${selectedPack.name}`
+              `Boost ${profileName} with ${selectedPack.name}`
             )}
           </button>
 
@@ -377,16 +373,14 @@ export default function BoostPackSelector({
               <strong>What happens next:</strong>
             </div>
             <div className="space-y-1 text-xs text-gray-400">
-              <div>• {selectedPack.basePoints} points added instantly</div>
-              <div>• Points decay over {selectedPack.duration}</div>
-              <div>• Leaderboard updates in real-time</div>
-              {selectedPack.id !== 'kayak' && (
-                <div className="flex items-center gap-1">
-                  <FaTwitter className="text-xs" />
-                  <FaTelegram className="text-xs" />
-                  <span>Social media announcement eligible</span>
-                </div>
-              )}
+              <div>• {selectedPack.basePoints} points added to profile</div>
+              <div>• Enhanced visibility for {selectedPack.duration}</div>
+              <div>• Profile ranking boost</div>
+              <div className="flex items-center gap-1">
+                <FaTwitter className="text-xs" />
+                <FaTelegram className="text-xs" />
+                <span>Social media promotion eligible</span>
+              </div>
               {selectedPack.id === 'elite' && (
                 <div className="flex items-center gap-1">
                   <FaMicrophone className="text-xs" />

@@ -1,25 +1,44 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCollection } from '@/lib/mongodb';
-import { BoostPoints, BoostPack } from '@/types/gamification';
 
-// Boost pack configurations
-const BOOST_PACKS: Record<string, BoostPack> = {
-  kayak: {
-    id: 'kayak',
-    name: 'Kayak',
-    basePoints: 25,
-    duration: '6 hours',
-    price: { usd: 1, eth: 0.0003, usdc: 1, nyax: 0.8 },
-    features: ['6h visibility boost', 'Entry-level leaderboard placement'],
-    decayHours: 6
-  },
+interface ProfileBoost {
+  id: string;
+  profileAddress: string;
+  points: number;
+  originalPoints: number;
+  createdAt: Date;
+  expiresAt: Date;
+  decayRate: number; // Points lost per hour
+  isActive: boolean;
+  transactionHash?: string;
+  boostPackType: 'starter' | 'growth' | 'pro' | 'elite';
+  walletAddress: string;
+}
+
+interface ProfileBoostPack {
+  id: 'starter' | 'growth' | 'pro' | 'elite';
+  name: string;
+  basePoints: number;
+  duration: string;
+  price: {
+    usd: number;
+    eth: number;
+    usdc: number;
+    nyax: number;
+  };
+  features: string[];
+  decayHours: number;
+}
+
+// Profile boost pack configurations
+const PROFILE_BOOST_PACKS: Record<string, ProfileBoostPack> = {
   starter: {
     id: 'starter',
     name: 'Starter Boost',
     basePoints: 200,
     duration: '1 week',
     price: { usd: 199, eth: 0.066, usdc: 199, nyax: 159 },
-    features: ['1 week visibility boost', 'Basic leaderboard placement', 'Social media eligibility'],
+    features: ['1 week profile visibility', 'Enhanced profile placement', 'Social media eligibility'],
     decayHours: 168
   },
   growth: {
@@ -28,7 +47,7 @@ const BOOST_PACKS: Record<string, BoostPack> = {
     basePoints: 500,
     duration: '2 weeks',
     price: { usd: 399, eth: 0.133, usdc: 399, nyax: 319 },
-    features: ['2 weeks visibility boost', 'Enhanced leaderboard placement', 'Social media priority', 'Cross-promotion eligibility'],
+    features: ['2 weeks profile visibility', 'Premium profile placement', 'Social media priority', 'Cross-promotion eligibility'],
     decayHours: 336
   },
   pro: {
@@ -37,7 +56,7 @@ const BOOST_PACKS: Record<string, BoostPack> = {
     basePoints: 1000,
     duration: '1 month',
     price: { usd: 599, eth: 0.2, usdc: 599, nyax: 479 },
-    features: ['1 month visibility boost', 'Featured leaderboard placement', 'Premium social media priority', 'Cross-promotion eligibility', 'Priority support'],
+    features: ['1 month profile visibility', 'Featured profile placement', 'Premium social media priority', 'Cross-promotion eligibility', 'Priority support'],
     decayHours: 720
   },
   elite: {
@@ -46,23 +65,23 @@ const BOOST_PACKS: Record<string, BoostPack> = {
     basePoints: 5000,
     duration: '3 months',
     price: { usd: 2999, eth: 1.0, usdc: 2999, nyax: 2399 },
-    features: ['3 months visibility boost', 'Premium featured placement', 'Maximum social media priority', 'Guaranteed cross-promotion', 'Podcast appearance opportunity', 'Dedicated account manager'],
+    features: ['3 months profile visibility', 'Premium featured placement', 'Maximum social media priority', 'Guaranteed cross-promotion', 'Podcast appearance opportunity', 'Dedicated account manager'],
     decayHours: 2160
   }
 };
 
 export async function POST(req: NextRequest) {
   try {
-    const { tokenId, boostPackType, transactionHash, walletAddress } = await req.json();
+    const { profileAddress, boostPackType, transactionHash, walletAddress } = await req.json();
 
-    if (!tokenId || !boostPackType || !transactionHash || !walletAddress) {
+    if (!profileAddress || !boostPackType || !transactionHash || !walletAddress) {
       return NextResponse.json({ 
         success: false, 
         error: 'Missing required fields' 
       }, { status: 400 });
     }
 
-    const boostPack = BOOST_PACKS[boostPackType];
+    const boostPack = PROFILE_BOOST_PACKS[boostPackType];
     if (!boostPack) {
       return NextResponse.json({ 
         success: false, 
@@ -74,9 +93,9 @@ export async function POST(req: NextRequest) {
     const expiresAt = new Date(now.getTime() + (boostPack.decayHours * 60 * 60 * 1000));
     const decayRate = boostPack.basePoints / boostPack.decayHours; // Points lost per hour
 
-    const boostPoints: BoostPoints = {
-      id: `boost_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      tokenId,
+    const profileBoost: ProfileBoost = {
+      id: `profile_boost_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      profileAddress,
       points: boostPack.basePoints,
       originalPoints: boostPack.basePoints,
       createdAt: now,
@@ -84,24 +103,25 @@ export async function POST(req: NextRequest) {
       decayRate,
       isActive: true,
       transactionHash,
-      boostPackType: boostPack.id
+      boostPackType: boostPack.id,
+      walletAddress
     };
 
     // Store in database
-    const boostCollection = await getCollection<BoostPoints>('boost_points');
-    await boostCollection.insertOne(boostPoints);
+    const profileBoostCollection = await getCollection<ProfileBoost>('profile_boosts');
+    await profileBoostCollection.insertOne(profileBoost);
 
-    // Update leaderboard
-    await updateLeaderboard(tokenId);
+    // Update profile leaderboard
+    await updateProfileLeaderboard(profileAddress);
 
     return NextResponse.json({
       success: true,
-      boostPoints,
-      message: `${boostPack.name} boost activated! ${boostPack.basePoints} points added.`
+      profileBoost,
+      message: `${boostPack.name} activated! ${boostPack.basePoints} points added to profile.`
     });
 
   } catch (error) {
-    console.error('Error creating boost:', error);
+    console.error('Error creating profile boost:', error);
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error'
@@ -112,20 +132,20 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const tokenId = searchParams.get('tokenId');
+    const profileAddress = searchParams.get('profileAddress');
 
-    if (!tokenId) {
+    if (!profileAddress) {
       return NextResponse.json({ 
         success: false, 
-        error: 'Token ID is required' 
+        error: 'Profile address is required' 
       }, { status: 400 });
     }
 
-    const boostCollection = await getCollection<BoostPoints>('boost_points');
+    const profileBoostCollection = await getCollection<ProfileBoost>('profile_boosts');
     
-    // Get active boosts for the token
-    const activeBoosts = await boostCollection.find({
-      tokenId,
+    // Get active boosts for the profile
+    const activeBoosts = await profileBoostCollection.find({
+      profileAddress,
       isActive: true,
       expiresAt: { $gt: new Date() }
     }).toArray();
@@ -148,11 +168,11 @@ export async function GET(req: NextRequest) {
       success: true,
       activeBoosts: currentBoosts,
       totalPoints,
-      boostPacks: BOOST_PACKS
+      boostPacks: PROFILE_BOOST_PACKS
     });
 
   } catch (error) {
-    console.error('Error fetching boosts:', error);
+    console.error('Error fetching profile boosts:', error);
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error'
@@ -160,8 +180,8 @@ export async function GET(req: NextRequest) {
   }
 }
 
-async function updateLeaderboard(tokenId: string) {
-  // This would trigger a leaderboard recalculation
-  // Implementation depends on your leaderboard storage strategy
-  console.log(`Updating leaderboard for token: ${tokenId}`);
+async function updateProfileLeaderboard(profileAddress: string) {
+  // This would trigger a profile leaderboard recalculation
+  // Implementation depends on your profile leaderboard storage strategy
+  console.log(`Updating profile leaderboard for: ${profileAddress}`);
 }

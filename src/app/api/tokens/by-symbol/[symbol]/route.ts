@@ -34,12 +34,13 @@ export async function GET(
           blockchain: token.blockchain,
           contractAddress: token.contractAddress,
           imageUri: token.imageUri,
-          website: token.website,
-          twitter: token.twitter,
-          telegram: token.telegram,
-          discord: token.discord,
-          github: token.github,
-          youtube: token.youtube,
+          // Only include social links if admin has enabled them (default to true if not set)
+          website: (token.showWebsite !== false) ? token.website : undefined,
+          twitter: (token.showTwitter !== false) ? token.twitter : undefined,
+          telegram: (token.showTelegram !== false) ? token.telegram : undefined,
+          discord: (token.showDiscord !== false) ? token.discord : undefined,
+          github: (token.showGithub !== false) ? token.github : undefined,
+          youtube: token.youtube, // YouTube doesn't have admin toggle yet
           status: token.status,
           createdAt: token.createdAt
         });
