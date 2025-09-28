@@ -13,9 +13,9 @@ import { TokenETH, TokenIcon } from "@web3icons/react";
 
 // Pricing tiers in USD (Race to Liberty tiers)
 const TIERS = [
-  { id: "paddle", name: "Paddle Boat", description: "1 week on Recently Updated.", priceUSD: 300 },
-  { id: "motor", name: "Motor Boat", description: "1 month placement.", priceUSD: 500 },
-  { id: "helicopter", name: "Helicopter", description: "3 months placement.", priceUSD: 700 },
+  { id: "speedboat", name: "Speed Boat", description: "1 week on Recently Updated.", priceUSD: 199 },
+  { id: "helicopter", name: "Helicopter", description: "1 month placement.", priceUSD: 349 },
+  { id: "submarine", name: "Submarine", description: "3 months placement.", priceUSD: 599 },
 ];
 
 // Boost Packs for projects to climb the board
@@ -32,7 +32,7 @@ const BOOST_PACKS = [
     id: "growth", 
     name: "Growth Boost", 
     points: 750, 
-    priceUSD: 499, 
+    priceUSD: 399, 
     description: "Highlighted in daily \"Top Movers\" feed",
     icon: "🔹"
   },
@@ -40,16 +40,16 @@ const BOOST_PACKS = [
     id: "pro", 
     name: "Pro Boost", 
     points: 1500, 
-    priceUSD: 899, 
-    description: "Unlocks \"Turbo Highlight\" (color frames, 48h push)",
+    priceUSD: 599, 
+    description: "Unlocks \"Featured\" placement (color frames, 48h push)",
     icon: "🔹"
   },
   { 
     id: "elite", 
     name: "Elite Boost", 
     points: 7500, 
-    priceUSD: 3999, 
-    description: "Premium: Top of board + Featured Video slot",
+    priceUSD: 2999, 
+    description: "Premium: Top of board + Featured Video slot + Podcast appearance",
     icon: "🔹"
   },
 ];
