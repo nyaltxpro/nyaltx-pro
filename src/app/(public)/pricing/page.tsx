@@ -355,6 +355,25 @@ export default function PricingPage() {
               >
                 <span className="inline-flex items-center gap-2"><Image src="/logo.png" width={16} height={16} alt="nyax"/> Register Token & Pay $160 with NYAX (20% off)</span>
               </button>
+              {/* $1 trial offer */}
+              <div className="mt-4 text-xs text-gray-400">Or try NyaltxPro with our $1 starter:</div>
+              <button
+                onClick={() => router.push(`/dashboard/register-token?redirect=pricing/checkout/nyaltxpro1&method=paypal`)}
+                className="w-full py-2 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors"
+              >
+                <span className="inline-flex items-center gap-2">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a9.124 9.124 0 0 1-.077.437c-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287z"/>
+                  </svg>
+                  Register Token & Pay $1 with PayPal
+                </span>
+              </button>
+              <button
+                onClick={() => router.push(`/dashboard/register-token?redirect=pricing/checkout/nyaltxpro1&method=usdt`)}
+                className="w-full py-2 rounded-lg border border-zinc-600 text-white font-medium hover:bg-emerald-500"
+              >
+                <span className="inline-flex items-center gap-2"><Image src="/crypto-icons/color/usdt.svg" width={16} height={16} alt="usdt"/> Register Token & Pay $1 with USDT</span>
+              </button>
             </div>
             {isPro && (
               <div className="mt-3 text-sm text-cyan-300">

@@ -17,6 +17,9 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
     nyaltxpro: [
       { id: 1, name: 'NyaltxPro Membership', desc: 'Project profile + socials + video', priceUsd: 200, image: '/logo.png', qty: 1 },
     ],
+    nyaltxpro1: [
+      { id: 1, name: 'NyaltxPro Starter', desc: 'Starter access to Pro features', priceUsd: 1, image: '/logo.png', qty: 1 },
+    ],
     paddle: [
       { id: 1, name: 'Race to Liberty — Paddle Boat', desc: '1 week on Recently Updated', priceUsd: 300, image: '/banner/1.png', qty: 1 },
     ],
@@ -180,8 +183,9 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
       
       if (result.success) {
         setSuccess(`${result.message} (Wallet: ${address})`);
-        // Set cookie for pro status if nyaltxpro
-        if ((selectedTier || 'nyaltxpro').toLowerCase() === 'nyaltxpro') {
+        // Set cookie for pro status if nyaltxpro or nyaltxpro1
+        const tierKey = (selectedTier || 'nyaltxpro').toLowerCase();
+        if (tierKey.startsWith('nyaltxpro')) {
           document.cookie = "nyaltx_pro=1; path=/; max-age=31536000"; // 1 year
           
           // Redirect to register token page after successful free activation
@@ -251,8 +255,9 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
       // Place order in admin panel
       await placeOrder(txHash);
       
-      // Set pro status cookie for nyaltxpro purchases
-      if ((selectedTier || 'nyaltxpro').toLowerCase() === 'nyaltxpro') {
+      // Set pro status cookie for nyaltxpro or nyaltxpro1 purchases
+      const tierKey = (selectedTier || 'nyaltxpro').toLowerCase();
+      if (tierKey.startsWith('nyaltxpro')) {
         document.cookie = "nyaltx_pro=1; path=/; max-age=31536000"; // 1 year
         
         // Redirect to register token page after successful payment
