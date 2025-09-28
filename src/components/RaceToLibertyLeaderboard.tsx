@@ -255,10 +255,16 @@ export default function RaceToLibertyLeaderboard({ className = '' }: RaceToLiber
                       <span>
                         {formatTimeRemaining(
                           entry.lastBoostTime,
-                          Math.max(...entry.decayingPoints.map(b => 
-                            b.boostPackType === 'paddle' ? 24 : 
-                            b.boostPackType === 'motor' ? 36 : 48
-                          ))
+                          Math.max(...entry.decayingPoints.map(b => {
+                            switch (b.boostPackType) {
+                              case 'kayak': return 6;
+                              case 'starter': return 168;
+                              case 'growth': return 336;
+                              case 'pro': return 720;
+                              case 'elite': return 2160;
+                              default: return 6;
+                            }
+                          }))
                         )}
                       </span>
                     </div>
