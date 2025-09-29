@@ -5,24 +5,26 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 const broadcasters: Record<string, { socketId: string; walletAddress?: string; streamTitle?: string }> = {};
 const viewers: Record<string, { socketId: string; broadcasterId: string; walletAddress?: string }> = {};
 
-interface SocketServer {
-  io?: Server;
-}
-
-export default function handler(req: NextApiRequest, res: NextApiResponse & { socket: { server: SocketServer } }) {
-  if (!res.socket?.server?.io) {
-    console.log('Initializing Socket.IO server for WebRTC signaling');
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
+  // Type assertion for Socket.IO server
+  const socketServer = res.socket as any;
+  
+  if (!socketServer.server.io) {
+    console.log('🚀 Initializing Socket.IO server for WebRTC signaling');
     
-    const io = new Server(res.socket.server as any, {
+    const io = new Server(socketServer.server, {
       path: '/api/socket',
       addTrailingSlash: false,
       cors: {
         origin: "*",
-        methods: ["GET", "POST"]
-      }
+        methods: ["GET", "POST"],
+        credentials: false
+      },
+      transports: ['websocket', 'polling'],
+      allowEIO3: true
     });
     
-    (res.socket.server as any).io = io;
+    socketServer.server.io = io;
 
     io.on('connection', (socket) => {
       console.log('Client connected:', socket.id);

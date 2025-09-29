@@ -51,16 +51,32 @@ export default function WebRTCBroadcaster({ onStreamEnd, streamTitle }: WebRTCBr
 
   // Initialize Socket.IO connection
   useEffect(() => {
-    if (!isConnected || !address) return;
+    if (!isConnected || !address) {
+      console.log('❌ Cannot initialize socket - wallet not connected');
+      return;
+    }
 
+    console.log('🔌 Initializing Socket.IO connection...');
     const newSocket = io({
       path: '/api/socket',
-      transports: ['websocket', 'polling']
+      transports: ['websocket', 'polling'],
+      forceNew: true,
+      reconnection: true,
+      timeout: 20000
     });
 
     newSocket.on('connect', () => {
-      console.log('Socket connected:', newSocket.id);
+      console.log('✅ Socket connected:', newSocket.id);
       setSocket(newSocket);
+    });
+
+    newSocket.on('connect_error', (error) => {
+      console.error('❌ Socket connection error:', error);
+      toast.error('Failed to connect to streaming server');
+    });
+
+    newSocket.on('disconnect', (reason) => {
+      console.log('🔌 Socket disconnected:', reason);
     });
 
     newSocket.on('viewer-join', async ({ viewerId, walletAddress }) => {
@@ -147,26 +163,49 @@ export default function WebRTCBroadcaster({ onStreamEnd, streamTitle }: WebRTCBr
 
   const startStream = async () => {
     if (!socket || !isConnected) {
-      toast.error('Please connect your wallet first');
+      toast.error('Please connect your wallet and wait for server connection');
       return;
     }
 
+    console.log('🎥 Starting stream...');
+
     try {
-      // Get screen share
+      // Check if browser supports required APIs
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+        throw new Error('Screen sharing not supported in this browser');
+      }
+
+      console.log('📺 Requesting screen share...');
+      // Get screen share with better options
       const screenStream = await navigator.mediaDevices.getDisplayMedia({
-        video: true,
-        audio: true
+        video: {
+          width: { ideal: 1920, max: 1920 },
+          height: { ideal: 1080, max: 1080 },
+          frameRate: { ideal: 30, max: 60 }
+        },
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        }
       });
 
+      console.log('📹 Screen share obtained, requesting camera...');
       // Get camera stream
       let cameraStream: MediaStream | null = null;
       try {
         cameraStream = await navigator.mediaDevices.getUserMedia({
-          video: true,
-          audio: false
+          video: {
+            width: { ideal: 640, max: 1280 },
+            height: { ideal: 480, max: 720 },
+            frameRate: { ideal: 30 }
+          },
+          audio: false // Use screen audio instead
         });
+        console.log('📷 Camera obtained');
       } catch (err) {
-        console.warn('Camera not available:', err);
+        console.warn('⚠️ Camera not available:', err);
+        toast('Camera not available, using screen only', { icon: '⚠️' });
       }
 
       // Combine streams
@@ -174,12 +213,14 @@ export default function WebRTCBroadcaster({ onStreamEnd, streamTitle }: WebRTCBr
       
       // Add screen tracks
       screenStream.getTracks().forEach(track => {
+        console.log('➕ Adding screen track:', track.kind);
         combinedStream.addTrack(track);
       });
 
       // Add camera tracks if available
       if (cameraStream) {
         cameraStream.getVideoTracks().forEach(track => {
+          console.log('➕ Adding camera track:', track.kind);
           combinedStream.addTrack(track);
         });
       }
@@ -188,9 +229,11 @@ export default function WebRTCBroadcaster({ onStreamEnd, streamTitle }: WebRTCBr
       
       if (localVideoRef.current) {
         localVideoRef.current.srcObject = combinedStream;
+        console.log('📺 Video element updated');
       }
 
       // Join as broadcaster
+      console.log('📡 Joining as broadcaster...');
       socket.emit('broadcaster-join', {
         broadcasterId,
         walletAddress: address,
@@ -199,16 +242,33 @@ export default function WebRTCBroadcaster({ onStreamEnd, streamTitle }: WebRTCBr
 
       setIsStreaming(true);
       startTimeRef.current = Date.now();
-      toast.success('Stream started successfully!');
+      toast.success('🎉 Stream started successfully!');
 
-      // Handle stream end
+      // Handle stream end when user stops screen sharing
       screenStream.getVideoTracks()[0].onended = () => {
+        console.log('📺 Screen sharing ended by user');
         stopStream();
       };
 
+      // Log stream info
+      console.log('🎯 Stream info:', {
+        broadcasterId,
+        tracks: combinedStream.getTracks().length,
+        videoTracks: combinedStream.getVideoTracks().length,
+        audioTracks: combinedStream.getAudioTracks().length
+      });
+
     } catch (error) {
-      console.error('Error starting stream:', error);
-      toast.error('Failed to start stream. Please check permissions.');
+      console.error('❌ Error starting stream:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      
+      if (errorMessage.includes('Permission denied')) {
+        toast.error('Screen sharing permission denied. Please allow screen sharing and try again.');
+      } else if (errorMessage.includes('not supported')) {
+        toast.error('Screen sharing not supported in this browser. Please use Chrome, Firefox, or Safari.');
+      } else {
+        toast.error(`Failed to start stream: ${errorMessage}`);
+      }
     }
   };
 

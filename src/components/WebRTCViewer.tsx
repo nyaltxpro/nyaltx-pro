@@ -53,22 +53,38 @@ export default function WebRTCViewer({ broadcasterId, streamTitle, onStreamEnd }
       return;
     }
 
+    console.log('🔌 Viewer connecting to Socket.IO...');
     const newSocket = io({
       path: '/api/socket',
-      transports: ['websocket', 'polling']
+      transports: ['websocket', 'polling'],
+      forceNew: true,
+      reconnection: true,
+      timeout: 20000
     });
 
     newSocket.on('connect', () => {
-      console.log('Socket connected:', newSocket.id);
+      console.log('✅ Viewer socket connected:', newSocket.id);
       setSocket(newSocket);
       setError(null);
       
       // Join as viewer
+      console.log('👀 Joining as viewer for broadcaster:', broadcasterId);
       newSocket.emit('viewer-join', {
         broadcasterId,
         viewerId: viewerId.current,
         walletAddress: address
       });
+    });
+
+    newSocket.on('connect_error', (error) => {
+      console.error('❌ Viewer socket connection error:', error);
+      setError('Failed to connect to streaming server');
+      setIsLoading(false);
+    });
+
+    newSocket.on('disconnect', (reason) => {
+      console.log('🔌 Viewer socket disconnected:', reason);
+      setIsConnected2Stream(false);
     });
 
     newSocket.on('broadcaster-signal', ({ signal }) => {
