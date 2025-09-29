@@ -28,12 +28,14 @@ const cleanupOldConnections = () => {
 };
 
 export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
-  const action = searchParams.get('action');
-  
-  cleanupOldConnections();
+  try {
+    const { searchParams } = new URL(req.url);
+    const action = searchParams.get('action');
+    
+    console.log(`📡 API GET request - action: ${action}`);
+    cleanupOldConnections();
 
-  switch (action) {
+    switch (action) {
     case 'get-active-streams':
       const activeStreams = Object.entries(broadcasters).map(([broadcasterId, broadcaster]) => ({
         broadcasterId,
@@ -86,6 +88,10 @@ export async function GET(req: NextRequest) {
 
     default:
       return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
+    }
+  } catch (error) {
+    console.error('API GET Error:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 

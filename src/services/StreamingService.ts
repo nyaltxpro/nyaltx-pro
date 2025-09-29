@@ -106,16 +106,22 @@ export class StreamingService {
   // Get active streams
   async getActiveStreams(): Promise<StreamData[]> {
     try {
-      const response = await fetch(`${this.baseUrl}?action=active-streams`);
+      const url = `${this.baseUrl}?action=get-active-streams`;
+      console.log('🔍 Fetching active streams from:', url);
+      
+      const response = await fetch(url);
       
       if (!response.ok) {
-        throw new Error(`Failed to get active streams: ${response.statusText}`);
+        const errorText = await response.text();
+        console.error('❌ API response not ok:', response.status, response.statusText, errorText);
+        throw new Error(`Failed to get active streams: ${response.statusText} - ${errorText}`);
       }
 
       const result = await response.json();
+      console.log('✅ Active streams response:', result);
       return result.streams || [];
     } catch (error) {
-      console.error('Error getting active streams:', error);
+      console.error('❌ Error getting active streams:', error);
       return [];
     }
   }
