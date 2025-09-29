@@ -702,7 +702,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
           </motion.div> */}
 
               {/* Nyaltz Tokens */}
-              {!searchTerm && nyaxTokens.length > 0 && (
+              {/* {!searchTerm && nyaxTokens.length > 0 && (
                 <motion.div
                   className="mb-6"
                   initial={{ opacity: 0, y: 20 }}
@@ -774,7 +774,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                     ))}
                   </motion.div>
                 </motion.div>
-              )}
+              )} */}
 
               {/* All Tokens (from catalog) */}
               {!searchTerm && (
