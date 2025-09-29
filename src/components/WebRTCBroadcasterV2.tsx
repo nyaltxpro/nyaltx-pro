@@ -2,8 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useAccount } from 'wagmi';
-import io, { Socket } from 'socket.io-client';
-import SimplePeer from 'simple-peer';
+import { streamingService, ChatMessage } from '@/services/StreamingService';
 import { v4 as uuidv4 } from 'uuid';
 import { FaVideo, FaVideoSlash, FaMicrophone, FaMicrophoneSlash, FaDesktop, FaStop, FaUsers, FaComments, FaPaperPlane } from 'react-icons/fa';
 import toast from 'react-hot-toast';
@@ -13,13 +12,6 @@ interface WebRTCBroadcasterProps {
   streamTitle: string;
 }
 
-interface ChatMessage {
-  message: string;
-  senderAddress: string;
-  senderName: string;
-  timestamp: number;
-}
-
 interface StreamStats {
   bitrate: number;
   fps: number;
@@ -27,9 +19,8 @@ interface StreamStats {
   duration: number;
 }
 
-export default function WebRTCBroadcaster({ onStreamEnd, streamTitle }: WebRTCBroadcasterProps) {
+export default function WebRTCBroadcasterV2({ onStreamEnd, streamTitle }: WebRTCBroadcasterProps) {
   const { address, isConnected } = useAccount();
-  const [socket, setSocket] = useState<Socket | null>(null);
   const [broadcasterId] = useState(() => uuidv4());
   const [isStreaming, setIsStreaming] = useState(false);
   const [isVideoEnabled, setIsVideoEnabled] = useState(true);
@@ -43,111 +34,46 @@ export default function WebRTCBroadcaster({ onStreamEnd, streamTitle }: WebRTCBr
     resolution: '1920x1080',
     duration: 0
   });
+  const [connected, setConnected] = useState(false);
 
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  const peersRef = useRef<{ [key: string]: SimplePeer.Instance }>({});
   const startTimeRef = useRef<number>(0);
 
-  // Initialize Socket.IO connection
+  // Initialize streaming service
   useEffect(() => {
     if (!isConnected || !address) {
-      console.log('❌ Cannot initialize socket - wallet not connected');
+      console.log('❌ Cannot initialize streaming - wallet not connected');
       return;
     }
 
-    console.log('🔌 Initializing Socket.IO connection...');
-    const newSocket = io({
-      path: '/api/socket',
-      transports: ['websocket', 'polling'],
-      forceNew: true,
-      reconnection: true,
-      timeout: 20000
+    console.log('🔌 Initializing HTTP-based streaming service...');
+
+    // Set up event listeners
+    const handleError = (error: any) => {
+      console.error('❌ Streaming service error:', error);
+      toast.error('Streaming service error');
+    };
+
+    const handleChatMessage = (message: ChatMessage) => {
+      setChatMessages(prev => [...prev, message]);
+    };
+
+    streamingService.on('error', handleError);
+    streamingService.on('chat-message', handleChatMessage);
+    streamingService.on('broadcaster-joined', () => {
+      setConnected(true);
+      console.log('✅ Successfully joined as broadcaster');
     });
 
-    newSocket.on('connect', () => {
-      console.log('✅ Socket connected:', newSocket.id);
-      setSocket(newSocket);
-    });
-
-    newSocket.on('connect_error', (error) => {
-      console.error('❌ Socket connection error:', error);
-      toast.error('Failed to connect to streaming server');
-    });
-
-    newSocket.on('disconnect', (reason) => {
-      console.log('🔌 Socket disconnected:', reason);
-    });
-
-    newSocket.on('viewer-join', async ({ viewerId, walletAddress }) => {
-      console.log('New viewer joined:', viewerId, walletAddress);
-      
-      if (!streamRef.current) return;
-
-      try {
-        // Create peer connection for new viewer
-        const peer = new SimplePeer({ 
-          initiator: true, 
-          stream: streamRef.current,
-          trickle: false,
-          config: {
-            iceServers: [
-              { urls: 'stun:stun.l.google.com:19302' },
-              { urls: 'stun:stun1.l.google.com:19302' }
-            ]
-          }
-        });
-
-        peer.on('signal', (signalData: any) => {
-          newSocket.emit('broadcaster-signal', { 
-            broadcasterId, 
-            viewerId, 
-            signal: signalData 
-          });
-        });
-
-        peer.on('error', (err: any) => {
-          console.error('Peer error for viewer', viewerId, err);
-          delete peersRef.current[viewerId];
-        });
-
-        peer.on('close', () => {
-          console.log('Peer connection closed for viewer', viewerId);
-          delete peersRef.current[viewerId];
-        });
-
-        peersRef.current[viewerId] = peer;
-        toast.success(`New viewer joined: ${walletAddress?.slice(0, 6)}...${walletAddress?.slice(-4)}`);
-      } catch (error) {
-        console.error('Error creating peer for viewer:', error);
-      }
-    });
-
-    newSocket.on('viewer-signal', ({ viewerId, signal }) => {
-      const peer = peersRef.current[viewerId];
-      if (peer) {
-        try {
-          peer.signal(signal);
-        } catch (error) {
-          console.error('Error handling viewer signal:', error);
-        }
-      }
-    });
-
-    newSocket.on('viewer-count-update', ({ broadcasterId: streamId, count }) => {
-      if (streamId === broadcasterId) {
-        setViewerCount(count);
-      }
-    });
-
-    newSocket.on('chat-message', ({ message, senderAddress, senderName, timestamp }) => {
-      setChatMessages(prev => [...prev, { message, senderAddress, senderName, timestamp }]);
-    });
+    setConnected(true); // HTTP service is always "connected"
 
     return () => {
-      newSocket.disconnect();
+      streamingService.off('error', handleError);
+      streamingService.off('chat-message', handleChatMessage);
+      streamingService.disconnect();
     };
-  }, [isConnected, address, broadcasterId]);
+  }, [isConnected, address]);
 
   // Update stream duration
   useEffect(() => {
@@ -162,8 +88,8 @@ export default function WebRTCBroadcaster({ onStreamEnd, streamTitle }: WebRTCBr
   }, [isStreaming]);
 
   const startStream = async () => {
-    if (!socket || !isConnected) {
-      toast.error('Please connect your wallet and wait for server connection');
+    if (!connected || !isConnected || !address) {
+      toast.error('Please connect your wallet and wait for service connection');
       return;
     }
 
@@ -232,13 +158,9 @@ export default function WebRTCBroadcaster({ onStreamEnd, streamTitle }: WebRTCBr
         console.log('📺 Video element updated');
       }
 
-      // Join as broadcaster
+      // Join as broadcaster using HTTP service
       console.log('📡 Joining as broadcaster...');
-      socket.emit('broadcaster-join', {
-        broadcasterId,
-        walletAddress: address,
-        streamTitle
-      });
+      await streamingService.joinAsBroadcaster(broadcasterId, address, streamTitle);
 
       setIsStreaming(true);
       startTimeRef.current = Date.now();
@@ -258,6 +180,30 @@ export default function WebRTCBroadcaster({ onStreamEnd, streamTitle }: WebRTCBr
         audioTracks: combinedStream.getAudioTracks().length
       });
 
+      // Start polling for viewer count updates
+      const pollViewers = async () => {
+        try {
+          const streams = await streamingService.getActiveStreams();
+          const myStream = streams.find(s => s.broadcasterId === broadcasterId);
+          if (myStream) {
+            setViewerCount(myStream.viewerCount);
+          }
+        } catch (error) {
+          console.error('Error polling viewer count:', error);
+        }
+      };
+
+      // Poll every 5 seconds
+      const viewerInterval = setInterval(pollViewers, 5000);
+      
+      // Store cleanup function
+      const cleanup = () => {
+        clearInterval(viewerInterval);
+      };
+
+      // Store cleanup for later use
+      (window as any).streamCleanup = cleanup;
+
     } catch (error) {
       console.error('❌ Error starting stream:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -272,26 +218,39 @@ export default function WebRTCBroadcaster({ onStreamEnd, streamTitle }: WebRTCBr
     }
   };
 
-  const stopStream = () => {
+  const stopStream = async () => {
+    console.log('🛑 Stopping stream...');
+    
     // Stop all tracks
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current.getTracks().forEach(track => {
+        track.stop();
+        console.log('🛑 Stopped track:', track.kind);
+      });
       streamRef.current = null;
     }
-
-    // Close all peer connections
-    Object.values(peersRef.current).forEach(peer => {
-      peer.destroy();
-    });
-    peersRef.current = {};
 
     // Clear video element
     if (localVideoRef.current) {
       localVideoRef.current.srcObject = null;
     }
 
+    // End stream on server
+    try {
+      await streamingService.endStream(broadcasterId);
+    } catch (error) {
+      console.error('Error ending stream on server:', error);
+    }
+
+    // Cleanup polling
+    if ((window as any).streamCleanup) {
+      (window as any).streamCleanup();
+      delete (window as any).streamCleanup;
+    }
+
     setIsStreaming(false);
     setViewerCount(0);
+    setChatMessages([]);
     toast.success('Stream ended');
     
     if (onStreamEnd) {
@@ -319,17 +278,21 @@ export default function WebRTCBroadcaster({ onStreamEnd, streamTitle }: WebRTCBr
     }
   };
 
-  const sendChatMessage = () => {
-    if (!chatInput.trim() || !socket) return;
+  const sendChatMessage = async () => {
+    if (!chatInput.trim() || !address) return;
 
-    socket.emit('chat-message', {
-      broadcasterId,
-      message: chatInput,
-      senderAddress: address,
-      senderName: 'Broadcaster'
-    });
-
-    setChatInput('');
+    try {
+      await streamingService.sendChatMessage(
+        broadcasterId,
+        chatInput,
+        address,
+        'Broadcaster'
+      );
+      setChatInput('');
+    } catch (error) {
+      console.error('Error sending chat message:', error);
+      toast.error('Failed to send message');
+    }
   };
 
   const formatDuration = (seconds: number) => {
@@ -350,6 +313,9 @@ export default function WebRTCBroadcaster({ onStreamEnd, streamTitle }: WebRTCBr
         <div>
           <h2 className="text-2xl font-bold text-white mb-2">Live Stream Broadcaster</h2>
           <p className="text-gray-400">Stream ID: {broadcasterId}</p>
+          <p className="text-sm text-gray-500">
+            {connected ? '🟢 Connected to HTTP streaming service' : '🔴 Disconnected'}
+          </p>
         </div>
         
         <div className="flex items-center gap-4">
@@ -382,6 +348,7 @@ export default function WebRTCBroadcaster({ onStreamEnd, streamTitle }: WebRTCBr
             <div className="text-center">
               <FaDesktop className="w-16 h-16 text-gray-500 mx-auto mb-4" />
               <p className="text-gray-400 text-lg">Click "Start Stream" to begin broadcasting</p>
+              <p className="text-gray-500 text-sm mt-2">Uses HTTP polling (Vercel compatible)</p>
             </div>
           </div>
         )}
@@ -393,6 +360,7 @@ export default function WebRTCBroadcaster({ onStreamEnd, streamTitle }: WebRTCBr
               <div>Duration: {formatDuration(streamStats.duration)}</div>
               <div>Resolution: {streamStats.resolution}</div>
               <div>Viewers: {viewerCount}</div>
+              <div className="text-green-400">HTTP Streaming</div>
             </div>
           </div>
         )}
@@ -404,7 +372,7 @@ export default function WebRTCBroadcaster({ onStreamEnd, streamTitle }: WebRTCBr
           {!isStreaming ? (
             <button
               onClick={startStream}
-              disabled={!isConnected}
+              disabled={!isConnected || !connected}
               className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white font-medium rounded-lg hover:from-red-700 hover:to-red-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <FaDesktop />

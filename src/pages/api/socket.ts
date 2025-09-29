@@ -6,11 +6,22 @@ const broadcasters: Record<string, { socketId: string; walletAddress?: string; s
 const viewers: Record<string, { socketId: string; broadcasterId: string; walletAddress?: string }> = {};
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
-  // Type assertion for Socket.IO server
+  // For Vercel deployment, we need to handle this differently
+  if (process.env.NODE_ENV === 'production' && process.env.VERCEL) {
+    // In production on Vercel, return a simple HTTP response
+    // WebSocket connections won't work on Vercel's serverless functions
+    res.status(200).json({ 
+      message: 'Socket.IO not supported on Vercel serverless functions',
+      suggestion: 'Use polling transport only or deploy to a server with WebSocket support'
+    });
+    return;
+  }
+
+  // Type assertion for Socket.IO server (for local development)
   const socketServer = res.socket as any;
   
-  if (!socketServer.server.io) {
-    console.log('🚀 Initializing Socket.IO server for WebRTC signaling');
+  if (!socketServer?.server?.io) {
+    console.log('🚀 Initializing Socket.IO server for WebRTC signaling (Development Mode)');
     
     const io = new Server(socketServer.server, {
       path: '/api/socket',
@@ -20,8 +31,11 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         methods: ["GET", "POST"],
         credentials: false
       },
-      transports: ['websocket', 'polling'],
-      allowEIO3: true
+      // For development, prefer polling over websockets for Vercel compatibility
+      transports: ['polling', 'websocket'],
+      allowEIO3: true,
+      pingTimeout: 60000,
+      pingInterval: 25000
     });
     
     socketServer.server.io = io;

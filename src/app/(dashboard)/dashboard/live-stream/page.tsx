@@ -3,9 +3,9 @@
 import { useState, useEffect } from 'react';
 import { useAccount } from 'wagmi';
 import dynamic from 'next/dynamic';
-import io from 'socket.io-client';
+import { streamingService } from '@/services/StreamingService';
 
-const WebRTCBroadcaster = dynamic(() => import('@/components/WebRTCBroadcaster'), { ssr: false });
+const WebRTCBroadcaster = dynamic(() => import('@/components/WebRTCBroadcasterV2'), { ssr: false });
 const WebRTCViewer = dynamic(() => import('@/components/WebRTCViewer'), { ssr: false });
 import { FaRocket, FaFire, FaUsers, FaChartLine, FaGlobe, FaArrowUp, FaPlay, FaPlus, FaEye } from 'react-icons/fa';
 import Image from 'next/image';
@@ -84,38 +84,13 @@ export default function LiveStreamPage() {
   ]);
 
   useEffect(() => {
-    // Connect to Socket.IO to get real active streams
-    const socket = io({
-      path: '/api/socket',
-      transports: ['websocket', 'polling']
-    });
+    // Use HTTP-based streaming service instead of Socket.IO
+    console.log('🔌 Connecting to HTTP streaming service...');
 
-    socket.on('connect', () => {
-      console.log('Connected to Socket.IO for stream updates');
-      socket.emit('get-active-streams');
-    });
-
-    socket.on('active-streams', (streams) => {
-      console.log('Received active streams:', streams);
+    // Start polling for active streams
+    const stopPolling = streamingService.startStreamPolling((streams) => {
+      console.log('📡 Received active streams:', streams);
       setActiveStreams(streams);
-    });
-
-    socket.on('stream-started', ({ broadcasterId, streamTitle, walletAddress }) => {
-      console.log('New stream started:', broadcasterId, streamTitle);
-      socket.emit('get-active-streams'); // Refresh active streams
-    });
-
-    socket.on('stream-ended', ({ broadcasterId }) => {
-      console.log('Stream ended:', broadcasterId);
-      socket.emit('get-active-streams'); // Refresh active streams
-    });
-
-    socket.on('viewer-count-update', ({ broadcasterId, count }) => {
-      setActiveStreams(prev => prev.map(stream => 
-        stream.broadcasterId === broadcasterId 
-          ? { ...stream, viewerCount: count }
-          : stream
-      ));
     });
 
     // Simulate real-time stats updates
@@ -136,13 +111,10 @@ export default function LiveStreamPage() {
         ...stream,
         viewerCount: stream.viewerCount + Math.floor(Math.random() * 10) - 5
       })));
-
-      // Periodically refresh active streams
-      socket.emit('get-active-streams');
     }, 10000);
 
     return () => {
-      socket.disconnect();
+      stopPolling();
       clearInterval(interval);
     };
   }, []);
