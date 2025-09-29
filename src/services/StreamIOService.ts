@@ -73,8 +73,8 @@ export class StreamIOService {
         throw new Error(`Call ID too long: ${callId.length} chars (max 64)`);
       }
       
-      // Create a livestream call
-      const call = this.client.call(CALL_TYPES.LIVESTREAM, callId);
+      // Create a livestream call (use 'default' type for better compatibility)
+      const call = this.client.call(CALL_TYPES.DEFAULT, callId);
       
       // Join the call as host with public access
       await call.join({
@@ -90,16 +90,8 @@ export class StreamIOService {
               role: 'host',
             },
           ],
-          settings_override: {
-            // Allow anyone to join the call
-            limits: {
-              max_participants: 1000,
-            },
-            // Disable backstage mode for public access
-            backstage: {
-              enabled: false,
-            },
-          },
+          // Remove settings_override to avoid backstage permission issues
+          // Use default call settings for maximum compatibility
         },
       });
 
@@ -122,21 +114,12 @@ export class StreamIOService {
     try {
       console.log('👀 Joining live stream:', callId);
       
-      // Get the call
-      const call = this.client.call(CALL_TYPES.LIVESTREAM, callId);
+      // Get the call (use same type as broadcaster)
+      const call = this.client.call(CALL_TYPES.DEFAULT, callId);
       
-      // Join as viewer with create: false (don't create if doesn't exist)
+      // Join as viewer with minimal configuration
       await call.join({
         create: false,
-        data: {
-          // Add viewer as member if needed
-          members: [
-            {
-              user_id: this.user.id,
-              role: 'viewer',
-            },
-          ],
-        },
       });
       
       this.currentCall = call;
@@ -146,11 +129,21 @@ export class StreamIOService {
     } catch (error) {
       console.error('❌ Failed to join live stream:', error);
       
-      // If join failed, try without adding as member (for public calls)
+      // If join failed, try with explicit member addition
       try {
-        console.log('🔄 Retrying join without member addition...');
-        const call = this.client.call(CALL_TYPES.LIVESTREAM, callId);
-        await call.join({ create: false });
+        console.log('🔄 Retrying join with member addition...');
+        const call = this.client.call(CALL_TYPES.DEFAULT, callId);
+        await call.join({
+          create: false,
+          data: {
+            members: [
+              {
+                user_id: this.user.id,
+                role: 'viewer',
+              },
+            ],
+          },
+        });
         
         this.currentCall = call;
         console.log('✅ Joined live stream successfully (retry)');
@@ -191,26 +184,28 @@ export class StreamIOService {
     try {
       console.log('📡 Fetching active live streams...');
       
-      // Query for active livestream calls
+      // Query for active calls (using default type now)
       const response = await this.client.queryCalls({
         filter_conditions: {
-          type: CALL_TYPES.LIVESTREAM,
+          type: CALL_TYPES.DEFAULT,
           ongoing: true,
         },
         sort: [{ field: 'created_at', direction: -1 }],
         limit: 25,
       });
 
-      const liveStreams: LiveStream[] = response.calls.map((call: any) => ({
-        id: call.id,
-        title: call.custom?.title || 'Untitled Stream',
-        hostId: call.created_by?.id || 'unknown',
-        hostName: call.created_by?.name || 'Unknown Host',
-        hostWallet: call.custom?.hostWallet || '',
-        viewerCount: call.session?.participants?.length || 0,
-        isLive: call.session?.live || false,
-        createdAt: new Date(call.created_at || Date.now()),
-      }));
+      const liveStreams: LiveStream[] = response.calls
+        .filter((call: any) => call.custom?.title && call.custom?.hostWallet) // Only our live streams
+        .map((call: any) => ({
+          id: call.id,
+          title: call.custom?.title || 'Untitled Stream',
+          hostId: call.created_by?.id || 'unknown',
+          hostName: call.created_by?.name || 'Unknown Host',
+          hostWallet: call.custom?.hostWallet || '',
+          viewerCount: call.session?.participants?.length || 0,
+          isLive: call.session?.live || false,
+          createdAt: new Date(call.created_at || Date.now()),
+        }));
 
       console.log(`✅ Found ${liveStreams.length} active live streams`);
       return liveStreams;
