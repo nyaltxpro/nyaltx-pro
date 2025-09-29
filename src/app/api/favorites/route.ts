@@ -22,10 +22,21 @@ export async function GET(request: NextRequest) {
     }
 
     const collection = await getCollection<Favorite>('favorites');
-    const favorites = await collection
+    const rawFavorites = await collection
       .find({ walletAddress: walletAddress.toLowerCase() })
       .sort({ createdAt: -1 })
       .toArray();
+
+    // Transform the data to match frontend interface
+    const favorites = rawFavorites.map(fav => ({
+      id: fav._id?.toString() || '',
+      wallet_address: fav.walletAddress,
+      token_address: fav.tokenAddress,
+      token_symbol: fav.tokenSymbol,
+      token_name: fav.tokenName,
+      chain_id: fav.chainId,
+      created_at: fav.createdAt.toISOString()
+    }));
 
     return NextResponse.json({ favorites });
   } catch (error) {
@@ -68,7 +79,18 @@ export async function POST(request: NextRequest) {
     const result = await collection.insertOne(favorite);
     const insertedFavorite = await collection.findOne({ _id: result.insertedId });
 
-    return NextResponse.json({ favorite: insertedFavorite });
+    // Transform the data to match frontend interface
+    const transformedFavorite = insertedFavorite ? {
+      id: insertedFavorite._id?.toString() || '',
+      wallet_address: insertedFavorite.walletAddress,
+      token_address: insertedFavorite.tokenAddress,
+      token_symbol: insertedFavorite.tokenSymbol,
+      token_name: insertedFavorite.tokenName,
+      chain_id: insertedFavorite.chainId,
+      created_at: insertedFavorite.createdAt.toISOString()
+    } : null;
+
+    return NextResponse.json({ favorite: transformedFavorite });
   } catch (error) {
     console.error('Error in POST /api/favorites:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

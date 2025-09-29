@@ -1132,10 +1132,10 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
                     className="bg-[#1a2932] rounded-lg p-3 hover:bg-[#243540] transition-colors cursor-pointer"
                     onClick={() => {
                       const params = new URLSearchParams();
-                      params.set('base', favorite.tokenSymbol);
-                      params.set('address', favorite.tokenAddress);
-                      if (favorite.chainId !== 1) {
-                        const chainName = getChainName(favorite.chainId);
+                      params.set('base', favorite.token_symbol);
+                      params.set('address', favorite.token_address);
+                      if (favorite.chain_id !== 1) {
+                        const chainName = getChainName(favorite.chain_id);
                         if (chainName) params.set('chain', chainName);
                       }
                       window.location.href = `/dashboard/trade?${params.toString()}`;
@@ -1145,8 +1145,8 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
                       <div className="flex items-center">
                         <div className="w-8 h-8 rounded-full flex items-center justify-center mr-3 overflow-hidden bg-[#0f1923]">
                           <Image
-                            src={getCryptoIconUrl(favorite.tokenSymbol)}
-                            alt={favorite.tokenSymbol}
+                            src={getCryptoIconUrl(favorite.token_symbol)}
+                            alt={favorite.token_symbol}
                             width={32}
                             height={32}
                             unoptimized
@@ -1154,11 +1154,11 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
                         </div>
                         <div>
                           <div className="flex items-center">
-                            <span className="font-medium text-white">{favorite.tokenSymbol}</span>
-                            <span className="text-gray-400 ml-2 text-sm">/ {favorite.tokenName}</span>
+                            <span className="font-medium text-white">{favorite.token_symbol}</span>
+                            <span className="text-gray-400 ml-2 text-sm">/ {favorite.token_name}</span>
                           </div>
                           <div className="text-xs text-gray-500 mt-1">
-                            {getChainName(favorite.chainId) || 'Ethereum'}
+                            {getChainName(favorite.chain_id) || 'Ethereum'}
                           </div>
                         </div>
                       </div>

@@ -109,7 +109,7 @@ export default function Sidebar({ isMobileMenuOpen, toggleMobileMenu }: SidebarP
     { icon: <FaUser />, text: 'Profile', href: '/dashboard/profile' },
     { icon: <FaChartLine />, text: 'NYAX', href: '/dashboard/trade?base=NYAX&chain=ethereum&address=0x5eed5621b92be4473f99bacac77acfa27deb57d9' },
     // { icon: <FaExchangeAlt />, text: 'Pairs', href: '/pairs' },
-    // { icon: <FaStar />, text: 'Favorites', href: '/dashboard/favorites' },
+    { icon: <FaStar />, text: 'Favorites', href: '/dashboard/favorites' },
     { icon: <FaPlay />, text: 'Live Stream', href: '/dashboard/live-stream' },
     // { icon: <FaGift />, text: 'Airdrops', href: '/dashboard/airdrops' },
     { icon: <FaRocket />, text: 'Trending', href: '/dashboard/trending' },
