@@ -44,6 +44,9 @@ export async function GET(req: NextRequest) {
         viewerCount: Object.values(viewers).filter(v => v.broadcasterId === broadcasterId).length
       }));
       
+      console.log(`📊 Active streams requested - found ${activeStreams.length} streams`);
+      console.log(`📊 Broadcasters: ${Object.keys(broadcasters).join(', ')}`);
+      
       return NextResponse.json({ streams: activeStreams });
 
     case 'get-signals':
@@ -80,8 +83,12 @@ export async function GET(req: NextRequest) {
       const now = Date.now();
       if (type === 'broadcaster' && broadcasters[id]) {
         broadcasters[id].lastSeen = now;
+        console.log(`💓 Heartbeat received from broadcaster: ${id}`);
       } else if (type === 'viewer' && viewers[id]) {
         viewers[id].lastSeen = now;
+        console.log(`💓 Heartbeat received from viewer: ${id}`);
+      } else {
+        console.log(`❌ Heartbeat for unknown ${type}: ${id}`);
       }
       
       return NextResponse.json({ success: true });
@@ -101,25 +108,28 @@ export async function POST(req: NextRequest) {
   
   try {
     const body = await req.json();
+    console.log(`📡 API POST request - action: ${action}`, body);
     cleanupOldConnections();
-
     switch (action) {
       case 'broadcaster-join':
         const { broadcasterId, walletAddress, streamTitle } = body;
         if (!broadcasterId) {
           return NextResponse.json({ error: 'Missing broadcasterId' }, { status: 400 });
         }
-        
+        if (broadcasters[broadcasterId]) {
+          return NextResponse.json({ error: 'Broadcaster already exists' }, { status: 409 });
+        }
         broadcasters[broadcasterId] = {
           walletAddress,
           streamTitle,
           lastSeen: Date.now()
         };
-        
-        // Initialize chat for this stream
         if (!chatMessages[broadcasterId]) {
           chatMessages[broadcasterId] = [];
         }
+        
+        console.log(`✅ Broadcaster registered: ${broadcasterId}`, broadcasters[broadcasterId]);
+        console.log(`📊 Total broadcasters: ${Object.keys(broadcasters).length}`);
         
         return NextResponse.json({ success: true, broadcasterId });
 
@@ -144,12 +154,16 @@ export async function POST(req: NextRequest) {
 
       case 'chat-message':
         const { broadcasterId: chatBroadcasterId, message, senderAddress, senderName } = body;
+        console.log(`💬 Chat message request for broadcaster: ${chatBroadcasterId}`);
+        console.log(`📊 Available broadcasters: ${Object.keys(broadcasters).join(', ')}`);
+        
         if (!chatBroadcasterId || !message || !senderAddress) {
           return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
         
         // Check if broadcaster exists
         if (!broadcasters[chatBroadcasterId]) {
+          console.log(`❌ Broadcaster ${chatBroadcasterId} not found`);
           return NextResponse.json({ error: 'Broadcaster not found' }, { status: 404 });
         }
         

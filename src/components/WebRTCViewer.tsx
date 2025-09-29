@@ -24,6 +24,7 @@ export default function WebRTCViewer({ broadcasterId, streamTitle, onStreamEnd }
   const [isConnected2Stream, setIsConnected2Stream] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [hasVideoStream, setHasVideoStream] = useState(false);
   const [viewerCount, setViewerCount] = useState(0);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState('');
@@ -175,6 +176,7 @@ export default function WebRTCViewer({ broadcasterId, streamTitle, onStreamEnd }
         remoteVideoRef.current.srcObject = stream;
         setIsLoading(false);
         setIsConnected2Stream(true);
+        setHasVideoStream(true);
         toast.success('Video stream connected!');
       }
     });
@@ -193,6 +195,7 @@ export default function WebRTCViewer({ broadcasterId, streamTitle, onStreamEnd }
     peer.on('close', () => {
       console.log('🔌 WebRTC peer connection closed');
       setIsConnected2Stream(false);
+      setHasVideoStream(false);
       if (remoteVideoRef.current) {
         remoteVideoRef.current.srcObject = null;
       }
@@ -361,58 +364,25 @@ export default function WebRTCViewer({ broadcasterId, streamTitle, onStreamEnd }
               className="w-full h-full object-cover"
             />
             
-            {/* Demo Video Stream */}
-            {isConnected2Stream && !error && (
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-900/30 to-purple-900/30">
-                {/* Simulated video content */}
-                <div className="w-full h-full flex items-center justify-center relative overflow-hidden">
-                  {/* Animated background */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-purple-500/10 animate-pulse"></div>
-                  
-                  {/* Stream content */}
-                  <div className="text-center z-10">
-                    <div className="relative">
-                      <FaPlay className="w-32 h-32 text-cyan-400/60 mx-auto mb-6 animate-bounce" />
-                      <div className="absolute inset-0 bg-cyan-400/20 rounded-full animate-ping"></div>
-                    </div>
-                    <h3 className="text-2xl font-bold text-white mb-3">🎥 Live Stream Active</h3>
-                    <p className="text-cyan-300 text-lg mb-2">Broadcasting: {streamTitle}</p>
-                    <p className="text-gray-300 text-sm mb-4">
-                      HTTP-based streaming with real-time chat
-                    </p>
-                    
-                    {/* Fake stream stats */}
-                    <div className="flex justify-center gap-6 text-sm">
-                      <div className="text-green-400">
-                        <span className="block font-semibold">Quality</span>
-                        <span>1080p HD</span>
-                      </div>
-                      <div className="text-blue-400">
-                        <span className="block font-semibold">Viewers</span>
-                        <span>{viewerCount}</span>
-                      </div>
-                      <div className="text-purple-400">
-                        <span className="block font-semibold">Status</span>
-                        <span>Live</span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* Floating particles effect */}
-                  <div className="absolute top-10 left-10 w-2 h-2 bg-cyan-400 rounded-full animate-ping"></div>
-                  <div className="absolute top-20 right-20 w-1 h-1 bg-purple-400 rounded-full animate-pulse"></div>
-                  <div className="absolute bottom-20 left-20 w-3 h-3 bg-blue-400 rounded-full animate-bounce"></div>
-                </div>
-              </div>
-            )}
             
             {/* Loading State */}
             {isLoading && (
               <div className="absolute inset-0 flex items-center justify-center bg-gray-900/80">
                 <div className="text-center">
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-400 mx-auto mb-4"></div>
-                  <p className="text-gray-400 text-lg">Connecting to stream...</p>
-                  <p className="text-gray-500 text-sm mt-2">Using HTTP polling (Vercel compatible)</p>
+                  <p className="text-gray-400 text-lg">Establishing WebRTC connection...</p>
+                  <p className="text-gray-500 text-sm mt-2">Waiting for video stream</p>
+                </div>
+              </div>
+            )}
+
+            {/* Waiting for Stream */}
+            {!isLoading && !error && isConnected2Stream && !hasVideoStream && (
+              <div className="absolute inset-0 flex items-center justify-center bg-gray-900/50">
+                <div className="text-center">
+                  <FaPlay className="w-16 h-16 text-cyan-400 mx-auto mb-4" />
+                  <p className="text-gray-300 text-lg">Connected to {streamTitle}</p>
+                  <p className="text-gray-400 text-sm">Waiting for video stream...</p>
                 </div>
               </div>
             )}
