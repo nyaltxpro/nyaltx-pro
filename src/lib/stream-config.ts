@@ -1,8 +1,8 @@
 import { StreamVideoClient, User } from '@stream-io/video-client';
 
 // Stream.io configuration
-export const STREAM_API_KEY = process.env.NEXT_PUBLIC_STREAM_API_KEY || 'your-stream-api-key';
-export const STREAM_API_SECRET = process.env.STREAM_API_SECRET || 'your-stream-api-secret';
+export const STREAM_API_KEY = process.env.NEXT_PUBLIC_STREAM_API_KEY || 'rcjuja6eu7my';
+export const STREAM_API_SECRET = process.env.STREAM_API_SECRET || 'eyre9m3xpkyrn6tgbt9t3656gg9enhw26ub7e8e7u5k4qbzjw7kg8qeswyav4zzg';
 
 // Initialize Stream Video Client
 export const createStreamClient = (user: User, token: string) => {
@@ -15,18 +15,41 @@ export const createStreamClient = (user: User, token: string) => {
 
 // Generate user token (in production, this should be done server-side)
 export const generateUserToken = async (userId: string): Promise<string> => {
-  // In production, call your backend to generate a JWT token
-  // For development, you can use Stream's token generator
-  
-  if (typeof window === 'undefined') {
-    // Server-side token generation
-    const { StreamChat } = await import('stream-chat');
-    const serverClient = StreamChat.getInstance(STREAM_API_KEY, STREAM_API_SECRET);
-    return serverClient.createToken(userId);
+  try {
+    // Call our API route to generate token server-side
+    const response = await fetch('/api/stream-token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userId }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Token generation failed: ${response.status}`);
+    }
+
+    const { token } = await response.json();
+    return token;
+  } catch (error) {
+    console.error('❌ Failed to generate Stream.io token:', error);
+    
+    // Fallback: Generate a basic development token
+    if (typeof window === 'undefined') {
+      // Server-side token generation using jwt
+      const jwt = await import('jsonwebtoken');
+      const payload = {
+        user_id: userId,
+        iss: 'stream-io',
+        sub: 'user/' + userId,
+        iat: Math.floor(Date.now() / 1000),
+        exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24), // 24 hours
+      };
+      return jwt.sign(payload, STREAM_API_SECRET);
+    }
+    
+    throw new Error('Token generation failed and no fallback available on client-side');
   }
-  
-  // Client-side fallback (development only)
-  return 'development-token';
 };
 
 // Stream call configuration
