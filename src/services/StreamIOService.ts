@@ -61,8 +61,17 @@ export class StreamIOService {
     try {
       console.log('🎥 Starting live stream:', streamTitle);
       
-      // Generate unique call ID
-      const callId = `livestream_${this.user.id}_${Date.now()}`;
+      // Generate unique call ID (max 64 chars for Stream.io)
+      // Format: "live_" (5) + shortWallet (12) + "_" (1) + timestamp (13) = 31 chars
+      const shortWallet = this.user.id.length > 12 
+        ? `${this.user.id.slice(0, 8)}${this.user.id.slice(-4)}`
+        : this.user.id;
+      const callId = `live_${shortWallet}_${Date.now()}`;
+      
+      console.log(`📏 Generated call ID: ${callId} (${callId.length} chars)`);
+      if (callId.length > 64) {
+        throw new Error(`Call ID too long: ${callId.length} chars (max 64)`);
+      }
       
       // Create a livestream call
       const call = this.client.call(CALL_TYPES.LIVESTREAM, callId);
