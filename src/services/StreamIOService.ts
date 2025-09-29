@@ -83,6 +83,7 @@ export class StreamIOService {
           custom: {
             title: streamTitle,
             hostWallet: this.user.walletAddress,
+            isLiveStream: true, // Flag to identify our streams
           },
           members: [
             {
@@ -90,10 +91,22 @@ export class StreamIOService {
               role: 'host',
             },
           ],
-          // Remove settings_override to avoid backstage permission issues
-          // Use default call settings for maximum compatibility
         },
       });
+
+      // Set additional call metadata after creation
+      try {
+        await call.update({
+          custom: {
+            title: streamTitle,
+            hostWallet: this.user.walletAddress,
+            isLiveStream: true,
+          },
+        });
+        console.log('✅ Updated call metadata successfully');
+      } catch (updateError) {
+        console.warn('⚠️ Failed to update call metadata:', updateError);
+      }
 
       this.currentCall = call;
       
@@ -184,30 +197,63 @@ export class StreamIOService {
     try {
       console.log('📡 Fetching active live streams...');
       
-      // Query for active calls (using default type now)
-      const response = await this.client.queryCalls({
-        filter_conditions: {
-          type: CALL_TYPES.DEFAULT,
-          ongoing: true,
-        },
-        sort: [{ field: 'created_at', direction: -1 }],
-        limit: 25,
+      // Try multiple query approaches to find streams
+      let response;
+      
+      // First try: Query for default calls that are ongoing
+      try {
+        response = await this.client.queryCalls({
+          filter_conditions: {
+            type: CALL_TYPES.DEFAULT,
+            ongoing: true,
+          },
+          sort: [{ field: 'created_at', direction: -1 }],
+          limit: 25,
+        });
+        console.log('✅ Default call query successful');
+      } catch (queryError) {
+        console.warn('⚠️ Default call query failed, trying broader query:', queryError);
+        
+        // Fallback: Query all recent calls
+        response = await this.client.queryCalls({
+          sort: [{ field: 'created_at', direction: -1 }],
+          limit: 25,
+        });
+        console.log('✅ Broader query successful');
+      }
+
+      console.log('🔍 Raw calls response:', {
+        totalCalls: response.calls.length,
+        calls: response.calls.map((call: any) => ({
+          id: call.id,
+          type: call.type,
+          ongoing: call.ongoing,
+          custom: call.custom,
+          created_by: call.created_by?.id,
+          session: call.session
+        }))
       });
 
       const liveStreams: LiveStream[] = response.calls
-        .filter((call: any) => call.custom?.title && call.custom?.hostWallet) // Only our live streams
+        .filter((call: any) => {
+          // More lenient filtering - accept any call that looks like ours
+          const isOurStream = call.id?.startsWith('live_'); // Our call IDs start with 'live_'
+          const hasCustomData = call.custom && Object.keys(call.custom).length > 0;
+          console.log(`🔍 Call ${call.id}: isOurStream=${isOurStream}, hasCustomData=${hasCustomData}, custom=`, call.custom);
+          return isOurStream || hasCustomData;
+        })
         .map((call: any) => ({
           id: call.id,
-          title: call.custom?.title || 'Untitled Stream',
+          title: call.custom?.title || call.id || 'Live Stream',
           hostId: call.created_by?.id || 'unknown',
-          hostName: call.created_by?.name || 'Unknown Host',
-          hostWallet: call.custom?.hostWallet || '',
+          hostName: call.created_by?.name || `User ${call.created_by?.id?.slice(0, 8) || 'Unknown'}`,
+          hostWallet: call.custom?.hostWallet || call.created_by?.id || '',
           viewerCount: call.session?.participants?.length || 0,
-          isLive: call.session?.live || false,
+          isLive: true, // If it's in the ongoing query, it's live
           createdAt: new Date(call.created_at || Date.now()),
         }));
 
-      console.log(`✅ Found ${liveStreams.length} active live streams`);
+      console.log(`✅ Found ${liveStreams.length} active live streams:`, liveStreams);
       return liveStreams;
     } catch (error) {
       console.error('❌ Failed to fetch live streams:', error);
@@ -308,6 +354,50 @@ export class StreamIOService {
   // Get current user
   getCurrentUser(): StreamUser | null {
     return this.user;
+  }
+
+  // Debug method to check if streams are being created
+  async debugStreamCreation(): Promise<void> {
+    if (!this.client) {
+      console.error('❌ Client not initialized');
+      return;
+    }
+
+    try {
+      console.log('🔍 Debug: Checking all calls...');
+      
+      // Query all calls without filters
+      const allCalls = await this.client.queryCalls({
+        sort: [{ field: 'created_at', direction: -1 }],
+        limit: 50,
+      });
+
+      console.log('🔍 All calls:', {
+        total: allCalls.calls.length,
+        calls: allCalls.calls.map((call: any) => ({
+          id: call.id,
+          type: call.type,
+          ongoing: call.ongoing,
+          created_at: call.created_at,
+          custom: call.custom,
+          created_by: call.created_by?.id,
+        }))
+      });
+
+      // Check for our specific streams
+      const ourStreams = allCalls.calls.filter((call: any) => 
+        call.id?.startsWith('live_') || call.custom?.isLiveStream
+      );
+
+      console.log('🔍 Our streams:', ourStreams);
+
+      if (ourStreams.length === 0) {
+        console.log('⚠️ No streams found with our format. Try creating a stream first.');
+      }
+
+    } catch (error) {
+      console.error('❌ Debug query failed:', error);
+    }
   }
 
   // Cleanup

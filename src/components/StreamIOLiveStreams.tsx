@@ -60,7 +60,13 @@ export default function StreamIOLiveStreams({ onStreamSelect }: StreamIOLiveStre
       const streams = await streamIOService.getActiveLiveStreams();
       setLiveStreams(streams);
       
-      console.log(`✅ Loaded ${streams.length} live streams`);
+      console.log(`✅ Loaded ${streams.length} live streams:`, streams);
+      
+      // If no streams found, run debug check
+      if (streams.length === 0) {
+        console.log('ℹ️ No streams found. Running debug check...');
+        await streamIOService.debugStreamCreation();
+      }
     } catch (error) {
       console.error('❌ Failed to load live streams:', error);
       setError('Failed to load live streams');
