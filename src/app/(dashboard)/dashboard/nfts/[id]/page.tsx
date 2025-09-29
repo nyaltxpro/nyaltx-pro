@@ -65,7 +65,7 @@ interface NFTCollectionDetail {
 
 export default function NFTCollectionDetail() {
   const params = useParams();
-  const id = params.id as string;
+  const id = params?.id as string;
   
   const [collection, setCollection] = useState<NFTCollectionDetail | null>(null);
   const [loading, setLoading] = useState(true);

@@ -12,9 +12,9 @@ function TwitchCallbackContent() {
 
   useEffect(() => {
     const handleCallback = async () => {
-      const code = searchParams.get('code');
-      const error = searchParams.get('error');
-      const state = searchParams.get('state');
+      const code = searchParams?.get('code');
+      const error = searchParams?.get('error');
+      const state = searchParams?.get('state');
 
       if (error) {
         setStatus('error');

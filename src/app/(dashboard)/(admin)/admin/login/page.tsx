@@ -28,7 +28,7 @@ function AdminLoginInner() {
   const { open } = useAppKit();
   const { signMessageAsync } = useSignMessage();
 
-  const from = params.get("from") || "/admin";
+  const from = params?.get("from") || "/admin";
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();

@@ -73,7 +73,7 @@ const bannerItems: BannerItem[] = [
 export default function AdDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const adId = parseInt(params.id as string);
+  const adId = parseInt(params?.id as string);
   
   const ad = bannerItems.find(item => item.id === adId);
   

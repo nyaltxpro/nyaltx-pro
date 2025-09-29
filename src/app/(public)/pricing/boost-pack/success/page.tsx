@@ -49,12 +49,12 @@ function BoostPackSuccessContent() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
 
-  const packId = searchParams.get('pack') as keyof typeof BOOST_PACKS;
-  const tokenIds = searchParams.get('tokens')?.split(',') || [];
-  const txHash = searchParams.get('tx');
-  const promoCode = searchParams.get('promo');
-  const discountAmount = searchParams.get('discount');
-  const isFree = searchParams.get('free') === 'true';
+  const packId = searchParams?.get('pack') as keyof typeof BOOST_PACKS;
+  const tokenIds = searchParams?.get('tokens')?.split(',') || [];
+  const txHash = searchParams?.get('tx');
+  const promoCode = searchParams?.get('promo');
+  const discountAmount = searchParams?.get('discount');
+  const isFree = searchParams?.get('free') === 'true';
 
   const boostPack = BOOST_PACKS[packId];
 

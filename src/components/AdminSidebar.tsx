@@ -29,7 +29,7 @@ interface SidebarItemProps {
   icon: React.ReactNode;
   text: string;
   href: string;
-  isActive: boolean;
+  isActive: any;
   isExpanded: boolean;
 }
 

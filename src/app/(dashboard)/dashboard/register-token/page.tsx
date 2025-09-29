@@ -38,8 +38,8 @@ function RegisterTokenContent() {
   } = useAppSelector((state) => state.tokens);
   
   // Redirect parameters
-  const redirectPath = searchParams.get('redirect');
-  const paymentMethod = searchParams.get('method');
+  const redirectPath = searchParams?.get('redirect');
+  const paymentMethod = searchParams?.get('method');
   
   // Local UI state (not managed by Redux)
   const [submitted, setSubmitted] = useState(false);

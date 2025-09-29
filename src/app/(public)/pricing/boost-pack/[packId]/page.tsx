@@ -194,7 +194,7 @@ export default function BoostPackCheckout() {
   // Redux state
   const { userTokens, tokenBoosts, isLoading } = useAppSelector((state) => state.tokens);
 
-  const packId = params.packId as string;
+  const packId = params?.packId as string;
   const boostPack = BOOST_PACKS[packId as keyof typeof BOOST_PACKS];
 
   const [selectedTokens, setSelectedTokens] = useState<string[]>([]);

@@ -38,12 +38,12 @@ function RaceToLibertySuccessContent() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
 
-  const tier = searchParams.get('tier') as keyof typeof TIER_INFO;
-  const token = searchParams.get('token');
-  const promoCode = searchParams.get('promo');
-  const points = searchParams.get('points');
-  const isFree = searchParams.get('free') === 'true';
-  const txHash = searchParams.get('tx');
+  const tier = searchParams?.get('tier') as keyof typeof TIER_INFO;
+  const token = searchParams?.get('token');
+  const promoCode = searchParams?.get('promo');
+  const points = searchParams?.get('points');
+  const isFree = searchParams?.get('free') === 'true';
+  const txHash = searchParams?.get('tx');
 
   const tierInfo = TIER_INFO[tier];
 

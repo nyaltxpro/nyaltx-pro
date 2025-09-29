@@ -62,7 +62,7 @@ async function fetchMetadata(tokenData: PumpFunToken): Promise<PumpFunToken> {
 const TokenDetailPage = () => {
   const params = useParams();
   const router = useRouter();
-  const mint = params.mint as string;
+  const mint = params?.mint as string;
   
   const [token, setToken] = useState<PumpFunToken | null>(null);
   const [loading, setLoading] = useState(true);

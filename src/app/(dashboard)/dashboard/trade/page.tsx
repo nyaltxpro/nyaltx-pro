@@ -73,11 +73,11 @@ const getChainName = (chainId: number): string => {
 // Move useSearchParams into a child and wrap with Suspense to satisfy Next.js requirements
 function TradePageContent() {
   const searchParams = useSearchParams();
-  const baseToken = (searchParams.get('base') || '').toUpperCase();
-  const chainParam = searchParams.get('chain')?.toLowerCase() || '';
-  const addressParam = searchParams.get('address')?.toLowerCase() || '';
-  const quoteToken = searchParams.get('quote') || 'USDT';
-  const videoId = searchParams.get('video') || 'VNTK2Bwyq7s';
+  const baseToken = (searchParams?.get('base') || '').toUpperCase();
+  const chainParam = searchParams?.get('chain')?.toLowerCase() || '';
+  const addressParam = searchParams?.get('address')?.toLowerCase() || '';
+  const quoteToken = searchParams?.get('quote') || 'USDT';
+  const videoId = searchParams?.get('video') || 'VNTK2Bwyq7s';
 
   // Scroll to top when route changes
   useEffect(() => {
