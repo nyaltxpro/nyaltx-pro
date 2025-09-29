@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAccount } from 'wagmi';
 import dynamic from 'next/dynamic';
+import io from 'socket.io-client';
 
 const WebRTCBroadcaster = dynamic(() => import('@/components/WebRTCBroadcaster'), { ssr: false });
 const WebRTCViewer = dynamic(() => import('@/components/WebRTCViewer'), { ssr: false });
@@ -52,6 +53,7 @@ export default function LiveStreamPage() {
   const [selectedStream, setSelectedStream] = useState<LiveStreamData | null>(null);
   const [streamTitle, setStreamTitle] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
+  const [activeStreams, setActiveStreams] = useState<any[]>([]);
   const [liveStreams, setLiveStreams] = useState<LiveStreamData[]>([
     {
       id: '1',
@@ -82,6 +84,40 @@ export default function LiveStreamPage() {
   ]);
 
   useEffect(() => {
+    // Connect to Socket.IO to get real active streams
+    const socket = io({
+      path: '/api/socket',
+      transports: ['websocket', 'polling']
+    });
+
+    socket.on('connect', () => {
+      console.log('Connected to Socket.IO for stream updates');
+      socket.emit('get-active-streams');
+    });
+
+    socket.on('active-streams', (streams) => {
+      console.log('Received active streams:', streams);
+      setActiveStreams(streams);
+    });
+
+    socket.on('stream-started', ({ broadcasterId, streamTitle, walletAddress }) => {
+      console.log('New stream started:', broadcasterId, streamTitle);
+      socket.emit('get-active-streams'); // Refresh active streams
+    });
+
+    socket.on('stream-ended', ({ broadcasterId }) => {
+      console.log('Stream ended:', broadcasterId);
+      socket.emit('get-active-streams'); // Refresh active streams
+    });
+
+    socket.on('viewer-count-update', ({ broadcasterId, count }) => {
+      setActiveStreams(prev => prev.map(stream => 
+        stream.broadcasterId === broadcasterId 
+          ? { ...stream, viewerCount: count }
+          : stream
+      ));
+    });
+
     // Simulate real-time stats updates
     const interval = setInterval(() => {
       setStats(prev => ({
@@ -95,14 +131,20 @@ export default function LiveStreamPage() {
         }))
       }));
 
-      // Update live stream viewer counts
+      // Update live stream viewer counts for demo streams
       setLiveStreams(prev => prev.map(stream => ({
         ...stream,
         viewerCount: stream.viewerCount + Math.floor(Math.random() * 10) - 5
       })));
-    }, 5000);
 
-    return () => clearInterval(interval);
+      // Periodically refresh active streams
+      socket.emit('get-active-streams');
+    }, 10000);
+
+    return () => {
+      socket.disconnect();
+      clearInterval(interval);
+    };
   }, []);
 
   const formatNumber = (num: number) => {
@@ -233,10 +275,88 @@ export default function LiveStreamPage() {
 
       {/* Live Streams Grid */}
       <div className="space-y-6">
-        <h2 className="text-xl font-bold text-white">Active Live Streams</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-bold text-white">Active Live Streams</h2>
+          <div className="text-sm text-gray-400">
+            {activeStreams.length} WebRTC streams • {liveStreams.length} demo streams
+          </div>
+        </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {liveStreams.map((stream) => (
+        {/* Real WebRTC Streams */}
+        {activeStreams.length > 0 && (
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-cyan-400">🔴 Live WebRTC Streams</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {activeStreams.map((stream) => (
+                <div
+                  key={stream.broadcasterId}
+                  className="bg-gradient-to-b from-white/5 to-white/[0.03] backdrop-blur-md border border-cyan-500/30 rounded-xl overflow-hidden hover:border-cyan-500/50 transition-all duration-300 hover:-translate-y-1 cursor-pointer"
+                  onClick={() => setSelectedStream({
+                    id: stream.broadcasterId,
+                    title: stream.streamTitle || 'Live Stream',
+                    description: 'Real-time WebRTC stream',
+                    category: 'live',
+                    streamerAddress: stream.walletAddress || '',
+                    streamerName: `${stream.walletAddress?.slice(0, 6)}...${stream.walletAddress?.slice(-4)}` || 'Anonymous',
+                    startTime: Date.now(),
+                    viewerCount: stream.viewerCount || 0,
+                    isLive: true,
+                    likes: 0
+                  })}
+                >
+                  {/* Stream Thumbnail */}
+                  <div className="relative aspect-video bg-gradient-to-br from-cyan-900/20 to-purple-900/20 flex items-center justify-center">
+                    <FaPlay className="w-12 h-12 text-white/60" />
+                    
+                    {/* Live Badge */}
+                    <div className="absolute top-3 left-3 flex items-center gap-2 bg-red-600 px-2 py-1 rounded-full">
+                      <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                      <span className="text-white text-xs font-medium">LIVE</span>
+                    </div>
+                    
+                    {/* WebRTC Badge */}
+                    <div className="absolute top-3 right-3 bg-cyan-600 px-2 py-1 rounded text-white text-xs">
+                      WebRTC
+                    </div>
+                    
+                    {/* Viewer Count */}
+                    <div className="absolute bottom-3 right-3 flex items-center gap-1 bg-black/60 px-2 py-1 rounded text-white text-xs">
+                      <FaEye />
+                      {stream.viewerCount || 0}
+                    </div>
+                  </div>
+                  
+                  {/* Stream Info */}
+                  <div className="p-4">
+                    <h3 className="text-white font-semibold mb-2 line-clamp-2">{stream.streamTitle || 'Live Stream'}</h3>
+                    <p className="text-gray-400 text-sm mb-3 line-clamp-2">Real-time WebRTC stream</p>
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 bg-cyan-600 rounded-full flex items-center justify-center">
+                          <span className="text-white text-xs">{stream.walletAddress?.[0] || 'A'}</span>
+                        </div>
+                        <span className="text-gray-300 text-sm">
+                          {stream.walletAddress ? `${stream.walletAddress.slice(0, 6)}...${stream.walletAddress.slice(-4)}` : 'Anonymous'}
+                        </span>
+                      </div>
+                      
+                      <span className="px-2 py-1 rounded-full text-xs bg-cyan-500/20 text-cyan-400">
+                        live
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {/* Demo Streams */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-gray-400">📺 Demo Streams</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {liveStreams.map((stream) => (
             <div
               key={stream.id}
               className="bg-gradient-to-b from-white/5 to-white/[0.03] backdrop-blur-md border border-white/10 rounded-xl overflow-hidden hover:border-cyan-500/30 transition-all duration-300 hover:-translate-y-1 cursor-pointer"
@@ -301,6 +421,7 @@ export default function LiveStreamPage() {
             </button>
           </div>
         )}
+        </div>
       </div>
 
       {/* Quick Actions */}

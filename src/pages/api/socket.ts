@@ -1,18 +1,19 @@
 import { Server } from 'socket.io';
-import type { NextRequest } from 'next/server';
+import type { NextApiRequest, NextApiResponse } from 'next';
 
 // Simple in-memory maps (for demo only - use Redis for production)
 const broadcasters: Record<string, { socketId: string; walletAddress?: string; streamTitle?: string }> = {};
 const viewers: Record<string, { socketId: string; broadcasterId: string; walletAddress?: string }> = {};
 
-let io: Server | null = null;
+interface SocketServer {
+  io?: Server;
+}
 
-export async function GET(req: NextRequest) {
-  if (!io) {
+export default function handler(req: NextApiRequest, res: NextApiResponse & { socket: { server: SocketServer } }) {
+  if (!res.socket?.server?.io) {
     console.log('Initializing Socket.IO server for WebRTC signaling');
     
-    // Create Socket.IO server
-    io = new Server({
+    const io = new Server(res.socket.server as any, {
       path: '/api/socket',
       addTrailingSlash: false,
       cors: {
@@ -20,6 +21,8 @@ export async function GET(req: NextRequest) {
         methods: ["GET", "POST"]
       }
     });
+    
+    (res.socket.server as any).io = io;
 
     io.on('connection', (socket) => {
       console.log('Client connected:', socket.id);
@@ -55,14 +58,14 @@ export async function GET(req: NextRequest) {
           };
           
           // Notify broadcaster about new viewer
-          io?.to(broadcaster.socketId).emit('viewer-join', { 
+          io.to(broadcaster.socketId).emit('viewer-join', { 
             viewerId, 
             walletAddress 
           });
           
           // Update viewer count
           const viewerCount = Object.values(viewers).filter(v => v.broadcasterId === broadcasterId).length;
-          io?.emit('viewer-count-update', { broadcasterId, count: viewerCount });
+          io.emit('viewer-count-update', { broadcasterId, count: viewerCount });
         } else {
           // No broadcaster found
           socket.emit('no-broadcaster', { broadcasterId });
@@ -73,7 +76,7 @@ export async function GET(req: NextRequest) {
       socket.on('broadcaster-signal', ({ broadcasterId, viewerId, signal }) => {
         const viewer = viewers[viewerId];
         if (viewer) {
-          io?.to(viewer.socketId).emit('broadcaster-signal', { 
+          io.to(viewer.socketId).emit('broadcaster-signal', { 
             broadcasterId, 
             viewerId, 
             signal 
@@ -85,7 +88,7 @@ export async function GET(req: NextRequest) {
       socket.on('viewer-signal', ({ broadcasterId, viewerId, signal }) => {
         const broadcaster = broadcasters[broadcasterId];
         if (broadcaster) {
-          io?.to(broadcaster.socketId).emit('viewer-signal', { 
+          io.to(broadcaster.socketId).emit('viewer-signal', { 
             viewerId, 
             signal 
           });
@@ -100,7 +103,7 @@ export async function GET(req: NextRequest) {
         const broadcaster = broadcasters[broadcasterId];
         if (broadcaster) {
           // Send to broadcaster
-          io?.to(broadcaster.socketId).emit('chat-message', {
+          io.to(broadcaster.socketId).emit('chat-message', {
             broadcasterId,
             message,
             senderAddress,
@@ -112,7 +115,7 @@ export async function GET(req: NextRequest) {
           Object.values(viewers)
             .filter(v => v.broadcasterId === broadcasterId)
             .forEach(viewer => {
-              io?.to(viewer.socketId).emit('chat-message', {
+              io.to(viewer.socketId).emit('chat-message', {
                 broadcasterId,
                 message,
                 senderAddress,
@@ -131,7 +134,7 @@ export async function GET(req: NextRequest) {
           Object.values(viewers)
             .filter(v => v.broadcasterId === broadcasterId)
             .forEach(viewer => {
-              io?.to(viewer.socketId).emit('stream-stats', { broadcasterId, stats });
+              io.to(viewer.socketId).emit('stream-stats', { broadcasterId, stats });
             });
         }
       });
@@ -150,7 +153,7 @@ export async function GET(req: NextRequest) {
             Object.values(viewers)
               .filter(v => v.broadcasterId === broadcasterId)
               .forEach(viewer => {
-                io?.to(viewer.socketId).emit('stream-ended', { broadcasterId });
+                io.to(viewer.socketId).emit('stream-ended', { broadcasterId });
               });
             
             // Remove all viewers of this stream
@@ -175,7 +178,7 @@ export async function GET(req: NextRequest) {
             
             // Update viewer count
             const viewerCount = Object.values(viewers).filter(v => v.broadcasterId === broadcasterId).length;
-            io?.emit('viewer-count-update', { broadcasterId, count: viewerCount });
+            io.emit('viewer-count-update', { broadcasterId, count: viewerCount });
             break;
           }
         }
@@ -195,10 +198,5 @@ export async function GET(req: NextRequest) {
     });
   }
 
-  return new Response('Socket.IO server initialized', { status: 200 });
-}
-
-export async function POST(req: NextRequest) {
-  // Handle Socket.IO upgrade for WebSocket connections
-  return new Response('Socket.IO endpoint', { status: 200 });
+  res.end();
 }
