@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useAccount } from 'wagmi';
 import { streamingService, ChatMessage } from '@/services/StreamingService';
 import { v4 as uuidv4 } from 'uuid';
-import { FaVideo, FaVideoSlash, FaMicrophone, FaMicrophoneSlash, FaDesktop, FaStop, FaUsers, FaComments, FaPaperPlane } from 'react-icons/fa';
+import { FaVideo, FaVideoSlash, FaMicrophone, FaMicrophoneSlash, FaDesktop, FaStop, FaUsers, FaComments, FaPaperPlane, FaCamera, FaCameraRetro } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 
 interface WebRTCBroadcasterProps {
@@ -25,6 +25,8 @@ export default function WebRTCBroadcasterV2({ onStreamEnd, streamTitle }: WebRTC
   const [isStreaming, setIsStreaming] = useState(false);
   const [isVideoEnabled, setIsVideoEnabled] = useState(true);
   const [isAudioEnabled, setIsAudioEnabled] = useState(true);
+  const [isWebcamEnabled, setIsWebcamEnabled] = useState(false);
+  const [webcamStream, setWebcamStream] = useState<MediaStream | null>(null);
   const [viewerCount, setViewerCount] = useState(0);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState('');
@@ -37,6 +39,7 @@ export default function WebRTCBroadcasterV2({ onStreamEnd, streamTitle }: WebRTC
   const [connected, setConnected] = useState(false);
 
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
+  const webcamVideoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const startTimeRef = useRef<number>(0);
 
@@ -116,22 +119,34 @@ export default function WebRTCBroadcasterV2({ onStreamEnd, streamTitle }: WebRTC
         }
       });
 
-      console.log('📹 Screen share obtained, requesting camera...');
-      // Get camera stream
+      console.log('📹 Screen share obtained');
+      
+      // Get camera stream if webcam is enabled
       let cameraStream: MediaStream | null = null;
-      try {
-        cameraStream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            width: { ideal: 640, max: 1280 },
-            height: { ideal: 480, max: 720 },
-            frameRate: { ideal: 30 }
-          },
-          audio: false // Use screen audio instead
-        });
-        console.log('📷 Camera obtained');
-      } catch (err) {
-        console.warn('⚠️ Camera not available:', err);
-        toast('Camera not available, using screen only', { icon: '⚠️' });
+      if (isWebcamEnabled) {
+        try {
+          cameraStream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              width: { ideal: 640, max: 1280 },
+              height: { ideal: 480, max: 720 },
+              frameRate: { ideal: 30 }
+            },
+            audio: false // Use screen audio instead
+          });
+          setWebcamStream(cameraStream);
+          
+          // Display webcam in separate video element
+          if (webcamVideoRef.current) {
+            webcamVideoRef.current.srcObject = cameraStream;
+          }
+          
+          console.log('📷 Webcam obtained and enabled');
+          toast.success('Webcam enabled!');
+        } catch (err) {
+          console.warn('⚠️ Webcam not available:', err);
+          toast.error('Webcam not available');
+          setIsWebcamEnabled(false);
+        }
       }
 
       // Combine streams
@@ -230,9 +245,22 @@ export default function WebRTCBroadcasterV2({ onStreamEnd, streamTitle }: WebRTC
       streamRef.current = null;
     }
 
-    // Clear video element
+    // Stop webcam stream
+    if (webcamStream) {
+      webcamStream.getTracks().forEach(track => {
+        track.stop();
+        console.log('🛑 Stopped webcam track:', track.kind);
+      });
+      setWebcamStream(null);
+    }
+
+    // Clear video elements
     if (localVideoRef.current) {
       localVideoRef.current.srcObject = null;
+    }
+    
+    if (webcamVideoRef.current) {
+      webcamVideoRef.current.srcObject = null;
     }
 
     // End stream on server
@@ -275,6 +303,50 @@ export default function WebRTCBroadcasterV2({ onStreamEnd, streamTitle }: WebRTC
         track.enabled = !track.enabled;
       });
       setIsAudioEnabled(!isAudioEnabled);
+    }
+  };
+
+  const toggleWebcam = async () => {
+    if (!isWebcamEnabled) {
+      // Enable webcam
+      try {
+        const cameraStream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            width: { ideal: 640, max: 1280 },
+            height: { ideal: 480, max: 720 },
+            frameRate: { ideal: 30 }
+          },
+          audio: false
+        });
+        
+        setWebcamStream(cameraStream);
+        setIsWebcamEnabled(true);
+        
+        // Display webcam in video element
+        if (webcamVideoRef.current) {
+          webcamVideoRef.current.srcObject = cameraStream;
+        }
+        
+        console.log('📷 Webcam enabled');
+        toast.success('Webcam enabled!');
+      } catch (error) {
+        console.error('Error enabling webcam:', error);
+        toast.error('Failed to enable webcam');
+      }
+    } else {
+      // Disable webcam
+      if (webcamStream) {
+        webcamStream.getTracks().forEach(track => track.stop());
+        setWebcamStream(null);
+      }
+      
+      if (webcamVideoRef.current) {
+        webcamVideoRef.current.srcObject = null;
+      }
+      
+      setIsWebcamEnabled(false);
+      console.log('📷 Webcam disabled');
+      toast('Webcam disabled');
     }
   };
 
@@ -343,6 +415,22 @@ export default function WebRTCBroadcasterV2({ onStreamEnd, streamTitle }: WebRTC
           className="w-full h-full object-cover"
         />
         
+        {/* Webcam Overlay */}
+        {isWebcamEnabled && webcamStream && (
+          <div className="absolute bottom-4 right-4 w-48 h-36 bg-gray-800 rounded-lg overflow-hidden border-2 border-cyan-500">
+            <video
+              ref={webcamVideoRef}
+              autoPlay
+              playsInline
+              muted
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute top-2 left-2 bg-black/60 px-2 py-1 rounded text-xs text-white">
+              Webcam
+            </div>
+          </div>
+        )}
+        
         {!isStreaming && (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-900/80">
             <div className="text-center">
@@ -408,6 +496,17 @@ export default function WebRTCBroadcasterV2({ onStreamEnd, streamTitle }: WebRTC
                 }`}
               >
                 {isAudioEnabled ? <FaMicrophone /> : <FaMicrophoneSlash />}
+              </button>
+              
+              <button
+                onClick={toggleWebcam}
+                className={`p-3 rounded-lg transition-colors ${
+                  isWebcamEnabled 
+                    ? 'bg-cyan-600 text-white hover:bg-cyan-700' 
+                    : 'bg-gray-700 text-white hover:bg-gray-600'
+                }`}
+              >
+                {isWebcamEnabled ? <FaCamera /> : <FaCameraRetro />}
               </button>
             </>
           )}

@@ -6,7 +6,7 @@ import dynamic from 'next/dynamic';
 import { streamingService } from '@/services/StreamingService';
 
 const WebRTCBroadcaster = dynamic(() => import('@/components/WebRTCBroadcasterV2'), { ssr: false });
-const WebRTCViewer = dynamic(() => import('@/components/WebRTCViewer'), { ssr: false });
+const WebRTCViewer = dynamic(() => import('@/components/WebRTCViewerV2'), { ssr: false });
 import { FaRocket, FaFire, FaUsers, FaChartLine, FaGlobe, FaArrowUp, FaPlay, FaPlus, FaEye } from 'react-icons/fa';
 import Image from 'next/image';
 
