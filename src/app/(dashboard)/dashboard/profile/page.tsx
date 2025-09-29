@@ -155,20 +155,7 @@ export default function ProfilePage() {
           )}
         </div>
 
-        {derivedConnected && (
-          <div className="mt-4 md:mt-0 flex items-center gap-3">
-            <div className="bg-gradient-to-r from-gray-800/80 to-gray-900/80 backdrop-blur-sm rounded-xl px-6 py-3 flex items-center border border-gray-700/50">
-              <FaEthereum className="text-blue-400 mr-3 text-xl" />
-              <div>
-                <div className="text-white font-semibold">{mockUser.ethBalance} ETH</div>
-                <div className="text-xs text-gray-400">Main Balance</div>
-              </div>
-            </div>
-            <button className="bg-gradient-to-r from-gray-800/80 to-gray-900/80 backdrop-blur-sm hover:from-gray-700/80 hover:to-gray-800/80 p-3 rounded-xl text-white border border-gray-700/50 transition-all duration-200">
-              <BiEdit />
-            </button>
-          </div>
-        )}
+    
       </div>
 
       {/* Tabs */}
