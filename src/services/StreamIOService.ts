@@ -76,7 +76,7 @@ export class StreamIOService {
       // Create a livestream call
       const call = this.client.call(CALL_TYPES.LIVESTREAM, callId);
       
-      // Join the call as host
+      // Join the call as host with public access
       await call.join({
         create: true,
         data: {
@@ -90,8 +90,16 @@ export class StreamIOService {
               role: 'host',
             },
           ],
-          // Note: settings_override API may vary by Stream.io version
-          // Using basic call creation for compatibility
+          settings_override: {
+            // Allow anyone to join the call
+            limits: {
+              max_participants: 1000,
+            },
+            // Disable backstage mode for public access
+            backstage: {
+              enabled: false,
+            },
+          },
         },
       });
 
@@ -117,8 +125,19 @@ export class StreamIOService {
       // Get the call
       const call = this.client.call(CALL_TYPES.LIVESTREAM, callId);
       
-      // Join as viewer
-      await call.join();
+      // Join as viewer with create: false (don't create if doesn't exist)
+      await call.join({
+        create: false,
+        data: {
+          // Add viewer as member if needed
+          members: [
+            {
+              user_id: this.user.id,
+              role: 'viewer',
+            },
+          ],
+        },
+      });
       
       this.currentCall = call;
       
@@ -126,7 +145,20 @@ export class StreamIOService {
       return call;
     } catch (error) {
       console.error('❌ Failed to join live stream:', error);
-      throw error;
+      
+      // If join failed, try without adding as member (for public calls)
+      try {
+        console.log('🔄 Retrying join without member addition...');
+        const call = this.client.call(CALL_TYPES.LIVESTREAM, callId);
+        await call.join({ create: false });
+        
+        this.currentCall = call;
+        console.log('✅ Joined live stream successfully (retry)');
+        return call;
+      } catch (retryError) {
+        console.error('❌ Retry also failed:', retryError);
+        throw new Error('Failed to join stream. Stream may have ended or is not accessible.');
+      }
     }
   }
 

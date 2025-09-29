@@ -55,6 +55,7 @@ export default function StreamIOViewer({ streamId, streamTitle, onStreamEnd }: S
         await streamIOService.initialize(user);
         
         // Join the live stream
+        console.log('🎯 Attempting to join stream:', streamId);
         const joinedCall = await streamIOService.joinLiveStream(streamId);
         
         setCall(joinedCall);
@@ -79,10 +80,23 @@ export default function StreamIOViewer({ streamId, streamTitle, onStreamEnd }: S
 
         console.log('✅ Successfully joined stream:', streamId);
         toast.success('Connected to stream!');
-      } catch (error) {
+      } catch (error: any) {
         console.error('❌ Failed to join stream:', error);
-        setError('Failed to connect to stream. Stream may have ended.');
-        toast.error('Failed to connect to stream');
+        
+        // Provide more specific error messages
+        let errorMessage = 'Failed to connect to stream. Stream may have ended.';
+        if (error?.message) {
+          errorMessage = error.message;
+        } else if (error?.response?.data?.message) {
+          errorMessage = error.response.data.message;
+        } else if (error?.toString().includes('not found')) {
+          errorMessage = 'Stream not found. It may have ended or the ID is incorrect.';
+        } else if (error?.toString().includes('permission')) {
+          errorMessage = 'Permission denied. You may not have access to this stream.';
+        }
+        
+        setError(errorMessage);
+        toast.error(errorMessage);
       } finally {
         setIsConnecting(false);
       }
