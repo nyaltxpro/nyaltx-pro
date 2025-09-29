@@ -312,7 +312,7 @@ export default function ProfilePage() {
 
 
       {/* Social Links Management Tab */}
-
+            <br/>
       <div>
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-white mb-4">Manage Token Social Links</h2>
