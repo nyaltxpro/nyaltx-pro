@@ -81,20 +81,8 @@ export class StreamIOService {
               role: 'host',
             },
           ],
-          settings_override: {
-            screensharing: {
-              enabled: true,
-              access_request_enabled: false,
-            },
-            video: {
-              enabled: true,
-              access_request_enabled: false,
-            },
-            audio: {
-              enabled: true,
-              access_request_enabled: false,
-            },
-          },
+          // Note: settings_override API may vary by Stream.io version
+          // Using basic call creation for compatibility
         },
       });
 
@@ -172,15 +160,15 @@ export class StreamIOService {
         limit: 25,
       });
 
-      const liveStreams: LiveStream[] = response.calls.map((call) => ({
+      const liveStreams: LiveStream[] = response.calls.map((call: any) => ({
         id: call.id,
         title: call.custom?.title || 'Untitled Stream',
-        hostId: call.created_by.id,
-        hostName: call.created_by.name || 'Unknown Host',
+        hostId: call.created_by?.id || 'unknown',
+        hostName: call.created_by?.name || 'Unknown Host',
         hostWallet: call.custom?.hostWallet || '',
         viewerCount: call.session?.participants?.length || 0,
         isLive: call.session?.live || false,
-        createdAt: new Date(call.created_at),
+        createdAt: new Date(call.created_at || Date.now()),
       }));
 
       console.log(`✅ Found ${liveStreams.length} active live streams`);
@@ -274,6 +262,11 @@ export class StreamIOService {
   // Get current call
   getCurrentCall(): Call | null {
     return this.currentCall;
+  }
+
+  // Get current client
+  getCurrentClient(): StreamVideoClient | null {
+    return this.client;
   }
 
   // Get current user

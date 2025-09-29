@@ -58,9 +58,7 @@ export default function StreamIOViewer({ streamId, streamTitle, onStreamEnd }: S
         const joinedCall = await streamIOService.joinLiveStream(streamId);
         
         setCall(joinedCall);
-        // Get client from service instead of call
-        const currentClient = streamIOService.getCurrentCall();
-        setClient(currentClient ? (currentClient as any).client : null);
+        setClient(streamIOService.getCurrentClient());
         setIsConnected2Stream(true);
         
         // Monitor participant count

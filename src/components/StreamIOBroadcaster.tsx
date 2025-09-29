@@ -51,7 +51,7 @@ export default function StreamIOBroadcaster({ onStreamEnd, streamTitle }: Stream
         };
 
         await streamIOService.initialize(user);
-        setClient(streamIOService.getCurrentCall()?.client || null);
+        setClient(streamIOService.getCurrentClient());
         
         console.log('✅ Stream.io service initialized');
         toast.success('Streaming service ready!');
