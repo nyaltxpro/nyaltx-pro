@@ -310,6 +310,7 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
         }
       } else {
         // Add to favorites
+        const imageUri = tokenSocialLinks?.imageUri || headerImageUrl || null;
         const response = await fetch('/api/favorites', {
           method: 'POST',
           headers: {
@@ -321,6 +322,7 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
             tokenSymbol: baseToken,
             tokenName: tokenName,
             chainId: chainId,
+            imageUri: imageUri,
           }),
         });
 

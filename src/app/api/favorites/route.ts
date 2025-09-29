@@ -9,6 +9,7 @@ interface Favorite {
   tokenSymbol: string;
   tokenName: string;
   chainId: number;
+  imageUri?: string;
   createdAt: Date;
 }
 
@@ -35,6 +36,7 @@ export async function GET(request: NextRequest) {
       token_symbol: fav.tokenSymbol,
       token_name: fav.tokenName,
       chain_id: fav.chainId,
+      image_uri: fav.imageUri || null,
       created_at: fav.createdAt.toISOString()
     }));
 
@@ -48,7 +50,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { walletAddress, tokenAddress, tokenSymbol, tokenName, chainId } = body;
+    const { walletAddress, tokenAddress, tokenSymbol, tokenName, chainId, imageUri } = body;
 
     if (!walletAddress || !tokenAddress || !tokenSymbol || !tokenName) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -73,6 +75,7 @@ export async function POST(request: NextRequest) {
       tokenSymbol: tokenSymbol.toUpperCase(),
       tokenName: tokenName,
       chainId: chainId || 1,
+      imageUri: imageUri || null,
       createdAt: new Date()
     };
 
@@ -87,6 +90,7 @@ export async function POST(request: NextRequest) {
       token_symbol: insertedFavorite.tokenSymbol,
       token_name: insertedFavorite.tokenName,
       chain_id: insertedFavorite.chainId,
+      image_uri: insertedFavorite.imageUri || null,
       created_at: insertedFavorite.createdAt.toISOString()
     } : null;
 

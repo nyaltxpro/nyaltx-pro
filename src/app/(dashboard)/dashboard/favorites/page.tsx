@@ -15,6 +15,7 @@ interface Favorite {
   token_symbol: string;
   token_name: string;
   chain_id: number;
+  image_uri?: string | null;
   created_at: string;
 }
 
@@ -215,17 +216,32 @@ export default function FavoritesPage() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 rounded-full overflow-hidden bg-[#1a2932] flex items-center justify-center">
-                        <Image
-                          src={getCryptoIconUrl(favorite.token_symbol)}
-                          alt={favorite.token_symbol}
-                          width={48}
-                          height={48}
-                          unoptimized
-                          onError={(e) => {
-                            const target = e.currentTarget;
-                            target.src = '/crypto-icons/color/generic.svg';
-                          }}
-                        />
+                        {favorite.image_uri ? (
+                          <Image
+                            src={favorite.image_uri}
+                            alt={favorite.token_symbol}
+                            width={48}
+                            height={48}
+                            unoptimized
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              const target = e.currentTarget;
+                              target.src = getCryptoIconUrl(favorite.token_symbol);
+                            }}
+                          />
+                        ) : (
+                          <Image
+                            src={getCryptoIconUrl(favorite.token_symbol)}
+                            alt={favorite.token_symbol}
+                            width={48}
+                            height={48}
+                            unoptimized
+                            onError={(e) => {
+                              const target = e.currentTarget;
+                              target.src = '/crypto-icons/color/generic.svg';
+                            }}
+                          />
+                        )}
                       </div>
                       
                       <div>
