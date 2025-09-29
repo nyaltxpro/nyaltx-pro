@@ -73,6 +73,7 @@ export default function FavoritesPage() {
       const response = await fetch(`/api/favorites?wallet=${address}`);
       if (response.ok) {
         const { favorites } = await response.json();
+        console.log('Fetched favorites from API:', favorites);
         setFavorites(favorites);
       } else {
         toast.error('Failed to fetch favorites');
@@ -208,7 +209,10 @@ export default function FavoritesPage() {
             </div>
           ) : (
             <div className="grid gap-4">
-              {favorites.map((favorite) => (
+              {favorites.map((favorite) => {
+                // Debug: Log the favorite data to see if image_uri is present
+                console.log('Favorite data:', favorite);
+                return (
                 <div
                   key={favorite.id}
                   className="bg-[#0f1923] rounded-lg p-6 border border-gray-800 hover:border-gray-700 transition-all duration-200"
@@ -216,32 +220,24 @@ export default function FavoritesPage() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 rounded-full overflow-hidden bg-[#1a2932] flex items-center justify-center">
-                        {favorite.image_uri ? (
-                          <Image
-                            src={favorite.image_uri}
-                            alt={favorite.token_symbol}
-                            width={48}
-                            height={48}
-                            unoptimized
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              const target = e.currentTarget;
+                        <Image
+                          src={favorite.image_uri || getCryptoIconUrl(favorite.token_symbol)}
+                          alt={favorite.token_symbol}
+                          width={48}
+                          height={48}
+                          unoptimized
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            const target = e.currentTarget;
+                            // First fallback: try generic crypto icon if custom image fails
+                            if (favorite.image_uri && target.src === favorite.image_uri) {
                               target.src = getCryptoIconUrl(favorite.token_symbol);
-                            }}
-                          />
-                        ) : (
-                          <Image
-                            src={getCryptoIconUrl(favorite.token_symbol)}
-                            alt={favorite.token_symbol}
-                            width={48}
-                            height={48}
-                            unoptimized
-                            onError={(e) => {
-                              const target = e.currentTarget;
+                            } else {
+                              // Final fallback: generic icon
                               target.src = '/crypto-icons/color/generic.svg';
-                            }}
-                          />
-                        )}
+                            }
+                          }}
+                        />
                       </div>
                       
                       <div>
@@ -250,6 +246,11 @@ export default function FavoritesPage() {
                           <span className="text-sm text-gray-400 uppercase font-mono">
                             {favorite.token_symbol}
                           </span>
+                          {favorite.image_uri && (
+                            <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded-full">
+                              IMG
+                            </span>
+                          )}
                           <div className={`px-2 py-1 rounded-full text-xs font-medium text-white ${chainColors[favorite.chain_id] || 'bg-gray-500'}`}>
                             {chainNames[favorite.chain_id] || `Chain ${favorite.chain_id}`}
                           </div>
@@ -291,7 +292,8 @@ export default function FavoritesPage() {
                     </div>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
