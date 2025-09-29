@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 let broadcasters: Record<string, { walletAddress?: string; streamTitle?: string; lastSeen: number }> = {};
 let viewers: Record<string, { broadcasterId: string; walletAddress?: string; lastSeen: number }> = {};
 let chatMessages: Record<string, Array<{ message: string; senderAddress: string; senderName: string; timestamp: number }>> = {};
+let webrtcSignals: Record<string, Array<{ fromId: string; toId: string; signal: any; timestamp: number }>> = {};
 
 // Cleanup old connections (older than 30 seconds)
 const cleanupOldConnections = () => {
@@ -33,7 +34,7 @@ export async function GET(req: NextRequest) {
   cleanupOldConnections();
 
   switch (action) {
-    case 'active-streams':
+    case 'get-active-streams':
       const activeStreams = Object.entries(broadcasters).map(([broadcasterId, broadcaster]) => ({
         broadcasterId,
         streamTitle: broadcaster.streamTitle,
@@ -42,6 +43,20 @@ export async function GET(req: NextRequest) {
       }));
       
       return NextResponse.json({ streams: activeStreams });
+
+    case 'get-signals':
+      const signalId = searchParams.get('id');
+      const signalType = searchParams.get('type');
+      
+      if (!signalId || !signalType) {
+        return NextResponse.json({ error: 'Missing id or type' }, { status: 400 });
+      }
+      
+      const signals = webrtcSignals[signalId] || [];
+      // Clear signals after reading
+      delete webrtcSignals[signalId];
+      
+      return NextResponse.json({ signals });
 
     case 'chat':
       const broadcasterId = searchParams.get('broadcasterId');
@@ -169,6 +184,27 @@ export async function POST(req: NextRequest) {
           }
         });
         
+        return NextResponse.json({ success: true });
+
+      case 'webrtc-signal':
+        const { fromId, toId, signal } = body;
+        if (!fromId || !toId || !signal) {
+          return NextResponse.json({ error: 'Missing signaling data' }, { status: 400 });
+        }
+        
+        // Store signal for the target peer
+        if (!webrtcSignals[toId]) {
+          webrtcSignals[toId] = [];
+        }
+        
+        webrtcSignals[toId].push({
+          fromId,
+          toId,
+          signal,
+          timestamp: Date.now()
+        });
+        
+        console.log(`📡 WebRTC signal stored: ${fromId} -> ${toId}`);
         return NextResponse.json({ success: true });
 
       default:

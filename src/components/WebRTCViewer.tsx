@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useAccount } from 'wagmi';
 import { streamingService, ChatMessage } from '@/services/StreamingService';
+import SimplePeer from 'simple-peer';
 import { FaComments, FaPaperPlane, FaUsers, FaSignal, FaExclamationTriangle, FaPlay } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 
@@ -37,6 +38,8 @@ export default function WebRTCViewer({ broadcasterId, streamTitle, onStreamEnd }
   const viewerId = useRef<string>(`viewer_${Math.random().toString(36).substring(2, 9)}`);
   const chatPollingRef = useRef<NodeJS.Timeout | null>(null);
   const streamPollingRef = useRef<NodeJS.Timeout | null>(null);
+  const peerRef = useRef<SimplePeer.Instance | null>(null);
+  const signalPollingRef = useRef<NodeJS.Timeout | null>(null);
 
   // Initialize HTTP-based streaming service
   useEffect(() => {
@@ -68,6 +71,9 @@ export default function WebRTCViewer({ broadcasterId, streamTitle, onStreamEnd }
         
         // Start polling for stream updates
         startStreamPolling();
+        
+        // Initialize WebRTC connection
+        initializeWebRTC();
         
         console.log('✅ Successfully joined as viewer');
       } catch (error) {
@@ -140,6 +146,87 @@ export default function WebRTCViewer({ broadcasterId, streamTitle, onStreamEnd }
     }, 5000); // Poll every 5 seconds
   };
 
+  const initializeWebRTC = () => {
+    console.log('🔗 Initializing WebRTC peer connection as viewer');
+    
+    const peer = new SimplePeer({
+      initiator: false, // Viewer doesn't initiate
+      trickle: false,
+      config: {
+        iceServers: [
+          { urls: 'stun:stun.l.google.com:19302' },
+          { urls: 'stun:stun1.l.google.com:19302' }
+        ]
+      }
+    });
+
+    peer.on('signal', async (signalData: any) => {
+      console.log('📤 Viewer sending signal to broadcaster');
+      try {
+        await streamingService.sendSignal(viewerId.current, broadcasterId, signalData, 'viewer');
+      } catch (error) {
+        console.error('Error sending signal:', error);
+      }
+    });
+
+    peer.on('stream', (stream: MediaStream) => {
+      console.log('📹 Received video stream from broadcaster!');
+      if (remoteVideoRef.current) {
+        remoteVideoRef.current.srcObject = stream;
+        setIsLoading(false);
+        setIsConnected2Stream(true);
+        toast.success('Video stream connected!');
+      }
+    });
+
+    peer.on('connect', () => {
+      console.log('✅ WebRTC peer connection established');
+      setIsConnected2Stream(true);
+    });
+
+    peer.on('error', (error: any) => {
+      console.error('❌ WebRTC peer error:', error);
+      setError('Failed to establish video connection');
+      setIsLoading(false);
+    });
+
+    peer.on('close', () => {
+      console.log('🔌 WebRTC peer connection closed');
+      setIsConnected2Stream(false);
+      if (remoteVideoRef.current) {
+        remoteVideoRef.current.srcObject = null;
+      }
+    });
+
+    peerRef.current = peer;
+
+    // Start polling for WebRTC signals from broadcaster
+    startSignalPolling();
+  };
+
+  const startSignalPolling = () => {
+    signalPollingRef.current = setInterval(async () => {
+      try {
+        const signals = await streamingService.getSignals(viewerId.current, 'viewer');
+        
+        signals.forEach((signalData: any) => {
+          const { fromId, signal } = signalData;
+          console.log('📡 Received WebRTC signal from broadcaster:', fromId);
+          
+          if (peerRef.current && fromId === broadcasterId) {
+            try {
+              peerRef.current.signal(signal);
+            } catch (error) {
+              console.error('Error processing signal:', error);
+            }
+          }
+        });
+      } catch (error) {
+        console.error('Error polling WebRTC signals:', error);
+      }
+    }, 2000); // Poll every 2 seconds
+  };
+
   const cleanup = () => {
     if (chatPollingRef.current) {
       clearInterval(chatPollingRef.current);
@@ -149,6 +236,16 @@ export default function WebRTCViewer({ broadcasterId, streamTitle, onStreamEnd }
     if (streamPollingRef.current) {
       clearInterval(streamPollingRef.current);
       streamPollingRef.current = null;
+    }
+
+    if (signalPollingRef.current) {
+      clearInterval(signalPollingRef.current);
+      signalPollingRef.current = null;
+    }
+
+    if (peerRef.current) {
+      peerRef.current.destroy();
+      peerRef.current = null;
     }
     
     streamingService.disconnect();

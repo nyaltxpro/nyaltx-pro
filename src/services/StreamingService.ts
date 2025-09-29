@@ -252,6 +252,42 @@ export class StreamingService {
     this.emit('disconnected');
   }
 
+  // WebRTC signaling methods
+  async sendSignal(fromId: string, toId: string, signal: any, type: 'broadcaster' | 'viewer') {
+    try {
+      const response = await fetch(`${this.baseUrl}?action=webrtc-signal`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fromId, toId, signal, type })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to send signal: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error sending WebRTC signal:', error);
+      throw error;
+    }
+  }
+
+  async getSignals(id: string, type: 'broadcaster' | 'viewer') {
+    try {
+      const response = await fetch(`${this.baseUrl}?action=get-signals&id=${id}&type=${type}`);
+      
+      if (!response.ok) {
+        throw new Error(`Failed to get signals: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      return result.signals || [];
+    } catch (error) {
+      console.error('Error getting signals:', error);
+      return [];
+    }
+  }
+
   // Start polling for active streams (for live stream page)
   startStreamPolling(callback: (streams: StreamData[]) => void) {
     const poll = async () => {

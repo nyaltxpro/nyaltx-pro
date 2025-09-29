@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useAccount } from 'wagmi';
 import { streamingService, ChatMessage } from '@/services/StreamingService';
 import { v4 as uuidv4 } from 'uuid';
+import SimplePeer from 'simple-peer';
 import { FaVideo, FaVideoSlash, FaMicrophone, FaMicrophoneSlash, FaDesktop, FaStop, FaUsers, FaComments, FaPaperPlane, FaCamera, FaCameraRetro } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 
@@ -42,6 +43,8 @@ export default function WebRTCBroadcaster({ onStreamEnd, streamTitle }: WebRTCBr
   const webcamVideoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const startTimeRef = useRef<number>(0);
+  const peersRef = useRef<{ [key: string]: SimplePeer.Instance }>({});
+  const signalQueueRef = useRef<{ [key: string]: any[] }>({});
 
   // Initialize streaming service
   useEffect(() => {
@@ -211,6 +214,9 @@ export default function WebRTCBroadcaster({ onStreamEnd, streamTitle }: WebRTCBr
       // Start polling for chat messages and viewer updates
       startPolling();
       
+      // Start WebRTC signaling polling
+      startWebRTCSignaling();
+      
       const pollViewers = async () => {
         try {
           const streams = await streamingService.getActiveStreams();
@@ -289,6 +295,20 @@ export default function WebRTCBroadcaster({ onStreamEnd, streamTitle }: WebRTCBr
     if ((window as any).streamCleanup) {
       (window as any).streamCleanup();
       delete (window as any).streamCleanup;
+    }
+
+    // Cleanup WebRTC connections
+    Object.values(peersRef.current).forEach(peer => {
+      if (peer) {
+        peer.destroy();
+      }
+    });
+    peersRef.current = {};
+
+    // Cleanup WebRTC signaling
+    if ((window as any).webrtcSignalInterval) {
+      clearInterval((window as any).webrtcSignalInterval);
+      delete (window as any).webrtcSignalInterval;
     }
 
     setIsStreaming(false);
@@ -373,6 +393,86 @@ export default function WebRTCBroadcaster({ onStreamEnd, streamTitle }: WebRTCBr
         setViewerCount(myStream.viewerCount);
       }
     });
+  };
+
+  const startWebRTCSignaling = () => {
+    // Poll for WebRTC signals from viewers
+    const signalInterval = setInterval(async () => {
+      try {
+        const signals = await streamingService.getSignals(broadcasterId, 'broadcaster');
+        
+        signals.forEach((signalData: any) => {
+          const { fromId, signal } = signalData;
+          console.log('📡 Received WebRTC signal from viewer:', fromId);
+          
+          // Create or get existing peer connection
+          if (!peersRef.current[fromId]) {
+            createPeerConnection(fromId);
+          }
+          
+          // Process the signal
+          if (peersRef.current[fromId]) {
+            try {
+              peersRef.current[fromId].signal(signal);
+            } catch (error) {
+              console.error('Error processing signal:', error);
+            }
+          }
+        });
+      } catch (error) {
+        console.error('Error polling WebRTC signals:', error);
+      }
+    }, 2000); // Poll every 2 seconds
+
+    // Store interval for cleanup
+    (window as any).webrtcSignalInterval = signalInterval;
+  };
+
+  const createPeerConnection = (viewerId: string) => {
+    console.log('🔗 Creating peer connection for viewer:', viewerId);
+    
+    const peer = new SimplePeer({
+      initiator: true, // Broadcaster initiates
+      trickle: false,
+      config: {
+        iceServers: [
+          { urls: 'stun:stun.l.google.com:19302' },
+          { urls: 'stun:stun1.l.google.com:19302' }
+        ]
+      }
+    });
+
+    // Add the stream to the peer connection
+    if (streamRef.current) {
+      peer.addStream(streamRef.current);
+      console.log('📹 Added stream to peer connection');
+    }
+
+    peer.on('signal', async (signalData: any) => {
+      console.log('📤 Sending signal to viewer:', viewerId);
+      try {
+        await streamingService.sendSignal(broadcasterId, viewerId, signalData, 'broadcaster');
+      } catch (error) {
+        console.error('Error sending signal:', error);
+      }
+    });
+
+    peer.on('connect', () => {
+      console.log('✅ WebRTC connection established with viewer:', viewerId);
+      toast.success(`Viewer ${viewerId.slice(-4)} connected via WebRTC!`);
+    });
+
+    peer.on('error', (error: any) => {
+      console.error('❌ WebRTC error with viewer:', viewerId, error);
+      delete peersRef.current[viewerId];
+    });
+
+    peer.on('close', () => {
+      console.log('🔌 WebRTC connection closed with viewer:', viewerId);
+      delete peersRef.current[viewerId];
+    });
+
+    peersRef.current[viewerId] = peer;
   };
 
   const sendChatMessage = async () => {
