@@ -2,11 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { useAccount } from 'wagmi';
-import LiveStream from '@/components/LiveStream';
 import dynamic from 'next/dynamic';
 
-const CreateLiveStream = dynamic(() => import('@/components/CreateLiveStream'), { ssr: false });
-const LiveStreamViewer = dynamic(() => import('@/components/LiveStreamViewer'), { ssr: false });
+const WebRTCBroadcaster = dynamic(() => import('@/components/WebRTCBroadcaster'), { ssr: false });
+const WebRTCViewer = dynamic(() => import('@/components/WebRTCViewer'), { ssr: false });
 import { FaRocket, FaFire, FaUsers, FaChartLine, FaGlobe, FaArrowUp, FaPlay, FaPlus, FaEye } from 'react-icons/fa';
 import Image from 'next/image';
 
@@ -51,6 +50,8 @@ export default function LiveStreamPage() {
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'trending' | 'new' | 'volume'>('all');
   const [showCreateStream, setShowCreateStream] = useState(false);
   const [selectedStream, setSelectedStream] = useState<LiveStreamData | null>(null);
+  const [streamTitle, setStreamTitle] = useState('');
+  const [isStreaming, setIsStreaming] = useState(false);
   const [liveStreams, setLiveStreams] = useState<LiveStreamData[]>([
     {
       id: '1',
@@ -118,9 +119,18 @@ export default function LiveStreamPage() {
     return `${minutes}:${Math.floor((duration % (1000 * 60)) / 1000).toString().padStart(2, '0')}`;
   };
 
-  const handleStreamCreated = (streamData: any) => {
-    setLiveStreams(prev => [streamData, ...prev]);
+  const handleStartStream = () => {
+    if (!streamTitle.trim()) {
+      alert('Please enter a stream title');
+      return;
+    }
+    setIsStreaming(true);
     setShowCreateStream(false);
+  };
+
+  const handleStreamEnd = () => {
+    setIsStreaming(false);
+    setStreamTitle('');
   };
 
   const getCategoryColor = (category: string) => {
@@ -323,19 +333,85 @@ export default function LiveStreamPage() {
         </div>
       </div>
 
-      {/* Modals */}
+      {/* WebRTC Broadcaster Modal */}
       {showCreateStream && (
-        <CreateLiveStream
-          onStreamCreated={handleStreamCreated}
-          onClose={() => setShowCreateStream(false)}
-        />
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-[#0f1923] rounded-xl border border-gray-800 p-6 w-full max-w-md">
+            <h3 className="text-xl font-bold text-white mb-4">Start Live Stream</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Stream Title
+                </label>
+                <input
+                  type="text"
+                  value={streamTitle}
+                  onChange={(e) => setStreamTitle(e.target.value)}
+                  placeholder="Enter your stream title..."
+                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500"
+                />
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={handleStartStream}
+                  disabled={!streamTitle.trim()}
+                  className="flex-1 px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white font-medium rounded-lg hover:from-red-700 hover:to-red-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Start Stream
+                </button>
+                <button
+                  onClick={() => setShowCreateStream(false)}
+                  className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
+      {/* WebRTC Broadcaster */}
+      {isStreaming && (
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 p-4 overflow-y-auto">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold text-white">Broadcasting: {streamTitle}</h2>
+              <button
+                onClick={handleStreamEnd}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+              >
+                End Stream
+              </button>
+            </div>
+            <WebRTCBroadcaster
+              streamTitle={streamTitle}
+              onStreamEnd={handleStreamEnd}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* WebRTC Viewer */}
       {selectedStream && (
-        <LiveStreamViewer
-          streamData={selectedStream}
-          onClose={() => setSelectedStream(null)}
-        />
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 p-4 overflow-y-auto">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold text-white">Watching: {selectedStream.title}</h2>
+              <button
+                onClick={() => setSelectedStream(null)}
+                className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
+              >
+                Close
+              </button>
+            </div>
+            <WebRTCViewer
+              broadcasterId={selectedStream.id}
+              streamTitle={selectedStream.title}
+              onStreamEnd={() => setSelectedStream(null)}
+            />
+          </div>
+        </div>
       )}
     </div>
   );
