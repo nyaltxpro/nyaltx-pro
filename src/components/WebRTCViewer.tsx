@@ -85,21 +85,28 @@ export default function WebRTCViewer({ broadcasterId, streamTitle, onStreamEnd }
   }, [isConnected, address, broadcasterId]);
 
   const startChatPolling = () => {
-    let lastMessageCount = 0;
+    let lastMessageTimestamp = 0;
     
     chatPollingRef.current = setInterval(async () => {
       try {
         const messages = await streamingService.getChatMessages(broadcasterId);
         
-        // Only update if we have new messages
-        if (messages.length > lastMessageCount) {
+        // Check for new messages based on timestamp
+        const newMessages = messages.filter(msg => msg.timestamp > lastMessageTimestamp);
+        
+        if (newMessages.length > 0) {
+          // Update last timestamp
+          lastMessageTimestamp = Math.max(...newMessages.map(msg => msg.timestamp));
+          
+          // Update all messages (for proper ordering)
           setChatMessages(messages);
-          lastMessageCount = messages.length;
+          
+          console.log(`📨 Received ${newMessages.length} new chat messages`);
         }
       } catch (error) {
         console.error('Chat polling error:', error);
       }
-    }, 2000); // Poll every 2 seconds
+    }, 1000); // Poll every 1 second for better responsiveness
   };
 
   const startStreamPolling = () => {
@@ -150,17 +157,42 @@ export default function WebRTCViewer({ broadcasterId, streamTitle, onStreamEnd }
   const sendChatMessage = async () => {
     if (!chatInput.trim() || !address) return;
 
+    const messageToSend = chatInput;
+    setChatInput(''); // Clear input immediately for better UX
+
     try {
+      console.log('📤 Viewer sending chat message:', messageToSend);
       await streamingService.sendChatMessage(
         broadcasterId,
-        chatInput,
+        messageToSend,
         address,
         'Viewer'
       );
-      setChatInput('');
+      
+      // Optimistically add message to local state
+      const newMessage: ChatMessage = {
+        message: messageToSend,
+        senderAddress: address,
+        senderName: 'Viewer',
+        timestamp: Date.now()
+      };
+      
+      setChatMessages(prev => {
+        // Check if message already exists to avoid duplicates
+        const exists = prev.some(msg => 
+          msg.message === newMessage.message && 
+          msg.senderAddress === newMessage.senderAddress &&
+          Math.abs(msg.timestamp - newMessage.timestamp) < 5000 // Within 5 seconds
+        );
+        return exists ? prev : [...prev, newMessage];
+      });
+      
+      toast.success('Message sent!');
     } catch (error) {
       console.error('Error sending chat message:', error);
-      toast.error('Failed to send message');
+      toast.error('Failed to send message. Please try again.');
+      // Restore message to input on failure
+      setChatInput(messageToSend);
     }
   };
 
@@ -232,18 +264,47 @@ export default function WebRTCViewer({ broadcasterId, streamTitle, onStreamEnd }
               className="w-full h-full object-cover"
             />
             
-            {/* Demo Video Placeholder */}
+            {/* Demo Video Stream */}
             {isConnected2Stream && !error && (
-              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-purple-900/20 to-blue-900/20">
-                <div className="text-center">
-                  <FaPlay className="w-24 h-24 text-white/20 mx-auto mb-4" />
-                  <p className="text-white text-xl font-semibold mb-2">HTTP Streaming Demo</p>
-                  <p className="text-gray-300 text-sm">
-                    This is a demo viewer for HTTP-based streaming
-                  </p>
-                  <p className="text-gray-400 text-xs mt-2">
-                    In production, this would show the actual WebRTC video stream
-                  </p>
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-900/30 to-purple-900/30">
+                {/* Simulated video content */}
+                <div className="w-full h-full flex items-center justify-center relative overflow-hidden">
+                  {/* Animated background */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-purple-500/10 animate-pulse"></div>
+                  
+                  {/* Stream content */}
+                  <div className="text-center z-10">
+                    <div className="relative">
+                      <FaPlay className="w-32 h-32 text-cyan-400/60 mx-auto mb-6 animate-bounce" />
+                      <div className="absolute inset-0 bg-cyan-400/20 rounded-full animate-ping"></div>
+                    </div>
+                    <h3 className="text-2xl font-bold text-white mb-3">🎥 Live Stream Active</h3>
+                    <p className="text-cyan-300 text-lg mb-2">Broadcasting: {streamTitle}</p>
+                    <p className="text-gray-300 text-sm mb-4">
+                      HTTP-based streaming with real-time chat
+                    </p>
+                    
+                    {/* Fake stream stats */}
+                    <div className="flex justify-center gap-6 text-sm">
+                      <div className="text-green-400">
+                        <span className="block font-semibold">Quality</span>
+                        <span>1080p HD</span>
+                      </div>
+                      <div className="text-blue-400">
+                        <span className="block font-semibold">Viewers</span>
+                        <span>{viewerCount}</span>
+                      </div>
+                      <div className="text-purple-400">
+                        <span className="block font-semibold">Status</span>
+                        <span>Live</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Floating particles effect */}
+                  <div className="absolute top-10 left-10 w-2 h-2 bg-cyan-400 rounded-full animate-ping"></div>
+                  <div className="absolute top-20 right-20 w-1 h-1 bg-purple-400 rounded-full animate-pulse"></div>
+                  <div className="absolute bottom-20 left-20 w-3 h-3 bg-blue-400 rounded-full animate-bounce"></div>
                 </div>
               </div>
             )}

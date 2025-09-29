@@ -120,24 +120,35 @@ export class StreamingService {
     }
   }
 
-  // Send chat message
-  async sendChatMessage(broadcasterId: string, message: string, senderAddress: string, senderName?: string) {
-    try {
-      const response = await fetch(`${this.baseUrl}?action=chat-message`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ broadcasterId, message, senderAddress, senderName })
-      });
+  // Send chat message with retry logic
+  async sendChatMessage(broadcasterId: string, message: string, senderAddress: string, senderName?: string, retries = 3) {
+    for (let i = 0; i < retries; i++) {
+      try {
+        const response = await fetch(`${this.baseUrl}?action=chat-message`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ broadcasterId, message, senderAddress, senderName })
+        });
 
-      if (!response.ok) {
-        throw new Error(`Failed to send chat message: ${response.statusText}`);
+        if (!response.ok) {
+          throw new Error(`Failed to send chat message: ${response.statusText}`);
+        }
+
+        const result = await response.json();
+        console.log('✅ Chat message sent successfully');
+        return result;
+      } catch (error) {
+        console.error(`❌ Error sending chat message (attempt ${i + 1}/${retries}):`, error);
+        
+        if (i === retries - 1) {
+          // Last attempt failed
+          this.emit('error', `Failed to send message after ${retries} attempts`);
+          throw error;
+        }
+        
+        // Wait before retry (exponential backoff)
+        await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
       }
-
-      const result = await response.json();
-      return result;
-    } catch (error) {
-      console.error('Error sending chat message:', error);
-      throw error;
     }
   }
 
@@ -194,24 +205,31 @@ export class StreamingService {
 
   // Start polling for chat messages
   private startChatPolling(broadcasterId: string) {
-    let lastMessageCount = 0;
+    let lastMessageTimestamp = 0;
     
     this.pollingInterval = setInterval(async () => {
       try {
         const messages = await this.getChatMessages(broadcasterId);
         
-        // Only emit new messages
-        if (messages.length > lastMessageCount) {
-          const newMessages = messages.slice(lastMessageCount);
+        // Only emit messages newer than last timestamp
+        const newMessages = messages.filter(msg => msg.timestamp > lastMessageTimestamp);
+        
+        if (newMessages.length > 0) {
+          // Update last timestamp to the newest message
+          lastMessageTimestamp = Math.max(...newMessages.map(msg => msg.timestamp));
+          
+          // Emit all new messages
           newMessages.forEach(message => {
             this.emit('chat-message', message);
           });
-          lastMessageCount = messages.length;
+          
+          // Also emit all messages for full sync
+          this.emit('chat-messages-sync', messages);
         }
       } catch (error) {
         console.error('Chat polling error:', error);
       }
-    }, 2000); // Poll every 2 seconds
+    }, 1000); // Poll every 1 second for better responsiveness
   }
 
   // Stop all polling

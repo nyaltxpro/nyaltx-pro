@@ -59,11 +59,24 @@ export default function WebRTCBroadcaster({ onStreamEnd, streamTitle }: WebRTCBr
     };
 
     const handleChatMessage = (message: ChatMessage) => {
-      setChatMessages(prev => [...prev, message]);
+      setChatMessages(prev => {
+        // Avoid duplicates by checking if message already exists
+        const exists = prev.some(msg => 
+          msg.timestamp === message.timestamp && 
+          msg.senderAddress === message.senderAddress &&
+          msg.message === message.message
+        );
+        return exists ? prev : [...prev, message];
+      });
+    };
+
+    const handleChatSync = (messages: ChatMessage[]) => {
+      setChatMessages(messages);
     };
 
     streamingService.on('error', handleError);
     streamingService.on('chat-message', handleChatMessage);
+    streamingService.on('chat-messages-sync', handleChatSync);
     streamingService.on('broadcaster-joined', () => {
       setConnected(true);
       console.log('✅ Successfully joined as broadcaster');
@@ -74,6 +87,7 @@ export default function WebRTCBroadcaster({ onStreamEnd, streamTitle }: WebRTCBr
     return () => {
       streamingService.off('error', handleError);
       streamingService.off('chat-message', handleChatMessage);
+      streamingService.off('chat-messages-sync', handleChatSync);
       streamingService.disconnect();
     };
   }, [isConnected, address]);
@@ -192,10 +206,11 @@ export default function WebRTCBroadcaster({ onStreamEnd, streamTitle }: WebRTCBr
         broadcasterId,
         tracks: combinedStream.getTracks().length,
         videoTracks: combinedStream.getVideoTracks().length,
-        audioTracks: combinedStream.getAudioTracks().length
       });
-
-      // Start polling for viewer count updates
+      
+      // Start polling for chat messages and viewer updates
+      startPolling();
+      
       const pollViewers = async () => {
         try {
           const streams = await streamingService.getActiveStreams();
@@ -350,20 +365,55 @@ export default function WebRTCBroadcaster({ onStreamEnd, streamTitle }: WebRTCBr
     }
   };
 
+  const startPolling = () => {
+    // Start chat polling using the streaming service
+    streamingService.startStreamPolling((streams) => {
+      const myStream = streams.find(s => s.broadcasterId === broadcasterId);
+      if (myStream) {
+        setViewerCount(myStream.viewerCount);
+      }
+    });
+  };
+
   const sendChatMessage = async () => {
     if (!chatInput.trim() || !address) return;
 
+    const messageToSend = chatInput;
+    setChatInput(''); // Clear input immediately for better UX
+
     try {
+      console.log('📤 Sending chat message:', messageToSend);
       await streamingService.sendChatMessage(
         broadcasterId,
-        chatInput,
+        messageToSend,
         address,
         'Broadcaster'
       );
-      setChatInput('');
+      
+      // Optimistically add message to local state
+      const newMessage: ChatMessage = {
+        message: messageToSend,
+        senderAddress: address,
+        senderName: 'Broadcaster',
+        timestamp: Date.now()
+      };
+      
+      setChatMessages(prev => {
+        // Check if message already exists to avoid duplicates
+        const exists = prev.some(msg => 
+          msg.message === newMessage.message && 
+          msg.senderAddress === newMessage.senderAddress &&
+          Math.abs(msg.timestamp - newMessage.timestamp) < 5000 // Within 5 seconds
+        );
+        return exists ? prev : [...prev, newMessage];
+      });
+      
+      toast.success('Message sent!');
     } catch (error) {
       console.error('Error sending chat message:', error);
-      toast.error('Failed to send message');
+      toast.error('Failed to send message. Please try again.');
+      // Restore message to input on failure
+      setChatInput(messageToSend);
     }
   };
 
