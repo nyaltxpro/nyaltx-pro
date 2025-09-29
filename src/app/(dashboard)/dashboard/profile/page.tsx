@@ -122,9 +122,9 @@ export default function ProfilePage() {
       {/* Profile Info */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent mb-3">
+          {/* <h1 className="text-3xl font-bold bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent mb-3">
             {mockUser.name}
-          </h1>
+          </h1> */}
 
           {derivedConnected ? (
             <div className="flex items-center gap-3">
