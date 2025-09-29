@@ -117,23 +117,25 @@ export default function ProfilePage() {
   return (
     <main className="container mx-auto px-4 py-8 max-w-7xl">
       {/* Profile Banner */}
-      <div className="relative h-64 w-full rounded-xl overflow-hidden mb-16">
+      <div className="relative h-64 w-full rounded-2xl overflow-hidden mb-16 shadow-2xl">
+        <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/20 via-blue-600/30 to-purple-700/40"></div>
         <Image 
           src={mockUser.bannerUrl} 
           alt="Profile Banner" 
           fill
-          className="object-cover"
+          className="object-cover mix-blend-overlay"
         />
         
         {/* Profile Avatar */}
         <div className="absolute -bottom-12 left-8">
-          <div className="relative h-24 w-24 rounded-full overflow-hidden border-4 border-gray-900">
+          <div className="relative h-24 w-24 rounded-full overflow-hidden border-4 border-white/20 backdrop-blur-sm bg-gray-800/50 shadow-2xl">
             <Image 
               src={mockUser.avatarUrl} 
               alt="Profile Avatar" 
               fill
               className="object-cover"
             />
+            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-cyan-400/20 to-blue-600/20"></div>
           </div>
         </div>
       </div>
@@ -141,23 +143,25 @@ export default function ProfilePage() {
       {/* Profile Info */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-white mb-2">{mockUser.name}</h1>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent mb-3">
+            {mockUser.name}
+          </h1>
           
           {derivedConnected ? (
-            <div className="flex items-center">
-              <div className="flex items-center bg-gray-800 rounded-lg px-3 py-1">
-                <FaEthereum className="text-blue-400 mr-1" />
-                <span className="text-gray-300 text-sm mr-2">{formatWalletAddress(userAddress)}</span>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center bg-gradient-to-r from-gray-800/80 to-gray-900/80 backdrop-blur-sm rounded-xl px-4 py-2 border border-gray-700/50">
+                <FaEthereum className="text-blue-400 mr-2" />
+                <span className="text-gray-300 text-sm mr-3 font-mono">{formatWalletAddress(userAddress)}</span>
                 <button 
                   onClick={copyToClipboard} 
-                  className="text-gray-400 hover:text-white transition-colors"
+                  className="text-gray-400 hover:text-white transition-colors p-1 rounded-md hover:bg-gray-700/50"
                 >
-                  {copied ? <FaCheck className="text-green-500" /> : <FaRegCopy />}
+                  {copied ? <FaCheck className="text-green-400" /> : <FaRegCopy />}
                 </button>
               </div>
               <button 
                 onClick={handleDisconnectWallet}
-                className="ml-3 flex items-center text-red-400 hover:text-red-300 text-sm"
+                className="flex items-center text-red-400 hover:text-red-300 text-sm px-3 py-2 rounded-lg hover:bg-red-500/10 transition-all duration-200"
               >
                 <BiLogOut className="mr-1" /> Disconnect
               </button>
@@ -165,7 +169,7 @@ export default function ProfilePage() {
           ) : (
             <button 
               onClick={handleConnectWallet}
-              className="flex items-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+              className="flex items-center bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white px-6 py-3 rounded-xl transition-all duration-200 shadow-lg hover:shadow-cyan-500/25"
             >
               <FaWallet className="mr-2" /> Connect Wallet
             </button>
@@ -173,12 +177,15 @@ export default function ProfilePage() {
         </div>
         
         {derivedConnected && (
-          <div className="mt-4 md:mt-0 flex items-center">
-            <div className="bg-gray-800 rounded-lg px-4 py-2 flex items-center">
-              <FaEthereum className="text-blue-400 mr-2 text-xl" />
-              <span className="text-white font-semibold">{mockUser.ethBalance} ETH</span>
+          <div className="mt-4 md:mt-0 flex items-center gap-3">
+            <div className="bg-gradient-to-r from-gray-800/80 to-gray-900/80 backdrop-blur-sm rounded-xl px-6 py-3 flex items-center border border-gray-700/50">
+              <FaEthereum className="text-blue-400 mr-3 text-xl" />
+              <div>
+                <div className="text-white font-semibold">{mockUser.ethBalance} ETH</div>
+                <div className="text-xs text-gray-400">Main Balance</div>
+              </div>
             </div>
-            <button className="ml-3 bg-gray-800 hover:bg-gray-700 p-2 rounded-lg text-white">
+            <button className="bg-gradient-to-r from-gray-800/80 to-gray-900/80 backdrop-blur-sm hover:from-gray-700/80 hover:to-gray-800/80 p-3 rounded-xl text-white border border-gray-700/50 transition-all duration-200">
               <BiEdit />
             </button>
           </div>
@@ -186,81 +193,111 @@ export default function ProfilePage() {
       </div>
       
       {/* Tabs */}
-      <div className="flex border-b border-gray-700 mb-6 overflow-x-auto">
+      <div className="flex bg-gray-800/30 rounded-xl p-1 mb-8 overflow-x-auto">
         <button
           onClick={() => setActiveTab('tokens')}
-          className={`px-4 py-3 font-medium text-sm whitespace-nowrap ${activeTab === 'tokens' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-gray-400 hover:text-gray-300'}`}
+          className={`px-6 py-3 font-medium text-sm whitespace-nowrap rounded-lg transition-all duration-200 ${
+            activeTab === 'tokens' 
+              ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg' 
+              : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
+          }`}
         >
-          My Tokens
+          💰 My Tokens
         </button>
         <button
           onClick={() => setActiveTab('social-links')}
-          className={`px-4 py-3 font-medium text-sm whitespace-nowrap ${activeTab === 'social-links' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-gray-400 hover:text-gray-300'}`}
+          className={`px-6 py-3 font-medium text-sm whitespace-nowrap rounded-lg transition-all duration-200 ${
+            activeTab === 'social-links' 
+              ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg' 
+              : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
+          }`}
         >
-          Social Links
+          🔗 Social Links
         </button>
         <button
           onClick={() => setActiveTab('boost')}
-          className={`px-4 py-3 font-medium text-sm whitespace-nowrap ${activeTab === 'boost' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-gray-400 hover:text-gray-300'}`}
+          className={`px-6 py-3 font-medium text-sm whitespace-nowrap rounded-lg transition-all duration-200 ${
+            activeTab === 'boost' 
+              ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg' 
+              : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
+          }`}
         >
-          Profile Boost
+          🚀 Profile Boost
         </button>
       </div>
       
       {/* My Tokens Tab */}
       {derivedConnected && activeTab === 'tokens' && (
         <div>
-          <div className="bg-gray-800 rounded-xl overflow-hidden mb-6">
-            <div className="p-4 border-b border-gray-700">
-              <h3 className="text-lg font-semibold text-white">My Tokens</h3>
+          <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm rounded-2xl border border-gray-700/50 overflow-hidden mb-6">
+            <div className="p-6 border-b border-gray-700/50">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-semibold text-white mb-1">My Tokens</h3>
+                  <p className="text-sm text-gray-400">Your cryptocurrency portfolio</p>
+                </div>
+                <div className="text-right">
+                  <div className="text-2xl font-bold text-white">
+                    ${mockUser.tokens.reduce((sum, token) => sum + token.value, 0).toLocaleString()}
+                  </div>
+                  <div className="text-sm text-gray-400">Total Value</div>
+                </div>
+              </div>
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="text-left text-gray-400 text-sm border-b border-gray-700">
-                    <th className="p-4">Asset</th>
-                    <th className="p-4">Balance</th>
-                    <th className="p-4">Value (USD)</th>
-                    <th className="p-4">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {mockUser.tokens.map((token, index) => (
-                    <tr key={token.symbol} className={index < mockUser.tokens.length - 1 ? 'border-b border-gray-700' : ''}>
-                      <td className="p-4">
-                        <div className="flex items-center">
-                          <div className="relative h-8 w-8 mr-3">
-                            <Image 
-                              src={token.icon} 
-                              alt={token.name} 
-                              width={32}
-                              height={32}
-                              className="rounded-full"
-                            />
-                          </div>
-                          <div>
-                            <div className="font-medium text-white">{token.name}</div>
-                            <div className="text-sm text-gray-400">{token.symbol}</div>
+            <div className="p-6">
+              <div className="grid gap-4">
+                {mockUser.tokens.map((token) => (
+                  <div key={token.symbol} className="bg-gray-800/50 rounded-xl p-4 border border-gray-700/50 hover:border-gray-600/50 transition-all duration-200">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-700 flex items-center justify-center flex-shrink-0">
+                          <Image 
+                            src={token.icon} 
+                            alt={token.name} 
+                            width={48}
+                            height={48}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              const target = e.currentTarget;
+                              target.style.display = 'none';
+                              const fallback = target.nextElementSibling as HTMLElement;
+                              if (fallback) fallback.style.display = 'flex';
+                            }}
+                          />
+                          <div className="hidden w-full h-full items-center justify-center text-gray-400 font-semibold">
+                            {token.symbol.charAt(0)}
                           </div>
                         </div>
-                      </td>
-                      <td className="p-4">
-                        <div className="font-medium text-white">{token.balance}</div>
-                      </td>
-                      <td className="p-4">
-                        <div className="font-medium text-white">${token.value.toLocaleString()}</div>
-                      </td>
-                      <td className="p-4">
-                        <div className="flex space-x-2">
-                          <button className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-md transition-colors">Send</button>
-                          <button className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded-md transition-colors">Receive</button>
-                          <button className="px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white text-sm rounded-md transition-colors">Swap</button>
+                        
+                        <div>
+                          <div className="flex items-center gap-3 mb-1">
+                            <h4 className="font-semibold text-white">{token.name}</h4>
+                            <span className="px-2 py-1 bg-gray-700 rounded-md text-xs font-mono text-gray-300">
+                              {token.symbol}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-4 text-sm text-gray-400">
+                            <span>{token.balance} {token.symbol}</span>
+                            <span className="text-green-400 font-medium">${token.value.toLocaleString()}</span>
+                          </div>
                         </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                      </div>
+                      
+                      <div className="flex items-center gap-2">
+                        <button className="px-3 py-1.5 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 text-sm rounded-lg border border-blue-500/30 transition-all duration-200">
+                          Send
+                        </button>
+                        <button className="px-3 py-1.5 bg-green-500/20 hover:bg-green-500/30 text-green-400 text-sm rounded-lg border border-green-500/30 transition-all duration-200">
+                          Receive
+                        </button>
+                        <button className="px-3 py-1.5 bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 text-sm rounded-lg border border-purple-500/30 transition-all duration-200">
+                          Swap
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
           
@@ -271,45 +308,102 @@ export default function ProfilePage() {
           </div>
 
           {/* My Registered Token Submissions */}
-          <div className="bg-gray-800 rounded-xl overflow-hidden mt-6">
-            <div className="p-4 border-b border-gray-700 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-white">My Registered Tokens</h3>
-              <a href="/dashboard/register-token" className="text-sm underline text-blue-400">Submit new</a>
+          <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm rounded-2xl border border-gray-700/50 overflow-hidden mt-6">
+            <div className="p-6 border-b border-gray-700/50 flex items-center justify-between">
+              <div>
+                <h3 className="text-xl font-semibold text-white mb-1">My Registered Tokens</h3>
+                <p className="text-sm text-gray-400">Tokens you've submitted for approval</p>
+              </div>
+              <a 
+                href="/dashboard/register-token" 
+                className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white rounded-lg text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-cyan-500/25"
+              >
+                Submit New Token
+              </a>
             </div>
-            <div className="p-4">
+            <div className="p-6">
               {!myRegisteredTokens ? (
-                <div className="text-gray-400 text-sm">Loading…</div>
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-400"></div>
+                  <span className="ml-3 text-gray-400">Loading tokens...</span>
+                </div>
               ) : myRegisteredTokens.length === 0 ? (
-                <div className="text-gray-400 text-sm">You have not submitted any tokens yet.</div>
+                <div className="text-center py-12">
+                  <div className="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-2xl">🪙</span>
+                  </div>
+                  <h4 className="text-lg font-medium text-white mb-2">No tokens registered yet</h4>
+                  <p className="text-gray-400 mb-6">Submit your first token to get started with the NYALTX ecosystem</p>
+                  <a 
+                    href="/dashboard/register-token"
+                    className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white rounded-lg font-medium transition-all duration-200"
+                  >
+                    Register Your First Token
+                  </a>
+                </div>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="min-w-full text-sm">
-                    <thead className="text-left text-gray-300">
-                      <tr>
-                        <th className="px-2 py-1">Name</th>
-                        <th className="px-2 py-1">Symbol</th>
-                        <th className="px-2 py-1">Chain</th>
-                        <th className="px-2 py-1">Contract</th>
-                        <th className="px-2 py-1">Status</th>
-                        <th className="px-2 py-1">Submitted</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {myRegisteredTokens.map((t) => (
-                        <tr key={t.id} className="border-t border-gray-700">
-                          <td className="px-2 py-1 text-white">{t.tokenName}</td>
-                          <td className="px-2 py-1 text-white">{t.tokenSymbol}</td>
-                          <td className="px-2 py-1 text-white">{t.blockchain}</td>
-                          <td className="px-2 py-1 text-white"><code className="text-xs">{t.contractAddress}</code></td>
-                          <td className="px-2 py-1 capitalize text-white">{t.status}</td>
-                          <td className="px-2 py-1 text-gray-300">{new Date(t.createdAt).toLocaleString()}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                <div className="grid gap-4">
+                  {myRegisteredTokens.map((token) => (
+                    <div key={token.id} className="bg-gray-800/50 rounded-xl p-4 border border-gray-700/50 hover:border-gray-600/50 transition-all duration-200">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-700 flex items-center justify-center flex-shrink-0">
+                          {token.imageUri ? (
+                            <Image
+                              src={token.imageUri}
+                              alt={token.tokenSymbol}
+                              width={48}
+                              height={48}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                const target = e.currentTarget;
+                                target.style.display = 'none';
+                                const fallback = target.nextElementSibling as HTMLElement;
+                                if (fallback) fallback.style.display = 'flex';
+                              }}
+                            />
+                          ) : null}
+                          <div className={`w-full h-full ${token.imageUri ? 'hidden' : 'flex'} items-center justify-center text-gray-400 font-semibold`}>
+                            {token.tokenSymbol?.charAt(0) || '?'}
+                          </div>
+                        </div>
+                        
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-3 mb-1">
+                            <h4 className="font-semibold text-white truncate">{token.tokenName}</h4>
+                            <span className="px-2 py-1 bg-gray-700 rounded-md text-xs font-mono text-gray-300">
+                              {token.tokenSymbol}
+                            </span>
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              token.status === 'approved' 
+                                ? 'bg-green-500/20 text-green-400 border border-green-500/30' 
+                                : token.status === 'pending'
+                                ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
+                                : 'bg-red-500/20 text-red-400 border border-red-500/30'
+                            }`}>
+                              {token.status}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-4 text-sm text-gray-400">
+                            <span className="flex items-center gap-1">
+                              <span className="w-2 h-2 bg-blue-400 rounded-full"></span>
+                              {token.blockchain}
+                            </span>
+                            <code className="text-xs bg-gray-700/50 px-2 py-1 rounded">
+                              {token.contractAddress?.slice(0, 6)}...{token.contractAddress?.slice(-4)}
+                            </code>
+                            <span>{new Date(token.createdAt).toLocaleDateString()}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
-              {myRegError && <div className="text-red-400 text-sm mt-2">{myRegError}</div>}
+              {myRegError && (
+                <div className="mt-4 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+                  <p className="text-red-400 text-sm">{myRegError}</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -455,24 +549,37 @@ export default function ProfilePage() {
       )}
       
       {/* Social Connections */}
-      <div className="mt-12 bg-gray-800 rounded-xl p-6">
-        <h2 className="text-xl font-semibold text-white mb-4">Connect Social Accounts</h2>
+      <div className="mt-12 bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm rounded-2xl border border-gray-700/50 p-6">
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold text-white mb-2">Connect Social Accounts</h2>
+          <p className="text-gray-400 text-sm">Link your social media accounts for enhanced profile visibility</p>
+        </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <button className="flex items-center justify-between bg-gray-700 hover:bg-gray-600 rounded-lg p-4 transition-colors">
+          <button className="flex items-center justify-between bg-gradient-to-r from-blue-500/10 to-blue-600/10 hover:from-blue-500/20 hover:to-blue-600/20 border border-blue-500/30 rounded-xl p-4 transition-all duration-200 group">
             <div className="flex items-center">
-              <FaTwitter className="text-blue-400 text-xl mr-3" />
-              <span className="text-white">Twitter</span>
+              <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center mr-3 group-hover:bg-blue-500/30 transition-colors">
+                <FaTwitter className="text-blue-400 text-lg" />
+              </div>
+              <div className="text-left">
+                <div className="text-white font-medium">Twitter</div>
+                <div className="text-xs text-gray-400">Connect your X account</div>
+              </div>
             </div>
-            <span className="text-sm text-gray-400">Connect</span>
+            <span className="text-sm text-blue-400 font-medium">Connect</span>
           </button>
           
-          <button className="flex items-center justify-between bg-gray-700 hover:bg-gray-600 rounded-lg p-4 transition-colors">
+          <button className="flex items-center justify-between bg-gradient-to-r from-indigo-500/10 to-purple-600/10 hover:from-indigo-500/20 hover:to-purple-600/20 border border-indigo-500/30 rounded-xl p-4 transition-all duration-200 group">
             <div className="flex items-center">
-              <FaDiscord className="text-indigo-400 text-xl mr-3" />
-              <span className="text-white">Discord</span>
+              <div className="w-10 h-10 bg-indigo-500/20 rounded-lg flex items-center justify-center mr-3 group-hover:bg-indigo-500/30 transition-colors">
+                <FaDiscord className="text-indigo-400 text-lg" />
+              </div>
+              <div className="text-left">
+                <div className="text-white font-medium">Discord</div>
+                <div className="text-xs text-gray-400">Join our community</div>
+              </div>
             </div>
-            <span className="text-sm text-gray-400">Connect</span>
+            <span className="text-sm text-indigo-400 font-medium">Connect</span>
           </button>
         </div>
       </div>
