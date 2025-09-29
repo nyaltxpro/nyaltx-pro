@@ -4,9 +4,7 @@ import React, { useState } from 'react';
 import { useAccount } from 'wagmi';
 import Image from 'next/image';
 import { FaEthereum, FaWallet, FaRegCopy, FaCheck, FaTwitter, FaDiscord } from 'react-icons/fa';
-import { BiEdit, BiLogOut, BiTransfer } from 'react-icons/bi';
-import { MdOutlineCollections, MdOutlineAccountBalanceWallet } from 'react-icons/md';
-import { BsGrid3X3Gap, BsHeart, BsClockHistory, BsCoin } from 'react-icons/bs';
+import { BiEdit, BiLogOut } from 'react-icons/bi';
 import { RiExchangeFill } from 'react-icons/ri';
 import ConnectWalletButton from '../../../../components/ConnectWalletButton';
 import SocialLinksEditor from '../../../../components/SocialLinksEditor';
@@ -14,7 +12,7 @@ import ProfileBoostSelector from '../../../../components/ProfileBoostSelector';
 
 export default function ProfilePage() {
   const { isConnected: isWagmiConnected, address } = useAccount();
-  const [activeTab, setActiveTab] = useState('collections');
+  const [activeTab, setActiveTab] = useState('tokens');
   const [copied, setCopied] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const [myRegisteredTokens, setMyRegisteredTokens] = useState<any[] | null>(null);
@@ -35,64 +33,6 @@ export default function ProfilePage() {
       { symbol: 'SOL', name: 'Solana', balance: 45.75, value: 2287.50, icon: '/crypto-icons/color/sol.svg' },
       { symbol: 'USDT', name: 'Tether', balance: 1250.00, value: 1250.00, icon: '/crypto-icons/color/usdt.svg' },
     ],
-    nfts: [
-      { id: 'bayc-1234', name: 'BAYC #1234', collection: 'Bored Ape Yacht Club', image: '/banner/2.png', floorPrice: 80.5 },
-      { id: 'bayc-5678', name: 'BAYC #5678', collection: 'Bored Ape Yacht Club', image: '/banner/3.png', floorPrice: 82.1 },
-      { id: 'punk-9012', name: 'Punk #9012', collection: 'CryptoPunks', image: '/banner/4.png', floorPrice: 65.3 },
-    ],
-    collections: [
-      { id: 'bored-ape-yacht-club', name: 'Bored Ape Yacht Club', items: 2, image: '/banner/2.png' },
-      { id: 'cryptopunks', name: 'CryptoPunks', items: 1, image: '/banner/3.png' },
-    ],
-    favorited: [],
-    transactions: [
-      { 
-        type: 'send', 
-        asset: 'ETH',
-        amount: 0.5,
-        to: '0x3a2...7f9d',
-        time: '1 day ago',
-        status: 'completed',
-        hash: '0x1a2b3c...'
-      },
-      { 
-        type: 'receive', 
-        asset: 'BTC',
-        amount: 0.025,
-        from: '0x7c8...2e4f',
-        time: '3 days ago',
-        status: 'completed',
-        hash: '0x4d5e6f...'
-      },
-      { 
-        type: 'swap', 
-        fromAsset: 'ETH',
-        toAsset: 'USDT',
-        fromAmount: 1.2,
-        toAmount: 3600,
-        time: '1 week ago',
-        status: 'completed',
-        hash: '0x7g8h9i...'
-      }
-    ],
-    activity: [
-      { 
-        type: 'purchase', 
-        collection: 'Bored Ape Yacht Club', 
-        item: 'BAYC #1234', 
-        price: 80.5, 
-        time: '2 days ago',
-        image: '/banner/2.png'
-      },
-      { 
-        type: 'sale', 
-        collection: 'CryptoPunks', 
-        item: 'Punk #5678', 
-        price: 65.3, 
-        time: '1 week ago',
-        image: '/banner/3.png'
-      }
-    ]
   };
 
   // Combined connected state (prefer real wallet connection if present)
@@ -258,36 +198,6 @@ export default function ProfilePage() {
           className={`px-4 py-3 font-medium text-sm whitespace-nowrap ${activeTab === 'social-links' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-gray-400 hover:text-gray-300'}`}
         >
           Social Links
-        </button>
-        <button
-          onClick={() => setActiveTab('nfts')}
-          className={`px-4 py-3 font-medium text-sm whitespace-nowrap ${activeTab === 'nfts' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-gray-400 hover:text-gray-300'}`}
-        >
-          My NFTs
-        </button>
-        <button
-          onClick={() => setActiveTab('transactions')}
-          className={`px-4 py-3 font-medium text-sm whitespace-nowrap ${activeTab === 'transactions' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-gray-400 hover:text-gray-300'}`}
-        >
-          Transactions
-        </button>
-        <button
-          onClick={() => setActiveTab('collections')}
-          className={`px-4 py-3 font-medium text-sm whitespace-nowrap ${activeTab === 'collections' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-gray-400 hover:text-gray-300'}`}
-        >
-          Collections
-        </button>
-        <button
-          onClick={() => setActiveTab('favorited')}
-          className={`px-4 py-3 font-medium text-sm whitespace-nowrap ${activeTab === 'favorited' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-gray-400 hover:text-gray-300'}`}
-        >
-          Favorited
-        </button>
-        <button
-          onClick={() => setActiveTab('activity')}
-          className={`px-4 py-3 font-medium text-sm whitespace-nowrap ${activeTab === 'activity' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-gray-400 hover:text-gray-300'}`}
-        >
-          Activity
         </button>
         <button
           onClick={() => setActiveTab('boost')}
@@ -520,13 +430,20 @@ export default function ProfilePage() {
         </div>
       )}
       
+      {/* Profile Boost Tab */}
+      {derivedConnected && activeTab === 'boost' && (
+        <div>
+          <ProfileBoostSelector profileAddress={userAddress} />
+        </div>
+      )}
+
       {/* Not Connected State */}
       {!derivedConnected && (
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <div className="bg-gray-800 p-6 rounded-xl max-w-md">
             <FaWallet className="text-5xl text-blue-400 mx-auto mb-4" />
             <h2 className="text-xl font-semibold text-white mb-2">Connect Your Wallet</h2>
-            <p className="text-gray-400 mb-6">Connect your wallet to view your NFT collections, items, and activity</p>
+            <p className="text-gray-400 mb-6">Connect your wallet to view your tokens and manage social links</p>
             <button 
               onClick={handleConnectWallet}
               className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg transition-colors"
@@ -534,230 +451,6 @@ export default function ProfilePage() {
               Connect Wallet
             </button>
           </div>
-        </div>
-      )}
-      
-      {/* Connected State - Collections Tab */}
-      {isConnected && activeTab === 'collections' && (
-        <div>
-          {mockUser.collections.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {mockUser.collections.map((collection) => (
-                <div key={collection.id} className="bg-gray-800 rounded-xl overflow-hidden hover:shadow-lg hover:shadow-blue-500/20 transition-all duration-300 border border-gray-700 hover:border-blue-500/50">
-                  <div className="relative h-48 w-full">
-                    <div className="w-full h-full bg-gray-700 flex items-center justify-center">
-                      <span className="text-gray-400">Collection Image</span>
-                    </div>
-                  </div>
-                  
-                  <div className="p-4">
-                    <h3 className="text-lg font-semibold text-white mb-2">{collection.name}</h3>
-                    <p className="text-sm text-gray-400">{collection.items} items</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <div className="bg-gray-800 p-6 rounded-xl max-w-md">
-                <MdOutlineCollections className="text-5xl text-blue-400 mx-auto mb-4" />
-                <h2 className="text-xl font-semibold text-white mb-2">No Collections Yet</h2>
-                <p className="text-gray-400 mb-6">You don't have any NFT collections yet</p>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-      
-      {/* My NFTs Tab */}
-      {isConnected && activeTab === 'nfts' && (
-        <div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {mockUser.nfts.map((nft) => (
-              <div key={nft.id} className="bg-gray-800 rounded-xl overflow-hidden border border-gray-700 hover:border-blue-500/50 transition-all duration-300">
-                <div className="relative h-48 w-full">
-                  <Image 
-                    src={nft.image} 
-                    alt={nft.name}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <div className="p-4">
-                  <h3 className="text-lg font-semibold text-white mb-1">{nft.name}</h3>
-                  <p className="text-sm text-gray-400 mb-3">{nft.collection}</p>
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center">
-                      <FaEthereum className="text-blue-400 mr-1" />
-                      <span className="text-white font-medium">{nft.floorPrice}</span>
-                    </div>
-                    <button className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-md transition-colors">
-                      View
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-      
-      {/* Connected State - Favorited Tab */}
-      {isConnected && activeTab === 'favorited' && (
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <div className="bg-gray-800 p-6 rounded-xl max-w-md">
-            <BsHeart className="text-5xl text-blue-400 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-white mb-2">No Favorites Yet</h2>
-            <p className="text-gray-400 mb-6">You haven't favorited any NFTs yet</p>
-          </div>
-        </div>
-      )}
-      
-      {/* Transactions Tab */}
-      {isConnected && activeTab === 'transactions' && (
-        <div>
-          {mockUser.transactions.length > 0 ? (
-            <>
-              <div className="bg-gray-800 rounded-xl overflow-hidden mb-6">
-                <div className="p-4 border-b border-gray-700">
-                  <h3 className="text-lg font-semibold text-white">Recent Transactions</h3>
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="text-left text-gray-400 text-sm border-b border-gray-700">
-                        <th className="p-4">Type</th>
-                        <th className="p-4">Asset</th>
-                        <th className="p-4">Amount</th>
-                        <th className="p-4">Details</th>
-                        <th className="p-4">Time</th>
-                        <th className="p-4">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {mockUser.transactions.map((tx, index) => (
-                        <tr key={index} className={index < mockUser.transactions.length - 1 ? 'border-b border-gray-700' : ''}>
-                          <td className="p-4">
-                            <div className="flex items-center">
-                              {tx.type === 'send' && (
-                                <div className="bg-red-500/20 p-2 rounded-full mr-2">
-                                  <BiTransfer className="text-red-400" />
-                                </div>
-                              )}
-                              {tx.type === 'receive' && (
-                                <div className="bg-green-500/20 p-2 rounded-full mr-2">
-                                  <BiTransfer className="text-green-400" />
-                                </div>
-                              )}
-                              {tx.type === 'swap' && (
-                                <div className="bg-purple-500/20 p-2 rounded-full mr-2">
-                                  <RiExchangeFill className="text-purple-400" />
-                                </div>
-                              )}
-                              <span className="text-white capitalize">{tx.type}</span>
-                            </div>
-                          </td>
-                          <td className="p-4">
-                            {tx.type === 'swap' ? (
-                              <div className="text-white">{tx.fromAsset} → {tx.toAsset}</div>
-                            ) : (
-                              <div className="text-white">{tx.asset}</div>
-                            )}
-                          </td>
-                          <td className="p-4">
-                            {tx.type === 'swap' ? (
-                              <div className="text-white">{tx.fromAmount} → {tx.toAmount}</div>
-                            ) : (
-                              <div className="text-white">{tx.amount}</div>
-                            )}
-                          </td>
-                          <td className="p-4">
-                            {tx.type === 'send' && (
-                              <div className="text-gray-400">To: {tx.to}</div>
-                            )}
-                            {tx.type === 'receive' && (
-                              <div className="text-gray-400">From: {tx.from}</div>
-                            )}
-                            {tx.type === 'swap' && (
-                              <div className="text-gray-400">Exchange</div>
-                            )}
-                          </td>
-                          <td className="p-4">
-                            <div className="text-gray-400">{tx.time}</div>
-                          </td>
-                          <td className="p-4">
-                            <div className="inline-block px-2 py-1 rounded-full bg-green-500/20 text-green-400 text-xs">
-                              {tx.status}
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-              
-              <div className="flex justify-center space-x-4">
-                <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center">
-                  <BiTransfer className="mr-2" /> Send
-                </button>
-                <button className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center">
-                  <BiTransfer className="mr-2" /> Receive
-                </button>
-              </div>
-            </>
-          ) : (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <div className="bg-gray-800 p-6 rounded-xl max-w-md">
-                <BiTransfer className="text-5xl text-blue-400 mx-auto mb-4" />
-                <h2 className="text-xl font-semibold text-white mb-2">No Transactions Yet</h2>
-                <p className="text-gray-400 mb-6">You don't have any transactions yet</p>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-      
-      {/* Connected State - Activity Tab */}
-      {isConnected && activeTab === 'activity' && (
-        <div>
-          {mockUser.activity.length > 0 ? (
-            <div className="bg-gray-800 rounded-xl overflow-hidden">
-              {mockUser.activity.map((item, index) => (
-                <div 
-                  key={index} 
-                  className={`flex items-center p-4 ${index < mockUser.activity.length - 1 ? 'border-b border-gray-700' : ''}`}
-                >
-                  <div className="relative h-12 w-12 rounded-md overflow-hidden mr-4">
-                    <div className="w-full h-full bg-gray-700 flex items-center justify-center">
-                      <span className="text-gray-400 text-xs">NFT</span>
-                    </div>
-                  </div>
-                  
-                  <div className="flex-1">
-                    <p className="text-white font-medium">{item.item}</p>
-                    <p className="text-sm text-gray-400">{item.collection}</p>
-                  </div>
-                  
-                  <div className="text-right">
-                    <p className="text-white font-medium flex items-center justify-end">
-                      <FaEthereum className="text-blue-400 mr-1" />
-                      {item.price}
-                    </p>
-                    <p className="text-sm text-gray-400">{item.time}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <div className="bg-gray-800 p-6 rounded-xl max-w-md">
-                <BsClockHistory className="text-5xl text-blue-400 mx-auto mb-4" />
-                <h2 className="text-xl font-semibold text-white mb-2">No Activity Yet</h2>
-                <p className="text-gray-400 mb-6">You don't have any activity yet</p>
-              </div>
-            </div>
-          )}
         </div>
       )}
       

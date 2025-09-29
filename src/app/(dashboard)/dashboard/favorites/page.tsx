@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useAccount } from 'wagmi';
 import Image from 'next/image';
 import Link from 'next/link';
-import { FaStar, FaTrash, FaExternalLinkAlt, FaWallet, FaSpinner } from 'react-icons/fa';
+import { FaStar, FaTrash, FaExternalLinkAlt, FaWallet, FaSpinner, FaSync } from 'react-icons/fa';
 import toast, { Toaster } from 'react-hot-toast';
 import { getCryptoIconUrl } from '@/utils/cryptoIcons';
 
@@ -28,6 +28,19 @@ const chainNames: { [key: number]: string } = {
   101: 'Solana',
 };
 
+const getChainName = (chainId: number): string => {
+  const chainNames: { [key: number]: string } = {
+    1: 'ethereum',
+    56: 'bsc',
+    137: 'polygon',
+    42161: 'arbitrum',
+    10: 'optimism',
+    43114: 'avalanche',
+    101: 'solana',
+  };
+  return chainNames[chainId] || 'ethereum';
+};
+
 const chainColors: { [key: number]: string } = {
   1: 'bg-blue-500',
   137: 'bg-purple-500',
@@ -43,6 +56,7 @@ export default function FavoritesPage() {
   const [favorites, setFavorites] = useState<Favorite[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [removingId, setRemovingId] = useState<string | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
     fetchFavorites();
@@ -96,6 +110,13 @@ export default function FavoritesPage() {
     }
   };
 
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await fetchFavorites();
+    setIsRefreshing(false);
+    toast.success('Favorites refreshed');
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -145,8 +166,22 @@ export default function FavoritesPage() {
             <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
               My Favorites
             </h1>
-            <div className="text-sm text-gray-400">
-              {favorites.length} token{favorites.length !== 1 ? 's' : ''} favorited
+            <div className="flex items-center gap-3">
+              <div className="text-sm text-gray-400">
+                {favorites.length} token{favorites.length !== 1 ? 's' : ''} favorited
+              </div>
+              <button
+                onClick={handleRefresh}
+                disabled={isRefreshing || isLoading}
+                className={`p-2 rounded-full transition-all duration-200 ${
+                  isRefreshing || isLoading
+                    ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                    : 'bg-[#1a2932] hover:bg-[#243540] text-gray-400 hover:text-white'
+                }`}
+                title="Refresh favorites"
+              >
+                <FaSync className={isRefreshing ? 'animate-spin' : ''} />
+              </button>
             </div>
           </div>
 
@@ -186,6 +221,10 @@ export default function FavoritesPage() {
                           width={48}
                           height={48}
                           unoptimized
+                          onError={(e) => {
+                            const target = e.currentTarget;
+                            target.src = '/crypto-icons/color/generic.svg';
+                          }}
                         />
                       </div>
                       
@@ -210,7 +249,7 @@ export default function FavoritesPage() {
 
                     <div className="flex items-center gap-2">
                       <Link
-                        href={`/dashboard/trade?address=${favorite.token_address}&base=${favorite.token_symbol}`}
+                        href={`/dashboard/trade?address=${favorite.token_address}&base=${favorite.token_symbol}&chain=${getChainName(favorite.chain_id)}`}
                         className="p-2 rounded-full bg-[#1a2932] hover:bg-[#243540] text-gray-400 hover:text-white transition-all duration-200"
                         title="View token"
                       >
