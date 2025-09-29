@@ -10,14 +10,25 @@ import { FaXTwitter } from 'react-icons/fa6';
 
 const Footer = () => {
   const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState('');
+  const [messageType, setMessageType] = useState<'success' | 'error'>('success');
 
   const handleNewsletterSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!email.trim()) {
       setMessage('Please enter a valid email address');
+      setMessageType('error');
+      return;
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setMessage('Please enter a valid email address');
+      setMessageType('error');
       return;
     }
 
@@ -25,15 +36,32 @@ const Footer = () => {
     setMessage('');
 
     try {
-      // TODO: Replace with actual API call to your newsletter service
-      // For now, we'll simulate the signup
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      console.log('Newsletter signup:', email);
-      setMessage('Thank you for signing up! Welcome to the NYALTX community.');
-      setEmail('');
+      const response = await fetch('/api/newsletter', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email.trim(),
+          name: name.trim() || undefined,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setMessage('🎉 Welcome to NYALTX! Check your email for exclusive crypto insights.');
+        setMessageType('success');
+        setEmail('');
+        setName('');
+      } else {
+        setMessage(data.error || 'Something went wrong. Please try again.');
+        setMessageType('error');
+      }
     } catch (error) {
-      setMessage('Something went wrong. Please try again.');
+      console.error('Newsletter signup error:', error);
+      setMessage('Network error. Please check your connection and try again.');
+      setMessageType('error');
     } finally {
       setIsSubmitting(false);
     }
@@ -64,16 +92,46 @@ const Footer = () => {
                 <p className="text-sm text-gray-300 mb-4">
                   Get exclusive crypto insights, market updates, and early access to new features.
                 </p>
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <input
-                    type="email"
-                    placeholder="Enter your email address"
-                    className="flex-1 px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all duration-300"
-                  />
-                  <button className="px-6 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-semibold rounded-lg hover:from-cyan-700 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-cyan-500/25">
-                    Sign Up
+                <form onSubmit={handleNewsletterSignup} className="space-y-3">
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <input
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Your name (optional)"
+                      className="flex-1 px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all duration-300"
+                      disabled={isSubmitting}
+                    />
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Enter your email address"
+                      className="flex-1 px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all duration-300"
+                      required
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                  <button 
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-semibold rounded-lg hover:from-cyan-700 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-cyan-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isSubmitting ? 'Signing Up...' : 'Join Community'}
                   </button>
-                </div>
+                </form>
+                
+                {/* Message Display */}
+                {message && (
+                  <div className={`mt-3 p-3 rounded-lg text-sm ${
+                    messageType === 'success' 
+                      ? 'bg-green-500/20 border border-green-500/30 text-green-400' 
+                      : 'bg-red-500/20 border border-red-500/30 text-red-400'
+                  }`}>
+                    {message}
+                  </div>
+                )}
+                
                 <p className="text-xs text-gray-400 mt-2">
                   By signing up, you agree to our Terms of Service and Privacy Policy.
                 </p>
