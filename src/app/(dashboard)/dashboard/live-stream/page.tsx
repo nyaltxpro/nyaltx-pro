@@ -7,7 +7,10 @@ import { streamingService } from '@/services/StreamingService';
 
 const WebRTCBroadcaster = dynamic(() => import('@/components/WebRTCBroadcaster'), { ssr: false });
 const WebRTCViewer = dynamic(() => import('@/components/WebRTCViewer'), { ssr: false });
-import { FaRocket, FaFire, FaUsers, FaChartLine, FaGlobe, FaArrowUp, FaPlay, FaPlus, FaEye } from 'react-icons/fa';
+const StreamIOBroadcaster = dynamic(() => import('@/components/StreamIOBroadcaster'), { ssr: false });
+const StreamIOViewer = dynamic(() => import('@/components/StreamIOViewer'), { ssr: false });
+const StreamIOLiveStreams = dynamic(() => import('@/components/StreamIOLiveStreams'), { ssr: false });
+import { FaRocket, FaFire, FaUsers, FaChartLine, FaGlobe, FaArrowUp, FaPlay, FaPlus, FaEye, FaStar, FaCrown } from 'react-icons/fa';
 import Image from 'next/image';
 
 interface StreamStats {
@@ -54,6 +57,11 @@ export default function LiveStreamPage() {
   const [streamTitle, setStreamTitle] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
   const [activeStreams, setActiveStreams] = useState<any[]>([]);
+  
+  // Stream.io state
+  const [streamingPlatform, setStreamingPlatform] = useState<'webrtc' | 'streamio'>('streamio');
+  const [isStreamIOStreaming, setIsStreamIOStreaming] = useState(false);
+  const [selectedStreamIOStream, setSelectedStreamIOStream] = useState<{id: string, title: string} | null>(null);
   const [liveStreams, setLiveStreams] = useState<LiveStreamData[]>([
     {
       id: '1',
@@ -138,13 +146,24 @@ export default function LiveStreamPage() {
       alert('Please enter a stream title');
       return;
     }
-    setIsStreaming(true);
+    
+    if (streamingPlatform === 'webrtc') {
+      setIsStreaming(true);
+    } else {
+      setIsStreamIOStreaming(true);
+    }
     setShowCreateStream(false);
   };
 
   const handleStreamEnd = () => {
     setIsStreaming(false);
+    setIsStreamIOStreaming(false);
     setStreamTitle('');
+  };
+
+  // Stream.io handlers
+  const handleStreamIOStreamSelect = (streamId: string, streamTitle: string) => {
+    setSelectedStreamIOStream({ id: streamId, title: streamTitle });
   };
 
   const getCategoryColor = (category: string) => {
@@ -168,6 +187,32 @@ export default function LiveStreamPage() {
         </div>
         
         <div className="flex items-center gap-4">
+          {/* Platform Selector */}
+          <div className="flex items-center gap-2 bg-gray-800 rounded-lg p-1">
+            <button
+              onClick={() => setStreamingPlatform('streamio')}
+              className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                streamingPlatform === 'streamio'
+                  ? 'bg-cyan-600 text-white'
+                  : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              <FaCrown className="w-4 h-4" />
+              Stream.io Pro
+            </button>
+            <button
+              onClick={() => setStreamingPlatform('webrtc')}
+              className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                streamingPlatform === 'webrtc'
+                  ? 'bg-gray-600 text-white'
+                  : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              <FaStar className="w-4 h-4" />
+              WebRTC
+            </button>
+          </div>
+          
           <div className="flex items-center gap-2 px-3 py-1 bg-red-500/20 text-red-400 rounded-full text-sm">
             <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
             {liveStreams.length} LIVE
@@ -247,12 +292,18 @@ export default function LiveStreamPage() {
 
       {/* Live Streams Grid */}
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-white">Active Live Streams</h2>
-          <div className="text-sm text-gray-400">
-            {activeStreams.length} WebRTC streams • {liveStreams.length} demo streams
-          </div>
-        </div>
+        {streamingPlatform === 'streamio' ? (
+          // Stream.io Live Streams
+          <StreamIOLiveStreams onStreamSelect={handleStreamIOStreamSelect} />
+        ) : (
+          // WebRTC Streams
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold text-white">Active Live Streams</h2>
+              <div className="text-sm text-gray-400">
+                {activeStreams.length} WebRTC streams • {liveStreams.length} demo streams
+              </div>
+            </div>
         
         {/* Real WebRTC Streams */}
         {activeStreams.length > 0 && (
@@ -324,16 +375,16 @@ export default function LiveStreamPage() {
           </div>
         )}
         
-        {/* Demo Streams */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-gray-400">📺 Demo Streams</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {liveStreams.map((stream) => (
-            <div
-              key={stream.id}
-              className="bg-gradient-to-b from-white/5 to-white/[0.03] backdrop-blur-md border border-white/10 rounded-xl overflow-hidden hover:border-cyan-500/30 transition-all duration-300 hover:-translate-y-1 cursor-pointer"
-              onClick={() => setSelectedStream(stream)}
-            >
+            {/* Demo Streams */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-400">📺 Demo Streams</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {liveStreams.map((stream) => (
+                  <div
+                    key={stream.id}
+                    className="bg-gradient-to-b from-white/5 to-white/[0.03] backdrop-blur-md border border-white/10 rounded-xl overflow-hidden hover:border-cyan-500/30 transition-all duration-300 hover:-translate-y-1 cursor-pointer"
+                    onClick={() => setSelectedStream(stream)}
+                  >
               {/* Stream Thumbnail */}
               <div className="relative aspect-video bg-gray-800">
                 <div className="absolute inset-0 bg-gradient-to-br from-cyan-900/20 to-purple-900/20 flex items-center justify-center">
@@ -377,23 +428,25 @@ export default function LiveStreamPage() {
                 </div>
               </div>
             </div>
-          ))}
-        </div>
-        
-        {liveStreams.length === 0 && (
-          <div className="text-center py-12">
-            <FaPlay className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-400 mb-2">No Live Streams</h3>
-            <p className="text-gray-500 mb-4">Be the first to go live and share your content!</p>
-            <button
-              onClick={() => setShowCreateStream(true)}
-              className="px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white font-medium rounded-lg hover:from-red-700 hover:to-red-800 transition-all"
-            >
-              Start Streaming
-            </button>
+                  ))}
+              </div>
+              
+              {liveStreams.length === 0 && (
+                <div className="text-center py-12">
+                  <FaPlay className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold text-gray-400 mb-2">No Live Streams</h3>
+                  <p className="text-gray-500 mb-4">Be the first to go live and share your content!</p>
+                  <button
+                    onClick={() => setShowCreateStream(true)}
+                    className="px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white font-medium rounded-lg hover:from-red-700 hover:to-red-800 transition-all"
+                  >
+                    Start Streaming
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         )}
-        </div>
       </div>
 
       {/* Quick Actions */}
@@ -426,11 +479,13 @@ export default function LiveStreamPage() {
         </div>
       </div>
 
-      {/* WebRTC Broadcaster Modal */}
+      {/* Create Stream Modal */}
       {showCreateStream && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-[#0f1923] rounded-xl border border-gray-800 p-6 w-full max-w-md">
-            <h3 className="text-xl font-bold text-white mb-4">Start Live Stream</h3>
+            <h3 className="text-xl font-bold text-white mb-4">
+              Start Live Stream - {streamingPlatform === 'streamio' ? 'Stream.io Pro' : 'WebRTC'}
+            </h3>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -444,6 +499,19 @@ export default function LiveStreamPage() {
                   className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500"
                 />
               </div>
+              
+              {streamingPlatform === 'streamio' && (
+                <div className="bg-cyan-900/20 border border-cyan-500/30 rounded-lg p-3">
+                  <div className="flex items-center gap-2 text-cyan-400 text-sm font-medium mb-1">
+                    <FaCrown className="w-4 h-4" />
+                    Stream.io Professional
+                  </div>
+                  <p className="text-gray-300 text-xs">
+                    Enterprise-grade streaming with HD quality, global CDN, and built-in chat
+                  </p>
+                </div>
+              )}
+              
               <div className="flex gap-3">
                 <button
                   onClick={handleStartStream}
@@ -464,12 +532,39 @@ export default function LiveStreamPage() {
         </div>
       )}
 
+      {/* Stream.io Broadcaster */}
+      {isStreamIOStreaming && (
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 p-4 overflow-y-auto">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h2 className="text-2xl font-bold text-white">Broadcasting: {streamTitle}</h2>
+                <p className="text-cyan-400 text-sm">Powered by Stream.io Professional</p>
+              </div>
+              <button
+                onClick={handleStreamEnd}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+              >
+                End Stream
+              </button>
+            </div>
+            <StreamIOBroadcaster
+              streamTitle={streamTitle}
+              onStreamEnd={handleStreamEnd}
+            />
+          </div>
+        </div>
+      )}
+
       {/* WebRTC Broadcaster */}
       {isStreaming && (
         <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 p-4 overflow-y-auto">
           <div className="max-w-7xl mx-auto">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold text-white">Broadcasting: {streamTitle}</h2>
+              <div>
+                <h2 className="text-2xl font-bold text-white">Broadcasting: {streamTitle}</h2>
+                <p className="text-gray-400 text-sm">WebRTC P2P Streaming</p>
+              </div>
               <button
                 onClick={handleStreamEnd}
                 className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
@@ -485,12 +580,40 @@ export default function LiveStreamPage() {
         </div>
       )}
 
+      {/* Stream.io Viewer */}
+      {selectedStreamIOStream && (
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 p-4 overflow-y-auto">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h2 className="text-2xl font-bold text-white">Watching: {selectedStreamIOStream.title}</h2>
+                <p className="text-cyan-400 text-sm">Stream.io Professional Quality</p>
+              </div>
+              <button
+                onClick={() => setSelectedStreamIOStream(null)}
+                className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
+              >
+                Close
+              </button>
+            </div>
+            <StreamIOViewer
+              streamId={selectedStreamIOStream.id}
+              streamTitle={selectedStreamIOStream.title}
+              onStreamEnd={() => setSelectedStreamIOStream(null)}
+            />
+          </div>
+        </div>
+      )}
+
       {/* WebRTC Viewer */}
       {selectedStream && (
         <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 p-4 overflow-y-auto">
           <div className="max-w-7xl mx-auto">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold text-white">Watching: {selectedStream.title}</h2>
+              <div>
+                <h2 className="text-2xl font-bold text-white">Watching: {selectedStream.title}</h2>
+                <p className="text-gray-400 text-sm">WebRTC P2P Connection</p>
+              </div>
               <button
                 onClick={() => setSelectedStream(null)}
                 className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
