@@ -111,7 +111,7 @@ export default function Sidebar({ isMobileMenuOpen, toggleMobileMenu }: SidebarP
     // { icon: <FaExchangeAlt />, text: 'Pairs', href: '/pairs' },
     // { icon: <FaStar />, text: 'Favorites', href: '/dashboard/favorites' },
     { icon: <FaPlay />, text: 'Live Stream', href: '/dashboard/live-stream' },
-    { icon: <FaGift />, text: 'Airdrops', href: '/dashboard/airdrops' },
+    // { icon: <FaGift />, text: 'Airdrops', href: '/dashboard/airdrops' },
     { icon: <FaRocket />, text: 'Trending', href: '/dashboard/trending' },
     { icon: <FaNewspaper />, text: 'News', href: '/dashboard/news' },
     { icon: <FaCalendarAlt />, text: 'Events', href: '/dashboard/events' },
