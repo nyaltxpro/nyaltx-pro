@@ -369,6 +369,12 @@ export default function PricingPage() {
                 </span>
               </button>
               <button
+                onClick={() => router.push(`/dashboard/register-token?redirect=pricing/checkout/nyaltxpro1&method=eth`)}
+                className="w-full py-2 rounded-lg border border-zinc-600 text-white font-medium hover:bg-indigo-500"
+              >
+                <span className="inline-flex items-center gap-2"><Image src="/crypto-icons/color/eth.svg" width={16} height={16} alt="eth"/> Register Token & Pay $1 with ETH</span>
+              </button>
+              <button
                 onClick={() => router.push(`/dashboard/register-token?redirect=pricing/checkout/nyaltxpro1&method=usdt`)}
                 className="w-full py-2 rounded-lg border border-zinc-600 text-white font-medium hover:bg-emerald-500"
               >
