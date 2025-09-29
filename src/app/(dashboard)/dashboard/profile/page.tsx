@@ -117,28 +117,7 @@ export default function ProfilePage() {
   return (
     <main className="container mx-auto px-4 py-8 max-w-7xl">
       {/* Profile Banner */}
-      <div className="relative h-64 w-full rounded-2xl overflow-hidden mb-16 shadow-2xl">
-        <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/20 via-blue-600/30 to-purple-700/40"></div>
-        <Image
-          src={mockUser.bannerUrl}
-          alt="Profile Banner"
-          fill
-          className="object-cover mix-blend-overlay"
-        />
-
-        {/* Profile Avatar */}
-        <div className="absolute -bottom-12 left-8">
-          <div className="relative h-24 w-24 rounded-full overflow-hidden border-4 border-white/20 backdrop-blur-sm bg-gray-800/50 shadow-2xl">
-            <Image
-              src={mockUser.avatarUrl}
-              alt="Profile Avatar"
-              fill
-              className="object-cover"
-            />
-            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-cyan-400/20 to-blue-600/20"></div>
-          </div>
-        </div>
-      </div>
+   
 
       {/* Profile Info */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
@@ -230,7 +209,7 @@ export default function ProfilePage() {
 
       <div>
 
-
+<br/>
         {/* My Registered Token Submissions */}
         <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm rounded-2xl border border-gray-700/50 overflow-hidden mt-6">
           <div className="p-6 border-b border-gray-700/50 flex items-center justify-between">
