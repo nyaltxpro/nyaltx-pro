@@ -8,7 +8,10 @@
     "start": "next start",
     "lint": "eslint",
     "seed:admin": "node scripts/seedAdmin.js",
-    "seed:nyax": "node scripts/seedNyaxTokens.js"
+    "seed:nyax": "node scripts/seedNyaxTokens.js",
+    "fetch:coins": "node scripts/getTopCoinsSimple.js",
+    "fetch:coins:full": "node scripts/fetchTop400Coins.js",
+    "fetch:coins:detailed": "node scripts/getTop400CoinsDetailed.js"
   },
   "dependencies": {
     "@paypal/react-paypal-js": "^8.9.1",

@@ -14,6 +14,7 @@ import {
   selectTrendingLoading 
 } from '@/store/slices/searchCacheSlice';
 import { useCoinGeckoSearch } from '@/hooks/useCoinGeckoSearch';
+import { useLocalCoinsSearch, LocalCoin, LocalSearchResult } from '@/hooks/useLocalCoinsSearch';
 import { commonCryptoSymbols, getCryptoIconUrl } from '../utils/cryptoIcons';
 import { getCryptoName } from '../utils/cryptoNames';
 import { usePumpFunTokens } from '../hooks/usePumpFunTokens';
@@ -89,11 +90,19 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [localSearchResults, setLocalSearchResults] = useState<LocalSearchResult[]>([]);
   const modalRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { tokens: pumpFunTokens } = usePumpFunTokens();
   const [nyaxTokens] = useState<NyaxToken[]>(nyaxTokensData.tokens || []);
+  
+  // Local coins search hook
+  const { 
+    searchCoins, 
+    getTrendingCoins: localTrendingCoins, 
+    isLoading: isLocalSearchLoading 
+  } = useLocalCoinsSearch();
 
   // Redux selectors for cached data
   const cachedTrendingCoins = useAppSelector(selectTrendingCoins);
@@ -191,12 +200,19 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
 
     if (value.trim() === '') {
       setSearchResults([]);
+      setLocalSearchResults([]);
       return;
     }
 
-    // Search using cached CoinGecko API with debounce
-    searchTimeoutRef.current = setTimeout(() => {
-      searchCoinGeckoWithCache(value);
+    // Search local detailed coins data with debounce
+    searchTimeoutRef.current = setTimeout(async () => {
+      try {
+        const localResults = await searchCoins(value, 8);
+        setLocalSearchResults(localResults);
+      } catch (error) {
+        console.error('Local search failed:', error);
+        setLocalSearchResults([]);
+      }
     }, 300);
 
     const results: SearchResult[] = [];
@@ -302,7 +318,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
     });
 
     // Limit results to avoid overwhelming the UI
-    setSearchResults(results.slice(0, 15));
+    setSearchResults(results.slice(0, 10));
   };
 
   // Handle clicking on a search result
@@ -378,6 +394,25 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
   // Handle clicking on a popular token
   const handlePopularTokenClick = (token: { symbol: string }) => {
     router.push(`/dashboard/trade?base=${token.symbol.toUpperCase()}`);
+    onClose();
+  };
+
+  // Enhanced local coin click handler
+  const handleLocalCoinClick = async (coin: LocalCoin) => {
+    const contractResult: ContractAddressResult = {
+      contractAddresses: coin.platforms || {},
+      primaryChain: (coin as any).primaryChain,
+      primaryAddress: (coin as any).primaryAddress
+    };
+    
+    // Log contract address information
+    logContractAddressInfo(coin.symbol, contractResult);
+    
+    // Generate trade URL and navigate
+    const tradeUrl = generateTradeUrl(coin.symbol, contractResult, coin.id);
+    console.log(`🚀 Navigating to local coin: ${tradeUrl}`);
+    
+    router.push(tradeUrl);
     onClose();
   };
 
@@ -586,20 +621,14 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
     }
   };
 
-  // Fetch trending coins when modal opens using Redux cache
+  // Focus input when modal opens
   useEffect(() => {
     if (isOpen) {
-
-      // Use Redux-based trending fetch instead
-      if (!cachedTrendingCoins && !isTrendingLoading) {
-        getTrendingCoinsWithCache();
-      }
-
       if (inputRef.current) {
         inputRef.current.focus();
       }
     }
-  }, [isOpen, cachedTrendingCoins, isTrendingLoading, getTrendingCoinsWithCache]);
+  }, [isOpen]);
 
   // Close modal when clicking outside
   useEffect(() => {
@@ -615,15 +644,13 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
       // Reset states when modal closes
       setSearchTerm('');
       setSearchResults([]);
+      setLocalSearchResults([]);
       
       // Cancel any pending searches
       if (searchTimeoutRef.current) {
         clearTimeout(searchTimeoutRef.current);
         searchTimeoutRef.current = null;
       }
-      
-      // Cancel any ongoing CoinGecko searches
-      cancelSearch();
     }
 
     return () => {
@@ -702,11 +729,100 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
               </div>
             </div>
 
+            {/* Local Detailed Coins Results */}
+            {searchTerm && searchTerm.length >= 2 && localSearchResults.length > 0 && (
+              <div className="border-b border-gray-800">
+                <div className="p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-green-400 font-bold flex items-center gap-2">
+                      <span>💎 TOP 400 CRYPTOCURRENCIES</span>
+                      {isLocalSearchLoading && (
+                        <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-green-400"></div>
+                      )}
+                    </h3>
+                    <div className="text-xs text-gray-400">
+                      {localSearchResults.length} results from local database
+                    </div>
+                  </div>
+                  <div className="max-h-60 overflow-y-auto">
+                    {localSearchResults.map((result, index) => (
+                      <div
+                        key={`local-${result.coin.id}-${index}`}
+                        className="flex items-center p-3 hover:bg-gray-700 cursor-pointer border-b border-gray-700 last:border-b-0 rounded-lg mb-1"
+                        onClick={() => handleLocalCoinClick(result.coin)}
+                      >
+                        <div className="flex items-center mr-3">
+                          <div className="relative">
+                            <div className="w-8 h-8 rounded-full overflow-hidden">
+                              <img
+                                src={result.coin.image?.thumb || result.coin.image?.small || ''}
+                                alt={result.coin.symbol}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  e.currentTarget.style.display = 'none';
+                                }}
+                              />
+                            </div>
+                            {/* Match type indicator */}
+                            <div className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border border-gray-800 ${
+                              result.matchType === 'exact_symbol' ? 'bg-green-500' :
+                              result.matchType === 'exact_name' ? 'bg-blue-500' :
+                              result.matchType === 'symbol_contains' ? 'bg-yellow-500' :
+                              result.matchType === 'name_contains' ? 'bg-orange-500' :
+                              'bg-gray-500'
+                            }`} title={`Match: ${result.matchType.replace('_', ' ')}`} />
+                          </div>
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium text-white">{result.coin.name}</span>
+                            <span className="text-xs bg-green-600 text-white px-2 py-0.5 rounded-full">
+                              #{result.coin.market_cap_rank || '?'}
+                            </span>
+                            {result.coin.is_native_token && (
+                              <span className="text-xs bg-purple-600 text-white px-2 py-0.5 rounded-full">
+                                Native
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-sm text-gray-400 flex items-center gap-2">
+                            <span className="font-mono">${result.coin.symbol.toUpperCase()}</span>
+                            {result.coin.current_price && (
+                              <span>${result.coin.current_price.toLocaleString()}</span>
+                            )}
+                            {result.coin.price_change_percentage_24h !== null && (
+                              <span className={`text-xs ${
+                                result.coin.price_change_percentage_24h > 0 ? 'text-green-400' : 'text-red-400'
+                              }`}>
+                                {result.coin.price_change_percentage_24h > 0 ? '+' : ''}
+                                {result.coin.price_change_percentage_24h.toFixed(2)}%
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {Object.keys(result.coin.platforms || {}).length > 0 && (
+                              <span>Contracts: {Object.keys(result.coin.platforms).length} chains</span>
+                            )}
+                            {result.coin.categories && result.coin.categories.length > 0 && (
+                              <span className="ml-2">• {result.coin.categories[0]}</span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="text-xs text-gray-400">
+                          Score: {Math.round(result.relevanceScore)}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Search Results */}
             {searchTerm && searchResults.length > 0 && (
               <div className="border-b border-gray-800">
                 <div className="p-4">
-                  <h3 className="text-blue-400 font-bold mb-3">SEARCH RESULTS</h3>
+                  <h3 className="text-blue-400 font-bold mb-3">OTHER SOURCES</h3>
                   <div className="max-h-60 overflow-y-auto">
                     {searchResults.map((result, index) => renderSearchResult(result, index))}
                   </div>
@@ -718,16 +834,56 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
             {searchTerm && searchTerm.length >= 2 && ((cachedCoinGeckoResults && cachedCoinGeckoResults.length > 0) || isSearchingCoinGecko) && (
               <div className="border-b border-gray-800">
                 <div className="p-4">
-                  <h3 className="text-orange-400 font-bold mb-3 flex items-center gap-2">
-                    <span>🦎 CRYPTOCURRENCIES</span>
-                    {isSearchingCoinGecko && (
-                      <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-orange-400"></div>
-                    )}
-                  </h3>
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-orange-400 font-bold flex items-center gap-2">
+                      <span>🔍 MULTI-SOURCE SEARCH</span>
+                      {isSearchingCoinGecko && (
+                        <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-orange-400"></div>
+                      )}
+                    </h3>
+                    {/* API Source Legend */}
+                    <div className="flex items-center space-x-3 text-xs">
+                      <div className="flex items-center space-x-1">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full" />
+                        <span className="text-gray-400">Dex</span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <div className="w-2 h-2 bg-orange-500 rounded-full" />
+                        <span className="text-gray-400">CMC</span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <div className="w-2 h-2 bg-purple-500 rounded-full" />
+                        <span className="text-gray-400">1inch</span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <div className="w-2 h-2 bg-green-500 rounded-full" />
+                        <span className="text-gray-400">CG</span>
+                      </div>
+                    </div>
+                  </div>
                   <div className="max-h-60 overflow-y-auto">
                     {isSearchingCoinGecko ? (
-                      <div className="flex justify-center items-center py-8">
-                        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-orange-400"></div>
+                      <div className="space-y-3">
+                        {[...Array(3)].map((_, i) => (
+                          <div key={i} className="flex items-center p-3 rounded-lg bg-gray-800/50 animate-pulse">
+                            <div className="relative mr-3">
+                              <div className="w-8 h-8 bg-gray-700 rounded-full" />
+                              <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-gray-600 rounded-full" />
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-center space-x-2 mb-1">
+                                <div className="h-4 bg-gray-700 rounded w-20" />
+                                <div className="h-3 bg-gray-600 rounded w-12" />
+                                <div className="h-3 bg-gray-600 rounded w-16" />
+                              </div>
+                              <div className="h-3 bg-gray-700 rounded w-2/3 mb-1" />
+                              <div className="h-2 bg-gray-700 rounded w-1/2" />
+                            </div>
+                          </div>
+                        ))}
+                        <div className="text-center text-sm text-gray-400 py-2">
+                          🔍 Searching Dexscreener, CoinPaprika, 1inch, CoinGecko...
+                        </div>
                       </div>
                     ) : (cachedCoinGeckoResults && cachedCoinGeckoResults.length > 0) ? (
                       cachedCoinGeckoResults.map((coin: any, index: number) => (
@@ -737,24 +893,55 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                           onClick={() => handleCoinGeckoClick(coin)}
                         >
                           <div className="flex items-center mr-3">
-                            <div className="w-8 h-8 rounded-full overflow-hidden">
-                              <img
-                                src={coin.thumb}
-                                alt={coin.symbol}
-                                className="w-full h-full object-cover"
-                                onError={(e) => {
-                                  e.currentTarget.style.display = 'none';
-                                }}
-                              />
+                            <div className="relative">
+                              <div className="w-8 h-8 rounded-full overflow-hidden">
+                                <img
+                                  src={coin.thumb}
+                                  alt={coin.symbol}
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    e.currentTarget.style.display = 'none';
+                                  }}
+                                />
+                              </div>
+                              {/* Source indicator */}
+                              {coin.source && (
+                                <div className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border border-gray-800 ${
+                                  coin.source === 'dexscreener' ? 'bg-blue-500' :
+                                  coin.source === 'coinpaprika' ? 'bg-orange-500' :
+                                  coin.source === '1inch' ? 'bg-purple-500' :
+                                  coin.source === 'multiapi' ? 'bg-green-500' :
+                                  'bg-gray-500'
+                                }`} title={`Source: ${coin.source}`} />
+                              )}
                             </div>
                           </div>
                           <div className="flex-1">
                             <div className="flex items-center gap-2">
                               <span className="font-medium text-white">{coin.name}</span>
-                              <span className="text-xs bg-orange-600 text-white px-2 py-0.5 rounded-full">CoinGecko</span>
+                              {/* Source badge */}
+                              <span className={`text-xs text-white px-2 py-0.5 rounded-full ${
+                                coin.source === 'dexscreener' ? 'bg-blue-600' :
+                                coin.source === 'coinpaprika' ? 'bg-orange-600' :
+                                coin.source === '1inch' ? 'bg-purple-600' :
+                                coin.source === 'multiapi' ? 'bg-green-600' :
+                                'bg-orange-600'
+                              }`}>
+                                {coin.source === 'dexscreener' ? 'DexScreener' :
+                                 coin.source === 'coinpaprika' ? 'CoinPaprika' :
+                                 coin.source === '1inch' ? '1inch' :
+                                 coin.source === 'multiapi' ? 'Multi-API' :
+                                 'CoinGecko'}
+                              </span>
                               {coin.market_cap_rank && (
                                 <span className="text-xs bg-gray-600 text-gray-300 px-2 py-0.5 rounded-full">
                                   #{coin.market_cap_rank}
+                                </span>
+                              )}
+                              {/* Confidence indicator */}
+                              {coin.confidence && coin.confidence > 70 && (
+                                <span className="text-xs bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full">
+                                  {coin.confidence}%
                                 </span>
                               )}
                             </div>
@@ -789,10 +976,13 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                       ))
                     ) : searchTerm.length >= 2 ? (
                       <div className="text-center text-gray-400 py-6">
-                        <div className="text-orange-400 mb-2 text-2xl">🦎</div>
+                        <div className="text-orange-400 mb-2 text-2xl">🔍</div>
                         <div className="font-medium">No cryptocurrencies found for "{searchTerm}"</div>
                         <div className="text-xs text-gray-500 mt-2">
-                          Try searching with different keywords or check the spelling
+                          Searched across multiple sources:
+                        </div>
+                        <div className="text-xs text-gray-600 mt-1">
+                          • Dexscreener • CoinPaprika • 1inch • CoinGecko
                         </div>
                       </div>
                     ) : null}
@@ -849,7 +1039,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                 </div>
               )} */}
 
-              {/* Trending Coins */}
+              {/* Trending Coins - Local Data */}
               {!searchTerm && (
                 <motion.div 
                   className="mb-6"
@@ -859,13 +1049,10 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                 >
                   <div className="flex justify-between items-center mb-3">
                     <h3 className="text-orange-400 font-bold flex items-center gap-2">
-                      🔥 TRENDING COINS
-                      {isTrendingLoading && (
-                        <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-orange-400"></div>
-                      )}
+                      🔥 TOP CRYPTOCURRENCIES
                     </h3>
                     <div className="flex space-x-2">
-                      <span className="text-xs text-gray-400">Live from CoinGecko</span>
+                      <span className="text-xs text-gray-400">By Market Cap • Local Data</span>
                     </div>
                   </div>
                   <motion.div 
@@ -874,16 +1061,12 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.2, duration: 0.3 }}
                   >
-                    {isTrendingLoading ? (
-                      <div className="flex justify-center items-center w-full py-8">
-                        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-orange-400"></div>
-                      </div>
-                    ) : (cachedTrendingCoins && cachedTrendingCoins.length > 0) ? (
-                      cachedTrendingCoins.map((coin: any, index: number) => (
+                    {localTrendingCoins && localTrendingCoins.length > 0 ? (
+                      localTrendingCoins.map((coin: any, index: number) => (
                         <div 
                           key={coin.id} 
                           className="relative min-w-[140px] bg-gray-800 bg-opacity-30 rounded-lg p-3 overflow-hidden cursor-pointer hover:bg-gray-700 transition-colors group"
-                          onClick={() => handleTrendingClick(coin)}
+                          onClick={() => handleLocalCoinClick(coin)}
                         >
                           <div className={`absolute top-1 right-1 px-2 py-1 text-xs font-bold rounded-full ${
                             index === 0 ? 'bg-yellow-500 text-black' : 
@@ -896,7 +1079,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                           <div className="flex items-center mb-2">
                             <div className="w-8 h-8 mr-2 rounded-full overflow-hidden">
                               <img 
-                                src={coin.thumb} 
+                                src={coin.image?.thumb || coin.image?.small || coin.thumb} 
                                 alt={coin.name} 
                                 className="w-full h-full object-cover"
                                 onError={(e) => {
