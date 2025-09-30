@@ -26,146 +26,119 @@ export async function GET(request: NextRequest) {
 
     const results: SearchResult[] = [];
 
-    // CoinGecko search with retry logic
-    const searchCoinGecko = async (retries = 2) => {
-      for (let attempt = 0; attempt <= retries; attempt++) {
-        try {
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 5000);
-          
-          const response = await fetch(
-            `https://api.coingecko.com/api/v3/search?query=${encodeURIComponent(query)}`,
-            {
-              signal: controller.signal,
-              headers: { 
-                'Accept': 'application/json',
-                'User-Agent': 'NYALTX-Search/1.0'
-              },
-              next: { revalidate: 300 }
-            }
-          );
-          
-          clearTimeout(timeoutId);
-          
-          if (response.status === 429) {
-            await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)));
-            continue;
+    // Simple CoinGecko search with basic retry
+    const searchCoinGecko = async () => {
+      try {
+        const response = await fetch(
+          `https://api.coingecko.com/api/v3/search?query=${encodeURIComponent(query)}`,
+          {
+            headers: { 
+              'Accept': 'application/json',
+              'User-Agent': 'NYALTX-Search/1.0'
+            },
+            next: { revalidate: 300 }
           }
-          
-          if (response.ok) {
-            const data = await response.json();
-            return data.coins || [];
-          }
-        } catch (error: any) {
-          if (error.name === 'AbortError') {
-            console.log(`CoinGecko search timeout, attempt ${attempt + 1}`);
-          } else {
-            console.error(`CoinGecko search error, attempt ${attempt + 1}:`, error);
-          }
-          
-          if (attempt < retries) {
-            await new Promise(resolve => setTimeout(resolve, 500 * (attempt + 1)));
-            continue;
-          }
+        );
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log('CoinGecko search results:', data.coins?.length || 0, 'coins found');
+          return data.coins || [];
+        } else {
+          console.error('CoinGecko API error:', response.status, response.statusText);
+          return [];
         }
+      } catch (error) {
+        console.error('CoinGecko search error:', error);
+        return [];
       }
-      return [];
     };
 
     const coins = await searchCoinGecko();
     
-    // Process coins in batches to avoid overwhelming the API
-    const batchSize = 3;
-    const topCoins = coins.slice(0, 8); // Limit to top 8 for better reliability
+    if (!coins || coins.length === 0) {
+      return NextResponse.json({
+        coins: [],
+        sources: ['coingecko'],
+        total: 0
+      });
+    }
+
+    // Process top coins with basic info first, then enhance with contract addresses
+    const topCoins = coins.slice(0, 10);
     
-    for (let i = 0; i < topCoins.length; i += batchSize) {
-      const batch = topCoins.slice(i, i + batchSize);
+    // Add basic coin info first
+    topCoins.forEach((coin: any) => {
+      results.push({
+        id: coin.id,
+        name: coin.name,
+        symbol: coin.symbol,
+        rank: coin.market_cap_rank || null,
+        source: 'coingecko',
+        contractAddresses: {},
+        primaryChain: null,
+        primaryAddress: null
+      });
+    });
+
+    // Try to enhance top 3 results with contract addresses (optional)
+    try {
+      const topResults = results.slice(0, 3);
       
-      await Promise.all(batch.map(async (coin: any) => {
-        const fetchCoinDetails = async (retries = 2) => {
-          for (let attempt = 0; attempt <= retries; attempt++) {
-            try {
-              const controller = new AbortController();
-              const timeoutId = setTimeout(() => controller.abort(), 5000);
-              
-              const response = await fetch(
-                `https://api.coingecko.com/api/v3/coins/${coin.id}?localization=false&tickers=false&market_data=false&community_data=false&developer_data=false`,
-                {
-                  signal: controller.signal,
-                  headers: { 
-                    'Accept': 'application/json',
-                    'User-Agent': 'NYALTX-Search/1.0'
-                  },
-                  next: { revalidate: 3600 }
+      for (const coin of topResults) {
+        try {
+          const response = await fetch(
+            `https://api.coingecko.com/api/v3/coins/${coin.id}?localization=false&tickers=false&market_data=false&community_data=false&developer_data=false`,
+            {
+              headers: { 
+                'Accept': 'application/json',
+                'User-Agent': 'NYALTX-Search/1.0'
+              },
+              next: { revalidate: 3600 }
+            }
+          );
+          
+          if (response.ok) {
+            const detailData = await response.json();
+            
+            if (detailData?.platforms) {
+              const contractAddresses: { [key: string]: string } = {};
+              const platformMapping: { [key: string]: string } = {
+                'ethereum': 'ethereum',
+                'binance-smart-chain': 'binance',
+                'polygon-pos': 'polygon',
+                'arbitrum-one': 'arbitrum',
+                'optimistic-ethereum': 'optimism',
+                'base': 'base'
+              };
+
+              Object.entries(detailData.platforms).forEach(([platform, address]) => {
+                const chainName = platformMapping[platform];
+                if (chainName && address && address !== '' && address !== '0x0000000000000000000000000000000000000000') {
+                  contractAddresses[chainName] = address as string;
                 }
-              );
-              
-              clearTimeout(timeoutId);
-              
-              if (response.status === 429) {
-                await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)));
-                continue;
-              }
-              
-              if (response.ok) {
-                return await response.json();
-              }
-            } catch (error: any) {
-              if (attempt < retries) {
-                await new Promise(resolve => setTimeout(resolve, 500 * (attempt + 1)));
-                continue;
-              }
+              });
+
+              const primaryChain = contractAddresses.ethereum ? 'ethereum' :
+                                 contractAddresses.binance ? 'binance' :
+                                 Object.keys(contractAddresses)[0] || null;
+
+              coin.contractAddresses = contractAddresses;
+              coin.primaryChain = primaryChain;
+              coin.primaryAddress = primaryChain ? contractAddresses[primaryChain] : null;
             }
           }
-          return null;
-        };
-
-        const detailData = await fetchCoinDetails();
-        
-        // Build contract addresses
-        const contractAddresses: { [key: string]: string } = {};
-        const platformMapping: { [key: string]: string } = {
-          'ethereum': 'ethereum',
-          'binance-smart-chain': 'binance',
-          'polygon-pos': 'polygon',
-          'arbitrum-one': 'arbitrum',
-          'optimistic-ethereum': 'optimism',
-          'base': 'base',
-          'fantom': 'fantom',
-          'solana': 'solana'
-        };
-
-        if (detailData?.platforms) {
-          Object.entries(detailData.platforms).forEach(([platform, address]) => {
-            const chainName = platformMapping[platform];
-            if (chainName && address && address !== '' && address !== '0x0000000000000000000000000000000000000000') {
-              contractAddresses[chainName] = address as string;
-            }
-          });
+        } catch (error) {
+          // Ignore contract fetch errors - basic search still works
+          console.log(`Could not fetch contract for ${coin.symbol}`);
         }
-
-        // Determine primary chain (prioritize Ethereum)
-        const primaryChain = contractAddresses.ethereum ? 'ethereum' :
-                           contractAddresses.binance ? 'binance' :
-                           contractAddresses.polygon ? 'polygon' :
-                           Object.keys(contractAddresses)[0] || null;
-
-        results.push({
-          id: coin.id,
-          name: coin.name,
-          symbol: coin.symbol,
-          rank: coin.market_cap_rank || null,
-          source: 'coingecko',
-          contractAddresses,
-          primaryChain,
-          primaryAddress: primaryChain ? contractAddresses[primaryChain] : null
-        });
-      }));
-      
-      // Small delay between batches to respect rate limits
-      if (i + batchSize < topCoins.length) {
+        
+        // Small delay to respect rate limits
         await new Promise(resolve => setTimeout(resolve, 200));
       }
+    } catch (error) {
+      // Contract enhancement failed, but basic search still works
+      console.log('Contract enhancement failed, returning basic results');
     }
 
     // Sort by relevance
