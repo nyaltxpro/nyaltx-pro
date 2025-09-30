@@ -105,6 +105,7 @@ const DEFAULT_USDC: `0x${string}` = "0xA0b86a33E6441c8C06DD2b7c94b7E0c8f8c8b8c8"
 const RECEIVER = (process.env.NEXT_PUBLIC_PAYMENT_RECEIVER_ADDRESS as `0x${string}` | undefined) ?? DEFAULT_RECEIVER;
 const NYAX_TOKEN = (process.env.NEXT_PUBLIC_NYAX_TOKEN_ADDRESS as `0x${string}` | undefined) ?? DEFAULT_NYAX;
 const USDC_TOKEN = DEFAULT_USDC;
+const PAYMENT_CHAIN_ID = process.env.NEXT_PUBLIC_PAYMENT_CHAIN_ID ? Number(process.env.NEXT_PUBLIC_PAYMENT_CHAIN_ID) : 1; // Default to mainnet Ethereum
 
 export default function ProfileBoostSelector({ 
   profileAddress, 
@@ -144,6 +145,16 @@ export default function ProfileBoostSelector({
     if (!selectedPack || !isConnected || !address) {
       setError('Please connect wallet and select a boost pack');
       return;
+    }
+
+    // Check and switch to correct chain if needed
+    if (PAYMENT_CHAIN_ID && chain?.id !== PAYMENT_CHAIN_ID) {
+      try {
+        await switchChainAsync({ chainId: PAYMENT_CHAIN_ID });
+      } catch (error) {
+        setError('Please switch to Ethereum mainnet to complete payment');
+        return;
+      }
     }
 
     setLoading(true);
