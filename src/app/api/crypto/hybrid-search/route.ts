@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
 
     const results: SearchResult[] = [];
 
-    // Enhanced CoinGecko search with retry logic
+    // Enhanced CoinGecko search with retry logic and better error handling
     const searchCoinGecko = async (retries = 2) => {
       for (let attempt = 0; attempt <= retries; attempt++) {
         try {
@@ -39,7 +39,8 @@ export async function GET(request: NextRequest) {
               signal: controller.signal,
               headers: { 
                 'Accept': 'application/json',
-                'User-Agent': 'NYALTX-Search/1.0'
+                'User-Agent': 'NYALTX-Search/1.0',
+                'Cache-Control': 'public, max-age=300' // 5 minute cache
               },
               next: { revalidate: 300 }
             }
@@ -49,29 +50,33 @@ export async function GET(request: NextRequest) {
           
           if (response.ok) {
             const data = await response.json();
-            console.log('CoinGecko search results:', data.coins?.length || 0, 'coins found');
+            console.log(`✅ CoinGecko search results: ${data.coins?.length || 0} coins found for "${query}"`);
             return data.coins || [];
           } else if (response.status === 429) {
-            // Rate limited, wait and retry
+            // Rate limited, wait and retry with exponential backoff
             if (attempt < retries) {
-              await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)));
+              const delay = 1500 * Math.pow(2, attempt); // 1.5s, 3s, 6s
+              console.log(`⏳ CoinGecko rate limited, retrying in ${delay}ms...`);
+              await new Promise(resolve => setTimeout(resolve, delay));
               continue;
             }
           } else {
-            console.error('CoinGecko API error:', response.status, response.statusText);
+            console.error(`❌ CoinGecko API error: ${response.status} ${response.statusText}`);
             return [];
           }
         } catch (error: any) {
           if (error.name === 'AbortError') {
-            console.log(`CoinGecko search timeout, attempt ${attempt + 1}`);
+            console.log(`⏱️ CoinGecko search timeout, attempt ${attempt + 1}/${retries + 1}`);
           } else {
-            console.error(`CoinGecko search error, attempt ${attempt + 1}:`, error);
+            console.error(`❌ CoinGecko search error, attempt ${attempt + 1}/${retries + 1}:`, error.message);
           }
           
           if (attempt < retries) {
-            await new Promise(resolve => setTimeout(resolve, 500 * (attempt + 1)));
+            const delay = 750 * (attempt + 1); // 750ms, 1.5s, 2.25s
+            await new Promise(resolve => setTimeout(resolve, delay));
             continue;
           } else {
+            console.log('❌ All CoinGecko search attempts failed');
             return [];
           }
         }

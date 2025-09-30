@@ -77,13 +77,48 @@ const SidebarItem = ({ icon, text, href, isActive, isExpanded }: SidebarItemProp
 };
 
 const LogoutButton = ({ isExpanded }: { isExpanded: boolean }) => {
+  const handleLogout = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      console.log('🚪 Attempting admin logout...');
+      
+      const response = await fetch('/api/admin/logout', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (response.ok) {
+        console.log('✅ Logout successful');
+        // Check if it's a redirect response
+        if (response.redirected) {
+          window.location.href = response.url;
+        } else {
+          // Fallback: manually redirect to login page
+          window.location.href = '/admin/login';
+        }
+      } else {
+        console.error('❌ Logout failed:', response.status, response.statusText);
+        // Force redirect even if API fails
+        window.location.href = '/admin/login';
+      }
+    } catch (error) {
+      console.error('❌ Logout error:', error);
+      // Force redirect on any error
+      window.location.href = '/admin/login';
+    }
+  };
+
   return (
     <motion.div
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       transition={{ type: "spring", stiffness: 400, damping: 17 }}
     >
-      <form action="/api/admin/logout" method="post" className="w-full">
+      <form onSubmit={handleLogout} className="w-full">
         <button 
           type="submit"
           className="flex items-center py-3 px-3 mb-1 rounded-md transition-all duration-200 text-red-400 hover:bg-red-900/20 hover:text-red-300 w-full"

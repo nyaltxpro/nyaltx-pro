@@ -26,8 +26,12 @@ interface TrendingCoin {
   symbol: string;
   market_cap_rank: number;
   thumb: string;
+  large: string;
   score: number;
   price_btc: number;
+  contractAddresses?: { [key: string]: string };
+  primaryChain?: string | null;
+  primaryAddress?: string | null;
 }
 
 interface CoinGeckoCoin {
@@ -125,7 +129,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
       try {
         // Create new abort controller for this attempt
         abortControllerRef.current = new AbortController();
-        const timeoutId = setTimeout(() => abortControllerRef.current?.abort(), 8000); // Reduced to 8 seconds
+        const timeoutId = setTimeout(() => abortControllerRef.current?.abort(), 6000); // Aligned with API timeout
         
         const response = await fetch(
           `/api/crypto/hybrid-search?query=${encodeURIComponent(query)}`,
@@ -133,6 +137,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
             signal: abortControllerRef.current.signal,
             headers: {
               'Accept': 'application/json',
+              'Cache-Control': 'no-cache'
             }
           }
         );
@@ -141,7 +146,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
         
         if (response.ok) {
           const data = await response.json();
-          console.log(`Hybrid search found ${data.coins?.length || 0} coins for "${query}"`);
+          console.log(`✅ Hybrid search found ${data.coins?.length || 0} coins for "${query}"`);
           
           // Enhanced conversion with better contract address handling
           const convertedCoins: CoinGeckoCoin[] = (data.coins || []).map((coin: any) => {
@@ -170,29 +175,29 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
         } else if (response.status === 429) {
           // Rate limited, wait and retry with exponential backoff
           if (attempt < retries) {
-            const delay = 1000 * Math.pow(2, attempt); // Exponential backoff: 1s, 2s, 4s
-            console.log(`Rate limited, retrying in ${delay}ms...`);
+            const delay = 1500 * Math.pow(2, attempt); // More aggressive backoff: 1.5s, 3s, 6s
+            console.log(`⏳ Rate limited, retrying in ${delay}ms...`);
             await new Promise(resolve => setTimeout(resolve, delay));
             continue;
           }
         } else {
-          console.error(`Hybrid search API error: ${response.status} ${response.statusText}`);
+          console.error(`❌ Hybrid search API error: ${response.status} ${response.statusText}`);
           setCoinGeckoResults([]);
           break;
         }
       } catch (error: any) {
         if (error.name === 'AbortError') {
-          console.log(`Hybrid search timeout, attempt ${attempt + 1}/${retries + 1}`);
+          console.log(`⏱️ Hybrid search timeout, attempt ${attempt + 1}/${retries + 1}`);
         } else {
-          console.error(`Error searching hybrid API, attempt ${attempt + 1}/${retries + 1}:`, error.message);
+          console.error(`❌ Error searching hybrid API, attempt ${attempt + 1}/${retries + 1}:`, error.message);
         }
         
         if (attempt < retries) {
-          const delay = 500 * (attempt + 1); // Linear backoff: 500ms, 1s, 1.5s
+          const delay = 750 * (attempt + 1); // Increased delay: 750ms, 1.5s, 2.25s
           await new Promise(resolve => setTimeout(resolve, delay));
           continue;
         } else {
-          console.error('All hybrid search attempts failed');
+          console.error('❌ All hybrid search attempts failed');
           setCoinGeckoResults([]);
           break;
         }
@@ -624,12 +629,13 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
         for (let attempt = 0; attempt <= retries; attempt++) {
           try {
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 8000);
+            const timeoutId = setTimeout(() => controller.abort(), 6000); // Aligned with API timeout
             
             const response = await fetch('/api/coingecko/trending', {
               signal: controller.signal,
               headers: {
                 'Accept': 'application/json',
+                'Cache-Control': 'no-cache'
               }
             });
             
@@ -637,30 +643,35 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
             
             if (response.ok) {
               const data = await response.json();
+              console.log(`✅ Trending coins loaded: ${data.coins?.length || 0} coins`);
               setTrendingCoins(data.coins || []);
               setTrendingLoading(false);
               return; // Success, exit retry loop
             } else if (response.status === 429) {
               if (attempt < retries) {
-                await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)));
+                const delay = 1500 * (attempt + 1); // More aggressive backoff
+                console.log(`⏳ Trending coins rate limited, retrying in ${delay}ms...`);
+                await new Promise(resolve => setTimeout(resolve, delay));
                 continue;
               }
             } else {
-              console.error(`Trending coins API error: ${response.status}`);
+              console.error(`❌ Trending coins API error: ${response.status}`);
               setTrendingCoins([]);
               break;
             }
           } catch (error: any) {
             if (error.name === 'AbortError') {
-              console.log(`Trending coins timeout, attempt ${attempt + 1}`);
+              console.log(`⏱️ Trending coins timeout, attempt ${attempt + 1}`);
             } else {
-              console.error(`Error fetching trending coins, attempt ${attempt + 1}:`, error);
+              console.error(`❌ Error fetching trending coins, attempt ${attempt + 1}:`, error);
             }
             
             if (attempt < retries) {
-              await new Promise(resolve => setTimeout(resolve, 500 * (attempt + 1)));
+              const delay = 750 * (attempt + 1); // Increased delay
+              await new Promise(resolve => setTimeout(resolve, delay));
               continue;
             } else {
+              console.log('❌ All trending coins attempts failed, using fallback');
               setTrendingCoins([]);
               break;
             }
@@ -868,9 +879,12 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                         </div>
                       ))
                     ) : searchTerm.length >= 2 ? (
-                      <div className="text-center text-gray-400 py-4">
-                        <div className="text-orange-400 mb-2">🦎</div>
-                        <div>No cryptocurrencies found for "{searchTerm}"</div>
+                      <div className="text-center text-gray-400 py-6">
+                        <div className="text-orange-400 mb-2 text-2xl">🦎</div>
+                        <div className="font-medium">No cryptocurrencies found for "{searchTerm}"</div>
+                        <div className="text-xs text-gray-500 mt-2">
+                          Try searching with different keywords or check the spelling
+                        </div>
                       </div>
                     ) : null}
                   </div>
@@ -927,69 +941,83 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
               )} */}
 
               {/* Trending Coins */}
-              {/* <motion.div 
-            className="mb-6"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1, duration: 0.3 }}
-          >
-            <div className="flex justify-between items-center mb-3">
-              <h3 className="text-blue-400 font-bold">TRENDING COINS</h3>
-              <div className="flex space-x-2">
-                <button className="bg-blue-600 text-xs px-3 py-1 rounded">TOP</button>
-                <button className="border border-blue-600 text-blue-400 text-xs px-3 py-1 rounded">RANKING</button>
-              </div>
-            </div>
-            <motion.div 
-              className="flex space-x-3 overflow-x-auto pb-2"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.2, duration: 0.3 }}
-            >
-              {trendingLoading ? (
-                <div className="flex justify-center items-center w-full py-4">
-                  <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-500"></div>
-                </div>
-              ) : trendingCoins.length > 0 ? (
-                trendingCoins.map((coin, index) => (
-                  <div 
-                    key={coin.id} 
-                    className="relative bg-gray-800 bg-opacity-30 rounded-lg p-3 overflow-hidden cursor-pointer hover:bg-gray-700 transition-colors"
-                    onClick={() => handleTrendingClick(coin)}
-                  >
-                    <div className={`absolute top-0 right-0 px-2 py-1 text-xs font-bold ${
-                      index === 0 ? 'bg-yellow-500' : 
-                      index === 1 ? 'bg-blue-500' : 
-                      index === 2 ? 'bg-green-500' : 
-                      'bg-purple-500'
-                    }`}>
-                      #{index + 1}
-                    </div>
-                    <div className="flex items-center mb-2">
-                      <div className="w-6 h-6 mr-2 rounded-full overflow-hidden">
-                        <Image 
-                          src={coin.thumb} 
-                          alt={coin.name} 
-                          width={24} 
-                          height={24} 
-                          unoptimized
-                        />
-                      </div>
-                      <div className="text-sm font-bold">{coin.symbol.toUpperCase()}</div>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="text-xs text-gray-400 truncate max-w-[80px]">{coin.name}</div>
-                      <div className="text-xs text-cyan-400 font-bold">USDT</div>
+              {!searchTerm && (
+                <motion.div 
+                  className="mb-6"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1, duration: 0.3 }}
+                >
+                  <div className="flex justify-between items-center mb-3">
+                    <h3 className="text-orange-400 font-bold flex items-center gap-2">
+                      🔥 TRENDING COINS
+                      {trendingLoading && (
+                        <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-orange-400"></div>
+                      )}
+                    </h3>
+                    <div className="flex space-x-2">
+                      <span className="text-xs text-gray-400">Live from CoinGecko</span>
                     </div>
                   </div>
-                ))
-              ) : (
-                <div className="text-center text-gray-400 w-full py-4">
-                  No trending coins found
-                </div>
+                  <motion.div 
+                    className="flex space-x-3 overflow-x-auto pb-2"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.2, duration: 0.3 }}
+                  >
+                    {trendingLoading ? (
+                      <div className="flex justify-center items-center w-full py-8">
+                        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-orange-400"></div>
+                      </div>
+                    ) : trendingCoins.length > 0 ? (
+                      trendingCoins.map((coin, index) => (
+                        <div 
+                          key={coin.id} 
+                          className="relative min-w-[140px] bg-gray-800 bg-opacity-30 rounded-lg p-3 overflow-hidden cursor-pointer hover:bg-gray-700 transition-colors group"
+                          onClick={() => handleTrendingClick(coin)}
+                        >
+                          <div className={`absolute top-1 right-1 px-2 py-1 text-xs font-bold rounded-full ${
+                            index === 0 ? 'bg-yellow-500 text-black' : 
+                            index === 1 ? 'bg-gray-400 text-black' : 
+                            index === 2 ? 'bg-amber-600 text-white' : 
+                            'bg-purple-500 text-white'
+                          }`}>
+                            #{index + 1}
+                          </div>
+                          <div className="flex items-center mb-2">
+                            <div className="w-8 h-8 mr-2 rounded-full overflow-hidden">
+                              <img 
+                                src={coin.thumb} 
+                                alt={coin.name} 
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  e.currentTarget.style.display = 'none';
+                                }}
+                              />
+                            </div>
+                            <div className="text-sm font-bold text-white">{coin.symbol.toUpperCase()}</div>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div className="text-xs text-gray-400 truncate max-w-[80px]" title={coin.name}>{coin.name}</div>
+                            {coin.primaryChain && (
+                              <div className="text-xs text-orange-400 font-bold">{coin.primaryChain.toUpperCase()}</div>
+                            )}
+                          </div>
+                          {coin.market_cap_rank && (
+                            <div className="text-xs text-gray-500 mt-1">Rank #{coin.market_cap_rank}</div>
+                          )}
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center text-gray-400 w-full py-8">
+                        <div className="text-orange-400 mb-2">🔥</div>
+                        <div>Unable to load trending coins</div>
+                        <div className="text-xs text-gray-500 mt-1">Try refreshing or search manually</div>
+                      </div>
+                    )}
+                  </motion.div>
+                </motion.div>
               )}
-            </motion.div>
-          </motion.div> */}
 
 
               {/* All Tokens (from catalog) */}
