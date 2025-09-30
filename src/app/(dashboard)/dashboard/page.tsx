@@ -22,6 +22,8 @@ import RecentlyAddedCoins from '@/components/RecentlyAddedCoins';
 import TrendingCoins from '@/components/TrendingCoins';
 import Ads from '@/components/Ads';
 import PumpFunLive from '@/components/PumpFunLive';
+import { useChainFilter } from '@/hooks/useChainFilter';
+import ChainFilterIndicator from '@/components/ChainFilterIndicator';
 // import DashboardBanners from '@/components/DashboardBanners';
 
 // SortConfig type will be used when we reimplement the token sorting functionality
@@ -285,6 +287,13 @@ export default function Home() {
     fetchRaceTokens();
   }, []);
 
+  // Apply chain filtering to token race data
+  const filteredTokenRaceData = useChainFilter(tokenRaceData, {
+    chainField: 'blockchain',
+    includeUnknown: true,
+    caseSensitive: false
+  });
+
   // Removed auto-slider - now manual navigation only
 
   // Update selected blockchain when chain is selected from All Chains dropdown
@@ -482,9 +491,13 @@ export default function Home() {
                 <span className="text-xl font-bold">TOKEN RACE</span>
               </div>
               <div className="flex space-x-2 items-center">
-
                 <button className="py-1 px-3 bg-gray-700 text-white font-bold rounded-md">RANKING</button>
               </div>
+            </div>
+
+            {/* Chain Filter Indicator for Token Race */}
+            <div className="mb-4">
+              <ChainFilterIndicator />
             </div>
 
             <div className="relative overflow-hidden  rounded-lg p-4">
@@ -493,16 +506,16 @@ export default function Home() {
                   className="flex gap-4 animate-pulse"
                   style={{
                     display: 'flex',
-                    width: `${tokenRaceData.length * 200}px`,
+                    width: `${filteredTokenRaceData.length * 200}px`,
                     animation: 'ticker 60s linear infinite',
                     animationFillMode: 'forwards'
                   }}
                 >
 
                   {/* Duplicate the array for seamless loop */}
-                  {[...tokenRaceData, ...tokenRaceData].map((token, index) => (
+                  {[...filteredTokenRaceData, ...filteredTokenRaceData].map((token, index) => (
                     <div
-                      key={`${token.id || `token-${index}`}-${Math.floor(index / tokenRaceData.length)}`}
+                      key={`${token.id || `token-${index}`}-${Math.floor(index / filteredTokenRaceData.length)}`}
                       className="flex-shrink-0 min-w-[280px] px-1"
                     >
                       <div
@@ -510,15 +523,15 @@ export default function Home() {
                         className="relative flex flex-row justify-between items-center mt-3 p-3 bg-gradient-to-br from-gray-800 to-gray-700 rounded-lg shadow-lg border border-gray-600 h-32 transform hover:scale-105 transition-transform duration-300 cursor-pointer hover:border-[#00c3ff]"
                       >
                         {/* Position tag on top right based on points ranking */}
-                        <div className={`absolute -top-1 -right-1 px-2 py-1 rounded-full text-xs font-bold ${(index % tokenRaceData.length) === 0 ? 'bg-yellow-500 text-black' :
-                            (index % tokenRaceData.length) === 1 ? 'bg-gray-400 text-black' :
-                              (index % tokenRaceData.length) === 2 ? 'bg-orange-500 text-black' :
+                        <div className={`absolute -top-1 -right-1 px-2 py-1 rounded-full text-xs font-bold ${(index % filteredTokenRaceData.length) === 0 ? 'bg-yellow-500 text-black' :
+                            (index % filteredTokenRaceData.length) === 1 ? 'bg-gray-400 text-black' :
+                              (index % filteredTokenRaceData.length) === 2 ? 'bg-orange-500 text-black' :
                                 'bg-blue-500 text-white'
                           }`}>
-                          {(index % tokenRaceData.length) === 0 ? '1st' :
-                            (index % tokenRaceData.length) === 1 ? '2nd' :
-                              (index % tokenRaceData.length) === 2 ? '3rd' :
-                                `${(index % tokenRaceData.length) + 1}th`}
+                          {(index % filteredTokenRaceData.length) === 0 ? '1st' :
+                            (index % filteredTokenRaceData.length) === 1 ? '2nd' :
+                              (index % filteredTokenRaceData.length) === 2 ? '3rd' :
+                                `${(index % filteredTokenRaceData.length) + 1}th`}
                         </div>
 
                         <div className="flex items-center gap-2 mb-1">

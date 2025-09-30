@@ -1,6 +1,8 @@
 'use client'
 import { useRouter } from "next/navigation";
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useChainFilter } from '@/hooks/useChainFilter';
+import ChainFilterIndicator from './ChainFilterIndicator';
 
 function formatTime(ts: number | string | undefined) {
   if (!ts) return "";
@@ -287,6 +289,20 @@ export default function PumpPortalSimpleUI() {
 
   const preList = useMemo(() => Object.values(preLaunched), [preLaunched, lastUpdate]);
   const launchedList = useMemo(() => Object.values(launched), [launched, lastUpdate]);
+
+  // Apply chain filtering to token lists
+  const filteredNewTokens = useChainFilter(newTokens, { 
+    chainField: 'blockchain',
+    includeUnknown: true 
+  });
+  const filteredPreList = useChainFilter(preList, { 
+    chainField: 'blockchain',
+    includeUnknown: true 
+  });
+  const filteredLaunchedList = useChainFilter(launchedList, { 
+    chainField: 'blockchain',
+    includeUnknown: true 
+  });
   
   // Debug the current state of tokens
   useEffect(() => {
@@ -481,14 +497,19 @@ export default function PumpPortalSimpleUI() {
         
         </header>
 
+        {/* Chain Filter Indicator */}
+        <div className="mt-4">
+          <ChainFilterIndicator />
+        </div>
+
         <main className="grid md:grid-cols-2 gap-6 mt-6">
           <section className="bg-gray-950 rounded-2xl p-4 border border-gray-800">
             <h2 className="text-lg font-semibold mb-3">
               New 
-              <span className="text-xs ml-2 text-gray-400">{newTokens.length} tokens</span>
+              <span className="text-xs ml-2 text-gray-400">{filteredNewTokens.length} tokens</span>
             </h2>
             <div className="space-y-3 max-h-[70vh] overflow-auto pr-1">
-              {filtered(newTokens).map((it, idx) => {
+              {filtered(filteredNewTokens).map((it, idx) => {
                 // Use mint as key to prevent duplicate rendering
                 const tokenFields = pickTokenFields(it.event?.token || it.event || it);
                 const key = tokenFields.mint || `new-${idx}-${Math.random()}`;
@@ -528,9 +549,9 @@ export default function PumpPortalSimpleUI() {
           <section className="bg-gray-950 rounded-2xl p-4 border border-gray-800">
             <h2 className="text-lg font-semibold mb-3">
               Launched 
-              <span className="text-xs ml-2 text-gray-400">{Object.keys(launched).length} tokens</span>
+              <span className="text-xs ml-2 text-gray-400">{filteredLaunchedList.length} tokens</span>
               <button 
-                onClick={() => console.log('Launched tokens:', launched, 'List:', launchedList)}
+                onClick={() => console.log('Launched tokens:', launched, 'List:', filteredLaunchedList)}
                 className="text-xs ml-2 px-2 py-0.5 rounded bg-gray-800 hover:bg-gray-700"
                 title="Log launched tokens to console"
               >
@@ -538,8 +559,8 @@ export default function PumpPortalSimpleUI() {
               </button>
             </h2>
             <div className="space-y-3 max-h-[70vh] overflow-auto pr-1">
-              {launchedList.length > 0 ? (
-                filtered(launchedList).map((it: any, index: number) => {
+              {filteredLaunchedList.length > 0 ? (
+                filtered(filteredLaunchedList).map((it: any, index: number) => {
                   // Extract the appropriate data structure for the Row component
                   const tokenFields = pickTokenFields(it.event?.token || it.event || it);
                   const key = tokenFields.mint || `launched-${index}-${Math.random()}`;

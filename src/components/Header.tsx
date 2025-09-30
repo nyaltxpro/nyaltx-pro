@@ -84,10 +84,7 @@ const Header = () => {
             {/* Header */}
             <div className="flex w-full items-center justify-between p-4 border-b border-gray-800">
               <div className="flex w-[20%] items-center space-x-4">
-                <BlockchainDropdown 
-                  onSelectNetwork={(networkId) => console.log(`Selected network: ${networkId}`)} 
-                />
-              
+                <BlockchainDropdown />
               </div>
               
               <div className="flex w-[60%] items-center justify-center mx-4">

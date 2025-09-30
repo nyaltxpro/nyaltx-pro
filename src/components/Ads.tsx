@@ -2,6 +2,8 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useChainFilter } from '@/hooks/useChainFilter';
+import ChainFilterIndicator from './ChainFilterIndicator';
 
 export interface BannerItem {
   id: number;
@@ -63,14 +65,21 @@ const Ads = () => {
     return () => { active = false; clearInterval(id); };
   }, []);
 
-  // Apply filters and duplicate items for seamless scroll
-  const filtered = useMemo(() => {
+  // Apply exclusion filters first
+  const excludeFiltered = useMemo(() => {
     return listings.filter((t) => {
       const sym = (t.tokenSymbol || '').toUpperCase();
       const name = (t.tokenName || '').toUpperCase();
       return !EXCLUDE_SYMBOLS.has(sym) && !EXCLUDE_SYMBOLS.has(name);
     });
   }, [listings, EXCLUDE_SYMBOLS]);
+
+  // Apply chain filtering
+  const filtered = useChainFilter(excludeFiltered, {
+    chainField: 'blockchain',
+    includeUnknown: true,
+    caseSensitive: false
+  });
 
   // Ticker animation setup
   useEffect(() => {
@@ -124,6 +133,11 @@ const Ads = () => {
   return (
     <div className="w-full py-4 overflow-hidden">
       <div className="mx-auto">
+        {/* Chain Filter Indicator */}
+        <div className="mb-4 px-4">
+          <ChainFilterIndicator />
+        </div>
+        
         <div
           className="relative"
           onMouseEnter={() => setIsHovering(true)}

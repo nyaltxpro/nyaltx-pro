@@ -1,7 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import Image from 'next/image';
-// import { blockchainNetworks } from '../lib/blockchain/blockchainUtils';
+import { useAppDispatch, useAppSelector } from '@/store';
+import { 
+  setSelectedChain, 
+  setAvailableChains, 
+  selectSelectedChain, 
+  selectAvailableChains,
+  filterTokensByChain,
+  BlockchainNetwork,
+  allNetworksChain 
+} from '@/store/slices/chainSlice';
 import { isTopBlockchain } from '../lib/blockchain/topBlockchains';
 import { getBlockchainLogoUrl } from '../lib/blockchain/blockchainLogos';
 import { getCryptoIconUrl } from '../utils/cryptoIcons';
@@ -86,20 +95,8 @@ const BlockchainLogo: React.FC<{
   );
 };
 
-interface BlockchainNetwork {
-  id: string;
-  name: string;
-  symbol: string;
-  logoPath: string;
-  image?: {
-    thumb: string | null;
-    small: string | null;
-    large: string | null;
-  };
-}
-
 // Convert chains data to BlockchainNetwork objects and filter for top 20 blockchains
-const blockchainNetworks: BlockchainNetwork[] = chainsData
+const chainNetworks: BlockchainNetwork[] = chainsData
   .filter(chain => isTopBlockchain(chain.id))
   .map(chain => ({
     id: chain.id,
@@ -108,6 +105,9 @@ const blockchainNetworks: BlockchainNetwork[] = chainsData
     logoPath: chain.image?.large || chain.image?.small || chain.image?.thumb || `/${chain.id}.svg`,
     image: chain.image
   }));
+
+// Add "All Networks" option at the beginning
+const blockchainNetworks: BlockchainNetwork[] = [allNetworksChain, ...chainNetworks];
 
 interface BlockchainDropdownProps {
   onSelectNetwork?: (networkId: string) => void;
@@ -118,12 +118,29 @@ const BlockchainDropdown: React.FC<BlockchainDropdownProps> = ({
   onSelectNetwork,
   className = '',
 }) => {
+  const dispatch = useAppDispatch();
+  const selectedNetwork = useAppSelector(selectSelectedChain);
+  const availableChains = useAppSelector(selectAvailableChains);
+  
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedNetwork, setSelectedNetwork] = useState<BlockchainNetwork>(blockchainNetworks[0]);
   const [isOpen, setIsOpen] = useState(false);
 
+  // Initialize available chains on component mount
+  useEffect(() => {
+    if (availableChains.length === 0) {
+      dispatch(setAvailableChains(blockchainNetworks));
+    }
+    // Set default selected network if none is selected
+    if (!selectedNetwork && blockchainNetworks.length > 0) {
+      dispatch(setSelectedChain(blockchainNetworks[0]));
+    }
+  }, [dispatch, availableChains.length, selectedNetwork]);
+
+  // Use available chains from Redux or fallback to static data
+  const networksToFilter = availableChains.length > 0 ? availableChains : blockchainNetworks;
+
   // Filter networks based on search term
-  const filteredNetworks = blockchainNetworks.filter(network => 
+  const filteredNetworks = networksToFilter.filter(network => 
     network.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
   
@@ -131,11 +148,25 @@ const BlockchainDropdown: React.FC<BlockchainDropdownProps> = ({
   filteredNetworks.sort((a, b) => a.name.localeCompare(b.name));
 
   const handleNetworkSelect = (network: BlockchainNetwork) => {
-    setSelectedNetwork(network);
+    dispatch(setSelectedChain(network));
+    dispatch(filterTokensByChain()); // Trigger token filtering
+    
     if (onSelectNetwork) {
       onSelectNetwork(network.id);
     }
+    
+    console.log(`🔗 Blockchain changed to: ${network.name} (${network.id})`);
   };
+
+  // Don't render if no network is selected
+  if (!selectedNetwork) {
+    return (
+      <div className="flex items-center space-x-2 bg-gray-800 text-white px-4 py-2 rounded-full border border-gray-700">
+        <div className="w-6 h-6 bg-gray-600 rounded-full animate-pulse"></div>
+        <span>Loading...</span>
+      </div>
+    );
+  }
 
   return (
     <DropdownMenu.Root open={isOpen} onOpenChange={setIsOpen}>
