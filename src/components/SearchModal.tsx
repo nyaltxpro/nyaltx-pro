@@ -561,74 +561,20 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
     }
   };
 
-  // Fetch trending coins when modal opens with retry logic
+  // Fetch trending coins when modal opens using Redux cache
   useEffect(() => {
     if (isOpen) {
-      const fetchTrending = async (retries = 2) => {
-        setTrendingLoading(true);
-        
-        for (let attempt = 0; attempt <= retries; attempt++) {
-          try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 6000); // Aligned with API timeout
-            
-            const response = await fetch('/api/coingecko/trending', {
-              signal: controller.signal,
-              headers: {
-                'Accept': 'application/json',
-                'Cache-Control': 'no-cache'
-              }
-            });
-            
-            clearTimeout(timeoutId);
-            
-            if (response.ok) {
-              const data = await response.json();
-              console.log(`✅ Trending coins loaded: ${data.coins?.length || 0} coins`);
-              setTrendingCoins(data.coins || []);
-              setTrendingLoading(false);
-              return; // Success, exit retry loop
-            } else if (response.status === 429) {
-              if (attempt < retries) {
-                const delay = 1500 * (attempt + 1); // More aggressive backoff
-                console.log(`⏳ Trending coins rate limited, retrying in ${delay}ms...`);
-                await new Promise(resolve => setTimeout(resolve, delay));
-                continue;
-              }
-            } else {
-              console.error(`❌ Trending coins API error: ${response.status}`);
-              setTrendingCoins([]);
-              break;
-            }
-          } catch (error: any) {
-            if (error.name === 'AbortError') {
-              console.log(`⏱️ Trending coins timeout, attempt ${attempt + 1}`);
-            } else {
-              console.error(`❌ Error fetching trending coins, attempt ${attempt + 1}:`, error);
-            }
-            
-            if (attempt < retries) {
-              const delay = 750 * (attempt + 1); // Increased delay
-              await new Promise(resolve => setTimeout(resolve, delay));
-              continue;
-            } else {
-              console.log('❌ All trending coins attempts failed, using fallback');
-              setTrendingCoins([]);
-              break;
-            }
-          }
-        }
-        
-        setTrendingLoading(false);
-      };
 
-      fetchTrending();
+      // Use Redux-based trending fetch instead
+      if (!cachedTrendingCoins && !isTrendingLoading) {
+        getTrendingCoinsWithCache();
+      }
 
       if (inputRef.current) {
         inputRef.current.focus();
       }
     }
-  }, [isOpen]);
+  }, [isOpen, cachedTrendingCoins, isTrendingLoading, getTrendingCoinsWithCache]);
 
   // Close modal when clicking outside
   useEffect(() => {
@@ -644,18 +590,15 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
       // Reset states when modal closes
       setSearchTerm('');
       setSearchResults([]);
-      setCoinGeckoResults([]);
-      setCoinGeckoLoading(false);
       
       // Cancel any pending searches
       if (searchTimeoutRef.current) {
         clearTimeout(searchTimeoutRef.current);
         searchTimeoutRef.current = null;
       }
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-        abortControllerRef.current = null;
-      }
+      
+      // Cancel any ongoing CoinGecko searches
+      cancelSearch();
     }
 
     return () => {
@@ -747,22 +690,22 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
             )}
 
             {/* CoinGecko Cryptocurrency Results */}
-            {searchTerm && searchTerm.length >= 2 && (coinGeckoResults.length > 0 || coinGeckoLoading) && (
+            {searchTerm && searchTerm.length >= 2 && ((cachedCoinGeckoResults && cachedCoinGeckoResults.length > 0) || isSearchingCoinGecko) && (
               <div className="border-b border-gray-800">
                 <div className="p-4">
                   <h3 className="text-orange-400 font-bold mb-3 flex items-center gap-2">
                     <span>🦎 CRYPTOCURRENCIES</span>
-                    {coinGeckoLoading && (
+                    {isSearchingCoinGecko && (
                       <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-orange-400"></div>
                     )}
                   </h3>
                   <div className="max-h-60 overflow-y-auto">
-                    {coinGeckoLoading ? (
+                    {isSearchingCoinGecko ? (
                       <div className="flex justify-center items-center py-8">
                         <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-orange-400"></div>
                       </div>
-                    ) : coinGeckoResults.length > 0 ? (
-                      coinGeckoResults.map((coin, index) => (
+                    ) : (cachedCoinGeckoResults && cachedCoinGeckoResults.length > 0) ? (
+                      cachedCoinGeckoResults.map((coin: any, index: number) => (
                         <div
                           key={`coingecko-${coin.id}-${index}`}
                           className="flex items-center p-3 hover:bg-gray-700 cursor-pointer border-b border-gray-700 last:border-b-0"
@@ -906,12 +849,12 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.2, duration: 0.3 }}
                   >
-                    {trendingLoading ? (
+                    {isTrendingLoading ? (
                       <div className="flex justify-center items-center w-full py-8">
                         <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-orange-400"></div>
                       </div>
-                    ) : trendingCoins.length > 0 ? (
-                      trendingCoins.map((coin, index) => (
+                    ) : (cachedTrendingCoins && cachedTrendingCoins.length > 0) ? (
+                      cachedTrendingCoins.map((coin: any, index: number) => (
                         <div 
                           key={coin.id} 
                           className="relative min-w-[140px] bg-gray-800 bg-opacity-30 rounded-lg p-3 overflow-hidden cursor-pointer hover:bg-gray-700 transition-colors group"
