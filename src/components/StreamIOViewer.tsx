@@ -13,6 +13,7 @@ import {
 } from '@stream-io/video-react-sdk';
 import { streamIOService, StreamUser, LiveStream, ChatMessage } from '@/services/StreamIOService';
 import { Channel } from 'stream-chat';
+import EnhancedStreamChat from './EnhancedStreamChat';
 import { FaUsers, FaExclamationTriangle, FaPlay, FaComments, FaPaperPlane } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 
@@ -32,7 +33,6 @@ export default function StreamIOViewer({ streamId, streamTitle, onStreamEnd }: S
   const [error, setError] = useState<string | null>(null);
   const [viewerCount, setViewerCount] = useState(0);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
-  const [chatInput, setChatInput] = useState('');
 
   // Initialize Stream.io service
   useEffect(() => {
@@ -124,12 +124,11 @@ export default function StreamIOViewer({ streamId, streamTitle, onStreamEnd }: S
   }, [isConnected, address, streamId]);
 
   // Send chat message using Stream.io chat
-  const sendChatMessage = async () => {
-    if (!chatInput.trim() || !chatChannel) return;
+  const sendChatMessage = async (message: string) => {
+    if (!message.trim() || !chatChannel) return;
 
     try {
-      await streamIOService.sendChatMessage(chatInput.trim());
-      setChatInput('');
+      await streamIOService.sendChatMessage(message.trim());
       toast.success('Message sent!');
     } catch (error) {
       console.error('❌ Failed to send message:', error);
@@ -218,72 +217,16 @@ export default function StreamIOViewer({ streamId, streamTitle, onStreamEnd }: S
         </div>
       </div>
 
-      {/* Chat Sidebar */}
+      {/* Enhanced Chat Sidebar */}
       <div className="lg:col-span-1">
-        <div className="bg-gray-800 rounded-lg h-full flex flex-col">
-          {/* Chat Header */}
-          <div className="p-4 border-b border-gray-700">
-            <div className="flex items-center gap-2">
-              <FaComments className="text-cyan-400" />
-              <h3 className="font-medium text-white">Live Chat</h3>
-            </div>
-          </div>
-
-          {/* Chat Messages */}
-          <div className="flex-1 p-4 overflow-y-auto space-y-3 min-h-0">
-            {chatMessages.length === 0 ? (
-              <div className="text-center text-gray-500 text-sm">
-                <p>No messages yet</p>
-                <p className="mt-1">Be the first to say something!</p>
-              </div>
-            ) : (
-              chatMessages.map((message) => (
-                <div key={message.id} className="break-words">
-                  <div className="flex items-start gap-2">
-                    <div className="w-6 h-6 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full flex-shrink-0 flex items-center justify-center text-xs text-white font-medium">
-                      {message.user.name.charAt(0).toUpperCase()}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-cyan-400 text-sm font-medium truncate">
-                          {message.user.name}
-                        </span>
-                        <span className="text-gray-500 text-xs">
-                          {new Date(message.created_at).toLocaleTimeString([], { 
-                            hour: '2-digit', 
-                            minute: '2-digit' 
-                          })}
-                        </span>
-                      </div>
-                      <p className="text-gray-300 text-sm break-words">{message.text}</p>
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-
-          {/* Chat Input */}
-          <div className="p-4 border-t border-gray-700">
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={chatInput}
-                onChange={(e) => setChatInput(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && sendChatMessage()}
-                placeholder="Type a message..."
-                className="flex-1 px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-cyan-400 focus:outline-none text-sm"
-                disabled={!isConnected2Stream}
-              />
-              <button
-                onClick={sendChatMessage}
-                disabled={!chatInput.trim() || !isConnected2Stream}
-                className="px-3 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <FaPaperPlane className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
+        <div className="bg-gray-800 rounded-lg h-full">
+          <EnhancedStreamChat
+            messages={chatMessages}
+            onSendMessage={sendChatMessage}
+            isStreamer={false}
+            isConnected={isConnected2Stream}
+            className="h-full"
+          />
         </div>
       </div>
     </div>

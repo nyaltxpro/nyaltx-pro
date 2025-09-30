@@ -31,9 +31,21 @@ export interface ChatMessage {
     walletAddress?: string;
   };
   created_at: Date;
-  type?: 'regular' | 'system' | 'donation';
+  type?: 'regular' | 'system' | 'donation' | 'streamer_announcement' | 'viewer_joined' | 'viewer_left';
   amount?: number;
   token?: string;
+  isStreamer?: boolean;
+  metadata?: {
+    donation?: {
+      amount: number;
+      token: string;
+      txHash?: string;
+    };
+    announcement?: {
+      priority: 'low' | 'medium' | 'high';
+      color?: string;
+    };
+  };
 }
 
 export class StreamIOService {
@@ -229,13 +241,34 @@ export class StreamIOService {
     try {
       console.log('🛑 Ending live stream...');
       
+      // Send stream ending announcement
+      if (this.currentChannel && this.isCurrentUserStreamer()) {
+        await this.sendSystemMessage('🔴 Stream has ended. Thank you for watching!', 'viewer_left');
+      }
+      
       await this.currentCall.leave();
       this.currentCall = null;
       
-      // Stop watching the chat channel
+      // Clean up and destroy the chat channel
       if (this.currentChannel) {
-        await this.currentChannel.stopWatching();
-        this.currentChannel = null;
+        try {
+          // Send final cleanup message
+          console.log('🧹 Cleaning up chat channel...');
+          
+          // Stop watching the channel
+          await this.currentChannel.stopWatching();
+          
+          // Delete the channel to destroy all messages (if streamer)
+          if (this.isCurrentUserStreamer()) {
+            await this.currentChannel.delete();
+            console.log('🗑️ Chat channel and messages destroyed');
+          }
+          
+          this.currentChannel = null;
+        } catch (channelError) {
+          console.warn('⚠️ Failed to cleanup chat channel:', channelError);
+          this.currentChannel = null;
+        }
       }
       
       console.log('✅ Live stream and chat ended successfully');
@@ -245,8 +278,46 @@ export class StreamIOService {
     }
   }
 
+  // Force cleanup all stream data (emergency cleanup)
+  async forceCleanupStream(): Promise<void> {
+    try {
+      console.log('🚨 Force cleaning up stream data...');
+      
+      if (this.currentCall) {
+        await this.currentCall.leave().catch(() => {});
+        this.currentCall = null;
+      }
+      
+      if (this.currentChannel) {
+        await this.currentChannel.stopWatching().catch(() => {});
+        await this.currentChannel.delete().catch(() => {});
+        this.currentChannel = null;
+      }
+      
+      console.log('✅ Force cleanup completed');
+    } catch (error) {
+      console.error('❌ Force cleanup failed:', error);
+    }
+  }
+
   // Chat functionality
-  async sendChatMessage(text: string, type: 'regular' | 'system' | 'donation' = 'regular', metadata?: { amount?: number; token?: string }): Promise<void> {
+  async sendChatMessage(
+    text: string, 
+    type: 'regular' | 'system' | 'donation' | 'streamer_announcement' | 'viewer_joined' | 'viewer_left' = 'regular', 
+    metadata?: { 
+      amount?: number; 
+      token?: string;
+      donation?: {
+        amount: number;
+        token: string;
+        txHash?: string;
+      };
+      announcement?: {
+        priority: 'low' | 'medium' | 'high';
+        color?: string;
+      };
+    }
+  ): Promise<void> {
     if (!this.currentChannel || !this.user) {
       throw new Error('No active chat channel or user not initialized');
     }
@@ -259,7 +330,11 @@ export class StreamIOService {
       };
 
       if (metadata) {
-        messageData.custom = metadata;
+        messageData.custom = {
+          ...metadata,
+          isStreamer: this.isCurrentUserStreamer(),
+          walletAddress: this.user.walletAddress,
+        };
       }
 
       await this.currentChannel.sendMessage(messageData);
@@ -268,6 +343,49 @@ export class StreamIOService {
       console.error('❌ Failed to send chat message:', error);
       throw error;
     }
+  }
+
+  // Send streamer announcement (highlighted message)
+  async sendStreamerAnnouncement(text: string, priority: 'low' | 'medium' | 'high' = 'medium'): Promise<void> {
+    if (!this.isCurrentUserStreamer()) {
+      throw new Error('Only streamers can send announcements');
+    }
+
+    await this.sendChatMessage(text, 'streamer_announcement', {
+      announcement: {
+        priority,
+        color: priority === 'high' ? '#ef4444' : priority === 'medium' ? '#f59e0b' : '#10b981'
+      }
+    });
+  }
+
+  // Send donation message
+  async sendDonationMessage(amount: number, token: string, txHash?: string, message?: string): Promise<void> {
+    const donationText = message || `Donated ${amount} ${token}! 🎉`;
+    
+    await this.sendChatMessage(donationText, 'donation', {
+      donation: {
+        amount,
+        token,
+        txHash
+      }
+    });
+  }
+
+  // Send system message (viewer joined/left)
+  async sendSystemMessage(text: string, type: 'viewer_joined' | 'viewer_left'): Promise<void> {
+    await this.sendChatMessage(text, type);
+  }
+
+  // Check if current user is the streamer
+  private isCurrentUserStreamer(): boolean {
+    // This would check if the current user created the stream
+    // For now, we'll check if they have the host role in the call
+    if (!this.currentCall || !this.user) return false;
+    
+    // In a real implementation, you'd check the call metadata or user roles
+    // For now, we'll assume the user who created the call is the streamer
+    return true; // Simplified for demo
   }
 
   // Get chat messages
@@ -288,12 +406,17 @@ export class StreamIOService {
           id: msg.user.id,
           name: msg.user.name || msg.user.id,
           image: msg.user.image,
-          walletAddress: msg.user.custom?.walletAddress,
+          walletAddress: msg.user.custom?.walletAddress || msg.custom?.walletAddress,
         },
         created_at: new Date(msg.created_at),
         type: msg.type || 'regular',
         amount: msg.custom?.amount,
         token: msg.custom?.token,
+        isStreamer: msg.custom?.isStreamer || false,
+        metadata: {
+          donation: msg.custom?.donation,
+          announcement: msg.custom?.announcement,
+        },
       }));
     } catch (error) {
       console.error('❌ Failed to get chat messages:', error);
@@ -317,12 +440,17 @@ export class StreamIOService {
             id: msg.user.id,
             name: msg.user.name || msg.user.id,
             image: msg.user.image,
-            walletAddress: msg.user.custom?.walletAddress,
+            walletAddress: msg.user.custom?.walletAddress || msg.custom?.walletAddress,
           },
           created_at: new Date(msg.created_at),
           type: msg.type || 'regular',
           amount: msg.custom?.amount,
           token: msg.custom?.token,
+          isStreamer: msg.custom?.isStreamer || false,
+          metadata: {
+            donation: msg.custom?.donation,
+            announcement: msg.custom?.announcement,
+          },
         };
         callback(chatMessage);
       }

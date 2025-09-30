@@ -14,6 +14,7 @@ import {
 } from '@stream-io/video-react-sdk';
 import { streamIOService, StreamUser, ChatMessage } from '@/services/StreamIOService';
 import { Channel } from 'stream-chat';
+import EnhancedStreamChat from './EnhancedStreamChat';
 import { FaDesktop, FaStop, FaUsers, FaComments, FaPaperPlane, FaCamera, FaMicrophone, FaMicrophoneSlash, FaVideoSlash } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 
@@ -34,7 +35,6 @@ export default function StreamIOBroadcaster({ onStreamEnd, streamTitle }: Stream
   const [streamDuration, setStreamDuration] = useState(0);
   const [startTime, setStartTime] = useState<number>(0);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
-  const [chatInput, setChatInput] = useState('');
 
   // Initialize Stream.io service
   useEffect(() => {
@@ -180,15 +180,27 @@ export default function StreamIOBroadcaster({ onStreamEnd, streamTitle }: Stream
   };
 
   // Send chat message
-  const sendChatMessage = async () => {
-    if (!chatInput.trim() || !chatChannel) return;
+  const sendChatMessage = async (message: string) => {
+    if (!message.trim() || !chatChannel) return;
 
     try {
-      await streamIOService.sendChatMessage(chatInput.trim());
-      setChatInput('');
+      await streamIOService.sendChatMessage(message.trim());
     } catch (error) {
       console.error('❌ Failed to send message:', error);
       toast.error('Failed to send message');
+    }
+  };
+
+  // Send streamer announcement
+  const sendStreamerAnnouncement = async (message: string, priority: 'low' | 'medium' | 'high') => {
+    if (!message.trim() || !chatChannel) return;
+
+    try {
+      await streamIOService.sendStreamerAnnouncement(message.trim(), priority);
+      toast.success('Announcement sent!');
+    } catch (error) {
+      console.error('❌ Failed to send announcement:', error);
+      toast.error('Failed to send announcement');
     }
   };
 
@@ -366,67 +378,16 @@ export default function StreamIOBroadcaster({ onStreamEnd, streamTitle }: Stream
             </StreamVideo>
           </div>
 
-          {/* Chat Interface */}
-          <div className="bg-gray-800 rounded-lg p-4 flex flex-col h-96">
-            <div className="flex items-center gap-2 mb-4">
-              <FaComments className="text-cyan-400" />
-              <h3 className="text-white font-medium">Live Chat</h3>
-              <span className="text-gray-400 text-sm">({chatMessages.length} messages)</span>
-            </div>
-
-            {/* Chat Messages */}
-            <div className="flex-1 overflow-y-auto space-y-2 mb-4">
-              {chatMessages.length === 0 ? (
-                <div className="text-center text-gray-500 py-8">
-                  <FaComments className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                  <p>No messages yet. Start the conversation!</p>
-                </div>
-              ) : (
-                chatMessages.map((message) => (
-                  <div key={message.id} className="p-2 rounded-lg bg-gray-700/50">
-                    <div className="flex items-start gap-2">
-                      <div className="w-6 h-6 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full flex-shrink-0 flex items-center justify-center text-xs text-white font-medium">
-                        {message.user.name.charAt(0).toUpperCase()}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-cyan-400 text-sm font-medium truncate">
-                            {message.user.name}
-                          </span>
-                          <span className="text-gray-500 text-xs">
-                            {new Date(message.created_at).toLocaleTimeString([], { 
-                              hour: '2-digit', 
-                              minute: '2-digit' 
-                            })}
-                          </span>
-                        </div>
-                        <p className="text-gray-300 text-sm break-words">{message.text}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-
-            {/* Chat Input */}
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={chatInput}
-                onChange={(e) => setChatInput(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && sendChatMessage()}
-                placeholder="Type a message..."
-                className="flex-1 px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-cyan-400 focus:outline-none text-sm"
-                disabled={!isStreaming}
-              />
-              <button
-                onClick={sendChatMessage}
-                disabled={!chatInput.trim() || !isStreaming}
-                className="px-3 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <FaPaperPlane className="w-4 h-4" />
-              </button>
-            </div>
+          {/* Enhanced Chat Interface */}
+          <div className="bg-gray-800 rounded-lg h-96">
+            <EnhancedStreamChat
+              messages={chatMessages}
+              onSendMessage={sendChatMessage}
+              onSendAnnouncement={sendStreamerAnnouncement}
+              isStreamer={true}
+              isConnected={isStreaming}
+              className="h-full"
+            />
           </div>
         </div>
       )}
