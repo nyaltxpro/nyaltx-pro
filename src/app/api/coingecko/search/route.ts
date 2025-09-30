@@ -26,19 +26,94 @@ export async function GET(request: NextRequest) {
 
     const data = await response.json();
 
-    // Format the response to include relevant coin data
-    const formattedCoins = data.coins?.slice(0, 20).map((coin: any) => ({
-      id: coin.id,
-      name: coin.name,
-      symbol: coin.symbol,
-      market_cap_rank: coin.market_cap_rank,
-      thumb: coin.thumb,
-      large: coin.large,
-      api_symbol: coin.api_symbol
-    })) || [];
+    // Get top 10 coins for detailed info (to avoid too many API calls)
+    const topCoins = data.coins?.slice(0, 10) || [];
+    
+    // Fetch detailed information for each coin to get contract addresses
+    const coinsWithDetails = await Promise.all(
+      topCoins.map(async (coin: any) => {
+        try {
+          const detailResponse = await fetch(
+            `https://api.coingecko.com/api/v3/coins/${coin.id}?localization=false&tickers=false&market_data=false&community_data=false&developer_data=false&sparkline=false`,
+            {
+              headers: {
+                'Accept': 'application/json',
+              },
+              next: { revalidate: 3600 } // Cache for 1 hour since contract addresses don't change often
+            }
+          );
+
+          if (detailResponse.ok) {
+            const detailData = await detailResponse.json();
+            
+            // Extract contract addresses for major chains
+            const contractAddresses: { [key: string]: string } = {};
+            if (detailData.platforms) {
+              // Map CoinGecko platform names to our chain names
+              const platformMapping: { [key: string]: string } = {
+                'ethereum': 'ethereum',
+                'binance-smart-chain': 'binance',
+                'polygon-pos': 'polygon',
+                'avalanche': 'avalanche',
+                'arbitrum-one': 'arbitrum',
+                'optimistic-ethereum': 'optimism',
+                'base': 'base',
+                'fantom': 'fantom',
+                'solana': 'solana'
+              };
+
+              Object.entries(detailData.platforms).forEach(([platform, address]) => {
+                const chainName = platformMapping[platform];
+                if (chainName && address && address !== '') {
+                  contractAddresses[chainName] = address as string;
+                }
+              });
+            }
+
+            // Determine primary chain (prefer Ethereum, then others)
+            const primaryChain = contractAddresses.ethereum ? 'ethereum' :
+                               contractAddresses.binance ? 'binance' :
+                               contractAddresses.polygon ? 'polygon' :
+                               contractAddresses.arbitrum ? 'arbitrum' :
+                               contractAddresses.base ? 'base' :
+                               contractAddresses.solana ? 'solana' :
+                               Object.keys(contractAddresses)[0] || null;
+
+            return {
+              id: coin.id,
+              name: coin.name,
+              symbol: coin.symbol,
+              market_cap_rank: coin.market_cap_rank,
+              thumb: coin.thumb,
+              large: coin.large,
+              api_symbol: coin.api_symbol,
+              contractAddresses,
+              primaryChain,
+              primaryAddress: primaryChain ? contractAddresses[primaryChain] : null
+            };
+          }
+        } catch (error) {
+          console.error(`Error fetching details for ${coin.id}:`, error);
+        }
+
+        // Return basic info if detailed fetch fails
+        return {
+          id: coin.id,
+          name: coin.name,
+          symbol: coin.symbol,
+          market_cap_rank: coin.market_cap_rank,
+          thumb: coin.thumb,
+          large: coin.large,
+          api_symbol: coin.api_symbol,
+          contractAddresses: {},
+          primaryChain: null,
+          primaryAddress: null
+        };
+      })
+    );
 
     return NextResponse.json({
-      coins: formattedCoins,
+      coins: coinsWithDetails,
       total: data.coins?.length || 0
     });
 

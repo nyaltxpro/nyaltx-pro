@@ -38,6 +38,9 @@ interface CoinGeckoCoin {
   thumb: string;
   large: string;
   api_symbol: string;
+  contractAddresses: { [key: string]: string };
+  primaryChain: string | null;
+  primaryAddress: string | null;
 }
 
 interface NyaxToken {
@@ -326,7 +329,21 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
 
   // Handle clicking on a CoinGecko coin
   const handleCoinGeckoClick = (coin: CoinGeckoCoin) => {
-    router.push(`/dashboard/trade?base=${coin.symbol.toUpperCase()}`);
+    const params = new URLSearchParams();
+    params.set('base', coin.symbol.toUpperCase());
+    
+    // Add chain and contract address if available
+    if (coin.primaryChain) {
+      params.set('chain', coin.primaryChain);
+    }
+    if (coin.primaryAddress) {
+      params.set('address', coin.primaryAddress);
+    }
+    
+    // Add CoinGecko ID for additional reference
+    params.set('coingecko_id', coin.id);
+    
+    router.push(`/dashboard/trade?${params.toString()}`);
     onClose();
   };
 
@@ -690,8 +707,18 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                             </div>
                             <div className="text-sm text-gray-400">
                               <span className="mr-2 font-mono">${coin.symbol.toUpperCase()}</span>
+                              {coin.primaryChain && (
+                                <span className="text-xs bg-blue-600 text-white px-2 py-0.5 rounded-full mr-2">
+                                  {coin.primaryChain.toUpperCase()}
+                                </span>
+                              )}
                               <span className="text-xs text-orange-400">ID: {coin.id}</span>
                             </div>
+                            {coin.primaryAddress && (
+                              <div className="text-xs text-gray-500 font-mono mt-1">
+                                {coin.primaryAddress.slice(0, 8)}...{coin.primaryAddress.slice(-6)}
+                              </div>
+                            )}
                           </div>
                         </div>
                       ))
