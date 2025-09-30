@@ -129,10 +129,16 @@ export const useLocalCoinsSearch = () => {
     loadCoinsData();
   }, []);
 
-  // Get trending coins (top 10 by market cap)
+  // Get trending coins (top 10 by market cap) - excluding XRP, Dogecoin, and TRX
   const getTrendingCoins = useMemo(() => {
+    const excludedCoins = ['ripple', 'dogecoin', 'tron']; // XRP, DOGE, TRX
+    
     return coins
-      .filter(coin => coin.market_cap_rank && coin.market_cap_rank <= 50)
+      .filter(coin => 
+        coin.market_cap_rank && 
+        coin.market_cap_rank <= 50 && 
+        !excludedCoins.includes(coin.id.toLowerCase())
+      )
       .sort((a, b) => (a.market_cap_rank || 999) - (b.market_cap_rank || 999))
       .slice(0, 10)
       .map(coin => ({
