@@ -835,7 +835,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                   <div className="flex justify-between items-center mb-3">
                     <h3 className="text-orange-400 font-bold flex items-center gap-2">
                       🔥 TRENDING COINS
-                      {trendingLoading && (
+                      {isTrendingLoading && (
                         <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-orange-400"></div>
                       )}
                     </h3>
