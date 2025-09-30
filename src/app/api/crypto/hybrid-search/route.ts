@@ -44,9 +44,9 @@ export async function GET(request: NextRequest) {
             id: coin.id,
             name: coin.name,
             symbol: coin.symbol,
-            rank: parseInt(coin.rank),
-            price: parseFloat(coin.priceUsd),
-            change24h: parseFloat(coin.changePercent24Hr),
+            rank: coin.rank ? parseInt(coin.rank) : null,
+            price: coin.priceUsd ? parseFloat(coin.priceUsd) : 0,
+            change24h: coin.changePercent24Hr ? parseFloat(coin.changePercent24Hr) : 0,
             source: 'coincap',
             // No contract addresses from CoinCap
             contractAddresses: {},
@@ -85,9 +85,9 @@ export async function GET(request: NextRequest) {
             name: baseSymbol,
             symbol: baseSymbol,
             rank: null,
-            price: parseFloat(ticker.lastPrice),
-            change24h: parseFloat(ticker.priceChangePercent),
-            volume24h: parseFloat(ticker.volume),
+            price: ticker.lastPrice ? parseFloat(ticker.lastPrice) : 0,
+            change24h: ticker.priceChangePercent ? parseFloat(ticker.priceChangePercent) : 0,
+            volume24h: ticker.volume ? parseFloat(ticker.volume) : 0,
             source: 'binance',
             contractAddresses: {},
             primaryChain: null,
@@ -191,10 +191,21 @@ export async function GET(request: NextRequest) {
       return 0;
     });
 
+    // If no results found, return an informative response
+    if (uniqueResults.length === 0) {
+      return NextResponse.json({
+        coins: [],
+        sources: ['coincap', 'binance', 'coingecko'],
+        total: 0,
+        message: 'No cryptocurrencies found matching your search'
+      });
+    }
+
     return NextResponse.json({
       coins: uniqueResults.slice(0, 15),
       sources: ['coincap', 'binance', 'coingecko'],
-      total: uniqueResults.length
+      total: uniqueResults.length,
+      message: `Found ${uniqueResults.length} cryptocurrencies`
     });
 
   } catch (error) {

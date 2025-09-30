@@ -112,8 +112,8 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
     return nyaxLogoMappings[logoId as keyof typeof nyaxLogoMappings] || null;
   };
 
-  // Function to search CoinGecko with retry logic
-  const searchCoinGecko = async (query: string, retries = 2) => {
+  // Function to search using hybrid API with retry logic
+  const searchHybridAPI = async (query: string, retries = 2) => {
     if (query.trim().length < 2) {
       setCoinGeckoResults([]);
       return;
@@ -125,10 +125,10 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
       try {
         // Create new abort controller for this attempt
         abortControllerRef.current = new AbortController();
-        const timeoutId = setTimeout(() => abortControllerRef.current?.abort(), 8000); // 8 second timeout
+        const timeoutId = setTimeout(() => abortControllerRef.current?.abort(), 10000); // 10 second timeout
         
         const response = await fetch(
-          `/api/coingecko/search?query=${encodeURIComponent(query)}`,
+          `/api/crypto/hybrid-search?query=${encodeURIComponent(query)}`,
           {
             signal: abortControllerRef.current.signal,
             headers: {
@@ -141,7 +141,21 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
         
         if (response.ok) {
           const data = await response.json();
-          setCoinGeckoResults(data.coins || []);
+          // Convert hybrid API format to expected CoinGeckoCoin format
+          const convertedCoins: CoinGeckoCoin[] = (data.coins || []).map((coin: any) => ({
+            id: coin.id,
+            name: coin.name,
+            symbol: coin.symbol,
+            market_cap_rank: coin.rank || 999999,
+            thumb: getCryptoIconUrl(coin.symbol),
+            large: getCryptoIconUrl(coin.symbol),
+            api_symbol: coin.symbol,
+            contractAddresses: coin.contractAddresses || {},
+            primaryChain: coin.primaryChain,
+            primaryAddress: coin.primaryAddress
+          }));
+          
+          setCoinGeckoResults(convertedCoins);
           setCoinGeckoLoading(false);
           return; // Success, exit retry loop
         } else if (response.status === 429) {
@@ -151,15 +165,15 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
             continue;
           }
         } else {
-          console.error(`CoinGecko API error: ${response.status}`);
+          console.error(`Hybrid search API error: ${response.status}`);
           setCoinGeckoResults([]);
           break;
         }
       } catch (error: any) {
         if (error.name === 'AbortError') {
-          console.log(`CoinGecko search timeout, attempt ${attempt + 1}`);
+          console.log(`Hybrid search timeout, attempt ${attempt + 1}`);
         } else {
-          console.error(`Error searching CoinGecko, attempt ${attempt + 1}:`, error);
+          console.error(`Error searching hybrid API, attempt ${attempt + 1}:`, error);
         }
         
         if (attempt < retries) {
@@ -215,9 +229,9 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
       return;
     }
 
-    // Search CoinGecko with debounce
+    // Search using hybrid API with debounce
     searchTimeoutRef.current = setTimeout(() => {
-      searchCoinGecko(value);
+      searchHybridAPI(value);
     }, 300);
 
     const results: SearchResult[] = [];
