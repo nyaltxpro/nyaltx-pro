@@ -6,16 +6,15 @@ interface SearchResult {
   name: string;
   symbol: string;
   rank: number | null;
-  price: number;
-  change24h: number;
-  volume24h?: number;
-  source: 'coincap' | 'binance' | 'coingecko';
+  price?: number;
+  change24h?: number;
+  source: 'coingecko';
   contractAddresses: { [key: string]: string };
   primaryChain: string | null;
   primaryAddress: string | null;
 }
 
-// Hybrid API approach: Use multiple free APIs for better reliability
+// Optimized CoinGecko search with retry logic and contract addresses
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -27,157 +26,150 @@ export async function GET(request: NextRequest) {
 
     const results: SearchResult[] = [];
 
-    // 1. Try CoinCap API first (higher rate limits)
-    try {
-      const coinCapResponse = await fetch(
-        `https://api.coincap.io/v2/assets?search=${encodeURIComponent(query)}&limit=10`,
-        {
-          headers: { 'Accept': 'application/json' },
-          next: { revalidate: 300 }
-        }
-      );
-
-      if (coinCapResponse.ok) {
-        const coinCapData = await coinCapResponse.json();
-        coinCapData.data?.forEach((coin: any) => {
-          results.push({
-            id: coin.id,
-            name: coin.name,
-            symbol: coin.symbol,
-            rank: coin.rank ? parseInt(coin.rank) : null,
-            price: coin.priceUsd ? parseFloat(coin.priceUsd) : 0,
-            change24h: coin.changePercent24Hr ? parseFloat(coin.changePercent24Hr) : 0,
-            source: 'coincap',
-            // No contract addresses from CoinCap
-            contractAddresses: {},
-            primaryChain: null,
-            primaryAddress: null
-          });
-        });
-      }
-    } catch (error) {
-      console.error('CoinCap API error:', error);
-    }
-
-    // 2. Try Binance API for additional data
-    try {
-      const binanceResponse = await fetch(
-        'https://api.binance.com/api/v3/ticker/24hr',
-        {
-          headers: { 'Accept': 'application/json' },
-          next: { revalidate: 300 }
-        }
-      );
-
-      if (binanceResponse.ok) {
-        const binanceData = await binanceResponse.json();
-        const matchingCoins = binanceData.filter((ticker: any) => 
-          ticker.symbol.toLowerCase().includes(query.toLowerCase()) ||
-          ticker.symbol.toLowerCase().startsWith(query.toLowerCase())
-        ).slice(0, 5);
-
-        matchingCoins.forEach((ticker: any) => {
-          // Extract base symbol (remove USDT, BUSD, etc.)
-          const baseSymbol = ticker.symbol.replace(/(USDT|BUSD|BTC|ETH|BNB)$/, '');
+    // CoinGecko search with retry logic
+    const searchCoinGecko = async (retries = 2) => {
+      for (let attempt = 0; attempt <= retries; attempt++) {
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 5000);
           
-          results.push({
-            id: baseSymbol.toLowerCase(),
-            name: baseSymbol,
-            symbol: baseSymbol,
-            rank: null,
-            price: ticker.lastPrice ? parseFloat(ticker.lastPrice) : 0,
-            change24h: ticker.priceChangePercent ? parseFloat(ticker.priceChangePercent) : 0,
-            volume24h: ticker.volume ? parseFloat(ticker.volume) : 0,
-            source: 'binance',
-            contractAddresses: {},
-            primaryChain: null,
-            primaryAddress: null
-          });
-        });
+          const response = await fetch(
+            `https://api.coingecko.com/api/v3/search?query=${encodeURIComponent(query)}`,
+            {
+              signal: controller.signal,
+              headers: { 
+                'Accept': 'application/json',
+                'User-Agent': 'NYALTX-Search/1.0'
+              },
+              next: { revalidate: 300 }
+            }
+          );
+          
+          clearTimeout(timeoutId);
+          
+          if (response.status === 429) {
+            await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)));
+            continue;
+          }
+          
+          if (response.ok) {
+            const data = await response.json();
+            return data.coins || [];
+          }
+        } catch (error: any) {
+          if (error.name === 'AbortError') {
+            console.log(`CoinGecko search timeout, attempt ${attempt + 1}`);
+          } else {
+            console.error(`CoinGecko search error, attempt ${attempt + 1}:`, error);
+          }
+          
+          if (attempt < retries) {
+            await new Promise(resolve => setTimeout(resolve, 500 * (attempt + 1)));
+            continue;
+          }
+        }
       }
-    } catch (error) {
-      console.error('Binance API error:', error);
-    }
+      return [];
+    };
 
-    // 3. Fallback to CoinGecko for contract addresses (limited usage)
-    if (results.length > 0) {
-      try {
-        // Only use CoinGecko for top 3 results to save API calls
-        const topResults = results.slice(0, 3);
-        
-        for (const coin of topResults) {
-          try {
-            const geckoResponse = await fetch(
-              `https://api.coingecko.com/api/v3/search?query=${encodeURIComponent(coin.symbol)}`,
-              {
-                headers: { 'Accept': 'application/json' },
-                next: { revalidate: 3600 }
-              }
-            );
-
-            if (geckoResponse.ok) {
-              const geckoData = await geckoResponse.json();
-              const matchingCoin = geckoData.coins?.find((c: any) => 
-                c.symbol.toLowerCase() === coin.symbol.toLowerCase()
-              );
-
-              if (matchingCoin) {
-                // Get detailed contract address info
-                const detailResponse = await fetch(
-                  `https://api.coingecko.com/api/v3/coins/${matchingCoin.id}?localization=false&tickers=false&market_data=false&community_data=false&developer_data=false`,
-                  {
-                    headers: { 'Accept': 'application/json' },
-                    next: { revalidate: 3600 }
-                  }
-                );
-
-                if (detailResponse.ok) {
-                  const detailData = await detailResponse.json();
-                  
-                  if (detailData.platforms) {
-                    const contractAddresses: { [key: string]: string } = {};
-                    const platformMapping: { [key: string]: string } = {
-                      'ethereum': 'ethereum',
-                      'binance-smart-chain': 'binance',
-                      'polygon-pos': 'polygon',
-                      'arbitrum-one': 'arbitrum',
-                      'base': 'base'
-                    };
-
-                    Object.entries(detailData.platforms).forEach(([platform, address]) => {
-                      const chainName = platformMapping[platform];
-                      if (chainName && address && address !== '') {
-                        contractAddresses[chainName] = address as string;
-                      }
-                    });
-
-                    const primaryChain = contractAddresses.ethereum ? 'ethereum' :
-                                       contractAddresses.binance ? 'binance' :
-                                       Object.keys(contractAddresses)[0] || null;
-
-                    coin.contractAddresses = contractAddresses;
-                    coin.primaryChain = primaryChain;
-                    coin.primaryAddress = primaryChain ? contractAddresses[primaryChain] : null;
-                  }
+    const coins = await searchCoinGecko();
+    
+    // Process coins in batches to avoid overwhelming the API
+    const batchSize = 3;
+    const topCoins = coins.slice(0, 8); // Limit to top 8 for better reliability
+    
+    for (let i = 0; i < topCoins.length; i += batchSize) {
+      const batch = topCoins.slice(i, i + batchSize);
+      
+      await Promise.all(batch.map(async (coin: any) => {
+        const fetchCoinDetails = async (retries = 2) => {
+          for (let attempt = 0; attempt <= retries; attempt++) {
+            try {
+              const controller = new AbortController();
+              const timeoutId = setTimeout(() => controller.abort(), 5000);
+              
+              const response = await fetch(
+                `https://api.coingecko.com/api/v3/coins/${coin.id}?localization=false&tickers=false&market_data=false&community_data=false&developer_data=false`,
+                {
+                  signal: controller.signal,
+                  headers: { 
+                    'Accept': 'application/json',
+                    'User-Agent': 'NYALTX-Search/1.0'
+                  },
+                  next: { revalidate: 3600 }
                 }
+              );
+              
+              clearTimeout(timeoutId);
+              
+              if (response.status === 429) {
+                await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)));
+                continue;
+              }
+              
+              if (response.ok) {
+                return await response.json();
+              }
+            } catch (error: any) {
+              if (attempt < retries) {
+                await new Promise(resolve => setTimeout(resolve, 500 * (attempt + 1)));
+                continue;
               }
             }
-          } catch (error) {
-            console.error(`Error fetching contract for ${coin.symbol}:`, error);
           }
+          return null;
+        };
 
-          // Small delay to respect rate limits
-          await new Promise(resolve => setTimeout(resolve, 200));
+        const detailData = await fetchCoinDetails();
+        
+        // Build contract addresses
+        const contractAddresses: { [key: string]: string } = {};
+        const platformMapping: { [key: string]: string } = {
+          'ethereum': 'ethereum',
+          'binance-smart-chain': 'binance',
+          'polygon-pos': 'polygon',
+          'arbitrum-one': 'arbitrum',
+          'optimistic-ethereum': 'optimism',
+          'base': 'base',
+          'fantom': 'fantom',
+          'solana': 'solana'
+        };
+
+        if (detailData?.platforms) {
+          Object.entries(detailData.platforms).forEach(([platform, address]) => {
+            const chainName = platformMapping[platform];
+            if (chainName && address && address !== '' && address !== '0x0000000000000000000000000000000000000000') {
+              contractAddresses[chainName] = address as string;
+            }
+          });
         }
-      } catch (error) {
-        console.error('CoinGecko fallback error:', error);
+
+        // Determine primary chain (prioritize Ethereum)
+        const primaryChain = contractAddresses.ethereum ? 'ethereum' :
+                           contractAddresses.binance ? 'binance' :
+                           contractAddresses.polygon ? 'polygon' :
+                           Object.keys(contractAddresses)[0] || null;
+
+        results.push({
+          id: coin.id,
+          name: coin.name,
+          symbol: coin.symbol,
+          rank: coin.market_cap_rank || null,
+          source: 'coingecko',
+          contractAddresses,
+          primaryChain,
+          primaryAddress: primaryChain ? contractAddresses[primaryChain] : null
+        });
+      }));
+      
+      // Small delay between batches to respect rate limits
+      if (i + batchSize < topCoins.length) {
+        await new Promise(resolve => setTimeout(resolve, 200));
       }
     }
 
-    // Remove duplicates and sort by relevance
-    const uniqueResults = results.filter((coin, index, self) => 
-      index === self.findIndex(c => c.symbol.toLowerCase() === coin.symbol.toLowerCase())
-    ).sort((a, b) => {
+    // Sort by relevance
+    const sortedResults = results.sort((a, b) => {
       // Prioritize exact matches
       const aExact = a.symbol.toLowerCase() === query.toLowerCase() ? 1 : 0;
       const bExact = b.symbol.toLowerCase() === query.toLowerCase() ? 1 : 0;
@@ -191,25 +183,14 @@ export async function GET(request: NextRequest) {
       return 0;
     });
 
-    // If no results found, return an informative response
-    if (uniqueResults.length === 0) {
-      return NextResponse.json({
-        coins: [],
-        sources: ['coincap', 'binance', 'coingecko'],
-        total: 0,
-        message: 'No cryptocurrencies found matching your search'
-      });
-    }
-
     return NextResponse.json({
-      coins: uniqueResults.slice(0, 15),
-      sources: ['coincap', 'binance', 'coingecko'],
-      total: uniqueResults.length,
-      message: `Found ${uniqueResults.length} cryptocurrencies`
+      coins: sortedResults,
+      sources: ['coingecko'],
+      total: sortedResults.length
     });
 
   } catch (error) {
-    console.error('Hybrid search error:', error);
+    console.error('CoinGecko search error:', error);
     return NextResponse.json(
       { error: 'Failed to search cryptocurrencies' },
       { status: 500 }
