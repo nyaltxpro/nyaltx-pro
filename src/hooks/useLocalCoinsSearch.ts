@@ -80,6 +80,34 @@ export const useLocalCoinsSearch = () => {
   const [coins, setCoins] = useState<LocalCoin[]>([]);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
 
+  // Get primary chain from platforms
+  const getPrimaryChain = (platforms: { [key: string]: string }): string | null => {
+    const mappedPlatforms: { [key: string]: string } = {};
+    
+    Object.entries(platforms).forEach(([platform, address]) => {
+      const chainName = PLATFORM_MAPPING[platform];
+      if (chainName && address && address !== '' && address !== '0x0000000000000000000000000000000000000000') {
+        mappedPlatforms[chainName] = address;
+      }
+    });
+
+    return CHAIN_PRIORITY.find(chain => mappedPlatforms[chain]) || 
+           Object.keys(mappedPlatforms)[0] || null;
+  };
+
+  // Get primary address from platforms
+  const getPrimaryAddress = (platforms: { [key: string]: string }): string | null => {
+    const primaryChain = getPrimaryChain(platforms);
+    if (!primaryChain) return null;
+
+    // Find the original platform key that maps to our primary chain
+    const originalPlatform = Object.keys(PLATFORM_MAPPING).find(
+      key => PLATFORM_MAPPING[key] === primaryChain
+    );
+
+    return originalPlatform ? platforms[originalPlatform] : null;
+  };
+
   // Load coins data dynamically
   useEffect(() => {
     const loadCoinsData = async () => {
@@ -118,35 +146,7 @@ export const useLocalCoinsSearch = () => {
         primaryChain: getPrimaryChain(coin.platforms || {}),
         primaryAddress: getPrimaryAddress(coin.platforms || {})
       }));
-  }, [coins]);
-
-  // Get primary chain from platforms
-  const getPrimaryChain = (platforms: { [key: string]: string }): string | null => {
-    const mappedPlatforms: { [key: string]: string } = {};
-    
-    Object.entries(platforms).forEach(([platform, address]) => {
-      const chainName = PLATFORM_MAPPING[platform];
-      if (chainName && address && address !== '' && address !== '0x0000000000000000000000000000000000000000') {
-        mappedPlatforms[chainName] = address;
-      }
-    });
-
-    return CHAIN_PRIORITY.find(chain => mappedPlatforms[chain]) || 
-           Object.keys(mappedPlatforms)[0] || null;
-  };
-
-  // Get primary address from platforms
-  const getPrimaryAddress = (platforms: { [key: string]: string }): string | null => {
-    const primaryChain = getPrimaryChain(platforms);
-    if (!primaryChain) return null;
-
-    // Find the original platform key that maps to our primary chain
-    const originalPlatform = Object.keys(PLATFORM_MAPPING).find(
-      key => PLATFORM_MAPPING[key] === primaryChain
-    );
-
-    return originalPlatform ? platforms[originalPlatform] : null;
-  };
+  }, [coins, getPrimaryChain, getPrimaryAddress]);
 
   // Search function
   const searchCoins = async (query: string, limit: number = 10): Promise<LocalSearchResult[]> => {
