@@ -75,10 +75,10 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
   const { writeContractAsync } = useWriteContract();
   const { switchChainAsync } = useSwitchChain();
 
-  // Sepolia testnet configuration
-  const SEPOLIA_CHAIN_ID = 11155111;
+  // Mainnet Ethereum configuration
+  const MAINNET_CHAIN_ID = 1;
   const RECEIVER_ADDRESS = '0x81bA7b98E49014Bff22F811E9405640bC2B39cC0' as `0x${string}`;
-  const USDT_SEPOLIA = '0x7169D38820dfd117C3FA1f22a697dBA58d90BA06' as `0x${string}`; // Example USDT on Sepolia
+  const USDT_MAINNET = '0xdAC17F958D2ee523a2206206994597C13D831ec7' as `0x${string}`; // Official USDT on Ethereum mainnet
 
   const filteredTokens = useMemo(() => tokens.filter(t => {
     if (network === 'solana') return t.chain === 'solana';
@@ -221,12 +221,12 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
         return;
       }
 
-      // Switch to Sepolia if not already on it
-      if (chain?.id !== SEPOLIA_CHAIN_ID) {
+      // Switch to Ethereum mainnet if not already on it
+      if (chain?.id !== MAINNET_CHAIN_ID) {
         try {
-          await switchChainAsync({ chainId: SEPOLIA_CHAIN_ID });
+          await switchChainAsync({ chainId: MAINNET_CHAIN_ID });
         } catch (switchError: any) {
-          throw new Error(`Failed to switch to Sepolia network: ${switchError?.message || 'Please add Sepolia network to your wallet'}`);
+          throw new Error(`Failed to switch to Ethereum mainnet: ${switchError?.message || 'Please add Ethereum mainnet to your wallet'}`);
         }
       }
 
@@ -244,7 +244,7 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
         const usdtAmount = total.toString();
         txHash = await writeContractAsync({
           abi: erc20Abi,
-          address: USDT_SEPOLIA,
+          address: USDT_MAINNET,
           functionName: 'transfer',
           args: [RECEIVER_ADDRESS, parseUnits(usdtAmount, 6)]
         });
@@ -283,7 +283,7 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
         wallet: address,
         txHash,
         amount: token === 'ETH' ? '0.1' : total.toString(),
-        chainId: SEPOLIA_CHAIN_ID
+        chainId: MAINNET_CHAIN_ID
       };
 
       const response = await fetch('/api/admin/orders/onchain', {
@@ -330,7 +330,7 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
                 <p className="text-gray-400 text-sm mt-1">Selected plan: <span className="text-white font-medium">{selectedTier}</span></p>
               )}
               {paymentMethod === 'usdt' && selectedTier === 'nyaltxpro' && (
-                <p className="text-cyan-400 text-sm mt-1">Auto-payment mode: 0.1 Sepolia ETH</p>
+                <p className="text-cyan-400 text-sm mt-1">Auto-payment mode: 0.1 ETH on Ethereum mainnet</p>
               )}
             </div>
             <ConnectWalletButton />
