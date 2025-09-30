@@ -363,8 +363,22 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
   };
 
   // Handle clicking on a trending coin
-  const handleTrendingClick = (coin: TrendingCoin) => {
-    router.push(`/dashboard/trade?base=${coin.symbol.toUpperCase()}`);
+  const handleTrendingClick = (coin: any) => {
+    const params = new URLSearchParams();
+    params.set('base', coin.symbol.toUpperCase());
+    
+    // Add chain and contract address if available (from optimized API)
+    if (coin.primaryChain) {
+      params.set('chain', coin.primaryChain);
+    }
+    if (coin.primaryAddress) {
+      params.set('address', coin.primaryAddress);
+    }
+    
+    // Add CoinGecko ID for additional reference
+    params.set('coingecko_id', coin.id);
+    
+    router.push(`/dashboard/trade?${params.toString()}`);
     onClose();
   };
 
@@ -565,34 +579,59 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
     }
   };
 
-  // Fetch trending coins when modal opens
+  // Fetch trending coins when modal opens with retry logic
   useEffect(() => {
     if (isOpen) {
-      const fetchTrending = async () => {
-        try {
-          setTrendingLoading(true);
-          const data = await getTrendingCoins();
-
-          // CoinGecko returns trending coins in a nested structure
-          if (data && data.coins) {
-            const formattedCoins = data.coins.map((item: any) => ({
-              id: item.item.id,
-              name: item.item.name,
-              symbol: item.item.symbol,
-              market_cap_rank: item.item.market_cap_rank,
-              thumb: item.item.thumb,
-              score: item.item.score,
-              price_btc: item.item.price_btc
-            }));
-
-            setTrendingCoins(formattedCoins);
+      const fetchTrending = async (retries = 2) => {
+        setTrendingLoading(true);
+        
+        for (let attempt = 0; attempt <= retries; attempt++) {
+          try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 8000);
+            
+            const response = await fetch('/api/coingecko/trending', {
+              signal: controller.signal,
+              headers: {
+                'Accept': 'application/json',
+              }
+            });
+            
+            clearTimeout(timeoutId);
+            
+            if (response.ok) {
+              const data = await response.json();
+              setTrendingCoins(data.coins || []);
+              setTrendingLoading(false);
+              return; // Success, exit retry loop
+            } else if (response.status === 429) {
+              if (attempt < retries) {
+                await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)));
+                continue;
+              }
+            } else {
+              console.error(`Trending coins API error: ${response.status}`);
+              setTrendingCoins([]);
+              break;
+            }
+          } catch (error: any) {
+            if (error.name === 'AbortError') {
+              console.log(`Trending coins timeout, attempt ${attempt + 1}`);
+            } else {
+              console.error(`Error fetching trending coins, attempt ${attempt + 1}:`, error);
+            }
+            
+            if (attempt < retries) {
+              await new Promise(resolve => setTimeout(resolve, 500 * (attempt + 1)));
+              continue;
+            } else {
+              setTrendingCoins([]);
+              break;
+            }
           }
-
-          setTrendingLoading(false);
-        } catch (err) {
-          console.error('Error fetching trending coins:', err);
-          setTrendingLoading(false);
         }
+        
+        setTrendingLoading(false);
       };
 
       fetchTrending();
