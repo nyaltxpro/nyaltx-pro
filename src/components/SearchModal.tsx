@@ -78,6 +78,8 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
   const [coinGeckoLoading, setCoinGeckoLoading] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
   const { tokens: pumpFunTokens } = usePumpFunTokens();
   const [nyaxTokens] = useState<NyaxToken[]>(nyaxTokensData.tokens || []);
 
@@ -110,28 +112,67 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
     return nyaxLogoMappings[logoId as keyof typeof nyaxLogoMappings] || null;
   };
 
-  // Function to search CoinGecko
-  const searchCoinGecko = async (query: string) => {
+  // Function to search CoinGecko with retry logic
+  const searchCoinGecko = async (query: string, retries = 2) => {
     if (query.trim().length < 2) {
       setCoinGeckoResults([]);
       return;
     }
 
     setCoinGeckoLoading(true);
-    try {
-      const response = await fetch(`/api/coingecko/search?query=${encodeURIComponent(query)}`);
-      if (response.ok) {
-        const data = await response.json();
-        setCoinGeckoResults(data.coins || []);
-      } else {
-        setCoinGeckoResults([]);
+    
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      try {
+        // Create new abort controller for this attempt
+        abortControllerRef.current = new AbortController();
+        const timeoutId = setTimeout(() => abortControllerRef.current?.abort(), 8000); // 8 second timeout
+        
+        const response = await fetch(
+          `/api/coingecko/search?query=${encodeURIComponent(query)}`,
+          {
+            signal: abortControllerRef.current.signal,
+            headers: {
+              'Accept': 'application/json',
+            }
+          }
+        );
+        
+        clearTimeout(timeoutId);
+        
+        if (response.ok) {
+          const data = await response.json();
+          setCoinGeckoResults(data.coins || []);
+          setCoinGeckoLoading(false);
+          return; // Success, exit retry loop
+        } else if (response.status === 429) {
+          // Rate limited, wait and retry
+          if (attempt < retries) {
+            await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)));
+            continue;
+          }
+        } else {
+          console.error(`CoinGecko API error: ${response.status}`);
+          setCoinGeckoResults([]);
+          break;
+        }
+      } catch (error: any) {
+        if (error.name === 'AbortError') {
+          console.log(`CoinGecko search timeout, attempt ${attempt + 1}`);
+        } else {
+          console.error(`Error searching CoinGecko, attempt ${attempt + 1}:`, error);
+        }
+        
+        if (attempt < retries) {
+          await new Promise(resolve => setTimeout(resolve, 500 * (attempt + 1)));
+          continue;
+        } else {
+          setCoinGeckoResults([]);
+          break;
+        }
       }
-    } catch (error) {
-      console.error('Error searching CoinGecko:', error);
-      setCoinGeckoResults([]);
-    } finally {
-      setCoinGeckoLoading(false);
     }
+    
+    setCoinGeckoLoading(false);
   };
 
   // Popular token pairs for quick suggestions
@@ -159,19 +200,25 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
     const value = e.target.value;
     setSearchTerm(value);
 
+    // Cancel previous search timeout and abort controller
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
     if (value.trim() === '') {
       setSearchResults([]);
       setCoinGeckoResults([]);
+      setCoinGeckoLoading(false);
       return;
     }
 
     // Search CoinGecko with debounce
-    const timeoutId = setTimeout(() => {
+    searchTimeoutRef.current = setTimeout(() => {
       searchCoinGecko(value);
     }, 300);
-
-    // Store timeout ID for cleanup
-    (e.target as any).searchTimeout = timeoutId;
 
     const results: SearchResult[] = [];
     const upperSearch = value.toUpperCase();
@@ -571,6 +618,17 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
       setSearchTerm('');
       setSearchResults([]);
       setCoinGeckoResults([]);
+      setCoinGeckoLoading(false);
+      
+      // Cancel any pending searches
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+        searchTimeoutRef.current = null;
+      }
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+      }
     }
 
     return () => {

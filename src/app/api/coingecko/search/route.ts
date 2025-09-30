@@ -1,5 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+interface CoinGeckoSearchCoin {
+  id: string;
+  name: string;
+  symbol: string;
+  market_cap_rank: number;
+  thumb: string;
+  large: string;
+  api_symbol: string;
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -26,22 +36,29 @@ export async function GET(request: NextRequest) {
 
     const data = await response.json();
 
-    // Get top 10 coins for detailed info (to avoid too many API calls)
-    const topCoins = data.coins?.slice(0, 10) || [];
+    // Get top 8 coins for detailed info (reduced to improve reliability)
+    const topCoins = data.coins?.slice(0, 8) || [];
     
-    // Fetch detailed information for each coin to get contract addresses
-    const coinsWithDetails = await Promise.all(
-      topCoins.map(async (coin: any) => {
+    // Helper function to fetch coin details with retry logic
+    const fetchCoinDetails = async (coin: CoinGeckoSearchCoin, retries = 2): Promise<any> => {
+      for (let attempt = 0; attempt <= retries; attempt++) {
         try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+          
           const detailResponse = await fetch(
             `https://api.coingecko.com/api/v3/coins/${coin.id}?localization=false&tickers=false&market_data=false&community_data=false&developer_data=false&sparkline=false`,
             {
               headers: {
                 'Accept': 'application/json',
+                'User-Agent': 'NYALTX-Search/1.0'
               },
-              next: { revalidate: 3600 } // Cache for 1 hour since contract addresses don't change often
+              signal: controller.signal,
+              next: { revalidate: 3600 } // Cache for 1 hour
             }
           );
+
+          clearTimeout(timeoutId);
 
           if (detailResponse.ok) {
             const detailData = await detailResponse.json();
@@ -64,20 +81,15 @@ export async function GET(request: NextRequest) {
 
               Object.entries(detailData.platforms).forEach(([platform, address]) => {
                 const chainName = platformMapping[platform];
-                if (chainName && address && address !== '') {
+                if (chainName && address && address !== '' && address !== '0x0000000000000000000000000000000000000000') {
                   contractAddresses[chainName] = address as string;
                 }
               });
             }
 
-            // Determine primary chain (prefer Ethereum, then others)
-            const primaryChain = contractAddresses.ethereum ? 'ethereum' :
-                               contractAddresses.binance ? 'binance' :
-                               contractAddresses.polygon ? 'polygon' :
-                               contractAddresses.arbitrum ? 'arbitrum' :
-                               contractAddresses.base ? 'base' :
-                               contractAddresses.solana ? 'solana' :
-                               Object.keys(contractAddresses)[0] || null;
+            // Determine primary chain (prefer Ethereum, then others by popularity)
+            const chainPriority = ['ethereum', 'binance', 'polygon', 'arbitrum', 'base', 'optimism', 'avalanche', 'fantom', 'solana'];
+            const primaryChain = chainPriority.find(chain => contractAddresses[chain]) || Object.keys(contractAddresses)[0] || null;
 
             return {
               id: coin.id,
@@ -91,26 +103,58 @@ export async function GET(request: NextRequest) {
               primaryChain,
               primaryAddress: primaryChain ? contractAddresses[primaryChain] : null
             };
+          } else if (detailResponse.status === 429) {
+            // Rate limited, wait and retry
+            if (attempt < retries) {
+              await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)));
+              continue;
+            }
           }
-        } catch (error) {
-          console.error(`Error fetching details for ${coin.id}:`, error);
+        } catch (error: any) {
+          if (error.name === 'AbortError') {
+            console.log(`Timeout fetching details for ${coin.id}, attempt ${attempt + 1}`);
+          } else {
+            console.error(`Error fetching details for ${coin.id}, attempt ${attempt + 1}:`, error);
+          }
+          
+          if (attempt < retries) {
+            await new Promise(resolve => setTimeout(resolve, 500 * (attempt + 1)));
+            continue;
+          }
         }
+      }
 
-        // Return basic info if detailed fetch fails
-        return {
-          id: coin.id,
-          name: coin.name,
-          symbol: coin.symbol,
-          market_cap_rank: coin.market_cap_rank,
-          thumb: coin.thumb,
-          large: coin.large,
-          api_symbol: coin.api_symbol,
-          contractAddresses: {},
-          primaryChain: null,
-          primaryAddress: null
-        };
-      })
-    );
+      // Return basic info if all attempts fail
+      return {
+        id: coin.id,
+        name: coin.name,
+        symbol: coin.symbol,
+        market_cap_rank: coin.market_cap_rank,
+        thumb: coin.thumb,
+        large: coin.large,
+        api_symbol: coin.api_symbol,
+        contractAddresses: {},
+        primaryChain: null,
+        primaryAddress: null
+      };
+    };
+
+    // Fetch details with controlled concurrency to avoid overwhelming the API
+    const coinsWithDetails = [];
+    const batchSize = 3; // Process 3 coins at a time
+    
+    for (let i = 0; i < topCoins.length; i += batchSize) {
+      const batch = topCoins.slice(i, i + batchSize);
+      const batchResults = await Promise.all(
+        batch.map((coin: CoinGeckoSearchCoin) => fetchCoinDetails(coin))
+      );
+      coinsWithDetails.push(...batchResults);
+      
+      // Small delay between batches to be respectful to the API
+      if (i + batchSize < topCoins.length) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+    }
 
     return NextResponse.json({
       coins: coinsWithDetails,
