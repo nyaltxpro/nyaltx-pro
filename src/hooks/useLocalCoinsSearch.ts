@@ -2,9 +2,6 @@
 
 import { useState, useEffect, useMemo } from 'react';
 
-// Import the detailed coins data
-import detailedCoinsData from '../../scripts/top400coins-detailed.json';
-
 export interface LocalCoin {
   index: number;
   id: string;
@@ -80,14 +77,28 @@ export const useLocalCoinsSearch = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Memoize the coins data to avoid re-processing
-  const coins = useMemo(() => {
-    try {
-      return (detailedCoinsData as any).coins as LocalCoin[];
-    } catch (err) {
-      console.error('Failed to load local coins data:', err);
-      return [];
-    }
+  const [coins, setCoins] = useState<LocalCoin[]>([]);
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
+
+  // Load coins data dynamically
+  useEffect(() => {
+    const loadCoinsData = async () => {
+      try {
+        const response = await fetch('/api/coins/local-data');
+        if (response.ok) {
+          const data = await response.json();
+          setCoins(data.coins || []);
+        } else {
+          console.error('Failed to fetch local coins data');
+        }
+      } catch (err) {
+        console.error('Failed to load local coins data:', err);
+      } finally {
+        setIsDataLoaded(true);
+      }
+    };
+
+    loadCoinsData();
   }, []);
 
   // Get trending coins (top 10 by market cap)
@@ -258,8 +269,9 @@ export const useLocalCoinsSearch = () => {
     getCoinsByCategory,
     getMarketMovers,
     getTrendingCoins,
-    isLoading,
+    isLoading: isLoading || !isDataLoaded,
     error,
-    totalCoins: coins.length
+    totalCoins: coins.length,
+    isDataLoaded
   };
 };
