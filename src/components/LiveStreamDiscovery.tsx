@@ -18,7 +18,7 @@ export default function LiveStreamDiscovery({ className = "" }: LiveStreamDiscov
   const [activeStreams, setActiveStreams] = useState<LiveStreamData[]>([]);
   const [selectedStream, setSelectedStream] = useState<LiveStreamData | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [isConnectedToWS, setIsConnectedToWS] = useState(false);
+  const [isConnectedToWS, setIsConnectedToWS] = useState(liveStreamWebSocket.connected);
   const [loading, setLoading] = useState(true);
   
   // Categories for filtering
@@ -36,6 +36,9 @@ export default function LiveStreamDiscovery({ className = "" }: LiveStreamDiscov
 
   // WebSocket connection and stream updates
   useEffect(() => {
+    // Update connection status immediately
+    setIsConnectedToWS(liveStreamWebSocket.connected);
+    
     const handleWebSocketMessage = (message: WebSocketStreamMessage) => {
       switch (message.type) {
         case 'connection_status':

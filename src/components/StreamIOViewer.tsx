@@ -11,7 +11,8 @@ import {
   CallParticipantsList,
   useCallStateHooks,
 } from '@stream-io/video-react-sdk';
-import { streamIOService, StreamUser, LiveStream } from '@/services/StreamIOService';
+import { streamIOService, StreamUser, LiveStream, ChatMessage } from '@/services/StreamIOService';
+import { Channel } from 'stream-chat';
 import { FaUsers, FaExclamationTriangle, FaPlay, FaComments, FaPaperPlane } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 
@@ -25,11 +26,12 @@ export default function StreamIOViewer({ streamId, streamTitle, onStreamEnd }: S
   const { address, isConnected } = useAccount();
   const [client, setClient] = useState<StreamVideoClient | null>(null);
   const [call, setCall] = useState<Call | null>(null);
+  const [chatChannel, setChatChannel] = useState<Channel | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isConnected2Stream, setIsConnected2Stream] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [viewerCount, setViewerCount] = useState(0);
-  const [chatMessages, setChatMessages] = useState<any[]>([]);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState('');
 
   // Initialize Stream.io service
@@ -56,19 +58,20 @@ export default function StreamIOViewer({ streamId, streamTitle, onStreamEnd }: S
         
         // Join the live stream
         console.log('🎯 Attempting to join stream:', streamId);
-        const joinedCall = await streamIOService.joinLiveStream(streamId);
+        const { call: joinedCall, chatChannel: joinedChatChannel } = await streamIOService.joinLiveStream(streamId);
         
         setCall(joinedCall);
+        setChatChannel(joinedChatChannel);
         setClient(streamIOService.getCurrentClient());
         setIsConnected2Stream(true);
         
         // Monitor participant count
-        joinedCall.state.participants$.subscribe((participants) => {
+        joinedCall.state.participants$.subscribe((participants: any) => {
           setViewerCount(participants.length - 1); // Exclude host
         });
 
         // Monitor call state
-        joinedCall.state.callingState$.subscribe((state) => {
+        joinedCall.state.callingState$.subscribe((state: any) => {
           // Use proper CallingState enum values
           if (state.toString() === 'left' || state.toString() === 'ended') {
             setIsConnected2Stream(false);
@@ -76,6 +79,15 @@ export default function StreamIOViewer({ streamId, streamTitle, onStreamEnd }: S
               onStreamEnd();
             }
           }
+        });
+
+        // Load initial chat messages
+        const initialMessages = await streamIOService.getChatMessages(50);
+        setChatMessages(initialMessages);
+
+        // Subscribe to new chat messages
+        const unsubscribe = streamIOService.subscribeToChatEvents((message) => {
+          setChatMessages(prev => [...prev, message]);
         });
 
         console.log('✅ Successfully joined stream:', streamId);
@@ -111,27 +123,12 @@ export default function StreamIOViewer({ streamId, streamTitle, onStreamEnd }: S
     };
   }, [isConnected, address, streamId]);
 
-  // Send chat message (using Stream.io's built-in chat if available)
+  // Send chat message using Stream.io chat
   const sendChatMessage = async () => {
-    if (!chatInput.trim() || !call) return;
+    if (!chatInput.trim() || !chatChannel) return;
 
     try {
-      // Stream.io calls have built-in messaging capabilities
-      // This would integrate with Stream Chat SDK for full chat functionality
-      console.log('💬 Sending message:', chatInput);
-      
-      // For now, we'll use a simple local state
-      const newMessage = {
-        id: Date.now().toString(),
-        text: chatInput,
-        user: {
-          id: address,
-          name: `${address?.slice(0, 6)}...${address?.slice(-4)}`,
-        },
-        timestamp: new Date(),
-      };
-      
-      setChatMessages(prev => [...prev, newMessage]);
+      await streamIOService.sendChatMessage(chatInput.trim());
       setChatInput('');
       toast.success('Message sent!');
     } catch (error) {
@@ -252,7 +249,7 @@ export default function StreamIOViewer({ streamId, streamTitle, onStreamEnd }: S
                           {message.user.name}
                         </span>
                         <span className="text-gray-500 text-xs">
-                          {new Date(message.timestamp).toLocaleTimeString([], { 
+                          {new Date(message.created_at).toLocaleTimeString([], { 
                             hour: '2-digit', 
                             minute: '2-digit' 
                           })}

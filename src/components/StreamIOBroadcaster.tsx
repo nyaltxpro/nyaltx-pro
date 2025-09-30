@@ -12,7 +12,8 @@ import {
   CallParticipantsList,
   useCallStateHooks,
 } from '@stream-io/video-react-sdk';
-import { streamIOService, StreamUser } from '@/services/StreamIOService';
+import { streamIOService, StreamUser, ChatMessage } from '@/services/StreamIOService';
+import { Channel } from 'stream-chat';
 import { FaDesktop, FaStop, FaUsers, FaComments, FaPaperPlane, FaCamera, FaMicrophone, FaMicrophoneSlash, FaVideoSlash } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 
@@ -25,12 +26,15 @@ export default function StreamIOBroadcaster({ onStreamEnd, streamTitle }: Stream
   const { address, isConnected } = useAccount();
   const [client, setClient] = useState<StreamVideoClient | null>(null);
   const [call, setCall] = useState<Call | null>(null);
+  const [chatChannel, setChatChannel] = useState<Channel | null>(null);
   const [callId, setCallId] = useState<string>('');
   const [isStreaming, setIsStreaming] = useState(false);
   const [isInitializing, setIsInitializing] = useState(false);
   const [viewerCount, setViewerCount] = useState(0);
   const [streamDuration, setStreamDuration] = useState(0);
   const [startTime, setStartTime] = useState<number>(0);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [chatInput, setChatInput] = useState('');
 
   // Initialize Stream.io service
   useEffect(() => {
@@ -96,12 +100,21 @@ export default function StreamIOBroadcaster({ onStreamEnd, streamTitle }: Stream
       console.log('🎥 Starting Stream.io live stream...');
       toast.loading('Starting stream...', { id: 'start-stream' });
 
-      const { callId: newCallId, call: newCall } = await streamIOService.startLiveStream(streamTitle);
+      const { callId: newCallId, call: newCall, chatChannel: newChatChannel } = await streamIOService.startLiveStream(streamTitle);
       
       setCall(newCall);
+      setChatChannel(newChatChannel);
       setCallId(newCallId);
       setIsStreaming(true);
       setStartTime(Date.now());
+
+      // Load initial chat messages and subscribe to new ones
+      const initialMessages = await streamIOService.getChatMessages(50);
+      setChatMessages(initialMessages);
+
+      const unsubscribe = streamIOService.subscribeToChatEvents((message) => {
+        setChatMessages(prev => [...prev, message]);
+      });
       
       // Monitor participant count
       newCall.state.participants$.subscribe((participants) => {
@@ -125,11 +138,13 @@ export default function StreamIOBroadcaster({ onStreamEnd, streamTitle }: Stream
       await streamIOService.endStream();
       
       setCall(null);
+      setChatChannel(null);
       setCallId('');
       setIsStreaming(false);
       setViewerCount(0);
       setStreamDuration(0);
       setStartTime(0);
+      setChatMessages([]);
 
       toast.success('Stream ended', { id: 'stop-stream' });
       
@@ -161,6 +176,19 @@ export default function StreamIOBroadcaster({ onStreamEnd, streamTitle }: Stream
     } catch (error) {
       console.error('❌ Failed to toggle camera:', error);
       toast.error('Failed to toggle camera');
+    }
+  };
+
+  // Send chat message
+  const sendChatMessage = async () => {
+    if (!chatInput.trim() || !chatChannel) return;
+
+    try {
+      await streamIOService.sendChatMessage(chatInput.trim());
+      setChatInput('');
+    } catch (error) {
+      console.error('❌ Failed to send message:', error);
+      toast.error('Failed to send message');
     }
   };
 
@@ -324,16 +352,82 @@ export default function StreamIOBroadcaster({ onStreamEnd, streamTitle }: Stream
 
       {/* Stream.io Call Controls (when streaming) */}
       {client && call && isStreaming && (
-        <div className="bg-gray-800 rounded-lg p-4">
-          <StreamVideo client={client}>
-            <StreamCall call={call}>
-              <CallControls />
-              <div className="mt-4">
-                <h3 className="text-white font-medium mb-2">Participants</h3>
-                <CallParticipantsList onClose={() => {}} />
-              </div>
-            </StreamCall>
-          </StreamVideo>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Video Controls */}
+          <div className="bg-gray-800 rounded-lg p-4">
+            <StreamVideo client={client}>
+              <StreamCall call={call}>
+                <CallControls />
+                <div className="mt-4">
+                  <h3 className="text-white font-medium mb-2">Participants ({viewerCount + 1})</h3>
+                  <CallParticipantsList onClose={() => {}} />
+                </div>
+              </StreamCall>
+            </StreamVideo>
+          </div>
+
+          {/* Chat Interface */}
+          <div className="bg-gray-800 rounded-lg p-4 flex flex-col h-96">
+            <div className="flex items-center gap-2 mb-4">
+              <FaComments className="text-cyan-400" />
+              <h3 className="text-white font-medium">Live Chat</h3>
+              <span className="text-gray-400 text-sm">({chatMessages.length} messages)</span>
+            </div>
+
+            {/* Chat Messages */}
+            <div className="flex-1 overflow-y-auto space-y-2 mb-4">
+              {chatMessages.length === 0 ? (
+                <div className="text-center text-gray-500 py-8">
+                  <FaComments className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                  <p>No messages yet. Start the conversation!</p>
+                </div>
+              ) : (
+                chatMessages.map((message) => (
+                  <div key={message.id} className="p-2 rounded-lg bg-gray-700/50">
+                    <div className="flex items-start gap-2">
+                      <div className="w-6 h-6 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full flex-shrink-0 flex items-center justify-center text-xs text-white font-medium">
+                        {message.user.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-cyan-400 text-sm font-medium truncate">
+                            {message.user.name}
+                          </span>
+                          <span className="text-gray-500 text-xs">
+                            {new Date(message.created_at).toLocaleTimeString([], { 
+                              hour: '2-digit', 
+                              minute: '2-digit' 
+                            })}
+                          </span>
+                        </div>
+                        <p className="text-gray-300 text-sm break-words">{message.text}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Chat Input */}
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && sendChatMessage()}
+                placeholder="Type a message..."
+                className="flex-1 px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-cyan-400 focus:outline-none text-sm"
+                disabled={!isStreaming}
+              />
+              <button
+                onClick={sendChatMessage}
+                disabled={!chatInput.trim() || !isStreaming}
+                className="px-3 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <FaPaperPlane className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -1,4 +1,5 @@
 import { StreamVideoClient, Call, User } from '@stream-io/video-client';
+import { StreamChat, Channel, ChannelData } from 'stream-chat';
 import { createStreamClient, generateUserToken, CALL_TYPES } from '@/lib/stream-config';
 
 export interface StreamUser {
@@ -17,11 +18,29 @@ export interface LiveStream {
   viewerCount: number;
   isLive: boolean;
   createdAt: Date;
+  chatChannelId?: string;
+}
+
+export interface ChatMessage {
+  id: string;
+  text: string;
+  user: {
+    id: string;
+    name: string;
+    image?: string;
+    walletAddress?: string;
+  };
+  created_at: Date;
+  type?: 'regular' | 'system' | 'donation';
+  amount?: number;
+  token?: string;
 }
 
 export class StreamIOService {
   private client: StreamVideoClient | null = null;
+  private chatClient: StreamChat | null = null;
   private currentCall: Call | null = null;
+  private currentChannel: Channel | null = null;
   private user: StreamUser | null = null;
 
   // Initialize the service with user credentials
@@ -41,11 +60,21 @@ export class StreamIOService {
       // Generate user token (in production, get this from your backend)
       const token = await generateUserToken(user.id);
       
-      // Create Stream client
+      // Create Stream Video client
       this.client = createStreamClient(streamUser, token);
+      
+      // Create Stream Chat client
+      const apiKey = process.env.NEXT_PUBLIC_STREAM_API_KEY;
+      if (!apiKey) {
+        throw new Error('Stream API key not found');
+      }
+      
+      this.chatClient = StreamChat.getInstance(apiKey);
+      await this.chatClient.connectUser(streamUser, token);
+      
       this.user = user;
       
-      console.log('✅ Stream.io client initialized successfully');
+      console.log('✅ Stream.io video and chat clients initialized successfully');
     } catch (error) {
       console.error('❌ Failed to initialize Stream.io service:', error);
       throw error;
@@ -53,8 +82,8 @@ export class StreamIOService {
   }
 
   // Start a live stream as broadcaster
-  async startLiveStream(streamTitle: string): Promise<{ callId: string; call: Call }> {
-    if (!this.client || !this.user) {
+  async startLiveStream(streamTitle: string): Promise<{ callId: string; call: Call; chatChannel: Channel }> {
+    if (!this.client || !this.chatClient || !this.user) {
       throw new Error('Stream.io service not initialized');
     }
 
@@ -108,10 +137,20 @@ export class StreamIOService {
         console.warn('⚠️ Failed to update call metadata:', updateError);
       }
 
-      this.currentCall = call;
+      // Create chat channel for the stream
+      const chatChannelId = `livestream-${callId}`;
+      const chatChannel = this.chatClient.channel('livestream', chatChannelId, {
+        created_by_id: this.user.id,
+        members: [this.user.id],
+      });
       
-      console.log('✅ Live stream started successfully:', callId);
-      return { callId, call };
+      await chatChannel.create();
+      
+      this.currentCall = call;
+      this.currentChannel = chatChannel;
+      
+      console.log('✅ Live stream and chat started successfully:', callId);
+      return { callId, call, chatChannel };
     } catch (error) {
       console.error('❌ Failed to start live stream:', error);
       throw error;
@@ -119,8 +158,8 @@ export class StreamIOService {
   }
 
   // Join a live stream as viewer
-  async joinLiveStream(callId: string): Promise<Call> {
-    if (!this.client || !this.user) {
+  async joinLiveStream(callId: string): Promise<{ call: Call; chatChannel: Channel }> {
+    if (!this.client || !this.chatClient || !this.user) {
       throw new Error('Stream.io service not initialized');
     }
 
@@ -135,10 +174,16 @@ export class StreamIOService {
         create: false,
       });
       
-      this.currentCall = call;
+      // Join the chat channel
+      const chatChannelId = `livestream-${callId}`;
+      const chatChannel = this.chatClient.channel('livestream', chatChannelId);
+      await chatChannel.watch();
       
-      console.log('✅ Joined live stream successfully');
-      return call;
+      this.currentCall = call;
+      this.currentChannel = chatChannel;
+      
+      console.log('✅ Joined live stream and chat successfully');
+      return { call, chatChannel };
     } catch (error) {
       console.error('❌ Failed to join live stream:', error);
       
@@ -158,9 +203,15 @@ export class StreamIOService {
           },
         });
         
+        // Join the chat channel for retry case too
+        const chatChannelId = `livestream-${callId}`;
+        const chatChannel = this.chatClient.channel('livestream', chatChannelId);
+        await chatChannel.watch();
+        
         this.currentCall = call;
-        console.log('✅ Joined live stream successfully (retry)');
-        return call;
+        this.currentChannel = chatChannel;
+        console.log('✅ Joined live stream and chat successfully (retry)');
+        return { call, chatChannel };
       } catch (retryError) {
         console.error('❌ Retry also failed:', retryError);
         throw new Error('Failed to join stream. Stream may have ended or is not accessible.');
@@ -181,11 +232,110 @@ export class StreamIOService {
       await this.currentCall.leave();
       this.currentCall = null;
       
-      console.log('✅ Live stream ended successfully');
+      // Stop watching the chat channel
+      if (this.currentChannel) {
+        await this.currentChannel.stopWatching();
+        this.currentChannel = null;
+      }
+      
+      console.log('✅ Live stream and chat ended successfully');
     } catch (error) {
       console.error('❌ Failed to end live stream:', error);
       throw error;
     }
+  }
+
+  // Chat functionality
+  async sendChatMessage(text: string, type: 'regular' | 'system' | 'donation' = 'regular', metadata?: { amount?: number; token?: string }): Promise<void> {
+    if (!this.currentChannel || !this.user) {
+      throw new Error('No active chat channel or user not initialized');
+    }
+
+    try {
+      const messageData: any = {
+        text,
+        user_id: this.user.id,
+        type,
+      };
+
+      if (metadata) {
+        messageData.custom = metadata;
+      }
+
+      await this.currentChannel.sendMessage(messageData);
+      console.log('💬 Chat message sent successfully');
+    } catch (error) {
+      console.error('❌ Failed to send chat message:', error);
+      throw error;
+    }
+  }
+
+  // Get chat messages
+  async getChatMessages(limit: number = 50): Promise<ChatMessage[]> {
+    if (!this.currentChannel) {
+      throw new Error('No active chat channel');
+    }
+
+    try {
+      const response = await this.currentChannel.query({
+        messages: { limit },
+      });
+
+      return response.messages.map((msg: any) => ({
+        id: msg.id,
+        text: msg.text,
+        user: {
+          id: msg.user.id,
+          name: msg.user.name || msg.user.id,
+          image: msg.user.image,
+          walletAddress: msg.user.custom?.walletAddress,
+        },
+        created_at: new Date(msg.created_at),
+        type: msg.type || 'regular',
+        amount: msg.custom?.amount,
+        token: msg.custom?.token,
+      }));
+    } catch (error) {
+      console.error('❌ Failed to get chat messages:', error);
+      return [];
+    }
+  }
+
+  // Subscribe to chat events
+  subscribeToChatEvents(callback: (message: ChatMessage) => void): () => void {
+    if (!this.currentChannel) {
+      throw new Error('No active chat channel');
+    }
+
+    const handleNewMessage = (event: any) => {
+      if (event.type === 'message.new') {
+        const msg = event.message;
+        const chatMessage: ChatMessage = {
+          id: msg.id,
+          text: msg.text,
+          user: {
+            id: msg.user.id,
+            name: msg.user.name || msg.user.id,
+            image: msg.user.image,
+            walletAddress: msg.user.custom?.walletAddress,
+          },
+          created_at: new Date(msg.created_at),
+          type: msg.type || 'regular',
+          amount: msg.custom?.amount,
+          token: msg.custom?.token,
+        };
+        callback(chatMessage);
+      }
+    };
+
+    this.currentChannel.on('message.new', handleNewMessage);
+
+    // Return unsubscribe function
+    return () => {
+      if (this.currentChannel) {
+        this.currentChannel.off('message.new', handleNewMessage);
+      }
+    };
   }
 
   // Get list of active live streams

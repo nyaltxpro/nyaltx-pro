@@ -35,8 +35,7 @@ export default function PumpFunLiveStream({ onClose }: PumpFunLiveStreamProps) {
   const [isChatVisible, setIsChatVisible] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
-  // Connection state
-  const [isConnectedToWS, setIsConnectedToWS] = useState(false);
+  // Connection state is now handled by liveStreamWebSocket.connected
   
   const categories = [
     { id: 'trading', label: '📈 Trading & Analysis' },
@@ -52,7 +51,7 @@ export default function PumpFunLiveStream({ onClose }: PumpFunLiveStreamProps) {
     const handleWebSocketMessage = (message: WebSocketStreamMessage) => {
       switch (message.type) {
         case 'connection_status':
-          setIsConnectedToWS(message.data.status === 'connected');
+          // Connection status is now handled by liveStreamWebSocket.connected
           break;
         case 'stream_created':
           if (message.data.streamerId === address) {
@@ -174,7 +173,7 @@ export default function PumpFunLiveStream({ onClose }: PumpFunLiveStreamProps) {
       return;
     }
 
-    if (!isConnectedToWS) {
+    if (!liveStreamWebSocket.connected) {
       alert('WebSocket not connected. Please try again.');
       return;
     }
@@ -310,9 +309,9 @@ export default function PumpFunLiveStream({ onClose }: PumpFunLiveStreamProps) {
           </div>
           
           <div className="flex items-center gap-2">
-            <div className={`w-2 h-2 rounded-full ${isConnectedToWS ? 'bg-green-500' : 'bg-red-500'}`}></div>
+            <div className={`w-2 h-2 rounded-full ${liveStreamWebSocket.connected ? 'bg-green-500' : 'bg-red-500'}`}></div>
             <span className="text-xs text-gray-400">
-              {isConnectedToWS ? 'Connected' : 'Disconnected'}
+              {liveStreamWebSocket.connected ? 'Connected' : 'Disconnected'}
             </span>
             <button
               onClick={onClose}
@@ -397,7 +396,7 @@ export default function PumpFunLiveStream({ onClose }: PumpFunLiveStreamProps) {
                   {!isStreaming ? (
                     <button
                       onClick={handleCreateStream}
-                      disabled={!isConnected || !isConnectedToWS || isCreating}
+                      disabled={!isConnected || !liveStreamWebSocket.connected || isCreating}
                       className="px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white font-medium rounded-lg hover:from-red-700 hover:to-red-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
                     >
                       <FaPlay />
@@ -528,7 +527,7 @@ export default function PumpFunLiveStream({ onClose }: PumpFunLiveStreamProps) {
                 <div className="flex gap-3 pt-4">
                   <button
                     onClick={handleCreateStream}
-                    disabled={!isConnected || !isConnectedToWS || !streamTitle.trim() || isCreating}
+                    disabled={!isConnected || !liveStreamWebSocket.connected || !streamTitle.trim() || isCreating}
                     className="flex-1 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white font-medium rounded-lg hover:from-red-700 hover:to-red-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                   >
                     {isCreating ? 'Creating...' : 'Create Stream'}
