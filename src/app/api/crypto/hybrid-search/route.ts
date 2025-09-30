@@ -112,11 +112,11 @@ export async function GET(request: NextRequest) {
     });
 
     // Enhanced contract address fetching with retry logic for ALL results
-    const fetchCoinDetails = async (coin: SearchResult, retries = 2) => {
+    const fetchCoinDetails = async (coin: SearchResult, retries = 3) => {
       for (let attempt = 0; attempt <= retries; attempt++) {
         try {
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 5000);
+          const timeoutId = setTimeout(() => controller.abort(), 8000); // Increased timeout
           
           const response = await fetch(
             `https://api.coingecko.com/api/v3/coins/${coin.id}?localization=false&tickers=false&market_data=false&community_data=false&developer_data=false`,
@@ -172,11 +172,15 @@ export async function GET(request: NextRequest) {
             }
             return; // Success, exit retry loop
           } else if (response.status === 429) {
-            // Rate limited, wait and retry
+            // Rate limited, wait and retry with exponential backoff
             if (attempt < retries) {
-              await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)));
+              const delay = 2000 * Math.pow(2, attempt); // 2s, 4s, 8s
+              console.log(`⏳ Rate limited fetching ${coin.symbol}, retrying in ${delay}ms...`);
+              await new Promise(resolve => setTimeout(resolve, delay));
               continue;
             }
+          } else {
+            console.log(`❌ HTTP ${response.status} fetching ${coin.symbol} details`);
           }
         } catch (error: any) {
           if (error.name === 'AbortError') {
@@ -186,30 +190,37 @@ export async function GET(request: NextRequest) {
           }
           
           if (attempt < retries) {
-            await new Promise(resolve => setTimeout(resolve, 500 * (attempt + 1)));
+            const delay = 1000 * (attempt + 1); // 1s, 2s, 3s
+            await new Promise(resolve => setTimeout(resolve, delay));
             continue;
           }
         }
       }
     };
 
-    // Process coins in batches of 3 to avoid overwhelming the API
+    // Process coins in smaller batches with better error handling
     try {
-      const batchSize = 3;
+      const batchSize = 2; // Reduced batch size for better reliability
       for (let i = 0; i < results.length; i += batchSize) {
         const batch = results.slice(i, i + batchSize);
         
-        // Process batch concurrently
-        await Promise.all(batch.map(coin => fetchCoinDetails(coin)));
+        // Process batch with individual error handling
+        await Promise.allSettled(batch.map(coin => fetchCoinDetails(coin)));
         
-        // Delay between batches to respect rate limits
+        // Longer delay between batches to respect rate limits
         if (i + batchSize < results.length) {
-          await new Promise(resolve => setTimeout(resolve, 500));
+          await new Promise(resolve => setTimeout(resolve, 1000));
         }
       }
     } catch (error) {
-      console.log('Contract enhancement failed, returning basic results');
+      console.log('Contract enhancement failed, returning basic results:', error);
     }
+
+    // Log contract address success rate for monitoring
+    const coinsWithAddresses = results.filter(coin => 
+      coin.contractAddresses && Object.keys(coin.contractAddresses).length > 0
+    );
+    console.log(`📊 Contract addresses retrieved for ${coinsWithAddresses.length}/${results.length} coins`);
 
     // Sort by relevance
     const sortedResults = results.sort((a, b) => {

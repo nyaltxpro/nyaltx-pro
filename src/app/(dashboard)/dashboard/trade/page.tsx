@@ -33,6 +33,11 @@ import { getCryptoName } from '@/utils/cryptoNames';
 import { geckoTerminalAPI } from '@/utils/geckoTerminalApi';
 import nyaxTokensData from '../../../../../nyax-tokens-data.json';
 import SwapPage from '@/components/SwapCard';
+import { 
+  fetchContractAddresses, 
+  updateUrlWithContractAddress, 
+  logContractAddressInfo 
+} from '@/utils/contractAddressUtils';
 
 // Chain name mapping utility
 const getChainName = (chainId: number): string => {
@@ -143,20 +148,21 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
   const [isRegisteredToken, setIsRegisteredToken] = useState<boolean>(false);
   const [customVideoUrl, setCustomVideoUrl] = useState<string | null>(null);
 
-  // Fetch token social links and admin settings
+  // Fetch token social links and admin settings with contract address fallback
   useEffect(() => {
     const fetchTokenData = async () => {
       try {
-        console.log("In fetch token")
+        console.log("🔍 Fetching token data for:", { baseToken, addressParam, chainParam });
+        
         // Check if token is registered and fetch social links by contract address
         if (addressParam) {
-          console.log('registered Token', addressParam)
+          console.log('📍 Looking up registered token by address:', addressParam);
           try {
             const tokenResponse = await fetch(`/api/tokens/by-address/${addressParam}`);
-            console.log(tokenResponse)
             
+            if (tokenResponse.ok) {
               const tokenData = await tokenResponse.json();
-              console.log(tokenData)
+              console.log('✅ Found registered token data:', tokenData);
               setIsRegisteredToken(true);
               setTokenSocialLinks({
                 imageUri: tokenData.imageUri,
@@ -172,36 +178,99 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
                 contractAddress: tokenData.contractAddress
               });
               setCustomVideoUrl(tokenData.youtube);
-              console.log(tokenSocialLinks)
-          
+            } else {
+              console.log('⚠️ Token not found by address, trying symbol lookup');
+              throw new Error('Token not found by address');
+            }
           } catch (err) {
-            console.log(err)
+            console.log('❌ Address lookup failed:', err);
+            // Fallback to symbol lookup
+            await trySymbolLookup();
           }
-
-
         } else {
-          // Fallback to symbol-based lookup if no address provided
-          const tokenResponse = await fetch(`/api/tokens/by-symbol/${baseToken}`);
-          if (tokenResponse.ok) {
-            const tokenData = await tokenResponse.json();
-            setIsRegisteredToken(true);
-            setTokenSocialLinks({
-              imageUri: tokenData.imageUri,
-              website: tokenData.website,
-              telegram: tokenData.telegram,
-              twitter: tokenData.twitter,
-              youtube: tokenData.youtube,
-              discord: tokenData.discord,
-              github: tokenData.github,
-              tokenName: tokenData.tokenName,
-              tokenSymbol: tokenData.tokenSymbol,
-              blockchain: tokenData.blockchain,
-              contractAddress: tokenData.contractAddress
-            });
-            setCustomVideoUrl(tokenData.youtube);
-          } else {
+          // No address provided, try symbol-based lookup
+          await trySymbolLookup();
+        }
+        
+        // If we still don't have contract address but have baseToken, try CoinGecko fallback
+        if (!addressParam && baseToken && baseToken !== 'USDT' && baseToken !== 'USDC' && baseToken !== 'ETH' && baseToken !== 'BTC') {
+          console.log(`⚠️ No contract address for ${baseToken}, attempting CoinGecko fallback...`);
+          await tryCoingeckoFallback();
+        }
+        
+        async function trySymbolLookup() {
+          try {
+            const tokenResponse = await fetch(`/api/tokens/by-symbol/${baseToken}`);
+            if (tokenResponse.ok) {
+              const tokenData = await tokenResponse.json();
+              console.log('✅ Found token by symbol:', tokenData);
+              setIsRegisteredToken(true);
+              setTokenSocialLinks({
+                imageUri: tokenData.imageUri,
+                website: tokenData.website,
+                telegram: tokenData.telegram,
+                twitter: tokenData.twitter,
+                youtube: tokenData.youtube,
+                discord: tokenData.discord,
+                github: tokenData.github,
+                tokenName: tokenData.tokenName,
+                tokenSymbol: tokenData.tokenSymbol,
+                blockchain: tokenData.blockchain,
+                contractAddress: tokenData.contractAddress
+              });
+              setCustomVideoUrl(tokenData.youtube);
+            } else {
+              console.log('⚠️ Token not found by symbol either');
+              setIsRegisteredToken(false);
+              setTokenSocialLinks(null);
+            }
+          } catch (error) {
+            console.log('❌ Symbol lookup failed:', error);
             setIsRegisteredToken(false);
             setTokenSocialLinks(null);
+          }
+        }
+        
+        async function tryCoingeckoFallback() {
+          try {
+            console.log(`🦎 Attempting CoinGecko fallback for ${baseToken}...`);
+            
+            // First search for the coin
+            const searchResponse = await fetch(
+              `https://api.coingecko.com/api/v3/search?query=${encodeURIComponent(baseToken)}`,
+              {
+                headers: { 
+                  'Accept': 'application/json',
+                  'User-Agent': 'NYALTX-Search/1.0'
+                }
+              }
+            );
+            
+            if (searchResponse.ok) {
+              const searchData = await searchResponse.json();
+              const matchingCoin = searchData.coins?.find((coin: any) => 
+                coin.symbol.toLowerCase() === baseToken.toLowerCase()
+              );
+              
+              if (matchingCoin) {
+                console.log(`🎯 Found matching coin: ${matchingCoin.id}`);
+                
+                // Use utility function to fetch contract addresses
+                const contractResult = await fetchContractAddresses(matchingCoin.id);
+                
+                if (contractResult.primaryAddress) {
+                  console.log(`✅ CoinGecko fallback success for ${baseToken}`);
+                  
+                  // Log contract address information
+                  logContractAddressInfo(baseToken, contractResult);
+                  
+                  // Update URL with found contract address
+                  updateUrlWithContractAddress(contractResult, matchingCoin.id);
+                }
+              }
+            }
+          } catch (error) {
+            console.log(`❌ CoinGecko fallback failed for ${baseToken}:`, error);
           }
         }
 
@@ -212,7 +281,7 @@ function TradingViewWithParams({ baseToken, quoteToken, chainParam, addressParam
           setAdminSocialLinksEnabled(adminData.socialLinksEnabled || false);
         }
       } catch (error) {
-        console.error('Error fetching token data:', error);
+        console.error('❌ Error fetching token data:', error);
         setIsRegisteredToken(false);
         setTokenSocialLinks(null);
       }

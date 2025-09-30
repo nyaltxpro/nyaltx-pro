@@ -21,6 +21,12 @@ import { TokenPair, PumpFunToken, SearchResult } from '../types/token';
 import catalog from '@/data/tokens.json';
 import nyaxTokensData from '../../nyax-tokens-data.json';
 import nyaxLogoMappings from '../../nyax-logo-mappings.json';
+import { 
+  fetchContractAddresses, 
+  generateTradeUrl, 
+  logContractAddressInfo,
+  ContractAddressResult 
+} from '@/utils/contractAddressUtils';
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -335,23 +341,37 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
     onClose();
   };
 
-  // Handle clicking on a trending coin
-  const handleTrendingClick = (coin: any) => {
-    const params = new URLSearchParams();
-    params.set('base', coin.symbol.toUpperCase());
+  // Handle clicking on a trending coin with utility-based fallback
+  const handleTrendingClick = async (coin: any) => {
+    let contractResult: ContractAddressResult = {
+      contractAddresses: coin.contractAddresses || {},
+      primaryChain: coin.primaryChain,
+      primaryAddress: coin.primaryAddress
+    };
     
-    // Add chain and contract address if available (from optimized API)
-    if (coin.primaryChain) {
-      params.set('chain', coin.primaryChain);
+    // If no contract address available, try fallback for trending coins
+    if (!contractResult.primaryAddress || !contractResult.primaryChain) {
+      console.log(`⚠️ Trending ${coin.symbol} missing contract data, attempting fallback...`);
+      
+      try {
+        const fallbackResult = await fetchContractAddresses(coin.id);
+        if (fallbackResult.primaryAddress) {
+          contractResult = fallbackResult;
+          console.log(`✅ Trending fallback success for ${coin.symbol}`);
+        }
+      } catch (error) {
+        console.log(`❌ Trending fallback failed for ${coin.symbol}:`, error);
+      }
     }
-    if (coin.primaryAddress) {
-      params.set('address', coin.primaryAddress);
-    }
     
-    // Add CoinGecko ID for additional reference
-    params.set('coingecko_id', coin.id);
+    // Log contract address information
+    logContractAddressInfo(coin.symbol, contractResult);
     
-    router.push(`/dashboard/trade?${params.toString()}`);
+    // Generate trade URL and navigate
+    const tradeUrl = generateTradeUrl(coin.symbol, contractResult, coin.id);
+    console.log(`🚀 Trending navigation: ${tradeUrl}`);
+    
+    router.push(tradeUrl);
     onClose();
   };
 
@@ -361,32 +381,37 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
     onClose();
   };
 
-  // Enhanced CoinGecko coin click handler with better contract address handling
-  const handleCoinGeckoClick = (coin: CoinGeckoCoin) => {
-    const params = new URLSearchParams();
-    params.set('base', coin.symbol.toUpperCase());
+  // Enhanced CoinGecko coin click handler with utility-based fallback
+  const handleCoinGeckoClick = async (coin: CoinGeckoCoin) => {
+    let contractResult: ContractAddressResult = {
+      contractAddresses: coin.contractAddresses || {},
+      primaryChain: coin.primaryChain,
+      primaryAddress: coin.primaryAddress
+    };
     
-    // Add chain and contract address if available
-    if (coin.primaryChain) {
-      params.set('chain', coin.primaryChain);
-      console.log(`Navigating to ${coin.symbol} on ${coin.primaryChain}`);
-    }
-    if (coin.primaryAddress) {
-      params.set('address', coin.primaryAddress);
-      console.log(`Contract address: ${coin.primaryAddress}`);
-    }
-    
-    // Add CoinGecko ID for additional reference
-    params.set('coingecko_id', coin.id);
-    
-    // Log available contract addresses for debugging
-    if (coin.contractAddresses && Object.keys(coin.contractAddresses).length > 0) {
-      console.log(`${coin.symbol} available on chains:`, coin.contractAddresses);
-    } else {
-      console.log(`${coin.symbol} has no contract addresses available`);
+    // If no contract address available, try fallback fetch
+    if (!contractResult.primaryAddress || !contractResult.primaryChain) {
+      console.log(`⚠️ ${coin.symbol} missing contract data, attempting fallback fetch...`);
+      
+      try {
+        const fallbackResult = await fetchContractAddresses(coin.id);
+        if (fallbackResult.primaryAddress) {
+          contractResult = fallbackResult;
+          console.log(`✅ Fallback success for ${coin.symbol}`);
+        }
+      } catch (error) {
+        console.log(`❌ Fallback fetch failed for ${coin.symbol}:`, error);
+      }
     }
     
-    router.push(`/dashboard/trade?${params.toString()}`);
+    // Log contract address information
+    logContractAddressInfo(coin.symbol, contractResult);
+    
+    // Generate trade URL and navigate
+    const tradeUrl = generateTradeUrl(coin.symbol, contractResult, coin.id);
+    console.log(`🚀 Navigating to: ${tradeUrl}`);
+    
+    router.push(tradeUrl);
     onClose();
   };
 

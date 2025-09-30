@@ -32,12 +32,12 @@ export async function GET(request: NextRequest) {
     const data = await response.json();
     const trendingCoins = data.coins?.slice(0, 8) || []; // Limit to 8 for better performance
 
-    // Helper function to fetch coin details with retry logic
-    const fetchCoinDetails = async (coin: any, retries = 2): Promise<any> => {
+    // Helper function to fetch coin details with enhanced retry logic
+    const fetchCoinDetails = async (coin: any, retries = 3): Promise<any> => {
       for (let attempt = 0; attempt <= retries; attempt++) {
         try {
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 5000);
+          const timeoutId = setTimeout(() => controller.abort(), 8000); // Increased timeout
           
           const detailResponse = await fetch(
             `https://api.coingecko.com/api/v3/coins/${coin.item.id}?localization=false&tickers=false&market_data=false&community_data=false&developer_data=false&sparkline=false`,
@@ -98,9 +98,13 @@ export async function GET(request: NextRequest) {
             };
           } else if (detailResponse.status === 429) {
             if (attempt < retries) {
-              await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)));
+              const delay = 2000 * Math.pow(2, attempt); // Exponential backoff: 2s, 4s, 8s
+              console.log(`⏳ Trending rate limited, retrying in ${delay}ms...`);
+              await new Promise(resolve => setTimeout(resolve, delay));
               continue;
             }
+          } else {
+            console.log(`❌ HTTP ${detailResponse.status} fetching trending ${coin.item.id}`);
           }
         } catch (error: any) {
           if (error.name === 'AbortError') {
@@ -110,7 +114,8 @@ export async function GET(request: NextRequest) {
           }
           
           if (attempt < retries) {
-            await new Promise(resolve => setTimeout(resolve, 500 * (attempt + 1)));
+            const delay = 1000 * (attempt + 1); // Linear backoff: 1s, 2s, 3s
+            await new Promise(resolve => setTimeout(resolve, delay));
             continue;
           }
         }
@@ -132,9 +137,9 @@ export async function GET(request: NextRequest) {
       };
     };
 
-    // Fetch details with controlled concurrency
+    // Fetch details with controlled concurrency and better error handling
     const coinsWithDetails = [];
-    const batchSize = 3;
+    const batchSize = 2; // Reduced for better reliability
     
     for (let i = 0; i < trendingCoins.length; i += batchSize) {
       const batch = trendingCoins.slice(i, i + batchSize);
