@@ -2,11 +2,13 @@ import { configureStore } from '@reduxjs/toolkit';
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 import tokenReducer from './slices/tokenSlice';
 import chainReducer from './slices/chainSlice';
+import searchCacheReducer from './slices/searchCacheSlice';
 
 export const store = configureStore({
   reducer: {
     tokens: tokenReducer,
     chain: chainReducer,
+    searchCache: searchCacheReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

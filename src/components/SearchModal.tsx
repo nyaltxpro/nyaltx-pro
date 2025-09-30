@@ -6,9 +6,16 @@ import { useRouter } from 'next/navigation';
 import { BiSearch } from 'react-icons/bi';
 import { IoMdClose } from 'react-icons/io';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAppSelector } from '@/store';
+import { 
+  selectCoinGeckoSearchResults, 
+  selectTrendingCoins,
+  selectSearchLoading,
+  selectTrendingLoading 
+} from '@/store/slices/searchCacheSlice';
+import { useCoinGeckoSearch } from '@/hooks/useCoinGeckoSearch';
 import { commonCryptoSymbols, getCryptoIconUrl } from '../utils/cryptoIcons';
 import { getCryptoName } from '../utils/cryptoNames';
-import { getTrendingCoins } from '../api/coingecko/client';
 import { usePumpFunTokens } from '../hooks/usePumpFunTokens';
 import { TokenPair, PumpFunToken, SearchResult } from '../types/token';
 import catalog from '@/data/tokens.json';
@@ -76,16 +83,27 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
-  const [trendingCoins, setTrendingCoins] = useState<TrendingCoin[]>([]);
-  const [coinGeckoResults, setCoinGeckoResults] = useState<CoinGeckoCoin[]>([]);
-  const [trendingLoading, setTrendingLoading] = useState(true);
-  const [coinGeckoLoading, setCoinGeckoLoading] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const abortControllerRef = useRef<AbortController | null>(null);
   const { tokens: pumpFunTokens } = usePumpFunTokens();
   const [nyaxTokens] = useState<NyaxToken[]>(nyaxTokensData.tokens || []);
+
+  // Redux selectors for cached data
+  const cachedTrendingCoins = useAppSelector(selectTrendingCoins);
+  const cachedCoinGeckoResults = useAppSelector((state) => 
+    selectCoinGeckoSearchResults(searchTerm)(state)
+  );
+  const isSearchingCoinGecko = useAppSelector(selectSearchLoading);
+  const isTrendingLoading = useAppSelector(selectTrendingLoading);
+
+  // CoinGecko search hook
+  const { 
+    searchCoinGecko, 
+    getTrendingCoinsWithCache, 
+    getCacheKey,
+    cancelSearch 
+  } = useCoinGeckoSearch();
 
   // Map NYAX network labels to our chain slugs
   const mapNetworkToChain = (network: string | null | undefined): string | undefined => {
@@ -116,95 +134,23 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
     return nyaxLogoMappings[logoId as keyof typeof nyaxLogoMappings] || null;
   };
 
-  // Enhanced hybrid API search with improved retry logic and contract address handling
-  const searchHybridAPI = async (query: string, retries = 2) => {
-    if (query.trim().length < 2) {
-      setCoinGeckoResults([]);
+  // Search CoinGecko with caching - wrapper function
+  const searchCoinGeckoWithCache = async (query: string) => {
+    if (!query || query.trim().length < 2) {
       return;
     }
 
-    setCoinGeckoLoading(true);
+    // Check cache first
+    const cacheKey = getCacheKey(query);
+    const cached = cachedCoinGeckoResults;
     
-    for (let attempt = 0; attempt <= retries; attempt++) {
-      try {
-        // Create new abort controller for this attempt
-        abortControllerRef.current = new AbortController();
-        const timeoutId = setTimeout(() => abortControllerRef.current?.abort(), 6000); // Aligned with API timeout
-        
-        const response = await fetch(
-          `/api/crypto/hybrid-search?query=${encodeURIComponent(query)}`,
-          {
-            signal: abortControllerRef.current.signal,
-            headers: {
-              'Accept': 'application/json',
-              'Cache-Control': 'no-cache'
-            }
-          }
-        );
-        
-        clearTimeout(timeoutId);
-        
-        if (response.ok) {
-          const data = await response.json();
-          console.log(`✅ Hybrid search found ${data.coins?.length || 0} coins for "${query}"`);
-          
-          // Enhanced conversion with better contract address handling
-          const convertedCoins: CoinGeckoCoin[] = (data.coins || []).map((coin: any) => {
-            // Log contract address data for debugging
-            if (coin.contractAddresses && Object.keys(coin.contractAddresses).length > 0) {
-              console.log(`${coin.symbol}: Found contracts on`, Object.keys(coin.contractAddresses));
-            }
-            
-            return {
-              id: coin.id,
-              name: coin.name,
-              symbol: coin.symbol,
-              market_cap_rank: coin.rank || 999999,
-              thumb: getCryptoIconUrl(coin.symbol),
-              large: getCryptoIconUrl(coin.symbol),
-              api_symbol: coin.symbol,
-              contractAddresses: coin.contractAddresses || {},
-              primaryChain: coin.primaryChain,
-              primaryAddress: coin.primaryAddress
-            };
-          });
-          
-          setCoinGeckoResults(convertedCoins);
-          setCoinGeckoLoading(false);
-          return; // Success, exit retry loop
-        } else if (response.status === 429) {
-          // Rate limited, wait and retry with exponential backoff
-          if (attempt < retries) {
-            const delay = 1500 * Math.pow(2, attempt); // More aggressive backoff: 1.5s, 3s, 6s
-            console.log(`⏳ Rate limited, retrying in ${delay}ms...`);
-            await new Promise(resolve => setTimeout(resolve, delay));
-            continue;
-          }
-        } else {
-          console.error(`❌ Hybrid search API error: ${response.status} ${response.statusText}`);
-          setCoinGeckoResults([]);
-          break;
-        }
-      } catch (error: any) {
-        if (error.name === 'AbortError') {
-          console.log(`⏱️ Hybrid search timeout, attempt ${attempt + 1}/${retries + 1}`);
-        } else {
-          console.error(`❌ Error searching hybrid API, attempt ${attempt + 1}/${retries + 1}:`, error.message);
-        }
-        
-        if (attempt < retries) {
-          const delay = 750 * (attempt + 1); // Increased delay: 750ms, 1.5s, 2.25s
-          await new Promise(resolve => setTimeout(resolve, delay));
-          continue;
-        } else {
-          console.error('❌ All hybrid search attempts failed');
-          setCoinGeckoResults([]);
-          break;
-        }
-      }
+    if (cached && cached.length > 0) {
+      console.log(`💰 Using cached CoinGecko results for "${query}" (${cached.length} coins)`);
+      return;
     }
-    
-    setCoinGeckoLoading(false);
+
+    // If not cached, fetch from API
+    await searchCoinGecko(query);
   };
 
   // Popular token pairs for quick suggestions
@@ -232,24 +178,19 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
     const value = e.target.value;
     setSearchTerm(value);
 
-    // Cancel previous search timeout and abort controller
+    // Cancel previous search timeout
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current);
-    }
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
     }
 
     if (value.trim() === '') {
       setSearchResults([]);
-      setCoinGeckoResults([]);
-      setCoinGeckoLoading(false);
       return;
     }
 
-    // Search using hybrid API with debounce
+    // Search using cached CoinGecko API with debounce
     searchTimeoutRef.current = setTimeout(() => {
-      searchHybridAPI(value);
+      searchCoinGeckoWithCache(value);
     }, 300);
 
     const results: SearchResult[] = [];
