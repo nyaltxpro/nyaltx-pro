@@ -170,8 +170,10 @@ export default function RaceToLibertyCheckout({ tier, amount, userTokens }: { ti
   // Crypto payment handlers
   const computeEthAmount = (usd: number) => {
     const ref = ethPrice && ethPrice > 0 ? ethPrice : FALLBACK_ETH_PRICE;
-    if (!ref) return null;
-    return usd / ref;
+    if (!ref || ref <= 0) return null;
+    const ethAmount = usd / ref;
+    console.log(`Computing ETH amount: $${usd} ÷ $${ref} = ${ethAmount} ETH`);
+    return ethAmount;
   };
 
   const handlePayETH = async () => {

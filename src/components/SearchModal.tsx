@@ -112,7 +112,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
     return nyaxLogoMappings[logoId as keyof typeof nyaxLogoMappings] || null;
   };
 
-  // Function to search using hybrid API with retry logic
+  // Enhanced hybrid API search with improved retry logic and contract address handling
   const searchHybridAPI = async (query: string, retries = 2) => {
     if (query.trim().length < 2) {
       setCoinGeckoResults([]);
@@ -125,7 +125,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
       try {
         // Create new abort controller for this attempt
         abortControllerRef.current = new AbortController();
-        const timeoutId = setTimeout(() => abortControllerRef.current?.abort(), 10000); // 10 second timeout
+        const timeoutId = setTimeout(() => abortControllerRef.current?.abort(), 8000); // Reduced to 8 seconds
         
         const response = await fetch(
           `/api/crypto/hybrid-search?query=${encodeURIComponent(query)}`,
@@ -141,45 +141,58 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
         
         if (response.ok) {
           const data = await response.json();
-          // Convert hybrid API format to expected CoinGeckoCoin format
-          const convertedCoins: CoinGeckoCoin[] = (data.coins || []).map((coin: any) => ({
-            id: coin.id,
-            name: coin.name,
-            symbol: coin.symbol,
-            market_cap_rank: coin.rank || 999999,
-            thumb: getCryptoIconUrl(coin.symbol),
-            large: getCryptoIconUrl(coin.symbol),
-            api_symbol: coin.symbol,
-            contractAddresses: coin.contractAddresses || {},
-            primaryChain: coin.primaryChain,
-            primaryAddress: coin.primaryAddress
-          }));
+          console.log(`Hybrid search found ${data.coins?.length || 0} coins for "${query}"`);
+          
+          // Enhanced conversion with better contract address handling
+          const convertedCoins: CoinGeckoCoin[] = (data.coins || []).map((coin: any) => {
+            // Log contract address data for debugging
+            if (coin.contractAddresses && Object.keys(coin.contractAddresses).length > 0) {
+              console.log(`${coin.symbol}: Found contracts on`, Object.keys(coin.contractAddresses));
+            }
+            
+            return {
+              id: coin.id,
+              name: coin.name,
+              symbol: coin.symbol,
+              market_cap_rank: coin.rank || 999999,
+              thumb: getCryptoIconUrl(coin.symbol),
+              large: getCryptoIconUrl(coin.symbol),
+              api_symbol: coin.symbol,
+              contractAddresses: coin.contractAddresses || {},
+              primaryChain: coin.primaryChain,
+              primaryAddress: coin.primaryAddress
+            };
+          });
           
           setCoinGeckoResults(convertedCoins);
           setCoinGeckoLoading(false);
           return; // Success, exit retry loop
         } else if (response.status === 429) {
-          // Rate limited, wait and retry
+          // Rate limited, wait and retry with exponential backoff
           if (attempt < retries) {
-            await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)));
+            const delay = 1000 * Math.pow(2, attempt); // Exponential backoff: 1s, 2s, 4s
+            console.log(`Rate limited, retrying in ${delay}ms...`);
+            await new Promise(resolve => setTimeout(resolve, delay));
             continue;
           }
         } else {
-          console.error(`Hybrid search API error: ${response.status}`);
+          console.error(`Hybrid search API error: ${response.status} ${response.statusText}`);
           setCoinGeckoResults([]);
           break;
         }
       } catch (error: any) {
         if (error.name === 'AbortError') {
-          console.log(`Hybrid search timeout, attempt ${attempt + 1}`);
+          console.log(`Hybrid search timeout, attempt ${attempt + 1}/${retries + 1}`);
         } else {
-          console.error(`Error searching hybrid API, attempt ${attempt + 1}:`, error);
+          console.error(`Error searching hybrid API, attempt ${attempt + 1}/${retries + 1}:`, error.message);
         }
         
         if (attempt < retries) {
-          await new Promise(resolve => setTimeout(resolve, 500 * (attempt + 1)));
+          const delay = 500 * (attempt + 1); // Linear backoff: 500ms, 1s, 1.5s
+          await new Promise(resolve => setTimeout(resolve, delay));
           continue;
         } else {
+          console.error('All hybrid search attempts failed');
           setCoinGeckoResults([]);
           break;
         }
@@ -402,7 +415,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
     onClose();
   };
 
-  // Handle clicking on a CoinGecko coin
+  // Enhanced CoinGecko coin click handler with better contract address handling
   const handleCoinGeckoClick = (coin: CoinGeckoCoin) => {
     const params = new URLSearchParams();
     params.set('base', coin.symbol.toUpperCase());
@@ -410,13 +423,22 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
     // Add chain and contract address if available
     if (coin.primaryChain) {
       params.set('chain', coin.primaryChain);
+      console.log(`Navigating to ${coin.symbol} on ${coin.primaryChain}`);
     }
     if (coin.primaryAddress) {
       params.set('address', coin.primaryAddress);
+      console.log(`Contract address: ${coin.primaryAddress}`);
     }
     
     // Add CoinGecko ID for additional reference
     params.set('coingecko_id', coin.id);
+    
+    // Log available contract addresses for debugging
+    if (coin.contractAddresses && Object.keys(coin.contractAddresses).length > 0) {
+      console.log(`${coin.symbol} available on chains:`, coin.contractAddresses);
+    } else {
+      console.log(`${coin.symbol} has no contract addresses available`);
+    }
     
     router.push(`/dashboard/trade?${params.toString()}`);
     onClose();
@@ -823,11 +845,23 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                                   {coin.primaryChain.toUpperCase()}
                                 </span>
                               )}
+                              {/* Show additional chains if available */}
+                              {coin.contractAddresses && Object.keys(coin.contractAddresses).length > 1 && (
+                                <span className="text-xs bg-green-600 text-white px-2 py-0.5 rounded-full mr-2">
+                                  +{Object.keys(coin.contractAddresses).length - 1} chains
+                                </span>
+                              )}
                               <span className="text-xs text-orange-400">ID: {coin.id}</span>
                             </div>
                             {coin.primaryAddress && (
                               <div className="text-xs text-gray-500 font-mono mt-1">
                                 {coin.primaryAddress.slice(0, 8)}...{coin.primaryAddress.slice(-6)}
+                              </div>
+                            )}
+                            {/* Show all available chains */}
+                            {coin.contractAddresses && Object.keys(coin.contractAddresses).length > 0 && (
+                              <div className="text-xs text-gray-400 mt-1">
+                                Available on: {Object.keys(coin.contractAddresses).join(', ')}
                               </div>
                             )}
                           </div>

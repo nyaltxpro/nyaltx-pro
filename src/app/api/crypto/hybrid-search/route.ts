@@ -26,32 +26,57 @@ export async function GET(request: NextRequest) {
 
     const results: SearchResult[] = [];
 
-    // Simple CoinGecko search with basic retry
-    const searchCoinGecko = async () => {
-      try {
-        const response = await fetch(
-          `https://api.coingecko.com/api/v3/search?query=${encodeURIComponent(query)}`,
-          {
-            headers: { 
-              'Accept': 'application/json',
-              'User-Agent': 'NYALTX-Search/1.0'
-            },
-            next: { revalidate: 300 }
+    // Enhanced CoinGecko search with retry logic
+    const searchCoinGecko = async (retries = 2) => {
+      for (let attempt = 0; attempt <= retries; attempt++) {
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 5000);
+          
+          const response = await fetch(
+            `https://api.coingecko.com/api/v3/search?query=${encodeURIComponent(query)}`,
+            {
+              signal: controller.signal,
+              headers: { 
+                'Accept': 'application/json',
+                'User-Agent': 'NYALTX-Search/1.0'
+              },
+              next: { revalidate: 300 }
+            }
+          );
+          
+          clearTimeout(timeoutId);
+          
+          if (response.ok) {
+            const data = await response.json();
+            console.log('CoinGecko search results:', data.coins?.length || 0, 'coins found');
+            return data.coins || [];
+          } else if (response.status === 429) {
+            // Rate limited, wait and retry
+            if (attempt < retries) {
+              await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)));
+              continue;
+            }
+          } else {
+            console.error('CoinGecko API error:', response.status, response.statusText);
+            return [];
           }
-        );
-        
-        if (response.ok) {
-          const data = await response.json();
-          console.log('CoinGecko search results:', data.coins?.length || 0, 'coins found');
-          return data.coins || [];
-        } else {
-          console.error('CoinGecko API error:', response.status, response.statusText);
-          return [];
+        } catch (error: any) {
+          if (error.name === 'AbortError') {
+            console.log(`CoinGecko search timeout, attempt ${attempt + 1}`);
+          } else {
+            console.error(`CoinGecko search error, attempt ${attempt + 1}:`, error);
+          }
+          
+          if (attempt < retries) {
+            await new Promise(resolve => setTimeout(resolve, 500 * (attempt + 1)));
+            continue;
+          } else {
+            return [];
+          }
         }
-      } catch (error) {
-        console.error('CoinGecko search error:', error);
-        return [];
       }
+      return [];
     };
 
     const coins = await searchCoinGecko();
@@ -65,7 +90,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Process top coins with basic info first, then enhance with contract addresses
-    const topCoins = coins.slice(0, 10);
+    const topCoins = coins.slice(0, 8); // Reduced from 10 to 8 for better reliability
     
     // Add basic coin info first
     topCoins.forEach((coin: any) => {
@@ -81,15 +106,17 @@ export async function GET(request: NextRequest) {
       });
     });
 
-    // Try to enhance top 3 results with contract addresses (optional)
-    try {
-      const topResults = results.slice(0, 3);
-      
-      for (const coin of topResults) {
+    // Enhanced contract address fetching with retry logic for ALL results
+    const fetchCoinDetails = async (coin: SearchResult, retries = 2) => {
+      for (let attempt = 0; attempt <= retries; attempt++) {
         try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 5000);
+          
           const response = await fetch(
             `https://api.coingecko.com/api/v3/coins/${coin.id}?localization=false&tickers=false&market_data=false&community_data=false&developer_data=false`,
             {
+              signal: controller.signal,
               headers: { 
                 'Accept': 'application/json',
                 'User-Agent': 'NYALTX-Search/1.0'
@@ -98,18 +125,28 @@ export async function GET(request: NextRequest) {
             }
           );
           
+          clearTimeout(timeoutId);
+          
           if (response.ok) {
             const detailData = await response.json();
             
             if (detailData?.platforms) {
               const contractAddresses: { [key: string]: string } = {};
+              // Enhanced platform mapping with more chains
               const platformMapping: { [key: string]: string } = {
                 'ethereum': 'ethereum',
                 'binance-smart-chain': 'binance',
                 'polygon-pos': 'polygon',
                 'arbitrum-one': 'arbitrum',
                 'optimistic-ethereum': 'optimism',
-                'base': 'base'
+                'base': 'base',
+                'fantom': 'fantom',
+                'avalanche': 'avalanche',
+                'solana': 'solana',
+                'xdai': 'gnosis',
+                'harmony-shard-0': 'harmony',
+                'moonbeam': 'moonbeam',
+                'cronos': 'cronos'
               };
 
               Object.entries(detailData.platforms).forEach(([platform, address]) => {
@@ -119,25 +156,53 @@ export async function GET(request: NextRequest) {
                 }
               });
 
-              const primaryChain = contractAddresses.ethereum ? 'ethereum' :
-                                 contractAddresses.binance ? 'binance' :
+              // Smart primary chain selection with priority order
+              const chainPriority = ['ethereum', 'binance', 'polygon', 'arbitrum', 'optimism', 'base', 'avalanche', 'fantom', 'solana'];
+              const primaryChain = chainPriority.find(chain => contractAddresses[chain]) || 
                                  Object.keys(contractAddresses)[0] || null;
 
               coin.contractAddresses = contractAddresses;
               coin.primaryChain = primaryChain;
               coin.primaryAddress = primaryChain ? contractAddresses[primaryChain] : null;
             }
+            return; // Success, exit retry loop
+          } else if (response.status === 429) {
+            // Rate limited, wait and retry
+            if (attempt < retries) {
+              await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)));
+              continue;
+            }
           }
-        } catch (error) {
-          // Ignore contract fetch errors - basic search still works
-          console.log(`Could not fetch contract for ${coin.symbol}`);
+        } catch (error: any) {
+          if (error.name === 'AbortError') {
+            console.log(`Contract fetch timeout for ${coin.symbol}, attempt ${attempt + 1}`);
+          } else {
+            console.log(`Contract fetch error for ${coin.symbol}, attempt ${attempt + 1}:`, error.message);
+          }
+          
+          if (attempt < retries) {
+            await new Promise(resolve => setTimeout(resolve, 500 * (attempt + 1)));
+            continue;
+          }
         }
+      }
+    };
+
+    // Process coins in batches of 3 to avoid overwhelming the API
+    try {
+      const batchSize = 3;
+      for (let i = 0; i < results.length; i += batchSize) {
+        const batch = results.slice(i, i + batchSize);
         
-        // Small delay to respect rate limits
-        await new Promise(resolve => setTimeout(resolve, 200));
+        // Process batch concurrently
+        await Promise.all(batch.map(coin => fetchCoinDetails(coin)));
+        
+        // Delay between batches to respect rate limits
+        if (i + batchSize < results.length) {
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
       }
     } catch (error) {
-      // Contract enhancement failed, but basic search still works
       console.log('Contract enhancement failed, returning basic results');
     }
 

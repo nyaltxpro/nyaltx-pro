@@ -231,13 +231,46 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
       }
 
       let txHash: string;
+      let ethAmount: number | undefined;
 
       if (token === 'ETH') {
-        // Send 0.1 ETH as requested
-        const ethAmount = '0.1';
+        // Calculate ETH amount based on current ETH price and total USD amount
+        
+        try {
+          // Fetch current ETH price
+          const ethPriceResponse = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd');
+          if (ethPriceResponse.ok) {
+            const priceData = await ethPriceResponse.json();
+            const currentEthPrice = priceData?.ethereum?.usd;
+            
+            if (currentEthPrice && currentEthPrice > 0) {
+              ethAmount = total / currentEthPrice;
+            } else {
+              throw new Error('Invalid ETH price from API');
+            }
+          } else {
+            throw new Error('Failed to fetch ETH price');
+          }
+        } catch (priceError) {
+          // Fallback to a reasonable ETH price if API fails
+          const fallbackEthPrice = 4200; // Conservative estimate
+          ethAmount = total / fallbackEthPrice;
+          console.warn('Using fallback ETH price:', fallbackEthPrice, 'Error:', priceError);
+        }
+        
+        // Ensure minimum precision and reasonable bounds
+        if (ethAmount < 0.000001) {
+          throw new Error('Calculated ETH amount too small');
+        }
+        if (ethAmount > 10) {
+          throw new Error('Calculated ETH amount seems too large - please check pricing');
+        }
+        
+        console.log(`Calculated ETH amount: ${ethAmount.toFixed(8)} ETH for $${total} USD`);
+        
         txHash = await sendTransactionAsync({
           to: RECEIVER_ADDRESS,
-          value: parseEther(ethAmount)
+          value: parseEther(ethAmount.toFixed(8)) // Use 8 decimal precision
         });
       } else if (token === 'USDT') {
         // Send USDT equivalent (assuming $199 worth)
@@ -253,7 +286,7 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
       }
 
       // Place order in admin panel
-      await placeOrder(txHash);
+      await placeOrder(txHash, token === 'ETH' ? (ethAmount?.toFixed(8) || '0') : total.toString());
       
       // Set pro status cookie for nyaltxpro or nyaltxpro1 purchases
       const tierKey = (selectedTier || 'nyaltxpro').toLowerCase();
@@ -275,14 +308,14 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
     }
   };
 
-  const placeOrder = async (txHash: string) => {
+  const placeOrder = async (txHash: string, amount: string) => {
     try {
       const orderData = {
         method: token as 'ETH' | 'NYAX',
         tierId: selectedTier as 'paddle' | 'motor' | 'helicopter',
         wallet: address,
         txHash,
-        amount: token === 'ETH' ? '0.1' : total.toString(),
+        amount: amount,
         chainId: MAINNET_CHAIN_ID
       };
 
