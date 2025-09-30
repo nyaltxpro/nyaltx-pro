@@ -30,6 +30,16 @@ interface TrendingCoin {
   price_btc: number;
 }
 
+interface CoinGeckoCoin {
+  id: string;
+  name: string;
+  symbol: string;
+  market_cap_rank: number;
+  thumb: string;
+  large: string;
+  api_symbol: string;
+}
+
 interface NyaxToken {
   logoId: string;
   name: string | null;
@@ -60,7 +70,9 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [trendingCoins, setTrendingCoins] = useState<TrendingCoin[]>([]);
+  const [coinGeckoResults, setCoinGeckoResults] = useState<CoinGeckoCoin[]>([]);
   const [trendingLoading, setTrendingLoading] = useState(true);
+  const [coinGeckoLoading, setCoinGeckoLoading] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { tokens: pumpFunTokens } = usePumpFunTokens();
@@ -95,6 +107,30 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
     return nyaxLogoMappings[logoId as keyof typeof nyaxLogoMappings] || null;
   };
 
+  // Function to search CoinGecko
+  const searchCoinGecko = async (query: string) => {
+    if (query.trim().length < 2) {
+      setCoinGeckoResults([]);
+      return;
+    }
+
+    setCoinGeckoLoading(true);
+    try {
+      const response = await fetch(`/api/coingecko/search?query=${encodeURIComponent(query)}`);
+      if (response.ok) {
+        const data = await response.json();
+        setCoinGeckoResults(data.coins || []);
+      } else {
+        setCoinGeckoResults([]);
+      }
+    } catch (error) {
+      console.error('Error searching CoinGecko:', error);
+      setCoinGeckoResults([]);
+    } finally {
+      setCoinGeckoLoading(false);
+    }
+  };
+
   // Popular token pairs for quick suggestions
   const popularPairs: TokenPair[] = [
     { baseToken: 'BTC', quoteToken: 'USDT', baseName: getCryptoName('BTC'), quoteName: getCryptoName('USDT') },
@@ -122,8 +158,17 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
 
     if (value.trim() === '') {
       setSearchResults([]);
+      setCoinGeckoResults([]);
       return;
     }
+
+    // Search CoinGecko with debounce
+    const timeoutId = setTimeout(() => {
+      searchCoinGecko(value);
+    }, 300);
+
+    // Store timeout ID for cleanup
+    (e.target as any).searchTimeout = timeoutId;
 
     const results: SearchResult[] = [];
     const upperSearch = value.toUpperCase();
@@ -276,6 +321,12 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
   // Handle clicking on a popular token
   const handlePopularTokenClick = (token: { symbol: string }) => {
     router.push(`/dashboard/trade?base=${token.symbol.toUpperCase()}`);
+    onClose();
+  };
+
+  // Handle clicking on a CoinGecko coin
+  const handleCoinGeckoClick = (coin: CoinGeckoCoin) => {
+    router.push(`/dashboard/trade?base=${coin.symbol.toUpperCase()}`);
     onClose();
   };
 
@@ -498,6 +549,11 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
 
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside);
+    } else {
+      // Reset states when modal closes
+      setSearchTerm('');
+      setSearchResults([]);
+      setCoinGeckoResults([]);
     }
 
     return () => {
@@ -583,6 +639,68 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                   <h3 className="text-blue-400 font-bold mb-3">SEARCH RESULTS</h3>
                   <div className="max-h-60 overflow-y-auto">
                     {searchResults.map((result, index) => renderSearchResult(result, index))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* CoinGecko Cryptocurrency Results */}
+            {searchTerm && searchTerm.length >= 2 && (coinGeckoResults.length > 0 || coinGeckoLoading) && (
+              <div className="border-b border-gray-800">
+                <div className="p-4">
+                  <h3 className="text-orange-400 font-bold mb-3 flex items-center gap-2">
+                    <span>🦎 CRYPTOCURRENCIES</span>
+                    {coinGeckoLoading && (
+                      <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-orange-400"></div>
+                    )}
+                  </h3>
+                  <div className="max-h-60 overflow-y-auto">
+                    {coinGeckoLoading ? (
+                      <div className="flex justify-center items-center py-8">
+                        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-orange-400"></div>
+                      </div>
+                    ) : coinGeckoResults.length > 0 ? (
+                      coinGeckoResults.map((coin, index) => (
+                        <div
+                          key={`coingecko-${coin.id}-${index}`}
+                          className="flex items-center p-3 hover:bg-gray-700 cursor-pointer border-b border-gray-700 last:border-b-0"
+                          onClick={() => handleCoinGeckoClick(coin)}
+                        >
+                          <div className="flex items-center mr-3">
+                            <div className="w-8 h-8 rounded-full overflow-hidden">
+                              <img
+                                src={coin.thumb}
+                                alt={coin.symbol}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  e.currentTarget.style.display = 'none';
+                                }}
+                              />
+                            </div>
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium text-white">{coin.name}</span>
+                              <span className="text-xs bg-orange-600 text-white px-2 py-0.5 rounded-full">CoinGecko</span>
+                              {coin.market_cap_rank && (
+                                <span className="text-xs bg-gray-600 text-gray-300 px-2 py-0.5 rounded-full">
+                                  #{coin.market_cap_rank}
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-sm text-gray-400">
+                              <span className="mr-2 font-mono">${coin.symbol.toUpperCase()}</span>
+                              <span className="text-xs text-orange-400">ID: {coin.id}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    ) : searchTerm.length >= 2 ? (
+                      <div className="text-center text-gray-400 py-4">
+                        <div className="text-orange-400 mb-2">🦎</div>
+                        <div>No cryptocurrencies found for "{searchTerm}"</div>
+                      </div>
+                    ) : null}
                   </div>
                 </div>
               </div>
