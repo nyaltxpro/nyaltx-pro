@@ -17,7 +17,7 @@ const FROM_EMAIL = process.env.FROM_EMAIL || 'noreply@nyaltx.io';
 
 // Create transporter
 const createTransporter = () => {
-  return nodemailer.createTransporter(EMAIL_CONFIG);
+  return nodemailer.createTransport(EMAIL_CONFIG);
 };
 
 // Validate email format
