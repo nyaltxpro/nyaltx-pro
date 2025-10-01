@@ -450,34 +450,7 @@ export default function LiveStreamPage() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-gradient-to-b from-white/5 to-white/[0.03] backdrop-blur-md border border-white/10 rounded-xl p-6 text-center">
-          <FaRocket className="w-12 h-12 text-cyan-400 mx-auto mb-4" />
-          <h3 className="text-white font-semibold mb-2">Create Token</h3>
-          <p className="text-gray-400 text-sm mb-4">Launch your own token and join the stream</p>
-          <button className="px-6 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition-colors">
-            Get Started
-          </button>
-        </div>
-
-        <div className="bg-gradient-to-b from-white/5 to-white/[0.03] backdrop-blur-md border border-white/10 rounded-xl p-6 text-center">
-          <FaFire className="w-12 h-12 text-orange-400 mx-auto mb-4" />
-          <h3 className="text-white font-semibold mb-2">Join Community</h3>
-          <p className="text-gray-400 text-sm mb-4">Connect with other traders and builders</p>
-          <button className="px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors">
-            Join Now
-          </button>
-        </div>
-
-        <div className="bg-gradient-to-b from-white/5 to-white/[0.03] backdrop-blur-md border border-white/10 rounded-xl p-6 text-center">
-          <FaChartLine className="w-12 h-12 text-green-400 mx-auto mb-4" />
-          <h3 className="text-white font-semibold mb-2">Start Trading</h3>
-          <p className="text-gray-400 text-sm mb-4">Trade tokens with zero fees</p>
-          <button className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-            Trade Now
-          </button>
-        </div>
-      </div>
+ 
 
       {/* Create Stream Modal */}
       {showCreateStream && (
