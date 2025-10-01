@@ -229,43 +229,7 @@ export default function LiveStreamPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-gradient-to-b from-white/5 to-white/[0.03] backdrop-blur-md border border-white/10 rounded-xl p-6">
-          <div className="flex items-center gap-3 mb-2">
-            <FaUsers className="text-cyan-400 text-xl" />
-            <span className="text-gray-300 text-sm">Total Viewers</span>
-          </div>
-          <div className="text-2xl font-bold text-white">{formatNumber(stats.totalViewers)}</div>
-          <div className="text-green-400 text-sm">+12% from yesterday</div>
-        </div>
-
-        <div className="bg-gradient-to-b from-white/5 to-white/[0.03] backdrop-blur-md border border-white/10 rounded-xl p-6">
-          <div className="flex items-center gap-3 mb-2">
-            <FaRocket className="text-purple-400 text-xl" />
-            <span className="text-gray-300 text-sm">Active Tokens</span>
-          </div>
-          <div className="text-2xl font-bold text-white">{stats.activeTokens}</div>
-          <div className="text-green-400 text-sm">+8 new today</div>
-        </div>
-
-        <div className="bg-gradient-to-b from-white/5 to-white/[0.03] backdrop-blur-md border border-white/10 rounded-xl p-6">
-          <div className="flex items-center gap-3 mb-2">
-            <FaChartLine className="text-emerald-400 text-xl" />
-            <span className="text-gray-300 text-sm">24h Volume</span>
-          </div>
-          <div className="text-2xl font-bold text-white">${formatNumber(stats.totalVolume)}</div>
-          <div className="text-green-400 text-sm">+24% from yesterday</div>
-        </div>
-
-        <div className="bg-gradient-to-b from-white/5 to-white/[0.03] backdrop-blur-md border border-white/10 rounded-xl p-6">
-          <div className="flex items-center gap-3 mb-2">
-            <FaGlobe className="text-yellow-400 text-xl" />
-            <span className="text-gray-300 text-sm">Global Rank</span>
-          </div>
-          <div className="text-2xl font-bold text-white">#3</div>
-          <div className="text-green-400 text-sm">↑2 positions</div>
-        </div>
-      </div>
+   
 
       {/* Filter Tabs */}
       <div className="flex gap-2 overflow-x-auto">
