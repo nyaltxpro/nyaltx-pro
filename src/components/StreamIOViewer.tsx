@@ -175,8 +175,8 @@ export default function StreamIOViewer({ streamId, streamTitle, onStreamEnd }: S
           {client && call && isConnected2Stream ? (
             <StreamVideo client={client}>
               <StreamCall call={call}>
-                {/* SpeakerLayout shows only the streamer's video */}
-                <SpeakerLayout />
+                {/* SpeakerLayout shows streamer's screen share and camera */}
+                <SpeakerLayout participantsBarPosition="bottom" />
               </StreamCall>
             </StreamVideo>
           ) : (

@@ -398,13 +398,102 @@ export class StreamIOService {
 
   // Check if current user is the streamer
   private isCurrentUserStreamer(): boolean {
-    // This would check if the current user created the stream
-    // For now, we'll check if they have the host role in the call
-    if (!this.currentCall || !this.user) return false;
-    
-    // In a real implementation, you'd check the call metadata or user roles
-    // For now, we'll assume the user who created the call is the streamer
-    return true; // Simplified for demo
+    return this.currentCall?.isCreatedByMe || false;
+  }
+
+  // Enable screen sharing for streamers
+  async enableScreenShare(): Promise<void> {
+    if (!this.currentCall) {
+      throw new Error('No active call to enable screen sharing');
+    }
+
+    try {
+      console.log('🖥️ Enabling screen share...');
+      await this.currentCall.screenShare.enable();
+      console.log('✅ Screen sharing enabled');
+    } catch (error) {
+      console.error('❌ Failed to enable screen sharing:', error);
+      throw error;
+    }
+  }
+
+  // Disable screen sharing
+  async disableScreenShare(): Promise<void> {
+    if (!this.currentCall) {
+      throw new Error('No active call to disable screen sharing');
+    }
+
+    try {
+      console.log('🖥️ Disabling screen share...');
+      await this.currentCall.screenShare.disable();
+      console.log('✅ Screen sharing disabled');
+    } catch (error) {
+      console.error('❌ Failed to disable screen sharing:', error);
+      throw error;
+    }
+  }
+
+  // Toggle camera on/off
+  async toggleCamera(): Promise<boolean> {
+    if (!this.currentCall) {
+      throw new Error('No active call to toggle camera');
+    }
+
+    try {
+      const isEnabled = this.currentCall.camera.state.status === 'enabled';
+      
+      if (isEnabled) {
+        await this.currentCall.camera.disable();
+        console.log('📷 Camera disabled');
+        return false;
+      } else {
+        await this.currentCall.camera.enable();
+        console.log('📷 Camera enabled');
+        return true;
+      }
+    } catch (error) {
+      console.error('❌ Failed to toggle camera:', error);
+      throw error;
+    }
+  }
+
+  // Toggle microphone on/off
+  async toggleMicrophone(): Promise<boolean> {
+    if (!this.currentCall) {
+      throw new Error('No active call to toggle microphone');
+    }
+
+    try {
+      const isEnabled = this.currentCall.microphone.state.status === 'enabled';
+      
+      if (isEnabled) {
+        await this.currentCall.microphone.disable();
+        console.log('🎤 Microphone disabled');
+        return false;
+      } else {
+        await this.currentCall.microphone.enable();
+        console.log('🎤 Microphone enabled');
+        return true;
+      }
+    } catch (error) {
+      console.error('❌ Failed to toggle microphone:', error);
+      throw error;
+    }
+  }
+
+  // Get current camera state
+  getCameraState(): boolean {
+    return this.currentCall?.camera.state.status === 'enabled';
+  }
+
+  // Get current microphone state
+  getMicrophoneState(): boolean {
+    return this.currentCall?.microphone.state.status === 'enabled';
+  }
+
+  // Get current screen share state
+  getScreenShareState(): boolean {
+    return this.currentCall?.screenShare.state.status === 'enabled';
   }
 
   // Get chat messages
@@ -545,86 +634,6 @@ export class StreamIOService {
     } catch (error) {
       console.error('❌ Failed to fetch live streams:', error);
       return [];
-    }
-  }
-
-  // Enable screen sharing
-  async enableScreenShare(): Promise<void> {
-    if (!this.currentCall) {
-      throw new Error('No active call');
-    }
-
-    try {
-      console.log('🖥️ Enabling screen share...');
-      await this.currentCall.screenShare.enable();
-      console.log('✅ Screen share enabled');
-    } catch (error) {
-      console.error('❌ Failed to enable screen share:', error);
-      throw error;
-    }
-  }
-
-  // Disable screen sharing
-  async disableScreenShare(): Promise<void> {
-    if (!this.currentCall) {
-      throw new Error('No active call');
-    }
-
-    try {
-      console.log('🖥️ Disabling screen share...');
-      await this.currentCall.screenShare.disable();
-      console.log('✅ Screen share disabled');
-    } catch (error) {
-      console.error('❌ Failed to disable screen share:', error);
-      throw error;
-    }
-  }
-
-  // Toggle camera
-  async toggleCamera(): Promise<boolean> {
-    if (!this.currentCall) {
-      throw new Error('No active call');
-    }
-
-    try {
-      const isEnabled = this.currentCall.camera.state.status === 'enabled';
-      
-      if (isEnabled) {
-        await this.currentCall.camera.disable();
-        console.log('📷 Camera disabled');
-      } else {
-        await this.currentCall.camera.enable();
-        console.log('📷 Camera enabled');
-      }
-      
-      return !isEnabled;
-    } catch (error) {
-      console.error('❌ Failed to toggle camera:', error);
-      throw error;
-    }
-  }
-
-  // Toggle microphone
-  async toggleMicrophone(): Promise<boolean> {
-    if (!this.currentCall) {
-      throw new Error('No active call');
-    }
-
-    try {
-      const isEnabled = this.currentCall.microphone.state.status === 'enabled';
-      
-      if (isEnabled) {
-        await this.currentCall.microphone.disable();
-        console.log('🎤 Microphone disabled');
-      } else {
-        await this.currentCall.microphone.enable();
-        console.log('🎤 Microphone enabled');
-      }
-      
-      return !isEnabled;
-    } catch (error) {
-      console.error('❌ Failed to toggle microphone:', error);
-      throw error;
     }
   }
 

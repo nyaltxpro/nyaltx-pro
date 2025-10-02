@@ -171,6 +171,17 @@ export default function StreamIOBroadcaster({ onStreamEnd, streamTitle }: Stream
     }
   };
 
+  // Disable screen sharing
+  const stopScreenShare = async () => {
+    try {
+      await streamIOService.disableScreenShare();
+      toast.success('Screen sharing disabled');
+    } catch (error) {
+      console.error('❌ Failed to stop screen share:', error);
+      toast.error('Failed to stop screen sharing');
+    }
+  };
+
   // Toggle camera
   const toggleCamera = async () => {
     try {
@@ -179,6 +190,17 @@ export default function StreamIOBroadcaster({ onStreamEnd, streamTitle }: Stream
     } catch (error) {
       console.error('❌ Failed to toggle camera:', error);
       toast.error('Failed to toggle camera');
+    }
+  };
+
+  // Toggle microphone
+  const toggleMicrophone = async () => {
+    try {
+      const isEnabled = await streamIOService.toggleMicrophone();
+      toast.success(isEnabled ? 'Microphone enabled' : 'Microphone disabled');
+    } catch (error) {
+      console.error('❌ Failed to toggle microphone:', error);
+      toast.error('Failed to toggle microphone');
     }
   };
 
@@ -204,17 +226,6 @@ export default function StreamIOBroadcaster({ onStreamEnd, streamTitle }: Stream
     } catch (error) {
       console.error('❌ Failed to send announcement:', error);
       toast.error('Failed to send announcement');
-    }
-  };
-
-  // Toggle microphone
-  const toggleMicrophone = async () => {
-    try {
-      const isEnabled = await streamIOService.toggleMicrophone();
-      toast.success(isEnabled ? 'Microphone enabled' : 'Microphone disabled');
-    } catch (error) {
-      console.error('❌ Failed to toggle microphone:', error);
-      toast.error('Failed to toggle microphone');
     }
   };
 
@@ -329,25 +340,46 @@ export default function StreamIOBroadcaster({ onStreamEnd, streamTitle }: Stream
                 End Stream
               </button>
               
-              <button
-                onClick={startScreenShare}
-                className="p-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
-                title="Share Screen"
-              >
-                <FaDesktop />
-              </button>
+              {/* Screen Share Controls */}
+              {streamIOService.getScreenShareState && streamIOService.getScreenShareState() ? (
+                <button
+                  onClick={stopScreenShare}
+                  className="p-3 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors"
+                  title="Stop Screen Share"
+                >
+                  <FaDesktop />
+                </button>
+              ) : (
+                <button
+                  onClick={startScreenShare}
+                  className="p-3 rounded-lg bg-cyan-600 text-white hover:bg-cyan-700 transition-colors"
+                  title="Start Screen Share"
+                >
+                  <FaDesktop />
+                </button>
+              )}
               
+              {/* Camera Controls */}
               <button
                 onClick={toggleCamera}
-                className="p-3 rounded-lg bg-gray-700 text-white hover:bg-gray-600 transition-colors"
+                className={`p-3 rounded-lg transition-colors ${
+                  streamIOService.getCameraState && streamIOService.getCameraState()
+                    ? 'bg-green-600 hover:bg-green-700'
+                    : 'bg-gray-700 hover:bg-gray-600'
+                } text-white`}
                 title="Toggle Camera"
               >
                 <FaCamera />
               </button>
               
+              {/* Microphone Controls */}
               <button
                 onClick={toggleMicrophone}
-                className="p-3 rounded-lg bg-gray-700 text-white hover:bg-gray-600 transition-colors"
+                className={`p-3 rounded-lg transition-colors ${
+                  streamIOService.getMicrophoneState && streamIOService.getMicrophoneState()
+                    ? 'bg-green-600 hover:bg-green-700'
+                    : 'bg-gray-700 hover:bg-gray-600'
+                } text-white`}
                 title="Toggle Microphone"
               >
                 <FaMicrophone />
