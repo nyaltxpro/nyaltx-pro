@@ -375,7 +375,7 @@ export default function StreamIOBroadcaster({ onStreamEnd, streamTitle }: Stream
                 <CallControls />
                 <div className="mt-4">
                   <h3 className="text-white font-medium mb-2">Participants ({viewerCount + 1})</h3>
-                  <CallParticipantsList onClose={() => {}} />
+                  {/* <CallParticipantsList onClose={() => {}} /> */}
                 </div>
               </StreamCall>
             </StreamVideo>
