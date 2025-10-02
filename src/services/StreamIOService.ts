@@ -1,6 +1,6 @@
 import { StreamVideoClient, Call, User } from '@stream-io/video-client';
 import { StreamChat, Channel, ChannelData } from 'stream-chat';
-import { createStreamClient, generateUserToken, CALL_TYPES } from '@/lib/stream-config';
+import { createStreamClient, generateUserToken, CALL_TYPES, STREAM_API_KEY } from '@/lib/stream-config';
 
 export interface StreamUser {
   id: string;
@@ -591,33 +591,51 @@ export class StreamIOService {
     try {
       console.log('📡 Fetching active live streams...');
       
-      // First try: Query for ongoing calls
+      // Try multiple query strategies
+      const queryStrategies = [
+        // Strategy 1: Query ongoing calls
+        {
+          name: 'ongoing calls',
+          filter: { type: CALL_TYPES.DEFAULT, ongoing: true }
+        },
+        // Strategy 2: Query all recent calls
+        {
+          name: 'all recent calls',
+          filter: { type: CALL_TYPES.DEFAULT }
+        },
+        // Strategy 3: Query livestream type calls
+        {
+          name: 'livestream type calls',
+          filter: { type: CALL_TYPES.LIVESTREAM }
+        }
+      ];
+
       let response;
-      try {
-        response = await this.client.queryCalls({
-          filter_conditions: {
-            type: CALL_TYPES.DEFAULT,
-            ongoing: true,
-          },
-          sort: [{ field: 'created_at', direction: -1 }],
-          limit: 25,
-        });
-        console.log('✅ Ongoing calls query successful');
-      } catch (queryError) {
-        console.warn('⚠️ Ongoing calls query failed, trying broader query:', queryError);
-        
-        // Fallback: Query all recent calls
-        response = await this.client.queryCalls({
-          filter_conditions: {
-            type: CALL_TYPES.DEFAULT,
-          },
-          sort: [{ field: 'created_at', direction: -1 }],
-          limit: 25,
-        });
-        console.log('✅ Broader query successful');
+      let usedStrategy = '';
+      
+      for (const strategy of queryStrategies) {
+        try {
+          console.log(`🔍 Trying strategy: ${strategy.name}`);
+          response = await this.client.queryCalls({
+            filter_conditions: strategy.filter,
+            sort: [{ field: 'created_at', direction: -1 }],
+            limit: 50, // Increased limit
+          });
+          usedStrategy = strategy.name;
+          console.log(`✅ ${strategy.name} query successful - found ${response.calls.length} calls`);
+          break;
+        } catch (queryError) {
+          console.warn(`⚠️ ${strategy.name} query failed:`, queryError);
+          continue;
+        }
       }
 
-      console.log('🔍 Raw calls response:', {
+      if (!response) {
+        console.error('❌ All query strategies failed');
+        return [];
+      }
+
+      console.log(`🔍 Raw calls response (${usedStrategy}):`, {
         totalCalls: response.calls.length,
         calls: response.calls.map((call: any) => ({
           id: call.id,
@@ -627,38 +645,47 @@ export class StreamIOService {
           custom: call.custom,
           created_by: call.created_by?.id,
           session: call.session,
-          participants: call.session?.participants?.length || 0
+          participants: call.session?.participants?.length || 0,
+          created_at: call.created_at
         }))
       });
 
+      // Very permissive filtering - show any call that could be a stream
       const liveStreams: LiveStream[] = response.calls
         .filter((call: any) => {
-          // More permissive filtering - include any call that looks like our stream
-          const isOurStream = call.id?.startsWith('live_'); // Our call IDs start with 'live_'
+          const isOurStream = call.id?.startsWith('live_');
           const hasLiveStreamFlag = call.custom?.isLiveStream === true;
-          const hasTitle = call.custom?.title;
+          const hasTitle = !!call.custom?.title;
           const isOngoing = call.ongoing === true;
           const notEnded = !call.ended_at;
+          const isRecent = call.created_at && (Date.now() - new Date(call.created_at).getTime()) < 24 * 60 * 60 * 1000; // Within 24 hours
           
-          console.log(`🔍 Call ${call.id}:`, {
+          console.log(`🔍 Evaluating call ${call.id}:`, {
             isOurStream,
             hasLiveStreamFlag,
             hasTitle,
             isOngoing,
             notEnded,
+            isRecent,
+            created_at: call.created_at,
             custom: call.custom
           });
           
-          // Include if it's our stream format OR has our live stream flag OR has a title
-          const isLiveStream = isOurStream || hasLiveStreamFlag || hasTitle;
+          // Very permissive: include if it matches any of our criteria
+          const couldBeOurStream = isOurStream || hasLiveStreamFlag || hasTitle;
+          const couldBeActive = notEnded && isRecent;
           
-          // For ongoing streams, require ongoing=true, for fallback query be more lenient
-          const hasOngoingField = response.calls.length > 0 && typeof (response.calls[0] as any).ongoing !== 'undefined';
-          const isActive = hasOngoingField 
-            ? isOngoing && notEnded  // If we have ongoing field, use it
-            : notEnded;              // Otherwise just check not ended
+          const shouldInclude = couldBeOurStream && couldBeActive;
+          console.log(`🎯 Call ${call.id} - Include: ${shouldInclude}`);
           
-          return isLiveStream && isActive;
+          // TEMPORARY: Show all calls for debugging
+          const debugMode = true; // Set to false after debugging
+          if (debugMode) {
+            console.log(`🚨 DEBUG MODE: Including all calls`);
+            return true;
+          }
+          
+          return shouldInclude;
         })
         .map((call: any) => ({
           id: call.id,
@@ -667,15 +694,15 @@ export class StreamIOService {
           hostName: call.created_by?.name || `User ${call.created_by?.id?.slice(0, 8) || 'Unknown'}`,
           hostWallet: call.custom?.hostWallet || call.created_by?.id || '',
           viewerCount: call.session?.participants?.length || 0,
-          isLive: call.ongoing !== false, // Consider live if not explicitly false
+          isLive: call.ongoing !== false,
           createdAt: new Date(call.created_at || Date.now()),
         }));
 
-      console.log(`✅ Found ${liveStreams.length} active live streams:`, liveStreams);
+      console.log(`✅ Found ${liveStreams.length} potential live streams:`, liveStreams);
       
-      // If still no streams, run debug to see all calls
+      // Always run debug if no streams found
       if (liveStreams.length === 0) {
-        console.log('🔍 No streams found, running debug...');
+        console.log('🔍 No streams found with any strategy, running comprehensive debug...');
         await this.debugStreamCreation();
       }
       
@@ -709,39 +736,77 @@ export class StreamIOService {
     }
 
     try {
-      console.log('🔍 Debug: Checking all calls...');
+      console.log('🔍 === COMPREHENSIVE STREAM DEBUG ===');
+      console.log('🔍 API Key:', STREAM_API_KEY?.slice(0, 8) + '...');
+      console.log('🔍 Current User:', this.user);
       
-      // Query all calls without filters
-      const allCalls = await this.client.queryCalls({
-        sort: [{ field: 'created_at', direction: -1 }],
-        limit: 50,
-      });
+      // Test multiple query approaches
+      const queryTests = [
+        { name: 'All calls (no filter)', filter: {} },
+        { name: 'Default type calls', filter: { type: CALL_TYPES.DEFAULT } },
+        { name: 'Livestream type calls', filter: { type: CALL_TYPES.LIVESTREAM } },
+        { name: 'Ongoing calls', filter: { ongoing: true } },
+      ];
 
-      console.log('🔍 All calls:', {
-        total: allCalls.calls.length,
-        calls: allCalls.calls.map((call: any) => ({
-          id: call.id,
-          type: call.type,
-          ongoing: call.ongoing,
-          created_at: call.created_at,
-          custom: call.custom,
-          created_by: call.created_by?.id,
-        }))
-      });
+      for (const test of queryTests) {
+        try {
+          console.log(`\n🔍 Testing: ${test.name}`);
+          const response = await this.client.queryCalls({
+            filter_conditions: test.filter,
+            sort: [{ field: 'created_at', direction: -1 }],
+            limit: 20,
+          });
 
-      // Check for our specific streams
-      const ourStreams = allCalls.calls.filter((call: any) => 
-        call.id?.startsWith('live_') || call.custom?.isLiveStream
-      );
+          console.log(`✅ ${test.name} - Found ${response.calls.length} calls`);
+          
+          if (response.calls.length > 0) {
+            console.log('📋 Sample calls:', response.calls.slice(0, 3).map((call: any) => ({
+              id: call.id,
+              type: call.type,
+              ongoing: call.ongoing,
+              ended_at: call.ended_at,
+              created_at: call.created_at,
+              custom: call.custom,
+              created_by: call.created_by?.id,
+              session_participants: call.session?.participants?.length || 0
+            })));
 
-      console.log('🔍 Our streams:', ourStreams);
-
-      if (ourStreams.length === 0) {
-        console.log('⚠️ No streams found with our format. Try creating a stream first.');
+            // Check for our streams in this result
+            const ourStreams = response.calls.filter((call: any) => 
+              call.id?.startsWith('live_') || call.custom?.isLiveStream || call.custom?.title
+            );
+            
+            if (ourStreams.length > 0) {
+              console.log(`🎯 Found ${ourStreams.length} potential streams in ${test.name}:`, ourStreams.map((call: any) => ({
+                id: call.id,
+                title: call.custom?.title,
+                isLiveStream: call.custom?.isLiveStream,
+                ongoing: call.ongoing,
+                ended_at: call.ended_at
+              })));
+            }
+          }
+        } catch (queryError) {
+          console.error(`❌ ${test.name} failed:`, queryError);
+        }
       }
 
+      // Check current call state if we have one
+      if (this.currentCall) {
+        console.log('\n🔍 Current call state:', {
+          id: this.currentCall.id,
+          type: this.currentCall.type,
+          state: this.currentCall.state,
+          custom: (this.currentCall as any).custom,
+        });
+      } else {
+        console.log('\n⚠️ No current call active');
+      }
+
+      console.log('\n🔍 === DEBUG COMPLETE ===');
+
     } catch (error) {
-      console.error('❌ Debug query failed:', error);
+      console.error('❌ Debug failed:', error);
     }
   }
 
