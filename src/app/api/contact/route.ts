@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
     // Email content for the admin
     const adminMailOptions = {
       from: process.env.FROM_EMAIL || process.env.SMTP_USER,
-      to: process.env.ADMIN_EMAIL || process.env.SMTP_USER,
+      to: process.env.SMTP_USER,
       subject: `Contact Form: ${subject}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
