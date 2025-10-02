@@ -211,7 +211,13 @@ export default function StreamIOViewer({ streamId, streamTitle, onStreamEnd }: S
               </div>
             </div>
           )}
-{{ ... }}
+          
+          {/* Viewer Mode Indicator */}
+          {isConnected2Stream && (
+            <div className="absolute top-4 right-4 bg-blue-600/80 backdrop-blur-sm rounded-lg px-3 py-1 text-white text-xs">
+              👁️ Viewer Mode
+            </div>
+          )}
         </div>
 
         {/* Stream Title */}
