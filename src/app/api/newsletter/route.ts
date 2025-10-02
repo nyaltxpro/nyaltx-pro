@@ -134,12 +134,12 @@ export async function POST(request: NextRequest) {
       <p><strong>IP:</strong> ${request.headers.get('x-forwarded-for') || 'Unknown'}</p>
     `;
 
-    await transporter.sendMail({
-      from: `"NYALTX System" <${FROM_EMAIL}>`,
-      to: ADMIN_EMAIL,
-      subject: '📧 New Newsletter Subscription - NYALTX',
-      html: adminNotificationHtml,
-    });
+    // await transporter.sendMail({
+    //   from: `"NYALTX System" <${FROM_EMAIL}>`,
+    //   to: ADMIN_EMAIL,
+    //   subject: '📧 New Newsletter Subscription - NYALTX',
+    //   html: adminNotificationHtml,
+    // });
 
     console.log('✅ Newsletter subscription processed:', email);
 
