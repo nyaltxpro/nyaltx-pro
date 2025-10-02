@@ -93,6 +93,17 @@ export default function StreamIOLiveStreams({ onStreamSelect }: StreamIOLiveStre
     toast.success('Refreshed live streams');
   };
 
+  // Debug streams
+  const handleDebug = async () => {
+    try {
+      await streamIOService.debugStreamCreation();
+      toast.success('Debug info logged to console');
+    } catch (error) {
+      console.error('❌ Debug failed:', error);
+      toast.error('Debug failed');
+    }
+  };
+
   // Join stream
   const handleJoinStream = (stream: LiveStream) => {
     console.log('🎯 Joining stream:', stream.id);
@@ -151,14 +162,23 @@ export default function StreamIOLiveStreams({ onStreamSelect }: StreamIOLiveStre
           <p className="text-gray-400 mt-1">Powered by Stream.io</p>
         </div>
         
-        <button
-          onClick={handleRefresh}
-          disabled={isLoading}
-          className="flex items-center gap-2 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors disabled:opacity-50"
-        >
-          <FaSync className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-          Refresh
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleDebug}
+            className="flex items-center gap-2 px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors"
+          >
+            🔍 Debug
+          </button>
+          
+          <button
+            onClick={handleRefresh}
+            disabled={isLoading}
+            className="flex items-center gap-2 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors disabled:opacity-50"
+          >
+            <FaSync className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+            Refresh
+          </button>
+        </div>
       </div>
 
       {/* Loading State */}

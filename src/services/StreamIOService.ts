@@ -149,6 +149,14 @@ export class StreamIOService {
         console.warn('⚠️ Failed to update call metadata:', updateError);
       }
 
+      // Log call details for debugging
+      console.log('🔍 Created call details:', {
+        id: callId,
+        type: call.type,
+        state: call.state,
+        custom: (call as any).custom,
+      });
+
       // Create chat channel for the stream
       const chatChannelId = `livestream-${callId}`;
       const chatChannel = this.chatClient.channel('livestream', chatChannelId, {
@@ -583,15 +591,31 @@ export class StreamIOService {
     try {
       console.log('📡 Fetching active live streams...');
       
-      // Query for ongoing calls only
-      const response = await this.client.queryCalls({
-        filter_conditions: {
-          type: CALL_TYPES.DEFAULT,
-          ongoing: true,
-        },
-        sort: [{ field: 'created_at', direction: -1 }],
-        limit: 25,
-      });
+      // First try: Query for ongoing calls
+      let response;
+      try {
+        response = await this.client.queryCalls({
+          filter_conditions: {
+            type: CALL_TYPES.DEFAULT,
+            ongoing: true,
+          },
+          sort: [{ field: 'created_at', direction: -1 }],
+          limit: 25,
+        });
+        console.log('✅ Ongoing calls query successful');
+      } catch (queryError) {
+        console.warn('⚠️ Ongoing calls query failed, trying broader query:', queryError);
+        
+        // Fallback: Query all recent calls
+        response = await this.client.queryCalls({
+          filter_conditions: {
+            type: CALL_TYPES.DEFAULT,
+          },
+          sort: [{ field: 'created_at', direction: -1 }],
+          limit: 25,
+        });
+        console.log('✅ Broader query successful');
+      }
 
       console.log('🔍 Raw calls response:', {
         totalCalls: response.calls.length,
@@ -602,21 +626,39 @@ export class StreamIOService {
           ended_at: call.ended_at,
           custom: call.custom,
           created_by: call.created_by?.id,
-          session: call.session
+          session: call.session,
+          participants: call.session?.participants?.length || 0
         }))
       });
 
       const liveStreams: LiveStream[] = response.calls
         .filter((call: any) => {
-          // Filter for our streams that are actually ongoing
+          // More permissive filtering - include any call that looks like our stream
           const isOurStream = call.id?.startsWith('live_'); // Our call IDs start with 'live_'
+          const hasLiveStreamFlag = call.custom?.isLiveStream === true;
+          const hasTitle = call.custom?.title;
           const isOngoing = call.ongoing === true;
-          const notEnded = !call.ended_at; // Make sure the call hasn't ended
-          const hasCustomData = call.custom && Object.keys(call.custom).length > 0;
+          const notEnded = !call.ended_at;
           
-          console.log(`🔍 Call ${call.id}: isOurStream=${isOurStream}, isOngoing=${isOngoing}, notEnded=${notEnded}, hasCustomData=${hasCustomData}`);
+          console.log(`🔍 Call ${call.id}:`, {
+            isOurStream,
+            hasLiveStreamFlag,
+            hasTitle,
+            isOngoing,
+            notEnded,
+            custom: call.custom
+          });
           
-          return (isOurStream || hasCustomData) && isOngoing && notEnded;
+          // Include if it's our stream format OR has our live stream flag OR has a title
+          const isLiveStream = isOurStream || hasLiveStreamFlag || hasTitle;
+          
+          // For ongoing streams, require ongoing=true, for fallback query be more lenient
+          const hasOngoingField = response.calls.length > 0 && typeof (response.calls[0] as any).ongoing !== 'undefined';
+          const isActive = hasOngoingField 
+            ? isOngoing && notEnded  // If we have ongoing field, use it
+            : notEnded;              // Otherwise just check not ended
+          
+          return isLiveStream && isActive;
         })
         .map((call: any) => ({
           id: call.id,
@@ -625,11 +667,18 @@ export class StreamIOService {
           hostName: call.created_by?.name || `User ${call.created_by?.id?.slice(0, 8) || 'Unknown'}`,
           hostWallet: call.custom?.hostWallet || call.created_by?.id || '',
           viewerCount: call.session?.participants?.length || 0,
-          isLive: true, // If it's in the ongoing query and not ended, it's live
+          isLive: call.ongoing !== false, // Consider live if not explicitly false
           createdAt: new Date(call.created_at || Date.now()),
         }));
 
       console.log(`✅ Found ${liveStreams.length} active live streams:`, liveStreams);
+      
+      // If still no streams, run debug to see all calls
+      if (liveStreams.length === 0) {
+        console.log('🔍 No streams found, running debug...');
+        await this.debugStreamCreation();
+      }
+      
       return liveStreams;
     } catch (error) {
       console.error('❌ Failed to fetch live streams:', error);
