@@ -157,7 +157,7 @@ const Footer = () => {
                 <FaXTwitter className="text-xl mb-1 opacity-90" />
                 <span className="text-xs text-gray-300/90">Twitter</span>
               </Link>
-              <Link href="https://www.instagram.com/Nyaltx.io/" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center rounded-xl border border-white/10 bg-white/[0.03] p-3 hover:border-white/20 transition-colors">
+              <Link href="https://discord.gg/tFMJ7eHj" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center rounded-xl border border-white/10 bg-white/[0.03] p-3 hover:border-white/20 transition-colors">
                 <BsDiscord className="text-xl mb-1 opacity-90" />
                 <span className="text-xs text-gray-300/90">Discord</span>
               </Link>
