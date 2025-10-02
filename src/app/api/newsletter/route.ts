@@ -91,7 +91,6 @@ export async function POST(request: NextRequest) {
               <h3>What you can expect:</h3>
               <ul>
                 <li>📈 Daily crypto market insights and analysis</li>
-                <li>🎯 Exclusive investment opportunities</li>
                 <li>🤝 Networking events and community meetups</li>
                 <li>🔥 Early access to new features and tools</li>
                 <li>💎 Premium trading signals and strategies</li>
