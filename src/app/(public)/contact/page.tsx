@@ -29,27 +29,41 @@ export default function ContactPage() {
     setIsSubmitting(true);
     setSubmitStatus(null);
     
-    // Simulate API call
     try {
-      // In a real application, you would send this data to your backend
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setSubmitStatus({
-        success: true,
-        message: 'Thank you for your message! We will get back to you soon.'
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
       });
-      
-      // Reset form
-      setFormData({
-        name: '',
-        email: '',
-        subject: '',
-        message: ''
-      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSubmitStatus({
+          success: true,
+          message: data.message || 'Thank you for your message! We will get back to you soon.'
+        });
+        
+        // Reset form
+        setFormData({
+          name: '',
+          email: '',
+          subject: '',
+          message: ''
+        });
+      } else {
+        setSubmitStatus({
+          success: false,
+          message: data.error || 'Something went wrong. Please try again later.'
+        });
+      }
     } catch (error) {
+      console.error('Contact form submission error:', error);
       setSubmitStatus({
         success: false,
-        message: 'Something went wrong. Please try again later.'
+        message: 'Network error. Please check your connection and try again.'
       });
     } finally {
       setIsSubmitting(false);
