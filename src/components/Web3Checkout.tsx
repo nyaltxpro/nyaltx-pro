@@ -93,7 +93,12 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
     }
     return 0;
   }, [promoValidation, subtotal]);
-  const fees = useMemo(() => promoValidation?.isFree ? 0 : Math.max(0.3, subtotal * 0.015), [subtotal, promoValidation]);
+  const fees = useMemo(() => {
+    if (promoValidation?.isFree) return 0;
+    // No fees for $1 trial (nyaltxpro1)
+    if (selectedTier?.toLowerCase() === 'nyaltxpro1') return 0;
+    return Math.max(0.3, subtotal * 0.015);
+  }, [subtotal, promoValidation, selectedTier]);
   const total = useMemo(() => Math.max(0, subtotal - discount) + fees, [subtotal, discount, fees]);
 
   // Auto-open wallet and initiate payment when component loads with specific conditions
@@ -438,7 +443,7 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
           {/* Payment Method Selection */}
           {paymentMethod === 'paypal' ? (
             <div className="mb-6">
-              <div className="p-4 rounded-lg bg-blue-900/30 border border-blue-500/30">
+              <div className="p-4 rounded-lg bg-white border border-blue-500/30">
                 <div className="flex items-center gap-3 mb-4">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className="text-blue-400">
                     <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a9.124 9.124 0 0 1-.077.437c-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287z"/>

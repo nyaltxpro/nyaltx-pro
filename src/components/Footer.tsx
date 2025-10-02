@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { FaTwitter, FaTelegram, FaTiktok, FaYoutube } from 'react-icons/fa';
 import { SiMedium } from 'react-icons/si';
-import { BsInstagram, BsMedium } from 'react-icons/bs';
+import { BsDiscord, BsInstagram, BsMedium } from 'react-icons/bs';
 import { FaXTwitter } from 'react-icons/fa6';
 
 const Footer = () => {
@@ -158,7 +158,7 @@ const Footer = () => {
                 <span className="text-xs text-gray-300/90">Twitter</span>
               </Link>
               <Link href="https://www.instagram.com/Nyaltx.io/" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center rounded-xl border border-white/10 bg-white/[0.03] p-3 hover:border-white/20 transition-colors">
-                <BsInstagram className="text-xl mb-1 opacity-90" />
+                <BsDiscord className="text-xl mb-1 opacity-90" />
                 <span className="text-xs text-gray-300/90">Instagram</span>
               </Link>
               <Link href="https://www.youtube.com/c/Nyaltx" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center rounded-xl border border-white/10 bg-white/[0.03] p-3 hover:border-white/20 transition-colors">
@@ -169,14 +169,14 @@ const Footer = () => {
                 <FaTelegram className="text-xl mb-1 opacity-90" />
                 <span className="text-xs text-gray-300/90">Telegram</span>
               </Link>
-              <Link href="https://www.tiktok.com/@Nyaltx.io" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center rounded-xl border border-white/10 bg-white/[0.03] p-3 hover:border-white/20 transition-colors">
+              {/* <Link href="https://www.tiktok.com/@Nyaltx.io" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center rounded-xl border border-white/10 bg-white/[0.03] p-3 hover:border-white/20 transition-colors">
                 <FaTiktok className="text-xl mb-1 opacity-90" />
                 <span className="text-xs text-gray-300/90">TikTok</span>
               </Link>
               <Link href="https://medium.com/@NyaltxOfficial" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center rounded-xl border border-white/10 bg-white/[0.03] p-3 hover:border-white/20 transition-colors">
                 <BsMedium className="text-xl mb-1 opacity-90" />
                 <span className="text-xs text-gray-300/90">Medium</span>
-              </Link>
+              </Link> */}
             </div>
           </div>
         </div>

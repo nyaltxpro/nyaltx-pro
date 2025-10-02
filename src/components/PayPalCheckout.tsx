@@ -1,7 +1,7 @@
 "use client";
 
 import { PayPalButtons } from "@paypal/react-paypal-js";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface PayPalCheckoutProps {
   amount: string;
@@ -49,6 +49,53 @@ export default function PayPalCheckout({
     }
   };
 
+  useEffect(() => {
+    if (typeof window !== "undefined" && (window as any).paypal) {
+      (window as any).paypal.HostedFields.render({
+        createOrder: () => {
+          return (window as any).paypal
+            .Buttons({
+              createOrder: (data: any, actions: any) => {
+                return actions.order.create({
+                  purchase_units: [
+                    {
+                      amount: {
+                        value: amount,
+                        currency_code: "USD",
+                      },
+                    },
+                  ],
+                });
+              },
+            })
+            .createOrder();
+        },
+        styles: {
+          input: {
+            "background-color": "#000",
+            color: "#fff",
+            "font-size": "16px",
+          },
+          ".valid": { color: "#4CAF50" },
+          ".invalid": { color: "#FF5252" },
+        },
+        fields: {
+          number: { selector: "#card-number" },
+          cvv: { selector: "#cvv" },
+          expirationDate: { selector: "#expiration-date" },
+        },
+      }).then((hf: any) => {
+        document
+          .getElementById("card-button")
+          ?.addEventListener("click", () => {
+            hf.submit().then((payload: any) => {
+              console.log("Payment success:", payload);
+            });
+          });
+      });
+    }
+  }, []);
+
   if (!isPayPalConfigured) {
     return (
       <div className="w-full p-4 bg-yellow-900/30 border border-yellow-500/50 rounded-lg">
@@ -68,10 +115,11 @@ export default function PayPalCheckout({
       <PayPalButtons
         style={{ 
           layout: "vertical",
-          color: "blue",
+          color: "gold",
           shape: "rect",
           label: "paypal"
         }}
+        
         createOrder={async (_, actions) => {
           setProcessing(true);
           return actions.order.create({
