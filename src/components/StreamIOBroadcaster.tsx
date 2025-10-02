@@ -135,8 +135,10 @@ export default function StreamIOBroadcaster({ onStreamEnd, streamTitle }: Stream
       console.log('🛑 Stopping stream...');
       toast.loading('Ending stream...', { id: 'stop-stream' });
 
+      // End the stream which will trigger cleanup for all viewers
       await streamIOService.endStream();
       
+      // Reset local state
       setCall(null);
       setChatChannel(null);
       setCallId('');
@@ -146,8 +148,9 @@ export default function StreamIOBroadcaster({ onStreamEnd, streamTitle }: Stream
       setStartTime(0);
       setChatMessages([]);
 
-      toast.success('Stream ended', { id: 'stop-stream' });
+      toast.success('Stream ended successfully', { id: 'stop-stream' });
       
+      // Notify parent component
       if (onStreamEnd) {
         onStreamEnd();
       }

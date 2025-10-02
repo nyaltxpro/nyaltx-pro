@@ -181,10 +181,19 @@ export class StreamIOService {
       // Get the call (use same type as broadcaster)
       const call = this.client.call(CALL_TYPES.DEFAULT, callId);
       
-      // Join as viewer with minimal configuration
+      // Join as viewer
       await call.join({
         create: false,
       });
+      
+      // Ensure camera and microphone are disabled for viewers
+      try {
+        await call.camera.disable();
+        await call.microphone.disable();
+        console.log('✅ Viewer camera and microphone disabled');
+      } catch (disableError) {
+        console.warn('⚠️ Could not disable camera/microphone:', disableError);
+      }
       
       // Join the chat channel
       const chatChannelId = `livestream-${callId}`;
@@ -194,7 +203,7 @@ export class StreamIOService {
       this.currentCall = call;
       this.currentChannel = chatChannel;
       
-      console.log('✅ Joined live stream and chat successfully');
+      console.log('✅ Joined live stream and chat successfully as viewer');
       return { call, chatChannel };
     } catch (error) {
       console.error('❌ Failed to join live stream:', error);
@@ -214,6 +223,15 @@ export class StreamIOService {
             ],
           },
         });
+        
+        // Disable camera and microphone for retry case too
+        try {
+          await call.camera.disable();
+          await call.microphone.disable();
+          console.log('✅ Viewer camera and microphone disabled (retry)');
+        } catch (disableError) {
+          console.warn('⚠️ Could not disable camera/microphone (retry):', disableError);
+        }
         
         // Join the chat channel for retry case too
         const chatChannelId = `livestream-${callId}`;
@@ -246,7 +264,8 @@ export class StreamIOService {
         await this.sendSystemMessage('🔴 Stream has ended. Thank you for watching!', 'viewer_left');
       }
       
-      await this.currentCall.leave();
+      // End the call properly to trigger cleanup for all participants
+      await this.currentCall.endCall();
       this.currentCall = null;
       
       // Clean up and destroy the chat channel
@@ -475,30 +494,15 @@ export class StreamIOService {
     try {
       console.log('📡 Fetching active live streams...');
       
-      // Try multiple query approaches to find streams
-      let response;
-      
-      // First try: Query for default calls that are ongoing
-      try {
-        response = await this.client.queryCalls({
-          filter_conditions: {
-            type: CALL_TYPES.DEFAULT,
-            ongoing: true,
-          },
-          sort: [{ field: 'created_at', direction: -1 }],
-          limit: 25,
-        });
-        console.log('✅ Default call query successful');
-      } catch (queryError) {
-        console.warn('⚠️ Default call query failed, trying broader query:', queryError);
-        
-        // Fallback: Query all recent calls
-        response = await this.client.queryCalls({
-          sort: [{ field: 'created_at', direction: -1 }],
-          limit: 25,
-        });
-        console.log('✅ Broader query successful');
-      }
+      // Query for ongoing calls only
+      const response = await this.client.queryCalls({
+        filter_conditions: {
+          type: CALL_TYPES.DEFAULT,
+          ongoing: true,
+        },
+        sort: [{ field: 'created_at', direction: -1 }],
+        limit: 25,
+      });
 
       console.log('🔍 Raw calls response:', {
         totalCalls: response.calls.length,
@@ -506,6 +510,7 @@ export class StreamIOService {
           id: call.id,
           type: call.type,
           ongoing: call.ongoing,
+          ended_at: call.ended_at,
           custom: call.custom,
           created_by: call.created_by?.id,
           session: call.session
@@ -514,11 +519,15 @@ export class StreamIOService {
 
       const liveStreams: LiveStream[] = response.calls
         .filter((call: any) => {
-          // More lenient filtering - accept any call that looks like ours
+          // Filter for our streams that are actually ongoing
           const isOurStream = call.id?.startsWith('live_'); // Our call IDs start with 'live_'
+          const isOngoing = call.ongoing === true;
+          const notEnded = !call.ended_at; // Make sure the call hasn't ended
           const hasCustomData = call.custom && Object.keys(call.custom).length > 0;
-          console.log(`🔍 Call ${call.id}: isOurStream=${isOurStream}, hasCustomData=${hasCustomData}, custom=`, call.custom);
-          return isOurStream || hasCustomData;
+          
+          console.log(`🔍 Call ${call.id}: isOurStream=${isOurStream}, isOngoing=${isOngoing}, notEnded=${notEnded}, hasCustomData=${hasCustomData}`);
+          
+          return (isOurStream || hasCustomData) && isOngoing && notEnded;
         })
         .map((call: any) => ({
           id: call.id,
@@ -527,7 +536,7 @@ export class StreamIOService {
           hostName: call.created_by?.name || `User ${call.created_by?.id?.slice(0, 8) || 'Unknown'}`,
           hostWallet: call.custom?.hostWallet || call.created_by?.id || '',
           viewerCount: call.session?.participants?.length || 0,
-          isLive: true, // If it's in the ongoing query, it's live
+          isLive: true, // If it's in the ongoing query and not ended, it's live
           createdAt: new Date(call.created_at || Date.now()),
         }));
 

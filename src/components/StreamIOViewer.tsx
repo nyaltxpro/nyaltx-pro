@@ -53,7 +53,6 @@ export default function StreamIOViewer({ streamId, streamTitle, onStreamEnd }: S
           image: `https://api.dicebear.com/7.x/identicon/svg?seed=${address}`,
         };
 
-        // Initialize service
         await streamIOService.initialize(user);
         
         // Join the live stream
@@ -64,6 +63,15 @@ export default function StreamIOViewer({ streamId, streamTitle, onStreamEnd }: S
         setChatChannel(joinedChatChannel);
         setClient(streamIOService.getCurrentClient());
         setIsConnected2Stream(true);
+        
+        // Disable viewer camera and microphone immediately after joining
+        try {
+          await joinedCall.camera.disable();
+          await joinedCall.microphone.disable();
+          console.log('✅ Viewer camera and microphone disabled');
+        } catch (disableError) {
+          console.warn('⚠️ Could not disable camera/microphone:', disableError);
+        }
         
         // Monitor participant count
         joinedCall.state.participants$.subscribe((participants: any) => {
@@ -161,12 +169,13 @@ export default function StreamIOViewer({ streamId, streamTitle, onStreamEnd }: S
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-full">
-      {/* Video Area */}
+      {/* Video Area - Viewer Only Mode */}
       <div className="lg:col-span-3 relative">
         <div className="aspect-video bg-gray-900 relative rounded-lg overflow-hidden">
           {client && call && isConnected2Stream ? (
             <StreamVideo client={client}>
               <StreamCall call={call}>
+                {/* SpeakerLayout shows only the streamer's video */}
                 <SpeakerLayout />
               </StreamCall>
             </StreamVideo>
@@ -202,6 +211,7 @@ export default function StreamIOViewer({ streamId, streamTitle, onStreamEnd }: S
               </div>
             </div>
           )}
+{{ ... }}
         </div>
 
         {/* Stream Title */}

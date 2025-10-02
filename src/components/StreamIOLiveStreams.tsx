@@ -76,13 +76,13 @@ export default function StreamIOLiveStreams({ onStreamSelect }: StreamIOLiveStre
     }
   };
 
-  // Auto-refresh streams every 10 seconds
+  // Auto-refresh streams every 5 seconds to quickly remove ended streams
   useEffect(() => {
     if (!isInitialized) return;
 
     const interval = setInterval(() => {
       loadLiveStreams();
-    }, 10000);
+    }, 5000);
 
     return () => clearInterval(interval);
   }, [isInitialized]);
