@@ -30,15 +30,15 @@ const roboto = Roboto({
 
 // Metadata can't be exported from a client component in this way.
 // We'll move this or handle it differently if needed, for now, we focus on layout.
-// export const metadata: Metadata = {
-//   title: "NYALTX | Crypto Token Tracker",
-//   description: "Track meme tokens, view real-time charts, history and all token information from blockchain.",
-//   icons: {
-//     icon: "/logo.png",
-//     apple: "/logo.png",
-//     shortcut: "/logo.png"
-//   },
-// };
+export const metadata: Metadata = {
+  title: "NYALTX | Crypto Token Tracker",
+  description: "Track meme tokens, view real-time charts, history and all token information from blockchain.",
+  icons: {
+    icon: "/logo.png",
+    apple: "/logo.png",
+    shortcut: "/logo.png"
+  },
+};
 
 export default function RootLayout({
   children,
