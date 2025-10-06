@@ -3,12 +3,14 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { FaSearch, FaCaretUp, FaCaretDown, FaExternalLinkAlt, FaRegStar, FaStar } from 'react-icons/fa';
+import { FaSearch, FaCaretUp, FaCaretDown, FaExternalLinkAlt, FaRegStar, FaStar, FaSync } from 'react-icons/fa';
 import ConnectWalletButton from '../../../../components/ConnectWalletButton';
 import Banner from '../../../../components/Banner';
 import { getCryptoIconUrl } from '../../../../utils/cryptoIcons';
 import Header from '../../../../components/Header';
 import { coinGeckoService, CoinGeckoMarketData } from '../../../../api/coingecko/trending';
+import { useTrendingCoins } from '../../../../hooks/useTrendingCoins';
+import { useAppDispatch, useAppSelector } from '../../../../store';
 import catalog from '@/data/tokens.json';
 
 // Define types
@@ -94,15 +96,20 @@ const SparklineChart = ({ data, change }: { data: number[], change: number }) =>
 export default function TrendingPage() {
   const router = useRouter();
   const [darkMode] = useState(true);
+  
+  // Redux-based trending coins data
+  const { trendingCoins: reduxTrendingCoins, loading: trendingLoading, error: trendingError, refreshTrendingCoins, hasCachedData } = useTrendingCoins();
+  
+  // Local state for UI and additional market data
   const [tokens, setTokens] = useState<TrendingToken[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [globalData, setGlobalData] = useState<GlobalMarketData | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortConfig, setSortConfig] = useState<{ key: keyof TrendingToken; direction: 'ascending' | 'descending' } | null>(null);
   const [timeframe, setTimeframe] = useState<'1h' | '24h' | '7d' | '30d'>('24h');
   const [activeFilter, setActiveFilter] = useState<'all' | 'gainers' | 'losers' | 'favorites'>('all');
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const [marketDataLoading, setMarketDataLoading] = useState(false);
+  const [marketDataError, setMarketDataError] = useState<string | null>(null);
 
   // Resolve local mapping for chain/address from catalog by symbol
   const resolveCatalogBySymbol = (symbol: string): { chain?: string; address?: string } => {
@@ -149,11 +156,11 @@ export default function TrendingPage() {
     router.push(`/dashboard/trade?${qs.toString()}`);
   };
   
-  // Load market data from CoinGecko
+  // Load additional market data from CoinGecko (for full market view)
   const loadMarketData = async () => {
     try {
-      setLoading(true);
-      setError(null);
+      setMarketDataLoading(true);
+      setMarketDataError(null);
       
       // Get top 20 cryptocurrencies and global data in parallel
       const [marketData, globalResponse] = await Promise.all([
@@ -185,14 +192,44 @@ export default function TrendingPage() {
       setTokens(trendingTokens);
     } catch (err) {
       console.error('Error loading market data:', err);
-      setError('Failed to load market data. Using cached data if available.');
+      setMarketDataError('Failed to load market data. Using cached data if available.');
       
       // Try to show cached data if available
       if (tokens.length === 0) {
-        setError('Failed to load market data. Please check your connection and try again.');
+        setMarketDataError('Failed to load market data. Please check your connection and try again.');
       }
     } finally {
-      setLoading(false);
+      setMarketDataLoading(false);
+    }
+  };
+
+  // Convert Redux trending coins to TrendingToken format for display
+  const convertReduxTrendingToTokens = () => {
+    if (!reduxTrendingCoins || reduxTrendingCoins.length === 0) return;
+    
+    // For now, we'll use the Redux trending coins as a fallback
+    // In a full implementation, you might want to fetch additional market data for these coins
+    const convertedTokens = reduxTrendingCoins.map((coin, index) => ({
+      id: coin.id,
+      name: coin.name,
+      symbol: coin.symbol.toUpperCase(),
+      logo: coin.thumb,
+      price: 0, // Would need additional API call for current price
+      priceUsd: 'Loading...',
+      change24h: 0,
+      change24hFormatted: 'N/A',
+      marketCap: 0,
+      marketCapFormatted: `Rank #${coin.market_cap_rank || index + 1}`,
+      volume24h: 0,
+      volume24hFormatted: 'N/A',
+      rank: coin.market_cap_rank || index + 1,
+      favorite: favorites.has(coin.id),
+      sparkline: []
+    }));
+    
+    // Only update if we don't have market data tokens
+    if (tokens.length === 0) {
+      setTokens(convertedTokens);
     }
   };
 
@@ -213,20 +250,25 @@ export default function TrendingPage() {
     ));
   };
 
-  // Load data on component mount and set up refresh interval
+  // Convert Redux trending coins when they change
+  useEffect(() => {
+    convertReduxTrendingToTokens();
+  }, [reduxTrendingCoins, favorites]);
+
+  // Load additional market data on component mount and set up refresh interval
   useEffect(() => {
     loadMarketData();
     
     // Refresh data every 10 minutes to reduce API calls
     const interval = setInterval(() => {
       // Only refresh if not currently loading
-      if (!loading) {
+      if (!marketDataLoading) {
         loadMarketData();
       }
     }, 10 * 60 * 1000);
     
     return () => clearInterval(interval);
-  }, [loading]);
+  }, [marketDataLoading]);
 
   // Update favorites when tokens change
   useEffect(() => {
@@ -312,11 +354,41 @@ export default function TrendingPage() {
       {/* Header with search and wallet */}
       <div className="container mx-auto px-4 py-4">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Top 20 Cryptocurrencies</h1>
+          <div>
+            <h1 className="text-2xl font-bold">Top 20 Cryptocurrencies</h1>
+            <div className="flex items-center gap-2 mt-1">
+              {hasCachedData && (
+                <span className="text-xs text-green-400 bg-green-900/20 px-2 py-1 rounded">
+                  📱 Trending Cached
+                </span>
+              )}
+              {(trendingLoading || marketDataLoading) && (
+                <span className="text-xs text-blue-400 bg-blue-900/20 px-2 py-1 rounded">
+                  🔄 Loading...
+                </span>
+              )}
+            </div>
+          </div>
           
           <div className="flex items-center space-x-4">
-         
-       
+            <button
+              onClick={refreshTrendingCoins}
+              disabled={trendingLoading}
+              className="flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 rounded transition-colors text-sm"
+              title="Refresh trending data from Redux cache"
+            >
+              <FaSync className={trendingLoading ? 'animate-spin' : ''} />
+              Refresh Trending
+            </button>
+            <button
+              onClick={loadMarketData}
+              disabled={marketDataLoading}
+              className="flex items-center gap-2 px-3 py-2 bg-cyan-600 hover:bg-cyan-700 disabled:bg-gray-600 rounded transition-colors text-sm"
+              title="Refresh market data"
+            >
+              <FaSync className={marketDataLoading ? 'animate-spin' : ''} />
+              Refresh Market
+            </button>
           </div>
         </div>
         
@@ -378,7 +450,7 @@ export default function TrendingPage() {
         </div>
         
         {/* Skeleton Loading State */}
-        {loading && (
+        {(trendingLoading || marketDataLoading) && (
           <>
             {/* Skeleton Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -448,15 +520,30 @@ export default function TrendingPage() {
         )}
         
         {/* Error State */}
-        {error && (
+        {(trendingError || marketDataError) && (
           <div className="bg-red-900/20 border border-red-500 rounded-lg p-4 mb-6">
-            <div className="text-red-400">{error}</div>
-            <button 
-              onClick={loadMarketData}
-              className="mt-2 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-sm transition-colors"
-            >
-              Retry
-            </button>
+            <div className="text-red-400">
+              {trendingError || marketDataError}
+              {hasCachedData && (
+                <div className="text-yellow-400 text-sm mt-1">
+                  📱 Using cached data while resolving issues
+                </div>
+              )}
+            </div>
+            <div className="flex gap-2 mt-2">
+              <button 
+                onClick={loadMarketData}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-sm transition-colors"
+              >
+                Retry Market Data
+              </button>
+              <button 
+                onClick={refreshTrendingCoins}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm transition-colors"
+              >
+                Refresh Trending
+              </button>
+            </div>
           </div>
         )}
         
@@ -486,7 +573,7 @@ export default function TrendingPage() {
         )}
         
         {/* Tokens Table */}
-        {!loading && !error && (
+        {!trendingLoading && !marketDataLoading && !trendingError && !marketDataError && (
           <div className="overflow-x-auto">
             <table className="min-w-full bg-[var(--card-bg)] rounded-lg overflow-hidden border border-[var(--border-color)]">
               <thead className="bg-[var(--header-bg)]">

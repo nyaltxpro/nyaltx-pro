@@ -4,12 +4,14 @@
 import { useState } from 'react';
 import type { Metadata } from "next";
 import { Poppins, Inter, Roboto } from "next/font/google";
+import { DefaultSeo } from 'next-seo';
 import "./globals.css";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/HeaderUpdated"; // Assuming HeaderUpdated is the one to use
 import Footer from "../components/Footer";
 import Providers from "./providers";
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
+import { defaultSEO } from "../lib/seo.config";
 import "./globals.css";
 
 // Removed duplicate web3modal import - already imported in providers
@@ -54,6 +56,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${poppins.variable} ${roboto.variable}`}>
       <body className={inter.className}>
+        <DefaultSeo {...defaultSEO} />
         <PayPalScriptProvider options={{ 
           clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "test",
           currency: "USD",

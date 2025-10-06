@@ -4,11 +4,13 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion, animate, useInView } from 'framer-motion';
+import { NextSeo } from 'next-seo';
 // Using named icons from @web3icons/react
 import type { Variants } from 'framer-motion';
 import PublicHeader from '@/components/PublicHeader';
 import Faq from '@/components/Faq';
-import { ExchangeIcon ,NetworkIcon,TokenIcon,WalletIcon } from '@web3icons/react'
+import { ExchangeIcon ,NetworkIcon,TokenIcon,WalletIcon } from '@web3icons/react';
+import { pageSEO, organizationJsonLd, websiteJsonLd } from '@/lib/seo.config';
 const container: Variants = {
   hidden: { opacity: 0 },
   show: {
@@ -29,8 +31,18 @@ const scaleIn: Variants = {
 
 export default function Page() {
   return (
-    <div className="min-h-screen">
-      <PublicHeader />
+    <>
+      <NextSeo {...pageSEO.home} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+      />
+      <div className="min-h-screen">
+        <PublicHeader />
       {/* 1) Hero */}
       <motion.section className="relative overflow-hidden" variants={container} initial="hidden" animate="show">
         {/* Web3 aurora + grid background */}
@@ -267,7 +279,8 @@ export default function Page() {
           </div>
         </motion.div>
       </motion.section>
-    </div>
+      </div>
+    </>
   );
 }
 

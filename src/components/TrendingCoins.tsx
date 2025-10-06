@@ -1,66 +1,16 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import Image from 'next/image';
-import { getTrendingCoins } from '../api/coingecko/client';
 import { useRouter } from 'next/navigation';
 import tokens from '@/data/tokens.json';
 import { fetchCoinPlatforms } from '@/api/coingecko/api';
-
-interface TrendingCoin {
-  id: string;
-  name: string;
-  symbol: string;
-  market_cap_rank: number;
-  thumb: string;
-  score: number;
-  price_btc: number;
-}
+import { useTrendingCoins } from '@/hooks/useTrendingCoins';
+import { CachedTrendingCoin } from '@/store/slices/searchCacheSlice';
 
 export default function TrendingCoins() {
-  const [trendingCoins, setTrendingCoins] = useState<TrendingCoin[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { trendingCoins, loading, error, refreshTrendingCoins, hasCachedData } = useTrendingCoins();
   const router = useRouter();
-
-  useEffect(() => {
-    const fetchTrendingCoins = async () => {
-      try {
-        setLoading(true);
-        const data = await getTrendingCoins();
-
-        console.log('data',data)
-        
-        // CoinGecko returns trending coins in a nested structure
-        if (data && data.coins) {
-          const formattedCoins = data.coins.map((item: any) => ({
-            id: item.item.id,
-            name: item.item.name,
-            symbol: item.item.symbol,
-            market_cap_rank: item.item.market_cap_rank,
-            thumb: item.item.thumb,
-            score: item.item.score,
-            price_btc: item.item.price_btc
-          }));
-          
-          setTrendingCoins(formattedCoins);
-        }
-        
-        setLoading(false);
-      } catch (err) {
-        console.error('Error fetching trending coins:', err);
-        setError('Failed to load trending coins');
-        setLoading(false);
-      }
-    };
-
-    fetchTrendingCoins();
-
-    // Refresh data every 5 minutes
-    const intervalId = setInterval(fetchTrendingCoins, 5 * 60 * 1000);
-    
-    return () => clearInterval(intervalId);
-  }, []);
 
   // Format BTC price with appropriate decimal places
   const formatBtcPrice = (price: number) => {
@@ -70,18 +20,50 @@ export default function TrendingCoins() {
     return price.toFixed(6);
   };
 
-  const handleNavigate = async (coin: any) => {
+  const handleNavigate = async (coin: CachedTrendingCoin) => {
     const base = coin.symbol?.toUpperCase() || coin.name?.toUpperCase();
     if (!base) return;
 
+    // First check local tokens data
     const list = tokens as Array<{ symbol: string; chain: string; address: string; name: string }>;
     const matches = list.filter(t => t.symbol.toUpperCase() === base);
     let selected = matches.find(t => t.chain && t.chain.toLowerCase() === 'ethereum') || matches[0];
     let chain = selected?.chain;
     let address = selected?.address;
 
+    // If not found in local data, use cached contract addresses from Redux
+    if (!chain || !address) {
+      if (coin.primaryChain && coin.primaryAddress) {
+        chain = coin.primaryChain;
+        address = coin.primaryAddress;
+        console.log(`🔗 Using cached contract address for ${coin.symbol}: ${chain}/${address}`);
+      } else if (coin.contractAddresses && Object.keys(coin.contractAddresses).length > 0) {
+        // Use the first available contract address
+        const availableChains = Object.keys(coin.contractAddresses);
+        const chainPreference = ['ethereum', 'arbitrum', 'optimism', 'base', 'polygon', 'binance'];
+        
+        for (const preferredChain of chainPreference) {
+          if (coin.contractAddresses[preferredChain]) {
+            chain = preferredChain;
+            address = coin.contractAddresses[preferredChain];
+            break;
+          }
+        }
+        
+        // If no preferred chain found, use the first available
+        if (!chain && availableChains.length > 0) {
+          chain = availableChains[0];
+          address = coin.contractAddresses[chain];
+        }
+        
+        console.log(`🔗 Using cached contract address for ${coin.symbol}: ${chain}/${address}`);
+      }
+    }
+
+    // Fallback: fetch fresh contract addresses if still not found
     if (!chain || !address) {
       try {
+        console.log(`🔍 Fetching fresh contract addresses for ${coin.symbol}...`);
         const platforms = await fetchCoinPlatforms(coin.id);
         if (platforms) {
           const platformToChain: Record<string, string> = {
@@ -108,7 +90,7 @@ export default function TrendingCoins() {
           ];
           for (const key of preference) {
             const addr = (platforms as any)[key];
-            if (addr) {
+            if (addr && addr !== '0x0000000000000000000000000000000000000000') {
               chain = platformToChain[key] || key;
               address = addr;
               break;
@@ -123,21 +105,48 @@ export default function TrendingCoins() {
     const params = new URLSearchParams({ base });
     if (chain) params.set('chain', chain);
     if (address) params.set('address', address);
+    params.set('coingecko_id', coin.id);
 
     router.push(`/dashboard/trade?${params.toString()}`);
   };
 
   return (
     <div className="w-full">
-      <h2 className="text-xl font-semibold mb-4">Trending Search List</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold">Trending Search List</h2>
+        <div className="flex items-center gap-2">
+          {hasCachedData && (
+            <span className="text-xs text-green-400 bg-green-900/20 px-2 py-1 rounded">
+              📱 Cached
+            </span>
+          )}
+          <button
+            onClick={refreshTrendingCoins}
+            disabled={loading}
+            className="text-xs px-3 py-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 rounded transition-colors"
+            title="Refresh trending coins"
+          >
+            {loading ? '🔄' : '↻'} Refresh
+          </button>
+        </div>
+      </div>
       
-      {loading ? (
+      {loading && !hasCachedData ? (
         <div className="flex justify-center items-center h-32">
           <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-500"></div>
+          <span className="ml-2 text-gray-400">Loading trending coins...</span>
         </div>
-      ) : error ? (
+      ) : error && !hasCachedData ? (
         <div className="text-red-500 p-4 bg-red-900 bg-opacity-20 rounded">
-          {error}
+          <div className="flex justify-between items-center">
+            <span>{error}</span>
+            <button
+              onClick={refreshTrendingCoins}
+              className="text-xs px-2 py-1 bg-red-600 hover:bg-red-700 rounded"
+            >
+              Retry
+            </button>
+          </div>
         </div>
       ) : (
         <div className="space-y-3">
@@ -159,24 +168,32 @@ export default function TrendingCoins() {
                 </div>
                 <div>
                   <div className="font-medium">{coin.name}</div>
-                  <div className="text-gray-400 text-xs">{coin.symbol.toUpperCase()}</div>
+                  <div className="text-gray-400 text-xs flex items-center gap-2">
+                    <span>{coin.symbol.toUpperCase()}</span>
+                    {coin.primaryChain && (
+                      <span className="bg-blue-900/30 text-blue-300 px-1 rounded text-xs">
+                        {coin.primaryChain}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
               
               <div className="text-right w-full sm:w-auto mt-2 sm:mt-0 flex justify-between sm:block">
                 <div className="font-medium text-sm flex items-center">
-                  {/* <Image 
-                    src="/bitcoin.svg" 
-                    alt="BTC" 
-                    width={12} 
-                    height={12} 
-                    className="mr-1"
-                    unoptimized
-                  /> */}
-                  {/* {formatBtcPrice(coin.price_btc)} */}
+                  {coin.price_btc && (
+                    <span className="text-orange-400">
+                      ₿ {formatBtcPrice(coin.price_btc)}
+                    </span>
+                  )}
                 </div>
-                <div className="text-xs text-gray-400">
-                  Rank #{coin.market_cap_rank || 'N/A'}
+                <div className="text-xs text-gray-400 flex items-center gap-2">
+                  <span>Rank #{coin.market_cap_rank || 'N/A'}</span>
+                  {coin.contractAddresses && Object.keys(coin.contractAddresses).length > 0 && (
+                    <span className="text-green-400" title="Contract addresses cached">
+                      🔗
+                    </span>
+                  )}
                 </div>
               </div>
             </div>

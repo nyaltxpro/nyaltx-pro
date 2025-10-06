@@ -5,6 +5,8 @@ import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { useAccount } from 'wagmi';
+import { NextSeo } from 'next-seo';
+import { pageSEO } from '@/lib/seo.config';
 import toast, { Toaster } from 'react-hot-toast';
 import tokens from '@/data/tokens.json';
 import {
@@ -102,9 +104,12 @@ function TradePageContent() {
 
 export default function Page() {
   return (
-    <Suspense fallback={<div className="p-4 text-white">Loading trade page…</div>}>
-      <TradePageContent />
-    </Suspense>
+    <>
+      <NextSeo {...pageSEO.trade} />
+      <Suspense fallback={<div className="p-4 text-white">Loading trade page…</div>}>
+        <TradePageContent />
+      </Suspense>
+    </>
   );
 }
 
