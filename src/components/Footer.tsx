@@ -1,11 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
-import { FaTwitter, FaTelegram, FaTiktok, FaYoutube } from 'react-icons/fa';
-import { SiMedium } from 'react-icons/si';
-import { BsDiscord, BsInstagram, BsMedium } from 'react-icons/bs';
+import React, { useState } from 'react';
+import { BsDiscord } from 'react-icons/bs';
+import { FaTelegram, FaYoutube } from 'react-icons/fa';
 import { FaXTwitter } from 'react-icons/fa6';
 
 const Footer = () => {
@@ -117,7 +115,7 @@ const Footer = () => {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-semibold rounded-lg hover:from-cyan-700 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-cyan-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full sm:w-auto px-6 py-3 bg-[#00b8d8] rounded-full text-white font-semibold   transition-all duration-300 shadow-lg hover:shadow-cyan-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isSubmitting ? 'Signing Up...' : 'Join Community'}
                   </button>
@@ -126,11 +124,10 @@ const Footer = () => {
                 {/* Message Display */}
                 {message && (
                   <div
-                    className={`mt-3 p-3 rounded-lg text-sm ${
-                      messageType === 'success'
-                        ? 'bg-green-500/20 border border-green-500/30 text-green-400'
-                        : 'bg-red-500/20 border border-red-500/30 text-red-400'
-                    }`}
+                    className={`mt-3 p-3 rounded-lg text-sm ${messageType === 'success'
+                      ? 'bg-green-500/20 border border-green-500/30 text-green-400'
+                      : 'bg-red-500/20 border border-red-500/30 text-red-400'
+                      }`}
                   >
                     {message}
                   </div>
