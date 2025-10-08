@@ -7,6 +7,7 @@ export interface RegisteredToken {
   tokenSymbol: string;
   blockchain: string;
   contractAddress: string;
+  userEmail?: string; // Optional email for notifications
   imageUri?: string;
   website?: string;
   twitter?: string;
@@ -57,6 +58,7 @@ export interface TokenState {
     tokenSymbol: string;
     blockchain: string;
     contractAddress: string;
+    userEmail: string;
     imageUri: string;
     website: string;
     twitter: string;
@@ -79,6 +81,7 @@ const initialState: TokenState = {
     tokenSymbol: '',
     blockchain: 'ethereum',
     contractAddress: '',
+    userEmail: '',
     imageUri: '',
     website: '',
     twitter: '',

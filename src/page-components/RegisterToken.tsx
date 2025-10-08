@@ -48,6 +48,7 @@ function RegisterTokenContent() {
     const [videoLink, setVideoLink] = useState('');
     const [imageUploadMethod, setImageUploadMethod] = useState<'upload' | 'url'>('upload');
     const [imageUploadError, setImageUploadError] = useState<string | null>(null);
+    const [hasPendingRegistration, setHasPendingRegistration] = useState(false);
 
     // Handle image upload success
     const handleImageUploaded = (ipfsUrl: string) => {
@@ -60,15 +61,74 @@ function RegisterTokenContent() {
         setImageUploadError(error);
     };
 
-    // Check for payment success from URL params
+    // Clear any pending token registration on component mount (in case user navigated back without completing payment)
     React.useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const paymentStatus = urlParams.get('payment');
-        if (paymentStatus === 'success' || paymentStatus === 'free') {
+        
+        // If no payment success status and user is on the register page, check for pending registration
+        if (!paymentStatus && !paymentSuccess) {
+            const pendingData = localStorage.getItem('pendingTokenRegistration');
+            if (pendingData) {
+                setHasPendingRegistration(true);
+                // Ask user if they want to clear the pending registration
+                const shouldClear = window.confirm(
+                    'You have a pending token registration from an incomplete payment. Would you like to clear it and start fresh?'
+                );
+                if (shouldClear) {
+                    localStorage.removeItem('pendingTokenRegistration');
+                    setHasPendingRegistration(false);
+                }
+            }
+        }
+    }, [paymentSuccess]);
+
+    // Check for payment success from URL params and register token if payment was successful
+    React.useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const paymentStatus = urlParams.get('payment');
+        
+        if (paymentStatus === 'success' || paymentStatus === 'paypal_success') {
+            setPaymentSuccess(true);
+            
+            // Register the token after successful payment
+            const handlePostPaymentRegistration = async () => {
+                try {
+                    const pendingTokenData = localStorage.getItem('pendingTokenRegistration');
+                    if (pendingTokenData) {
+                        const tokenData = JSON.parse(pendingTokenData);
+                        
+                        // Register the token in the database now that payment is successful
+                        await dispatch(registerToken(tokenData)).unwrap();
+                        
+                        // Clear the pending registration data
+                        localStorage.removeItem('pendingTokenRegistration');
+                        
+                        dispatch({
+                            type: 'tokens/setSuccess',
+                            payload: '🎉 Payment successful! Your token has been registered with NyaltxPro benefits.',
+                        });
+                    } else {
+                        dispatch({
+                            type: 'tokens/setSuccess',
+                            payload: '🎉 Payment successful! You can now register your token with NyaltxPro benefits.',
+                        });
+                    }
+                } catch (error) {
+                    console.error('Post-payment token registration failed:', error);
+                    dispatch({
+                        type: 'tokens/setError',
+                        payload: 'Payment successful, but token registration failed. Please try registering again.',
+                    });
+                }
+            };
+            
+            handlePostPaymentRegistration();
+        } else if (paymentStatus === 'free') {
             setPaymentSuccess(true);
             dispatch({
                 type: 'tokens/setSuccess',
-                payload: '🎉 Payment successful! You can now register your token with NyaltxPro benefits.',
+                payload: '🎉 Free registration successful! Your token has been registered.',
             });
         }
     }, [dispatch]);
@@ -105,31 +165,28 @@ function RegisterTokenContent() {
         dispatch(clearError());
 
         try {
-            // If redirecting to checkout, store in database; otherwise use localStorage
+            // If redirecting to checkout, store token data temporarily in localStorage for registration after payment
             if (redirectPath && paymentMethod) {
-                // Store in database via Redux action
+                // Store token data temporarily in localStorage (not in database yet)
                 const tokenData = {
                     tokenName: formData.tokenName,
                     tokenSymbol: formData.tokenSymbol,
                     blockchain: formData.blockchain,
                     contractAddress: formData.contractAddress,
-                    imageUri: formData.imageUri,
                     website: formData.website,
                     twitter: formData.twitter,
                     telegram: formData.telegram,
                     discord: formData.discord,
                     github: formData.github,
                     submittedByAddress: address,
+                    userEmail: formData.userEmail || '',
                 };
 
-                await dispatch(registerToken(tokenData)).unwrap();
+                // Store in localStorage for post-payment registration
+                localStorage.setItem('pendingTokenRegistration', JSON.stringify(tokenData));
 
-                setSubmitted(true);
-
-                // Redirect to checkout after successful database registration
-                setTimeout(() => {
-                    router.push(`/${redirectPath}?method=${paymentMethod}`);
-                }, 3000);
+                // Redirect to checkout immediately (no database registration yet)
+                router.push(`/${redirectPath}?method=${paymentMethod}`);
             } else {
                 // Store in localStorage for regular registration
                 const registeredTokens = JSON.parse(localStorage.getItem('registeredTokens') || '[]');
@@ -356,6 +413,25 @@ function RegisterTokenContent() {
                                         required
                                     />
                                     <p className="text-xs text-gray-500 mt-1">Paste the verified contract address</p>
+                                </div>
+
+                                {/* Email Address (Optional) */}
+                                <div className="mb-6">
+                                    <label className="block text-sm font-medium text-gray-300 mb-1">
+                                        Email Address (Optional)
+                                    </label>
+                                    <input
+                                        type="email"
+                                        className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
+                                        placeholder="your@email.com"
+                                        value={formData.userEmail}
+                                        onChange={e =>
+                                            dispatch(updateFormField({ field: 'userEmail', value: e.target.value }))
+                                        }
+                                    />
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        Receive email notifications about your token registration status
+                                    </p>
                                 </div>
 
                                 {/* Image Upload/URI */}

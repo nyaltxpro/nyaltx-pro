@@ -1,5 +1,69 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCollection } from '@/lib/mongodb';
+import { createUserTokenRegistrationEmail, createAdminTokenRegistrationEmail } from '@/utils/emailTemplates';
+
+// Function to send email notifications
+async function sendTokenRegistrationEmails(tokenData: TokenRegistration) {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+  
+  // Send user confirmation email (if we have user email)
+  if (tokenData.userEmail) {
+    try {
+      const { subject, html } = createUserTokenRegistrationEmail(tokenData);
+      
+      const response = await fetch(`${baseUrl}/api/email/send`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          to: tokenData.userEmail,
+          subject,
+          html,
+        }),
+      });
+
+      if (!response.ok) {
+        console.error(`Failed to send user confirmation email to ${tokenData.userEmail}:`, await response.text());
+      } else {
+        console.log(`User confirmation sent to ${tokenData.userEmail} for token ${tokenData.tokenSymbol}`);
+      }
+    } catch (error) {
+      console.error(`Error sending user confirmation email:`, error);
+    }
+  }
+  
+  // Send admin notification email
+  const adminEmails = process.env.ADMIN_EMAIL_ADDRESSES?.split(',') || ['admin@nyaltx.com'];
+  
+  for (const adminEmail of adminEmails) {
+    if (adminEmail.trim()) {
+      try {
+        const { subject, html } = createAdminTokenRegistrationEmail(tokenData);
+        
+        const response = await fetch(`${baseUrl}/api/email/send`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            to: adminEmail.trim(),
+            subject,
+            html,
+          }),
+        });
+
+        if (!response.ok) {
+          console.error(`Failed to send admin email to ${adminEmail}:`, await response.text());
+        } else {
+          console.log(`Admin notification sent to ${adminEmail} for token ${tokenData.tokenSymbol}`);
+        }
+      } catch (error) {
+        console.error(`Error sending admin email to ${adminEmail}:`, error);
+      }
+    }
+  }
+}
 
 export type TokenRegistration = {
   id: string;
@@ -10,6 +74,7 @@ export type TokenRegistration = {
   contractAddressLower?: string;
   submittedByAddress?: string;
   submittedByAddressLower?: string;
+  userEmail?: string; // Optional email for user notifications
   imageUri?: string;
   website?: string;
   twitter?: string;
@@ -49,6 +114,7 @@ export async function POST(req: NextRequest) {
       contractAddressLower: body.contractAddress.trim().toLowerCase(),
       submittedByAddress: submittedBy,
       submittedByAddressLower: submittedBy ? submittedBy.toLowerCase() : undefined,
+      userEmail: body.userEmail?.trim() || undefined,
       imageUri: body.imageUri?.trim() || undefined,
       website: body.website?.trim() || undefined,
       twitter: body.twitter?.trim() || undefined,
@@ -79,6 +145,14 @@ export async function POST(req: NextRequest) {
     }
 
     await col.insertOne(record);
+
+    // Send email notifications after successful registration
+    try {
+      await sendTokenRegistrationEmails(record);
+    } catch (emailError) {
+      console.error('Failed to send registration emails:', emailError);
+      // Don't fail the registration if email fails
+    }
 
     return NextResponse.json({ ok: true, record });
   } catch (e) {

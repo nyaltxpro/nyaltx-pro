@@ -37,6 +37,20 @@ export default function PayPalCheckout({
         setTimeout(() => {
           window.location.href = '/dashboard/register-token?payment=paypal_success';
         }, 2000);
+      } else if (tier.toLowerCase().includes('race-')) {
+        // Handle Race to Liberty payments
+        setTimeout(() => {
+          window.location.href = `/pricing/race-to-liberty/success?tier=${tier}&payment=paypal_success`;
+        }, 2000);
+      } else {
+        // For other payments, check if there's a pending token registration
+        const pendingTokenData = localStorage.getItem('pendingTokenRegistration');
+        if (pendingTokenData) {
+          // Redirect back to register token page with success status
+          setTimeout(() => {
+            window.location.href = '/dashboard/register-token?payment=paypal_success';
+          }, 2000);
+        }
       }
 
       if (onSuccess) {
