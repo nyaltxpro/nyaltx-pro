@@ -371,7 +371,7 @@ export default function ProfilePage() {
             {!derivedConnected && (
                 <div className="flex flex-col items-center justify-center py-16 text-center">
                     <div className="bg-gray-800 p-6 rounded-xl max-w-md">
-                        <FaWallet className="text-5xl text-blue-400 mx-auto mb-4" />
+                        <FaWallet className="text-5xl text-[#00b8d8] mx-auto mb-4" />
                         <h2 className="text-xl font-semibold text-white mb-2">Connect Your Wallet</h2>
                         <p className="text-gray-400 mb-6">
                             Connect your wallet to view your tokens and manage social links
