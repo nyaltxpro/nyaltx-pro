@@ -141,79 +141,14 @@ export default function ProfilePage() {
             {/* Profile Info */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
                 <div>
-                    {/* <h1 className="text-3xl font-bold bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent mb-3">
-            {mockUser.name}
-          </h1> */}
 
-                    {/* {derivedConnected ? (
-                        <div className="flex items-center gap-3">
-                            <div className="flex items-center bg-gradient-to-r from-gray-800/80 to-gray-900/80 backdrop-blur-sm rounded-xl px-4 py-2 border border-gray-700/50">
-                                <FaEthereum className="text-blue-400 mr-2" />
-                                <span className="text-gray-300 text-sm mr-3 font-mono">
-                                    {formatWalletAddress(userAddress)}
-                                </span>
-                                <button
-                                    onClick={copyToClipboard}
-                                    className="text-gray-400 hover:text-white transition-colors p-1 rounded-md hover:bg-gray-700/50"
-                                >
-                                    {copied ? <FaCheck className="text-green-400" /> : <FaRegCopy />}
-                                </button>
-                            </div>
-                            <button
-                                onClick={handleDisconnectWallet}
-                                className="flex items-center text-red-400 hover:text-red-300 text-sm px-3 py-2 rounded-lg hover:bg-red-500/10 transition-all duration-200"
-                            >
-                                <BiLogOut className="mr-1" /> Disconnect
-                            </button>
-                        </div>
-                    ) : (
-                        <button
-                            onClick={handleConnectWallet}
-                            className="flex items-center bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white px-6 py-3 rounded-xl transition-all duration-200 shadow-lg hover:shadow-cyan-500/25"
-                        >
-                            <FaWallet className="mr-2" /> Connect Wallet
-                        </button>
-                    )} */}
                 </div>
             </div>
 
-            {/* Tabs */}
-            {/* <div className="flex bg-gray-800/30 rounded-xl p-1 mb-8 overflow-x-auto">
-        <button
-          onClick={() => setActiveTab('tokens')}
-          className={`px-6 py-3 font-medium text-sm whitespace-nowrap rounded-lg transition-all duration-200 ${
-            activeTab === 'tokens' 
-              ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg' 
-              : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
-          }`}
-        >
-          💰 My Tokens
-        </button>
-        <button
-          onClick={() => setActiveTab('social-links')}
-          className={`px-6 py-3 font-medium text-sm whitespace-nowrap rounded-lg transition-all duration-200 ${
-            activeTab === 'social-links' 
-              ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg' 
-              : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
-          }`}
-        >
-          🔗 Social Links
-        </button>
-        <button
-          onClick={() => setActiveTab('boost')}
-          className={`px-6 py-3 font-medium text-sm whitespace-nowrap rounded-lg transition-all duration-200 ${
-            activeTab === 'boost' 
-              ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg' 
-              : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
-          }`}
-        >
-          🚀 Profile Boost
-        </button>
-      </div> */}
 
             {/* My Tokens Tab */}
 
-            <div>
+            {derivedConnected && <div>
                 <br />
                 {/* My Registered Token Submissions */}
                 <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm rounded-2xl border border-gray-700/50 overflow-hidden mt-6">
@@ -325,9 +260,12 @@ export default function ProfilePage() {
                 </div>
             </div>
 
+            }
+
             {/* Social Links Management Tab */}
             <br />
-            <div>
+
+            {derivedConnected && <div>
                 <div className="mb-8">
                     <h2 className="text-2xl font-bold text-white mb-4">Manage Token Social Links</h2>
                     <p className="text-gray-400 mb-6">
@@ -425,6 +363,8 @@ export default function ProfilePage() {
                     )}
                 </div>
             </div>
+
+            }
 
             {/* Profile Boost Tab */}
             {/* Not Connected State */}
