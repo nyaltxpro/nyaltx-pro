@@ -254,10 +254,17 @@ export default function Web3Checkout({
         if (tierKey.startsWith('nyaltxpro')) {
           document.cookie = 'nyaltx_pro=1; path=/; max-age=31536000'; // 1 year
 
-          // Redirect to register token page after successful free activation
-          setTimeout(() => {
-            window.location.href = '/dashboard/register-token?payment=free';
-          }, 2000);
+          // Check if there's a pending token registration to process
+          const pendingTokenData = localStorage.getItem('pendingTokenRegistration');
+          if (pendingTokenData) {
+            // Register the token after successful free activation
+            await handleTokenRegistrationAfterFreeActivation(result, pendingTokenData);
+          } else {
+            // Redirect to register token page after successful free activation
+            setTimeout(() => {
+              window.location.href = '/dashboard/register-token?payment=free';
+            }, 2000);
+          }
         }
       } else {
         setError(result.message || 'Failed to activate subscription');
@@ -267,6 +274,63 @@ export default function Web3Checkout({
       setError(`Failed to activate free subscription: ${err.message}`);
     } finally {
       setProcessing(false);
+    }
+  };
+
+  // Handle token registration after successful free activation
+  const handleTokenRegistrationAfterFreeActivation = async (activationResult: any, pendingTokenDataString: string) => {
+    try {
+      const tokenData = JSON.parse(pendingTokenDataString);
+      
+      setSuccess(`Free activation successful! Registering your token...`);
+      
+      // Register the token via API
+      const response = await fetch('/api/tokens/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(tokenData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Token registration failed');
+      }
+
+      const result = await response.json();
+      
+      // Clear pending registration data
+      localStorage.removeItem('pendingTokenRegistration');
+      
+      setSuccess(`Free activation and token registration successful! Redirecting...`);
+      
+      // Redirect to success page with token and activation details
+      const successUrl = new URL('/dashboard/checkout/success', window.location.origin);
+      successUrl.searchParams.set('method', 'free');
+      successUrl.searchParams.set('tokenName', tokenData.tokenName);
+      successUrl.searchParams.set('tokenSymbol', tokenData.tokenSymbol);
+      successUrl.searchParams.set('txId', 'free_activation');
+      successUrl.searchParams.set('regId', result.record.id);
+      
+      setTimeout(() => {
+        window.location.href = successUrl.toString();
+      }, 2000);
+      
+    } catch (error) {
+      console.error('Token registration after free activation failed:', error);
+      
+      setError(`Free activation successful, but token registration failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      
+      // Still redirect to success page but show error
+      const successUrl = new URL('/dashboard/checkout/success', window.location.origin);
+      successUrl.searchParams.set('method', 'free');
+      successUrl.searchParams.set('error', 'registration_failed');
+      successUrl.searchParams.set('txId', 'free_activation');
+      
+      setTimeout(() => {
+        window.location.href = successUrl.toString();
+      }, 3000);
     }
   };
 
@@ -387,6 +451,63 @@ export default function Web3Checkout({
     }
   };
 
+  // Handle token registration after successful PayPal payment
+  const handleTokenRegistrationAfterPayPalPayment = async (paymentDetails: any, pendingTokenDataString: string) => {
+    try {
+      const tokenData = JSON.parse(pendingTokenDataString);
+      
+      setSuccess(`Payment successful! Registering your token...`);
+      
+      // Register the token via API
+      const response = await fetch('/api/tokens/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(tokenData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Token registration failed');
+      }
+
+      const result = await response.json();
+      
+      // Clear pending registration data
+      localStorage.removeItem('pendingTokenRegistration');
+      
+      setSuccess(`Payment and token registration successful! Redirecting...`);
+      
+      // Redirect to success page with token and payment details
+      const successUrl = new URL('/dashboard/checkout/success', window.location.origin);
+      successUrl.searchParams.set('method', 'paypal');
+      successUrl.searchParams.set('tokenName', tokenData.tokenName);
+      successUrl.searchParams.set('tokenSymbol', tokenData.tokenSymbol);
+      successUrl.searchParams.set('txId', paymentDetails.id);
+      successUrl.searchParams.set('regId', result.record.id);
+      
+      setTimeout(() => {
+        window.location.href = successUrl.toString();
+      }, 2000);
+      
+    } catch (error) {
+      console.error('Token registration after PayPal payment failed:', error);
+      
+      setError(`Payment successful, but token registration failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      
+      // Still redirect to success page but show error
+      const successUrl = new URL('/dashboard/checkout/success', window.location.origin);
+      successUrl.searchParams.set('method', 'paypal');
+      successUrl.searchParams.set('error', 'registration_failed');
+      successUrl.searchParams.set('txId', paymentDetails.id);
+      
+      setTimeout(() => {
+        window.location.href = successUrl.toString();
+      }, 3000);
+    }
+  };
+
   // Handle token registration after successful crypto payment
   const handleTokenRegistrationAfterCryptoPayment = async (txHash: string, pendingTokenDataString: string) => {
     try {
@@ -474,9 +595,26 @@ export default function Web3Checkout({
     }
   };
 
-  const handlePayPalSuccess = (details: any) => {
-    setSuccess(`Payment successful! Transaction ID: ${details?.id}. Redirecting...`);
-    setError(null);
+  const handlePayPalSuccess = async (details: any) => {
+    try {
+      setSuccess(`Payment successful! Transaction ID: ${details?.id}. Processing...`);
+      setError(null);
+      
+      // Check if there's a pending token registration to process
+      const pendingTokenData = localStorage.getItem('pendingTokenRegistration');
+      if (pendingTokenData) {
+        // Register the token after successful payment
+        await handleTokenRegistrationAfterPayPalPayment(details, pendingTokenData);
+      } else {
+        // Redirect to success page without token registration
+        setTimeout(() => {
+          window.location.href = `/dashboard/checkout/success?method=paypal&txId=${details?.id}`;
+        }, 2000);
+      }
+    } catch (error) {
+      console.error('PayPal success handling error:', error);
+      setError(`Payment successful, but processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   };
 
   const handlePayPalError = (error: any) => {
