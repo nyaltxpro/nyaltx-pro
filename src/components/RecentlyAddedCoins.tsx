@@ -1,137 +1,23 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import Image from 'next/image';
-import { getRecentlyAddedCoins } from '../api/coingecko/client';
 import { useRouter } from 'next/navigation';
 import tokens from '@/data/tokens.json';
 import { fetchCoinPlatforms } from '@/api/coingecko/api';
-
-interface RecentCoin {
-  id: string;
-  name: string;
-  symbol: string;
-  image: string;
-  current_price: number;
-  market_cap: number;
-  total_volume: number;
-  price_change_percentage_24h: number;
-  market_cap_rank: number;
-}
-
-// Local storage key for caching
-const STORAGE_KEY = 'recently_added_coins';
-const CACHE_EXPIRY = 30 * 60 * 1000; // 30 minutes in milliseconds
+import { useRecentlyAddedCoins } from '@/hooks/useRecentlyAddedCoins';
+import { CachedRecentlyAddedCoin } from '@/store/slices/searchCacheSlice';
 
 export default function RecentlyAddedCoins() {
-  const [coins, setCoins] = useState<RecentCoin[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const { 
+    recentlyAddedCoins: coins, 
+    loading, 
+    error, 
+    refreshRecentlyAddedCoins,
+    hasCachedData 
+  } = useRecentlyAddedCoins();
 
-  // Function to retry fetching data
-  const retryFetch = () => {
-    setError(null);
-    setLoading(true);
-    // This will trigger the useEffect to run again
-    setCoins([]);
-  };
-
-  useEffect(() => {
-    // Function to load data from cache
-    const loadFromCache = () => {
-      try {
-        if (typeof window !== 'undefined') {
-          const cachedData = localStorage.getItem(STORAGE_KEY);
-          if (cachedData) {
-            const { data, timestamp } = JSON.parse(cachedData);
-            const now = Date.now();
-
-            // Check if cache is still valid (not expired)
-            if (now - timestamp < CACHE_EXPIRY) {
-              console.log('Loading recently added coins from cache');
-              setCoins(data);
-              setLoading(false);
-              return true;
-            }
-          }
-        }
-        return false;
-      } catch (e) {
-        console.error('Error loading from cache:', e);
-        return false;
-      }
-    };
-
-    // Function to save data to cache
-    const saveToCache = (data: RecentCoin[]) => {
-      try {
-        if (typeof window !== 'undefined') {
-          const cacheData = {
-            data,
-            timestamp: Date.now(),
-          };
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(cacheData));
-        }
-      } catch (e) {
-        console.error('Error saving to cache:', e);
-      }
-    };
-
-    const fetchRecentCoins = async (retries = 2) => {
-      for (let attempt = 0; attempt <= retries; attempt++) {
-        try {
-          // Try to load from cache first if we're in loading state
-          if (loading && loadFromCache()) {
-            return; // Exit if we successfully loaded from cache
-          }
-
-          setLoading(true);
-          setError(null);
-          
-          const data = await getRecentlyAddedCoins('usd', 10);
-          
-          if (data && data.length > 0) {
-            setCoins(data);
-            saveToCache(data); // Save the fresh data to cache
-            setError(null);
-            setLoading(false);
-            return;
-          } else {
-            throw new Error('No data received from API');
-          }
-        } catch (err) {
-          console.error(`Error fetching recently added coins (attempt ${attempt + 1}):`, err);
-
-          if (attempt < retries) {
-            // Wait before retrying with exponential backoff
-            const delay = 1000 * Math.pow(2, attempt);
-            await new Promise(resolve => setTimeout(resolve, delay));
-            continue;
-          }
-
-          // Final attempt failed - check for cached data
-          if (!loadFromCache()) {
-            setError('Failed to load recently added coins. Please check your connection and try again.');
-          } else {
-            console.log('Using cached data due to API failure');
-          }
-
-          setLoading(false);
-        }
-      }
-    };
-
-    // Try to load from cache immediately
-    if (!loadFromCache()) {
-      fetchRecentCoins();
-    }
-
-    // Refresh data every 5 minutes
-    const intervalId = setInterval(fetchRecentCoins, 5 * 60 * 1000);
-
-    return () => clearInterval(intervalId);
-  }, [loading]);
 
   // Format price with appropriate decimal places
   const formatPrice = (price: number) => {
@@ -154,7 +40,7 @@ export default function RecentlyAddedCoins() {
     }
   };
 
-  const handleNavigate = async (coin: RecentCoin) => {
+  const handleNavigate = async (coin: CachedRecentlyAddedCoin) => {
     const base = coin.symbol?.toUpperCase() || coin.name?.toUpperCase();
     if (!base) return;
 
@@ -213,7 +99,38 @@ export default function RecentlyAddedCoins() {
 
   return (
     <div className="w-full">
-      <h2 className="text-xl font-semibold mb-4">Recently Added Coins</h2>
+      <div className="flex justify-between items-center mb-4">
+        <div>
+          <h2 className="text-xl font-semibold">Recently Added Coins</h2>
+          <div className="flex items-center gap-2 mt-1">
+            {hasCachedData && !loading && (
+              <span className="text-xs text-green-400 bg-green-900/20 px-2 py-1 rounded">
+                📱 Recently Added Cached
+              </span>
+            )}
+            {loading && (
+              <span className="text-xs text-blue-400 bg-blue-900/20 px-2 py-1 rounded animate-pulse">
+                🔄 Loading Recently Added...
+              </span>
+            )}
+            {coins.length > 0 && !loading && (
+              <span className="text-xs text-green-400 bg-green-900/20 px-2 py-1 rounded">
+                ✅ {coins.length} Coins Loaded
+              </span>
+            )}
+          </div>
+        </div>
+        
+        <button
+          onClick={refreshRecentlyAddedCoins}
+          disabled={loading}
+          className="flex items-center gap-2 px-3 py-2 bg-cyan-600 hover:bg-cyan-700 disabled:bg-gray-600 rounded-full transition-colors text-sm"
+          title="Refresh recently added coins data"
+        >
+          <span className={loading ? 'animate-spin' : ''}>🔄</span>
+          Refresh
+        </button>
+      </div>
 
       {loading ? (
         <div className="animate-pulse space-y-4">
@@ -239,7 +156,7 @@ export default function RecentlyAddedCoins() {
             <div className="text-red-400 mb-2">⚠️ Failed to load recently added coins</div>
             <p className="text-gray-400 text-sm mb-3">{error}</p>
             <button
-              onClick={retryFetch}
+              onClick={refreshRecentlyAddedCoins}
               className="px-4 py-2 bg-[#00b8d8] hover:bg-[#00a6c4] text-white rounded-full text-sm transition-colors"
             >
               Retry
