@@ -4,8 +4,7 @@ import SocialLinksEditor from '@/components/SocialLinksEditor';
 import { useAppKit } from '@reown/appkit/react';
 import Image from 'next/image';
 import React, { useState } from 'react';
-import { BiLogOut } from 'react-icons/bi';
-import { FaCheck, FaEthereum, FaRegCopy, FaWallet } from 'react-icons/fa';
+import { FaWallet } from 'react-icons/fa';
 import { useAccount } from 'wagmi';
 export default function ProfilePage() {
     const { isConnected: isWagmiConnected, address } = useAccount();
@@ -146,7 +145,7 @@ export default function ProfilePage() {
             {mockUser.name}
           </h1> */}
 
-                    {derivedConnected ? (
+                    {/* {derivedConnected ? (
                         <div className="flex items-center gap-3">
                             <div className="flex items-center bg-gradient-to-r from-gray-800/80 to-gray-900/80 backdrop-blur-sm rounded-xl px-4 py-2 border border-gray-700/50">
                                 <FaEthereum className="text-blue-400 mr-2" />
@@ -174,7 +173,7 @@ export default function ProfilePage() {
                         >
                             <FaWallet className="mr-2" /> Connect Wallet
                         </button>
-                    )}
+                    )} */}
                 </div>
             </div>
 
