@@ -8,45 +8,20 @@ interface EmailRequest {
   text?: string;
 }
 
-// Create reusable transporter
+// Create Gmail transporter
 const createTransporter = () => {
-  // Support multiple email providers
-  const emailProvider = process.env.EMAIL_PROVIDER || 'smtp';
-  
-  if (emailProvider === 'sendgrid') {
-    return nodemailer.createTransport({
-      service: 'SendGrid',
-      auth: {
-        user: 'apikey',
-        pass: process.env.SENDGRID_API_KEY,
-      },
-    });
-  } else if (emailProvider === 'gmail') {
-    return nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_APP_PASSWORD,
-      },
-    });
-  } else {
-    // Generic SMTP
-    return nodemailer.createTransport({
-      host: process.env.SMTP_HOST || 'smtp.gmail.com',
-      port: parseInt(process.env.SMTP_PORT || '587'),
-      secure: process.env.SMTP_SECURE === 'true',
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASSWORD,
-      },
-    });
-  }
+  return nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+    },
+  });
 };
 
 export async function POST(request: NextRequest) {
   try {
     const { to, subject, html, text }: EmailRequest = await request.json();
-
     if (!to || !subject || !html) {
       return NextResponse.json(
         { error: 'Missing required fields: to, subject, html' },
@@ -63,14 +38,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if email service is configured
-    const requiredEnvVars = ['SMTP_USER', 'SMTP_PASSWORD'];
+    // Check if Gmail is configured
+    const requiredEnvVars = ['SMTP_USER', 'SMTP_PASS'];
     const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
     
     if (missingVars.length > 0) {
-      console.warn('Email service not configured. Missing:', missingVars.join(', '));
+      console.warn('Gmail service not configured. Missing:', missingVars.join(', '));
       return NextResponse.json(
-        { error: 'Email service not configured' },
+        { error: 'Gmail service not configured. Please set SMTP_USER and SMTP_PASS environment variables.' },
         { status: 503 }
       );
     }
@@ -84,19 +59,17 @@ export async function POST(request: NextRequest) {
       console.error('Email transporter verification failed:', error);
       return NextResponse.json(
         { error: 'Email service configuration error' },
-        { status: 503 }
       );
     }
 
     // Send email
     const mailOptions = {
-      from: process.env.SMTP_FROM || process.env.SMTP_USER,
+      from: process.env.FROM_EMAIL || process.env.SMTP_USER,
       to,
       subject,
       html,
       text: text || html.replace(/<[^>]*>/g, ''), // Strip HTML for text version
     };
-
     const info = await transporter.sendMail(mailOptions);
     
     console.log('Email sent successfully:', {

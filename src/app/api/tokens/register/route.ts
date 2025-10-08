@@ -38,7 +38,7 @@ async function sendTokenRegistrationEmails(tokenData: TokenRegistration) {
   }
   
   // Send admin notification email
-  const adminEmails = process.env.ADMIN_EMAIL_ADDRESSES?.split(',') || ['admin@nyaltx.com'];
+  const adminEmails = process.env.ADMIN_EMAIL ? [process.env.ADMIN_EMAIL] : ['admin@nyaltx.com'];
   
   for (const adminEmail of adminEmails) {
     if (adminEmail.trim()) {
