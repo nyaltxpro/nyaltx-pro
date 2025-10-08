@@ -159,7 +159,7 @@ export default function ProfilePage() {
                         </div>
                         <a
                             href="/dashboard/register-token"
-                            className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white rounded-lg text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-cyan-500/25"
+                            className="px-4 py-2 bg-[#00b8d8] text-white rounded-full text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-cyan-500/25"
                         >
                             Submit New Token
                         </a>
@@ -378,7 +378,7 @@ export default function ProfilePage() {
                         </p>
                         <button
                             onClick={handleConnectWallet}
-                            className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg transition-colors"
+                            className="w-full bg-[#00b8d8]  text-white px-4 py-3 rounded-full transition-colors"
                         >
                             Connect Wallet
                         </button>
