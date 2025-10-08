@@ -8,7 +8,6 @@ import {
 import Faq from '@/components/Faq';
 import SwapPage from '@/components/SwapCard';
 import tokens from '@/data/tokens.json';
-import { pageSEO } from '@/lib/seo.config';
 import {
     fetchContractAddresses,
     logContractAddressInfo,
@@ -17,7 +16,6 @@ import {
 import { getCryptoIconUrl, getCryptoIconUrlWithFallback } from '@/utils/cryptoIcons';
 import { getCryptoName } from '@/utils/cryptoNames';
 import { geckoTerminalAPI } from '@/utils/geckoTerminalApi';
-import { NextSeo } from 'next-seo';
 import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
 import React, { Suspense, useEffect, useState } from 'react';
@@ -107,7 +105,7 @@ function TradePageContent() {
 export default function Page() {
     return (
         <>
-            <NextSeo {...pageSEO.trade} />
+
             <Suspense fallback={<div className="p-4 text-white">Loading trade page…</div>}>
                 <TradePageContent />
             </Suspense>
