@@ -469,7 +469,7 @@ function RegisterTokenContent() {
                                     <button
                                         type="submit"
                                         disabled={isSubmitting || !isConnected}
-                                        className={`bg-[#00b8d8] hover:bg-[#00a6c4] text-white font-medium py-2 px-6 rounded-md transition duration-200 ${isSubmitting || !isConnected ? 'opacity-60 cursor-not-allowed' : ''}`}
+                                        className={`bg-[#00b8d8] hover:bg-[#00a6c4] text-white font-medium py-2 px-6 rounded-full transition duration-200 ${isSubmitting || !isConnected ? 'opacity-60 cursor-not-allowed' : ''}`}
                                     >
                                         {isSubmitting
                                             ? 'Submitting…'

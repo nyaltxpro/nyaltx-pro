@@ -385,7 +385,7 @@ export default function ToolsPage() {
                                         <span className="text-xs text-gray-400 ml-2">Supported tokens</span>
                                     </div>
                                 )}
-                            <button className="w-full bg-[#00b8d8] hover:bg-blue-700 text-white py-2 rounded-md transition-colors">
+                            <button className="w-full bg-[#00b8d8] hover:bg-[#00a6c4] text-white py-2 rounded-full transition-colors">
                                 Launch Tool
                             </button>
                         </div>
@@ -475,10 +475,10 @@ export default function ToolsPage() {
                         </div>
 
                         <div className="flex flex-col sm:flex-row gap-3">
-                            <button className="bg-[#00b8d8] hover:bg-blue-700 text-white py-2 px-4 rounded-md transition-colors">
+                            <button className="bg-[#00b8d8] hover:bg-[#00a6c4] text-white py-2 px-4 rounded-full transition-colors">
                                 Get API Key
                             </button>
-                            <button className="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded-md transition-colors">
+                            <button className="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded-full transition-colors">
                                 View Documentation
                             </button>
                         </div>
@@ -511,7 +511,7 @@ export default function ToolsPage() {
                             ></textarea>
                         </div>
 
-                        <button className="bg-[#00b8d8] hover:bg-blue-700 text-white py-2 px-4 rounded-md transition-colors">
+                        <button className="bg-[#00b8d8] hover:bg-[#00a6c4] text-white py-2 px-4 rounded-full transition-colors">
                             Submit Request
                         </button>
                     </div>

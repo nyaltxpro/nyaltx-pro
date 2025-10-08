@@ -195,7 +195,7 @@ export default function SocialLinksEditor({
         {!isEditing && (
           <button
             onClick={() => setIsEditing(true)}
-            className="flex items-center px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
+            className="flex items-center px-3 py-2 bg-[#00b8d8] hover:bg-[#00a6c4] text-white rounded-full transition-colors"
           >
             <FaEdit className="mr-2" />
             Edit Links

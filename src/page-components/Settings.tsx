@@ -203,7 +203,7 @@ export default function SettingsPage() {
                                     <button
                                         onClick={saveSettings}
                                         disabled={isLoading}
-                                        className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-lg hover:from-cyan-700 hover:to-blue-700 transition-all duration-300 disabled:opacity-50"
+                                        className="flex items-center gap-2 px-4 py-2 bg-[#00b8d8] text-white rounded-full hover:bg-[#00a6c4] transition-all duration-300 disabled:opacity-50"
                                     >
                                         <FaSave className="w-4 h-4" />
                                         {isLoading ? 'Saving...' : 'Save Changes'}
@@ -236,7 +236,7 @@ export default function SettingsPage() {
                                             key={tab.id}
                                             onClick={() => setActiveTab(tab.id)}
                                             className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all duration-200 ${activeTab === tab.id
-                                                ? 'bg-gradient-to-r from-cyan-600/20 to-blue-600/20 text-cyan-400 border border-cyan-500/30'
+                                                ? 'bg-[#00b8d8]/20 text-[#00b8d8] border border-[#00b8d8]/30'
                                                 : 'text-gray-300 hover:bg-gray-700/50 hover:text-white'
                                                 }`}
                                             whileHover={{ scale: 1.02 }}
@@ -610,8 +610,8 @@ export default function SettingsPage() {
                                                         <button
                                                             key={slippage}
                                                             onClick={() => updateSetting('defaultSlippage', slippage)}
-                                                            className={`px-4 py-2 rounded-lg transition-all ${settings.defaultSlippage === slippage
-                                                                ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white'
+                                                            className={`px-4 py-2 rounded-full transition-all ${settings.defaultSlippage === slippage
+                                                                ? 'bg-[#00b8d8] text-white'
                                                                 : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                                                                 }`}
                                                         >

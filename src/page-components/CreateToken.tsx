@@ -413,7 +413,7 @@ export default function CreateTokenPage() {
                                     <button
                                         type="submit"
                                         disabled={isCreating}
-                                        className={`bg-[#00b8d8] hover:bg-[#00a6c4] text-white font-medium py-3 px-8 rounded-md transition duration-200 flex items-center justify-center space-x-2 mx-auto ${isCreating ? 'opacity-60 cursor-not-allowed' : ''}`}
+                                        className={`bg-[#00b8d8] hover:bg-[#00a6c4] text-white font-medium py-3 px-8 rounded-full transition duration-200 flex items-center justify-center space-x-2 mx-auto ${isCreating ? 'opacity-60 cursor-not-allowed' : ''}`}
                                     >
                                         <FaRocket />
                                         <span>{isCreating ? 'Creating Token...' : 'Create Token'}</span>

@@ -169,7 +169,7 @@ export default function DashboardRaceToLibertyPage() {
           </p>
           <a
             href="/dashboard/register-token"
-            className="inline-block px-6 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-semibold rounded-lg hover:from-cyan-700 hover:to-blue-700 transition-all duration-300"
+            className="inline-block px-6 py-3 bg-[#00b8d8] hover:bg-[#00a6c4] text-white font-semibold rounded-full transition-all duration-300"
           >
             Register Token
           </a>

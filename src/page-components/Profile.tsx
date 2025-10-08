@@ -181,7 +181,7 @@ export default function ProfilePage() {
                                 </p>
                                 <a
                                     href="/dashboard/register-token"
-                                    className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white rounded-lg font-medium transition-all duration-200"
+                                    className="inline-flex items-center px-4 py-2 bg-[#00b8d8] hover:bg-[#00a6c4] text-white rounded-full font-medium transition-all duration-200"
                                 >
                                     Register Your First Token
                                 </a>

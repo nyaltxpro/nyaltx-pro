@@ -11,8 +11,7 @@ import {
     FaFire,
     FaGlobe,
     FaPlay,
-    FaPlus,
-    FaStar
+    FaPlus
 } from 'react-icons/fa';
 import { useAccount } from 'wagmi';
 
@@ -231,16 +230,7 @@ export default function LiveStreamPage() {
                             <FaCrown className="w-4 h-4" />
                             Stream.io Pro
                         </button>
-                        <button
-                            onClick={() => setStreamingPlatform('webrtc')}
-                            className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${streamingPlatform === 'webrtc'
-                                ? 'bg-gray-600 text-white'
-                                : 'text-gray-400 hover:text-white'
-                                }`}
-                        >
-                            <FaStar className="w-4 h-4" />
-                            WebRTC
-                        </button>
+
                     </div>
 
                     <div className="flex items-center gap-2 px-3 py-1 bg-red-500/20 text-red-400 rounded-full text-sm">
@@ -271,7 +261,7 @@ export default function LiveStreamPage() {
                     <button
                         key={id}
                         onClick={() => setSelectedFilter(id as any)}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-lg whitespace-nowrap transition-colors ${selectedFilter === id
+                        className={`flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap transition-colors ${selectedFilter === id
                             ? 'bg-cyan-600 text-white'
                             : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                             }`}
