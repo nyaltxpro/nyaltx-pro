@@ -1,6 +1,7 @@
 'use client';
 
 import ConnectWalletButton from '@/components/ConnectWalletButton';
+import ImageUpload from '@/components/ImageUpload';
 import { useAppDispatch, useAppSelector } from '@/store';
 import {
     clearError,
@@ -14,7 +15,9 @@ import {
     FaCheck,
     FaChevronDown,
     FaChevronUp,
-    FaInfoCircle
+    FaInfoCircle,
+    FaImage,
+    FaLink
 } from 'react-icons/fa';
 import { useAccount } from 'wagmi';
 
@@ -43,6 +46,19 @@ function RegisterTokenContent() {
     const [activeTab, setActiveTab] = useState('basic');
     const [youtube, setYoutube] = useState('');
     const [videoLink, setVideoLink] = useState('');
+    const [imageUploadMethod, setImageUploadMethod] = useState<'upload' | 'url'>('upload');
+    const [imageUploadError, setImageUploadError] = useState<string | null>(null);
+
+    // Handle image upload success
+    const handleImageUploaded = (ipfsUrl: string) => {
+        dispatch(updateFormField({ field: 'imageUri', value: ipfsUrl }));
+        setImageUploadError(null);
+    };
+
+    // Handle image upload error
+    const handleImageUploadError = (error: string) => {
+        setImageUploadError(error);
+    };
 
     // Check for payment success from URL params
     React.useEffect(() => {
@@ -342,23 +358,88 @@ function RegisterTokenContent() {
                                     <p className="text-xs text-gray-500 mt-1">Paste the verified contract address</p>
                                 </div>
 
-                                {/* Image URI */}
-                                <div className="mb-4">
-                                    <label className="block text-sm font-medium text-gray-300 mb-1">
-                                        Image URI (Logo)
+                                {/* Image Upload/URI */}
+                                <div className="mb-6">
+                                    <label className="block text-sm font-medium text-gray-300 mb-3">
+                                        Token Logo (400x300 recommended)
                                     </label>
-                                    <input
-                                        type="url"
-                                        className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
-                                        placeholder="https://.../logo.png"
-                                        value={formData.imageUri}
-                                        onChange={e =>
-                                            dispatch(updateFormField({ field: 'imageUri', value: e.target.value }))
-                                        }
-                                    />
-                                    <p className="text-xs text-gray-500 mt-1">
-                                        Direct URL to your token logo (PNG/SVG recommended)
-                                    </p>
+                                    
+                                    {/* Upload Method Toggle */}
+                                    <div className="flex space-x-1 mb-4 bg-gray-800 rounded-lg p-1">
+                                        <button
+                                            type="button"
+                                            onClick={() => setImageUploadMethod('upload')}
+                                            className={`flex-1 flex items-center justify-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                                                imageUploadMethod === 'upload'
+                                                    ? 'bg-[#00b8d8] text-white'
+                                                    : 'text-gray-400 hover:text-gray-300'
+                                            }`}
+                                        >
+                                            <FaImage className="h-4 w-4" />
+                                            <span>Upload Image</span>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setImageUploadMethod('url')}
+                                            className={`flex-1 flex items-center justify-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                                                imageUploadMethod === 'url'
+                                                    ? 'bg-[#00b8d8] text-white'
+                                                    : 'text-gray-400 hover:text-gray-300'
+                                            }`}
+                                        >
+                                            <FaLink className="h-4 w-4" />
+                                            <span>Image URL</span>
+                                        </button>
+                                    </div>
+
+                                    {/* Upload Interface */}
+                                    {imageUploadMethod === 'upload' ? (
+                                        <ImageUpload
+                                            onImageUploaded={handleImageUploaded}
+                                            onError={handleImageUploadError}
+                                            currentImageUrl={formData.imageUri}
+                                            disabled={isSubmitting}
+                                        />
+                                    ) : (
+                                        <div>
+                                            <input
+                                                type="url"
+                                                className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
+                                                placeholder="https://example.com/logo.png"
+                                                value={formData.imageUri}
+                                                onChange={e =>
+                                                    dispatch(updateFormField({ field: 'imageUri', value: e.target.value }))
+                                                }
+                                            />
+                                            <p className="text-xs text-gray-500 mt-2">
+                                                Direct URL to your token logo (PNG, JPG, SVG, WebP recommended)
+                                            </p>
+                                        </div>
+                                    )}
+
+                                    {/* Upload Error */}
+                                    {imageUploadError && (
+                                        <div className="mt-3 p-3 bg-red-900/20 border border-red-500/50 rounded-lg">
+                                            <p className="text-red-400 text-sm">{imageUploadError}</p>
+                                        </div>
+                                    )}
+
+                                    {/* Current Image Preview for URL method */}
+                                    {imageUploadMethod === 'url' && formData.imageUri && (
+                                        <div className="mt-3 p-3 bg-gray-800/50 rounded-lg">
+                                            <p className="text-xs text-gray-400 mb-2">Preview:</p>
+                                            <div className="relative w-20 h-15 mx-auto">
+                                                <img
+                                                    src={formData.imageUri}
+                                                    alt="Token logo preview"
+                                                    className="w-full h-full object-contain rounded"
+                                                    onError={(e) => {
+                                                        e.currentTarget.style.display = 'none';
+                                                    }}
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Social Links (Optional) */}

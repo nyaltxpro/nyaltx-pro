@@ -226,12 +226,12 @@ export default function RecentlyAddedCoins() {
               </div>
 
               <div className="text-right w-full sm:w-auto mt-2 sm:mt-0 flex justify-between sm:block">
-                <div className="font-medium">${formatPrice(coin.current_price)}</div>
+                <div className="font-medium">{formatPrice(coin.current_price)}</div>
                 <div
-                  className={`text-xs ${coin.price_change_percentage_24h >= 0 ? 'text-green-500' : 'text-red-500'}`}
+                  className={`text-xs ${(coin.price_change_percentage_24h || 0) >= 0 ? 'text-green-500' : 'text-red-500'}`}
                 >
-                  {coin.price_change_percentage_24h >= 0 ? '+' : ''}
-                  {coin.price_change_percentage_24h?.toFixed(2)}%
+                  {(coin.price_change_percentage_24h || 0) >= 0 ? '+' : ''}
+                  {(coin.price_change_percentage_24h || 0).toFixed(2)}%
                 </div>
               </div>
             </div>
