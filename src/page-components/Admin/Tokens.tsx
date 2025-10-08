@@ -438,7 +438,7 @@ function AdminTokensComponent() {
                                     >
                                         <div className="flex items-center gap-2">
                                             {t.imageUri && (
-                                                <img src={t.imageUri} alt="logo" className="w-6 h-6 rounded" />
+                                                <img src={t.imageUri.replace('gateway.pinata.cloud', 'ipfs.io')} alt="logo" className="w-6 h-6 rounded" />
                                             )}
                                             <div className="min-w-0">
                                                 <div className="font-medium">

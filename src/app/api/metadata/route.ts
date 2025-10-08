@@ -14,10 +14,10 @@ export async function GET(request: NextRequest) {
 
     // IPFS gateways in order of preference (fastest/most reliable first)
     const ipfsGateways = [
-      'https://cloudflare-ipfs.com/ipfs/',
-      'https://gateway.pinata.cloud/ipfs/',
-      'https://dweb.link/ipfs/',
       'https://ipfs.io/ipfs/',
+      'https://cloudflare-ipfs.com/ipfs/',
+      'https://dweb.link/ipfs/',
+      'https://gateway.pinata.cloud/ipfs/',
       'https://nftstorage.link/ipfs/',
     ];
 
@@ -130,9 +130,9 @@ export async function GET(request: NextRequest) {
       if (metadata.image.startsWith('ipfs://')) {
         const ipfsHash = metadata.image.replace('ipfs://', '');
         // Use multiple IPFS gateways for better reliability
-        metadata.image = `https://cloudflare-ipfs.com/ipfs/${ipfsHash}`;
+        metadata.image = `https://ipfs.io/ipfs/${ipfsHash}`;
         metadata.imageBackups = [
-          `https://ipfs.io/ipfs/${ipfsHash}`,
+          `https://cloudflare-ipfs.com/ipfs/${ipfsHash}`,
           `https://gateway.pinata.cloud/ipfs/${ipfsHash}`,
         ];
       }

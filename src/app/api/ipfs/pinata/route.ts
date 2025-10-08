@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
       IpfsHash: data.IpfsHash,
       PinSize: data.PinSize,
       Timestamp: data.Timestamp,
-      ipfsUrl: `https://gateway.pinata.cloud/ipfs/${data.IpfsHash}`,
+      ipfsUrl: `https://ipfs.io/ipfs/${data.IpfsHash}`,
     });
 
   } catch (error) {

@@ -34,7 +34,7 @@ const pinataProvider: IPFSProvider = {
       return {
         success: true,
         ipfsHash: data.IpfsHash,
-        ipfsUrl: `https://gateway.pinata.cloud/ipfs/${data.IpfsHash}`,
+        ipfsUrl: `https://ipfs.io/ipfs/${data.IpfsHash}`,
       };
     } catch (error) {
       console.error('Pinata upload error:', error);
@@ -67,7 +67,7 @@ const web3StorageProvider: IPFSProvider = {
       return {
         success: true,
         ipfsHash: data.cid,
-        ipfsUrl: `https://w3s.link/ipfs/${data.cid}`,
+        ipfsUrl: `https://ipfs.io/ipfs/${data.cid}`,
       };
     } catch (error) {
       console.error('Web3.Storage upload error:', error);
@@ -288,7 +288,7 @@ export const uploadToIPFS = async (
 };
 
 // Utility to get IPFS URL from hash
-export const getIPFSUrl = (hash: string, gateway = 'https://gateway.pinata.cloud'): string => {
+export const getIPFSUrl = (hash: string, gateway = 'https://ipfs.io'): string => {
   if (hash.startsWith('http')) return hash; // Already a URL
   return `${gateway}/ipfs/${hash}`;
 };
@@ -298,4 +298,18 @@ export const extractIPFSHash = (url: string): string | null => {
   const ipfsRegex = /\/ipfs\/([a-zA-Z0-9]+)/;
   const match = url.match(ipfsRegex);
   return match ? match[1] : null;
+};
+
+// Utility to convert any IPFS URL to use ipfs.io gateway
+export const normalizeIPFSUrl = (url: string): string => {
+  if (!url) return url;
+  
+  // Extract IPFS hash from any gateway URL
+  const hash = extractIPFSHash(url);
+  if (hash) {
+    return `https://ipfs.io/ipfs/${hash}`;
+  }
+  
+  // If it's already an ipfs.io URL or not an IPFS URL, return as-is
+  return url;
 };

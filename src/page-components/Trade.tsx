@@ -793,7 +793,7 @@ function TradingViewWithParams({
                                     {tokenSocialLinks?.imageUri ? (
                                         // eslint-disable-next-line @next/next/no-img-element
                                         <img
-                                            src={tokenSocialLinks.imageUri}
+                                            src={tokenSocialLinks.imageUri.replace('gateway.pinata.cloud', 'ipfs.io')}
                                             alt={baseToken}
                                             className="w-10 h-10 object-cover"
                                         />
