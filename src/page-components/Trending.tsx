@@ -415,7 +415,7 @@ export default function TrendingPage() {
                         <button
                             onClick={refreshTrendingCoins}
                             disabled={trendingLoading}
-                            className="flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 rounded transition-colors text-sm"
+                            className="flex items-center gap-2 px-3 py-2 bg-cyan-600 disabled:bg-gray-600 rounded-full transition-colors text-sm"
                             title="Refresh trending data from Redux cache"
                         >
                             <FaSync className={trendingLoading ? 'animate-spin' : ''} />
@@ -424,7 +424,7 @@ export default function TrendingPage() {
                         <button
                             onClick={loadMarketData}
                             disabled={marketDataLoading}
-                            className="flex items-center gap-2 px-3 py-2 bg-cyan-600 hover:bg-cyan-700 disabled:bg-gray-600 rounded transition-colors text-sm"
+                            className="flex items-center gap-2 px-3 py-2 bg-cyan-600 hover:bg-cyan-700 disabled:bg-gray-600 rounded-full transition-colors text-sm"
                             title="Refresh market data"
                         >
                             <FaSync className={marketDataLoading ? 'animate-spin' : ''} />
@@ -437,25 +437,25 @@ export default function TrendingPage() {
                 <div className="flex flex-wrap gap-4 mb-6">
                     <div className="flex space-x-2">
                         <button
-                            className={`px-4 py-2 rounded-lg ${activeFilter === 'all' ? 'bg-cyan-500' : 'bg-gray-800'}`}
+                            className={`px-4 py-2 rounded-full ${activeFilter === 'all' ? 'bg-cyan-500' : 'bg-gray-800'}`}
                             onClick={() => setActiveFilter('all')}
                         >
                             All
                         </button>
                         <button
-                            className={`px-4 py-2 rounded-lg ${activeFilter === 'gainers' ? 'bg-cyan-500' : 'bg-gray-800'}`}
+                            className={`px-4 py-2 rounded-full ${activeFilter === 'gainers' ? 'bg-cyan-500' : 'bg-gray-800'}`}
                             onClick={() => setActiveFilter('gainers')}
                         >
                             Gainers
                         </button>
                         <button
-                            className={`px-4 py-2 rounded-lg ${activeFilter === 'losers' ? 'bg-cyan-500' : 'bg-gray-800'}`}
+                            className={`px-4 py-2 rounded-full ${activeFilter === 'losers' ? 'bg-cyan-500' : 'bg-gray-800'}`}
                             onClick={() => setActiveFilter('losers')}
                         >
                             Losers
                         </button>
                         <button
-                            className={`px-4 py-2 rounded-lg ${activeFilter === 'favorites' ? 'bg-cyan-500' : 'bg-gray-800'}`}
+                            className={`px-4 py-2 rounded-full ${activeFilter === 'favorites' ? 'bg-cyan-500' : 'bg-gray-800'}`}
                             onClick={() => setActiveFilter('favorites')}
                         >
                             Favorites
@@ -791,47 +791,7 @@ export default function TrendingPage() {
                 )}
 
                 {/* Hot Trends Section */}
-                <div className="mt-8">
-                    <h2 className="text-xl font-bold mb-4">Hot Trends</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        {/* Trending Category Cards */}
-                        <div className="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-lg p-4 hover:bg-[var(--hover-bg)] transition-colors cursor-pointer">
-                            <h3 className="font-medium mb-2">DeFi</h3>
-                            <div className="text-sm text-gray-400 mb-2">Top DeFi tokens by market cap</div>
-                            <div className="flex items-center justify-between">
-                                <div className="text-green-500">+5.2%</div>
-                                <div className="text-sm text-gray-400">24h change</div>
-                            </div>
-                        </div>
 
-                        <div className="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-lg p-4 hover:bg-[var(--hover-bg)] transition-colors cursor-pointer">
-                            <h3 className="font-medium mb-2">NFTs</h3>
-                            <div className="text-sm text-gray-400 mb-2">Top NFT tokens by volume</div>
-                            <div className="flex items-center justify-between">
-                                <div className="text-red-500">-2.8%</div>
-                                <div className="text-sm text-gray-400">24h change</div>
-                            </div>
-                        </div>
-
-                        <div className="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-lg p-4 hover:bg-[var(--hover-bg)] transition-colors cursor-pointer">
-                            <h3 className="font-medium mb-2">Layer 2</h3>
-                            <div className="text-sm text-gray-400 mb-2">Top L2 scaling solutions</div>
-                            <div className="flex items-center justify-between">
-                                <div className="text-green-500">+8.7%</div>
-                                <div className="text-sm text-gray-400">24h change</div>
-                            </div>
-                        </div>
-
-                        <div className="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-lg p-4 hover:bg-[var(--hover-bg)] transition-colors cursor-pointer">
-                            <h3 className="font-medium mb-2">Meme Coins</h3>
-                            <div className="text-sm text-gray-400 mb-2">Top meme coins by volume</div>
-                            <div className="flex items-center justify-between">
-                                <div className="text-green-500">+12.4%</div>
-                                <div className="text-sm text-gray-400">24h change</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     );
