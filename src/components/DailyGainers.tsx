@@ -2,33 +2,24 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { useMarketData } from '../api/websocket/useMarketData';
-import { MarketData } from '../api/websocket/marketData';
 import { useRouter } from 'next/navigation';
 import tokens from '@/data/tokens.json';
 import { fetchCoinPlatforms } from '@/api/coingecko/api';
+import { useMarketMovers } from '@/hooks/useMarketMovers';
+import { CachedMarketMoverCoin } from '@/store/slices/searchCacheSlice';
 
 export default function DailyGainers() {
   const [activeTab, setActiveTab] = useState<'gainers' | 'losers'>('gainers');
   const router = useRouter();
 
-  // Use our new websocket hook to get market data
+  // Use our new market movers hook with Redux caching
   const {
-    isLoading: isLoadingCoinData,
+    coins: displayData,
+    loading: isLoadingCoinData,
     error,
-    getTopGainers,
-    getTopLosers,
-  } = useMarketData({
-    // Top 100 coins by market cap
-    pollingInterval: 30000, // Update every 30 seconds
-  });
-
-  // Get top 5 gainers and losers
-  const gainers = getTopGainers(5);
-  const losers = getTopLosers(5);
-
-  // Select which data to display based on active tab
-  const displayData = activeTab === 'gainers' ? gainers : losers;
+    refreshMarketMovers,
+    hasCachedData
+  } = useMarketMovers(activeTab, 5);
 
   const formatPrice = (price: number) => {
     if (price < 0.01) return price.toFixed(6);
@@ -47,16 +38,36 @@ export default function DailyGainers() {
     }
   };
 
-  const handleNavigate = async (coin: any) => {
+  const handleNavigate = async (coin: CachedMarketMoverCoin) => {
     const base = coin.symbol?.toUpperCase() || coin.name?.toUpperCase();
     if (!base) return;
 
-    const list = tokens as Array<{ symbol: string; chain: string; address: string; name: string }>;
-    const matches = list.filter(t => t.symbol.toUpperCase() === base);
-    let selected = matches.find(t => t.chain && t.chain.toLowerCase() === 'ethereum') || matches[0];
-    let chain = selected?.chain;
-    let address = selected?.address;
+    // First try to use cached contract addresses from Redux
+    let chain = coin.primaryChain;
+    let address = coin.primaryAddress;
 
+    // If no cached data, try local tokens list
+    if (!chain || !address) {
+      const list = tokens as Array<{ symbol: string; chain: string; address: string; name: string }>;
+      const matches = list.filter(t => t.symbol.toUpperCase() === base);
+      const selected = matches.find(t => t.chain && t.chain.toLowerCase() === 'ethereum') || matches[0];
+      chain = selected?.chain;
+      address = selected?.address;
+    }
+
+    // If still no data, try contract addresses from cache
+    if (!chain || !address) {
+      if (coin.contractAddresses && Object.keys(coin.contractAddresses).length > 0) {
+        const chainPriority = ['ethereum', 'binance', 'polygon', 'arbitrum', 'base', 'optimism', 'avalanche', 'fantom', 'solana'];
+        const availableChain = chainPriority.find(c => coin.contractAddresses![c]);
+        if (availableChain) {
+          chain = availableChain;
+          address = coin.contractAddresses[availableChain];
+        }
+      }
+    }
+
+    // Fallback to API call only if absolutely necessary
     if (!chain || !address) {
       try {
         const platforms = await fetchCoinPlatforms(coin.id);
@@ -72,17 +83,7 @@ export default function DailyGainers() {
             'optimistic-ethereum': 'optimism',
             solana: 'solana',
           };
-          const preference = [
-            'ethereum',
-            'arbitrum-one',
-            'optimistic-ethereum',
-            'base',
-            'polygon-pos',
-            'binance-smart-chain',
-            'avalanche',
-            'fantom',
-            'solana',
-          ];
+          const preference = ['ethereum', 'arbitrum-one', 'optimistic-ethereum', 'base', 'polygon-pos', 'binance-smart-chain', 'avalanche', 'fantom', 'solana'];
           for (const key of preference) {
             const addr = (platforms as any)[key];
             if (addr) {
@@ -100,26 +101,58 @@ export default function DailyGainers() {
     const params = new URLSearchParams({ base });
     if (chain) params.set('chain', chain);
     if (address) params.set('address', address);
+    if (coin.id) params.set('coingecko_id', coin.id);
 
     router.push(`/dashboard/trade?${params.toString()}`);
   };
 
   return (
     <>
-      <div className="section-header flex justify-between items-center">
-        <h2 className="text-xl font-semibold mb-4">Market Movers</h2>
-        <div className="flex space-x-2">
+      <div className="section-header flex justify-between items-center mb-4">
+        <div>
+          <h2 className="text-xl font-semibold">Market Movers</h2>
+          <div className="flex items-center gap-2 mt-1">
+            {hasCachedData && !isLoadingCoinData && (
+              <span className="text-xs text-green-400 bg-green-900/20 px-2 py-1 rounded">
+                📈 {activeTab} Cached
+              </span>
+            )}
+            {isLoadingCoinData && (
+              <span className="text-xs text-blue-400 bg-blue-900/20 px-2 py-1 rounded animate-pulse">
+                🔄 Loading {activeTab}...
+              </span>
+            )}
+            {displayData.length > 0 && !isLoadingCoinData && (
+              <span className="text-xs text-green-400 bg-green-900/20 px-2 py-1 rounded">
+                ✅ {displayData.length} {activeTab} Loaded
+              </span>
+            )}
+          </div>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <div className="flex space-x-2">
+            <button
+              onClick={() => setActiveTab('gainers')}
+              className={`px-3 py-1 text-xs rounded-full transition-colors ${activeTab === 'gainers' ? 'bg-green-500 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}
+            >
+              Gainers
+            </button>
+            <button
+              onClick={() => setActiveTab('losers')}
+              className={`px-3 py-1 text-xs rounded-full transition-colors ${activeTab === 'losers' ? 'bg-red-500 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}
+            >
+              Losers
+            </button>
+          </div>
+          
           <button
-            onClick={() => setActiveTab('gainers')}
-            className={`px-3 py-1 text-xs rounded-full transition-colors ${activeTab === 'gainers' ? 'bg-green-500 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}
+            onClick={refreshMarketMovers}
+            disabled={isLoadingCoinData}
+            className="flex items-center gap-1 px-2 py-1 bg-cyan-600 hover:bg-cyan-700 disabled:bg-gray-600 rounded-full transition-colors text-xs"
+            title={`Refresh ${activeTab} data`}
           >
-            Gainers
-          </button>
-          <button
-            onClick={() => setActiveTab('losers')}
-            className={`px-3 py-1 text-xs rounded-full transition-colors ${activeTab === 'losers' ? 'bg-red-500 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}
-          >
-            Losers
+            <span className={isLoadingCoinData ? 'animate-spin' : ''}>🔄</span>
           </button>
         </div>
       </div>
