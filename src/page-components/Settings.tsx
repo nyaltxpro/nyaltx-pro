@@ -182,9 +182,9 @@ export default function SettingsPage() {
     ];
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+        <div className="min-h-screen bg-inherit">
             {/* Header */}
-            <div className="sticky top-0 z-10 bg-gray-900/80 backdrop-blur-lg border-b border-gray-700/50">
+            <div className="sticky top-0 z-10 bg-inherit backdrop-blur-lg border-b border-gray-700/50">
                 <div className="container mx-auto px-4 py-6">
                     <div className="flex items-center justify-between">
                         <div>
