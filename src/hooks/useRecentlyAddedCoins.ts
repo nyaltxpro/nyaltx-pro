@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store';
 import {
   selectRecentlyAddedCoins,
@@ -16,18 +16,22 @@ export const useRecentlyAddedCoins = () => {
   const recentlyAddedCoins = useAppSelector(selectRecentlyAddedCoins);
   const loading = useAppSelector(selectRecentlyAddedLoading);
   const error = useAppSelector(selectRecentlyAddedError);
+  
+  // Fallback state in case Redux has issues
+  const [fallbackInitialized, setFallbackInitialized] = useState(false);
 
-  const fetchRecentlyAddedCoins = useCallback(async () => {
-    // Clean expired cache first
-    dispatch(cleanExpiredCache());
+  console.log('🔍 useRecentlyAddedCoins - State:', {
+    coinsCount: recentlyAddedCoins?.length || 0,
+    loading,
+    error,
+    fallbackInitialized
+  });
 
-    // Check if we have valid cached data
-    if (recentlyAddedCoins && recentlyAddedCoins.length > 0) {
-      console.log('📱 Using cached recently added coins data');
-      return recentlyAddedCoins;
-    }
-
+  const fetchRecentlyAddedCoins = useCallback(async (forceRefresh = false) => {
     try {
+      // Clean expired cache first
+      dispatch(cleanExpiredCache());
+
       dispatch(setRecentlyAddedLoading(true));
       console.log('🔄 Fetching fresh recently added coins data from API...');
 
@@ -74,38 +78,53 @@ export const useRecentlyAddedCoins = () => {
       console.error('❌ Error fetching recently added coins:', err);
       const errorMessage = err instanceof Error ? err.message : 'Failed to load recently added coins';
       dispatch(setRecentlyAddedError(errorMessage));
-
-      // Return cached data if available, even if expired
-      if (recentlyAddedCoins) {
-        console.log('📱 Using expired cached data due to API error');
-        return recentlyAddedCoins;
-      }
-
       throw err;
     }
-  }, [dispatch, recentlyAddedCoins]);
+  }, [dispatch]);
 
   const refreshRecentlyAddedCoins = useCallback(async () => {
     // Force refresh by clearing cache first
     dispatch(setRecentlyAddedCoins([]));
-    return fetchRecentlyAddedCoins();
+    return fetchRecentlyAddedCoins(true);
   }, [dispatch, fetchRecentlyAddedCoins]);
 
   // Auto-fetch on mount and set up refresh interval
   useEffect(() => {
-    fetchRecentlyAddedCoins();
+    const initializeData = async () => {
+      try {
+        // Prevent multiple initializations
+        if (fallbackInitialized) return;
+        
+        // Only fetch if we don't have cached data
+        if (!recentlyAddedCoins || recentlyAddedCoins.length === 0) {
+          console.log('🚀 Initializing recently added coins data...');
+          await fetchRecentlyAddedCoins();
+        } else {
+          console.log('📱 Using existing cached recently added coins data');
+        }
+        
+        setFallbackInitialized(true);
+      } catch (error) {
+        console.error('❌ Error initializing recently added coins:', error);
+        setFallbackInitialized(true);
+      }
+    };
+
+    initializeData();
 
     // Refresh every 30 minutes
     const intervalId = setInterval(
       () => {
         console.log('⏰ Auto-refreshing recently added coins...');
-        fetchRecentlyAddedCoins();
+        fetchRecentlyAddedCoins().catch(error => {
+          console.error('❌ Error in auto-refresh:', error);
+        });
       },
       30 * 60 * 1000
     );
 
     return () => clearInterval(intervalId);
-  }, [fetchRecentlyAddedCoins]);
+  }, [fallbackInitialized]); // Add fallbackInitialized to prevent multiple runs
 
   return {
     recentlyAddedCoins: recentlyAddedCoins || [],

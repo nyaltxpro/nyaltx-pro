@@ -10,13 +10,29 @@ import { CachedRecentlyAddedCoin } from '@/store/slices/searchCacheSlice';
 
 export default function RecentlyAddedCoins() {
   const router = useRouter();
+  
+  // Wrap hook usage in try-catch for error boundary
+  let hookResult;
+  try {
+    hookResult = useRecentlyAddedCoins();
+  } catch (hookError) {
+    console.error('❌ Error in useRecentlyAddedCoins hook:', hookError);
+    hookResult = {
+      recentlyAddedCoins: [],
+      loading: false,
+      error: 'Failed to initialize recently added coins',
+      refreshRecentlyAddedCoins: async () => {},
+      hasCachedData: false
+    };
+  }
+  
   const { 
     recentlyAddedCoins: coins, 
     loading, 
     error, 
     refreshRecentlyAddedCoins,
     hasCachedData 
-  } = useRecentlyAddedCoins();
+  } = hookResult;
 
 
   // Format price with appropriate decimal places
@@ -44,12 +60,32 @@ export default function RecentlyAddedCoins() {
     const base = coin.symbol?.toUpperCase() || coin.name?.toUpperCase();
     if (!base) return;
 
-    const list = tokens as Array<{ symbol: string; chain: string; address: string; name: string }>;
-    const matches = list.filter(t => t.symbol.toUpperCase() === base);
-    let selected = matches.find(t => t.chain && t.chain.toLowerCase() === 'ethereum') || matches[0];
-    let chain = selected?.chain;
-    let address = selected?.address;
+    // First try to use cached contract addresses from Redux
+    let chain = coin.primaryChain;
+    let address = coin.primaryAddress;
 
+    // If no cached data, try local tokens list
+    if (!chain || !address) {
+      const list = tokens as Array<{ symbol: string; chain: string; address: string; name: string }>;
+      const matches = list.filter(t => t.symbol.toUpperCase() === base);
+      const selected = matches.find(t => t.chain && t.chain.toLowerCase() === 'ethereum') || matches[0];
+      chain = selected?.chain;
+      address = selected?.address;
+    }
+
+    // If still no data, try contract addresses from cache
+    if (!chain || !address) {
+      if (coin.contractAddresses && Object.keys(coin.contractAddresses).length > 0) {
+        const chainPriority = ['ethereum', 'binance', 'polygon', 'arbitrum', 'base', 'optimism', 'avalanche', 'fantom', 'solana'];
+        const availableChain = chainPriority.find(c => coin.contractAddresses![c]);
+        if (availableChain) {
+          chain = availableChain;
+          address = coin.contractAddresses[availableChain];
+        }
+      }
+    }
+
+    // Fallback to API call only if absolutely necessary
     if (!chain || !address) {
       try {
         const platforms = await fetchCoinPlatforms(coin.id);
@@ -65,17 +101,7 @@ export default function RecentlyAddedCoins() {
             'optimistic-ethereum': 'optimism',
             solana: 'solana',
           };
-          const preference = [
-            'ethereum',
-            'arbitrum-one',
-            'optimistic-ethereum',
-            'base',
-            'polygon-pos',
-            'binance-smart-chain',
-            'avalanche',
-            'fantom',
-            'solana',
-          ];
+          const preference = ['ethereum', 'arbitrum-one', 'optimistic-ethereum', 'base', 'polygon-pos', 'binance-smart-chain', 'avalanche', 'fantom', 'solana'];
           for (const key of preference) {
             const addr = (platforms as any)[key];
             if (addr) {
@@ -93,6 +119,7 @@ export default function RecentlyAddedCoins() {
     const params = new URLSearchParams({ base });
     if (chain) params.set('chain', chain);
     if (address) params.set('address', address);
+    if (coin.id) params.set('coingecko_id', coin.id);
 
     router.push(`/dashboard/trade?${params.toString()}`);
   };
