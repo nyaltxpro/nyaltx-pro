@@ -148,16 +148,31 @@ function RegisterTokenContent() {
         },
         {
             question: 'How long does it take to appear?',
-            answer:
-                'Tokens typically appear instantly after successful submission, but indexing and analytics may take a few minutes to populate.',
+            answer: 'Tokens typically appear within 24-48 hours after admin approval.',
             isOpen: false,
         },
     ]);
 
     const toggleFAQ = (index: number) => {
-        const updated = [...faqs];
-        updated[index].isOpen = !updated[index].isOpen;
+        const updated = faqs.map((faq, idx) =>
+            idx === index ? { ...faq, isOpen: !faq.isOpen } : faq
+        );
         setFaqs(updated);
+    };
+
+    // Check if contract address already exists
+    const checkContractExists = async (contractAddress: string, blockchain: string): Promise<boolean> => {
+        try {
+            const response = await fetch(`/api/tokens/by-address/${contractAddress}?blockchain=${blockchain}&checkExists=true`);
+            if (response.ok) {
+                const data = await response.json();
+                return data.exists || false;
+            }
+            return false;
+        } catch (error) {
+            console.error('Error checking contract address:', error);
+            return false;
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -165,6 +180,16 @@ function RegisterTokenContent() {
         dispatch(clearError());
 
         try {
+            // Check if contract address already exists
+            const contractExists = await checkContractExists(formData.contractAddress, formData.blockchain);
+            if (contractExists) {
+                dispatch({
+                    type: 'tokens/setError',
+                    payload: 'Contract address already exists in the database. Please use a different contract address.',
+                });
+                return;
+            }
+
             // If redirecting to checkout, store token data temporarily in localStorage for registration after payment
             if (redirectPath && paymentMethod) {
                 // Store token data temporarily in localStorage (not in database yet)

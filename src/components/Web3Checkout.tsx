@@ -300,6 +300,12 @@ export default function Web3Checkout({
 
       const result = await response.json();
       
+      // Log email success to console
+      console.log('✅ Free activation Token registration successful:', result);
+      if (result.emailSent) {
+        console.log('📧 Email notifications sent successfully for free activation!');
+      }
+      
       // Clear pending registration data
       localStorage.removeItem('pendingTokenRegistration');
       
@@ -474,6 +480,12 @@ export default function Web3Checkout({
 
       const result = await response.json();
       
+      // Log email success to console
+      console.log('✅ PayPal Token registration successful:', result);
+      if (result.emailSent) {
+        console.log('📧 Email notifications sent successfully for PayPal payment!');
+      }
+      
       // Clear pending registration data
       localStorage.removeItem('pendingTokenRegistration');
       
@@ -530,6 +542,12 @@ export default function Web3Checkout({
       }
 
       const result = await response.json();
+      
+      // Log email success to console
+      console.log('✅ Crypto Token registration successful:', result);
+      if (result.emailSent) {
+        console.log('📧 Email notifications sent successfully for crypto payment!');
+      }
       
       // Clear pending registration data
       localStorage.removeItem('pendingTokenRegistration');

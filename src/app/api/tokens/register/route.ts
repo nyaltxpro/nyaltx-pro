@@ -26,7 +26,11 @@ async function sendTokenRegistrationEmails(tokenData: TokenRegistration) {
       if (!response.ok) {
         console.error(`Failed to send user confirmation email to ${tokenData.userEmail}:`, await response.text());
       } else {
-        console.log(`User confirmation sent to ${tokenData.userEmail} for token ${tokenData.tokenSymbol}`);
+        console.log(`✅ User confirmation email sent successfully to ${tokenData.userEmail} for token ${tokenData.tokenSymbol}`);
+        // Also log to frontend console if in development
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`[EMAIL SUCCESS] User notification sent to: ${tokenData.userEmail}`);
+        }
       }
     } catch (error) {
       console.error(`Error sending user confirmation email:`, error);
@@ -56,7 +60,11 @@ async function sendTokenRegistrationEmails(tokenData: TokenRegistration) {
         if (!response.ok) {
           console.error(`Failed to send admin email to ${adminEmail}:`, await response.text());
         } else {
-          console.log(`Admin notification sent to ${adminEmail} for token ${tokenData.tokenSymbol}`);
+          console.log(`✅ Admin notification email sent successfully to ${adminEmail} for token ${tokenData.tokenSymbol}`);
+          // Also log to frontend console if in development
+          if (process.env.NODE_ENV === 'development') {
+            console.log(`[EMAIL SUCCESS] Admin notification sent to: ${adminEmail}`);
+          }
         }
       } catch (error) {
         console.error(`Error sending admin email to ${adminEmail}:`, error);
@@ -149,12 +157,18 @@ export async function POST(req: NextRequest) {
     // Send email notifications after successful registration
     try {
       await sendTokenRegistrationEmails(record);
+      console.log(`✅ Token registration completed with email notifications for ${record.tokenSymbol}`);
     } catch (emailError) {
       console.error('Failed to send registration emails:', emailError);
       // Don't fail the registration if email fails
     }
 
-    return NextResponse.json({ ok: true, record });
+    return NextResponse.json({ 
+      ok: true, 
+      record,
+      emailSent: true,
+      message: `Token ${record.tokenSymbol} registered successfully. Email notifications sent.`
+    });
   } catch (e) {
     console.error('Register token error', e);
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 });

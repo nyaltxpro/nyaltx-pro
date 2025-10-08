@@ -7,6 +7,9 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ addr
   try {
     const { address: addressParam } = await params;
     const address = addressParam?.toLowerCase();
+    const { searchParams } = new URL(req.url);
+    const blockchain = searchParams.get('blockchain');
+    const checkExists = searchParams.get('checkExists') === 'true';
 
     if (!address) {
       return NextResponse.json({ error: 'Address parameter is required' }, { status: 400 });
@@ -16,14 +19,32 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ addr
     try {
       const col = await getCollection<any>('token_registrations');
 
+      // If checking for existence (for duplicate prevention), check all statuses
+      const query: any = { contractAddressLower: address };
+      if (blockchain) {
+        query.blockchain = blockchain;
+      }
+      if (!checkExists) {
+        // For normal lookups, only return approved and non-paused tokens
+        query.status = 'approved';
+        query.paused = { $ne: true };
+      }
+
       // Search by contract address (case-insensitive)
-      const token = await col.findOne({
-        contractAddressLower: address,
-        status: 'approved',
-        paused: { $ne: true },
-      });
+      const token = await col.findOne(query);
 
       if (token) {
+        // If just checking for existence, return simple response
+        if (checkExists) {
+          return NextResponse.json({
+            exists: true,
+            status: token.status,
+            tokenName: token.tokenName,
+            tokenSymbol: token.tokenSymbol,
+          });
+        }
+
+        // Return full token data for normal lookups
         return NextResponse.json({
           id: token.id,
           tokenName: token.tokenName,
@@ -74,6 +95,11 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ addr
       }
     } catch (fallbackError) {
       console.error('Fallback error in by-address:', fallbackError);
+    }
+
+    // If checking for existence and not found, return exists: false
+    if (checkExists) {
+      return NextResponse.json({ exists: false });
     }
 
     return NextResponse.json({ error: 'Token not found' }, { status: 404 });
