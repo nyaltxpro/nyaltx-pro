@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
 import { getCollection } from '@/lib/mongodb';
-import { createUserTokenRegistrationEmail, createAdminTokenRegistrationEmail } from '@/utils/emailTemplates';
+import { createAdminTokenRegistrationEmail, createUserTokenRegistrationEmail } from '@/utils/emailTemplates';
+import { NextRequest, NextResponse } from 'next/server';
 
 // Function to send email notifications
 async function sendTokenRegistrationEmails(tokenData: TokenRegistration) {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://nyaltx-pro-5hqd.vercel.app';
   
   // Send user confirmation email (if we have user email)
   if (tokenData.userEmail) {
@@ -38,7 +38,7 @@ async function sendTokenRegistrationEmails(tokenData: TokenRegistration) {
   }
   
   // Send admin notification email
-  const adminEmails = process.env.ADMIN_EMAIL ? [process.env.ADMIN_EMAIL] : ['admin@nyaltx.com'];
+  const adminEmails = process.env.ADMIN_EMAIL ? [process.env.ADMIN_EMAIL] : ['nyaltxpro@gmail.com.com'];
   
   for (const adminEmail of adminEmails) {
     if (adminEmail.trim()) {

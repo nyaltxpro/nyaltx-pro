@@ -163,11 +163,28 @@ function RegisterTokenContent() {
     // Check if contract address already exists
     const checkContractExists = async (contractAddress: string, blockchain: string): Promise<boolean> => {
         try {
-            const response = await fetch(`/api/tokens/by-address/${contractAddress}?blockchain=${blockchain}&checkExists=true`);
+            // Validate contract address format
+            if (!contractAddress || contractAddress.trim() === '') {
+                console.warn('Empty contract address provided');
+                return false;
+            }
+
+            // Check if it's a valid Ethereum address (starts with 0x and 42 characters)
+            const cleanAddress = contractAddress.trim();
+            if (!cleanAddress.startsWith('0x') || cleanAddress.length !== 42) {
+                console.warn('Invalid contract address format:', cleanAddress);
+                return false;
+            }
+
+            console.log('Checking contract address:', cleanAddress, 'on blockchain:', blockchain);
+            
+            const response = await fetch(`/api/tokens/by-address/${encodeURIComponent(cleanAddress)}?blockchain=${blockchain}&checkExists=true`);
             if (response.ok) {
                 const data = await response.json();
+                console.log('Contract check result:', data);
                 return data.exists || false;
             }
+            console.warn('Contract check failed with status:', response.status);
             return false;
         } catch (error) {
             console.error('Error checking contract address:', error);
@@ -180,6 +197,25 @@ function RegisterTokenContent() {
         dispatch(clearError());
 
         try {
+            // Validate required fields
+            if (!formData.tokenName || !formData.tokenSymbol || !formData.contractAddress) {
+                dispatch({
+                    type: 'tokens/setError',
+                    payload: 'Please fill in all required fields.',
+                });
+                return;
+            }
+
+            // Validate contract address format
+            const cleanAddress = formData.contractAddress.trim();
+            if (!cleanAddress.startsWith('0x') || cleanAddress.length !== 42) {
+                dispatch({
+                    type: 'tokens/setError',
+                    payload: 'Please enter a valid contract address (must start with 0x and be 42 characters long).',
+                });
+                return;
+            }
+
             // Check if contract address already exists
             const contractExists = await checkContractExists(formData.contractAddress, formData.blockchain);
             if (contractExists) {
