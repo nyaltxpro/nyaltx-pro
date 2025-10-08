@@ -1,9 +1,9 @@
-// import AdminBannersClient from '@/page-components/Admin/Banners';
+import AdminBannersClient from '@/page-components/Admin/Banners';
 
-// const page = () => {
-//   return (
-//     <AdminBannersClient />
-//   )
-// }
+const page = () => {
+    return (
+        <AdminBannersClient />
+    )
+}
 
-// export default page
+export default page
