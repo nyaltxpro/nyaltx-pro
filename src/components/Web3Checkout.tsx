@@ -32,7 +32,7 @@ export default function Web3Checkout({
         id: 1,
         name: 'NyaltxPro Membership',
         desc: 'Project profile + socials + video',
-        priceUsd: 200,
+        priceUsd: 199,
         image: '/logo.png',
         qty: 1,
       },
@@ -82,7 +82,7 @@ export default function Web3Checkout({
         id: 1,
         name: 'NyaltxPro Membership',
         desc: 'Project profile + socials + video',
-        priceUsd: 200,
+        priceUsd: 199,
         image: '/logo.png',
         qty: 1,
       },
@@ -155,8 +155,9 @@ export default function Web3Checkout({
   }, [promoValidation, subtotal]);
   const fees = useMemo(() => {
     if (promoValidation?.isFree) return 0;
-    // No fees for $1 trial (nyaltxpro1)
-    if (selectedTier?.toLowerCase() === 'nyaltxpro1') return 0;
+    // No fees for $1 trial (nyaltxpro1) and main membership (nyaltxpro)
+    if (selectedTier?.toLowerCase() === 'nyaltxpro1' || selectedTier?.toLowerCase() === 'nyaltxpro') return 0;
+    // Only add fees for Race to Liberty tiers
     return Math.max(0.3, subtotal * 0.015);
   }, [subtotal, promoValidation, selectedTier]);
   const total = useMemo(() => Math.max(0, subtotal - discount) + fees, [subtotal, discount, fees]);
@@ -362,18 +363,84 @@ export default function Web3Checkout({
       if (tierKey.startsWith('nyaltxpro')) {
         document.cookie = 'nyaltx_pro=1; path=/; max-age=31536000'; // 1 year
 
-        // Redirect to register token page after successful payment
-        setTimeout(() => {
-          window.location.href = '/dashboard/register-token?payment=success';
-        }, 2000);
+        // Check if there's a pending token registration to process
+        const pendingTokenData = localStorage.getItem('pendingTokenRegistration');
+        if (pendingTokenData) {
+          // Register the token after successful payment
+          await handleTokenRegistrationAfterCryptoPayment(txHash, pendingTokenData);
+        } else {
+          // Redirect to register token page after successful payment
+          setTimeout(() => {
+            window.location.href = '/dashboard/register-token?payment=success';
+          }, 2000);
+        }
       }
 
-      setSuccess(`Payment successful! Transaction: ${txHash}. Redirecting to register token...`);
+      if (!localStorage.getItem('pendingTokenRegistration')) {
+        setSuccess(`Payment successful! Transaction: ${txHash}. Redirecting to register token...`);
+      }
     } catch (err: any) {
       console.error('Payment error:', err);
       setError(err?.shortMessage || err?.message || 'Payment failed');
     } finally {
       setProcessing(false);
+    }
+  };
+
+  // Handle token registration after successful crypto payment
+  const handleTokenRegistrationAfterCryptoPayment = async (txHash: string, pendingTokenDataString: string) => {
+    try {
+      const tokenData = JSON.parse(pendingTokenDataString);
+      
+      setSuccess(`Payment successful! Registering your token...`);
+      
+      // Register the token via API
+      const response = await fetch('/api/tokens/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(tokenData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Token registration failed');
+      }
+
+      const result = await response.json();
+      
+      // Clear pending registration data
+      localStorage.removeItem('pendingTokenRegistration');
+      
+      setSuccess(`Payment and token registration successful! Redirecting...`);
+      
+      // Redirect to success page with token and payment details
+      const successUrl = new URL('/dashboard/checkout/success', window.location.origin);
+      successUrl.searchParams.set('method', 'crypto');
+      successUrl.searchParams.set('tokenName', tokenData.tokenName);
+      successUrl.searchParams.set('tokenSymbol', tokenData.tokenSymbol);
+      successUrl.searchParams.set('txId', txHash);
+      successUrl.searchParams.set('regId', result.record.id);
+      
+      setTimeout(() => {
+        window.location.href = successUrl.toString();
+      }, 2000);
+      
+    } catch (error) {
+      console.error('Token registration after crypto payment failed:', error);
+      
+      setError(`Payment successful, but token registration failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      
+      // Still redirect to success page but show error
+      const successUrl = new URL('/dashboard/checkout/success', window.location.origin);
+      successUrl.searchParams.set('method', 'crypto');
+      successUrl.searchParams.set('error', 'registration_failed');
+      successUrl.searchParams.set('txId', txHash);
+      
+      setTimeout(() => {
+        window.location.href = successUrl.toString();
+      }, 3000);
     }
   };
 

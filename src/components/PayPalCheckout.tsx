@@ -33,10 +33,17 @@ export default function PayPalCheckout({
       if (tier.toLowerCase() === 'nyaltxpro') {
         document.cookie = 'nyaltx_pro=1; path=/; max-age=31536000'; // 1 year
 
-        // Redirect to register token page after successful payment
-        setTimeout(() => {
-          window.location.href = '/dashboard/register-token?payment=paypal_success';
-        }, 2000);
+        // Check if there's a pending token registration to process
+        const pendingTokenData = localStorage.getItem('pendingTokenRegistration');
+        if (pendingTokenData) {
+          // Register the token after successful payment
+          await handleTokenRegistrationAfterPayment(details, pendingTokenData);
+        } else {
+          // Redirect to register token page after successful payment
+          setTimeout(() => {
+            window.location.href = '/dashboard/register-token?payment=paypal_success';
+          }, 2000);
+        }
       } else if (tier.toLowerCase().includes('race-')) {
         // Handle Race to Liberty payments
         setTimeout(() => {
@@ -46,10 +53,8 @@ export default function PayPalCheckout({
         // For other payments, check if there's a pending token registration
         const pendingTokenData = localStorage.getItem('pendingTokenRegistration');
         if (pendingTokenData) {
-          // Redirect back to register token page with success status
-          setTimeout(() => {
-            window.location.href = '/dashboard/register-token?payment=paypal_success';
-          }, 2000);
+          // Register the token after successful payment
+          await handleTokenRegistrationAfterPayment(details, pendingTokenData);
         }
       }
 
@@ -61,6 +66,57 @@ export default function PayPalCheckout({
       if (onError) {
         onError(error);
       }
+    }
+  };
+
+  // Handle token registration after successful payment
+  const handleTokenRegistrationAfterPayment = async (paymentDetails: any, pendingTokenDataString: string) => {
+    try {
+      const tokenData = JSON.parse(pendingTokenDataString);
+      
+      // Register the token via API
+      const response = await fetch('/api/tokens/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(tokenData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Token registration failed');
+      }
+
+      const result = await response.json();
+      
+      // Clear pending registration data
+      localStorage.removeItem('pendingTokenRegistration');
+      
+      // Redirect to success page with token and payment details
+      const successUrl = new URL('/dashboard/checkout/success', window.location.origin);
+      successUrl.searchParams.set('method', 'paypal');
+      successUrl.searchParams.set('tokenName', tokenData.tokenName);
+      successUrl.searchParams.set('tokenSymbol', tokenData.tokenSymbol);
+      successUrl.searchParams.set('txId', paymentDetails.id);
+      successUrl.searchParams.set('regId', result.record.id);
+      
+      setTimeout(() => {
+        window.location.href = successUrl.toString();
+      }, 2000);
+      
+    } catch (error) {
+      console.error('Token registration after payment failed:', error);
+      
+      // Still redirect to success page but show error
+      const successUrl = new URL('/dashboard/checkout/success', window.location.origin);
+      successUrl.searchParams.set('method', 'paypal');
+      successUrl.searchParams.set('error', 'registration_failed');
+      successUrl.searchParams.set('txId', paymentDetails.id);
+      
+      setTimeout(() => {
+        window.location.href = successUrl.toString();
+      }, 2000);
     }
   };
 
