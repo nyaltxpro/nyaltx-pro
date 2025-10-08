@@ -173,11 +173,13 @@ function RegisterTokenContent() {
                     tokenSymbol: formData.tokenSymbol,
                     blockchain: formData.blockchain,
                     contractAddress: formData.contractAddress,
+                    imageUri: formData.imageUri,
                     website: formData.website,
                     twitter: formData.twitter,
                     telegram: formData.telegram,
                     discord: formData.discord,
                     github: formData.github,
+                    youtube: youtube,
                     submittedByAddress: address,
                     userEmail: formData.userEmail || '',
                 };

@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { FaCheckCircle, FaSpinner, FaExclamationTriangle, FaArrowRight, FaEnvelope, FaCog } from 'react-icons/fa';
 import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense, useEffect, useState } from 'react';
+import { FaArrowRight, FaCheckCircle, FaCog, FaEnvelope, FaExclamationTriangle, FaSpinner } from 'react-icons/fa';
 
 function CheckoutSuccessContent() {
   const router = useRouter();
@@ -23,7 +23,7 @@ function CheckoutSuccessContent() {
     const timer = setInterval(() => {
       setCountdown((prev) => {
         if (prev <= 1) {
-          router.push('/dashboard/tokens');
+          router.push('/dashboard/profile');
           return 0;
         }
         return prev - 1;
@@ -156,7 +156,7 @@ function CheckoutSuccessContent() {
                 <span className="font-medium">Token Registration Failed</span>
               </div>
               <p className="text-gray-300 text-sm mb-3">
-                Your payment was successful, but we couldn't register your token automatically. 
+                Your payment was successful, but we couldn't register your token automatically.
                 Please try registering your token manually or contact support.
               </p>
               <Link
