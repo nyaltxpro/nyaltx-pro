@@ -21,14 +21,18 @@ export default function DailyGainers() {
     hasCachedData
   } = useMarketMovers(activeTab, 5);
 
-  const formatPrice = (price: number) => {
-    if (price < 0.01) return price.toFixed(6);
-    if (price < 1) return price.toFixed(4);
-    if (price < 10) return price.toFixed(2);
-    return price.toFixed(2);
+  const formatPrice = (price: number | null | undefined) => {
+    if (!price || price === 0) return '$0.00';
+    
+    if (price < 0.01) return `$${price.toFixed(6)}`;
+    if (price < 1) return `$${price.toFixed(4)}`;
+    if (price < 10) return `$${price.toFixed(2)}`;
+    return `$${price.toFixed(2)}`;
   };
 
-  const formatVolume = (volume: number) => {
+  const formatVolume = (volume: number | null | undefined) => {
+    if (!volume || volume === 0) return '$0.00';
+    
     if (volume >= 1000000) {
       return `$${(volume / 1000000).toFixed(2)}M`;
     } else if (volume >= 1000) {
@@ -181,7 +185,7 @@ export default function DailyGainers() {
             <div className="text-red-400 mb-2">⚠️ Failed to load market data</div>
             <p className="text-gray-400 text-sm mb-3">{typeof error === 'string' ? error : 'An error occurred'}</p>
             <button
-              onClick={() => window.location.reload()}
+              onClick={refreshMarketMovers}
               className="px-4 py-2 bg-[#00b8d8] hover:bg-[#00a6c4] text-white rounded-full text-sm transition-colors"
             >
               Retry
@@ -216,16 +220,16 @@ export default function DailyGainers() {
                 <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
                   <div className="token-name font-medium">{coin.name}</div>
                   <div className="token-chain text-sm text-gray-400">
-                    ${formatPrice(coin.current_price)}
+                    {formatPrice(coin.current_price)}
                   </div>
                 </div>
               </div>
               <div className="text-right">
                 <p
-                  className={`font-medium ${coin.price_change_percentage_24h >= 0 ? 'text-green-500' : 'text-red-500'}`}
+                  className={`font-medium ${(coin.price_change_percentage_24h || 0) >= 0 ? 'text-green-500' : 'text-red-500'}`}
                 >
-                  {coin.price_change_percentage_24h >= 0 ? '+' : ''}
-                  {coin.price_change_percentage_24h.toFixed(2)}%
+                  {(coin.price_change_percentage_24h || 0) >= 0 ? '+' : ''}
+                  {(coin.price_change_percentage_24h || 0).toFixed(2)}%
                 </p>
                 <p className="text-sm text-gray-400">Vol: {formatVolume(coin.total_volume)}</p>
               </div>

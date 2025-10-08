@@ -36,15 +36,19 @@ export default function RecentlyAddedCoins() {
 
 
   // Format price with appropriate decimal places
-  const formatPrice = (price: number) => {
-    if (price < 0.01) return price.toFixed(6);
-    if (price < 1) return price.toFixed(4);
-    if (price < 10) return price.toFixed(2);
-    return price.toFixed(2);
+  const formatPrice = (price: number | null | undefined) => {
+    if (!price || price === 0) return '$0.00';
+    
+    if (price < 0.01) return `$${price.toFixed(6)}`;
+    if (price < 1) return `$${price.toFixed(4)}`;
+    if (price < 10) return `$${price.toFixed(2)}`;
+    return `$${price.toFixed(2)}`;
   };
 
   // Format market cap and volume
-  const formatNumber = (num: number) => {
+  const formatNumber = (num: number | null | undefined) => {
+    if (!num || num === 0) return '$0.00';
+    
     if (num >= 1000000000) {
       return `$${(num / 1000000000).toFixed(2)}B`;
     } else if (num >= 1000000) {
