@@ -563,7 +563,7 @@ function Stat({
 }) {
   const ref = React.useRef<HTMLDivElement | null>(null);
   const [isMounted, setIsMounted] = React.useState(false);
-  const inView = isMounted ? useInView(ref, { once: true, margin: '-20% 0px' }) : false;
+  const inView = useInView(ref, { once: true, margin: '-20% 0px' });
   const [display, setDisplay] = React.useState('0');
   const [color, setColor] = React.useState<string | undefined>(undefined);
 
@@ -574,7 +574,7 @@ function Stat({
   const formatNumber = (n: number) => n.toLocaleString();
 
   React.useEffect(() => {
-    if (!inView) return;
+    if (!isMounted || !inView) return;
     const controls = animate(0, value, {
       duration: 1.8,
       onUpdate: latest => setDisplay(formatNumber(Math.floor(latest))),
@@ -587,7 +587,7 @@ function Stat({
       controls.stop();
       colorAnim.stop();
     };
-  }, [inView, value]);
+  }, [isMounted, inView, value]);
 
   return (
     <div ref={ref} className="p-1">
