@@ -241,15 +241,16 @@ export default function TrendingPage() {
     const convertReduxTrendingToTokens = () => {
         if (!reduxTrendingCoins || reduxTrendingCoins.length === 0) return;
 
-        // For now, we'll use the Redux trending coins as a fallback
-        // In a full implementation, you might want to fetch additional market data for these coins
+        // Only use Redux data as fallback when market data is not loading and not available
+        if (marketDataLoading || tokens.length > 0) return;
+
         const convertedTokens = reduxTrendingCoins.map((coin, index) => ({
             id: coin.id,
             name: coin.name,
             symbol: coin.symbol.toUpperCase(),
             logo: coin.thumb,
-            price: 0, // Would need additional API call for current price
-            priceUsd: 'Loading...',
+            price: 0,
+            priceUsd: 'N/A',
             change24h: 0,
             change24hFormatted: 'N/A',
             marketCap: 0,
@@ -261,10 +262,7 @@ export default function TrendingPage() {
             sparkline: [],
         }));
 
-        // Only update if we don't have market data tokens
-        if (tokens.length === 0) {
-            setTokens(convertedTokens);
-        }
+        setTokens(convertedTokens);
     };
 
     // Toggle favorite status for a token
@@ -287,25 +285,21 @@ export default function TrendingPage() {
     // Convert Redux trending coins when they change
     useEffect(() => {
         convertReduxTrendingToTokens();
-    }, [reduxTrendingCoins, favorites]);
+    }, [reduxTrendingCoins, marketDataLoading, tokens.length]);
 
     // Load additional market data on component mount and set up refresh interval
     useEffect(() => {
         loadMarketData();
 
         // Refresh data every 10 minutes to reduce API calls
-        const interval = setInterval(
-            () => {
-                // Only refresh if not currently loading
-                if (!marketDataLoading) {
-                    loadMarketData();
-                }
-            },
-            10 * 60 * 1000
-        );
+        const interval = setInterval(() => {
+            if (!marketDataLoading) {
+                loadMarketData();
+            }
+        }, 10 * 60 * 1000);
 
         return () => clearInterval(interval);
-    }, [marketDataLoading]);
+    }, []); // Remove marketDataLoading dependency to prevent infinite loops
 
     // Update favorites when tokens change
     useEffect(() => {
@@ -399,14 +393,19 @@ export default function TrendingPage() {
                     <div>
                         <h1 className="text-2xl font-bold">Top 20 Cryptocurrencies</h1>
                         <div className="flex items-center gap-2 mt-1">
-                            {hasCachedData && (
+                            {hasCachedData && !trendingLoading && (
                                 <span className="text-xs text-green-400 bg-green-900/20 px-2 py-1 rounded">
                                     📱 Trending Cached
                                 </span>
                             )}
                             {(trendingLoading || marketDataLoading) && (
-                                <span className="text-xs text-blue-400 bg-blue-900/20 px-2 py-1 rounded">
-                                    🔄 Loading...
+                                <span className="text-xs text-blue-400 bg-blue-900/20 px-2 py-1 rounded animate-pulse">
+                                    🔄 Loading Market Data...
+                                </span>
+                            )}
+                            {tokens.length > 0 && !trendingLoading && !marketDataLoading && (
+                                <span className="text-xs text-green-400 bg-green-900/20 px-2 py-1 rounded">
+                                    ✅ {tokens.length} Tokens Loaded
                                 </span>
                             )}
                         </div>
@@ -491,27 +490,27 @@ export default function TrendingPage() {
                     </div>
                 </div>
 
-                {/* Skeleton Loading State */}
-                {(trendingLoading || marketDataLoading) && (
-                    <>
+                {/* Enhanced Skeleton Loading State */}
+                {(trendingLoading || marketDataLoading || tokens.length === 0) && (
+                    <div className="animate-pulse">
                         {/* Skeleton Stats Cards */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                             {[1, 2, 3].map(i => (
                                 <div
                                     key={i}
-                                    className="bg-[var(--card-bg)] p-4 rounded-lg border border-[var(--border-color)]"
+                                    className="bg-gray-800/50 p-4 rounded-lg border border-gray-700/50"
                                 >
-                                    <div className="h-4 bg-gray-700 rounded animate-pulse mb-2 w-24"></div>
-                                    <div className="h-6 bg-gray-700 rounded animate-pulse mb-1 w-32"></div>
-                                    <div className="h-4 bg-gray-700 rounded animate-pulse w-20"></div>
+                                    <div className="h-4 bg-gray-700/60 rounded mb-2 w-24"></div>
+                                    <div className="h-6 bg-gray-700/60 rounded mb-1 w-32"></div>
+                                    <div className="h-4 bg-gray-700/60 rounded w-20"></div>
                                 </div>
                             ))}
                         </div>
 
                         {/* Skeleton Table */}
                         <div className="overflow-x-auto">
-                            <table className="min-w-full bg-[var(--card-bg)] rounded-lg overflow-hidden border border-[var(--border-color)]">
-                                <thead className="bg-[var(--header-bg)]">
+                            <table className="min-w-full bg-gray-800/50 rounded-lg overflow-hidden border border-gray-700/50">
+                                <thead className="bg-gray-900/50">
                                     <tr>
                                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider w-16">
                                             Rank
@@ -526,56 +525,61 @@ export default function TrendingPage() {
                                             24h Change
                                         </th>
                                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                            Chart (7d)
+                                        </th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                                             Market Cap
                                         </th>
                                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                                             Volume (24h)
                                         </th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                                            Chart
+                                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                            Actions
                                         </th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider w-16"></th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-[var(--border-color)]">
-                                    {[...Array(20)].map((_, index) => (
-                                        <tr key={index} className="hover:bg-[var(--hover-bg)] transition-colors">
+                                <tbody className="divide-y divide-gray-700/50">
+                                    {[...Array(10)].map((_, index) => (
+                                        <tr key={`skeleton-${index}`} className="bg-gray-800/30">
                                             <td className="px-4 py-4 whitespace-nowrap">
-                                                <div className="h-4 bg-gray-700 rounded animate-pulse w-6"></div>
+                                                <div className="h-4 bg-gray-700/60 rounded w-6"></div>
                                             </td>
                                             <td className="px-4 py-4 whitespace-nowrap">
                                                 <div className="flex items-center">
-                                                    <div className="h-8 w-8 bg-gray-700 rounded-full animate-pulse mr-3"></div>
+                                                    <div className="h-8 w-8 bg-gray-700/60 rounded-full mr-3"></div>
                                                     <div>
-                                                        <div className="h-4 bg-gray-700 rounded animate-pulse w-16 mb-1"></div>
-                                                        <div className="h-3 bg-gray-700 rounded animate-pulse w-12"></div>
+                                                        <div className="h-4 bg-gray-700/60 rounded w-16 mb-1"></div>
+                                                        <div className="h-3 bg-gray-700/60 rounded w-12"></div>
                                                     </div>
                                                 </div>
                                             </td>
                                             <td className="px-4 py-4 whitespace-nowrap">
-                                                <div className="h-4 bg-gray-700 rounded animate-pulse w-20"></div>
+                                                <div className="h-4 bg-gray-700/60 rounded w-20"></div>
                                             </td>
                                             <td className="px-4 py-4 whitespace-nowrap">
-                                                <div className="h-4 bg-gray-700 rounded animate-pulse w-16"></div>
+                                                <div className="h-4 bg-gray-700/60 rounded w-16"></div>
                                             </td>
                                             <td className="px-4 py-4 whitespace-nowrap">
-                                                <div className="h-4 bg-gray-700 rounded animate-pulse w-24"></div>
+                                                <div className="h-8 bg-gray-700/60 rounded w-20"></div>
                                             </td>
                                             <td className="px-4 py-4 whitespace-nowrap">
-                                                <div className="h-4 bg-gray-700 rounded animate-pulse w-20"></div>
+                                                <div className="h-4 bg-gray-700/60 rounded w-24"></div>
                                             </td>
                                             <td className="px-4 py-4 whitespace-nowrap">
-                                                <div className="h-8 bg-gray-700 rounded animate-pulse w-16"></div>
+                                                <div className="h-4 bg-gray-700/60 rounded w-20"></div>
                                             </td>
-                                            <td className="px-4 py-4 whitespace-nowrap">
-                                                <div className="h-4 w-4 bg-gray-700 rounded animate-pulse"></div>
+                                            <td className="px-4 py-4 text-center">
+                                                <div className="flex items-center justify-center space-x-3">
+                                                    <div className="h-4 w-4 bg-gray-700/60 rounded"></div>
+                                                    <div className="h-4 w-4 bg-gray-700/60 rounded"></div>
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}
                                 </tbody>
                             </table>
                         </div>
-                    </>
+                    </div>
                 )}
 
                 {/* Error State */}
@@ -634,7 +638,7 @@ export default function TrendingPage() {
                 )}
 
                 {/* Tokens Table */}
-                {!trendingLoading && !marketDataLoading && !trendingError && !marketDataError && (
+                {!trendingLoading && !marketDataLoading && tokens.length > 0 && (
                     <div className="overflow-x-auto">
                         <table className="min-w-full bg-[var(--card-bg)] rounded-lg overflow-hidden border border-[var(--border-color)]">
                             <thead className="bg-[var(--header-bg)]">
@@ -756,6 +760,33 @@ export default function TrendingPage() {
                                 ))}
                             </tbody>
                         </table>
+                    </div>
+                )}
+
+                {/* Empty State */}
+                {!trendingLoading && !marketDataLoading && tokens.length === 0 && !trendingError && !marketDataError && (
+                    <div className="text-center py-12">
+                        <div className="bg-gray-800/50 rounded-lg p-8 max-w-md mx-auto">
+                            <div className="text-4xl mb-4">📊</div>
+                            <h3 className="text-xl font-semibold mb-2">No Data Available</h3>
+                            <p className="text-gray-400 mb-4">
+                                Unable to load cryptocurrency data at the moment.
+                            </p>
+                            <div className="flex gap-2 justify-center">
+                                <button
+                                    onClick={loadMarketData}
+                                    className="px-4 py-2 bg-cyan-600 hover:bg-cyan-700 rounded-lg text-sm transition-colors"
+                                >
+                                    Retry Market Data
+                                </button>
+                                <button
+                                    onClick={refreshTrendingCoins}
+                                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm transition-colors"
+                                >
+                                    Refresh Trending
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 )}
 

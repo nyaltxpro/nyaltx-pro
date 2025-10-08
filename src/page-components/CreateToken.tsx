@@ -1,7 +1,5 @@
 'use client';
 
-import ConnectWalletButton from '@/components/ConnectWalletButton';
-import SolanaWalletButton from '@/components/SolanaWalletButton';
 import TransactionMonitor, { useTransactionMonitor } from '@/components/TransactionMonitor';
 import React, { useRef, useState } from 'react';
 import { FaChevronDown, FaChevronUp, FaInfoCircle, FaRocket, FaUpload } from 'react-icons/fa';
@@ -158,10 +156,10 @@ export default function CreateTokenPage() {
     return (
         <div className="p-6 max-w-7xl mx-auto">
             <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold text-white">Create Token</h1>
+                <h1 className="text-2xl font-bold text-[#00b8d8]">Create Token</h1>
                 <div className="flex items-center space-x-4">
-                    <SolanaWalletButton />
-                    <ConnectWalletButton />
+                    {/* <SolanaWalletButton />
+                    <ConnectWalletButton /> */}
                 </div>
             </div>
 
