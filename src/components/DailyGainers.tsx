@@ -111,13 +111,13 @@ export default function DailyGainers() {
         <div className="flex space-x-2">
           <button
             onClick={() => setActiveTab('gainers')}
-            className={`px-3 py-1 text-xs rounded ${activeTab === 'gainers' ? 'bg-green-500 text-white' : 'bg-gray-700 text-gray-300'}`}
+            className={`px-3 py-1 text-xs rounded-full transition-colors ${activeTab === 'gainers' ? 'bg-green-500 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}
           >
             Gainers
           </button>
           <button
             onClick={() => setActiveTab('losers')}
-            className={`px-3 py-1 text-xs rounded ${activeTab === 'losers' ? 'bg-red-500 text-white' : 'bg-gray-700 text-gray-300'}`}
+            className={`px-3 py-1 text-xs rounded-full transition-colors ${activeTab === 'losers' ? 'bg-red-500 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}
           >
             Losers
           </button>
@@ -125,8 +125,42 @@ export default function DailyGainers() {
       </div>
 
       {isLoadingCoinData ? (
-        <div className="flex justify-center items-center h-32">
-          <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-green-500"></div>
+        <div className="animate-pulse space-y-3">
+          {[...Array(5)].map((_, index) => (
+            <div key={`skeleton-${index}`} className="flex justify-between items-center p-2">
+              <div className="flex items-center">
+                <div className="h-8 w-8 bg-gray-700/60 rounded-full mr-3"></div>
+                <div>
+                  <div className="h-4 bg-gray-700/60 rounded w-20 mb-1"></div>
+                  <div className="h-3 bg-gray-700/60 rounded w-16"></div>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="h-4 bg-gray-700/60 rounded w-12 mb-1"></div>
+                <div className="h-3 bg-gray-700/60 rounded w-16"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : error ? (
+        <div className="text-center py-8">
+          <div className="bg-red-900/20 border border-red-500/50 rounded-lg p-4 max-w-sm mx-auto">
+            <div className="text-red-400 mb-2">⚠️ Failed to load market data</div>
+            <p className="text-gray-400 text-sm mb-3">{typeof error === 'string' ? error : 'An error occurred'}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-[#00b8d8] hover:bg-[#00a6c4] text-white rounded-full text-sm transition-colors"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      ) : displayData.length === 0 ? (
+        <div className="text-center py-8">
+          <div className="text-gray-400">
+            <div className="text-2xl mb-2">📊</div>
+            <p>No {activeTab} data available</p>
+          </div>
         </div>
       ) : (
         <div>

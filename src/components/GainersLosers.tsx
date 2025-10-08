@@ -79,16 +79,16 @@ const GainersLosers = () => {
         <div className="flex space-x-2">
           <button
             onClick={() => setActiveTab('gainers')}
-            className={`px-4 py-2 rounded-lg ${
-              activeTab === 'gainers' ? 'bg-green-500 text-white' : 'bg-gray-800 text-gray-300'
+            className={`px-4 py-2 rounded-full transition-colors ${
+              activeTab === 'gainers' ? 'bg-green-500 text-white' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
             }`}
           >
             Top Gainers
           </button>
           <button
             onClick={() => setActiveTab('losers')}
-            className={`px-4 py-2 rounded-lg ${
-              activeTab === 'losers' ? 'bg-red-500 text-white' : 'bg-gray-800 text-gray-300'
+            className={`px-4 py-2 rounded-full transition-colors ${
+              activeTab === 'losers' ? 'bg-red-500 text-white' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
             }`}
           >
             Top Losers
@@ -97,8 +97,54 @@ const GainersLosers = () => {
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
+        <div className="animate-pulse">
+          <table className="min-w-full">
+            <thead>
+              <tr className="text-gray-400 text-sm">
+                <th className="text-left py-2">#</th>
+                <th className="text-left py-2">Coin</th>
+                <th className="text-right py-2">Price</th>
+                <th className="text-right py-2">24h Change</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[...Array(5)].map((_, index) => (
+                <tr key={`skeleton-${index}`} className="border-t border-gray-800">
+                  <td className="py-3">
+                    <div className="h-4 bg-gray-700/60 rounded w-4"></div>
+                  </td>
+                  <td className="py-3">
+                    <div className="flex items-center">
+                      <div className="w-8 h-8 bg-gray-700/60 rounded-full mr-3"></div>
+                      <div>
+                        <div className="h-4 bg-gray-700/60 rounded w-20 mb-1"></div>
+                        <div className="h-3 bg-gray-700/60 rounded w-12"></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="py-3 text-right">
+                    <div className="h-4 bg-gray-700/60 rounded w-16 ml-auto"></div>
+                  </td>
+                  <td className="py-3 text-right">
+                    <div className="h-4 bg-gray-700/60 rounded w-12 ml-auto"></div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : coins.length === 0 ? (
+        <div className="text-center py-12">
+          <div className="text-gray-400">
+            <div className="text-3xl mb-3">📈</div>
+            <p className="text-lg">No market data available</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-4 px-4 py-2 bg-[#00b8d8] hover:bg-[#00a6c4] text-white rounded-full text-sm transition-colors"
+            >
+              Refresh Data
+            </button>
+          </div>
         </div>
       ) : (
         <div className="overflow-x-auto">

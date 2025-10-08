@@ -1,12 +1,11 @@
 'use client';
 
-import React from 'react';
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import tokens from '@/data/tokens.json';
 import { fetchCoinPlatforms } from '@/api/coingecko/api';
+import tokens from '@/data/tokens.json';
 import { useTrendingCoins } from '@/hooks/useTrendingCoins';
 import { CachedTrendingCoin } from '@/store/slices/searchCacheSlice';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 export default function TrendingCoins() {
   const { trendingCoins, loading, error, refreshTrendingCoins, hasCachedData } = useTrendingCoins();
@@ -182,7 +181,7 @@ export default function TrendingCoins() {
               <div className="text-right w-full sm:w-auto mt-2 sm:mt-0 flex justify-between sm:block">
                 <div className="font-medium text-sm flex items-center">
                   {coin.price_btc && (
-                    <span className="text-orange-400">₿ {formatBtcPrice(coin.price_btc)}</span>
+                    <span className="text-orange-400">{formatBtcPrice(coin.price_btc)}</span>
                   )}
                 </div>
                 <div className="text-xs text-gray-400 flex items-center gap-2">
