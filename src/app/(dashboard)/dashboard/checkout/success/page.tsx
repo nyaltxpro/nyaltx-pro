@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FaCheckCircle, FaSpinner, FaExclamationTriangle, FaArrowRight, FaEnvelope, FaCog } from 'react-icons/fa';
 import Link from 'next/link';
 
-export default function CheckoutSuccessPage() {
+function CheckoutSuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [countdown, setCountdown] = useState(10);
@@ -224,5 +224,25 @@ export default function CheckoutSuccessPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function CheckoutSuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center p-4">
+        <div className="max-w-2xl w-full text-center">
+          <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-8">
+            <div className="mx-auto w-20 h-20 bg-blue-500/20 rounded-full flex items-center justify-center mb-4">
+              <FaSpinner className="w-10 h-10 text-blue-400 animate-spin" />
+            </div>
+            <h1 className="text-2xl font-bold text-white mb-2">Loading...</h1>
+            <p className="text-gray-300">Please wait while we load your success page</p>
+          </div>
+        </div>
+      </div>
+    }>
+      <CheckoutSuccessContent />
+    </Suspense>
   );
 }
