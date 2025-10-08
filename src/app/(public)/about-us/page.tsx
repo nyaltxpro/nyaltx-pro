@@ -8,7 +8,7 @@ import { FiUsers, FiTarget, FiCpu } from 'react-icons/fi';
 
 export default function AboutUs() {
   return (
-    <div className="min-h-screen bg-[#0a0b0f] text-white">
+    <div className="min-h-screen bg-inherit text-white">
       <PublicHeader />
 
       {/* Background accents */}
@@ -35,7 +35,8 @@ export default function AboutUs() {
             </span>
           </h1>
           <p className="max-w-3xl text-white/70">
-            We make crypto trading accessible, transparent, and efficient with data-driven aggregation and a design-first approach.
+            We make crypto trading accessible, transparent, and efficient with data-driven
+            aggregation and a design-first approach.
           </p>
         </motion.div>
       </section>
@@ -55,12 +56,14 @@ export default function AboutUs() {
               <h2 className="text-2xl font-semibold">Our Mission</h2>
             </div>
             <p className="mb-4">
-              At NYALTX, we're on a mission to make cryptocurrency trading accessible, transparent, and efficient for everyone. 
-              We believe in the power of decentralized finance to transform the global economy and create new opportunities for people worldwide.
+              At NYALTX, we're on a mission to make cryptocurrency trading accessible, transparent,
+              and efficient for everyone. We believe in the power of decentralized finance to
+              transform the global economy and create new opportunities for people worldwide.
             </p>
             <p>
-              Our platform aggregates data from multiple decentralized exchanges to provide you with the best possible trading experience, 
-              ensuring you always get the best rates and lowest fees when swapping your digital assets.
+              Our platform aggregates data from multiple decentralized exchanges to provide you with
+              the best possible trading experience, ensuring you always get the best rates and
+              lowest fees when swapping your digital assets.
             </p>
           </div>
         </motion.div>
@@ -123,12 +126,15 @@ export default function AboutUs() {
               <h2 className="text-2xl font-semibold">Our Technology</h2>
             </div>
             <p className="mb-4">
-              NYALTX leverages cutting-edge blockchain technology to provide a seamless trading experience across multiple chains and protocols.
-              Our platform integrates with leading DEXs including Uniswap, SushiSwap, PancakeSwap, and more to ensure you always get the best rates.
+              NYALTX leverages cutting-edge blockchain technology to provide a seamless trading
+              experience across multiple chains and protocols. Our platform integrates with leading
+              DEXs including Uniswap, SushiSwap, PancakeSwap, and more to ensure you always get the
+              best rates.
             </p>
             <p>
-              We're committed to security, transparency, and continuous improvement. Our smart contract integrations are regularly audited,
-              and we're constantly working to add new features and support for additional chains and protocols.
+              We're committed to security, transparency, and continuous improvement. Our smart
+              contract integrations are regularly audited, and we're constantly working to add new
+              features and support for additional chains and protocols.
             </p>
           </div>
         </motion.div>
@@ -143,7 +149,9 @@ export default function AboutUs() {
           <div className="pointer-events-none absolute -inset-px rounded-2xl  blur-[10px]" />
           <div className="relative p-6 md:p-10">
             <h2 className="text-2xl font-semibold mb-4">Contact Us</h2>
-            <p className="mb-4">Have questions, suggestions, or just want to say hello? We'd love to hear from you!</p>
+            <p className="mb-4">
+              Have questions, suggestions, or just want to say hello? We'd love to hear from you!
+            </p>
             <div className="flex flex-col space-y-2 text-white/80">
               <p>
                 <span className="font-semibold">Email:</span> info@nyaltx.com

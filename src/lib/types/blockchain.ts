@@ -37,9 +37,9 @@ export interface BlockchainTokens {
 
 // Categories for token display
 export enum TokenCategory {
-  NEW = "NEW",
-  PRE_LAUNCHED = "PRE LAUNCHED",
-  LAUNCHED = "LAUNCHED"
+  NEW = 'NEW',
+  PRE_LAUNCHED = 'PRE LAUNCHED',
+  LAUNCHED = 'LAUNCHED',
 }
 
 // Token display filters

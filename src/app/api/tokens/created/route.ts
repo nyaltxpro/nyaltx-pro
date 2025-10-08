@@ -11,17 +11,19 @@ export async function GET(req: NextRequest) {
     }
 
     const col = await getCollection<any>('created_tokens');
-    
+
     // Find all tokens created by this address
-    const tokens = await col.find({ 
-      createdByAddressLower: address.toLowerCase() 
-    }).sort({ createdAt: -1 }).toArray();
+    const tokens = await col
+      .find({
+        createdByAddressLower: address.toLowerCase(),
+      })
+      .sort({ createdAt: -1 })
+      .toArray();
 
-    return NextResponse.json({ 
-      success: true, 
-      data: tokens 
+    return NextResponse.json({
+      success: true,
+      data: tokens,
     });
-
   } catch (error) {
     console.error('Get created tokens error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

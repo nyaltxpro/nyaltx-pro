@@ -28,7 +28,7 @@ export default function TransactionMonitor({ signature, onStatusChange }: Transa
         signature,
         status: 'pending',
         timestamp: Date.now(),
-        type: 'token_creation'
+        type: 'token_creation',
       });
     }
   }, [signature]);
@@ -40,7 +40,7 @@ export default function TransactionMonitor({ signature, onStatusChange }: Transa
 
   const monitorTransaction = async (txSignature: string) => {
     if (isMonitoring) return;
-    
+
     setIsMonitoring(true);
     let attempts = 0;
     const maxAttempts = 30; // Monitor for ~2 minutes (30 * 4s intervals)
@@ -50,11 +50,11 @@ export default function TransactionMonitor({ signature, onStatusChange }: Transa
         // In production, you would check the actual Solana transaction status
         // For demo purposes, we'll simulate the status check
         const response = await fetch(`/api/transactions/status?signature=${txSignature}`);
-        
+
         if (response.ok) {
           const data = await response.json();
           updateTransactionStatus(txSignature, data.status);
-          
+
           if (data.status === 'confirmed' || data.status === 'failed') {
             setIsMonitoring(false);
             onStatusChange?.(data.status);
@@ -80,14 +80,11 @@ export default function TransactionMonitor({ signature, onStatusChange }: Transa
     setTimeout(checkStatus, 2000);
   };
 
-  const updateTransactionStatus = (signature: string, status: 'pending' | 'confirmed' | 'failed') => {
-    setTransactions(prev => 
-      prev.map(tx => 
-        tx.signature === signature 
-          ? { ...tx, status }
-          : tx
-      )
-    );
+  const updateTransactionStatus = (
+    signature: string,
+    status: 'pending' | 'confirmed' | 'failed'
+  ) => {
+    setTransactions(prev => prev.map(tx => (tx.signature === signature ? { ...tx, status } : tx)));
   };
 
   const getStatusIcon = (status: string) => {
@@ -130,9 +127,9 @@ export default function TransactionMonitor({ signature, onStatusChange }: Transa
         <FaClock />
         <span>Transaction Monitor</span>
       </h3>
-      
+
       <div className="space-y-3 max-h-64 overflow-y-auto">
-        {transactions.map((tx) => (
+        {transactions.map(tx => (
           <div
             key={tx.signature}
             className="flex items-center justify-between p-3 bg-gray-800 rounded-lg border border-gray-600"
@@ -148,16 +145,20 @@ export default function TransactionMonitor({ signature, onStatusChange }: Transa
                 </div>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-2">
-              <span className={`text-xs px-2 py-1 rounded ${
-                tx.status === 'confirmed' ? 'bg-green-900 text-green-300' :
-                tx.status === 'failed' ? 'bg-red-900 text-red-300' :
-                'bg-yellow-900 text-yellow-300'
-              }`}>
+              <span
+                className={`text-xs px-2 py-1 rounded ${
+                  tx.status === 'confirmed'
+                    ? 'bg-green-900 text-green-300'
+                    : tx.status === 'failed'
+                      ? 'bg-red-900 text-red-300'
+                      : 'bg-yellow-900 text-yellow-300'
+                }`}
+              >
                 {getStatusText(tx.status)}
               </span>
-              
+
               <a
                 href={`https://solscan.io/tx/${tx.signature}`}
                 target="_blank"
@@ -171,7 +172,7 @@ export default function TransactionMonitor({ signature, onStatusChange }: Transa
           </div>
         ))}
       </div>
-      
+
       {isMonitoring && (
         <div className="mt-3 text-center">
           <div className="inline-flex items-center space-x-2 text-sm text-gray-400">
@@ -204,6 +205,6 @@ export function useTransactionMonitor() {
     status,
     startMonitoring,
     stopMonitoring,
-    setStatus
+    setStatus,
   };
 }

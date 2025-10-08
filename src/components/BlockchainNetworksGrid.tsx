@@ -3,57 +3,57 @@ import React, { useState } from 'react';
 // Define blockchain information
 export const blockchainInfo = {
   blockchains: [
-    "ethereum",
-    "filecoin",
-    "fio",
-    "gochain",
-    "groestlcoin",
-    "harmony",
-    "icon",
-    "iost",
-    "iotex",
-    "kava",
-    "kin",
-    "kusama",
-    "litecoin",
-    "lkscoin",
-    "loom",
-    "nano",
-    "near",
-    "nebulas",
-    "neo",
-    "nervos",
-    "nimiq",
-    "nuls",
-    "ontology",
-    "poa",
-    "polkadot",
-    "qtum",
-    "ravencoin",
-    "ripple",
-    "smartchain",
-    "solana",
-    "steem",
-    "stellar",
-    "terra",
-    "tezos",
-    "theta",
-    "thundertoken",
-    "tomochain",
-    "ton",
-    "tron",
-    "vechain",
-    "viacoin",
-    "wanchain",
-    "waves",
-    "xdai",
-    "xdc",
-    "xrp",
-    "zcash",
-    "zcoin",
-    "zelcash",
-    "zilliqa"
-  ]
+    'ethereum',
+    'filecoin',
+    'fio',
+    'gochain',
+    'groestlcoin',
+    'harmony',
+    'icon',
+    'iost',
+    'iotex',
+    'kava',
+    'kin',
+    'kusama',
+    'litecoin',
+    'lkscoin',
+    'loom',
+    'nano',
+    'near',
+    'nebulas',
+    'neo',
+    'nervos',
+    'nimiq',
+    'nuls',
+    'ontology',
+    'poa',
+    'polkadot',
+    'qtum',
+    'ravencoin',
+    'ripple',
+    'smartchain',
+    'solana',
+    'steem',
+    'stellar',
+    'terra',
+    'tezos',
+    'theta',
+    'thundertoken',
+    'tomochain',
+    'ton',
+    'tron',
+    'vechain',
+    'viacoin',
+    'wanchain',
+    'waves',
+    'xdai',
+    'xdc',
+    'xrp',
+    'zcash',
+    'zcoin',
+    'zelcash',
+    'zilliqa',
+  ],
 };
 
 interface BlockchainNetwork {
@@ -71,13 +71,13 @@ const blockchainNetworks: BlockchainNetwork[] = [];
 blockchainInfo.blockchains.forEach(id => {
   // Create a capitalized name from the ID
   const name = id.charAt(0).toUpperCase() + id.slice(1);
-  
+
   blockchainNetworks.push({
     id: id,
     name: name,
     symbol: name.substring(0, 3).toUpperCase(),
     logoPath: `/${id}.svg`,
-    folderPath: id
+    folderPath: id,
   });
 });
 
@@ -88,41 +88,39 @@ interface BlockchainNetworksGridProps {
 
 // Function to get blockchain logo path
 
-const BlockchainNetworksGrid: React.FC<BlockchainNetworksGridProps> = ({
-  className = '',
-}) => {
+const BlockchainNetworksGrid: React.FC<BlockchainNetworksGridProps> = ({ className = '' }) => {
   // State to store blockchain icon URLs
   const [blockchainIcons, setBlockchainIcons] = useState<Record<string, string>>({});
 
   // Load blockchain icons when component mounts
-//   useEffect(() => {
-//     const loadIcons = async () => {
-//       const iconPromises = blockchainNetworks.map(async (network) => {
-//         const iconUrl = await loadBlockchainIcon(network.id);
-//         return { id: network.id, iconUrl };
-//       });
+  //   useEffect(() => {
+  //     const loadIcons = async () => {
+  //       const iconPromises = blockchainNetworks.map(async (network) => {
+  //         const iconUrl = await loadBlockchainIcon(network.id);
+  //         return { id: network.id, iconUrl };
+  //       });
 
-//       const results = await Promise.all(iconPromises);
-//       const iconMap: Record<string, string> = {};
-      
-//       results.forEach(result => {
-//         if (result.iconUrl) {
-//           iconMap[result.id] = result.iconUrl;
-//         }
-//       });
+  //       const results = await Promise.all(iconPromises);
+  //       const iconMap: Record<string, string> = {};
 
-//       setBlockchainIcons(iconMap);
-//     };
+  //       results.forEach(result => {
+  //         if (result.iconUrl) {
+  //           iconMap[result.id] = result.iconUrl;
+  //         }
+  //       });
 
-//     loadIcons();
-//   }, [blockchainIcons]);
+  //       setBlockchainIcons(iconMap);
+  //     };
+
+  //     loadIcons();
+  //   }, [blockchainIcons]);
 
   // Function to get the icon for a blockchain
-//   const getBlockchainIcon = (id: string): string => {
-//     return loadBlockchainIcon(id) ;
-//   };
+  //   const getBlockchainIcon = (id: string): string => {
+  //     return loadBlockchainIcon(id) ;
+  //   };
 
-  console.log(blockchainNetworks)
+  console.log(blockchainNetworks);
 
   return (
     <div className={`${className}`}>

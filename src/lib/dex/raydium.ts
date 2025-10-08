@@ -1,7 +1,17 @@
 /**
  * Raydium DEX Integration (Solana)
  */
-import { DexInterface, Token, PriceQuote, SwapRoute, DexConfig, CHAIN_IDS, DEX_PROTOCOL, QuoteParams, SwapParams } from './types';
+import {
+  DexInterface,
+  Token,
+  PriceQuote,
+  SwapRoute,
+  DexConfig,
+  CHAIN_IDS,
+  DEX_PROTOCOL,
+  QuoteParams,
+  SwapParams,
+} from './types';
 import { getCryptoIconUrl } from '../../utils/cryptoIcons';
 // Uncomment when implementing real SDK calls
 // import { Liquidity, Token as RaydiumToken, TokenAmount, Percent } from '@raydium-io/raydium-sdk';
@@ -16,18 +26,18 @@ export const RaydiumConfig: DexConfig = {
   supportedChains: [CHAIN_IDS.SOLANA],
   // Solana uses program IDs instead of router addresses
   routerAddress: {
-    [CHAIN_IDS.SOLANA]: '675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8'
+    [CHAIN_IDS.SOLANA]: '675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8',
   },
-  version: '1.0.0'
+  version: '1.0.0',
 };
 
 export class Raydium implements DexInterface {
   config: DexConfig;
-  
+
   constructor() {
     this.config = RaydiumConfig;
   }
-  
+
   async getQuote(params: QuoteParams): Promise<PriceQuote> {
     try {
       // For now, we'll still use mock data but structure it as if we're using the SDK
@@ -40,20 +50,20 @@ export class Raydium implements DexInterface {
       //   symbol: params.tokenIn.symbol,
       //   name: params.tokenIn.name
       // });
-      // 
+      //
       // const raydiumToToken = new RaydiumToken({
       //   mint: new PublicKey(params.tokenOut.address),
       //   decimals: params.tokenOut.decimals,
       //   symbol: params.tokenOut.symbol,
       //   name: params.tokenOut.name
       // });
-      // 
+      //
       // // Create a connection to the Solana network
       // const connection = new Connection('https://api.mainnet-beta.solana.com');
-      // 
+      //
       // // Get the pool information
       // const poolKeys = await Liquidity.fetchPoolKeys(connection, new PublicKey('POOL_ADDRESS'));
-      // 
+      //
       // // Calculate the swap amount
       // const { amountOut, minAmountOut, priceImpact } = Liquidity.computeAmountOut({
       //   poolKeys,
@@ -63,11 +73,15 @@ export class Raydium implements DexInterface {
       // });
 
       // Mock the output that would come from the SDK
-      const outputAmount = (parseFloat(params.amountIn) * 1952 * (1 - Math.random() * 0.02)).toString();
+      const outputAmount = (
+        parseFloat(params.amountIn) *
+        1952 *
+        (1 - Math.random() * 0.02)
+      ).toString();
       const fee = '0.25'; // 0.25% fee for Raydium
 
       const routerAddress = this.config.routerAddress?.[params.chainId] || '';
-      
+
       const swapRoute: SwapRoute = {
         protocol: this.config.name,
         routerAddress,
@@ -75,9 +89,9 @@ export class Raydium implements DexInterface {
         amountIn: params.amountIn,
         amountOut: outputAmount,
         priceImpact: (Math.random() * 0.35).toFixed(2),
-        fee
+        fee,
       };
-      
+
       return {
         protocol: this.config.name,
         inputAmount: params.amountIn,
@@ -92,7 +106,7 @@ export class Raydium implements DexInterface {
       throw error;
     }
   }
-  
+
   async executeSwap(params: SwapParams): Promise<string> {
     try {
       // In a real implementation, we would:
@@ -106,20 +120,20 @@ export class Raydium implements DexInterface {
       //   symbol: params.tokenIn.symbol,
       //   name: params.tokenIn.name
       // });
-      // 
+      //
       // const raydiumToToken = new RaydiumToken({
       //   mint: new PublicKey(params.tokenOut.address),
       //   decimals: params.tokenOut.decimals,
       //   symbol: params.tokenOut.symbol,
       //   name: params.tokenOut.name
       // });
-      // 
+      //
       // // Create a connection to the Solana network
       // const connection = new Connection('https://api.mainnet-beta.solana.com');
-      // 
+      //
       // // Get the pool information
       // const poolKeys = await Liquidity.fetchPoolKeys(connection, new PublicKey('POOL_ADDRESS'));
-      // 
+      //
       // // Calculate the swap amount
       // const { amountOut, minAmountOut } = Liquidity.computeAmountOut({
       //   poolKeys,
@@ -127,7 +141,7 @@ export class Raydium implements DexInterface {
       //   currencyOut: raydiumToToken,
       //   slippage: new Percent(parseFloat(params.slippageTolerance) * 100, 10000)
       // });
-      // 
+      //
       // // Create the swap instruction
       // const swapInstruction = await Liquidity.makeSwapInstruction({
       //   poolKeys,
@@ -139,17 +153,17 @@ export class Raydium implements DexInterface {
       //   amountIn: new TokenAmount(raydiumFromToken, params.amountIn),
       //   minAmountOut
       // });
-      // 
+      //
       // // Create and sign the transaction
       // const transaction = new Transaction().add(swapInstruction);
       // transaction.recentBlockhash = (await connection.getRecentBlockhash()).blockhash;
       // transaction.feePayer = new PublicKey(params.recipient);
-      // 
+      //
       // // Sign and send the transaction
       // const provider = getProvider(params.chainId);
       // const signedTransaction = await provider.signTransaction(transaction);
       // const txid = await connection.sendRawTransaction(signedTransaction.serialize());
-      // 
+      //
       // return txid;
 
       console.log(`Executing swap on ${this.config.name}:`);
@@ -162,13 +176,15 @@ export class Raydium implements DexInterface {
       console.log(`Chain ID: ${params.chainId}`);
 
       // Return mock transaction hash - for Solana, transaction IDs are base58 encoded
-      return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+      return (
+        Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+      );
     } catch (error) {
       console.error('Error executing swap on Raydium:', error);
       throw error;
     }
   }
-  
+
   isChainSupported(chainId: number): boolean {
     return this.config.supportedChains.includes(chainId);
   }

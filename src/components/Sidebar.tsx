@@ -1,17 +1,17 @@
-"use client";
+'use client';
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  FaHome, 
-  FaChartBar, 
-  FaExchangeAlt, 
-  FaRocket, 
-  FaGift, 
-  FaLayerGroup, 
-  FaSyncAlt, 
+import {
+  FaHome,
+  FaChartBar,
+  FaExchangeAlt,
+  FaRocket,
+  FaGift,
+  FaLayerGroup,
+  FaSyncAlt,
   FaLightbulb,
   FaWallet,
   FaUser,
@@ -30,7 +30,7 @@ import {
   FaTrophy,
   FaGamepad,
   FaListOl,
-  FaVideo
+  FaVideo,
 } from 'react-icons/fa';
 import Image from 'next/image';
 
@@ -52,17 +52,17 @@ const SidebarItem = ({ icon, text, href, isActive, isExpanded }: SidebarItemProp
     <motion.div
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
-      transition={{ type: "spring", stiffness: 400, damping: 17 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 17 }}
     >
-      <Link 
+      <Link
         href={href}
         className={`flex items-center py-3 px-3 mb-1 rounded-md transition-all duration-200 ${
-          isActive 
-            ? 'bg-[#1a2932] text-[#00b8d8]' 
+          isActive
+            ? 'bg-[#1a2932] text-[#00b8d8]'
             : 'text-gray-400 hover:bg-[#1a2932] hover:text-white'
         }`}
       >
-        <motion.div 
+        <motion.div
           className="text-xl"
           animate={{ rotate: isActive ? 360 : 0 }}
           transition={{ duration: 0.3 }}
@@ -71,14 +71,14 @@ const SidebarItem = ({ icon, text, href, isActive, isExpanded }: SidebarItemProp
         </motion.div>
         <AnimatePresence>
           {isExpanded && (
-            <motion.span 
+            <motion.span
               className="ml-3 whitespace-nowrap"
               initial={{ opacity: 0, width: 0 }}
-              animate={{ opacity: 1, width: "auto" }}
+              animate={{ opacity: 1, width: 'auto' }}
               exit={{ opacity: 0, width: 0 }}
-              transition={{ 
+              transition={{
                 duration: 0.2,
-                ease: "easeInOut"
+                ease: 'easeInOut',
               }}
             >
               {text}
@@ -108,7 +108,11 @@ export default function Sidebar({ isMobileMenuOpen, toggleMobileMenu }: SidebarP
   const navItems = [
     { icon: <FaHome />, text: 'Home', href: '/dashboard' },
     { icon: <FaUser />, text: 'Profile', href: '/dashboard/profile' },
-    { icon: <FaChartLine />, text: 'NYAX', href: '/dashboard/trade?base=NYAX&chain=ethereum&address=0x5eed5621b92be4473f99bacac77acfa27deb57d9' },
+    {
+      icon: <FaChartLine />,
+      text: 'NYAX',
+      href: '/dashboard/trade?base=NYAX&chain=ethereum&address=0x5eed5621b92be4473f99bacac77acfa27deb57d9',
+    },
     // { icon: <FaExchangeAlt />, text: 'Pairs', href: '/pairs' },
     { icon: <FaStar />, text: 'Favorites', href: '/dashboard/favorites' },
     // { icon: <FaVideo />, text: 'Live Streams', href: '/dashboard/live-streams' },
@@ -137,50 +141,39 @@ export default function Sidebar({ isMobileMenuOpen, toggleMobileMenu }: SidebarP
   return (
     <>
       {!isDesktop && isMobileMenuOpen && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-40"
-          onClick={toggleMobileMenu}
-        />
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-40" onClick={toggleMobileMenu} />
       )}
-      <motion.div 
+      <motion.div
         className={`fixed left-0 top-0 h-full bg-[#0f1923] z-50 ${
           !isDesktop && (isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full')
         }`}
         initial={false}
         animate={{
           width: isDesktop ? (isExpanded ? 224 : 64) : 224, // 56 = 14rem, 16 = 4rem in pixels
-          x: !isDesktop && !isMobileMenuOpen ? -224 : 0
+          x: !isDesktop && !isMobileMenuOpen ? -224 : 0,
         }}
         transition={{
-          type: "spring",
+          type: 'spring',
           stiffness: 300,
           damping: 30,
-          duration: 0.3
+          duration: 0.3,
         }}
         onMouseEnter={() => isDesktop && setIsExpanded(true)}
         onMouseLeave={() => isDesktop && setIsExpanded(false)}
       >
         <div className="flex items-center h-16 border-b border-gray-800 px-4">
           <div className="flex items-center">
-            <motion.div
-              animate={{ rotate: isExpanded ? 360 : 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              <Image
-                src="/logo.png" 
-                alt="Logo" 
-                width={30}
-                height={30}
-              />
+            <motion.div animate={{ rotate: isExpanded ? 360 : 0 }} transition={{ duration: 0.5 }}>
+              <Image src="/logo.png" alt="Logo" width={30} height={30} />
             </motion.div>
             <AnimatePresence>
               {sidebarExpanded && (
-                <motion.span 
+                <motion.span
                   className="ml-2 font-bold text-white whitespace-nowrap"
                   initial={{ opacity: 0, width: 0 }}
-                  animate={{ opacity: 1, width: "auto" }}
+                  animate={{ opacity: 1, width: 'auto' }}
                   exit={{ opacity: 0, width: 0 }}
-                  transition={{ duration: 0.2, ease: "easeInOut" }}
+                  transition={{ duration: 0.2, ease: 'easeInOut' }}
                 >
                   NYALTX
                 </motion.span>
@@ -190,7 +183,7 @@ export default function Sidebar({ isMobileMenuOpen, toggleMobileMenu }: SidebarP
         </div>
 
         <div className="p-2">
-          {navItems.map((item) => (
+          {navItems.map(item => (
             <SidebarItem
               key={item.href}
               icon={item.icon}
@@ -229,7 +222,7 @@ export default function Sidebar({ isMobileMenuOpen, toggleMobileMenu }: SidebarP
               )}
             </AnimatePresence>
           </div> */}
-          
+
           {/* {extraItems.map((item) => (
             <SidebarItem
               key={item.href}
@@ -240,7 +233,7 @@ export default function Sidebar({ isMobileMenuOpen, toggleMobileMenu }: SidebarP
               isExpanded={sidebarExpanded}
             />
           ))} */}
-          
+
           {/* <Link href="/profile" className="flex items-center py-3 px-3 mt-4 rounded-md text-gray-400 hover:bg-[#1a2932] hover:text-white cursor-pointer">
             <div className="text-xl"><FaUser /></div>
             {sidebarExpanded && (

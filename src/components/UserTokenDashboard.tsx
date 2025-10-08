@@ -29,37 +29,35 @@ export default function UserTokenDashboard() {
 
     try {
       console.log('Fetching tokens for dashboard address:', address);
-      
+
       const response = await fetch(`/api/tokens/by-wallet?address=${encodeURIComponent(address)}`);
       const data = await response.json();
-      
+
       if (data.success) {
         setUserTokens(data.tokens as RegisteredToken[]);
       } else {
         console.error('API error:', data.error);
         // Fallback to localStorage
-        const storedTokens = JSON.parse(localStorage.getItem('registeredTokens') || '[]') as RegisteredToken[];
-        const myTokens = storedTokens.filter(
-          token => {
-            const tokenAddress = token.submittedByAddress || token.walletAddress;
-            return tokenAddress && address && 
-              tokenAddress.toLowerCase() === address.toLowerCase();
-          }
-        );
+        const storedTokens = JSON.parse(
+          localStorage.getItem('registeredTokens') || '[]'
+        ) as RegisteredToken[];
+        const myTokens = storedTokens.filter(token => {
+          const tokenAddress = token.submittedByAddress || token.walletAddress;
+          return tokenAddress && address && tokenAddress.toLowerCase() === address.toLowerCase();
+        });
         setUserTokens(myTokens);
       }
     } catch (error) {
       console.error('Error loading user tokens from API:', error);
       // Fallback to localStorage
       try {
-        const storedTokens = JSON.parse(localStorage.getItem('registeredTokens') || '[]') as RegisteredToken[];
-        const myTokens = storedTokens.filter(
-          token => {
-            const tokenAddress = token.submittedByAddress || token.walletAddress;
-            return tokenAddress && address && 
-              tokenAddress.toLowerCase() === address.toLowerCase();
-          }
-        );
+        const storedTokens = JSON.parse(
+          localStorage.getItem('registeredTokens') || '[]'
+        ) as RegisteredToken[];
+        const myTokens = storedTokens.filter(token => {
+          const tokenAddress = token.submittedByAddress || token.walletAddress;
+          return tokenAddress && address && tokenAddress.toLowerCase() === address.toLowerCase();
+        });
         setUserTokens(myTokens);
       } catch (fallbackError) {
         console.error('Fallback to localStorage also failed:', fallbackError);
@@ -76,17 +74,23 @@ export default function UserTokenDashboard() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'approved': return 'text-green-400 bg-green-900/20 border-green-500';
-      case 'rejected': return 'text-red-400 bg-red-900/20 border-red-500';
-      default: return 'text-yellow-400 bg-yellow-900/20 border-yellow-500';
+      case 'approved':
+        return 'text-green-400 bg-green-900/20 border-green-500';
+      case 'rejected':
+        return 'text-red-400 bg-red-900/20 border-red-500';
+      default:
+        return 'text-yellow-400 bg-yellow-900/20 border-yellow-500';
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'approved': return <FaStar className="text-green-400" />;
-      case 'rejected': return <FaTimes className="text-red-400" />;
-      default: return <FaClock className="text-yellow-400" />;
+      case 'approved':
+        return <FaStar className="text-green-400" />;
+      case 'rejected':
+        return <FaTimes className="text-red-400" />;
+      default:
+        return <FaClock className="text-yellow-400" />;
     }
   };
 
@@ -96,7 +100,7 @@ export default function UserTokenDashboard() {
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   };
 
@@ -187,16 +191,21 @@ export default function UserTokenDashboard() {
           </p>
           <div className="grid gap-4">
             {approvedTokens.map(token => (
-              <div key={token.id} className="bg-green-900/10 border border-green-500/30 rounded-lg p-4">
+              <div
+                key={token.id}
+                className="bg-green-900/10 border border-green-500/30 rounded-lg p-4"
+              >
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
                     {token.logo && (
                       <img src={token.logo} alt={token.name} className="w-10 h-10 rounded-full" />
                     )}
                     <div>
-                      <h4 className="text-lg font-semibold text-white">{token.name} ({token.symbol})</h4>
+                      <h4 className="text-lg font-semibold text-white">
+                        {token.name} ({token.symbol})
+                      </h4>
                       <p className="text-sm text-gray-400">
-                        {token.chain.charAt(0).toUpperCase() + token.chain.slice(1)} • 
+                        {token.chain.charAt(0).toUpperCase() + token.chain.slice(1)} •
                         <span className="text-green-400 font-medium ml-1">
                           {token.boostMultiplier}x boost multiplier
                         </span>
@@ -212,22 +221,33 @@ export default function UserTokenDashboard() {
                     <div className="text-gray-400">{formatDate(token.approvedAt!)}</div>
                   </div>
                 </div>
-                
+
                 <div className="mt-3 pt-3 border-t border-green-500/20">
                   <div className="flex items-center justify-between text-sm">
                     <div className="text-gray-400">
-                      Contract: <span className="font-mono text-gray-300">{token.contractAddress.slice(0, 10)}...{token.contractAddress.slice(-8)}</span>
+                      Contract:{' '}
+                      <span className="font-mono text-gray-300">
+                        {token.contractAddress.slice(0, 10)}...{token.contractAddress.slice(-8)}
+                      </span>
                     </div>
                     <div className="flex gap-2">
                       {token.website && (
-                        <a href={token.website} target="_blank" rel="noopener noreferrer" 
-                           className="text-blue-400 hover:text-blue-300 flex items-center gap-1">
+                        <a
+                          href={token.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-400 hover:text-blue-300 flex items-center gap-1"
+                        >
                           <FaExternalLinkAlt className="text-xs" /> Website
                         </a>
                       )}
                       {token.twitter && (
-                        <a href={token.twitter} target="_blank" rel="noopener noreferrer" 
-                           className="text-blue-400 hover:text-blue-300 flex items-center gap-1">
+                        <a
+                          href={token.twitter}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-400 hover:text-blue-300 flex items-center gap-1"
+                        >
                           <FaExternalLinkAlt className="text-xs" /> Twitter
                         </a>
                       )}
@@ -247,22 +267,25 @@ export default function UserTokenDashboard() {
             <FaClock className="text-yellow-400" />
             Pending Approval ({pendingTokens.length})
           </h3>
-          <p className="text-gray-400 mb-4">
-            These tokens are waiting for admin approval.
-          </p>
+          <p className="text-gray-400 mb-4">These tokens are waiting for admin approval.</p>
           <div className="grid gap-4">
             {pendingTokens.map(token => (
-              <div key={token.id} className="bg-yellow-900/10 border border-yellow-500/30 rounded-lg p-4">
+              <div
+                key={token.id}
+                className="bg-yellow-900/10 border border-yellow-500/30 rounded-lg p-4"
+              >
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
                     {token.logo && (
                       <img src={token.logo} alt={token.name} className="w-8 h-8 rounded-full" />
                     )}
                     <div>
-                      <h4 className="text-lg font-semibold text-white">{token.name} ({token.symbol})</h4>
+                      <h4 className="text-lg font-semibold text-white">
+                        {token.name} ({token.symbol})
+                      </h4>
                       <p className="text-sm text-gray-400">
-                        {token.chain.charAt(0).toUpperCase() + token.chain.slice(1)} • 
-                        Potential {token.boostMultiplier}x boost
+                        {token.chain.charAt(0).toUpperCase() + token.chain.slice(1)} • Potential{' '}
+                        {token.boostMultiplier}x boost
                       </p>
                     </div>
                   </div>
@@ -296,14 +319,14 @@ export default function UserTokenDashboard() {
                       <img src={token.logo} alt={token.name} className="w-8 h-8 rounded-full" />
                     )}
                     <div>
-                      <h4 className="text-lg font-semibold text-white">{token.name} ({token.symbol})</h4>
+                      <h4 className="text-lg font-semibold text-white">
+                        {token.name} ({token.symbol})
+                      </h4>
                       <p className="text-sm text-gray-400">
                         {token.chain.charAt(0).toUpperCase() + token.chain.slice(1)}
                       </p>
                       {token.rejectionReason && (
-                        <p className="text-red-400 text-sm mt-1">
-                          Reason: {token.rejectionReason}
-                        </p>
+                        <p className="text-red-400 text-sm mt-1">Reason: {token.rejectionReason}</p>
                       )}
                     </div>
                   </div>
@@ -327,7 +350,8 @@ export default function UserTokenDashboard() {
             <FaPlus className="text-4xl text-gray-600 mx-auto mb-4" />
             <h3 className="text-xl font-bold text-white mb-2">No Tokens Registered</h3>
             <p className="text-gray-400 mb-6">
-              Register your tokens to unlock boost multipliers in Race to Liberty and increase your points earnings.
+              Register your tokens to unlock boost multipliers in Race to Liberty and increase your
+              points earnings.
             </p>
             <button
               onClick={() => setShowRegistration(true)}

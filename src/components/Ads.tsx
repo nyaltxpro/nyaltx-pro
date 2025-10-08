@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -39,10 +39,11 @@ const Ads = () => {
   const tickerRef = useRef<HTMLDivElement>(null);
 
   // Exclusion list (by symbol or name). Add more symbols here as needed.
-  const EXCLUDE_SYMBOLS = useMemo(() => new Set<string>([
-    'RANTS', 'BDOGE', 'VAULT' ,'CLOT' ,'ONE' , 'TREKS', 'XPAY' , 'HACHIKO'
-  ]), []);
-  
+  const EXCLUDE_SYMBOLS = useMemo(
+    () => new Set<string>(['RANTS', 'BDOGE', 'VAULT', 'CLOT', 'ONE', 'TREKS', 'XPAY', 'HACHIKO']),
+    []
+  );
+
   useEffect(() => {
     let active = true;
     const load = async () => {
@@ -62,12 +63,15 @@ const Ads = () => {
     };
     load();
     const id = setInterval(load, 60_000);
-    return () => { active = false; clearInterval(id); };
+    return () => {
+      active = false;
+      clearInterval(id);
+    };
   }, []);
 
   // Apply exclusion filters first
   const excludeFiltered = useMemo(() => {
-    return listings.filter((t) => {
+    return listings.filter(t => {
       const sym = (t.tokenSymbol || '').toUpperCase();
       const name = (t.tokenName || '').toUpperCase();
       return !EXCLUDE_SYMBOLS.has(sym) && !EXCLUDE_SYMBOLS.has(name);
@@ -78,21 +82,23 @@ const Ads = () => {
   const filtered = useChainFilter(excludeFiltered, {
     chainField: 'blockchain',
     includeUnknown: true,
-    caseSensitive: false
+    caseSensitive: false,
   });
 
   // Ticker animation setup
   useEffect(() => {
     if (!tickerRef.current || filtered.length === 0) return;
-    
+
     const ticker = tickerRef.current;
     let animationId: number;
-    
+
     const animate = () => {
       if (!isHovering && ticker) {
         const currentTransform = ticker.style.transform;
-        const currentX = currentTransform ? parseFloat(currentTransform.replace(/[^-\d.]/g, '')) || 0 : 0;
-        
+        const currentX = currentTransform
+          ? parseFloat(currentTransform.replace(/[^-\d.]/g, '')) || 0
+          : 0;
+
         // Reset position when fully scrolled
         if (Math.abs(currentX) >= ticker.scrollWidth / 2) {
           ticker.style.transform = 'translateX(0px)';
@@ -102,9 +108,9 @@ const Ads = () => {
       }
       animationId = requestAnimationFrame(animate);
     };
-    
+
     animationId = requestAnimationFrame(animate);
-    
+
     return () => {
       if (animationId) cancelAnimationFrame(animationId);
     };
@@ -137,7 +143,7 @@ const Ads = () => {
         <div className="mb-4 px-4">
           <ChainFilterIndicator />
         </div>
-        
+
         <div
           className="relative"
           onMouseEnter={() => setIsHovering(true)}
@@ -148,9 +154,9 @@ const Ads = () => {
             <div
               ref={tickerRef}
               className="flex gap-4 whitespace-nowrap"
-              style={{ 
+              style={{
                 transform: 'translateX(0px)',
-                width: 'max-content'
+                width: 'max-content',
               }}
             >
               {tickerItems.map((item, index) => (
@@ -165,15 +171,21 @@ const Ads = () => {
                       src={item.imageUri || '/crypto-icons/color/generic.svg'}
                       alt={item.tokenName || item.tokenSymbol || 'token'}
                       className="w-full h-full object-cover"
-                      onError={(e) => { (e.target as HTMLImageElement).src = '/crypto-icons/color/generic.svg'; }}
+                      onError={e => {
+                        (e.target as HTMLImageElement).src = '/crypto-icons/color/generic.svg';
+                      }}
                     />
                     <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
                       {item.blockchain || 'token'}
                     </div>
                   </div>
                   <div className="p-4 flex-grow">
-                    <h3 className="text-base font-semibold text-white mb-1 whitespace-normal">{item.tokenSymbol || item.tokenName}</h3>
-                    <p className="text-gray-400 text-sm mb-1 whitespace-normal">{item.tokenName || ''}</p>
+                    <h3 className="text-base font-semibold text-white mb-1 whitespace-normal">
+                      {item.tokenSymbol || item.tokenName}
+                    </h3>
+                    <p className="text-gray-400 text-sm mb-1 whitespace-normal">
+                      {item.tokenName || ''}
+                    </p>
                     <p className="text-gray-500 text-xs truncate">{item.contractAddress}</p>
                   </div>
                 </div>
@@ -184,6 +196,6 @@ const Ads = () => {
       </div>
     </div>
   );
-}
+};
 
 export default Ads;

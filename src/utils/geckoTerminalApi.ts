@@ -45,9 +45,9 @@ class GeckoTerminalAPI {
   private cache: Map<string, CachedTokenData> = new Map();
   private rateLimitState: RateLimitState = {
     requests: [],
-    lastReset: Date.now()
+    lastReset: Date.now(),
   };
-  
+
   // Rate limiting: 30 requests per minute
   private readonly MAX_REQUESTS_PER_MINUTE = 30;
   private readonly RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute in milliseconds
@@ -57,69 +57,69 @@ class GeckoTerminalAPI {
   // Network mapping for GeckoTerminal
   private readonly NETWORK_MAPPING: { [key: string]: string } = {
     // Ethereum variants
-    'ethereum': 'eth',
-    'eth': 'eth',
-    'mainnet': 'eth',
+    ethereum: 'eth',
+    eth: 'eth',
+    mainnet: 'eth',
     '1': 'eth',
-    
+
     // BSC variants
-    'bsc': 'bsc',
-    'binance': 'bsc',
+    bsc: 'bsc',
+    binance: 'bsc',
     'binance smart chain': 'bsc',
-    'bnb': 'bsc',
+    bnb: 'bsc',
     '56': 'bsc',
-    
+
     // Polygon variants
-    'polygon': 'polygon_pos',
-    'matic': 'polygon_pos',
-    'polygon_pos': 'polygon_pos',
+    polygon: 'polygon_pos',
+    matic: 'polygon_pos',
+    polygon_pos: 'polygon_pos',
     '137': 'polygon_pos',
-    
+
     // Arbitrum variants
-    'arbitrum': 'arbitrum',
+    arbitrum: 'arbitrum',
     'arbitrum one': 'arbitrum',
-    'arb': 'arbitrum',
+    arb: 'arbitrum',
     '42161': 'arbitrum',
-    
+
     // Optimism variants
-    'optimism': 'optimism',
-    'op': 'optimism',
+    optimism: 'optimism',
+    op: 'optimism',
     '10': 'optimism',
-    
+
     // Base variants
-    'base': 'base',
+    base: 'base',
     '8453': 'base',
-    
+
     // Avalanche variants
-    'avalanche': 'avax',
-    'avax': 'avax',
+    avalanche: 'avax',
+    avax: 'avax',
     'avalanche c-chain': 'avax',
     '43114': 'avax',
-    
+
     // Fantom variants
-    'fantom': 'fantom',
-    'ftm': 'fantom',
+    fantom: 'fantom',
+    ftm: 'fantom',
     '250': 'fantom',
-    
+
     // Solana variants
-    'solana': 'solana',
-    'sol': 'solana'
+    solana: 'solana',
+    sol: 'solana',
   };
 
   private isRateLimited(): boolean {
     const now = Date.now();
-    
+
     // Reset rate limit window if needed
     if (now - this.rateLimitState.lastReset >= this.RATE_LIMIT_WINDOW) {
       this.rateLimitState.requests = [];
       this.rateLimitState.lastReset = now;
     }
-    
+
     // Remove requests older than the window
     this.rateLimitState.requests = this.rateLimitState.requests.filter(
       timestamp => now - timestamp < this.RATE_LIMIT_WINDOW
     );
-    
+
     return this.rateLimitState.requests.length >= this.MAX_REQUESTS_PER_MINUTE;
   }
 
@@ -134,13 +134,13 @@ class GeckoTerminalAPI {
   private getCachedData(cacheKey: string): GeckoTerminalTokenData | null {
     const cached = this.cache.get(cacheKey);
     if (!cached) return null;
-    
+
     const now = Date.now();
     if (now > cached.expiresAt) {
       this.cache.delete(cacheKey);
       return null;
     }
-    
+
     return cached.data;
   }
 
@@ -149,7 +149,7 @@ class GeckoTerminalAPI {
     this.cache.set(cacheKey, {
       data,
       timestamp: now,
-      expiresAt: now + this.CACHE_DURATION
+      expiresAt: now + this.CACHE_DURATION,
     });
   }
 
@@ -162,7 +162,11 @@ class GeckoTerminalAPI {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  async getTokenPrice(network: string, address: string, retries = 3): Promise<{
+  async getTokenPrice(
+    network: string,
+    address: string,
+    retries = 3
+  ): Promise<{
     price_usd: string;
     price_change_24h: string;
     volume_24h: string;
@@ -170,11 +174,11 @@ class GeckoTerminalAPI {
   } | null> {
     try {
       console.log(`🔍 GeckoTerminal: Input network="${network}", address="${address}"`);
-      
+
       // Map network name
       const geckoNetwork = this.mapNetworkName(network);
       console.log(`🔍 GeckoTerminal: Mapped "${network}" -> "${geckoNetwork}"`);
-      
+
       if (!geckoNetwork) {
         console.warn(`❌ Unsupported network for GeckoTerminal: ${network}`);
         console.log('📋 Supported networks:', Object.keys(this.NETWORK_MAPPING));
@@ -182,7 +186,7 @@ class GeckoTerminalAPI {
       }
 
       const cacheKey = this.getCacheKey(geckoNetwork, address);
-      
+
       // Check cache first
       const cachedData = this.getCachedData(cacheKey);
       if (cachedData) {
@@ -191,7 +195,7 @@ class GeckoTerminalAPI {
           price_usd: cachedData.attributes.price_usd || '0',
           price_change_24h: cachedData.attributes.price_change_percentage?.h24 || '0',
           volume_24h: cachedData.attributes.volume_usd.h24 || '0',
-          market_cap: cachedData.attributes.market_cap_usd || '0'
+          market_cap: cachedData.attributes.market_cap_usd || '0',
         };
       }
 
@@ -209,9 +213,9 @@ class GeckoTerminalAPI {
 
       const response = await fetch(url, {
         headers: {
-          'Accept': 'application/json',
-          'User-Agent': 'NYALTX-Trading-Platform/1.0'
-        }
+          Accept: 'application/json',
+          'User-Agent': 'NYALTX-Trading-Platform/1.0',
+        },
       });
 
       if (!response.ok) {
@@ -227,7 +231,7 @@ class GeckoTerminalAPI {
 
       const data: GeckoTerminalResponse = await response.json();
       console.log('🔍 GeckoTerminal API Response:', JSON.stringify(data, null, 2));
-      
+
       if (!data.data || !data.data.attributes) {
         console.warn('GeckoTerminal: Invalid response format');
         return null;
@@ -240,22 +244,24 @@ class GeckoTerminalAPI {
         price_usd: data.data.attributes.price_usd || '0',
         price_change_24h: data.data.attributes.price_change_percentage?.h24 || '0',
         volume_24h: data.data.attributes.volume_usd.h24 || '0',
-        market_cap: data.data.attributes.market_cap_usd || '0'
+        market_cap: data.data.attributes.market_cap_usd || '0',
       };
 
       console.log('✅ GeckoTerminal: Processed result:', result);
       return result;
-
     } catch (error) {
       console.error('GeckoTerminal API error:', error);
-      
+
       // Retry logic for network errors
-      if (retries > 0 && (error instanceof TypeError || (error instanceof Error && error.message.includes('fetch')))) {
+      if (
+        retries > 0 &&
+        (error instanceof TypeError || (error instanceof Error && error.message.includes('fetch')))
+      ) {
         console.log(`GeckoTerminal: Retrying... (${retries} attempts left)`);
         await this.delay(1000);
         return this.getTokenPrice(network, address, retries - 1);
       }
-      
+
       return null;
     }
   }
@@ -274,7 +280,7 @@ class GeckoTerminalAPI {
   getCacheStats(): { size: number; entries: string[] } {
     return {
       size: this.cache.size,
-      entries: Array.from(this.cache.keys())
+      entries: Array.from(this.cache.keys()),
     };
   }
 
@@ -282,11 +288,11 @@ class GeckoTerminalAPI {
   getRateLimitStats(): { requestsInWindow: number; maxRequests: number; windowResetIn: number } {
     const now = Date.now();
     const windowResetIn = this.RATE_LIMIT_WINDOW - (now - this.rateLimitState.lastReset);
-    
+
     return {
       requestsInWindow: this.rateLimitState.requests.length,
       maxRequests: this.MAX_REQUESTS_PER_MINUTE,
-      windowResetIn: Math.max(0, windowResetIn)
+      windowResetIn: Math.max(0, windowResetIn),
     };
   }
 
@@ -303,7 +309,10 @@ class GeckoTerminalAPI {
   }
 
   // Get token metadata including image URL
-  async getTokenMetadata(network: string, address: string): Promise<{
+  async getTokenMetadata(
+    network: string,
+    address: string
+  ): Promise<{
     name: string;
     symbol: string;
     image_url: string | null;
@@ -311,7 +320,7 @@ class GeckoTerminalAPI {
   } | null> {
     try {
       console.log(`🔍 GeckoTerminal: Getting metadata for ${network}:${address}`);
-      
+
       // Map network name
       const geckoNetwork = this.mapNetworkName(network);
       if (!geckoNetwork) {
@@ -320,7 +329,7 @@ class GeckoTerminalAPI {
       }
 
       const cacheKey = this.getCacheKey(geckoNetwork, address);
-      
+
       // Check cache first
       const cachedData = this.getCachedData(cacheKey);
       if (cachedData) {
@@ -329,7 +338,7 @@ class GeckoTerminalAPI {
           name: cachedData.attributes.name,
           symbol: cachedData.attributes.symbol,
           image_url: cachedData.attributes.image_url,
-          coingecko_coin_id: cachedData.attributes.coingecko_coin_id
+          coingecko_coin_id: cachedData.attributes.coingecko_coin_id,
         };
       }
 
@@ -347,21 +356,23 @@ class GeckoTerminalAPI {
 
       const response = await fetch(url, {
         headers: {
-          'Accept': 'application/json',
-          'User-Agent': 'NYALTX-Trading-Platform/1.0'
-        }
+          Accept: 'application/json',
+          'User-Agent': 'NYALTX-Trading-Platform/1.0',
+        },
       });
 
       if (!response.ok) {
         if (response.status === 429) {
           console.warn('GeckoTerminal: Rate limited by server');
         }
-        console.warn(`GeckoTerminal metadata API returned ${response.status}: ${response.statusText}`);
+        console.warn(
+          `GeckoTerminal metadata API returned ${response.status}: ${response.statusText}`
+        );
         return null;
       }
 
       const data: GeckoTerminalResponse = await response.json();
-      
+
       if (!data.data || !data.data.attributes) {
         console.warn('GeckoTerminal: Invalid metadata response format');
         return null;
@@ -374,12 +385,11 @@ class GeckoTerminalAPI {
         name: data.data.attributes.name,
         symbol: data.data.attributes.symbol,
         image_url: data.data.attributes.image_url,
-        coingecko_coin_id: data.data.attributes.coingecko_coin_id
+        coingecko_coin_id: data.data.attributes.coingecko_coin_id,
       };
 
       console.log('✅ GeckoTerminal: Metadata found:', result);
       return result;
-
     } catch (error) {
       console.error('GeckoTerminal metadata error:', error);
       return null;
@@ -393,9 +403,12 @@ export const geckoTerminalAPI = new GeckoTerminalAPI();
 // Make available globally for debugging
 if (typeof window !== 'undefined') {
   (window as any).geckoTerminalAPI = geckoTerminalAPI;
-  
+
   // Clean up expired cache entries every 5 minutes
-  setInterval(() => {
-    geckoTerminalAPI.clearExpiredCache();
-  }, 5 * 60 * 1000);
+  setInterval(
+    () => {
+      geckoTerminalAPI.clearExpiredCache();
+    },
+    5 * 60 * 1000
+  );
 }

@@ -11,7 +11,7 @@ async function ensureBucket() {
 
   const { data: buckets } = await supabaseAdmin.storage.listBuckets();
   const bucketExists = buckets?.some(bucket => bucket.name === BUCKET_NAME);
-  
+
   if (!bucketExists) {
     const { error } = await supabaseAdmin.storage.createBucket(BUCKET_NAME, {
       public: true,
@@ -28,43 +28,39 @@ async function ensureBucket() {
 export async function GET() {
   try {
     await ensureBucket();
-    
+
     if (!supabaseAdmin) {
       throw new Error('Supabase admin client not configured');
     }
 
-    const { data: files, error } = await supabaseAdmin.storage
-      .from(BUCKET_NAME)
-      .list('', {
-        limit: 100,
-        sortBy: { column: 'created_at', order: 'desc' }
-      });
+    const { data: files, error } = await supabaseAdmin.storage.from(BUCKET_NAME).list('', {
+      limit: 100,
+      sortBy: { column: 'created_at', order: 'desc' },
+    });
 
     if (error) {
       throw new Error(`Failed to list files: ${error.message}`);
     }
 
-    const banners = files?.map((file) => {
-      const { data: publicUrl } = supabaseAdmin!.storage
-        .from(BUCKET_NAME)
-        .getPublicUrl(file.name);
+    const banners =
+      files?.map(file => {
+        const { data: publicUrl } = supabaseAdmin!.storage
+          .from(BUCKET_NAME)
+          .getPublicUrl(file.name);
 
-      return {
-        name: file.name,
-        path: file.name,
-        url: publicUrl.publicUrl,
-        size: file.metadata?.size || 0,
-        lastModified: file.created_at || new Date().toISOString(),
-      };
-    }) || [];
+        return {
+          name: file.name,
+          path: file.name,
+          url: publicUrl.publicUrl,
+          size: file.metadata?.size || 0,
+          lastModified: file.created_at || new Date().toISOString(),
+        };
+      }) || [];
 
     return NextResponse.json({ banners });
   } catch (error: any) {
     console.error('Error listing banners:', error);
-    return NextResponse.json(
-      { error: 'Failed to list banners' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to list banners' }, { status: 500 });
   }
 }
 
@@ -72,7 +68,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     await ensureBucket();
-    
+
     if (!supabaseAdmin) {
       throw new Error('Supabase admin client not configured');
     }
@@ -81,10 +77,7 @@ export async function POST(request: NextRequest) {
     const files = formData.getAll('banners') as File[];
 
     if (!files || files.length === 0) {
-      return NextResponse.json(
-        { error: 'No files provided' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No files provided' }, { status: 400 });
     }
 
     let uploaded = 0;
@@ -104,14 +97,12 @@ export async function POST(request: NextRequest) {
       try {
         const arrayBuffer = await file.arrayBuffer();
         const buffer = new Uint8Array(arrayBuffer);
-        
-        const { error } = await supabaseAdmin.storage
-          .from(BUCKET_NAME)
-          .upload(uniqueName, buffer, {
-            contentType: file.type,
-            cacheControl: '3600',
-            upsert: false
-          });
+
+        const { error } = await supabaseAdmin.storage.from(BUCKET_NAME).upload(uniqueName, buffer, {
+          contentType: file.type,
+          cacheControl: '3600',
+          upsert: false,
+        });
 
         if (error) {
           results.push({ filename: file.name, status: 'failed', reason: error.message });
@@ -120,22 +111,22 @@ export async function POST(request: NextRequest) {
           results.push({ filename: uniqueName, status: 'uploaded' });
         }
       } catch (error: any) {
-        results.push({ filename: file.name, status: 'failed', reason: error.message || 'Upload error' });
+        results.push({
+          filename: file.name,
+          status: 'failed',
+          reason: error.message || 'Upload error',
+        });
       }
     }
 
     return NextResponse.json({
       uploaded,
       total: files.length,
-      results
+      results,
     });
-
   } catch (error: any) {
     console.error('Error uploading banners:', error);
-    return NextResponse.json(
-      { error: 'Failed to upload banners' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to upload banners' }, { status: 500 });
   }
 }
 
@@ -149,16 +140,11 @@ export async function DELETE(request: NextRequest) {
     const { filename } = await request.json();
 
     if (!filename) {
-      return NextResponse.json(
-        { error: 'Filename is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Filename is required' }, { status: 400 });
     }
 
     // Delete the file from Supabase storage
-    const { error } = await supabaseAdmin.storage
-      .from(BUCKET_NAME)
-      .remove([filename]);
+    const { error } = await supabaseAdmin.storage.from(BUCKET_NAME).remove([filename]);
 
     if (error) {
       return NextResponse.json(
@@ -167,16 +153,12 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    return NextResponse.json({ 
-      success: true, 
-      message: `Banner ${filename} deleted successfully` 
+    return NextResponse.json({
+      success: true,
+      message: `Banner ${filename} deleted successfully`,
     });
-
   } catch (error: any) {
     console.error('Error deleting banner:', error);
-    return NextResponse.json(
-      { error: 'Failed to delete banner' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to delete banner' }, { status: 500 });
   }
 }

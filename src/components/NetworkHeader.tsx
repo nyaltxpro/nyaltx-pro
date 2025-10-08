@@ -45,44 +45,51 @@ const NetworkHeader = () => {
       <div className="flex items-center space-x-1">
         {/* Chain Selector */}
         <div className="relative">
-          <button 
+          <button
             className="flex items-center space-x-1 bg-[#1a2932] hover:bg-[#253742] px-2 py-1 rounded text-xs text-white"
             onClick={() => setShowChainSelector(!showChainSelector)}
           >
             <div className="w-4 h-4 relative">
               {selectedChain.icon && (
-                <div className="w-4 h-4 rounded-full overflow-hidden flex items-center justify-center" style={{ backgroundColor: selectedChain.color }}>
-                  <Image 
-                    src={selectedChain.icon} 
-                    alt={selectedChain.name} 
-                    width={16} 
-                    height={16} 
-                  />
+                <div
+                  className="w-4 h-4 rounded-full overflow-hidden flex items-center justify-center"
+                  style={{ backgroundColor: selectedChain.color }}
+                >
+                  <Image src={selectedChain.icon} alt={selectedChain.name} width={16} height={16} />
                 </div>
               )}
             </div>
             <span>{selectedChain.name}</span>
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-3 w-3"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
             </svg>
           </button>
-          
+
           {showChainSelector && (
             <div className="absolute top-full left-0 mt-1 bg-[#1a2932] border border-gray-700 rounded shadow-lg z-50 w-64 max-h-80 overflow-y-auto">
               <div className="grid grid-cols-3 gap-1 p-2">
-                {blockchains.map((chain) => (
+                {blockchains.map(chain => (
                   <button
                     key={chain.id}
                     className={`flex flex-col items-center justify-center p-2 rounded hover:bg-[#253742] ${selectedChain.id === chain.id ? 'bg-[#253742]' : ''}`}
                     onClick={() => handleChainSelect(chain)}
                   >
-                    <div className="w-6 h-6 rounded-full overflow-hidden flex items-center justify-center mb-1" style={{ backgroundColor: chain.color }}>
-                      <Image 
-                        src={chain.icon} 
-                        alt={chain.name} 
-                        width={20} 
-                        height={20} 
-                      />
+                    <div
+                      className="w-6 h-6 rounded-full overflow-hidden flex items-center justify-center mb-1"
+                      style={{ backgroundColor: chain.color }}
+                    >
+                      <Image src={chain.icon} alt={chain.name} width={20} height={20} />
                     </div>
                     <span className="text-xs text-white">{chain.name}</span>
                   </button>
@@ -91,22 +98,20 @@ const NetworkHeader = () => {
             </div>
           )}
         </div>
-        
+
         {/* Network Pills */}
         <div className="flex items-center space-x-1 overflow-x-auto hide-scrollbar">
-          {blockchains.slice(0, 12).map((chain) => (
+          {blockchains.slice(0, 12).map(chain => (
             <button
               key={chain.id}
               className={`flex items-center space-x-1 px-2 py-1 rounded text-xs ${selectedChain.id === chain.id ? 'bg-[#1a2932] text-white' : 'text-gray-400 hover:text-white'}`}
               onClick={() => handleChainSelect(chain)}
             >
-              <div className="w-3 h-3 rounded-full overflow-hidden flex items-center justify-center" style={{ backgroundColor: chain.color }}>
-                <Image 
-                  src={chain.icon} 
-                  alt={chain.name} 
-                  width={12} 
-                  height={12} 
-                />
+              <div
+                className="w-3 h-3 rounded-full overflow-hidden flex items-center justify-center"
+                style={{ backgroundColor: chain.color }}
+              >
+                <Image src={chain.icon} alt={chain.name} width={12} height={12} />
               </div>
               <span>{chain.name}</span>
             </button>

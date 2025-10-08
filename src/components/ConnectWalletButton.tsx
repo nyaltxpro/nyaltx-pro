@@ -1,21 +1,24 @@
-"use client";
+'use client';
 
 import { useRouter } from 'next/navigation';
 import { useAccount } from 'wagmi';
 import { useState, useEffect } from 'react';
-import { useAppKit } from "@reown/appkit/react";
+import { useAppKit } from '@reown/appkit/react';
 
 interface ConnectWalletButtonProps {
   className?: string;
   onConnect?: () => void;
 }
 
-export default function ConnectWalletButton({ className = "", onConnect }: ConnectWalletButtonProps) {
+export default function ConnectWalletButton({
+  className = '',
+  onConnect,
+}: ConnectWalletButtonProps) {
   const router = useRouter();
   const { address, isConnected } = useAccount();
   const { open, close } = useAppKit();
   const [displayAddress, setDisplayAddress] = useState<string>('');
-  
+
   useEffect(() => {
     if (isConnected && address) {
       setDisplayAddress(`${address.slice(0, 6)}...${address.slice(-4)}`);
@@ -35,7 +38,7 @@ export default function ConnectWalletButton({ className = "", onConnect }: Conne
   };
 
   return (
-    <button 
+    <button
       className={`py-1 px-4 rounded-full bg-primary bg-[#00b8d8] text-white font-medium hover:bg-opacity-90 transition-colors duration-200  text-sm tracking-wide ${className}`}
       onClick={handleClick}
     >

@@ -1,8 +1,8 @@
-import { MetadataRoute } from 'next'
+import { MetadataRoute } from 'next';
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://nyaltx.com'
-  
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://nyaltx.com';
+
   return {
     rules: [
       {
@@ -40,31 +40,31 @@ export default function robots(): MetadataRoute.Robots {
           // Admin routes - keep private
           '/admin/*',
           '/dashboard/admin/*',
-          
+
           // API routes - no indexing needed
           '/api/*',
-          
+
           // Authentication and callback routes
           '/auth/*',
-          
+
           // Success pages - no SEO value
           '/pricing/success',
           '/pricing/race-to-liberty/success',
           '/pricing/boost-pack/success',
-          
+
           // Test and development routes
           '/test-email',
           '/websockets',
-          
+
           // Private user data
           '/dashboard/settings',
           '/dashboard/connect',
-          
+
           // Dynamic routes that might contain sensitive data
           '/dashboard/ad/*',
           '/dashboard/nfts/*',
           '/nyax-token-details/*',
-          
+
           // Checkout pages - no indexing needed
           '/pricing/checkout/*',
           '/pricing/race-to-liberty/*/checkout',
@@ -85,24 +85,15 @@ export default function robots(): MetadataRoute.Robots {
           '/dashboard/trending',
           '/dashboard/market-data',
         ],
-        disallow: [
-          '/admin/*',
-          '/api/*',
-          '/auth/*',
-          '/dashboard/settings',
-          '/dashboard/connect',
-        ],
+        disallow: ['/admin/*', '/api/*', '/auth/*', '/dashboard/settings', '/dashboard/connect'],
       },
       // Block admin access for all bots
       {
         userAgent: '*',
-        disallow: [
-          '/admin',
-          '/admin/*',
-        ],
+        disallow: ['/admin', '/admin/*'],
       },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,
     host: baseUrl,
-  }
+  };
 }

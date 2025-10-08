@@ -15,7 +15,7 @@ export default function SolanaWalletButton() {
     publicKey: null,
     connected: false,
     connect: async () => {},
-    disconnect: async () => {}
+    disconnect: async () => {},
   });
   const [isConnecting, setIsConnecting] = useState(false);
 
@@ -35,7 +35,7 @@ export default function SolanaWalletButton() {
                 setWallet(prev => ({
                   ...prev,
                   publicKey: response.publicKey.toString(),
-                  connected: true
+                  connected: true,
                 }));
               } catch (error) {
                 console.error('Failed to connect wallet:', error);
@@ -49,12 +49,12 @@ export default function SolanaWalletButton() {
                 setWallet(prev => ({
                   ...prev,
                   publicKey: null,
-                  connected: false
+                  connected: false,
                 }));
               } catch (error) {
                 console.error('Failed to disconnect wallet:', error);
               }
-            }
+            },
           });
         }
       }
@@ -65,12 +65,12 @@ export default function SolanaWalletButton() {
     // Listen for wallet events
     if (typeof window !== 'undefined' && (window as any).solana) {
       const solana = (window as any).solana;
-      
+
       const handleConnect = () => {
         setWallet(prev => ({
           ...prev,
           publicKey: solana.publicKey?.toString() || null,
-          connected: true
+          connected: true,
         }));
       };
 
@@ -78,7 +78,7 @@ export default function SolanaWalletButton() {
         setWallet(prev => ({
           ...prev,
           publicKey: null,
-          connected: false
+          connected: false,
         }));
       };
 
@@ -98,7 +98,7 @@ export default function SolanaWalletButton() {
       window.open('https://phantom.app/', '_blank');
       return;
     }
-    
+
     await wallet.connect();
   };
 
@@ -156,7 +156,7 @@ export function useSolanaWallet() {
     publicKey: null,
     connected: false,
     connect: async () => {},
-    disconnect: async () => {}
+    disconnect: async () => {},
   });
 
   useEffect(() => {
@@ -166,7 +166,7 @@ export function useSolanaWallet() {
         publicKey: solana.publicKey?.toString() || null,
         connected: solana.isConnected || false,
         connect: () => solana.connect(),
-        disconnect: () => solana.disconnect()
+        disconnect: () => solana.disconnect(),
       });
     }
   }, []);

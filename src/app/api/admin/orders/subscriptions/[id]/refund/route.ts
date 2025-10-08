@@ -19,10 +19,7 @@ type SubscriptionOrder = {
   refundDate?: string;
 };
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const admin = await getAdminFromRequest();
   if (!admin) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -38,7 +35,7 @@ export async function POST(
 
   try {
     const col = await getCollection<SubscriptionOrder>('subscription_orders');
-    
+
     // Find the subscription
     const subscription = await col.findOne({ id });
     if (!subscription) {
@@ -52,9 +49,12 @@ export async function POST(
 
     // Check if it's a stripe payment (only stripe payments can be refunded automatically)
     if (subscription.paymentMethod !== 'stripe') {
-      return NextResponse.json({ 
-        error: 'Only Stripe payments can be refunded through this system' 
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: 'Only Stripe payments can be refunded through this system',
+        },
+        { status: 400 }
+      );
     }
 
     // For demo purposes, we'll simulate the refund process
@@ -70,8 +70,8 @@ export async function POST(
           refundStatus: 'completed',
           refundAmount,
           refundDate,
-          status: 'inactive' // Mark subscription as inactive after refund
-        }
+          status: 'inactive', // Mark subscription as inactive after refund
+        },
       }
     );
 
@@ -86,16 +86,15 @@ export async function POST(
     //   amount: Math.round(parseFloat(refundAmount) * 100), // Convert to cents
     // });
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       message: 'Refund processed successfully',
       refundAmount,
-      refundDate
+      refundDate,
     });
-
   } catch (error: any) {
     console.error('Refund processing error:', error);
-    
+
     // If there was an error, mark the refund as failed
     try {
       const col = await getCollection<SubscriptionOrder>('subscription_orders');
@@ -104,16 +103,19 @@ export async function POST(
         {
           $set: {
             refundStatus: 'failed',
-            refundDate: new Date().toISOString()
-          }
+            refundDate: new Date().toISOString(),
+          },
         }
       );
     } catch (updateError) {
       console.error('Failed to update refund status to failed:', updateError);
     }
 
-    return NextResponse.json({ 
-      error: 'Failed to process refund: ' + error.message 
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: 'Failed to process refund: ' + error.message,
+      },
+      { status: 500 }
+    );
   }
 }

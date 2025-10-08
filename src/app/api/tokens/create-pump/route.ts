@@ -5,7 +5,7 @@ import bs58 from 'bs58';
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
-    
+
     const file = formData.get('file') as File;
     const name = formData.get('name') as string;
     const symbol = formData.get('symbol') as string;
@@ -28,10 +28,7 @@ export async function POST(req: NextRequest) {
 
     // Validate file size (5MB limit)
     if (file.size > 5 * 1024 * 1024) {
-      return NextResponse.json(
-        { error: 'File size must be less than 5MB' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'File size must be less than 5MB' }, { status: 400 });
     }
 
     // Create metadata for IPFS upload
@@ -67,7 +64,7 @@ export async function POST(req: NextRequest) {
             image: imgUri,
             name,
             symbol,
-            website: website || ''
+            website: website || '',
           }),
         });
         metadataUri = await metaResponse.text();
@@ -83,10 +80,7 @@ export async function POST(req: NextRequest) {
       }
     } catch (error) {
       console.error('IPFS upload error:', error);
-      return NextResponse.json(
-        { error: 'Failed to upload metadata to IPFS' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Failed to upload metadata to IPFS' }, { status: 500 });
     }
 
     // Generate a random keypair for the token
@@ -96,12 +90,12 @@ export async function POST(req: NextRequest) {
     const tokenMetadata = {
       name: metadataResponse.metadata.name,
       symbol: metadataResponse.metadata.symbol,
-      uri: metadataUri
+      uri: metadataUri,
     };
 
     // Check if we have API key for production mode
     const apiKey = process.env.PUMP_PORTAL_API_KEY;
-    
+
     if (apiKey && apiKey !== 'your-pump-portal-api-key-here') {
       // Production mode - real API call
       const createTokenPayload = {
@@ -112,29 +106,29 @@ export async function POST(req: NextRequest) {
         amount: parseFloat(devBuyAmount || '1'),
         slippage: parseInt(slippage || '10'),
         priorityFee: parseFloat(priorityFee || '0.0005'),
-        pool: platform
+        pool: platform,
       };
 
       const response = await fetch(`https://pumpportal.fun/api/trade?api-key=${apiKey}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(createTokenPayload)
+        body: JSON.stringify(createTokenPayload),
       });
-      
+
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`Failed to create token: ${errorText}`);
       }
-      
+
       const data = await response.json();
-      
+
       return NextResponse.json({
         success: true,
         signature: data.signature,
         mint: mintKeypair.publicKey.toBase58(),
         metadataUri,
         platform,
-        message: 'Token created successfully!'
+        message: 'Token created successfully!',
       });
     } else {
       // Demo mode - simulated response
@@ -145,7 +139,7 @@ export async function POST(req: NextRequest) {
         platform,
         name,
         symbol,
-        description
+        description,
       };
 
       return NextResponse.json({
@@ -154,16 +148,13 @@ export async function POST(req: NextRequest) {
         mint: simulatedResponse.mint,
         metadataUri: simulatedResponse.metadataUri,
         platform: simulatedResponse.platform,
-        message: 'Token created successfully! (Demo mode - add PUMP_PORTAL_API_KEY for real transactions)'
+        message:
+          'Token created successfully! (Demo mode - add PUMP_PORTAL_API_KEY for real transactions)',
       });
     }
-
   } catch (error: any) {
     console.error('Token creation error:', error);
-    return NextResponse.json(
-      { error: error.message || 'Failed to create token' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message || 'Failed to create token' }, { status: 500 });
   }
 }
 
@@ -171,5 +162,7 @@ export async function POST(req: NextRequest) {
 
 function generateRandomSignature() {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  return Array.from({ length: 88 }, () => chars.charAt(Math.floor(Math.random() * chars.length))).join('');
+  return Array.from({ length: 88 }, () =>
+    chars.charAt(Math.floor(Math.random() * chars.length))
+  ).join('');
 }

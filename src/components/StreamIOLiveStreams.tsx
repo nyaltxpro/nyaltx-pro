@@ -37,7 +37,7 @@ export default function StreamIOLiveStreams({ onStreamSelect }: StreamIOLiveStre
         await streamIOService.initialize(user);
         setIsInitialized(true);
         setError(null);
-        
+
         // Load initial streams
         await loadLiveStreams();
       } catch (error) {
@@ -56,12 +56,12 @@ export default function StreamIOLiveStreams({ onStreamSelect }: StreamIOLiveStre
     try {
       setIsLoading(true);
       setError(null);
-      
+
       const streams = await streamIOService.getActiveLiveStreams();
       setLiveStreams(streams);
-      
+
       console.log(`✅ Loaded ${streams.length} live streams:`, streams);
-      
+
       // If no streams found, run debug check
       if (streams.length === 0) {
         console.log('ℹ️ No streams found. Running debug check...');
@@ -114,13 +114,13 @@ export default function StreamIOLiveStreams({ onStreamSelect }: StreamIOLiveStre
   const formatTimeAgo = (date: Date) => {
     const now = new Date();
     const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
-    
+
     if (diffInMinutes < 1) return 'Just started';
     if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
-    
+
     const diffInHours = Math.floor(diffInMinutes / 60);
     if (diffInHours < 24) return `${diffInHours}h ago`;
-    
+
     const diffInDays = Math.floor(diffInHours / 24);
     return `${diffInDays}d ago`;
   };
@@ -161,7 +161,7 @@ export default function StreamIOLiveStreams({ onStreamSelect }: StreamIOLiveStre
           <h2 className="text-2xl font-bold text-white">Live Streams</h2>
           <p className="text-gray-400 mt-1">Powered by Stream.io</p>
         </div>
-        
+
         <div className="flex items-center gap-2">
           <button
             onClick={handleDebug}
@@ -169,7 +169,7 @@ export default function StreamIOLiveStreams({ onStreamSelect }: StreamIOLiveStre
           >
             🔍 Debug
           </button>
-          
+
           <button
             onClick={handleRefresh}
             disabled={isLoading}
@@ -213,7 +213,7 @@ export default function StreamIOLiveStreams({ onStreamSelect }: StreamIOLiveStre
       {/* Streams Grid */}
       {liveStreams.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {liveStreams.map((stream) => (
+          {liveStreams.map(stream => (
             <div
               key={stream.id}
               className="bg-gray-800 rounded-lg overflow-hidden hover:bg-gray-750 transition-colors cursor-pointer group"
@@ -227,13 +227,13 @@ export default function StreamIOLiveStreams({ onStreamSelect }: StreamIOLiveStre
                     <p className="text-white font-medium">Join Stream</p>
                   </div>
                 </div>
-                
+
                 {/* Live Badge */}
                 <div className="absolute top-3 left-3 flex items-center gap-2 px-2 py-1 bg-red-600 rounded-full text-white text-xs font-medium">
                   <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
                   LIVE
                 </div>
-                
+
                 {/* Viewer Count */}
                 <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-1 bg-black/60 rounded-full text-white text-xs">
                   <FaUsers className="w-3 h-3" />
@@ -246,7 +246,7 @@ export default function StreamIOLiveStreams({ onStreamSelect }: StreamIOLiveStre
                 <h3 className="font-medium text-white mb-2 line-clamp-2 group-hover:text-cyan-400 transition-colors">
                   {stream.title}
                 </h3>
-                
+
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-sm text-gray-400">
                     <div className="w-6 h-6 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full flex items-center justify-center text-xs text-white font-medium">
@@ -254,10 +254,12 @@ export default function StreamIOLiveStreams({ onStreamSelect }: StreamIOLiveStre
                     </div>
                     <span className="truncate">{stream.hostName}</span>
                   </div>
-                  
+
                   <div className="flex items-center justify-between text-xs text-gray-500">
                     <span>{formatTimeAgo(stream.createdAt)}</span>
-                    <span>{stream.hostWallet.slice(0, 6)}...{stream.hostWallet.slice(-4)}</span>
+                    <span>
+                      {stream.hostWallet.slice(0, 6)}...{stream.hostWallet.slice(-4)}
+                    </span>
                   </div>
                 </div>
               </div>

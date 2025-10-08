@@ -11,7 +11,7 @@
 export function getCryptoIconPath(symbol: string, style: 'color' | 'black' = 'color'): string {
   // Convert symbol to lowercase as the package uses lowercase filenames
   const normalizedSymbol = symbol.toLowerCase();
-  
+
   try {
     // Try to require the icon (this will throw an error if the icon doesn't exist)
     // Using dynamic import pattern for Next.js compatibility
@@ -26,13 +26,13 @@ export function getCryptoIconPath(symbol: string, style: 'color' | 'black' = 'co
  * Map of blockchain symbols to their corresponding filenames in the /cc directory
  */
 const ccLogoMap: Record<string, string> = {
-  'ARB': 'arbitrum',
-  'BASE': 'base',
-  'FTM': 'fantom',
-  'OP': 'optimism',
-  'RON': 'ronin',
-  'SEI': 'sei',
-  'XAI': 'xai'
+  ARB: 'arbitrum',
+  BASE: 'base',
+  FTM: 'fantom',
+  OP: 'optimism',
+  RON: 'ronin',
+  SEI: 'sei',
+  XAI: 'xai',
 };
 
 /**
@@ -45,18 +45,18 @@ export function getCryptoIconUrl(symbol: string): string {
   if (!symbol) {
     return `/crypto-icons/color/generic.svg`;
   }
-  
+
   // Convert symbol to uppercase for the map lookup
   const upperSymbol = symbol.toUpperCase();
-  
+
   // Check if we have a custom PNG logo in the /cc directory
   if (ccLogoMap[upperSymbol]) {
     return `/cc/${ccLogoMap[upperSymbol]}.png`;
   }
-  
+
   // Convert symbol to lowercase for the default path
   const normalizedSymbol = symbol.toLowerCase();
-  
+
   // Fallback to the cryptocurrency-icons package
   return `/crypto-icons/color/${normalizedSymbol}.svg`;
 }
@@ -69,22 +69,22 @@ export function getCryptoIconUrl(symbol: string): string {
  * @returns Promise<string> - The URL to the icon
  */
 export async function getCryptoIconUrlWithFallback(
-  symbol: string, 
-  network?: string, 
+  symbol: string,
+  network?: string,
   address?: string
 ): Promise<string> {
   // First try the local icons
   const localIconUrl = getCryptoIconUrl(symbol);
-  
+
   // If we have network and address, try to get from GeckoTerminal
   if (network && address) {
     try {
       // Dynamic import to avoid circular dependencies
       const { geckoTerminalAPI } = await import('./geckoTerminalApi');
-      
+
       console.log(`🔍 Trying to get icon from GeckoTerminal for ${symbol} on ${network}`);
       const metadata = await geckoTerminalAPI.getTokenMetadata(network, address);
-      
+
       if (metadata?.image_url) {
         console.log(`✅ Found GeckoTerminal icon for ${symbol}:`, metadata.image_url);
         return metadata.image_url;
@@ -93,7 +93,7 @@ export async function getCryptoIconUrlWithFallback(
       console.warn('Failed to fetch icon from GeckoTerminal:', error);
     }
   }
-  
+
   // Return local icon as fallback
   return localIconUrl;
 }
@@ -102,10 +102,38 @@ export async function getCryptoIconUrlWithFallback(
  * List of common cryptocurrency symbols
  */
 export const commonCryptoSymbols = [
-  'BTC', 'ETH', 'USDT', 'BNB', 'SOL', 'XRP', 'USDC', 'ADA', 
-  'AVAX', 'DOGE', 'DOT', 'MATIC', 'SHIB', 'DAI', 'TRX', 'LINK',
-  'TON', 'UNI', 'WBTC', 'LEO', 'ATOM', 'ETC', 'OKB', 'LTC',
-  'BCH', 'XLM', 'XMR', 'FIL', 'NEAR', 'CRO', 'INJ', 'VET'
+  'BTC',
+  'ETH',
+  'USDT',
+  'BNB',
+  'SOL',
+  'XRP',
+  'USDC',
+  'ADA',
+  'AVAX',
+  'DOGE',
+  'DOT',
+  'MATIC',
+  'SHIB',
+  'DAI',
+  'TRX',
+  'LINK',
+  'TON',
+  'UNI',
+  'WBTC',
+  'LEO',
+  'ATOM',
+  'ETC',
+  'OKB',
+  'LTC',
+  'BCH',
+  'XLM',
+  'XMR',
+  'FIL',
+  'NEAR',
+  'CRO',
+  'INJ',
+  'VET',
 ];
 
 /**

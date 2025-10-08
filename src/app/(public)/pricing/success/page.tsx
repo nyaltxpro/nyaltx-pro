@@ -4,7 +4,7 @@ import PublicHeader from '@/components/PublicHeader';
 import { FaCheckCircle, FaArrowRight } from 'react-icons/fa';
 
 export default function PaymentSuccessPage({
-  searchParams
+  searchParams,
 }: {
   searchParams: { tier?: string; orderId?: string; method?: string };
 }) {
@@ -13,7 +13,7 @@ export default function PaymentSuccessPage({
   return (
     <div className="min-h-screen bg-[#0a0b0f] text-white">
       <PublicHeader />
-      
+
       {/* Success background effects */}
       <div className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute top-20 left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-green-500/20 blur-3xl" />
@@ -35,7 +35,8 @@ export default function PaymentSuccessPage({
           </h1>
 
           <p className="text-xl text-gray-300 mb-8">
-            Thank you for your purchase. Your {tier || 'subscription'} has been activated successfully.
+            Thank you for your purchase. Your {tier || 'subscription'} has been activated
+            successfully.
           </p>
 
           {/* Payment Details */}
@@ -70,34 +71,50 @@ export default function PaymentSuccessPage({
               {tier === 'nyaltxpro' ? (
                 <>
                   <div className="flex items-start gap-3">
-                    <div className="w-6 h-6 rounded-full bg-cyan-600 flex items-center justify-center text-xs font-bold mt-0.5">1</div>
+                    <div className="w-6 h-6 rounded-full bg-cyan-600 flex items-center justify-center text-xs font-bold mt-0.5">
+                      1
+                    </div>
                     <div>
                       <p className="font-medium">Register Your Token</p>
-                      <p className="text-sm text-gray-400">Complete your project profile and add your token information.</p>
+                      <p className="text-sm text-gray-400">
+                        Complete your project profile and add your token information.
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <div className="w-6 h-6 rounded-full bg-gray-600 flex items-center justify-center text-xs font-bold mt-0.5">2</div>
+                    <div className="w-6 h-6 rounded-full bg-gray-600 flex items-center justify-center text-xs font-bold mt-0.5">
+                      2
+                    </div>
                     <div>
                       <p className="font-medium">Access Dashboard</p>
-                      <p className="text-sm text-gray-400">Your NyaltxPro membership is now active for 1 year.</p>
+                      <p className="text-sm text-gray-400">
+                        Your NyaltxPro membership is now active for 1 year.
+                      </p>
                     </div>
                   </div>
                 </>
               ) : (
                 <>
                   <div className="flex items-start gap-3">
-                    <div className="w-6 h-6 rounded-full bg-cyan-600 flex items-center justify-center text-xs font-bold mt-0.5">1</div>
+                    <div className="w-6 h-6 rounded-full bg-cyan-600 flex items-center justify-center text-xs font-bold mt-0.5">
+                      1
+                    </div>
                     <div>
                       <p className="font-medium">Campaign Activation</p>
-                      <p className="text-sm text-gray-400">Your Race to Liberty campaign will be activated within 24 hours.</p>
+                      <p className="text-sm text-gray-400">
+                        Your Race to Liberty campaign will be activated within 24 hours.
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <div className="w-6 h-6 rounded-full bg-gray-600 flex items-center justify-center text-xs font-bold mt-0.5">2</div>
+                    <div className="w-6 h-6 rounded-full bg-gray-600 flex items-center justify-center text-xs font-bold mt-0.5">
+                      2
+                    </div>
                     <div>
                       <p className="font-medium">Placement Begins</p>
-                      <p className="text-sm text-gray-400">Your project will appear in the designated placement areas.</p>
+                      <p className="text-sm text-gray-400">
+                        Your project will appear in the designated placement areas.
+                      </p>
                     </div>
                   </div>
                 </>
@@ -124,7 +141,7 @@ export default function PaymentSuccessPage({
                 <FaArrowRight />
               </Link>
             )}
-            
+
             <Link
               href="/pricing"
               className="inline-flex items-center gap-2 px-6 py-3 border border-gray-600 hover:bg-gray-800 rounded-lg font-medium transition-colors"

@@ -2,7 +2,9 @@ import { StreamVideoClient, User } from '@stream-io/video-client';
 
 // Stream.io configuration
 export const STREAM_API_KEY = process.env.NEXT_PUBLIC_STREAM_API_KEY || 'rcjuja6eu7my';
-export const STREAM_API_SECRET = process.env.STREAM_API_SECRET || 'eyre9m3xpkyrn6tgbt9t3656gg9enhw26ub7e8e7u5k4qbzjw7kg8qeswyav4zzg';
+export const STREAM_API_SECRET =
+  process.env.STREAM_API_SECRET ||
+  'eyre9m3xpkyrn6tgbt9t3656gg9enhw26ub7e8e7u5k4qbzjw7kg8qeswyav4zzg';
 
 // Initialize Stream Video Client
 export const createStreamClient = (user: User, token: string) => {
@@ -33,7 +35,7 @@ export const generateUserToken = async (userId: string): Promise<string> => {
     return token;
   } catch (error) {
     console.error('❌ Failed to generate Stream.io token:', error);
-    
+
     // Fallback: Generate a basic development token
     if (typeof window === 'undefined') {
       // Server-side token generation using jwt
@@ -43,11 +45,11 @@ export const generateUserToken = async (userId: string): Promise<string> => {
         iss: 'stream-io',
         sub: 'user/' + userId,
         iat: Math.floor(Date.now() / 1000),
-        exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24), // 24 hours
+        exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24, // 24 hours
       };
       return jwt.sign(payload, STREAM_API_SECRET);
     }
-    
+
     throw new Error('Token generation failed and no fallback available on client-side');
   }
 };

@@ -7,6 +7,10 @@
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint",
+    "lint:fix": "eslint --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "format:staged": "prettier --write",
     "seed:admin": "node scripts/seedAdmin.js",
     "seed:nyax": "node scripts/seedNyaxTokens.js",
     "fetch:coins": "node scripts/getTopCoinsSimple.js",
@@ -67,6 +71,9 @@
     "@types/simple-peer": "^9.11.8",
     "eslint": "^9",
     "eslint-config-next": "15.5.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
+    "prettier": "^3.6.2",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

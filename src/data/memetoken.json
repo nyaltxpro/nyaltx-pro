@@ -1,5 +1,5 @@
 [
-    {
+  {
     "id": "pudgy-penguins",
     "symbol": "pengu",
     "name": "Pudgy Penguins",
@@ -26,8 +26,8 @@
     "atl_date": "2025-04-09T01:31:57.832Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:33.899Z"
-    },
-    {
+  },
+  {
     "id": "official-trump",
     "symbol": "trump",
     "name": "Official Trump",
@@ -54,8 +54,8 @@
     "atl_date": "2025-01-18T03:40:29.231Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:45.044Z"
-    },
-    {
+  },
+  {
     "id": "bonk",
     "symbol": "bonk",
     "name": "Bonk",
@@ -82,8 +82,8 @@
     "atl_date": "2022-12-29T22:48:46.755Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:46.308Z"
-    },
-    {
+  },
+  {
     "id": "dogwifcoin",
     "symbol": "wif",
     "name": "dogwifhat",
@@ -110,8 +110,8 @@
     "atl_date": "2023-12-13T07:13:50.873Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:47.655Z"
-    },
-    {
+  },
+  {
     "id": "fartcoin",
     "symbol": "fartcoin",
     "name": "Fartcoin",
@@ -138,8 +138,8 @@
     "atl_date": "2024-10-30T07:56:04.381Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:46.811Z"
-    },
-    {
+  },
+  {
     "id": "popcat",
     "symbol": "popcat",
     "name": "Popcat",
@@ -166,8 +166,8 @@
     "atl_date": "2024-01-05T15:34:24.842Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:34.873Z"
-    },
-    {
+  },
+  {
     "id": "cat-in-a-dogs-world",
     "symbol": "mew",
     "name": "cat in a dogs world",
@@ -194,8 +194,8 @@
     "atl_date": "2024-03-27T01:55:58.952Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:46.522Z"
-    },
-    {
+  },
+  {
     "id": "dog-go-to-the-moon-rune",
     "symbol": "dog",
     "name": "Dog (Bitcoin)",
@@ -222,8 +222,8 @@
     "atl_date": "2025-04-07T07:05:49.306Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:47.486Z"
-    },
-    {
+  },
+  {
     "id": "peanut-the-squirrel",
     "symbol": "pnut",
     "name": "Peanut the Squirrel",
@@ -250,8 +250,8 @@
     "atl_date": "2024-11-04T21:41:11.808Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:35.093Z"
-    },
-    {
+  },
+  {
     "id": "useless-3",
     "symbol": "useless",
     "name": "Useless Coin",
@@ -278,8 +278,8 @@
     "atl_date": "2025-06-05T11:05:59.234Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:35.169Z"
-    },
-    {
+  },
+  {
     "id": "baby-doge-coin",
     "symbol": "babydoge",
     "name": "Baby Doge Coin",
@@ -306,8 +306,8 @@
     "atl_date": "2021-06-09T02:48:21.787Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:45.567Z"
-    },
-    {
+  },
+  {
     "id": "troll-2",
     "symbol": "troll",
     "name": "TROLL",
@@ -334,8 +334,8 @@
     "atl_date": "2025-04-22T03:50:51.686Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:35.307Z"
-    },
-    {
+  },
+  {
     "id": "fartful",
     "symbol": "fartful",
     "name": "FARTFUL",
@@ -362,8 +362,8 @@
     "atl_date": "2025-08-28T02:45:00.433Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:48.024Z"
-    },
-    {
+  },
+  {
     "id": "melania-meme",
     "symbol": "melania",
     "name": "Melania Meme",
@@ -390,8 +390,8 @@
     "atl_date": "2025-07-08T07:02:24.671Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:35.399Z"
-    },
-    {
+  },
+  {
     "id": "book-of-meme",
     "symbol": "bome",
     "name": "BOOK OF MEME",
@@ -418,8 +418,8 @@
     "atl_date": "2024-03-14T10:17:29.365Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:46.273Z"
-    },
-    {
+  },
+  {
     "id": "aura-on-sol",
     "symbol": "aura",
     "name": "aura",
@@ -446,8 +446,8 @@
     "atl_date": "2024-06-02T07:28:15.724Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:45.440Z"
-    },
-    {
+  },
+  {
     "id": "moo-deng",
     "symbol": "moodeng",
     "name": "Moo Deng",
@@ -474,8 +474,8 @@
     "atl_date": "2024-09-20T13:55:20.098Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:35.447Z"
-    },
-    {
+  },
+  {
     "id": "gigachad-2",
     "symbol": "giga",
     "name": "Gigachad",
@@ -502,8 +502,8 @@
     "atl_date": "2024-02-06T19:23:17.592Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:48.502Z"
-    },
-    {
+  },
+  {
     "id": "comedian",
     "symbol": "ban",
     "name": "Comedian",
@@ -530,8 +530,8 @@
     "atl_date": "2024-10-29T04:34:36.529Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:46.857Z"
-    },
-    {
+  },
+  {
     "id": "goatseus-maximus",
     "symbol": "goat",
     "name": "Goatseus Maximus",
@@ -558,8 +558,8 @@
     "atl_date": "2025-04-07T06:56:09.012Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:48.534Z"
-    },
-    {
+  },
+  {
     "id": "bertram-the-pomeranian",
     "symbol": "bert",
     "name": "Bertram The Pomeranian",
@@ -586,8 +586,8 @@
     "atl_date": "2024-11-13T13:39:36.066Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:45.871Z"
-    },
-    {
+  },
+  {
     "id": "tdccp",
     "symbol": "tdccp",
     "name": "TDCCP",
@@ -614,8 +614,8 @@
     "atl_date": "2025-08-23T01:57:50.091Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:36.462Z"
-    },
-    {
+  },
+  {
     "id": "vine",
     "symbol": "vine",
     "name": "Vine",
@@ -642,8 +642,8 @@
     "atl_date": "2025-03-18T18:35:46.959Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:36.611Z"
-    },
-    {
+  },
+  {
     "id": "ben-pasternak",
     "symbol": "launchcoin",
     "name": "Launch Coin on Believe",
@@ -670,8 +670,8 @@
     "atl_date": "2025-03-13T09:29:49.316Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:45.936Z"
-    },
-    {
+  },
+  {
     "id": "nobody-sausage",
     "symbol": "nobody",
     "name": "Nobody Sausage",
@@ -698,8 +698,8 @@
     "atl_date": "2025-05-02T08:06:33.290Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:36.868Z"
-    },
-    {
+  },
+  {
     "id": "daku-v2",
     "symbol": "daku",
     "name": "Daku V2",
@@ -726,8 +726,8 @@
     "atl_date": "2025-07-15T15:11:30.716Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:47.128Z"
-    },
-    {
+  },
+  {
     "id": "ponke",
     "symbol": "ponke",
     "name": "PONKE",
@@ -754,8 +754,8 @@
     "atl_date": "2024-01-03T19:05:58.444Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:36.982Z"
-    },
-    {
+  },
+  {
     "id": "uranus-4",
     "symbol": "uranus",
     "name": "Uranus",
@@ -782,8 +782,8 @@
     "atl_date": "2025-07-19T06:46:18.012Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:37.419Z"
-    },
-    {
+  },
+  {
     "id": "chill-guy",
     "symbol": "chillguy",
     "name": "Just a chill guy",
@@ -810,8 +810,8 @@
     "atl_date": "2024-11-18T12:34:51.762Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:46.944Z"
-    },
-    {
+  },
+  {
     "id": "the-spirit-of-gambling",
     "symbol": "tokabu",
     "name": "The Spirit of Gambling",
@@ -838,8 +838,8 @@
     "atl_date": "2025-06-20T23:36:39.000Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:38.324Z"
-    },
-    {
+  },
+  {
     "id": "unstable-coin",
     "symbol": "usduc",
     "name": "Unstable Coin",
@@ -866,8 +866,8 @@
     "atl_date": "2025-06-13T13:29:33.481Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:37.855Z"
-    },
-    {
+  },
+  {
     "id": "slerf",
     "symbol": "slerf",
     "name": "Slerf",
@@ -894,8 +894,8 @@
     "atl_date": "2025-04-07T06:57:36.213Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:37.730Z"
-    },
-    {
+  },
+  {
     "id": "fwog",
     "symbol": "fwog",
     "name": "Fwog",
@@ -922,8 +922,8 @@
     "atl_date": "2024-08-08T00:56:41.729Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:48.336Z"
-    },
-    {
+  },
+  {
     "id": "big-dog-fink",
     "symbol": "bink",
     "name": "Big Dog Fink",
@@ -950,8 +950,8 @@
     "atl_date": "2024-11-20T03:41:33.624Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:45.806Z"
-    },
-    {
+  },
+  {
     "id": "act-i-the-ai-prophecy",
     "symbol": "act",
     "name": "Act I The AI Prophecy",
@@ -978,8 +978,8 @@
     "atl_date": "2024-10-25T19:44:36.847Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:44.746Z"
-    },
-    {
+  },
+  {
     "id": "pepecoin-2",
     "symbol": "pepecoin",
     "name": "PepeCoin",
@@ -1006,8 +1006,8 @@
     "atl_date": "2023-10-13T16:41:39.013Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:37.986Z"
-    },
-    {
+  },
+  {
     "id": "mori-coin",
     "symbol": "mori",
     "name": "MORI COIN",
@@ -1034,8 +1034,8 @@
     "atl_date": "2025-06-27T08:53:54.177Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:38.279Z"
-    },
-    {
+  },
+  {
     "id": "mcdull",
     "symbol": "mcdull",
     "name": "McDull (Meme)",
@@ -1062,8 +1062,8 @@
     "atl_date": "2025-06-12T20:52:11.125Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:38.256Z"
-    },
-    {
+  },
+  {
     "id": "fartboy",
     "symbol": "$fartboy",
     "name": "Fartboy",
@@ -1090,8 +1090,8 @@
     "atl_date": "2025-01-23T09:30:46.136Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:48.008Z"
-    },
-    {
+  },
+  {
     "id": "sillynubcat",
     "symbol": "nub",
     "name": "Sillynubcat",
@@ -1118,8 +1118,8 @@
     "atl_date": "2025-04-07T07:02:37.100Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:38.508Z"
-    },
-    {
+  },
+  {
     "id": "unicorn-fart-dust",
     "symbol": "ufd",
     "name": "Unicorn Fart Dust",
@@ -1146,8 +1146,8 @@
     "atl_date": "2025-06-22T14:31:13.402Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:38.803Z"
-    },
-    {
+  },
+  {
     "id": "crow-with-knife",
     "symbol": "caw",
     "name": "crow with knife",
@@ -1174,8 +1174,8 @@
     "atl_date": "2024-03-14T08:43:41.684Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:47.087Z"
-    },
-    {
+  },
+  {
     "id": "au79",
     "symbol": "au79",
     "name": "AU79",
@@ -1202,8 +1202,8 @@
     "atl_date": "2025-08-02T09:07:39.449Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:45.406Z"
-    },
-    {
+  },
+  {
     "id": "wen-4",
     "symbol": "wen",
     "name": "Wen",
@@ -1230,8 +1230,8 @@
     "atl_date": "2024-01-26T15:12:50.824Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:40.011Z"
-    },
-    {
+  },
+  {
     "id": "myro",
     "symbol": "$myro",
     "name": "Myro",
@@ -1258,8 +1258,8 @@
     "atl_date": "2023-11-12T18:30:55.091Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:39.349Z"
-    },
-    {
+  },
+  {
     "id": "zerebro",
     "symbol": "zerebro",
     "name": "Zerebro",
@@ -1286,8 +1286,8 @@
     "atl_date": "2024-11-03T08:34:49.111Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:39.441Z"
-    },
-    {
+  },
+  {
     "id": "bucky-2",
     "symbol": "bucky",
     "name": "Bucky",
@@ -1314,8 +1314,8 @@
     "atl_date": "2025-07-30T23:45:55.500Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:46.370Z"
-    },
-    {
+  },
+  {
     "id": "neet",
     "symbol": "neet",
     "name": "Not in Employment, Education, or Training",
@@ -1342,8 +1342,8 @@
     "atl_date": "2025-06-13T16:50:55.650Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:39.787Z"
-    },
-    {
+  },
+  {
     "id": "hyperpigmentation",
     "symbol": "$hyper",
     "name": "Hyperpigmentation",
@@ -1370,8 +1370,8 @@
     "atl_date": "2025-04-06T18:55:28.219Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:49.067Z"
-    },
-    {
+  },
+  {
     "id": "retardio",
     "symbol": "retardio",
     "name": "RETARDIO",
@@ -1398,8 +1398,8 @@
     "atl_date": "2024-04-02T07:42:57.846Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:39.973Z"
-    },
-    {
+  },
+  {
     "id": "daddy-tate",
     "symbol": "daddy",
     "name": "Daddy Tate",
@@ -1426,8 +1426,8 @@
     "atl_date": "2025-07-20T23:05:33.651Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:47.165Z"
-    },
-    {
+  },
+  {
     "id": "illusion-of-life",
     "symbol": "spark",
     "name": "Illusion of Life",
@@ -1454,8 +1454,8 @@
     "atl_date": "2025-08-28T17:22:51.124Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:49.148Z"
-    },
-    {
+  },
+  {
     "id": "pippin",
     "symbol": "pippin",
     "name": "pippin",
@@ -1482,8 +1482,8 @@
     "atl_date": "2024-12-30T00:02:49.802Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:40.690Z"
-    },
-    {
+  },
+  {
     "id": "purple-pepe",
     "symbol": "purpe",
     "name": "PURPLE PEPE",
@@ -1510,8 +1510,8 @@
     "atl_date": "2024-11-13T13:40:47.723Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:40.767Z"
-    },
-    {
+  },
+  {
     "id": "richquack",
     "symbol": "quack",
     "name": "Rich Quack",
@@ -1538,8 +1538,8 @@
     "atl_date": "2021-10-06T13:37:28.994Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:40.801Z"
-    },
-    {
+  },
+  {
     "id": "michicoin",
     "symbol": "$michi",
     "name": "michi",
@@ -1566,8 +1566,8 @@
     "atl_date": "2025-04-07T07:00:24.912Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:41.089Z"
-    },
-    {
+  },
+  {
     "id": "hosico-cat",
     "symbol": "hosico",
     "name": "Hosico Cat",
@@ -1594,8 +1594,8 @@
     "atl_date": "2025-06-05T21:30:18.866Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:49.172Z"
-    },
-    {
+  },
+  {
     "id": "lock-in",
     "symbol": "lockin",
     "name": "LOCK IN",
@@ -1622,8 +1622,8 @@
     "atl_date": "2025-04-07T08:03:45.567Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:41.152Z"
-    },
-    {
+  },
+  {
     "id": "startup",
     "symbol": "startup",
     "name": "Startup",
@@ -1650,8 +1650,8 @@
     "atl_date": "2025-06-05T20:38:07.429Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:41.237Z"
-    },
-    {
+  },
+  {
     "id": "maneki",
     "symbol": "maneki",
     "name": "MANEKI",
@@ -1678,8 +1678,8 @@
     "atl_date": "2025-04-09T01:26:43.905Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:41.349Z"
-    },
-    {
+  },
+  {
     "id": "the-bitcoin-mascot",
     "symbol": "bitty",
     "name": "The Bitcoin Mascot",
@@ -1706,8 +1706,8 @@
     "atl_date": "2025-07-19T10:37:42.841Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:41.469Z"
-    },
-    {
+  },
+  {
     "id": "darkpino",
     "symbol": "dpino",
     "name": "DarkPino",
@@ -1734,8 +1734,8 @@
     "atl_date": "2025-06-14T05:40:44.258Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:47.155Z"
-    },
-    {
+  },
+  {
     "id": "opus-2",
     "symbol": "opus",
     "name": "Opus",
@@ -1762,8 +1762,8 @@
     "atl_date": "2025-06-13T02:43:32.237Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:41.774Z"
-    },
-    {
+  },
+  {
     "id": "minimini",
     "symbol": "mini",
     "name": "mini",
@@ -1790,8 +1790,8 @@
     "atl_date": "2024-06-24T09:31:55.908Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:41.828Z"
-    },
-    {
+  },
+  {
     "id": "yeti-2",
     "symbol": "yeti",
     "name": "YETI",
@@ -1818,8 +1818,8 @@
     "atl_date": "2025-08-01T20:49:53.516Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:41.832Z"
-    },
-    {
+  },
+  {
     "id": "v2ex",
     "symbol": "v2ex",
     "name": "V2EX",
@@ -1846,8 +1846,8 @@
     "atl_date": "2025-08-21T02:11:56.728Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:41.851Z"
-    },
-    {
+  },
+  {
     "id": "chill-house",
     "symbol": "chillhouse",
     "name": "Chill House",
@@ -1874,8 +1874,8 @@
     "atl_date": "2025-05-14T15:04:07.583Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:46.736Z"
-    },
-    {
+  },
+  {
     "id": "sigma",
     "symbol": "sigma",
     "name": "Sigma",
@@ -1902,8 +1902,8 @@
     "atl_date": "2024-08-12T01:03:44.075Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:41.886Z"
-    },
-    {
+  },
+  {
     "id": "max-2",
     "symbol": "max",
     "name": "MAX",
@@ -1930,8 +1930,8 @@
     "atl_date": "2025-07-04T16:10:38.467Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:41.963Z"
-    },
-    {
+  },
+  {
     "id": "strategic-solana-reserve",
     "symbol": "ssr",
     "name": "Strategic Solana Reserve",
@@ -1958,8 +1958,8 @@
     "atl_date": "2025-01-24T04:35:31.745Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:42.051Z"
-    },
-    {
+  },
+  {
     "id": "gme",
     "symbol": "gme",
     "name": "GME",
@@ -1986,8 +1986,8 @@
     "atl_date": "2024-04-30T17:02:21.313Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:48.450Z"
-    },
-    {
+  },
+  {
     "id": "cryptocurrency-coin",
     "symbol": "crypto",
     "name": "Cryptocurrency Coin",
@@ -2014,8 +2014,8 @@
     "atl_date": "2025-05-17T00:30:39.013Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:47.073Z"
-    },
-    {
+  },
+  {
     "id": "catwifmask",
     "symbol": "mask",
     "name": "catwifmask",
@@ -2042,8 +2042,8 @@
     "atl_date": "2025-05-30T08:11:00.462Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:46.513Z"
-    },
-    {
+  },
+  {
     "id": "ani-grok-companion",
     "symbol": "ani",
     "name": "Ani Grok Companion",
@@ -2070,8 +2070,8 @@
     "atl_date": "2025-08-28T21:03:10.101Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:49.818Z"
-    },
-    {
+  },
+  {
     "id": "rizzmas",
     "symbol": "rizzmas",
     "name": "Rizzmas",
@@ -2098,8 +2098,8 @@
     "atl_date": "2025-03-11T01:20:32.334Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:42.447Z"
-    },
-    {
+  },
+  {
     "id": "pepo",
     "symbol": "pepo",
     "name": "PEPO",
@@ -2126,8 +2126,8 @@
     "atl_date": "2025-04-28T15:34:00.848Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:42.697Z"
-    },
-    {
+  },
+  {
     "id": "american-coin",
     "symbol": "usa",
     "name": "American Coin",
@@ -2154,8 +2154,8 @@
     "atl_date": "2024-08-21T22:36:45.816Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:45.064Z"
-    },
-    {
+  },
+  {
     "id": "this-will-make-ur-monthly-salary",
     "symbol": "salary",
     "name": "This will make ur monthly salary",
@@ -2182,8 +2182,8 @@
     "atl_date": "2025-06-07T06:37:55.658Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:42.657Z"
-    },
-    {
+  },
+  {
     "id": "mother-iggy",
     "symbol": "mother",
     "name": "Mother Iggy",
@@ -2210,8 +2210,8 @@
     "atl_date": "2025-04-07T06:55:46.369Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:42.664Z"
-    },
-    {
+  },
+  {
     "id": "samoyedcoin",
     "symbol": "samo",
     "name": "Samoyedcoin",
@@ -2238,8 +2238,8 @@
     "atl_date": "2021-04-29T13:34:43.813Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:42.810Z"
-    },
-    {
+  },
+  {
     "id": "poop",
     "symbol": "poop",
     "name": "Poop",
@@ -2266,8 +2266,8 @@
     "atl_date": "2025-07-18T17:58:40.113Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:42.916Z"
-    },
-    {
+  },
+  {
     "id": "candle-tv",
     "symbol": "candle",
     "name": "Candle TV",
@@ -2294,8 +2294,8 @@
     "atl_date": "2025-05-05T13:55:38.233Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:46.411Z"
-    },
-    {
+  },
+  {
     "id": "karmacoin-2",
     "symbol": "karma",
     "name": "Karmacoin",
@@ -2322,8 +2322,8 @@
     "atl_date": "2025-07-16T15:44:29.785Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:49.453Z"
-    },
-    {
+  },
+  {
     "id": "jobcoin-2",
     "symbol": "jobcoin",
     "name": "JOBCOIN",
@@ -2350,8 +2350,8 @@
     "atl_date": "2025-05-31T17:57:12.038Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:49.359Z"
-    },
-    {
+  },
+  {
     "id": "snap-kero",
     "symbol": "$nap",
     "name": "SNAP",
@@ -2378,8 +2378,8 @@
     "atl_date": "2025-04-07T07:05:21.065Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:43.175Z"
-    },
-    {
+  },
+  {
     "id": "mumu-the-bull-3",
     "symbol": "mumu",
     "name": "MUMU THE BULL",
@@ -2406,8 +2406,8 @@
     "atl_date": "2025-04-06T23:25:44.378Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:43.260Z"
-    },
-    {
+  },
+  {
     "id": "pain",
     "symbol": "pain",
     "name": "Pain",
@@ -2434,8 +2434,8 @@
     "atl_date": "2025-06-22T20:25:13.963Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:43.421Z"
-    },
-    {
+  },
+  {
     "id": "worlds-first-memecoin",
     "symbol": "lolcoin",
     "name": "Worlds First Memecoin",
@@ -2462,8 +2462,8 @@
     "atl_date": "2025-07-06T15:54:53.728Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:43.551Z"
-    },
-    {
+  },
+  {
     "id": "monkey-pox",
     "symbol": "pox",
     "name": "Monkey Pox",
@@ -2490,8 +2490,8 @@
     "atl_date": "2025-03-29T21:04:45.356Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:43.755Z"
-    },
-    {
+  },
+  {
     "id": "fric",
     "symbol": "fric",
     "name": "FRIC",
@@ -2518,8 +2518,8 @@
     "atl_date": "2025-04-04T05:40:17.100Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:48.360Z"
-    },
-    {
+  },
+  {
     "id": "stonks-4",
     "symbol": "stnk",
     "name": "Stonks",
@@ -2546,8 +2546,8 @@
     "atl_date": "2025-08-03T04:19:51.878Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:44.045Z"
-    },
-    {
+  },
+  {
     "id": "xavier-renegade-angel",
     "symbol": "xavier",
     "name": "Xavier: Renegade Angel",
@@ -2574,8 +2574,8 @@
     "atl_date": "2025-05-20T08:56:15.187Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:44.086Z"
-    },
-    {
+  },
+  {
     "id": "are-ya-winning-son",
     "symbol": "son",
     "name": "ARE YA WINNING, SON?",
@@ -2602,8 +2602,8 @@
     "atl_date": "2025-08-17T13:11:12.704Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:47.085Z"
-    },
-    {
+  },
+  {
     "id": "titcoin-2",
     "symbol": "titcoin",
     "name": "titcoin",
@@ -2630,8 +2630,8 @@
     "atl_date": "2025-03-11T01:10:24.842Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:44.266Z"
-    },
-    {
+  },
+  {
     "id": "360noscope420blazeit",
     "symbol": "mlg",
     "name": "360noscope420blazeit",
@@ -2658,8 +2658,8 @@
     "atl_date": "2024-10-27T14:34:43.171Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:44.185Z"
-    },
-    {
+  },
+  {
     "id": "hege",
     "symbol": "hege",
     "name": "Hege",
@@ -2686,8 +2686,8 @@
     "atl_date": "2024-04-09T07:21:23.281Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:48.822Z"
-    },
-    {
+  },
+  {
     "id": "slothana",
     "symbol": "sloth",
     "name": "Slothana",
@@ -2714,8 +2714,8 @@
     "atl_date": "2025-02-25T11:46:43.342Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:44.344Z"
-    },
-    {
+  },
+  {
     "id": "the-last-play",
     "symbol": "retire",
     "name": "The Last Play",
@@ -2742,8 +2742,8 @@
     "atl_date": "2025-01-08T17:50:26.575Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:44.580Z"
-    },
-    {
+  },
+  {
     "id": "hahayes",
     "symbol": "rizo",
     "name": "HahaYes",
@@ -2770,8 +2770,8 @@
     "atl_date": "2024-09-26T20:41:31.237Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:48.701Z"
-    },
-    {
+  },
+  {
     "id": "giko-cat",
     "symbol": "giko",
     "name": "Giko Cat",
@@ -2798,5 +2798,5 @@
     "atl_date": "2025-04-07T07:03:49.642Z",
     "roi": null,
     "last_updated": "2025-08-28T23:17:48.489Z"
-    }
-    ]
+  }
+]

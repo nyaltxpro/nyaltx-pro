@@ -1,9 +1,26 @@
-"use client";
+'use client';
 
 import { useState, useEffect, useRef } from 'react';
 import { useAccount } from 'wagmi';
-import { FaHeart, FaShare, FaUsers, FaPaperPlane, FaTimes, FaComment, FaGift, FaVolumeMute, FaVolumeUp, FaExpand, FaCompress } from 'react-icons/fa';
-import { liveStreamWebSocket, LiveStreamData, StreamMessage, WebSocketStreamMessage } from '@/services/LiveStreamWebSocket';
+import {
+  FaHeart,
+  FaShare,
+  FaUsers,
+  FaPaperPlane,
+  FaTimes,
+  FaComment,
+  FaGift,
+  FaVolumeMute,
+  FaVolumeUp,
+  FaExpand,
+  FaCompress,
+} from 'react-icons/fa';
+import {
+  liveStreamWebSocket,
+  LiveStreamData,
+  StreamMessage,
+  WebSocketStreamMessage,
+} from '@/services/LiveStreamWebSocket';
 
 interface LiveStreamViewerProps {
   streamData: LiveStreamData;
@@ -12,24 +29,24 @@ interface LiveStreamViewerProps {
 
 export default function LiveStreamViewer({ streamData, onClose }: LiveStreamViewerProps) {
   const { address, isConnected } = useAccount();
-  
+
   // Stream state
   const [currentStream, setCurrentStream] = useState<LiveStreamData>(streamData);
   const [viewerCount, setViewerCount] = useState(streamData.viewerCount || 0);
   const [isLive, setIsLive] = useState(streamData.isLive);
-  
+
   // Chat state
   const [messages, setMessages] = useState<StreamMessage[]>([]);
   const [chatMessage, setChatMessage] = useState('');
   const [isChatVisible, setIsChatVisible] = useState(true);
-  
+
   // UI state
   const [hasLiked, setHasLiked] = useState(false);
   const [likes, setLikes] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isConnectedToWS, setIsConnectedToWS] = useState(false);
-  
+
   // Refs
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -75,7 +92,7 @@ export default function LiveStreamViewer({ streamData, onClose }: LiveStreamView
 
     // Subscribe to stream
     liveStreamWebSocket.subscribeToStream(currentStream.id, handleWebSocketMessage);
-    
+
     return () => {
       liveStreamWebSocket.unsubscribeFromStream(currentStream.id, handleWebSocketMessage);
     };
@@ -88,15 +105,10 @@ export default function LiveStreamViewer({ streamData, onClose }: LiveStreamView
 
   const sendChatMessage = () => {
     if (!chatMessage.trim() || !address) return;
-    
+
     const username = `${address.slice(0, 6)}...${address.slice(-4)}`;
-    liveStreamWebSocket.sendChatMessage(
-      currentStream.id,
-      chatMessage.trim(),
-      address,
-      username
-    );
-    
+    liveStreamWebSocket.sendChatMessage(currentStream.id, chatMessage.trim(), address, username);
+
     setChatMessage('');
   };
 
@@ -109,7 +121,7 @@ export default function LiveStreamViewer({ streamData, onClose }: LiveStreamView
 
   const handleLike = () => {
     setHasLiked(!hasLiked);
-    setLikes(prev => hasLiked ? prev - 1 : prev + 1);
+    setLikes(prev => (hasLiked ? prev - 1 : prev + 1));
   };
 
   const toggleFullscreen = () => {
@@ -126,15 +138,18 @@ export default function LiveStreamViewer({ streamData, onClose }: LiveStreamView
   const renderMessage = (msg: StreamMessage) => {
     if (msg.type === 'donation') {
       return (
-        <div key={msg.id} className="p-3 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/30 rounded-lg mb-2">
+        <div
+          key={msg.id}
+          className="p-3 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/30 rounded-lg mb-2"
+        >
           <div className="flex items-center gap-2 mb-1">
             <FaGift className="text-yellow-400" />
             <span className="font-bold text-yellow-400">{msg.username}</span>
-            <span className="text-yellow-300">donated {msg.amount} {msg.token}</span>
+            <span className="text-yellow-300">
+              donated {msg.amount} {msg.token}
+            </span>
           </div>
-          {msg.message && (
-            <div className="text-gray-300 text-sm">{msg.message}</div>
-          )}
+          {msg.message && <div className="text-gray-300 text-sm">{msg.message}</div>}
         </div>
       );
     }
@@ -158,9 +173,12 @@ export default function LiveStreamViewer({ streamData, onClose }: LiveStreamView
   };
 
   return (
-    <div className={`fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 ${isFullscreen ? 'p-0' : 'p-4'}`}>
-      <div className={`bg-gradient-to-b from-gray-900 to-black border border-gray-700 rounded-xl overflow-hidden ${isFullscreen ? 'w-full h-full rounded-none' : 'w-full max-w-6xl max-h-[95vh]'}`}>
-        
+    <div
+      className={`fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 ${isFullscreen ? 'p-0' : 'p-4'}`}
+    >
+      <div
+        className={`bg-gradient-to-b from-gray-900 to-black border border-gray-700 rounded-xl overflow-hidden ${isFullscreen ? 'w-full h-full rounded-none' : 'w-full max-w-6xl max-h-[95vh]'}`}
+      >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
           <div className="flex items-center gap-3">
@@ -170,20 +188,16 @@ export default function LiveStreamViewer({ streamData, onClose }: LiveStreamView
               ) : (
                 <div className="w-3 h-3 bg-gray-500 rounded-full"></div>
               )}
-              <span className="text-white font-semibold">
-                {isLive ? 'LIVE' : 'OFFLINE'}
-              </span>
+              <span className="text-white font-semibold">{isLive ? 'LIVE' : 'OFFLINE'}</span>
             </div>
-            <div className="text-gray-300">
-              👥 {viewerCount.toLocaleString()} viewers
-            </div>
-            <div className="text-gray-400">
-              {currentStream.title}
-            </div>
+            <div className="text-gray-300">👥 {viewerCount.toLocaleString()} viewers</div>
+            <div className="text-gray-400">{currentStream.title}</div>
           </div>
-          
+
           <div className="flex items-center gap-2">
-            <div className={`w-2 h-2 rounded-full ${isConnectedToWS ? 'bg-green-500' : 'bg-red-500'}`}></div>
+            <div
+              className={`w-2 h-2 rounded-full ${isConnectedToWS ? 'bg-green-500' : 'bg-red-500'}`}
+            ></div>
             <span className="text-xs text-gray-400">
               {isConnectedToWS ? 'Connected' : 'Disconnected'}
             </span>
@@ -197,7 +211,6 @@ export default function LiveStreamViewer({ streamData, onClose }: LiveStreamView
         </div>
 
         <div className="flex h-[calc(95vh-80px)]">
-          
           {/* Video Area */}
           <div className="flex-1 relative bg-gray-900">
             {isLive ? (
@@ -209,7 +222,8 @@ export default function LiveStreamViewer({ streamData, onClose }: LiveStreamView
                   <h3 className="text-2xl font-bold mb-2">{currentStream.streamerName}</h3>
                   <p className="text-gray-300">{currentStream.title}</p>
                   <div className="mt-4 text-sm text-gray-400">
-                    {currentStream.category} • Started {new Date(currentStream.startedAt).toLocaleTimeString()}
+                    {currentStream.category} • Started{' '}
+                    {new Date(currentStream.startedAt).toLocaleTimeString()}
                   </div>
                 </div>
               </div>
@@ -230,21 +244,21 @@ export default function LiveStreamViewer({ streamData, onClose }: LiveStreamView
                   <button
                     onClick={handleLike}
                     className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-                      hasLiked 
-                        ? 'bg-red-500 text-white' 
+                      hasLiked
+                        ? 'bg-red-500 text-white'
                         : 'bg-white/20 backdrop-blur-sm text-white hover:bg-white/30'
                     }`}
                   >
                     <FaHeart />
                     <span>{likes}</span>
                   </button>
-                  
+
                   <button className="flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm rounded-lg text-white hover:bg-white/30 transition-colors">
                     <FaShare />
                     <span>Share</span>
                   </button>
                 </div>
-                
+
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setIsMuted(!isMuted)}
@@ -252,7 +266,7 @@ export default function LiveStreamViewer({ streamData, onClose }: LiveStreamView
                   >
                     {isMuted ? <FaVolumeMute /> : <FaVolumeUp />}
                   </button>
-                  
+
                   <button
                     onClick={toggleFullscreen}
                     className="p-2 bg-white/20 backdrop-blur-sm rounded-lg hover:bg-white/30 transition-colors text-white"
@@ -266,7 +280,6 @@ export default function LiveStreamViewer({ streamData, onClose }: LiveStreamView
 
           {/* Chat Sidebar */}
           <div className="w-80 bg-gray-900 border-l border-gray-700 flex flex-col">
-            
             {/* Chat Header */}
             <div className="p-4 border-b border-gray-700 flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -304,7 +317,7 @@ export default function LiveStreamViewer({ streamData, onClose }: LiveStreamView
                       <input
                         type="text"
                         value={chatMessage}
-                        onChange={(e) => setChatMessage(e.target.value)}
+                        onChange={e => setChatMessage(e.target.value)}
                         onKeyPress={handleKeyPress}
                         placeholder="Type a message..."
                         className="flex-1 px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-cyan-500 focus:outline-none text-sm"
@@ -319,9 +332,7 @@ export default function LiveStreamViewer({ streamData, onClose }: LiveStreamView
                       </button>
                     </div>
                     {!isConnected && (
-                      <div className="text-xs text-gray-400 mt-2">
-                        Connect wallet to chat
-                      </div>
+                      <div className="text-xs text-gray-400 mt-2">Connect wallet to chat</div>
                     )}
                   </div>
                 )}

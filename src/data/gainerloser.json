@@ -1,5 +1,5 @@
 [
-    {
+  {
     "id": "bitcoin",
     "symbol": "btc",
     "name": "Bitcoin",
@@ -26,8 +26,8 @@
     "atl_date": "2013-07-06T00:00:00.000Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:12.157Z"
-    },
-    {
+  },
+  {
     "id": "ethereum",
     "symbol": "eth",
     "name": "Ethereum",
@@ -53,13 +53,13 @@
     "atl_change_percentage": 1005437.51606,
     "atl_date": "2015-10-20T00:00:00.000Z",
     "roi": {
-    "times": 52.7617804909387,
-    "currency": "btc",
-    "percentage": 5276.17804909387
+      "times": 52.7617804909387,
+      "currency": "btc",
+      "percentage": 5276.17804909387
     },
     "last_updated": "2025-08-30T04:19:13.484Z"
-    },
-    {
+  },
+  {
     "id": "ripple",
     "symbol": "xrp",
     "name": "XRP",
@@ -86,8 +86,8 @@
     "atl_date": "2014-05-22T00:00:00.000Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:05.528Z"
-    },
-    {
+  },
+  {
     "id": "tether",
     "symbol": "usdt",
     "name": "Tether",
@@ -114,8 +114,8 @@
     "atl_date": "2015-03-02T00:00:00.000Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:06.813Z"
-    },
-    {
+  },
+  {
     "id": "binancecoin",
     "symbol": "bnb",
     "name": "BNB",
@@ -142,8 +142,8 @@
     "atl_date": "2017-10-19T00:00:00.000Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:09.094Z"
-    },
-    {
+  },
+  {
     "id": "solana",
     "symbol": "sol",
     "name": "Solana",
@@ -170,8 +170,8 @@
     "atl_date": "2020-05-11T19:35:23.449Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:05.913Z"
-    },
-    {
+  },
+  {
     "id": "usd-coin",
     "symbol": "usdc",
     "name": "USDC",
@@ -198,8 +198,8 @@
     "atl_date": "2023-03-11T08:02:13.981Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:07.332Z"
-    },
-    {
+  },
+  {
     "id": "staked-ether",
     "symbol": "steth",
     "name": "Lido Staked Ether",
@@ -226,8 +226,8 @@
     "atl_date": "2020-12-22T04:08:21.854Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:05.686Z"
-    },
-    {
+  },
+  {
     "id": "dogecoin",
     "symbol": "doge",
     "name": "Dogecoin",
@@ -254,8 +254,8 @@
     "atl_date": "2015-05-06T00:00:00.000Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:10.412Z"
-    },
-    {
+  },
+  {
     "id": "tron",
     "symbol": "trx",
     "name": "TRON",
@@ -281,13 +281,13 @@
     "atl_change_percentage": 18674.1771,
     "atl_date": "2017-11-12T00:00:00.000Z",
     "roi": {
-    "times": 177.5047672343889,
-    "currency": "usd",
-    "percentage": 17750.47672343889
+      "times": 177.5047672343889,
+      "currency": "usd",
+      "percentage": 17750.47672343889
     },
     "last_updated": "2025-08-30T04:19:06.859Z"
-    },
-    {
+  },
+  {
     "id": "cardano",
     "symbol": "ada",
     "name": "Cardano",
@@ -314,8 +314,8 @@
     "atl_date": "2020-03-13T02:22:55.044Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:10.392Z"
-    },
-    {
+  },
+  {
     "id": "wrapped-steth",
     "symbol": "wsteth",
     "name": "Wrapped stETH",
@@ -342,8 +342,8 @@
     "atl_date": "2022-05-13T01:36:45.053Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:07.422Z"
-    },
-    {
+  },
+  {
     "id": "chainlink",
     "symbol": "link",
     "name": "Chainlink",
@@ -370,8 +370,8 @@
     "atl_date": "2017-11-29T00:00:00.000Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:09.944Z"
-    },
-    {
+  },
+  {
     "id": "wrapped-beacon-eth",
     "symbol": "wbeth",
     "name": "Wrapped Beacon ETH",
@@ -398,8 +398,8 @@
     "atl_date": "2025-04-09T03:57:40.245Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:07.372Z"
-    },
-    {
+  },
+  {
     "id": "wrapped-bitcoin",
     "symbol": "wbtc",
     "name": "Wrapped Bitcoin",
@@ -426,8 +426,8 @@
     "atl_date": "2019-04-02T00:00:00.000Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:07.561Z"
-    },
-    {
+  },
+  {
     "id": "ethena-usde",
     "symbol": "usde",
     "name": "Ethena USDe",
@@ -454,8 +454,8 @@
     "atl_date": "2024-10-04T07:57:15.809Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:10.436Z"
-    },
-    {
+  },
+  {
     "id": "hyperliquid",
     "symbol": "hype",
     "name": "Hyperliquid",
@@ -482,8 +482,8 @@
     "atl_date": "2024-11-29T09:30:30.871Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:11.568Z"
-    },
-    {
+  },
+  {
     "id": "wrapped-eeth",
     "symbol": "weeth",
     "name": "Wrapped eETH",
@@ -510,8 +510,8 @@
     "atl_date": "2025-04-09T03:45:31.391Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:07.279Z"
-    },
-    {
+  },
+  {
     "id": "sui",
     "symbol": "sui",
     "name": "Sui",
@@ -538,8 +538,8 @@
     "atl_date": "2023-10-19T10:40:30.078Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:06.436Z"
-    },
-    {
+  },
+  {
     "id": "stellar",
     "symbol": "xlm",
     "name": "Stellar",
@@ -566,8 +566,8 @@
     "atl_date": "2015-03-05T00:00:00.000Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:06.055Z"
-    },
-    {
+  },
+  {
     "id": "bitcoin-cash",
     "symbol": "bch",
     "name": "Bitcoin Cash",
@@ -594,8 +594,8 @@
     "atl_date": "2018-12-16T00:00:00.000Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:09.103Z"
-    },
-    {
+  },
+  {
     "id": "crypto-com-chain",
     "symbol": "cro",
     "name": "Cronos",
@@ -622,8 +622,8 @@
     "atl_date": "2019-02-08T00:00:00.000Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:09.813Z"
-    },
-    {
+  },
+  {
     "id": "avalanche-2",
     "symbol": "avax",
     "name": "Avalanche",
@@ -650,8 +650,8 @@
     "atl_date": "2020-12-31T13:15:21.540Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:08.915Z"
-    },
-    {
+  },
+  {
     "id": "hedera-hashgraph",
     "symbol": "hbar",
     "name": "Hedera",
@@ -678,8 +678,8 @@
     "atl_date": "2020-01-02T17:30:24.852Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:11.327Z"
-    },
-    {
+  },
+  {
     "id": "weth",
     "symbol": "weth",
     "name": "WETH",
@@ -706,8 +706,8 @@
     "atl_date": "2018-12-15T00:00:00.000Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:08.075Z"
-    },
-    {
+  },
+  {
     "id": "leo-token",
     "symbol": "leo",
     "name": "LEO Token",
@@ -734,8 +734,8 @@
     "atl_date": "2019-12-24T15:14:35.376Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:12.091Z"
-    },
-    {
+  },
+  {
     "id": "litecoin",
     "symbol": "ltc",
     "name": "Litecoin",
@@ -762,8 +762,8 @@
     "atl_date": "2015-01-14T00:00:00.000Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:12.675Z"
-    },
-    {
+  },
+  {
     "id": "usds",
     "symbol": "usds",
     "name": "USDS",
@@ -790,8 +790,8 @@
     "atl_date": "2024-10-03T13:19:28.826Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:06.652Z"
-    },
-    {
+  },
+  {
     "id": "the-open-network",
     "symbol": "ton",
     "name": "Toncoin",
@@ -818,8 +818,8 @@
     "atl_date": "2021-09-21T00:33:11.092Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:06.716Z"
-    },
-    {
+  },
+  {
     "id": "shiba-inu",
     "symbol": "shib",
     "name": "Shiba Inu",
@@ -846,8 +846,8 @@
     "atl_date": "2020-11-28T11:26:25.838Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:05.559Z"
-    },
-    {
+  },
+  {
     "id": "binance-bridged-usdt-bnb-smart-chain",
     "symbol": "bsc-usd",
     "name": "Binance Bridged USDT (BNB Smart Chain)",
@@ -874,8 +874,8 @@
     "atl_date": "2024-12-05T22:30:39.827Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:10.704Z"
-    },
-    {
+  },
+  {
     "id": "coinbase-wrapped-btc",
     "symbol": "cbbtc",
     "name": "Coinbase Wrapped BTC",
@@ -902,8 +902,8 @@
     "atl_date": "2024-09-12T14:07:41.775Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:09.844Z"
-    },
-    {
+  },
+  {
     "id": "whitebit",
     "symbol": "wbt",
     "name": "WhiteBIT Coin",
@@ -930,8 +930,8 @@
     "atl_date": "2023-02-13T19:01:21.899Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:07.045Z"
-    },
-    {
+  },
+  {
     "id": "polkadot",
     "symbol": "dot",
     "name": "Polkadot",
@@ -958,8 +958,8 @@
     "atl_date": "2020-08-20T05:48:11.359Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:05.657Z"
-    },
-    {
+  },
+  {
     "id": "uniswap",
     "symbol": "uni",
     "name": "Uniswap",
@@ -986,8 +986,8 @@
     "atl_date": "2020-09-17T01:20:38.214Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:06.904Z"
-    },
-    {
+  },
+  {
     "id": "ethena-staked-usde",
     "symbol": "susde",
     "name": "Ethena Staked USDe",
@@ -1014,8 +1014,8 @@
     "atl_date": "2024-04-03T14:23:03.162Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:10.393Z"
-    },
-    {
+  },
+  {
     "id": "bitget-token",
     "symbol": "bgb",
     "name": "Bitget Token",
@@ -1042,8 +1042,8 @@
     "atl_date": "2020-06-25T04:17:05.895Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:08.749Z"
-    },
-    {
+  },
+  {
     "id": "monero",
     "symbol": "xmr",
     "name": "Monero",
@@ -1070,8 +1070,8 @@
     "atl_date": "2015-01-14T00:00:00.000Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:12.860Z"
-    },
-    {
+  },
+  {
     "id": "aave",
     "symbol": "aave",
     "name": "Aave",
@@ -1098,8 +1098,8 @@
     "atl_date": "2020-11-05T09:20:11.928Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:07.899Z"
-    },
-    {
+  },
+  {
     "id": "dai",
     "symbol": "dai",
     "name": "Dai",
@@ -1126,8 +1126,8 @@
     "atl_date": "2023-03-11T07:50:50.514Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:10.151Z"
-    },
-    {
+  },
+  {
     "id": "ethena",
     "symbol": "ena",
     "name": "Ethena",
@@ -1154,8 +1154,8 @@
     "atl_date": "2024-09-06T21:04:48.253Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:10.473Z"
-    },
-    {
+  },
+  {
     "id": "pepe",
     "symbol": "pepe",
     "name": "Pepe",
@@ -1182,8 +1182,8 @@
     "atl_date": "2023-04-18T02:14:41.591Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:04.489Z"
-    },
-    {
+  },
+  {
     "id": "mantle",
     "symbol": "mnt",
     "name": "Mantle",
@@ -1210,8 +1210,8 @@
     "atl_date": "2023-10-18T02:50:46.942Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:12.485Z"
-    },
-    {
+  },
+  {
     "id": "okb",
     "symbol": "okb",
     "name": "OKB",
@@ -1238,8 +1238,8 @@
     "atl_date": "2019-01-14T00:00:00.000Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:03.834Z"
-    },
-    {
+  },
+  {
     "id": "ethereum-classic",
     "symbol": "etc",
     "name": "Ethereum Classic",
@@ -1265,13 +1265,13 @@
     "atl_change_percentage": 3320.24831,
     "atl_date": "2016-07-25T00:00:00.000Z",
     "roi": {
-    "times": 45.71640327053091,
-    "currency": "usd",
-    "percentage": 4571.640327053091
+      "times": 45.71640327053091,
+      "currency": "usd",
+      "percentage": 4571.640327053091
     },
     "last_updated": "2025-08-30T04:19:10.467Z"
-    },
-    {
+  },
+  {
     "id": "bittensor",
     "symbol": "tao",
     "name": "Bittensor",
@@ -1298,8 +1298,8 @@
     "atl_date": "2023-05-14T08:57:53.732Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:09.218Z"
-    },
-    {
+  },
+  {
     "id": "jito-staked-sol",
     "symbol": "jitosol",
     "name": "Jito Staked SOL",
@@ -1326,8 +1326,8 @@
     "atl_date": "2023-09-12T10:21:17.665Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:11.826Z"
-    },
-    {
+  },
+  {
     "id": "near",
     "symbol": "near",
     "name": "NEAR Protocol",
@@ -1354,8 +1354,8 @@
     "atl_date": "2020-11-04T16:09:15.137Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:13.218Z"
-    },
-    {
+  },
+  {
     "id": "aptos",
     "symbol": "apt",
     "name": "Aptos",
@@ -1382,8 +1382,8 @@
     "atl_date": "2022-12-29T21:35:14.796Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:08.464Z"
-    },
-    {
+  },
+  {
     "id": "pi-network",
     "symbol": "pi",
     "name": "Pi Network",
@@ -1410,8 +1410,8 @@
     "atl_date": "2025-08-26T00:57:49.575Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:04.340Z"
-    },
-    {
+  },
+  {
     "id": "ondo-finance",
     "symbol": "ondo",
     "name": "Ondo",
@@ -1438,8 +1438,8 @@
     "atl_date": "2024-01-18T12:14:30.524Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:03.968Z"
-    },
-    {
+  },
+  {
     "id": "usdt0",
     "symbol": "usdt0",
     "name": "USDT0",
@@ -1466,8 +1466,8 @@
     "atl_date": "2025-02-28T01:35:58.101Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:07.355Z"
-    },
-    {
+  },
+  {
     "id": "internet-computer",
     "symbol": "icp",
     "name": "Internet Computer",
@@ -1494,8 +1494,8 @@
     "atl_date": "2023-09-22T00:29:57.369Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:11.903Z"
-    },
-    {
+  },
+  {
     "id": "binance-peg-weth",
     "symbol": "weth",
     "name": "Binance-Peg WETH",
@@ -1522,8 +1522,8 @@
     "atl_date": "2025-04-09T01:32:41.942Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:09.147Z"
-    },
-    {
+  },
+  {
     "id": "arbitrum",
     "symbol": "arb",
     "name": "Arbitrum",
@@ -1550,8 +1550,8 @@
     "atl_date": "2025-04-07T07:01:34.124Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:08.543Z"
-    },
-    {
+  },
+  {
     "id": "polygon-ecosystem-token",
     "symbol": "pol",
     "name": "POL (ex-MATIC)",
@@ -1578,8 +1578,8 @@
     "atl_date": "2025-04-07T07:06:08.017Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:04.621Z"
-    },
-    {
+  },
+  {
     "id": "usd1-wlfi",
     "symbol": "usd1",
     "name": "USD1",
@@ -1606,8 +1606,8 @@
     "atl_date": "2025-04-16T00:36:15.580Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:06.962Z"
-    },
-    {
+  },
+  {
     "id": "blackrock-usd-institutional-digital-liquidity-fund",
     "symbol": "buidl",
     "name": "BlackRock USD Institutional Digital Liquidity Fund",
@@ -1634,8 +1634,8 @@
     "atl_date": "2025-02-12T05:45:10.196Z",
     "roi": null,
     "last_updated": "2025-08-30T04:15:07.167Z"
-    },
-    {
+  },
+  {
     "id": "binance-staked-sol",
     "symbol": "bnsol",
     "name": "Binance Staked SOL",
@@ -1662,8 +1662,8 @@
     "atl_date": "2025-04-07T06:56:20.488Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:08.721Z"
-    },
-    {
+  },
+  {
     "id": "kaspa",
     "symbol": "kas",
     "name": "Kaspa",
@@ -1690,8 +1690,8 @@
     "atl_date": "2022-05-26T14:42:59.316Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:11.943Z"
-    },
-    {
+  },
+  {
     "id": "cosmos",
     "symbol": "atom",
     "name": "Cosmos Hub",
@@ -1717,13 +1717,13 @@
     "atl_change_percentage": 290.89953,
     "atl_date": "2020-03-13T02:27:44.591Z",
     "roi": {
-    "times": 44.33276913563555,
-    "currency": "usd",
-    "percentage": 4433.276913563555
+      "times": 44.33276913563555,
+      "currency": "usd",
+      "percentage": 4433.276913563555
     },
     "last_updated": "2025-08-30T04:19:10.006Z"
-    },
-    {
+  },
+  {
     "id": "vechain",
     "symbol": "vet",
     "name": "VeChain",
@@ -1749,13 +1749,13 @@
     "atl_change_percentage": 1183.81746,
     "atl_date": "2020-03-13T02:29:59.652Z",
     "roi": {
-    "times": 0.9674184261666932,
-    "currency": "eth",
-    "percentage": 96.74184261666932
+      "times": 0.9674184261666932,
+      "currency": "eth",
+      "percentage": 96.74184261666932
     },
     "last_updated": "2025-08-30T04:19:06.968Z"
-    },
-    {
+  },
+  {
     "id": "algorand",
     "symbol": "algo",
     "name": "Algorand",
@@ -1781,13 +1781,13 @@
     "atl_change_percentage": 167.73644,
     "atl_date": "2023-09-11T19:42:08.247Z",
     "roi": {
-    "times": -0.9024002627297404,
-    "currency": "usd",
-    "percentage": -90.24002627297403
+      "times": -0.9024002627297404,
+      "currency": "usd",
+      "percentage": -90.24002627297403
     },
     "last_updated": "2025-08-30T04:19:08.297Z"
-    },
-    {
+  },
+  {
     "id": "gatechain-token",
     "symbol": "gt",
     "name": "Gate",
@@ -1814,8 +1814,8 @@
     "atl_date": "2020-03-13T02:18:02.481Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:10.875Z"
-    },
-    {
+  },
+  {
     "id": "rocket-pool-eth",
     "symbol": "reth",
     "name": "Rocket Pool ETH",
@@ -1842,8 +1842,8 @@
     "atl_date": "2022-06-18T20:55:45.957Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:05.017Z"
-    },
-    {
+  },
+  {
     "id": "susds",
     "symbol": "susds",
     "name": "sUSDS",
@@ -1870,8 +1870,8 @@
     "atl_date": "2025-01-04T01:21:08.460Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:06.014Z"
-    },
-    {
+  },
+  {
     "id": "fasttoken",
     "symbol": "ftn",
     "name": "Fasttoken",
@@ -1898,8 +1898,8 @@
     "atl_date": "2023-01-21T10:15:39.503Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:10.723Z"
-    },
-    {
+  },
+  {
     "id": "jupiter-perpetuals-liquidity-provider-token",
     "symbol": "jlp",
     "name": "Jupiter Perpetuals Liquidity Provider Token",
@@ -1926,8 +1926,8 @@
     "atl_date": "2023-11-24T05:55:06.706Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:11.879Z"
-    },
-    {
+  },
+  {
     "id": "pudgy-penguins",
     "symbol": "pengu",
     "name": "Pudgy Penguins",
@@ -1954,8 +1954,8 @@
     "atl_date": "2025-04-09T01:31:57.832Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:04.708Z"
-    },
-    {
+  },
+  {
     "id": "kelp-dao-restaked-eth",
     "symbol": "rseth",
     "name": "Kelp DAO Restaked ETH",
@@ -1982,8 +1982,8 @@
     "atl_date": "2025-04-09T01:45:22.546Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:11.823Z"
-    },
-    {
+  },
+  {
     "id": "story-2",
     "symbol": "ip",
     "name": "Story",
@@ -2010,8 +2010,8 @@
     "atl_date": "2025-02-14T03:11:08.309Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:05.994Z"
-    },
-    {
+  },
+  {
     "id": "worldcoin-wld",
     "symbol": "wld",
     "name": "Worldcoin",
@@ -2038,8 +2038,8 @@
     "atl_date": "2025-04-07T07:06:11.379Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:07.341Z"
-    },
-    {
+  },
+  {
     "id": "render-token",
     "symbol": "render",
     "name": "Render",
@@ -2066,8 +2066,8 @@
     "atl_date": "2020-06-16T13:22:25.900Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:04.931Z"
-    },
-    {
+  },
+  {
     "id": "bonk",
     "symbol": "bonk",
     "name": "Bonk",
@@ -2094,8 +2094,8 @@
     "atl_date": "2022-12-29T22:48:46.755Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:09.825Z"
-    },
-    {
+  },
+  {
     "id": "kucoin-shares",
     "symbol": "kcs",
     "name": "KuCoin",
@@ -2122,8 +2122,8 @@
     "atl_date": "2019-02-07T00:00:00.000Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:12.055Z"
-    },
-    {
+  },
+  {
     "id": "sei-network",
     "symbol": "sei",
     "name": "Sei",
@@ -2150,8 +2150,8 @@
     "atl_date": "2023-10-19T08:05:30.655Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:05.263Z"
-    },
-    {
+  },
+  {
     "id": "bfusd",
     "symbol": "bfusd",
     "name": "BFUSD",
@@ -2178,8 +2178,8 @@
     "atl_date": "2025-08-21T20:27:41.005Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:08.570Z"
-    },
-    {
+  },
+  {
     "id": "official-trump",
     "symbol": "trump",
     "name": "Official Trump",
@@ -2206,8 +2206,8 @@
     "atl_date": "2025-01-18T03:40:29.231Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:13.670Z"
-    },
-    {
+  },
+  {
     "id": "stakewise-v3-oseth",
     "symbol": "oseth",
     "name": "StakeWise Staked ETH",
@@ -2234,8 +2234,8 @@
     "atl_date": "2025-04-09T01:32:44.161Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:05.781Z"
-    },
-    {
+  },
+  {
     "id": "fetch-ai",
     "symbol": "fet",
     "name": "Artificial Superintelligence Alliance",
@@ -2261,13 +2261,13 @@
     "atl_change_percentage": 7518.79339,
     "atl_date": "2020-03-13T02:24:18.347Z",
     "roi": {
-    "times": 6.1720939503376675,
-    "currency": "usd",
-    "percentage": 617.2093950337668
+      "times": 6.1720939503376675,
+      "currency": "usd",
+      "percentage": 617.2093950337668
     },
     "last_updated": "2025-08-30T04:19:10.762Z"
-    },
-    {
+  },
+  {
     "id": "kinetic-staked-hype",
     "symbol": "khype",
     "name": "Kinetiq Staked HYPE",
@@ -2294,8 +2294,8 @@
     "atl_date": "2025-08-02T18:59:35.641Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:11.950Z"
-    },
-    {
+  },
+  {
     "id": "jupiter-exchange-solana",
     "symbol": "jup",
     "name": "Jupiter",
@@ -2322,8 +2322,8 @@
     "atl_date": "2025-04-07T06:56:22.719Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:12.154Z"
-    },
-    {
+  },
+  {
     "id": "filecoin",
     "symbol": "fil",
     "name": "Filecoin",
@@ -2350,8 +2350,8 @@
     "atl_date": "2025-06-22T20:30:12.846Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:10.847Z"
-    },
-    {
+  },
+  {
     "id": "liquid-staked-ethereum",
     "symbol": "lseth",
     "name": "Liquid Staked ETH",
@@ -2378,8 +2378,8 @@
     "atl_date": "2023-03-10T11:26:12.210Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:12.664Z"
-    },
-    {
+  },
+  {
     "id": "flare-networks",
     "symbol": "flr",
     "name": "Flare",
@@ -2406,8 +2406,8 @@
     "atl_date": "2023-10-19T03:35:41.663Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:10.747Z"
-    },
-    {
+  },
+  {
     "id": "sky",
     "symbol": "sky",
     "name": "Sky",
@@ -2434,8 +2434,8 @@
     "atl_date": "2025-02-03T05:01:48.626Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:05.626Z"
-    },
-    {
+  },
+  {
     "id": "lombard-staked-btc",
     "symbol": "lbtc",
     "name": "Lombard Staked BTC",
@@ -2462,8 +2462,8 @@
     "atl_date": "2024-09-06T21:01:52.094Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:12.267Z"
-    },
-    {
+  },
+  {
     "id": "quant-network",
     "symbol": "qnt",
     "name": "Quant",
@@ -2489,13 +2489,13 @@
     "atl_change_percentage": 47518.51441,
     "atl_date": "2018-08-23T00:00:00.000Z",
     "roi": {
-    "times": 9.16479036508853,
-    "currency": "eth",
-    "percentage": 916.479036508853
+      "times": 9.16479036508853,
+      "currency": "eth",
+      "percentage": 916.479036508853
     },
     "last_updated": "2025-08-30T04:19:04.811Z"
-    },
-    {
+  },
+  {
     "id": "usdtb",
     "symbol": "usdtb",
     "name": "USDtb",
@@ -2522,8 +2522,8 @@
     "atl_date": "2025-07-17T08:05:52.672Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:06.675Z"
-    },
-    {
+  },
+  {
     "id": "polygon-bridged-usdt-polygon",
     "symbol": "usdt",
     "name": "Polygon Bridged USDT (Polygon)",
@@ -2550,8 +2550,8 @@
     "atl_date": "2024-12-05T22:30:30.789Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:04.809Z"
-    },
-    {
+  },
+  {
     "id": "four",
     "symbol": "form",
     "name": "Four",
@@ -2578,8 +2578,8 @@
     "atl_date": "2025-03-21T09:59:50.287Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:10.937Z"
-    },
-    {
+  },
+  {
     "id": "xdce-crowd-sale",
     "symbol": "xdc",
     "name": "XDC Network",
@@ -2605,13 +2605,13 @@
     "atl_change_percentage": 19230.7941,
     "atl_date": "2019-07-22T00:00:00.000Z",
     "roi": {
-    "times": 1.3357546873702513,
-    "currency": "eth",
-    "percentage": 133.57546873702512
+      "times": 1.3357546873702513,
+      "currency": "eth",
+      "percentage": 133.57546873702512
     },
     "last_updated": "2025-08-30T04:19:07.500Z"
-    },
-    {
+  },
+  {
     "id": "renzo-restaked-eth",
     "symbol": "ezeth",
     "name": "Renzo Restaked ETH",
@@ -2638,8 +2638,8 @@
     "atl_date": "2025-04-09T01:30:57.856Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:04.957Z"
-    },
-    {
+  },
+  {
     "id": "falcon-finance",
     "symbol": "usdf",
     "name": "Falcon USD",
@@ -2666,8 +2666,8 @@
     "atl_date": "2025-07-08T10:16:34.749Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:10.528Z"
-    },
-    {
+  },
+  {
     "id": "hash-2",
     "symbol": "hash",
     "name": "Provenance Blockchain",
@@ -2694,8 +2694,8 @@
     "atl_date": "2025-06-04T11:15:56.153Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:11.191Z"
-    },
-    {
+  },
+  {
     "id": "mantle-staked-ether",
     "symbol": "meth",
     "name": "Mantle Staked Ether",
@@ -2722,8 +2722,8 @@
     "atl_date": "2025-04-09T01:32:38.082Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:12.473Z"
-    },
-    {
+  },
+  {
     "id": "tether-gold",
     "symbol": "xaut",
     "name": "Tether Gold",
@@ -2750,8 +2750,8 @@
     "atl_date": "2020-03-19T13:45:41.821Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:06.278Z"
-    },
-    {
+  },
+  {
     "id": "pump-fun",
     "symbol": "pump",
     "name": "Pump.fun",
@@ -2778,8 +2778,8 @@
     "atl_date": "2025-07-29T11:15:43.983Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:04.810Z"
-    },
-    {
+  },
+  {
     "id": "injective-protocol",
     "symbol": "inj",
     "name": "Injective",
@@ -2806,8 +2806,8 @@
     "atl_date": "2020-11-03T16:19:30.576Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:11.735Z"
-    },
-    {
+  },
+  {
     "id": "nexo",
     "symbol": "nexo",
     "name": "NEXO",
@@ -2833,13 +2833,13 @@
     "atl_change_percentage": 2669.20881,
     "atl_date": "2018-09-13T00:00:00.000Z",
     "roi": {
-    "times": 11.53223417409558,
-    "currency": "usd",
-    "percentage": 1153.223417409558
+      "times": 11.53223417409558,
+      "currency": "usd",
+      "percentage": 1153.223417409558
     },
     "last_updated": "2025-08-30T04:19:13.175Z"
-    },
-    {
+  },
+  {
     "id": "celestia",
     "symbol": "tia",
     "name": "Celestia",
@@ -2866,8 +2866,8 @@
     "atl_date": "2025-06-22T20:21:50.444Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:09.502Z"
-    },
-    {
+  },
+  {
     "id": "optimism",
     "symbol": "op",
     "name": "Optimism",
@@ -2894,8 +2894,8 @@
     "atl_date": "2022-06-18T20:54:52.178Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:04.182Z"
-    },
-    {
+  },
+  {
     "id": "jupiter-staked-sol",
     "symbol": "jupsol",
     "name": "Jupiter Staked SOL",
@@ -2922,8 +2922,8 @@
     "atl_date": "2025-04-07T07:01:06.676Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:11.794Z"
-    },
-    {
+  },
+  {
     "id": "wbnb",
     "symbol": "wbnb",
     "name": "Wrapped BNB",
@@ -2950,8 +2950,8 @@
     "atl_date": "2020-09-24T13:48:40.532Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:07.830Z"
-    },
-    {
+  },
+  {
     "id": "paypal-usd",
     "symbol": "pyusd",
     "name": "PayPal USD",
@@ -2978,8 +2978,8 @@
     "atl_date": "2024-12-05T22:31:13.430Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:04.231Z"
-    },
-    {
+  },
+  {
     "id": "pyth-network",
     "symbol": "pyth",
     "name": "Pyth Network",
@@ -3006,8 +3006,8 @@
     "atl_date": "2025-06-22T20:20:35.064Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:04.653Z"
-    },
-    {
+  },
+  {
     "id": "first-digital-usd",
     "symbol": "fdusd",
     "name": "First Digital USD",
@@ -3034,8 +3034,8 @@
     "atl_date": "2024-12-05T22:30:51.394Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:10.920Z"
-    },
-    {
+  },
+  {
     "id": "solv-btc",
     "symbol": "solvbtc",
     "name": "Solv Protocol BTC",
@@ -3062,8 +3062,8 @@
     "atl_date": "2024-08-05T06:28:45.311Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:05.464Z"
-    },
-    {
+  },
+  {
     "id": "blockstack",
     "symbol": "stx",
     "name": "Stacks",
@@ -3089,13 +3089,13 @@
     "atl_change_percentage": 1274.00068,
     "atl_date": "2020-03-13T02:29:26.415Z",
     "roi": {
-    "times": 4.217881428427497,
-    "currency": "usd",
-    "percentage": 421.7881428427498
+      "times": 4.217881428427497,
+      "currency": "usd",
+      "percentage": 421.7881428427498
     },
     "last_updated": "2025-08-30T04:19:08.995Z"
-    },
-    {
+  },
+  {
     "id": "lido-dao",
     "symbol": "ldo",
     "name": "Lido DAO",
@@ -3122,8 +3122,8 @@
     "atl_date": "2022-06-18T20:55:12.035Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:12.439Z"
-    },
-    {
+  },
+  {
     "id": "curve-dao-token",
     "symbol": "crv",
     "name": "Curve DAO",
@@ -3150,8 +3150,8 @@
     "atl_date": "2024-08-05T11:41:26.119Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:10.111Z"
-    },
-    {
+  },
+  {
     "id": "binance-bridged-usdc-bnb-smart-chain",
     "symbol": "usdc",
     "name": "Binance Bridged USDC (BNB Smart Chain)",
@@ -3178,8 +3178,8 @@
     "atl_date": "2024-12-05T22:30:25.440Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:09.929Z"
-    },
-    {
+  },
+  {
     "id": "spx6900",
     "symbol": "spx",
     "name": "SPX6900",
@@ -3206,8 +3206,8 @@
     "atl_date": "2024-02-04T19:12:19.110Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:05.758Z"
-    },
-    {
+  },
+  {
     "id": "sonic-3",
     "symbol": "s",
     "name": "Sonic",
@@ -3234,8 +3234,8 @@
     "atl_date": "2025-06-22T19:45:12.848Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:05.729Z"
-    },
-    {
+  },
+  {
     "id": "aerodrome-finance",
     "symbol": "aero",
     "name": "Aerodrome Finance",
@@ -3262,8 +3262,8 @@
     "atl_date": "2023-10-17T01:23:50.860Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:08.117Z"
-    },
-    {
+  },
+  {
     "id": "immutable-x",
     "symbol": "imx",
     "name": "Immutable",
@@ -3290,8 +3290,8 @@
     "atl_date": "2025-06-22T20:21:37.426Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:11.810Z"
-    },
-    {
+  },
+  {
     "id": "super-oeth",
     "symbol": "superoeth",
     "name": "Super OETH",
@@ -3318,8 +3318,8 @@
     "atl_date": "2025-03-21T12:27:33.460Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:05.940Z"
-    },
-    {
+  },
+  {
     "id": "pax-gold",
     "symbol": "paxg",
     "name": "PAX Gold",
@@ -3346,8 +3346,8 @@
     "atl_date": "2019-11-18T03:09:35.959Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:04.284Z"
-    },
-    {
+  },
+  {
     "id": "conflux-token",
     "symbol": "cfx",
     "name": "Conflux",
@@ -3374,8 +3374,8 @@
     "atl_date": "2022-12-30T08:16:30.345Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:09.714Z"
-    },
-    {
+  },
+  {
     "id": "syrupusdc",
     "symbol": "syrupusdc",
     "name": "SyrupUSDC",
@@ -3402,8 +3402,8 @@
     "atl_date": "2025-08-01T06:27:19.933Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:06.024Z"
-    },
-    {
+  },
+  {
     "id": "msol",
     "symbol": "msol",
     "name": "Marinade Staked SOL",
@@ -3430,8 +3430,8 @@
     "atl_date": "2022-12-29T20:45:33.039Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:13.154Z"
-    },
-    {
+  },
+  {
     "id": "raydium",
     "symbol": "ray",
     "name": "Raydium",
@@ -3458,8 +3458,8 @@
     "atl_date": "2022-12-29T22:15:53.927Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:04.883Z"
-    },
-    {
+  },
+  {
     "id": "the-graph",
     "symbol": "grt",
     "name": "The Graph",
@@ -3486,8 +3486,8 @@
     "atl_date": "2022-11-22T10:05:03.503Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:04.807Z"
-    },
-    {
+  },
+  {
     "id": "saros-finance",
     "symbol": "saros",
     "name": "Saros",
@@ -3514,8 +3514,8 @@
     "atl_date": "2024-08-05T07:07:02.188Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:05.200Z"
-    },
-    {
+  },
+  {
     "id": "floki",
     "symbol": "floki",
     "name": "FLOKI",
@@ -3542,8 +3542,8 @@
     "atl_date": "2021-07-06T01:11:20.438Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:10.792Z"
-    },
-    {
+  },
+  {
     "id": "memecore",
     "symbol": "m",
     "name": "MemeCore",
@@ -3570,8 +3570,8 @@
     "atl_date": "2025-07-04T03:56:17.448Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:12.556Z"
-    },
-    {
+  },
+  {
     "id": "arbitrum-bridged-wbtc-arbitrum-one",
     "symbol": "wbtc",
     "name": "Arbitrum Bridged WBTC (Arbitrum One)",
@@ -3598,8 +3598,8 @@
     "atl_date": "2024-08-05T13:30:13.831Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:08.204Z"
-    },
-    {
+  },
+  {
     "id": "kaia",
     "symbol": "kaia",
     "name": "Kaia",
@@ -3626,8 +3626,8 @@
     "atl_date": "2025-04-07T07:06:20.797Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:11.856Z"
-    },
-    {
+  },
+  {
     "id": "pancakeswap-token",
     "symbol": "cake",
     "name": "PancakeSwap",
@@ -3654,8 +3654,8 @@
     "atl_date": "2020-11-03T14:29:34.165Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:04.390Z"
-    },
-    {
+  },
+  {
     "id": "ether-fi-staked-eth",
     "symbol": "eeth",
     "name": "ether.fi Staked ETH",
@@ -3682,8 +3682,8 @@
     "atl_date": "2025-04-09T01:25:53.228Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:10.456Z"
-    },
-    {
+  },
+  {
     "id": "clbtc",
     "symbol": "clbtc",
     "name": "clBTC",
@@ -3710,8 +3710,8 @@
     "atl_date": "2025-04-21T12:36:24.067Z",
     "roi": null,
     "last_updated": "2025-08-30T01:24:41.653Z"
-    },
-    {
+  },
+  {
     "id": "cgeth-hashkey-cloud",
     "symbol": "cgeth.hashkey",
     "name": "cgETH Hashkey Cloud",
@@ -3738,8 +3738,8 @@
     "atl_date": "2025-04-09T01:56:39.147Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:09.350Z"
-    },
-    {
+  },
+  {
     "id": "l2-standard-bridged-weth-base",
     "symbol": "weth",
     "name": "L2 Standard Bridged WETH (Base)",
@@ -3766,8 +3766,8 @@
     "atl_date": "2025-04-09T01:31:06.248Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:12.868Z"
-    },
-    {
+  },
+  {
     "id": "dogwifcoin",
     "symbol": "wif",
     "name": "dogwifhat",
@@ -3794,8 +3794,8 @@
     "atl_date": "2023-12-13T07:13:50.873Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:10.328Z"
-    },
-    {
+  },
+  {
     "id": "pendle",
     "symbol": "pendle",
     "name": "Pendle",
@@ -3822,8 +3822,8 @@
     "atl_date": "2022-11-14T20:15:58.336Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:04.421Z"
-    },
-    {
+  },
+  {
     "id": "fartcoin",
     "symbol": "fartcoin",
     "name": "Fartcoin",
@@ -3850,8 +3850,8 @@
     "atl_date": "2024-10-30T07:56:04.381Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:10.758Z"
-    },
-    {
+  },
+  {
     "id": "vaulta",
     "symbol": "a",
     "name": "Vaulta",
@@ -3878,8 +3878,8 @@
     "atl_date": "2025-06-22T20:20:22.608Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:06.786Z"
-    },
-    {
+  },
+  {
     "id": "theta-token",
     "symbol": "theta",
     "name": "Theta Network",
@@ -3905,13 +3905,13 @@
     "atl_change_percentage": 1843.58366,
     "atl_date": "2020-03-13T02:24:16.483Z",
     "roi": {
-    "times": 4.23630386986425,
-    "currency": "usd",
-    "percentage": 423.6303869864251
+      "times": 4.23630386986425,
+      "currency": "usd",
+      "percentage": 423.6303869864251
     },
     "last_updated": "2025-08-30T04:19:06.429Z"
-    },
-    {
+  },
+  {
     "id": "tezos",
     "symbol": "xtz",
     "name": "Tezos",
@@ -3937,13 +3937,13 @@
     "atl_change_percentage": 111.76929,
     "atl_date": "2018-12-07T00:00:00.000Z",
     "roi": {
-    "times": 0.5773849195304523,
-    "currency": "usd",
-    "percentage": 57.738491953045234
+      "times": 0.5773849195304523,
+      "currency": "usd",
+      "percentage": 57.738491953045234
     },
     "last_updated": "2025-08-30T04:19:06.243Z"
-    },
-    {
+  },
+  {
     "id": "ethereum-name-service",
     "symbol": "ens",
     "name": "Ethereum Name Service",
@@ -3970,8 +3970,8 @@
     "atl_date": "2023-10-19T02:35:00.861Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:10.606Z"
-    },
-    {
+  },
+  {
     "id": "iota",
     "symbol": "iota",
     "name": "IOTA",
@@ -3997,13 +3997,13 @@
     "atl_change_percentage": 136.87518,
     "atl_date": "2020-03-13T02:22:41.168Z",
     "roi": {
-    "times": 0.33041628451307836,
-    "currency": "btc",
-    "percentage": 33.04162845130784
+      "times": 0.33041628451307836,
+      "currency": "btc",
+      "percentage": 33.04162845130784
     },
     "last_updated": "2025-08-30T04:19:11.678Z"
-    },
-    {
+  },
+  {
     "id": "virtual-protocol",
     "symbol": "virtual",
     "name": "Virtuals Protocol",
@@ -4030,8 +4030,8 @@
     "atl_date": "2024-01-23T20:55:21.653Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:07.366Z"
-    },
-    {
+  },
+  {
     "id": "gala",
     "symbol": "gala",
     "name": "GALA",
@@ -4058,8 +4058,8 @@
     "atl_date": "2020-12-28T08:46:48.367Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:10.951Z"
-    },
-    {
+  },
+  {
     "id": "jito-governance-token",
     "symbol": "jto",
     "name": "Jito",
@@ -4086,8 +4086,8 @@
     "atl_date": "2025-04-07T06:57:23.706Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:11.793Z"
-    },
-    {
+  },
+  {
     "id": "ousg",
     "symbol": "ousg",
     "name": "OUSG",
@@ -4114,8 +4114,8 @@
     "atl_date": "2023-03-22T20:00:17.106Z",
     "roi": null,
     "last_updated": "2025-08-30T04:15:09.627Z"
-    },
-    {
+  },
+  {
     "id": "jasmycoin",
     "symbol": "jasmy",
     "name": "JasmyCoin",
@@ -4142,8 +4142,8 @@
     "atl_date": "2022-12-29T20:41:09.113Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:11.759Z"
-    },
-    {
+  },
+  {
     "id": "ripple-usd",
     "symbol": "rlusd",
     "name": "Ripple USD",
@@ -4170,8 +4170,8 @@
     "atl_date": "2024-12-18T04:40:40.880Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:05.110Z"
-    },
-    {
+  },
+  {
     "id": "loaded-lions",
     "symbol": "lion",
     "name": "Loaded Lions",
@@ -4198,8 +4198,8 @@
     "atl_date": "2025-03-04T09:34:06.201Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:12.217Z"
-    },
-    {
+  },
+  {
     "id": "newton-project",
     "symbol": "ab",
     "name": "AB",
@@ -4225,13 +4225,13 @@
     "atl_change_percentage": 240388.17599,
     "atl_date": "2022-10-11T02:32:18.937Z",
     "roi": {
-    "times": 2.815197491619817,
-    "currency": "usd",
-    "percentage": 281.5197491619817
+      "times": 2.815197491619817,
+      "currency": "usd",
+      "percentage": 281.5197491619817
     },
     "last_updated": "2025-08-30T04:19:13.088Z"
-    },
-    {
+  },
+  {
     "id": "usdx-money-usdx",
     "symbol": "usdx",
     "name": "Stables Labs USDX",
@@ -4258,8 +4258,8 @@
     "atl_date": "2025-02-05T20:50:54.140Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:06.669Z"
-    },
-    {
+  },
+  {
     "id": "the-sandbox",
     "symbol": "sand",
     "name": "The Sandbox",
@@ -4286,8 +4286,8 @@
     "atl_date": "2020-11-04T15:59:14.441Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:06.522Z"
-    },
-    {
+  },
+  {
     "id": "ondo-us-dollar-yield",
     "symbol": "usdy",
     "name": "Ondo US Dollar Yield",
@@ -4314,8 +4314,8 @@
     "atl_date": "2024-01-14T11:40:50.825Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:13.433Z"
-    },
-    {
+  },
+  {
     "id": "build-on",
     "symbol": "b",
     "name": "BUILDon",
@@ -4342,8 +4342,8 @@
     "atl_date": "2025-05-23T11:15:45.539Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:09.179Z"
-    },
-    {
+  },
+  {
     "id": "morpho",
     "symbol": "morpho",
     "name": "Morpho",
@@ -4370,8 +4370,8 @@
     "atl_date": "2024-11-25T01:55:43.353Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:13.016Z"
-    },
-    {
+  },
+  {
     "id": "stader-ethx",
     "symbol": "ethx",
     "name": "Stader ETHx",
@@ -4398,8 +4398,8 @@
     "atl_date": "2025-04-09T01:32:31.885Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:05.553Z"
-    },
-    {
+  },
+  {
     "id": "arbitrum-bridged-weth-arbitrum-one",
     "symbol": "weth",
     "name": "Arbitrum Bridged WETH (Arbitrum One)",
@@ -4426,8 +4426,8 @@
     "atl_date": "2025-04-09T01:32:31.046Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:08.677Z"
-    },
-    {
+  },
+  {
     "id": "zcash",
     "symbol": "zec",
     "name": "Zcash",
@@ -4454,8 +4454,8 @@
     "atl_date": "2024-07-05T04:22:29.321Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:07.615Z"
-    },
-    {
+  },
+  {
     "id": "mantle-restaked-eth",
     "symbol": "cmeth",
     "name": "Mantle Restaked ETH",
@@ -4482,8 +4482,8 @@
     "atl_date": "2025-04-09T01:30:47.033Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:12.539Z"
-    },
-    {
+  },
+  {
     "id": "bittorrent",
     "symbol": "btt",
     "name": "BitTorrent",
@@ -4510,8 +4510,8 @@
     "atl_date": "2023-10-13T05:10:41.241Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:09.405Z"
-    },
-    {
+  },
+  {
     "id": "tbtc",
     "symbol": "tbtc",
     "name": "tBTC",
@@ -4538,8 +4538,8 @@
     "atl_date": "2020-09-23T00:00:00.000Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:06.198Z"
-    },
-    {
+  },
+  {
     "id": "flow",
     "symbol": "flow",
     "name": "Flow",
@@ -4566,8 +4566,8 @@
     "atl_date": "2025-06-22T20:20:12.921Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:10.791Z"
-    },
-    {
+  },
+  {
     "id": "coinbase-wrapped-staked-eth",
     "symbol": "cbeth",
     "name": "Coinbase Wrapped Staked ETH",
@@ -4594,8 +4594,8 @@
     "atl_date": "2022-11-09T23:45:43.665Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:09.575Z"
-    },
-    {
+  },
+  {
     "id": "usual-usd",
     "symbol": "usd0",
     "name": "Usual USD",
@@ -4622,8 +4622,8 @@
     "atl_date": "2025-04-10T08:30:51.088Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:06.740Z"
-    },
-    {
+  },
+  {
     "id": "sweth",
     "symbol": "sweth",
     "name": "Swell Ethereum",
@@ -4650,8 +4650,8 @@
     "atl_date": "2025-04-09T01:31:40.463Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:05.963Z"
-    },
-    {
+  },
+  {
     "id": "beldex",
     "symbol": "bdx",
     "name": "Beldex",
@@ -4677,13 +4677,13 @@
     "atl_change_percentage": 27611.89555,
     "atl_date": "2019-11-01T11:05:12.090Z",
     "roi": {
-    "times": -0.6946719963566074,
-    "currency": "usd",
-    "percentage": -69.46719963566073
+      "times": -0.6946719963566074,
+      "currency": "usd",
+      "percentage": -69.46719963566073
     },
     "last_updated": "2025-08-30T04:19:08.606Z"
-    },
-    {
+  },
+  {
     "id": "binance-peg-dogecoin",
     "symbol": "doge",
     "name": "Binance-Peg Dogecoin",
@@ -4710,8 +4710,8 @@
     "atl_date": "2022-06-18T20:56:27.223Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:11.715Z"
-    },
-    {
+  },
+  {
     "id": "global-dollar",
     "symbol": "usdg",
     "name": "Global Dollar",
@@ -4738,8 +4738,8 @@
     "atl_date": "2024-11-11T23:55:50.604Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:10.970Z"
-    },
-    {
+  },
+  {
     "id": "decentraland",
     "symbol": "mana",
     "name": "Decentraland",
@@ -4765,13 +4765,13 @@
     "atl_change_percentage": 3003.31219,
     "atl_date": "2017-10-31T00:00:00.000Z",
     "roi": {
-    "times": 13.32633289248807,
-    "currency": "usd",
-    "percentage": 1332.633289248807
+      "times": 13.32633289248807,
+      "currency": "usd",
+      "percentage": 1332.633289248807
     },
     "last_updated": "2025-08-30T04:19:10.154Z"
-    },
-    {
+  },
+  {
     "id": "walrus-2",
     "symbol": "wal",
     "name": "Walrus",
@@ -4798,8 +4798,8 @@
     "atl_date": "2025-06-22T20:31:22.243Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:07.021Z"
-    },
-    {
+  },
+  {
     "id": "vision-3",
     "symbol": "vsn",
     "name": "Vision",
@@ -4826,8 +4826,8 @@
     "atl_date": "2025-07-21T06:42:09.192Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:06.859Z"
-    },
-    {
+  },
+  {
     "id": "bitcoin-avalanche-bridged-btc-b",
     "symbol": "btc.b",
     "name": "Avalanche Bridged BTC (Avalanche)",
@@ -4854,8 +4854,8 @@
     "atl_date": "2023-03-03T05:01:42.603Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:08.723Z"
-    },
-    {
+  },
+  {
     "id": "bitcoin-cash-sv",
     "symbol": "bsv",
     "name": "Bitcoin SV",
@@ -4882,8 +4882,8 @@
     "atl_date": "2023-06-10T04:32:12.266Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:08.760Z"
-    },
-    {
+  },
+  {
     "id": "syrup",
     "symbol": "syrup",
     "name": "Maple Finance",
@@ -4910,8 +4910,8 @@
     "atl_date": "2025-04-07T07:46:35.793Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:06.133Z"
-    },
-    {
+  },
+  {
     "id": "ether-fi",
     "symbol": "ethfi",
     "name": "Ether.fi",
@@ -4938,8 +4938,8 @@
     "atl_date": "2025-04-07T06:55:38.982Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:10.645Z"
-    },
-    {
+  },
+  {
     "id": "frax-ether",
     "symbol": "frxeth",
     "name": "Frax Ether",
@@ -4966,8 +4966,8 @@
     "atl_date": "2022-11-23T02:25:33.267Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:10.785Z"
-    },
-    {
+  },
+  {
     "id": "true-usd",
     "symbol": "tusd",
     "name": "TrueUSD",
@@ -4994,8 +4994,8 @@
     "atl_date": "2020-03-12T10:47:51.380Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:06.599Z"
-    },
-    {
+  },
+  {
     "id": "starknet",
     "symbol": "strk",
     "name": "Starknet",
@@ -5022,8 +5022,8 @@
     "atl_date": "2025-06-22T20:21:37.039Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:05.953Z"
-    },
-    {
+  },
+  {
     "id": "neo",
     "symbol": "neo",
     "name": "NEO",
@@ -5049,13 +5049,13 @@
     "atl_change_percentage": 8615.10979,
     "atl_date": "2016-10-21T00:00:00.000Z",
     "roi": {
-    "times": 188.3476817013993,
-    "currency": "usd",
-    "percentage": 18834.76817013993
+      "times": 188.3476817013993,
+      "currency": "usd",
+      "percentage": 18834.76817013993
     },
     "last_updated": "2025-08-30T04:19:13.207Z"
-    },
-    {
+  },
+  {
     "id": "helium",
     "symbol": "hnt",
     "name": "Helium",
@@ -5082,8 +5082,8 @@
     "atl_date": "2020-04-18T00:19:10.902Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:11.360Z"
-    },
-    {
+  },
+  {
     "id": "dydx-chain",
     "symbol": "dydx",
     "name": "dYdX",
@@ -5110,8 +5110,8 @@
     "atl_date": "2025-06-22T20:22:23.718Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:10.227Z"
-    },
-    {
+  },
+  {
     "id": "based-brett",
     "symbol": "brett",
     "name": "Brett",
@@ -5138,8 +5138,8 @@
     "atl_date": "2024-02-29T08:40:24.951Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:08.701Z"
-    },
-    {
+  },
+  {
     "id": "polygon-pos-bridged-weth-polygon-pos",
     "symbol": "weth",
     "name": "Polygon PoS Bridged WETH (Polygon POS)",
@@ -5166,8 +5166,8 @@
     "atl_date": "2025-04-09T01:31:27.335Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:04.845Z"
-    },
-    {
+  },
+  {
     "id": "solv-protocol-solvbtc-bbn",
     "symbol": "xsolvbtc",
     "name": "Solv Protocol Staked BTC",
@@ -5194,8 +5194,8 @@
     "atl_date": "2024-09-10T17:58:43.974Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:05.604Z"
-    },
-    {
+  },
+  {
     "id": "apecoin",
     "symbol": "ape",
     "name": "ApeCoin",
@@ -5222,8 +5222,8 @@
     "atl_date": "2025-04-07T06:55:35.578Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:08.218Z"
-    },
-    {
+  },
+  {
     "id": "apenft",
     "symbol": "nft",
     "name": "APENFT",
@@ -5250,8 +5250,8 @@
     "atl_date": "2023-06-10T04:30:05.717Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:08.079Z"
-    },
-    {
+  },
+  {
     "id": "bybit-staked-sol",
     "symbol": "bbsol",
     "name": "Bybit Staked SOL",
@@ -5278,8 +5278,8 @@
     "atl_date": "2025-04-07T06:57:27.130Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:09.880Z"
-    },
-    {
+  },
+  {
     "id": "usdd",
     "symbol": "usdd",
     "name": "USDD",
@@ -5306,8 +5306,8 @@
     "atl_date": "2022-06-19T16:15:11.558Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:06.690Z"
-    },
-    {
+  },
+  {
     "id": "reserve-rights-token",
     "symbol": "rsr",
     "name": "Reserve Rights",
@@ -5333,13 +5333,13 @@
     "atl_change_percentage": 519.17797,
     "atl_date": "2020-03-16T11:09:08.151Z",
     "roi": {
-    "times": 5.831811351451527,
-    "currency": "usd",
-    "percentage": 583.1811351451527
+      "times": 5.831811351451527,
+      "currency": "usd",
+      "percentage": 583.1811351451527
     },
     "last_updated": "2025-08-30T04:19:04.876Z"
-    },
-    {
+  },
+  {
     "id": "mantle-bridged-usdt-mantle",
     "symbol": "usdt",
     "name": "Mantle Bridged USDT (Mantle)",
@@ -5366,8 +5366,8 @@
     "atl_date": "2024-03-15T09:13:18.491Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:12.458Z"
-    },
-    {
+  },
+  {
     "id": "polygon-pos-bridged-dai-polygon-pos",
     "symbol": "dai",
     "name": "Polygon PoS Bridged DAI (Polygon POS)",
@@ -5394,8 +5394,8 @@
     "atl_date": "2024-12-05T22:30:49.634Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:04.524Z"
-    },
-    {
+  },
+  {
     "id": "zksync",
     "symbol": "zk",
     "name": "ZKsync",
@@ -5422,8 +5422,8 @@
     "atl_date": "2025-06-22T20:21:44.030Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:07.621Z"
-    },
-    {
+  },
+  {
     "id": "sun-token",
     "symbol": "sun",
     "name": "Sun Token",
@@ -5450,8 +5450,8 @@
     "atl_date": "2022-11-14T04:45:13.210Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:06.581Z"
-    },
-    {
+  },
+  {
     "id": "savings-dai",
     "symbol": "sdai",
     "name": "Savings Dai",
@@ -5478,8 +5478,8 @@
     "atl_date": "2023-11-10T20:10:32.383Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:05.084Z"
-    },
-    {
+  },
+  {
     "id": "coredaoorg",
     "symbol": "core",
     "name": "Core",
@@ -5506,8 +5506,8 @@
     "atl_date": "2023-11-03T01:20:55.441Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:09.683Z"
-    },
-    {
+  },
+  {
     "id": "telcoin",
     "symbol": "tel",
     "name": "Telcoin",
@@ -5533,13 +5533,13 @@
     "atl_change_percentage": 7120.38594,
     "atl_date": "2020-03-13T02:24:47.992Z",
     "roi": {
-    "times": 3.665476602723912,
-    "currency": "usd",
-    "percentage": 366.5476602723912
+      "times": 3.665476602723912,
+      "currency": "usd",
+      "percentage": 366.5476602723912
     },
     "last_updated": "2025-08-30T04:19:06.190Z"
-    },
-    {
+  },
+  {
     "id": "dexe",
     "symbol": "dexe",
     "name": "DeXe",
@@ -5566,8 +5566,8 @@
     "atl_date": "2020-11-06T19:31:40.144Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:09.942Z"
-    },
-    {
+  },
+  {
     "id": "instadapp",
     "symbol": "fluid",
     "name": "Fluid",
@@ -5594,8 +5594,8 @@
     "atl_date": "2022-12-28T16:20:48.360Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:11.617Z"
-    },
-    {
+  },
+  {
     "id": "thorchain",
     "symbol": "rune",
     "name": "THORChain",
@@ -5621,13 +5621,13 @@
     "atl_change_percentage": 13876.47998,
     "atl_date": "2019-09-28T00:00:00.000Z",
     "roi": {
-    "times": 30.3417527729915,
-    "currency": "usd",
-    "percentage": 3034.17527729915
+      "times": 30.3417527729915,
+      "currency": "usd",
+      "percentage": 3034.17527729915
     },
     "last_updated": "2025-08-30T04:19:06.448Z"
-    },
-    {
+  },
+  {
     "id": "arweave",
     "symbol": "ar",
     "name": "Arweave",
@@ -5653,13 +5653,13 @@
     "atl_change_percentage": 2037.67032,
     "atl_date": "2020-01-31T06:47:36.543Z",
     "roi": {
-    "times": 7.622724629914012,
-    "currency": "usd",
-    "percentage": 762.2724629914012
+      "times": 7.622724629914012,
+      "currency": "usd",
+      "percentage": 762.2724629914012
     },
     "last_updated": "2025-08-30T04:19:08.396Z"
-    },
-    {
+  },
+  {
     "id": "bridged-usdc-polygon-pos-bridge",
     "symbol": "usdc.e",
     "name": "Bridged USDC (Polygon PoS Bridge)",
@@ -5686,8 +5686,8 @@
     "atl_date": "2024-02-28T17:40:28.349Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:09.559Z"
-    },
-    {
+  },
+  {
     "id": "elrond-erd-2",
     "symbol": "egld",
     "name": "MultiversX",
@@ -5714,8 +5714,8 @@
     "atl_date": "2020-10-07T01:44:53.554Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:10.377Z"
-    },
-    {
+  },
+  {
     "id": "hashnote-usyc",
     "symbol": "usyc",
     "name": "Circle USYC",
@@ -5742,8 +5742,8 @@
     "atl_date": "2024-12-05T22:31:20.475Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:11.174Z"
-    },
-    {
+  },
+  {
     "id": "benqi-liquid-staked-avax",
     "symbol": "savax",
     "name": "BENQI Liquid Staked AVAX",
@@ -5770,8 +5770,8 @@
     "atl_date": "2023-09-14T12:26:14.318Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:08.643Z"
-    },
-    {
+  },
+  {
     "id": "kava",
     "symbol": "kava",
     "name": "Kava",
@@ -5798,8 +5798,8 @@
     "atl_date": "2024-08-05T06:27:34.050Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:11.987Z"
-    },
-    {
+  },
+  {
     "id": "compound-governance-token",
     "symbol": "comp",
     "name": "Compound",
@@ -5826,8 +5826,8 @@
     "atl_date": "2023-06-10T16:15:05.289Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:10.000Z"
-    },
-    {
+  },
+  {
     "id": "steakhouse-usdc-morpho-vault",
     "symbol": "steakusdc",
     "name": "Steakhouse USDC Morpho Vault",
@@ -5854,8 +5854,8 @@
     "atl_date": "2025-02-28T11:10:02.135Z",
     "roi": null,
     "last_updated": "2025-08-30T04:15:05.389Z"
-    },
-    {
+  },
+  {
     "id": "usdb",
     "symbol": "usdb",
     "name": "USDB",
@@ -5882,8 +5882,8 @@
     "atl_date": "2025-04-07T06:57:31.689Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:06.646Z"
-    },
-    {
+  },
+  {
     "id": "tokenize-xchange",
     "symbol": "tkx",
     "name": "Tokenize Xchange",
@@ -5909,13 +5909,13 @@
     "atl_change_percentage": 4536.97304,
     "atl_date": "2019-04-28T00:00:00.000Z",
     "roi": {
-    "times": 16.602267758957524,
-    "currency": "usd",
-    "percentage": 1660.2267758957526
+      "times": 16.602267758957524,
+      "currency": "usd",
+      "percentage": 1660.2267758957526
     },
     "last_updated": "2025-08-30T04:19:06.363Z"
-    },
-    {
+  },
+  {
     "id": "ecash",
     "symbol": "xec",
     "name": "eCash",
@@ -5942,8 +5942,8 @@
     "atl_date": "2025-04-07T07:05:49.124Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:10.453Z"
-    },
-    {
+  },
+  {
     "id": "eigenlayer",
     "symbol": "eigen",
     "name": "EigenCloud (prev. EigenLayer)",
@@ -5970,8 +5970,8 @@
     "atl_date": "2025-04-09T01:30:50.669Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:10.380Z"
-    },
-    {
+  },
+  {
     "id": "chain-2",
     "symbol": "xcn",
     "name": "Onyxcoin",
@@ -5998,8 +5998,8 @@
     "atl_date": "2023-10-11T20:12:02.910Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:09.406Z"
-    },
-    {
+  },
+  {
     "id": "superstate-short-duration-us-government-securities-fund-ustb",
     "symbol": "ustb",
     "name": "Superstate Short Duration U.S. Government Securities Fund (USTB)",
@@ -6026,8 +6026,8 @@
     "atl_date": "2025-02-26T09:55:09.261Z",
     "roi": null,
     "last_updated": "2025-08-30T04:15:05.785Z"
-    },
-    {
+  },
+  {
     "id": "wormhole",
     "symbol": "w",
     "name": "Wormhole",
@@ -6054,8 +6054,8 @@
     "atl_date": "2025-06-22T20:21:05.616Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:07.346Z"
-    },
-    {
+  },
+  {
     "id": "treehouse-eth",
     "symbol": "teth",
     "name": "Treehouse ETH",
@@ -6082,8 +6082,8 @@
     "atl_date": "2025-04-09T01:47:32.152Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:06.438Z"
-    },
-    {
+  },
+  {
     "id": "chiliz",
     "symbol": "chz",
     "name": "Chiliz",
@@ -6109,13 +6109,13 @@
     "atl_change_percentage": 861.10835,
     "atl_date": "2019-09-28T00:00:00.000Z",
     "roi": {
-    "times": 0.7949264334003154,
-    "currency": "usd",
-    "percentage": 79.49264334003155
+      "times": 0.7949264334003154,
+      "currency": "usd",
+      "percentage": 79.49264334003155
     },
     "last_updated": "2025-08-30T04:19:09.585Z"
-    },
-    {
+  },
+  {
     "id": "axie-infinity",
     "symbol": "axs",
     "name": "Axie Infinity",
@@ -6142,8 +6142,8 @@
     "atl_date": "2020-11-06T08:05:43.662Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:08.680Z"
-    },
-    {
+  },
+  {
     "id": "aioz-network",
     "symbol": "aioz",
     "name": "AIOZ Network",
@@ -6170,8 +6170,8 @@
     "atl_date": "2023-09-13T19:20:42.446Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:07.912Z"
-    },
-    {
+  },
+  {
     "id": "beam-2",
     "symbol": "beam",
     "name": "Beam",
@@ -6198,8 +6198,8 @@
     "atl_date": "2025-06-22T20:20:13.273Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:08.697Z"
-    },
-    {
+  },
+  {
     "id": "keeta",
     "symbol": "kta",
     "name": "Keeta",
@@ -6226,8 +6226,8 @@
     "atl_date": "2025-03-08T15:56:27.362Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:11.868Z"
-    },
-    {
+  },
+  {
     "id": "wrapped-avax",
     "symbol": "wavax",
     "name": "Wrapped AVAX",
@@ -6254,8 +6254,8 @@
     "atl_date": "2022-12-12T20:49:46.006Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:07.684Z"
-    },
-    {
+  },
+  {
     "id": "olympus",
     "symbol": "ohm",
     "name": "Olympus",
@@ -6282,8 +6282,8 @@
     "atl_date": "2022-11-26T16:36:26.296Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:03.905Z"
-    },
-    {
+  },
+  {
     "id": "zebec-network",
     "symbol": "zbcn",
     "name": "Zebec Network",
@@ -6310,8 +6310,8 @@
     "atl_date": "2024-08-05T13:31:51.088Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:07.449Z"
-    },
-    {
+  },
+  {
     "id": "superfarm",
     "symbol": "super",
     "name": "SuperVerse",
@@ -6338,8 +6338,8 @@
     "atl_date": "2023-10-19T02:20:23.295Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:05.996Z"
-    },
-    {
+  },
+  {
     "id": "just",
     "symbol": "jst",
     "name": "JUST",
@@ -6366,8 +6366,8 @@
     "atl_date": "2020-05-09T06:08:54.872Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:11.840Z"
-    },
-    {
+  },
+  {
     "id": "unit-bitcoin",
     "symbol": "ubtc",
     "name": "Unit Bitcoin",
@@ -6394,8 +6394,8 @@
     "atl_date": "2025-04-07T06:56:28.361Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:06.695Z"
-    },
-    {
+  },
+  {
     "id": "aethir",
     "symbol": "ath",
     "name": "Aethir",
@@ -6422,8 +6422,8 @@
     "atl_date": "2025-04-07T06:56:24.011Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:07.795Z"
-    },
-    {
+  },
+  {
     "id": "drift-staked-sol",
     "symbol": "dsol",
     "name": "Drift Staked SOL",
@@ -6450,8 +6450,8 @@
     "atl_date": "2025-04-07T06:56:08.117Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:10.097Z"
-    },
-    {
+  },
+  {
     "id": "gho",
     "symbol": "gho",
     "name": "GHO",
@@ -6478,8 +6478,8 @@
     "atl_date": "2023-10-24T04:41:04.568Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:10.982Z"
-    },
-    {
+  },
+  {
     "id": "ronin",
     "symbol": "ron",
     "name": "Ronin",
@@ -6506,8 +6506,8 @@
     "atl_date": "2022-11-21T19:36:31.487Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:05.082Z"
-    },
-    {
+  },
+  {
     "id": "wrapped-ether-mantle-bridge",
     "symbol": "weth",
     "name": "Wrapped Ether (Mantle Bridge)",
@@ -6534,8 +6534,8 @@
     "atl_date": "2025-04-09T01:32:36.128Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:07.244Z"
-    },
-    {
+  },
+  {
     "id": "mog-coin",
     "symbol": "mog",
     "name": "Mog Coin",
@@ -6562,8 +6562,8 @@
     "atl_date": "2023-07-24T17:10:57.805Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:12.892Z"
-    },
-    {
+  },
+  {
     "id": "1inch",
     "symbol": "1inch",
     "name": "1inch",
@@ -6590,8 +6590,8 @@
     "atl_date": "2025-04-07T07:05:53.693Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:07.900Z"
-    },
-    {
+  },
+  {
     "id": "reserve-protocol-eth-plus",
     "symbol": "eth+",
     "name": "ETHPlus",
@@ -6618,8 +6618,8 @@
     "atl_date": "2025-04-09T01:30:26.111Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:04.878Z"
-    },
-    {
+  },
+  {
     "id": "wrapped-hype",
     "symbol": "whype",
     "name": "Wrapped HYPE",
@@ -6646,8 +6646,8 @@
     "atl_date": "2025-04-07T07:00:52.802Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:07.652Z"
-    },
-    {
+  },
+  {
     "id": "gnosis",
     "symbol": "gno",
     "name": "Gnosis",
@@ -6674,8 +6674,8 @@
     "atl_date": "2020-03-13T02:24:11.825Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:11.092Z"
-    },
-    {
+  },
+  {
     "id": "deep",
     "symbol": "deep",
     "name": "DeepBook",
@@ -6702,8 +6702,8 @@
     "atl_date": "2024-10-14T13:34:58.507Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:09.913Z"
-    },
-    {
+  },
+  {
     "id": "berachain-bera",
     "symbol": "bera",
     "name": "Berachain",
@@ -6730,8 +6730,8 @@
     "atl_date": "2025-06-22T20:21:53.125Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:08.680Z"
-    },
-    {
+  },
+  {
     "id": "eutbl",
     "symbol": "eutbl",
     "name": "Spiko EU T-Bills Money Market Fund",
@@ -6758,8 +6758,8 @@
     "atl_date": "2024-08-15T09:45:23.684Z",
     "roi": null,
     "last_updated": "2025-08-30T04:15:06.406Z"
-    },
-    {
+  },
+  {
     "id": "staked-frax-ether",
     "symbol": "sfrxeth",
     "name": "Staked Frax Ether",
@@ -6786,8 +6786,8 @@
     "atl_date": "2022-12-23T11:50:57.675Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:05.661Z"
-    },
-    {
+  },
+  {
     "id": "movement",
     "symbol": "move",
     "name": "Movement",
@@ -6814,8 +6814,8 @@
     "atl_date": "2025-06-22T20:21:22.317Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:13.115Z"
-    },
-    {
+  },
+  {
     "id": "agentfun-ai",
     "symbol": "agentfun",
     "name": "AgentFun.AI",
@@ -6842,8 +6842,8 @@
     "atl_date": "2025-06-22T20:21:41.873Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:07.896Z"
-    },
-    {
+  },
+  {
     "id": "eos",
     "symbol": "eos",
     "name": "EOS",
@@ -6869,13 +6869,13 @@
     "atl_change_percentage": 23.33445,
     "atl_date": "2024-11-04T21:55:59.771Z",
     "roi": {
-    "times": -0.4984489010248298,
-    "currency": "usd",
-    "percentage": -49.84489010248298
+      "times": -0.4984489010248298,
+      "currency": "usd",
+      "percentage": -49.84489010248298
     },
     "last_updated": "2025-08-30T04:19:10.428Z"
-    },
-    {
+  },
+  {
     "id": "bio-protocol",
     "symbol": "bio",
     "name": "Bio Protocol",
@@ -6902,8 +6902,8 @@
     "atl_date": "2025-04-16T18:01:37.302Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:08.970Z"
-    },
-    {
+  },
+  {
     "id": "venom",
     "symbol": "venom",
     "name": "Venom",
@@ -6930,8 +6930,8 @@
     "atl_date": "2025-02-03T14:22:17.614Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:07.315Z"
-    },
-    {
+  },
+  {
     "id": "terra-luna",
     "symbol": "lunc",
     "name": "Terra Luna Classic",
@@ -6958,8 +6958,8 @@
     "atl_date": "2022-05-13T02:34:40.340Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:06.278Z"
-    },
-    {
+  },
+  {
     "id": "wemix-token",
     "symbol": "wemix",
     "name": "WEMIX",
@@ -6986,8 +6986,8 @@
     "atl_date": "2021-06-22T12:52:49.089Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:07.054Z"
-    },
-    {
+  },
+  {
     "id": "akash-network",
     "symbol": "akt",
     "name": "Akash Network",
@@ -7014,8 +7014,8 @@
     "atl_date": "2022-11-21T20:30:53.727Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:07.926Z"
-    },
-    {
+  },
+  {
     "id": "resolv-usr",
     "symbol": "usr",
     "name": "Resolv USR",
@@ -7042,8 +7042,8 @@
     "atl_date": "2025-03-05T06:15:52.738Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:05.708Z"
-    },
-    {
+  },
+  {
     "id": "evervalue-coin",
     "symbol": "eva",
     "name": "EverValue Coin",
@@ -7070,8 +7070,8 @@
     "atl_date": "2025-02-08T21:21:36.476Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:10.526Z"
-    },
-    {
+  },
+  {
     "id": "rekt-4",
     "symbol": "rekt",
     "name": "Rekt",
@@ -7098,5 +7098,5 @@
     "atl_date": "2025-03-13T18:02:06.181Z",
     "roi": null,
     "last_updated": "2025-08-30T04:19:04.798Z"
-    }
-    ]
+  }
+]

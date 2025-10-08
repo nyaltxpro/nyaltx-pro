@@ -8,7 +8,7 @@ import {
   setTrendingLoading,
   setTrendingError,
   cleanExpiredCache,
-  CachedTrendingCoin
+  CachedTrendingCoin,
 } from '@/store/slices/searchCacheSlice';
 
 export const useTrendingCoins = () => {
@@ -20,7 +20,7 @@ export const useTrendingCoins = () => {
   const fetchTrendingCoins = useCallback(async () => {
     // Clean expired cache first
     dispatch(cleanExpiredCache());
-    
+
     // Check if we have valid cached data
     if (trendingCoins && trendingCoins.length > 0) {
       console.log('📱 Using cached trending coins data');
@@ -30,7 +30,7 @@ export const useTrendingCoins = () => {
     try {
       dispatch(setTrendingLoading(true));
       console.log('🔄 Fetching fresh trending coins data from API...');
-      
+
       // Use the optimized API endpoint instead of direct CoinGecko calls
       const response = await fetch('/api/coingecko/trending', {
         method: 'GET',
@@ -44,7 +44,7 @@ export const useTrendingCoins = () => {
       }
 
       const data = await response.json();
-      
+
       if (data && data.coins) {
         // The API already returns enhanced coins with contract addresses
         const enhancedCoins: CachedTrendingCoin[] = data.coins.map((coin: any) => ({
@@ -58,11 +58,13 @@ export const useTrendingCoins = () => {
           price_btc: coin.price_btc,
           contractAddresses: coin.contractAddresses || {},
           primaryChain: coin.primaryChain || null,
-          primaryAddress: coin.primaryAddress || null
+          primaryAddress: coin.primaryAddress || null,
         }));
 
         dispatch(setTrendingCoins(enhancedCoins));
-        console.log(`✅ Cached ${enhancedCoins.length} trending coins with contract addresses from API`);
+        console.log(
+          `✅ Cached ${enhancedCoins.length} trending coins with contract addresses from API`
+        );
         return enhancedCoins;
       } else {
         throw new Error('Invalid trending coins data structure from API');
@@ -71,13 +73,13 @@ export const useTrendingCoins = () => {
       console.error('❌ Error fetching trending coins:', err);
       const errorMessage = err instanceof Error ? err.message : 'Failed to load trending coins';
       dispatch(setTrendingError(errorMessage));
-      
+
       // Return cached data if available, even if expired
       if (trendingCoins) {
         console.log('📱 Using expired cached data due to API error');
         return trendingCoins;
       }
-      
+
       throw err;
     }
   }, [dispatch, trendingCoins]);
@@ -93,10 +95,13 @@ export const useTrendingCoins = () => {
     fetchTrendingCoins();
 
     // Refresh every 30 minutes
-    const intervalId = setInterval(() => {
-      console.log('⏰ Auto-refreshing trending coins...');
-      fetchTrendingCoins();
-    }, 30 * 60 * 1000);
+    const intervalId = setInterval(
+      () => {
+        console.log('⏰ Auto-refreshing trending coins...');
+        fetchTrendingCoins();
+      },
+      30 * 60 * 1000
+    );
 
     return () => clearInterval(intervalId);
   }, [fetchTrendingCoins]);
@@ -107,6 +112,6 @@ export const useTrendingCoins = () => {
     error,
     fetchTrendingCoins,
     refreshTrendingCoins,
-    hasCachedData: !!trendingCoins && trendingCoins.length > 0
+    hasCachedData: !!trendingCoins && trendingCoins.length > 0,
   };
 };

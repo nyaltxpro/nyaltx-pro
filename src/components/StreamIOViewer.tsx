@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { useAccount } from 'wagmi';
-import { 
-  StreamVideo, 
-  StreamVideoClient, 
+import {
+  StreamVideo,
+  StreamVideoClient,
   Call,
   StreamCall,
   SpeakerLayout,
@@ -23,7 +23,11 @@ interface StreamIOViewerProps {
   onStreamEnd?: () => void;
 }
 
-export default function StreamIOViewer({ streamId, streamTitle, onStreamEnd }: StreamIOViewerProps) {
+export default function StreamIOViewer({
+  streamId,
+  streamTitle,
+  onStreamEnd,
+}: StreamIOViewerProps) {
   const { address, isConnected } = useAccount();
   const [client, setClient] = useState<StreamVideoClient | null>(null);
   const [call, setCall] = useState<Call | null>(null);
@@ -45,7 +49,7 @@ export default function StreamIOViewer({ streamId, streamTitle, onStreamEnd }: S
       try {
         setIsConnecting(true);
         setError(null);
-        
+
         const user: StreamUser = {
           id: address.toLowerCase(),
           name: `${address.slice(0, 6)}...${address.slice(-4)}`,
@@ -54,16 +58,17 @@ export default function StreamIOViewer({ streamId, streamTitle, onStreamEnd }: S
         };
 
         await streamIOService.initialize(user);
-        
+
         // Join the live stream
         console.log('🎯 Attempting to join stream:', streamId);
-        const { call: joinedCall, chatChannel: joinedChatChannel } = await streamIOService.joinLiveStream(streamId);
-        
+        const { call: joinedCall, chatChannel: joinedChatChannel } =
+          await streamIOService.joinLiveStream(streamId);
+
         setCall(joinedCall);
         setChatChannel(joinedChatChannel);
         setClient(streamIOService.getCurrentClient());
         setIsConnected2Stream(true);
-        
+
         // Disable viewer camera and microphone immediately after joining
         try {
           await joinedCall.camera.disable();
@@ -72,7 +77,7 @@ export default function StreamIOViewer({ streamId, streamTitle, onStreamEnd }: S
         } catch (disableError) {
           console.warn('⚠️ Could not disable camera/microphone:', disableError);
         }
-        
+
         // Monitor participant count
         joinedCall.state.participants$.subscribe((participants: any) => {
           setViewerCount(participants.length - 1); // Exclude host
@@ -94,7 +99,7 @@ export default function StreamIOViewer({ streamId, streamTitle, onStreamEnd }: S
         setChatMessages(initialMessages);
 
         // Subscribe to new chat messages
-        const unsubscribe = streamIOService.subscribeToChatEvents((message) => {
+        const unsubscribe = streamIOService.subscribeToChatEvents(message => {
           setChatMessages(prev => [...prev, message]);
         });
 
@@ -102,7 +107,7 @@ export default function StreamIOViewer({ streamId, streamTitle, onStreamEnd }: S
         toast.success('Connected to stream!');
       } catch (error: any) {
         console.error('❌ Failed to join stream:', error);
-        
+
         // Provide more specific error messages
         let errorMessage = 'Failed to connect to stream. Stream may have ended.';
         if (error?.message) {
@@ -114,7 +119,7 @@ export default function StreamIOViewer({ streamId, streamTitle, onStreamEnd }: S
         } else if (error?.toString().includes('permission')) {
           errorMessage = 'Permission denied. You may not have access to this stream.';
         }
-        
+
         setError(errorMessage);
         toast.error(errorMessage);
       } finally {
@@ -195,7 +200,7 @@ export default function StreamIOViewer({ streamId, streamTitle, onStreamEnd }: S
               )}
             </div>
           )}
-          
+
           {/* Stream Info Overlay */}
           {isConnected2Stream && (
             <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-sm rounded-lg p-3 text-white text-sm">
@@ -211,7 +216,7 @@ export default function StreamIOViewer({ streamId, streamTitle, onStreamEnd }: S
               </div>
             </div>
           )}
-          
+
           {/* Viewer Mode Indicator */}
           {isConnected2Stream && (
             <div className="absolute top-4 right-4 bg-blue-600/80 backdrop-blur-sm rounded-lg px-3 py-1 text-white text-xs">

@@ -41,7 +41,10 @@ export async function GET(req: NextRequest) {
 
   const status = (req.nextUrl.searchParams.get('status') as Status | null) || null;
   const page = Math.max(1, parseInt(req.nextUrl.searchParams.get('page') || '1', 10));
-  const limit = Math.min(100, Math.max(1, parseInt(req.nextUrl.searchParams.get('limit') || '10', 10)));
+  const limit = Math.min(
+    100,
+    Math.max(1, parseInt(req.nextUrl.searchParams.get('limit') || '10', 10))
+  );
   const skip = (page - 1) * limit;
 
   const col = await getCollection<TokenRegistration>('token_registrations');
@@ -92,7 +95,7 @@ export async function PATCH(req: NextRequest) {
   const unauth = await requireAdmin();
   if (unauth) return unauth;
 
-  const body = await req.json().catch(() => ({} as any));
+  const body = await req.json().catch(() => ({}) as any);
   const { id } = body as { id?: string };
   if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
 

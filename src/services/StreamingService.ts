@@ -51,7 +51,7 @@ export class StreamingService {
       const response = await fetch(`${this.baseUrl}?action=broadcaster-join`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ broadcasterId, walletAddress, streamTitle })
+        body: JSON.stringify({ broadcasterId, walletAddress, streamTitle }),
       });
 
       if (!response.ok) {
@@ -59,10 +59,10 @@ export class StreamingService {
       }
 
       const result = await response.json();
-      
+
       // Start heartbeat to keep connection alive
       this.startHeartbeat(broadcasterId, 'broadcaster');
-      
+
       this.emit('broadcaster-joined', { broadcasterId });
       return result;
     } catch (error) {
@@ -78,7 +78,7 @@ export class StreamingService {
       const response = await fetch(`${this.baseUrl}?action=viewer-join`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ viewerId, broadcasterId, walletAddress })
+        body: JSON.stringify({ viewerId, broadcasterId, walletAddress }),
       });
 
       if (!response.ok) {
@@ -87,13 +87,13 @@ export class StreamingService {
       }
 
       const result = await response.json();
-      
+
       // Start heartbeat to keep connection alive
       this.startHeartbeat(viewerId, 'viewer');
-      
+
       // Start polling for chat messages
       this.startChatPolling(broadcasterId);
-      
+
       this.emit('viewer-joined', { viewerId, broadcasterId });
       return result;
     } catch (error) {
@@ -108,9 +108,9 @@ export class StreamingService {
     try {
       const url = `${this.baseUrl}?action=get-active-streams`;
       console.log('🔍 Fetching active streams from:', url);
-      
+
       const response = await fetch(url);
-      
+
       if (!response.ok) {
         const errorText = await response.text();
         console.error('❌ API response not ok:', response.status, response.statusText, errorText);
@@ -127,13 +127,19 @@ export class StreamingService {
   }
 
   // Send chat message with retry logic
-  async sendChatMessage(broadcasterId: string, message: string, senderAddress: string, senderName?: string, retries = 3) {
+  async sendChatMessage(
+    broadcasterId: string,
+    message: string,
+    senderAddress: string,
+    senderName?: string,
+    retries = 3
+  ) {
     for (let i = 0; i < retries; i++) {
       try {
         const response = await fetch(`${this.baseUrl}?action=chat-message`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ broadcasterId, message, senderAddress, senderName })
+          body: JSON.stringify({ broadcasterId, message, senderAddress, senderName }),
         });
 
         if (!response.ok) {
@@ -145,13 +151,13 @@ export class StreamingService {
         return result;
       } catch (error) {
         console.error(`❌ Error sending chat message (attempt ${i + 1}/${retries}):`, error);
-        
+
         if (i === retries - 1) {
           // Last attempt failed
           this.emit('error', `Failed to send message after ${retries} attempts`);
           throw error;
         }
-        
+
         // Wait before retry (exponential backoff)
         await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
       }
@@ -162,7 +168,7 @@ export class StreamingService {
   async getChatMessages(broadcasterId: string): Promise<ChatMessage[]> {
     try {
       const response = await fetch(`${this.baseUrl}?action=chat&broadcasterId=${broadcasterId}`);
-      
+
       if (!response.ok) {
         throw new Error(`Failed to get chat messages: ${response.statusText}`);
       }
@@ -181,7 +187,7 @@ export class StreamingService {
       const response = await fetch(`${this.baseUrl}?action=stream-end`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ broadcasterId })
+        body: JSON.stringify({ broadcasterId }),
       });
 
       if (!response.ok) {
@@ -190,7 +196,7 @@ export class StreamingService {
 
       this.stopPolling();
       this.emit('stream-ended', { broadcasterId });
-      
+
       return await response.json();
     } catch (error) {
       console.error('Error ending stream:', error);
@@ -212,23 +218,23 @@ export class StreamingService {
   // Start polling for chat messages
   private startChatPolling(broadcasterId: string) {
     let lastMessageTimestamp = 0;
-    
+
     this.pollingInterval = setInterval(async () => {
       try {
         const messages = await this.getChatMessages(broadcasterId);
-        
+
         // Only emit messages newer than last timestamp
         const newMessages = messages.filter(msg => msg.timestamp > lastMessageTimestamp);
-        
+
         if (newMessages.length > 0) {
           // Update last timestamp to the newest message
           lastMessageTimestamp = Math.max(...newMessages.map(msg => msg.timestamp));
-          
+
           // Emit all new messages
           newMessages.forEach(message => {
             this.emit('chat-message', message);
           });
-          
+
           // Also emit all messages for full sync
           this.emit('chat-messages-sync', messages);
         }
@@ -244,7 +250,7 @@ export class StreamingService {
       clearInterval(this.pollingInterval);
       this.pollingInterval = null;
     }
-    
+
     if (this.heartbeatInterval) {
       clearInterval(this.heartbeatInterval);
       this.heartbeatInterval = null;
@@ -264,7 +270,7 @@ export class StreamingService {
       const response = await fetch(`${this.baseUrl}?action=webrtc-signal`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fromId, toId, signal, type })
+        body: JSON.stringify({ fromId, toId, signal, type }),
       });
 
       if (!response.ok) {
@@ -281,7 +287,7 @@ export class StreamingService {
   async getSignals(id: string, type: 'broadcaster' | 'viewer') {
     try {
       const response = await fetch(`${this.baseUrl}?action=get-signals&id=${id}&type=${type}`);
-      
+
       if (!response.ok) {
         throw new Error(`Failed to get signals: ${response.statusText}`);
       }
@@ -300,13 +306,13 @@ export class StreamingService {
       const streams = await this.getActiveStreams();
       callback(streams);
     };
-    
+
     // Initial poll
     poll();
-    
+
     // Poll every 5 seconds
     const interval = setInterval(poll, 5000);
-    
+
     return () => clearInterval(interval);
   }
 }

@@ -41,7 +41,7 @@ export default function TrendingCoins() {
         // Use the first available contract address
         const availableChains = Object.keys(coin.contractAddresses);
         const chainPreference = ['ethereum', 'arbitrum', 'optimism', 'base', 'polygon', 'binance'];
-        
+
         for (const preferredChain of chainPreference) {
           if (coin.contractAddresses[preferredChain]) {
             chain = preferredChain;
@@ -49,13 +49,13 @@ export default function TrendingCoins() {
             break;
           }
         }
-        
+
         // If no preferred chain found, use the first available
         if (!chain && availableChains.length > 0) {
           chain = availableChains[0];
           address = coin.contractAddresses[chain];
         }
-        
+
         console.log(`🔗 Using cached contract address for ${coin.symbol}: ${chain}/${address}`);
       }
     }
@@ -67,15 +67,15 @@ export default function TrendingCoins() {
         const platforms = await fetchCoinPlatforms(coin.id);
         if (platforms) {
           const platformToChain: Record<string, string> = {
-            'ethereum': 'ethereum',
+            ethereum: 'ethereum',
             'binance-smart-chain': 'binance',
             'polygon-pos': 'polygon',
-            'avalanche': 'avalanche',
-            'fantom': 'fantom',
-            'base': 'base',
+            avalanche: 'avalanche',
+            fantom: 'fantom',
+            base: 'base',
             'arbitrum-one': 'arbitrum',
             'optimistic-ethereum': 'optimism',
-            'solana': 'solana',
+            solana: 'solana',
           };
           const preference = [
             'ethereum',
@@ -130,7 +130,7 @@ export default function TrendingCoins() {
           </button>
         </div>
       </div>
-      
+
       {loading && !hasCachedData ? (
         <div className="flex justify-center items-center h-32">
           <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-500"></div>
@@ -150,7 +150,7 @@ export default function TrendingCoins() {
         </div>
       ) : (
         <div className="space-y-3">
-          {trendingCoins.map((coin) => (
+          {trendingCoins.map(coin => (
             <div
               key={coin.id}
               className="rounded-lg p-2 flex flex-col sm:flex-row sm:justify-between sm:items-center cursor-pointer hover:bg-gray-800/40"
@@ -178,13 +178,11 @@ export default function TrendingCoins() {
                   </div>
                 </div>
               </div>
-              
+
               <div className="text-right w-full sm:w-auto mt-2 sm:mt-0 flex justify-between sm:block">
                 <div className="font-medium text-sm flex items-center">
                   {coin.price_btc && (
-                    <span className="text-orange-400">
-                      ₿ {formatBtcPrice(coin.price_btc)}
-                    </span>
+                    <span className="text-orange-400">₿ {formatBtcPrice(coin.price_btc)}</span>
                   )}
                 </div>
                 <div className="text-xs text-gray-400 flex items-center gap-2">
@@ -198,11 +196,9 @@ export default function TrendingCoins() {
               </div>
             </div>
           ))}
-          
+
           {trendingCoins.length === 0 && (
-            <div className="text-center text-gray-400 py-4">
-              No trending coins found
-            </div>
+            <div className="text-center text-gray-400 py-4">No trending coins found</div>
           )}
         </div>
       )}

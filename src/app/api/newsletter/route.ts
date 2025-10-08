@@ -32,19 +32,13 @@ export async function POST(request: NextRequest) {
 
     // Validate input
     if (!email || !isValidEmail(email)) {
-      return NextResponse.json(
-        { error: 'Valid email address is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Valid email address is required' }, { status: 400 });
     }
 
     // Check if required environment variables are set
     if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
       console.error('❌ SMTP credentials not configured');
-      return NextResponse.json(
-        { error: 'Email service not configured' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Email service not configured' }, { status: 500 });
     }
 
     const transporter = createTransporter();
@@ -55,10 +49,7 @@ export async function POST(request: NextRequest) {
       console.log('✅ SMTP connection verified');
     } catch (verifyError) {
       console.error('❌ SMTP verification failed:', verifyError);
-      return NextResponse.json(
-        { error: 'Email service unavailable' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Email service unavailable' }, { status: 500 });
     }
 
     // Send welcome email to subscriber
@@ -147,7 +138,6 @@ export async function POST(request: NextRequest) {
       success: true,
       message: 'Successfully subscribed to newsletter!',
     });
-
   } catch (error) {
     console.error('❌ Newsletter subscription error:', error);
     return NextResponse.json(

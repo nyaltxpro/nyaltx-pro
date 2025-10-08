@@ -2,9 +2,9 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useAccount } from 'wagmi';
-import { 
-  StreamVideo, 
-  StreamVideoClient, 
+import {
+  StreamVideo,
+  StreamVideoClient,
   Call,
   StreamCall,
   CallControls,
@@ -15,7 +15,17 @@ import {
 import { streamIOService, StreamUser, ChatMessage } from '@/services/StreamIOService';
 import { Channel } from 'stream-chat';
 import EnhancedStreamChat from './EnhancedStreamChat';
-import { FaDesktop, FaStop, FaUsers, FaComments, FaPaperPlane, FaCamera, FaMicrophone, FaMicrophoneSlash, FaVideoSlash } from 'react-icons/fa';
+import {
+  FaDesktop,
+  FaStop,
+  FaUsers,
+  FaComments,
+  FaPaperPlane,
+  FaCamera,
+  FaMicrophone,
+  FaMicrophoneSlash,
+  FaVideoSlash,
+} from 'react-icons/fa';
 import toast from 'react-hot-toast';
 
 interface StreamIOBroadcasterProps {
@@ -23,7 +33,10 @@ interface StreamIOBroadcasterProps {
   streamTitle: string;
 }
 
-export default function StreamIOBroadcaster({ onStreamEnd, streamTitle }: StreamIOBroadcasterProps) {
+export default function StreamIOBroadcaster({
+  onStreamEnd,
+  streamTitle,
+}: StreamIOBroadcasterProps) {
   const { address, isConnected } = useAccount();
   const [client, setClient] = useState<StreamVideoClient | null>(null);
   const [call, setCall] = useState<Call | null>(null);
@@ -46,7 +59,7 @@ export default function StreamIOBroadcaster({ onStreamEnd, streamTitle }: Stream
     const initializeService = async () => {
       try {
         setIsInitializing(true);
-        
+
         const user: StreamUser = {
           id: address.toLowerCase(),
           name: `${address.slice(0, 6)}...${address.slice(-4)}`,
@@ -56,7 +69,7 @@ export default function StreamIOBroadcaster({ onStreamEnd, streamTitle }: Stream
 
         await streamIOService.initialize(user);
         setClient(streamIOService.getCurrentClient());
-        
+
         console.log('✅ Stream.io service initialized');
         toast.success('Streaming service ready!');
       } catch (error) {
@@ -77,7 +90,7 @@ export default function StreamIOBroadcaster({ onStreamEnd, streamTitle }: Stream
   // Update stream duration
   useEffect(() => {
     let interval: NodeJS.Timeout;
-    
+
     if (isStreaming && startTime) {
       interval = setInterval(() => {
         setStreamDuration(Math.floor((Date.now() - startTime) / 1000));
@@ -100,8 +113,12 @@ export default function StreamIOBroadcaster({ onStreamEnd, streamTitle }: Stream
       console.log('🎥 Starting Stream.io live stream...');
       toast.loading('Starting stream...', { id: 'start-stream' });
 
-      const { callId: newCallId, call: newCall, chatChannel: newChatChannel } = await streamIOService.startLiveStream(streamTitle);
-      
+      const {
+        callId: newCallId,
+        call: newCall,
+        chatChannel: newChatChannel,
+      } = await streamIOService.startLiveStream(streamTitle);
+
       setCall(newCall);
       setChatChannel(newChatChannel);
       setCallId(newCallId);
@@ -112,12 +129,12 @@ export default function StreamIOBroadcaster({ onStreamEnd, streamTitle }: Stream
       const initialMessages = await streamIOService.getChatMessages(50);
       setChatMessages(initialMessages);
 
-      const unsubscribe = streamIOService.subscribeToChatEvents((message) => {
+      const unsubscribe = streamIOService.subscribeToChatEvents(message => {
         setChatMessages(prev => [...prev, message]);
       });
-      
+
       // Monitor participant count
-      newCall.state.participants$.subscribe((participants) => {
+      newCall.state.participants$.subscribe(participants => {
         setViewerCount(participants.length - 1); // Exclude host
       });
 
@@ -137,7 +154,7 @@ export default function StreamIOBroadcaster({ onStreamEnd, streamTitle }: Stream
 
       // End the stream which will trigger cleanup for all viewers
       await streamIOService.endStream();
-      
+
       // Reset local state
       setCall(null);
       setChatChannel(null);
@@ -149,7 +166,7 @@ export default function StreamIOBroadcaster({ onStreamEnd, streamTitle }: Stream
       setChatMessages([]);
 
       toast.success('Stream ended successfully', { id: 'stop-stream' });
-      
+
       // Notify parent component
       if (onStreamEnd) {
         onStreamEnd();
@@ -233,7 +250,7 @@ export default function StreamIOBroadcaster({ onStreamEnd, streamTitle }: Stream
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
-    
+
     if (hours > 0) {
       return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     }
@@ -268,9 +285,11 @@ export default function StreamIOBroadcaster({ onStreamEnd, streamTitle }: Stream
       <div className="flex items-center justify-between p-4 bg-gray-800 rounded-lg">
         <div>
           <h2 className="text-xl font-bold text-white">{streamTitle}</h2>
-          <p className="text-gray-400">Broadcaster: {address.slice(0, 6)}...{address.slice(-4)}</p>
+          <p className="text-gray-400">
+            Broadcaster: {address.slice(0, 6)}...{address.slice(-4)}
+          </p>
         </div>
-        
+
         <div className="flex items-center gap-4">
           {isStreaming && (
             <div className="flex items-center gap-2 px-3 py-1 bg-red-600 rounded-full text-white text-sm">
@@ -278,7 +297,7 @@ export default function StreamIOBroadcaster({ onStreamEnd, streamTitle }: Stream
               LIVE
             </div>
           )}
-          
+
           <div className="flex items-center gap-2 text-gray-400">
             <FaUsers />
             <span>{viewerCount} viewers</span>
@@ -293,7 +312,7 @@ export default function StreamIOBroadcaster({ onStreamEnd, streamTitle }: Stream
             <StreamCall call={call}>
               <div className="w-full h-full">
                 <SpeakerLayout />
-                
+
                 {/* Stream Stats Overlay */}
                 {isStreaming && (
                   <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-sm rounded-lg p-3 text-white text-sm">
@@ -339,7 +358,7 @@ export default function StreamIOBroadcaster({ onStreamEnd, streamTitle }: Stream
                 <FaStop />
                 End Stream
               </button>
-              
+
               {/* Screen Share Controls */}
               {streamIOService.getScreenShareState && streamIOService.getScreenShareState() ? (
                 <button
@@ -358,7 +377,7 @@ export default function StreamIOBroadcaster({ onStreamEnd, streamTitle }: Stream
                   <FaDesktop />
                 </button>
               )}
-              
+
               {/* Camera Controls */}
               <button
                 onClick={toggleCamera}
@@ -371,7 +390,7 @@ export default function StreamIOBroadcaster({ onStreamEnd, streamTitle }: Stream
               >
                 <FaCamera />
               </button>
-              
+
               {/* Microphone Controls */}
               <button
                 onClick={toggleMicrophone}

@@ -7,43 +7,43 @@ const COINGECKO_API_URL = 'https://api.coingecko.com/api/v3';
 
 // Map of common token symbols to their CoinGecko IDs
 export const tokenIdMap: Record<string, string> = {
-  'BTC': 'bitcoin',
-  'ETH': 'ethereum',
-  'USDT': 'tether',
-  'BNB': 'binancecoin',
-  'SOL': 'solana',
-  'XRP': 'ripple',
-  'USDC': 'usd-coin',
-  'ADA': 'cardano',
-  'AVAX': 'avalanche-2',
-  'DOGE': 'dogecoin',
-  'DOT': 'polkadot',
-  'MATIC': 'matic-network',
-  'SHIB': 'shiba-inu',
-  'DAI': 'dai',
-  'TRX': 'tron',
-  'LINK': 'chainlink',
-  'TON': 'the-open-network',
-  'UNI': 'uniswap',
-  'WBTC': 'wrapped-bitcoin',
-  'LEO': 'leo-token',
-  'ATOM': 'cosmos',
-  'ETC': 'ethereum-classic',
-  'OKB': 'okb',
-  'LTC': 'litecoin',
-  'BCH': 'bitcoin-cash',
-  'XLM': 'stellar',
-  'XMR': 'monero',
-  'FIL': 'filecoin',
-  'NEAR': 'near',
-  'CRO': 'crypto-com-chain',
-  'INJ': 'injective-protocol',
-  'VET': 'vechain',
-  'ARB': 'arbitrum',
-  'FTM': 'fantom',
-  'OP': 'optimism',
-  'SEI': 'sei-network',
-  'SUI': 'sui',
+  BTC: 'bitcoin',
+  ETH: 'ethereum',
+  USDT: 'tether',
+  BNB: 'binancecoin',
+  SOL: 'solana',
+  XRP: 'ripple',
+  USDC: 'usd-coin',
+  ADA: 'cardano',
+  AVAX: 'avalanche-2',
+  DOGE: 'dogecoin',
+  DOT: 'polkadot',
+  MATIC: 'matic-network',
+  SHIB: 'shiba-inu',
+  DAI: 'dai',
+  TRX: 'tron',
+  LINK: 'chainlink',
+  TON: 'the-open-network',
+  UNI: 'uniswap',
+  WBTC: 'wrapped-bitcoin',
+  LEO: 'leo-token',
+  ATOM: 'cosmos',
+  ETC: 'ethereum-classic',
+  OKB: 'okb',
+  LTC: 'litecoin',
+  BCH: 'bitcoin-cash',
+  XLM: 'stellar',
+  XMR: 'monero',
+  FIL: 'filecoin',
+  NEAR: 'near',
+  CRO: 'crypto-com-chain',
+  INJ: 'injective-protocol',
+  VET: 'vechain',
+  ARB: 'arbitrum',
+  FTM: 'fantom',
+  OP: 'optimism',
+  SEI: 'sei-network',
+  SUI: 'sui',
   // Note: NYAX may not be available on CoinGecko, will be handled by fallback logic
 };
 
@@ -97,13 +97,13 @@ export async function fetchTokenPrice(
     const response = await fetch(
       `${COINGECKO_API_URL}/coins/${tokenId}?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false`
     );
-    
+
     if (!response.ok) {
       throw new Error(`Failed to fetch token price: ${response.statusText}`);
     }
-    
+
     const data = await response.json();
-    
+
     return {
       price: data.market_data.current_price[vsCurrency] || 0,
       price_change_24h: data.market_data.price_change_24h || 0,
@@ -133,19 +133,22 @@ export async function fetchTokenPairData(
   try {
     const baseTokenId = getTokenId(baseToken);
     const quoteTokenId = getTokenId(quoteToken);
-    
+
     if (!baseTokenId || !quoteTokenId) {
-      console.warn(`Token mapping not found for: ${baseToken}/${quoteToken}. Available tokens:`, Object.keys(tokenIdMap));
+      console.warn(
+        `Token mapping not found for: ${baseToken}/${quoteToken}. Available tokens:`,
+        Object.keys(tokenIdMap)
+      );
       return null; // Return null instead of throwing error
     }
-    
+
     // For most pairs, we'll use USD as the reference and calculate the pair price
     const baseData = await fetchTokenPrice(baseTokenId);
-    
+
     if (!baseData) {
       throw new Error(`Failed to fetch data for ${baseToken}`);
     }
-    
+
     // If quote token is a stablecoin (USDT, USDC, DAI), we can use the USD price directly
     if (['USDT', 'USDC', 'DAI'].includes(quoteToken.toUpperCase())) {
       return {
@@ -161,22 +164,22 @@ export async function fetchTokenPairData(
         lastUpdated: baseData.last_updated,
       };
     }
-    
+
     // For non-stablecoin quote tokens, fetch the quote token data and calculate the ratio
     const quoteData = await fetchTokenPrice(quoteTokenId);
-    
+
     if (!quoteData || quoteData.price === 0) {
       throw new Error(`Failed to fetch data for ${quoteToken} or price is zero`);
     }
-    
+
     // Calculate the price in terms of the quote token
     const pairPrice = baseData.price / quoteData.price;
-    
+
     // Calculate the 24h change percentage for the pair
     // This is an approximation and doesn't account for the changing ratio over time
-    const priceChangePercentage = 
+    const priceChangePercentage =
       baseData.price_change_percentage_24h - quoteData.price_change_percentage_24h;
-    
+
     return {
       baseToken,
       quoteToken,
@@ -220,10 +223,7 @@ export function formatCurrency(
  * @param maximumFractionDigits Maximum fraction digits (default: 2)
  * @returns Formatted percentage string
  */
-export function formatPercentage(
-  value: number,
-  maximumFractionDigits: number = 2
-): string {
+export function formatPercentage(value: number, maximumFractionDigits: number = 2): string {
   return new Intl.NumberFormat('en-US', {
     style: 'percent',
     maximumFractionDigits,
@@ -234,9 +234,7 @@ export function formatPercentage(
  * Fetch a coin's platform contract addresses map from CoinGecko
  * Example response structure: { ethereum: "0x...", solana: "...", 'binance-smart-chain': "0x...", ... }
  */
-export async function fetchCoinPlatforms(
-  coinId: string
-): Promise<Record<string, string> | null> {
+export async function fetchCoinPlatforms(coinId: string): Promise<Record<string, string> | null> {
   try {
     const response = await fetch(
       `${COINGECKO_API_URL}/coins/${coinId}?localization=false&tickers=false&market_data=false&community_data=false&developer_data=false`

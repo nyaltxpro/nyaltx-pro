@@ -2,34 +2,48 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaExchangeAlt, FaChevronDown, FaCog, FaInfoCircle, FaExternalLinkAlt, FaSearch, FaTimes } from 'react-icons/fa';
+import {
+  FaExchangeAlt,
+  FaChevronDown,
+  FaCog,
+  FaInfoCircle,
+  FaExternalLinkAlt,
+  FaSearch,
+  FaTimes,
+} from 'react-icons/fa';
 import { SiBinance } from 'react-icons/si';
 import { FaEthereum } from 'react-icons/fa';
 import { getCryptoIconUrl } from '@/utils/cryptoIcons';
 import { dexManager } from '@/lib/dex/dexManager';
-import { DexInterface, PriceQuote, Token as DexToken, CHAIN_IDS, DEX_PROTOCOL } from '@/lib/dex/types';
+import {
+  DexInterface,
+  PriceQuote,
+  Token as DexToken,
+  CHAIN_IDS,
+  DEX_PROTOCOL,
+} from '@/lib/dex/types';
 import { useAccount, useWalletClient } from 'wagmi';
 import { Address, createPublicClient, formatUnits, http, parseUnits } from 'viem';
 import { mainnet, bsc as bscChain } from 'viem/chains';
 
 // Uniswap V3 constants and contract addresses
-const UNISWAP_V3_QUOTER = "0xb27308f9F90D607463bb33eA1BeBb41C27CE5AB6";
-const UNISWAP_V3_ROUTER = "0xE592427A0AEce92De3Edee1F18E0157C05861564";
+const UNISWAP_V3_QUOTER = '0xb27308f9F90D607463bb33eA1BeBb41C27CE5AB6';
+const UNISWAP_V3_ROUTER = '0xE592427A0AEce92De3Edee1F18E0157C05861564';
 const DEFAULT_FEE_TIER = 3000; // 0.3%
 
 // Contract ABIs
 const QUOTER_ABI = [
-  "function quoteExactInputSingle(address,address,uint24,uint256,uint160) external returns (uint256)",
+  'function quoteExactInputSingle(address,address,uint24,uint256,uint160) external returns (uint256)',
 ];
 
 const ROUTER_ABI = [
-  "function exactInputSingle((address,address,uint24,address,uint256,uint256,uint256,uint160)) payable returns (uint256)",
+  'function exactInputSingle((address,address,uint24,address,uint256,uint256,uint256,uint160)) payable returns (uint256)',
 ];
 
 // Minimal ERC20 ABI for approvals
 const ERC20_ABI = [
-  "function allowance(address owner, address spender) view returns (uint256)",
-  "function approve(address spender, uint256 value) returns (bool)"
+  'function allowance(address owner, address spender) view returns (uint256)',
+  'function approve(address spender, uint256 value) returns (bool)',
 ];
 
 // Remove local Token interface - using DexToken from types
@@ -88,7 +102,7 @@ const NYAXSwapCard: React.FC<NYAXSwapCardProps> = ({ token }) => {
         address: tokenAddr,
         abi: ERC20_ABI,
         functionName: 'allowance',
-        args: [owner, spender]
+        args: [owner, spender],
       } as any);
       if (current >= required) return;
       if (!walletClient) throw new Error('No wallet client');
@@ -96,7 +110,7 @@ const NYAXSwapCard: React.FC<NYAXSwapCardProps> = ({ token }) => {
         address: tokenAddr,
         abi: ERC20_ABI,
         functionName: 'approve',
-        args: [spender, required]
+        args: [spender, required],
       } as any);
     } catch (e) {
       console.error('Allowance check/approve failed:', e);
@@ -111,16 +125,19 @@ const NYAXSwapCard: React.FC<NYAXSwapCardProps> = ({ token }) => {
     name: token.name || 'Unknown Token',
     decimals: 18,
     chainId: token.network === 'BSC' ? CHAIN_IDS.BSC : CHAIN_IDS.ETHEREUM,
-    logoURI: token.logo || getCryptoIconUrl(token.symbol?.toLowerCase() || 'unknown')
+    logoURI: token.logo || getCryptoIconUrl(token.symbol?.toLowerCase() || 'unknown'),
   });
 
   const [toToken, setToToken] = useState<DexToken>({
-    address: token.network === 'BSC' ? '0x55d398326f99059fF775485246999027B3197955' : '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+    address:
+      token.network === 'BSC'
+        ? '0x55d398326f99059fF775485246999027B3197955'
+        : '0xdAC17F958D2ee523a2206206994597C13D831ec7',
     symbol: 'USDT',
     name: 'Tether USD',
     decimals: token.network === 'BSC' ? 18 : 6,
     chainId: token.network === 'BSC' ? CHAIN_IDS.BSC : CHAIN_IDS.ETHEREUM,
-    logoURI: getCryptoIconUrl('usdt')
+    logoURI: getCryptoIconUrl('usdt'),
   });
 
   // Popular tokens list
@@ -131,39 +148,51 @@ const NYAXSwapCard: React.FC<NYAXSwapCardProps> = ({ token }) => {
       name: 'Ethereum',
       decimals: 18,
       chainId: CHAIN_IDS.ETHEREUM,
-      logoURI: getCryptoIconUrl('eth')
+      logoURI: getCryptoIconUrl('eth'),
     },
     {
-      address: token.network === 'BSC' ? '0x55d398326f99059fF775485246999027B3197955' : '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+      address:
+        token.network === 'BSC'
+          ? '0x55d398326f99059fF775485246999027B3197955'
+          : '0xdAC17F958D2ee523a2206206994597C13D831ec7',
       symbol: 'USDT',
       name: 'Tether USD',
       decimals: token.network === 'BSC' ? 18 : 6,
       chainId: token.network === 'BSC' ? CHAIN_IDS.BSC : CHAIN_IDS.ETHEREUM,
-      logoURI: getCryptoIconUrl('usdt')
+      logoURI: getCryptoIconUrl('usdt'),
     },
     {
-      address: token.network === 'BSC' ? '0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d' : '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+      address:
+        token.network === 'BSC'
+          ? '0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d'
+          : '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
       symbol: 'USDC',
       name: 'USD Coin',
       decimals: token.network === 'BSC' ? 18 : 6,
       chainId: token.network === 'BSC' ? CHAIN_IDS.BSC : CHAIN_IDS.ETHEREUM,
-      logoURI: getCryptoIconUrl('usdc')
+      logoURI: getCryptoIconUrl('usdc'),
     },
     {
-      address: token.network === 'BSC' ? '0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c' : '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599',
+      address:
+        token.network === 'BSC'
+          ? '0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c'
+          : '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599',
       symbol: 'WBTC',
       name: 'Wrapped Bitcoin',
       decimals: token.network === 'BSC' ? 18 : 8,
       chainId: token.network === 'BSC' ? CHAIN_IDS.BSC : CHAIN_IDS.ETHEREUM,
-      logoURI: getCryptoIconUrl('btc')
+      logoURI: getCryptoIconUrl('btc'),
     },
     {
-      address: token.network === 'BSC' ? '0x1AF3F329e8BE154074D8769D1FFa4eE058B1DBc3' : '0x6B175474E89094C44Da98b954EedeAC495271d0F',
+      address:
+        token.network === 'BSC'
+          ? '0x1AF3F329e8BE154074D8769D1FFa4eE058B1DBc3'
+          : '0x6B175474E89094C44Da98b954EedeAC495271d0F',
       symbol: 'DAI',
       name: 'Dai Stablecoin',
       decimals: 18,
       chainId: token.network === 'BSC' ? CHAIN_IDS.BSC : CHAIN_IDS.ETHEREUM,
-      logoURI: getCryptoIconUrl('dai')
+      logoURI: getCryptoIconUrl('dai'),
     },
     {
       address: '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984',
@@ -171,8 +200,8 @@ const NYAXSwapCard: React.FC<NYAXSwapCardProps> = ({ token }) => {
       name: 'Uniswap',
       decimals: 18,
       chainId: CHAIN_IDS.ETHEREUM,
-      logoURI: getCryptoIconUrl('uni')
-    }
+      logoURI: getCryptoIconUrl('uni'),
+    },
   ].filter(t => t.chainId === (token.network === 'BSC' ? CHAIN_IDS.BSC : CHAIN_IDS.ETHEREUM));
 
   const getNetworkIcon = (network: string) => {
@@ -203,39 +232,54 @@ const NYAXSwapCard: React.FC<NYAXSwapCardProps> = ({ token }) => {
         tokenOut: toToken,
         amountIn: inputAmount,
         chainId: fromToken.chainId,
-        slippageTolerance: slippage
+        slippageTolerance: slippage,
       });
 
       if (quote) {
         setToAmount(parseFloat(quote.outputAmount).toFixed(6));
         setPriceImpact(quote.priceImpact);
-        console.log(`Real Uniswap Quote: ${inputAmount} ${fromToken.symbol} → ${quote.outputAmount} ${toToken.symbol}`);
+        console.log(
+          `Real Uniswap Quote: ${inputAmount} ${fromToken.symbol} → ${quote.outputAmount} ${toToken.symbol}`
+        );
         console.log(`Price Impact: ${quote.priceImpact}%, Fee: ${quote.fee}`);
       } else {
         // Fallback to mock calculation if no quote available
-        const mockRate = fromToken.symbol === 'ETH' ? 1950 : 
-                        fromToken.symbol === 'WETH' ? 1950 :
-                        fromToken.symbol === 'USDT' ? 1 :
-                        fromToken.symbol === 'USDC' ? 1 :
-                        fromToken.symbol === 'WBTC' ? 43000 :
-                        Math.random() * 100 + 1;
-        
+        const mockRate =
+          fromToken.symbol === 'ETH'
+            ? 1950
+            : fromToken.symbol === 'WETH'
+              ? 1950
+              : fromToken.symbol === 'USDT'
+                ? 1
+                : fromToken.symbol === 'USDC'
+                  ? 1
+                  : fromToken.symbol === 'WBTC'
+                    ? 43000
+                    : Math.random() * 100 + 1;
+
         const outputAmount = parseFloat(inputAmount) * mockRate;
         setToAmount(outputAmount.toFixed(6));
         setPriceImpact((Math.random() * 0.5).toFixed(2));
-        console.log(`Fallback quote: ${inputAmount} ${fromToken.symbol} → ${outputAmount.toFixed(6)} ${toToken.symbol}`);
+        console.log(
+          `Fallback quote: ${inputAmount} ${fromToken.symbol} → ${outputAmount.toFixed(6)} ${toToken.symbol}`
+        );
       }
-      
     } catch (error) {
       console.error('Error fetching Uniswap quote:', error);
       // Fallback to mock calculation
-      const mockRate = fromToken.symbol === 'ETH' ? 1950 : 
-                      fromToken.symbol === 'WETH' ? 1950 :
-                      fromToken.symbol === 'USDT' ? 1 :
-                      fromToken.symbol === 'USDC' ? 1 :
-                      fromToken.symbol === 'WBTC' ? 43000 :
-                      Math.random() * 100 + 1;
-      
+      const mockRate =
+        fromToken.symbol === 'ETH'
+          ? 1950
+          : fromToken.symbol === 'WETH'
+            ? 1950
+            : fromToken.symbol === 'USDT'
+              ? 1
+              : fromToken.symbol === 'USDC'
+                ? 1
+                : fromToken.symbol === 'WBTC'
+                  ? 43000
+                  : Math.random() * 100 + 1;
+
       const outputAmount = parseFloat(inputAmount) * mockRate;
       setToAmount(outputAmount.toFixed(6));
       setPriceImpact((Math.random() * 0.5).toFixed(2));
@@ -253,7 +297,7 @@ const NYAXSwapCard: React.FC<NYAXSwapCardProps> = ({ token }) => {
   const swapTokens = () => {
     const tempToken = fromToken;
     const tempAmount = fromAmount;
-    
+
     setFromToken(toToken);
     setToToken(tempToken);
     setFromAmount(toAmount);
@@ -268,16 +312,17 @@ const NYAXSwapCard: React.FC<NYAXSwapCardProps> = ({ token }) => {
     }
     setShowTokenModal(false);
     setSearchTerm('');
-    
+
     // Refetch quote if there's an amount
     if (fromAmount) {
       fetchUniswapQuote(fromAmount);
     }
   };
 
-  const filteredTokens = popularTokens.filter(t =>
-    (t.name && t.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (t.symbol && t.symbol.toLowerCase().includes(searchTerm.toLowerCase()))
+  const filteredTokens = popularTokens.filter(
+    t =>
+      (t.name && t.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (t.symbol && t.symbol.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   // if (!isAvailable) {
@@ -316,14 +361,16 @@ const NYAXSwapCard: React.FC<NYAXSwapCardProps> = ({ token }) => {
                 src={token.logo}
                 alt={token.symbol || 'Token'}
                 className="w-full h-full object-cover"
-                onError={(e) => {
+                onError={e => {
                   const target = e.target as HTMLImageElement;
                   target.style.display = 'none';
                   target.nextElementSibling?.classList.remove('hidden');
                 }}
               />
             ) : null}
-            <div className={`w-full h-full bg-gradient-to-r from-cyan-500 to-blue-500 flex items-center justify-center text-white text-sm font-bold ${token.logo ? 'hidden' : ''}`}>
+            <div
+              className={`w-full h-full bg-gradient-to-r from-cyan-500 to-blue-500 flex items-center justify-center text-white text-sm font-bold ${token.logo ? 'hidden' : ''}`}
+            >
               {token.symbol?.[0] || '?'}
             </div>
           </div>
@@ -363,7 +410,7 @@ const NYAXSwapCard: React.FC<NYAXSwapCardProps> = ({ token }) => {
               max="5"
               step="0.1"
               value={slippage}
-              onChange={(e) => setSlippage(e.target.value)}
+              onChange={e => setSlippage(e.target.value)}
               className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
             />
             <div className="flex justify-between text-xs text-gray-500 mt-1">
@@ -403,7 +450,7 @@ const NYAXSwapCard: React.FC<NYAXSwapCardProps> = ({ token }) => {
                     src={fromToken.logoURI}
                     alt={fromToken.symbol}
                     className="w-full h-full object-cover"
-                    onError={(e) => {
+                    onError={e => {
                       const target = e.target as HTMLImageElement;
                       target.src = getCryptoIconUrl('unknown');
                     }}
@@ -453,7 +500,7 @@ const NYAXSwapCard: React.FC<NYAXSwapCardProps> = ({ token }) => {
                     src={toToken.logoURI}
                     alt={toToken.symbol}
                     className="w-full h-full object-cover"
-                    onError={(e) => {
+                    onError={e => {
                       const target = e.target as HTMLImageElement;
                       target.src = getCryptoIconUrl('unknown');
                     }}
@@ -475,13 +522,19 @@ const NYAXSwapCard: React.FC<NYAXSwapCardProps> = ({ token }) => {
                 {isLoading ? (
                   <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-cyan-500"></div>
                 ) : (
-                  <span className="text-white">1 {fromToken.symbol} ≈ {(parseFloat(toAmount) / parseFloat(fromAmount) || 0).toFixed(4)} {toToken.symbol}</span>
+                  <span className="text-white">
+                    1 {fromToken.symbol} ≈{' '}
+                    {(parseFloat(toAmount) / parseFloat(fromAmount) || 0).toFixed(4)}{' '}
+                    {toToken.symbol}
+                  </span>
                 )}
               </div>
             </div>
             <div className="flex justify-between items-center text-sm mt-2">
               <span className="text-gray-400">Price Impact</span>
-              <span className={`${parseFloat(priceImpact) > 1 ? 'text-red-400' : parseFloat(priceImpact) > 0.5 ? 'text-yellow-400' : 'text-green-400'}`}>
+              <span
+                className={`${parseFloat(priceImpact) > 1 ? 'text-red-400' : parseFloat(priceImpact) > 0.5 ? 'text-yellow-400' : 'text-green-400'}`}
+              >
                 {priceImpact}%
               </span>
             </div>
@@ -493,7 +546,7 @@ const NYAXSwapCard: React.FC<NYAXSwapCardProps> = ({ token }) => {
         )}
 
         {/* Action Button */}
-        <button 
+        <button
           onClick={async () => {
             if (!fromAmount || !toAmount || !isConnected || !walletClient || !address) {
               alert('Please connect your wallet first');
@@ -508,7 +561,7 @@ const NYAXSwapCard: React.FC<NYAXSwapCardProps> = ({ token }) => {
               const amountIn = parseUnits(fromAmount, fromToken.decimals);
               const quotedOut = parseUnits(toAmount, toToken.decimals);
               const slipBps = Math.floor(parseFloat(slippage) * 100);
-              const amountOutMin = quotedOut * BigInt(10000 - slipBps) / BigInt(10000);
+              const amountOutMin = (quotedOut * BigInt(10000 - slipBps)) / BigInt(10000);
               const deadline = BigInt(Math.floor(Date.now() / 1000) + 60 * 10);
 
               // Approve if ERC20 input
@@ -524,14 +577,16 @@ const NYAXSwapCard: React.FC<NYAXSwapCardProps> = ({ token }) => {
 
               // Prepare params for exactInputSingle
               const params = {
-                tokenIn: isNative(fromToken) ? getWETHAddress(fromToken.chainId) : (fromToken.address as Address),
+                tokenIn: isNative(fromToken)
+                  ? getWETHAddress(fromToken.chainId)
+                  : (fromToken.address as Address),
                 tokenOut: toToken.address as Address,
                 fee: DEFAULT_FEE_TIER,
                 recipient: address as Address,
                 deadline,
                 amountIn,
                 amountOutMinimum: amountOutMin,
-                sqrtPriceLimitX96: BigInt(0)
+                sqrtPriceLimitX96: BigInt(0),
               } as any;
 
               const hash = await walletClient.writeContract({
@@ -539,7 +594,7 @@ const NYAXSwapCard: React.FC<NYAXSwapCardProps> = ({ token }) => {
                 abi: ROUTER_ABI,
                 functionName: 'exactInputSingle',
                 args: [params],
-                value: isNative(fromToken) ? amountIn : BigInt(0)
+                value: isNative(fromToken) ? amountIn : BigInt(0),
               } as any);
 
               console.log('Swap submitted, hash:', hash);
@@ -636,7 +691,7 @@ const NYAXSwapCard: React.FC<NYAXSwapCardProps> = ({ token }) => {
                     type="text"
                     placeholder="Search tokens..."
                     value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onChange={e => setSearchTerm(e.target.value)}
                     className="w-full bg-[#0f1923] text-white px-4 py-3 pl-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 border border-gray-600/30"
                   />
                   <FaSearch className="absolute left-3 top-3.5 text-gray-400" />
@@ -646,7 +701,7 @@ const NYAXSwapCard: React.FC<NYAXSwapCardProps> = ({ token }) => {
               <div className="overflow-y-auto max-h-[50vh]">
                 <div className="p-2">
                   <div className="text-sm text-gray-400 mb-2 px-2">Popular Tokens</div>
-                  {filteredTokens.map((tokenItem) => (
+                  {filteredTokens.map(tokenItem => (
                     <motion.div
                       key={tokenItem.address}
                       whileHover={{ backgroundColor: 'rgba(75, 85, 99, 0.3)' }}
@@ -658,7 +713,7 @@ const NYAXSwapCard: React.FC<NYAXSwapCardProps> = ({ token }) => {
                           src={tokenItem.logoURI}
                           alt={tokenItem.symbol}
                           className="w-full h-full object-cover"
-                          onError={(e) => {
+                          onError={e => {
                             const target = e.target as HTMLImageElement;
                             target.src = getCryptoIconUrl('unknown');
                           }}

@@ -89,34 +89,36 @@ export class CoinGeckoService {
     const cached = this.cache.get(cacheKey);
     const now = Date.now();
 
-    if (cached && (now - cached.timestamp) < this.CACHE_DURATION) {
+    if (cached && now - cached.timestamp < this.CACHE_DURATION) {
       return cached.data;
     }
 
     // Rate limiting: ensure minimum delay between requests
     const timeSinceLastRequest = now - this.lastRequestTime;
     if (timeSinceLastRequest < this.RATE_LIMIT_DELAY) {
-      await new Promise(resolve => setTimeout(resolve, this.RATE_LIMIT_DELAY - timeSinceLastRequest));
+      await new Promise(resolve =>
+        setTimeout(resolve, this.RATE_LIMIT_DELAY - timeSinceLastRequest)
+      );
     }
 
     try {
       this.lastRequestTime = Date.now();
       const response = await fetch(url, {
         headers: {
-          'Accept': 'application/json',
-          'User-Agent': 'CryptoApp/1.0'
-        }
+          Accept: 'application/json',
+          'User-Agent': 'CryptoApp/1.0',
+        },
       });
-      
+
       if (!response.ok) {
         if (response.status === 429) {
           // Rate limited, wait and retry once
           await new Promise(resolve => setTimeout(resolve, 5000));
           const retryResponse = await fetch(url, {
             headers: {
-              'Accept': 'application/json',
-              'User-Agent': 'CryptoApp/1.0'
-            }
+              Accept: 'application/json',
+              'User-Agent': 'CryptoApp/1.0',
+            },
           });
           if (!retryResponse.ok) {
             throw new Error(`HTTP error after retry! status: ${retryResponse.status}`);
@@ -127,19 +129,19 @@ export class CoinGeckoService {
         }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const data = await response.json();
       this.cache.set(cacheKey, { data, timestamp: Date.now() });
       return data;
     } catch (error) {
       console.error(`Error fetching from CoinGecko API: ${url}`, error);
-      
+
       // Return cached data if available, even if expired
       if (cached) {
         console.log(`Using cached data for ${cacheKey} due to API error`);
         return cached.data;
       }
-      
+
       throw error;
     }
   }
@@ -149,13 +151,19 @@ export class CoinGeckoService {
     return this.fetchWithCache<CoinGeckoTrendingResponse>(url, 'trending');
   }
 
-  async getMarketData(coinIds: string[], vsCurrency: string = 'usd'): Promise<CoinGeckoMarketData[]> {
+  async getMarketData(
+    coinIds: string[],
+    vsCurrency: string = 'usd'
+  ): Promise<CoinGeckoMarketData[]> {
     const ids = coinIds.join(',');
     const url = `${COINGECKO_API_BASE}/coins/markets?vs_currency=${vsCurrency}&ids=${ids}&order=market_cap_desc&per_page=100&page=1&sparkline=true&price_change_percentage=24h`;
     return this.fetchWithCache<CoinGeckoMarketData[]>(url, `market-${ids}-${vsCurrency}`);
   }
 
-  async getTopCryptocurrencies(count: number = 20, vsCurrency: string = 'usd'): Promise<CoinGeckoMarketData[]> {
+  async getTopCryptocurrencies(
+    count: number = 20,
+    vsCurrency: string = 'usd'
+  ): Promise<CoinGeckoMarketData[]> {
     const url = `${COINGECKO_API_BASE}/coins/markets?vs_currency=${vsCurrency}&order=market_cap_desc&per_page=${count}&page=1&sparkline=true&price_change_percentage=24h`;
     return this.fetchWithCache<CoinGeckoMarketData[]>(url, `top-${count}-${vsCurrency}`);
   }
@@ -182,7 +190,7 @@ export class CoinGeckoService {
     } else {
       return price.toLocaleString('en-US', {
         minimumFractionDigits: 2,
-        maximumFractionDigits: 2
+        maximumFractionDigits: 2,
       });
     }
   }

@@ -7,7 +7,8 @@ const dataPath = (file: string) => path.join(process.cwd(), 'src', 'app', 'data'
 
 export async function GET() {
   const c = await cookies();
-  if (c.get('admin_auth')?.value !== '1') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (c.get('admin_auth')?.value !== '1')
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   // Load local JSON resources (best-effort)
   const readJson = async (file: string) => {
@@ -28,7 +29,9 @@ export async function GET() {
   const result = {
     profiles: {
       count: Array.isArray(profiles) ? profiles.length : 0,
-      active: Array.isArray(profiles) ? profiles.filter((p: any) => p.status === 'active').length : 0,
+      active: Array.isArray(profiles)
+        ? profiles.filter((p: any) => p.status === 'active').length
+        : 0,
     },
     orders: {
       onchain: {
@@ -38,7 +41,9 @@ export async function GET() {
     campaigns: {
       count: Array.isArray(campaigns) ? campaigns.length : 0,
       active: Array.isArray(campaigns)
-        ? campaigns.filter((c: any) => new Date(c.startDate) <= new Date() && new Date(c.endDate) >= new Date()).length
+        ? campaigns.filter(
+            (c: any) => new Date(c.startDate) <= new Date() && new Date(c.endDate) >= new Date()
+          ).length
         : 0,
     },
   };

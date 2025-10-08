@@ -1,7 +1,18 @@
 'use client';
 
 import React, { useState } from 'react';
-import { FaGlobe, FaTwitter, FaTelegram, FaDiscord, FaGithub, FaYoutube, FaVideo, FaSave, FaTimes, FaEdit } from 'react-icons/fa';
+import {
+  FaGlobe,
+  FaTwitter,
+  FaTelegram,
+  FaDiscord,
+  FaGithub,
+  FaYoutube,
+  FaVideo,
+  FaSave,
+  FaTimes,
+  FaEdit,
+} from 'react-icons/fa';
 
 interface SocialLinks {
   website?: string;
@@ -39,7 +50,12 @@ interface SocialLinksEditorProps {
   onUpdate: (tokenId: string, updatedToken: Token) => void;
 }
 
-export default function SocialLinksEditor({ token, tokenType, userAddress, onUpdate }: SocialLinksEditorProps) {
+export default function SocialLinksEditor({
+  token,
+  tokenType,
+  userAddress,
+  onUpdate,
+}: SocialLinksEditorProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -55,18 +71,43 @@ export default function SocialLinksEditor({ token, tokenType, userAddress, onUpd
 
   const socialFields = [
     { key: 'website', label: 'Website', icon: FaGlobe, placeholder: 'https://example.com' },
-    { key: 'twitter', label: 'Twitter', icon: FaTwitter, placeholder: 'https://twitter.com/yourhandle' },
-    { key: 'telegram', label: 'Telegram', icon: FaTelegram, placeholder: 'https://t.me/yourchannel' },
-    { key: 'discord', label: 'Discord', icon: FaDiscord, placeholder: 'https://discord.gg/yourinvite' },
+    {
+      key: 'twitter',
+      label: 'Twitter',
+      icon: FaTwitter,
+      placeholder: 'https://twitter.com/yourhandle',
+    },
+    {
+      key: 'telegram',
+      label: 'Telegram',
+      icon: FaTelegram,
+      placeholder: 'https://t.me/yourchannel',
+    },
+    {
+      key: 'discord',
+      label: 'Discord',
+      icon: FaDiscord,
+      placeholder: 'https://discord.gg/yourinvite',
+    },
     { key: 'github', label: 'GitHub', icon: FaGithub, placeholder: 'https://github.com/org/repo' },
-    { key: 'youtube', label: 'YouTube', icon: FaYoutube, placeholder: 'https://youtube.com/channel/...' },
-    { key: 'videoLink', label: 'Video Link', icon: FaVideo, placeholder: 'https://youtube.com/watch?v=... or other video URL' },
+    {
+      key: 'youtube',
+      label: 'YouTube',
+      icon: FaYoutube,
+      placeholder: 'https://youtube.com/channel/...',
+    },
+    {
+      key: 'videoLink',
+      label: 'Video Link',
+      icon: FaVideo,
+      placeholder: 'https://youtube.com/watch?v=... or other video URL',
+    },
   ];
 
   const handleInputChange = (key: string, value: string) => {
     setSocialLinks(prev => ({
       ...prev,
-      [key]: value
+      [key]: value,
     }));
   };
 
@@ -136,17 +177,21 @@ export default function SocialLinksEditor({ token, tokenType, userAddress, onUpd
             {token.blockchain && <span>• {token.blockchain}</span>}
             {token.platform && <span>• {token.platform}</span>}
             {token.status && (
-              <span className={`px-2 py-1 rounded-full text-xs ${
-                token.status === 'approved' ? 'bg-green-500/20 text-green-400' :
-                token.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' :
-                'bg-red-500/20 text-red-400'
-              }`}>
+              <span
+                className={`px-2 py-1 rounded-full text-xs ${
+                  token.status === 'approved'
+                    ? 'bg-green-500/20 text-green-400'
+                    : token.status === 'pending'
+                      ? 'bg-yellow-500/20 text-yellow-400'
+                      : 'bg-red-500/20 text-red-400'
+                }`}
+              >
                 {token.status}
               </span>
             )}
           </div>
         </div>
-        
+
         {!isEditing && (
           <button
             onClick={() => setIsEditing(true)}
@@ -167,7 +212,7 @@ export default function SocialLinksEditor({ token, tokenType, userAddress, onUpd
       {isEditing ? (
         <div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            {socialFields.map((field) => {
+            {socialFields.map(field => {
               const Icon = field.icon;
               return (
                 <div key={field.key}>
@@ -180,7 +225,7 @@ export default function SocialLinksEditor({ token, tokenType, userAddress, onUpd
                     className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
                     placeholder={field.placeholder}
                     value={socialLinks[field.key as keyof SocialLinks] || ''}
-                    onChange={(e) => handleInputChange(field.key, e.target.value)}
+                    onChange={e => handleInputChange(field.key, e.target.value)}
                   />
                 </div>
               );
@@ -210,10 +255,10 @@ export default function SocialLinksEditor({ token, tokenType, userAddress, onUpd
         <div>
           {hasAnyLinks ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {socialFields.map((field) => {
+              {socialFields.map(field => {
                 const value = token[field.key as keyof Token] as string;
                 if (!value) return null;
-                
+
                 const Icon = field.icon;
                 return (
                   <div key={field.key} className="flex items-center">
@@ -233,7 +278,8 @@ export default function SocialLinksEditor({ token, tokenType, userAddress, onUpd
             </div>
           ) : (
             <div className="text-gray-500 text-sm">
-              No social links added yet. Click "Edit Links" to add social media links and promotional content.
+              No social links added yet. Click "Edit Links" to add social media links and
+              promotional content.
             </div>
           )}
         </div>

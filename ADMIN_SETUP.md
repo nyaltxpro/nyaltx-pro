@@ -23,6 +23,7 @@ NEXT_PUBLIC_APP_DOMAIN=nyax-admin
 ### Setup Steps
 
 1. **Generate JWT Secret**:
+
    ```bash
    # Generate a secure random string (32+ characters)
    openssl rand -base64 32
@@ -54,15 +55,18 @@ NEXT_PUBLIC_APP_DOMAIN=nyax-admin
 ### Troubleshooting
 
 **"Address not allowed" error**:
+
 - Check that your wallet address is in `ADMIN_WALLET_ADDRESSES`
 - Ensure the address is lowercase
 - Verify no extra spaces in the environment variable
 
 **"Failed to get authentication nonce" error**:
+
 - Check that `ADMIN_JWT_SECRET` is set
 - Restart your development server after adding env vars
 
 **Wallet connection issues**:
+
 - Ensure you have a Web3 wallet installed (MetaMask, etc.)
 - Check that the wallet is connected to the correct network
 - Try refreshing the page and reconnecting

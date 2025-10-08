@@ -1,20 +1,49 @@
-
-"use client";
-
-import { useState } from 'react';
-import type { Metadata } from "next";
-import { Poppins, Inter, Roboto } from "next/font/google";
-import { DefaultSeo } from 'next-seo';
-import "./globals.css";
-import Sidebar from "../components/Sidebar";
-import Header from "../components/HeaderUpdated"; // Assuming HeaderUpdated is the one to use
+import { Inter, Poppins, Roboto } from "next/font/google";
 import Footer from "../components/Footer";
-import Providers from "./providers";
-import { PayPalScriptProvider } from "@paypal/react-paypal-js";
-import { defaultSEO } from "../lib/seo.config";
 import "./globals.css";
+import Providers from "./providers";
+import type { Metadata } from 'next';
 
-// Removed duplicate web3modal import - already imported in providers
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://nyaltx.com';
+
+export const metadata: Metadata = {
+  title: 'NYALTX | Crypto Token Tracker & DeFi Platform',
+  description: 'Track meme tokens, view real-time charts, participate in Race to Liberty gamification, and discover trending cryptocurrencies across multiple blockchains.',
+  keywords: 'crypto, cryptocurrency, token tracker, DeFi, meme tokens, blockchain, Ethereum, trading, gamification, Race to Liberty, NYAX',
+  authors: [{ name: 'NYALTX Team' }],
+  creator: 'NYALTX Team',
+  publisher: 'NYALTX',
+  robots: 'index, follow',
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: baseUrl,
+    siteName: 'NYALTX',
+    title: 'NYALTX | Crypto Token Tracker & DeFi Platform',
+    description: 'Track meme tokens, view real-time charts, participate in Race to Liberty gamification, and discover trending cryptocurrencies across multiple blockchains.',
+    images: [
+      {
+        url: `${baseUrl}/og-image.png`,
+        width: 1200,
+        height: 630,
+        alt: 'NYALTX - Crypto Token Tracker',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    site: '@nyaltx',
+    creator: '@nyaltx',
+  },
+  icons: {
+    icon: '/logo.png',
+    apple: '/logo.png',
+  },
+  manifest: '/manifest.json',
+  themeColor: '#06b6d4',
+  viewport: 'width=device-width, initial-scale=1',
+};
+
 
 const poppins = Poppins({
   weight: ['400', '500', '600', '700'],
@@ -30,50 +59,57 @@ const roboto = Roboto({
   variable: '--font-roboto',
 });
 
-// Metadata can't be exported from a client component in this way.
-// We'll move this or handle it differently if needed, for now, we focus on layout.
-export const metadata: Metadata = {
-  title: "NYALTX | Crypto Token Tracker",
-  description: "Track meme tokens, view real-time charts, history and all token information from blockchain.",
-  icons: {
-    icon: "/logo.png",
-    apple: "/logo.png",
-    shortcut: "/logo.png"
-  },
-};
+
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  const toggleMobileMenu = () => {
-    setMobileMenuOpen(!isMobileMenuOpen);
-  };
-
   return (
     <html lang="en" className={`${poppins.variable} ${roboto.variable}`}>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'Organization',
+              name: 'NYALTX',
+              url: baseUrl,
+              logo: `${baseUrl}/logo.png`,
+              description: 'Crypto token tracker and DeFi platform for discovering, tracking, and promoting cryptocurrency tokens.',
+              sameAs: ['https://twitter.com/nyaltx', 'https://t.me/nyaltx', 'https://discord.gg/nyaltx'],
+            })
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'WebSite',
+              name: 'NYALTX',
+              url: baseUrl,
+              description: 'Crypto token tracker and DeFi platform',
+              potentialAction: {
+                '@type': 'SearchAction',
+                target: `${baseUrl}/dashboard/trade?search={search_term_string}`,
+                'query-input': 'required name=search_term_string',
+              },
+            })
+          }}
+        />
+      </head>
       <body className={inter.className}>
-        <DefaultSeo {...defaultSEO} />
-        <PayPalScriptProvider options={{ 
-          clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "test",
-          currency: "USD",
-          intent: "capture"
-        }}>
-          <Providers>
-            {/* <Sidebar isMobileMenuOpen={isMobileMenuOpen} toggleMobileMenu={toggleMobileMenu} /> */}
-            {/* Apply margin-left for desktop, none for mobile */}
-            <div className=" transition-all duration-300 flex flex-col min-h-screen">
-              {/* <Header toggleMobileMenu={toggleMobileMenu} /> */}
-              <main className="flex-grow">
-                {children}
-              </main>
-              <Footer />
-            </div>
-          </Providers>
-        </PayPalScriptProvider>
+        <Providers>
+          <div className=" transition-all duration-300 flex flex-col min-h-screen">
+            <main className="flex-grow">
+              {children}
+            </main>
+            <Footer />
+          </div>
+        </Providers>
       </body>
     </html>
   );

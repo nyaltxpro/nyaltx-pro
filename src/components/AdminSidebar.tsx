@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  FaHome, 
-  FaChartBar, 
-  FaUsers, 
-  FaCoins, 
+import {
+  FaHome,
+  FaChartBar,
+  FaUsers,
+  FaCoins,
   FaBullhorn,
   FaChartLine,
   FaGift,
@@ -16,7 +16,7 @@ import {
   FaShoppingCart,
   FaImage,
   FaRocket,
-  FaSignOutAlt
+  FaSignOutAlt,
 } from 'react-icons/fa';
 import Image from 'next/image';
 
@@ -38,17 +38,17 @@ const SidebarItem = ({ icon, text, href, isActive, isExpanded }: SidebarItemProp
     <motion.div
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
-      transition={{ type: "spring", stiffness: 400, damping: 17 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 17 }}
     >
-      <Link 
+      <Link
         href={href}
         className={`flex items-center py-3 px-3 mb-1 rounded-md transition-all duration-200 ${
-          isActive 
-            ? 'bg-[#1a2932] text-[#00b8d8]' 
+          isActive
+            ? 'bg-[#1a2932] text-[#00b8d8]'
             : 'text-gray-400 hover:bg-[#1a2932] hover:text-white'
         }`}
       >
-        <motion.div 
+        <motion.div
           className="text-xl"
           animate={{ rotate: isActive ? 360 : 0 }}
           transition={{ duration: 0.3 }}
@@ -57,14 +57,14 @@ const SidebarItem = ({ icon, text, href, isActive, isExpanded }: SidebarItemProp
         </motion.div>
         <AnimatePresence>
           {isExpanded && (
-            <motion.span 
+            <motion.span
               className="ml-3 whitespace-nowrap"
               initial={{ opacity: 0, width: 0 }}
-              animate={{ opacity: 1, width: "auto" }}
+              animate={{ opacity: 1, width: 'auto' }}
               exit={{ opacity: 0, width: 0 }}
-              transition={{ 
+              transition={{
                 duration: 0.2,
-                ease: "easeInOut"
+                ease: 'easeInOut',
               }}
             >
               {text}
@@ -79,10 +79,10 @@ const SidebarItem = ({ icon, text, href, isActive, isExpanded }: SidebarItemProp
 const LogoutButton = ({ isExpanded }: { isExpanded: boolean }) => {
   const handleLogout = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       console.log('🚪 Attempting admin logout...');
-      
+
       const response = await fetch('/api/admin/logout', {
         method: 'POST',
         credentials: 'include',
@@ -90,7 +90,7 @@ const LogoutButton = ({ isExpanded }: { isExpanded: boolean }) => {
           'Content-Type': 'application/json',
         },
       });
-      
+
       if (response.ok) {
         console.log('✅ Logout successful');
         // Check if it's a redirect response
@@ -116,14 +116,14 @@ const LogoutButton = ({ isExpanded }: { isExpanded: boolean }) => {
     <motion.div
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
-      transition={{ type: "spring", stiffness: 400, damping: 17 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 17 }}
     >
       <form onSubmit={handleLogout} className="w-full">
-        <button 
+        <button
           type="submit"
           className="flex items-center py-3 px-3 mb-1 rounded-md transition-all duration-200 text-red-400 hover:bg-red-900/20 hover:text-red-300 w-full"
         >
-          <motion.div 
+          <motion.div
             className="text-xl"
             whileHover={{ rotate: 15 }}
             transition={{ duration: 0.3 }}
@@ -132,14 +132,14 @@ const LogoutButton = ({ isExpanded }: { isExpanded: boolean }) => {
           </motion.div>
           <AnimatePresence>
             {isExpanded && (
-              <motion.span 
+              <motion.span
                 className="ml-3 whitespace-nowrap"
                 initial={{ opacity: 0, width: 0 }}
-                animate={{ opacity: 1, width: "auto" }}
+                animate={{ opacity: 1, width: 'auto' }}
                 exit={{ opacity: 0, width: 0 }}
-                transition={{ 
+                transition={{
                   duration: 0.2,
-                  ease: "easeInOut"
+                  ease: 'easeInOut',
                 }}
               >
                 Logout
@@ -183,50 +183,39 @@ export default function AdminSidebar({ isMobileMenuOpen, toggleMobileMenu }: Adm
   return (
     <>
       {!isDesktop && isMobileMenuOpen && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-40"
-          onClick={toggleMobileMenu}
-        />
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-40" onClick={toggleMobileMenu} />
       )}
-      <motion.div 
+      <motion.div
         className={`fixed left-0 top-0 h-full bg-[#0f1923] z-50 ${
           !isDesktop && (isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full')
         }`}
         initial={false}
         animate={{
           width: isDesktop ? (isExpanded ? 224 : 64) : 224, // 224px = 14rem, 64px = 4rem
-          x: !isDesktop && !isMobileMenuOpen ? -224 : 0
+          x: !isDesktop && !isMobileMenuOpen ? -224 : 0,
         }}
         transition={{
-          type: "spring",
+          type: 'spring',
           stiffness: 300,
           damping: 30,
-          duration: 0.3
+          duration: 0.3,
         }}
         onMouseEnter={() => isDesktop && setIsExpanded(true)}
         onMouseLeave={() => isDesktop && setIsExpanded(false)}
       >
         <div className="flex items-center h-16 border-b border-gray-800 px-4">
           <div className="flex items-center">
-            <motion.div
-              animate={{ rotate: isExpanded ? 360 : 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              <Image
-                src="/logo.png" 
-                alt="Logo" 
-                width={30}
-                height={30}
-              />
+            <motion.div animate={{ rotate: isExpanded ? 360 : 0 }} transition={{ duration: 0.5 }}>
+              <Image src="/logo.png" alt="Logo" width={30} height={30} />
             </motion.div>
             <AnimatePresence>
               {sidebarExpanded && (
-                <motion.span 
+                <motion.span
                   className="ml-2 font-bold text-white whitespace-nowrap"
                   initial={{ opacity: 0, width: 0 }}
-                  animate={{ opacity: 1, width: "auto" }}
+                  animate={{ opacity: 1, width: 'auto' }}
                   exit={{ opacity: 0, width: 0 }}
-                  transition={{ duration: 0.2, ease: "easeInOut" }}
+                  transition={{ duration: 0.2, ease: 'easeInOut' }}
                 >
                   NYAX Admin
                 </motion.span>
@@ -240,7 +229,7 @@ export default function AdminSidebar({ isMobileMenuOpen, toggleMobileMenu }: Adm
           <div className="mb-4">
             <AnimatePresence>
               {sidebarExpanded && (
-                <motion.div 
+                <motion.div
                   className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -251,13 +240,16 @@ export default function AdminSidebar({ isMobileMenuOpen, toggleMobileMenu }: Adm
                 </motion.div>
               )}
             </AnimatePresence>
-            {navItems.slice(0, 5).map((item) => (
+            {navItems.slice(0, 5).map(item => (
               <SidebarItem
                 key={item.href}
                 icon={item.icon}
                 text={item.text}
                 href={item.href}
-                isActive={pathname === item.href || (item.href !== '/admin' && pathname?.startsWith(item.href))}
+                isActive={
+                  pathname === item.href ||
+                  (item.href !== '/admin' && pathname?.startsWith(item.href))
+                }
                 isExpanded={sidebarExpanded}
               />
             ))}
@@ -267,7 +259,7 @@ export default function AdminSidebar({ isMobileMenuOpen, toggleMobileMenu }: Adm
           <div className="mb-4">
             <AnimatePresence>
               {sidebarExpanded && (
-                <motion.div 
+                <motion.div
                   className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -278,13 +270,16 @@ export default function AdminSidebar({ isMobileMenuOpen, toggleMobileMenu }: Adm
                 </motion.div>
               )}
             </AnimatePresence>
-            {navItems.slice(5).map((item) => (
+            {navItems.slice(5).map(item => (
               <SidebarItem
                 key={item.href}
                 icon={item.icon}
                 text={item.text}
                 href={item.href}
-                isActive={pathname === item.href || (item.href !== '/admin' && pathname?.startsWith(item.href))}
+                isActive={
+                  pathname === item.href ||
+                  (item.href !== '/admin' && pathname?.startsWith(item.href))
+                }
                 isExpanded={sidebarExpanded}
               />
             ))}

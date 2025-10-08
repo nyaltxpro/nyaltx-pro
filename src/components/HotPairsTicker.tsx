@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React, { useEffect, useRef } from 'react';
 
@@ -44,13 +44,13 @@ export default function HotPairsTicker({ pairs }: HotPairsTickerProps) {
 
   return (
     <div className="w-full bg-gray-900 border-y border-gray-800 py-2 overflow-hidden">
-      <div 
+      <div
         ref={scrollRef}
         className="flex items-center space-x-6 overflow-x-auto scrollbar-hide"
-        style={{ 
+        style={{
           whiteSpace: 'nowrap',
           scrollbarWidth: 'none',
-          msOverflowStyle: 'none'
+          msOverflowStyle: 'none',
         }}
       >
         {/* Duplicate the pairs to create a continuous scrolling effect */}
@@ -58,13 +58,7 @@ export default function HotPairsTicker({ pairs }: HotPairsTickerProps) {
           <div key={`${pair.id}-${index}`} className="flex items-center space-x-2 px-2">
             <span className="text-white font-medium">{pair.symbol}</span>
             <span className="text-gray-400">{pair.price}</span>
-            <span 
-              className={`${
-                pair.change.startsWith('+') 
-                  ? 'text-green-500' 
-                  : 'text-red-500'
-              }`}
-            >
+            <span className={`${pair.change.startsWith('+') ? 'text-green-500' : 'text-red-500'}`}>
               {pair.change}
             </span>
           </div>

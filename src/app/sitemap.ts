@@ -1,8 +1,8 @@
-import { MetadataRoute } from 'next'
+import { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://nyaltx.com'
-  
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://nyaltx.com';
+
   return [
     // Main Pages
     {
@@ -11,7 +11,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'daily',
       priority: 1,
     },
-    
+
     // Public Pages
     {
       url: `${baseUrl}/about-us`,
@@ -311,5 +311,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly',
       priority: 0.3,
     },
-  ]
+  ];
 }

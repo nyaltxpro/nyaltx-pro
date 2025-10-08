@@ -54,13 +54,13 @@ export default function GamificationStats() {
           try {
             const userTokensResponse = await fetch(`/api/tokens/by-wallet?address=${address}`);
             const userTokensData = await userTokensResponse.json();
-            
+
             if (userTokensData.success) {
               const userTokenIds = userTokensData.tokens.map((token: any) => token.id);
-              const userEntry = leaderboard.find((entry: any) => 
+              const userEntry = leaderboard.find((entry: any) =>
                 userTokenIds.includes(entry.tokenId)
               );
-              
+
               if (userEntry) {
                 userPosition = userEntry.position;
                 userPoints = userEntry.currentPoints;
@@ -75,17 +75,21 @@ export default function GamificationStats() {
           userPosition,
           userPoints,
           totalCompetitors: leaderboardData.totalEntries || 0,
-          currentLeader: currentLeader ? {
-            tokenName: currentLeader.tokenName,
-            tokenSymbol: currentLeader.tokenSymbol,
-            tokenLogo: currentLeader.tokenLogo,
-            points: currentLeader.currentPoints
-          } : undefined,
-          weeklyWinner: weeklyWinner ? {
-            tokenName: weeklyWinner.tokenName,
-            tokenSymbol: weeklyWinner.tokenSymbol,
-            tokenLogo: weeklyWinner.tokenLogo
-          } : undefined
+          currentLeader: currentLeader
+            ? {
+                tokenName: currentLeader.tokenName,
+                tokenSymbol: currentLeader.tokenSymbol,
+                tokenLogo: currentLeader.tokenLogo,
+                points: currentLeader.currentPoints,
+              }
+            : undefined,
+          weeklyWinner: weeklyWinner
+            ? {
+                tokenName: weeklyWinner.tokenName,
+                tokenSymbol: weeklyWinner.tokenSymbol,
+                tokenLogo: weeklyWinner.tokenLogo,
+              }
+            : undefined,
         });
       }
     } catch (error) {
@@ -121,8 +125,8 @@ export default function GamificationStats() {
             <p className="text-sm text-gray-400">Competitive crypto marketing</p>
           </div>
         </div>
-        
-        <Link 
+
+        <Link
           href="/dashboard/gamification"
           className="text-cyan-400 hover:text-cyan-300 flex items-center gap-2 text-sm"
         >
@@ -153,7 +157,7 @@ export default function GamificationStats() {
                   <p className="text-sm text-purple-400">Not Competing</p>
                   <p className="text-xs text-gray-400">Register tokens to join</p>
                 </div>
-                <Link 
+                <Link
                   href="/dashboard/race-to-liberty"
                   className="px-3 py-1 bg-purple-600 text-white text-xs rounded-lg hover:bg-purple-700 transition-colors"
                 >
@@ -172,8 +176,8 @@ export default function GamificationStats() {
         {stats?.currentLeader && (
           <div className="flex items-center gap-3 p-3 bg-white/5 rounded-xl">
             <FaTrophy className="text-yellow-400" />
-            <img 
-              src={stats.currentLeader.tokenLogo} 
+            <img
+              src={stats.currentLeader.tokenLogo}
               alt={stats.currentLeader.tokenName}
               className="w-8 h-8 rounded-full"
             />
@@ -192,8 +196,8 @@ export default function GamificationStats() {
         {stats?.weeklyWinner && (
           <div className="flex items-center gap-3 p-3 bg-white/5 rounded-xl">
             <FaCrown className="text-yellow-400" />
-            <img 
-              src={stats.weeklyWinner.tokenLogo} 
+            <img
+              src={stats.weeklyWinner.tokenLogo}
               alt={stats.weeklyWinner.tokenName}
               className="w-8 h-8 rounded-full"
             />
@@ -212,8 +216,8 @@ export default function GamificationStats() {
             <p className="text-lg font-bold">{stats?.totalCompetitors || 0}</p>
             <p className="text-xs text-gray-400">Active Players</p>
           </div>
-          
-          <Link 
+
+          <Link
             href="/dashboard/race-to-liberty"
             className="text-center p-3 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/20 rounded-xl hover:from-cyan-500/20 hover:to-blue-500/20 transition-all group"
           >

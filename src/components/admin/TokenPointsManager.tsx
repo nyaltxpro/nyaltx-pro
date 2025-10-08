@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
@@ -51,9 +51,7 @@ export default function TokenPointsManager() {
       const result = await response.json();
       if (result.success) {
         // Update local state
-        setTokens(prev => prev.map(token => 
-          token.id === tokenId ? { ...token, points } : token
-        ));
+        setTokens(prev => prev.map(token => (token.id === tokenId ? { ...token, points } : token)));
       } else {
         alert('Failed to update points: ' + result.error);
       }
@@ -65,9 +63,10 @@ export default function TokenPointsManager() {
     }
   };
 
-  const filteredTokens = tokens.filter(token =>
-    token.tokenName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    token.tokenSymbol.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredTokens = tokens.filter(
+    token =>
+      token.tokenName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      token.tokenSymbol.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (loading) {
@@ -92,14 +91,14 @@ export default function TokenPointsManager() {
         <p className="text-gray-400 mb-4">
           Manage points for tokens to control their ranking in the Token Race
         </p>
-        
+
         {/* Search */}
         <div className="mb-4">
           <input
             type="text"
             placeholder="Search tokens..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={e => setSearchTerm(e.target.value)}
             className="w-full max-w-md px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg focus:outline-none focus:border-[#00c3ff]"
           />
         </div>
@@ -128,7 +127,7 @@ export default function TokenPointsManager() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-600">
-              {filteredTokens.map((token) => (
+              {filteredTokens.map(token => (
                 <TokenRow
                   key={token.id}
                   token={token}
@@ -142,9 +141,7 @@ export default function TokenPointsManager() {
       </div>
 
       {filteredTokens.length === 0 && (
-        <div className="text-center py-8 text-gray-400">
-          No tokens found matching your search.
-        </div>
+        <div className="text-center py-8 text-gray-400">No tokens found matching your search.</div>
       )}
     </div>
   );
@@ -186,19 +183,13 @@ function TokenRow({ token, updating, onUpdatePoints }: TokenRowProps) {
               />
             ) : (
               <div className="h-10 w-10 bg-gray-600 rounded-full flex items-center justify-center">
-                <span className="text-sm font-bold">
-                  {token.tokenSymbol.charAt(0)}
-                </span>
+                <span className="text-sm font-bold">{token.tokenSymbol.charAt(0)}</span>
               </div>
             )}
           </div>
           <div className="ml-4">
-            <div className="text-sm font-medium text-white">
-              {token.tokenName}
-            </div>
-            <div className="text-sm text-gray-400">
-              {token.tokenSymbol}
-            </div>
+            <div className="text-sm font-medium text-white">{token.tokenName}</div>
+            <div className="text-sm text-gray-400">{token.tokenSymbol}</div>
           </div>
         </div>
       </td>
@@ -212,22 +203,20 @@ function TokenRow({ token, updating, onUpdatePoints }: TokenRowProps) {
           <input
             type="number"
             value={points}
-            onChange={(e) => setPoints(Number(e.target.value))}
+            onChange={e => setPoints(Number(e.target.value))}
             className="w-20 px-2 py-1 bg-gray-700 border border-gray-600 rounded text-sm focus:outline-none focus:border-[#00c3ff]"
             min="0"
           />
         ) : (
-          <span className="text-lg font-bold text-[#00c3ff]">
-            {token.points || 0}
-          </span>
+          <span className="text-lg font-bold text-[#00c3ff]">{token.points || 0}</span>
         )}
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
-        <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-          token.inRace 
-            ? 'bg-green-100 text-green-800' 
-            : 'bg-gray-100 text-gray-800'
-        }`}>
+        <span
+          className={`px-2 py-1 text-xs font-medium rounded-full ${
+            token.inRace ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+          }`}
+        >
           {token.inRace ? 'In Race' : 'Not in Race'}
         </span>
       </td>

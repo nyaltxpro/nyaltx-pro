@@ -67,7 +67,7 @@ export enum DEX_PROTOCOL {
   UNISWAP_V3 = 'Uniswap V3',
   PANCAKESWAP = 'PancakeSwap',
   SUSHISWAP = 'SushiSwap',
-  RAYDIUM = 'Raydium'
+  RAYDIUM = 'Raydium',
 }
 
 export const CHAIN_IDS = {
@@ -77,5 +77,5 @@ export const CHAIN_IDS = {
   OPTIMISM: 10,
   BSC: 56,
   AVALANCHE: 43114,
-  SOLANA: 101
+  SOLANA: 101,
 };

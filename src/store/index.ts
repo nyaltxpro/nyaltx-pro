@@ -10,7 +10,7 @@ export const store = configureStore({
     chain: chainReducer,
     searchCache: searchCacheReducer,
   },
-  middleware: (getDefaultMiddleware) =>
+  middleware: getDefaultMiddleware =>
     getDefaultMiddleware({
       serializableCheck: {
         ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE'],

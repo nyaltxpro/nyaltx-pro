@@ -1,17 +1,19 @@
-"use client";
+'use client';
 
-import React from 'react'
-import Image from 'next/image'
-import { usePumpFunTrades } from '@/hooks/usePumpFunTrades'
+import React from 'react';
+import Image from 'next/image';
+import { usePumpFunTrades } from '@/hooks/usePumpFunTrades';
 
 export default function PumpFunLive() {
-  const { connected, trades, topByMarketCap, allTokens } = usePumpFunTrades()
+  const { connected, trades, topByMarketCap, allTokens } = usePumpFunTrades();
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-bold">Pump.fun Live</h2>
-        <div className={`text-xs px-2 py-1 rounded ${connected ? 'bg-green-600/20 text-green-400' : 'bg-gray-600/20 text-gray-300'}`}>
+        <div
+          className={`text-xs px-2 py-1 rounded ${connected ? 'bg-green-600/20 text-green-400' : 'bg-gray-600/20 text-gray-300'}`}
+        >
           {connected ? 'LIVE' : 'DISCONNECTED'}
         </div>
       </div>
@@ -25,14 +27,16 @@ export default function PumpFunLive() {
           </div>
           <div className="max-h-[360px] overflow-auto divide-y divide-gray-800/60">
             {topByMarketCap.length === 0 && (
-              <div className="text-sm text-gray-400 p-3">No market cap data yet. Gathering live trades...</div>
+              <div className="text-sm text-gray-400 p-3">
+                No market cap data yet. Gathering live trades...
+              </div>
             )}
-            {topByMarketCap.map((t) => (
+            {topByMarketCap.map(t => (
               <div key={t.mint} className="flex items-center gap-3 p-3 hover:bg-white/5 rounded">
                 <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-700 flex-shrink-0">
                   {t.image ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={t.image} alt={t.symbol} className="w-full h-full object-cover"/>
+                    <img src={t.image} alt={t.symbol} className="w-full h-full object-cover" />
                   ) : null}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -64,11 +68,18 @@ export default function PumpFunLive() {
               <div className="text-sm text-gray-400 p-3">Waiting for trades...</div>
             )}
             {trades.map((t, idx) => (
-              <div key={idx + (t.mint || '')} className="flex items-center gap-3 p-3 hover:bg-white/5 rounded">
+              <div
+                key={idx + (t.mint || '')}
+                className="flex items-center gap-3 p-3 hover:bg-white/5 rounded"
+              >
                 <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-700 flex-shrink-0">
                   {t.image ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={t.image} alt={t.symbol || ''} className="w-full h-full object-cover"/>
+                    <img
+                      src={t.image}
+                      alt={t.symbol || ''}
+                      className="w-full h-full object-cover"
+                    />
                   ) : null}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -99,16 +110,18 @@ export default function PumpFunLive() {
           <span className="text-xs text-gray-400">{allTokens.length}</span>
         </div>
         <div className="max-h-[280px] overflow-auto grid grid-cols-1 sm:grid-cols-2 gap-2">
-          {allTokens.map((t) => (
+          {allTokens.map(t => (
             <div key={t.mint} className="flex items-center gap-2 p-2 rounded hover:bg-white/5">
               <div className="w-6 h-6 rounded-full overflow-hidden bg-gray-700">
                 {t.image ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={t.image} alt={t.symbol} className="w-full h-full object-cover"/>
+                  <img src={t.image} alt={t.symbol} className="w-full h-full object-cover" />
                 ) : null}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-sm truncate">{t.name} <span className="text-xs text-cyan-400">${t.symbol}</span></div>
+                <div className="text-sm truncate">
+                  {t.name} <span className="text-xs text-cyan-400">${t.symbol}</span>
+                </div>
                 <div className="text-[10px] text-gray-500 font-mono truncate">{t.mint}</div>
               </div>
               {t.marketCap !== undefined && (
@@ -119,19 +132,24 @@ export default function PumpFunLive() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 function formatCurrency(n?: number) {
-  if (typeof n !== 'number') return '-'
+  if (typeof n !== 'number') return '-';
   try {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', notation: 'compact', maximumFractionDigits: 2 }).format(n)
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      notation: 'compact',
+      maximumFractionDigits: 2,
+    }).format(n);
   } catch {
-    return `$${formatNumber(n)}`
+    return `$${formatNumber(n)}`;
   }
 }
 
 function formatNumber(n?: number) {
-  if (typeof n !== 'number') return '-'
-  return new Intl.NumberFormat('en-US', { maximumFractionDigits: 6 }).format(n)
+  if (typeof n !== 'number') return '-';
+  return new Intl.NumberFormat('en-US', { maximumFractionDigits: 6 }).format(n);
 }

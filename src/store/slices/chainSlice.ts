@@ -28,8 +28,8 @@ const allNetworksChain: BlockchainNetwork = {
   image: {
     thumb: '/globe.svg',
     small: '/globe.svg',
-    large: '/globe.svg'
-  }
+    large: '/globe.svg',
+  },
 };
 
 // Default chain (All Networks - no filtering)
@@ -51,7 +51,7 @@ const chainSlice = createSlice({
       state.error = null;
       console.log(`🔗 Chain selected: ${action.payload.name} (${action.payload.id})`);
     },
-    
+
     setAvailableChains: (state, action: PayloadAction<BlockchainNetwork[]>) => {
       state.availableChains = action.payload;
       // If no chain is selected, select the first available one
@@ -59,29 +59,29 @@ const chainSlice = createSlice({
         state.selectedChain = action.payload[0];
       }
     },
-    
+
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.isLoading = action.payload;
     },
-    
+
     setError: (state, action: PayloadAction<string | null>) => {
       state.error = action.payload;
       state.isLoading = false;
     },
-    
-    resetChainState: (state) => {
+
+    resetChainState: state => {
       state.selectedChain = defaultChain;
       state.error = null;
       state.isLoading = false;
     },
-    
+
     // Action to filter tokens by selected chain
-    filterTokensByChain: (state) => {
+    filterTokensByChain: state => {
       if (state.selectedChain) {
         console.log(`🔍 Filtering tokens for chain: ${state.selectedChain.name}`);
         // This action can be used to trigger filtering in other parts of the app
       }
-    }
+    },
   },
 });
 
@@ -91,7 +91,7 @@ export const {
   setLoading,
   setError,
   resetChainState,
-  filterTokensByChain
+  filterTokensByChain,
 } = chainSlice.actions;
 
 // Selectors

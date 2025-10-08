@@ -65,7 +65,7 @@ const PairsTable: React.FC<PairsTableProps> = ({ pairs, isLoading }) => {
       newFavorites.add(id);
     }
     setFavorites(newFavorites);
-    
+
     // Save to local storage
     localStorage.setItem('favoritePairs', JSON.stringify([...newFavorites]));
   };
@@ -74,7 +74,7 @@ const PairsTable: React.FC<PairsTableProps> = ({ pairs, isLoading }) => {
   const sortedPairs = [...pairs].sort((a, b) => {
     const aValue = a[sortField];
     const bValue = b[sortField];
-    
+
     if (sortDirection === 'asc') {
       return aValue - bValue;
     } else {
@@ -103,15 +103,10 @@ const PairsTable: React.FC<PairsTableProps> = ({ pairs, isLoading }) => {
             <th className="px-4 py-3">#</th>
             <th className="px-4 py-3">Favorite</th>
             <th className="px-4 py-3">Name</th>
-            <th 
-              className="px-4 py-3 cursor-pointer"
-              onClick={() => handleSort('current_price')}
-            >
-              <div className="flex items-center">
-                Price {getSortIcon('current_price')}
-              </div>
+            <th className="px-4 py-3 cursor-pointer" onClick={() => handleSort('current_price')}>
+              <div className="flex items-center">Price {getSortIcon('current_price')}</div>
             </th>
-            <th 
+            <th
               className="px-4 py-3 cursor-pointer"
               onClick={() => handleSort('price_change_percentage_24h')}
             >
@@ -119,42 +114,30 @@ const PairsTable: React.FC<PairsTableProps> = ({ pairs, isLoading }) => {
                 24h % {getSortIcon('price_change_percentage_24h')}
               </div>
             </th>
-            <th 
-              className="px-4 py-3 cursor-pointer"
-              onClick={() => handleSort('market_cap')}
-            >
-              <div className="flex items-center">
-                Market Cap {getSortIcon('market_cap')}
-              </div>
+            <th className="px-4 py-3 cursor-pointer" onClick={() => handleSort('market_cap')}>
+              <div className="flex items-center">Market Cap {getSortIcon('market_cap')}</div>
             </th>
-            <th 
-              className="px-4 py-3 cursor-pointer"
-              onClick={() => handleSort('total_volume')}
-            >
-              <div className="flex items-center">
-                Volume (24h) {getSortIcon('total_volume')}
-              </div>
+            <th className="px-4 py-3 cursor-pointer" onClick={() => handleSort('total_volume')}>
+              <div className="flex items-center">Volume (24h) {getSortIcon('total_volume')}</div>
             </th>
           </tr>
         </thead>
         <tbody>
-          {sortedPairs.map((pair) => (
-            <tr 
-              key={pair.id} 
+          {sortedPairs.map(pair => (
+            <tr
+              key={pair.id}
               className="border-b border-gray-800 hover:bg-gray-800/30 cursor-pointer transition-colors"
               onClick={() => handleRowClick(pair)}
             >
-              <td className="px-4 py-4 whitespace-nowrap text-sm">
-                {pair.market_cap_rank || '-'}
-              </td>
-              <td 
+              <td className="px-4 py-4 whitespace-nowrap text-sm">{pair.market_cap_rank || '-'}</td>
+              <td
                 className="px-4 py-4 whitespace-nowrap text-sm"
-                onClick={(e) => {
+                onClick={e => {
                   e.stopPropagation();
                   toggleFavorite(pair.id);
                 }}
               >
-                <FaStar className={favorites.has(pair.id) ? "text-yellow-400" : "text-gray-600"} />
+                <FaStar className={favorites.has(pair.id) ? 'text-yellow-400' : 'text-gray-600'} />
               </td>
               <td className="px-4 py-4 whitespace-nowrap">
                 <div className="flex items-center">
@@ -177,13 +160,15 @@ const PairsTable: React.FC<PairsTableProps> = ({ pairs, isLoading }) => {
               <td className="px-4 py-4 whitespace-nowrap text-sm">
                 {formatCurrency(pair.current_price)}
               </td>
-              <td className={`px-4 py-4 whitespace-nowrap text-sm ${
-                pair.price_change_percentage_24h > 0 
-                  ? 'text-green-500' 
-                  : pair.price_change_percentage_24h < 0 
-                    ? 'text-red-500' 
-                    : ''
-              }`}>
+              <td
+                className={`px-4 py-4 whitespace-nowrap text-sm ${
+                  pair.price_change_percentage_24h > 0
+                    ? 'text-green-500'
+                    : pair.price_change_percentage_24h < 0
+                      ? 'text-red-500'
+                      : ''
+                }`}
+              >
                 {formatPercentage(pair.price_change_percentage_24h)}
               </td>
               <td className="px-4 py-4 whitespace-nowrap text-sm">

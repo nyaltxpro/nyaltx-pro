@@ -30,10 +30,7 @@ interface AllChainsDropdownProps {
   className?: string;
 }
 
-const AllChainsDropdown: React.FC<AllChainsDropdownProps> = ({
-  onSelectChain,
-  className = '',
-}) => {
+const AllChainsDropdown: React.FC<AllChainsDropdownProps> = ({ onSelectChain, className = '' }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleSelectChain = (chainId: string) => {
@@ -53,14 +50,14 @@ const AllChainsDropdown: React.FC<AllChainsDropdownProps> = ({
           </button>
         </DropdownMenu.Trigger>
         <DropdownMenu.Portal>
-          <DropdownMenu.Content 
-            className="bg-gray-900 border border-gray-700 rounded-lg shadow-xl p-2 w-64 max-h-96 overflow-y-auto z-50" 
+          <DropdownMenu.Content
+            className="bg-gray-900 border border-gray-700 rounded-lg shadow-xl p-2 w-64 max-h-96 overflow-y-auto z-50"
             sideOffset={5}
             align="center"
           >
             <div className="grid grid-cols-1 gap-1">
-              {blockchainNetworks.map((network) => (
-                <DropdownMenu.Item 
+              {blockchainNetworks.map(network => (
+                <DropdownMenu.Item
                   key={network.id}
                   className="flex items-center px-3 py-2 rounded hover:bg-gray-800 cursor-pointer"
                   onClick={() => handleSelectChain(network.id)}
@@ -72,7 +69,7 @@ const AllChainsDropdown: React.FC<AllChainsDropdownProps> = ({
                       width={24}
                       height={24}
                       className="object-contain"
-                      onError={(e) => {
+                      onError={e => {
                         // Fallback for missing images
                         (e.target as HTMLImageElement).src = '/globe.svg';
                       }}
@@ -83,9 +80,7 @@ const AllChainsDropdown: React.FC<AllChainsDropdownProps> = ({
               ))}
             </div>
             <DropdownMenu.Separator className="h-px bg-gray-700 my-2" />
-            <DropdownMenu.Item 
-              className="flex items-center justify-center px-3 py-2 rounded hover:bg-gray-800 cursor-pointer"
-            >
+            <DropdownMenu.Item className="flex items-center justify-center px-3 py-2 rounded hover:bg-gray-800 cursor-pointer">
               <span className="text-sm text-blue-400">View All Networks</span>
             </DropdownMenu.Item>
           </DropdownMenu.Content>

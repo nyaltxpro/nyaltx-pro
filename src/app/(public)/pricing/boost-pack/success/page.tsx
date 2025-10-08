@@ -1,47 +1,46 @@
-"use client";
+'use client';
 
-import { useEffect, useState, Suspense } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
 import PublicHeader from '@/components/PublicHeader';
-import { FaCheck, FaRocket, FaCoins, FaArrowRight, FaHome, FaGift, FaTag } from 'react-icons/fa';
-import Image from 'next/image';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense, useEffect, useState } from 'react';
+import { FaArrowRight, FaCheck, FaCoins, FaGift, FaHome, FaRocket, FaTag } from 'react-icons/fa';
 
 const BOOST_PACKS = {
-  starter: { 
-    name: "Starter Boost", 
-    points: 250, 
-    description: "Gain entry into the Boosted Zone",
-    icon: "🔹",
-    color: "from-blue-600 to-blue-700"
+  starter: {
+    name: 'Starter Boost',
+    points: 250,
+    description: 'Gain entry into the Boosted Zone',
+    icon: '🔹',
+    color: 'from-blue-600 to-blue-700',
   },
-  growth: { 
-    name: "Growth Boost", 
-    points: 750, 
-    description: "Highlighted in daily \"Top Movers\" feed",
-    icon: "🔹",
-    color: "from-green-600 to-green-700"
+  growth: {
+    name: 'Growth Boost',
+    points: 750,
+    description: 'Highlighted in daily "Top Movers" feed',
+    icon: '🔹',
+    color: 'from-green-600 to-green-700',
   },
-  pro: { 
-    name: "Pro Boost", 
-    points: 1500, 
-    description: "Unlocks \"Turbo Highlight\" (color frames, 48h push)",
-    icon: "🔹",
-    color: "from-purple-600 to-purple-700"
+  pro: {
+    name: 'Pro Boost',
+    points: 1500,
+    description: 'Unlocks "Turbo Highlight" (color frames, 48h push)',
+    icon: '🔹',
+    color: 'from-purple-600 to-purple-700',
   },
-  elite: { 
-    name: "Elite Boost", 
-    points: 7500, 
-    description: "Premium: Top of board + Featured Video slot",
-    icon: "🔹",
-    color: "from-yellow-600 to-yellow-700"
+  elite: {
+    name: 'Elite Boost',
+    points: 7500,
+    description: 'Premium: Top of board + Featured Video slot',
+    icon: '🔹',
+    color: 'from-yellow-600 to-yellow-700',
   },
 };
 
 const TOKEN_SYMBOLS = {
   '1': 'PEPE',
-  '2': 'DOGE', 
+  '2': 'DOGE',
   '3': 'SHIB',
-  '4': 'FLOKI'
+  '4': 'FLOKI',
 };
 
 function BoostPackSuccessContent() {
@@ -89,18 +88,19 @@ function BoostPackSuccessContent() {
             <div className="inline-flex items-center justify-center w-24 h-24 bg-green-500 rounded-full mb-6 animate-bounce">
               <FaCheck className="text-white text-3xl" />
             </div>
-            
+
             <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-emerald-400 mb-4">
-              {isFree ? 'Free Boost Pack Claimed Successfully!' : 'Boost Pack Purchased Successfully!'}
+              {isFree
+                ? 'Free Boost Pack Claimed Successfully!'
+                : 'Boost Pack Purchased Successfully!'}
             </h1>
-            
+
             <p className="text-gray-300 text-lg">
-              {isFree 
+              {isFree
                 ? 'Your tokens have been boosted for free and are now climbing the leaderboard!'
-                : 'Your tokens have been boosted and are now climbing the leaderboard'
-              }
+                : 'Your tokens have been boosted and are now climbing the leaderboard'}
             </p>
-            
+
             {promoCode && (
               <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-green-500/20 border border-green-500/30 rounded-full">
                 <FaTag className="text-green-400" />
@@ -119,7 +119,7 @@ function BoostPackSuccessContent() {
                   <FaRocket className="text-green-400" />
                   Boost Pack Applied
                 </h2>
-                
+
                 <div className={`p-6 rounded-lg bg-gradient-to-r ${boostPack.color} mb-4`}>
                   <div className="text-center">
                     <div className="text-3xl mb-2">{boostPack.icon}</div>
@@ -160,7 +160,7 @@ function BoostPackSuccessContent() {
                   <FaCoins className="text-cyan-400" />
                   Boosted Tokens
                 </h2>
-                
+
                 <div className="space-y-3">
                   {tokenIds.map((tokenId, index) => {
                     const symbol = TOKEN_SYMBOLS[tokenId as keyof typeof TOKEN_SYMBOLS];
@@ -178,9 +178,7 @@ function BoostPackSuccessContent() {
                             <div className="text-green-400 text-sm">Boost Active</div>
                           </div>
                         </div>
-                        <div className="text-green-400 font-bold">
-                          +{boostPack.points} pts
-                        </div>
+                        <div className="text-green-400 font-bold">+{boostPack.points} pts</div>
                       </div>
                     );
                   })}
@@ -196,7 +194,9 @@ function BoostPackSuccessContent() {
                 {isFree ? 'Promo Code Details' : 'Transaction Details'}
               </h3>
               <div className="flex items-center gap-3 p-3 bg-gray-800/50 rounded-lg">
-                <div className={`w-2 h-2 rounded-full animate-pulse ${isFree ? 'bg-yellow-500' : 'bg-green-500'}`}></div>
+                <div
+                  className={`w-2 h-2 rounded-full animate-pulse ${isFree ? 'bg-yellow-500' : 'bg-green-500'}`}
+                ></div>
                 <div>
                   {isFree ? (
                     <>
@@ -209,9 +209,7 @@ function BoostPackSuccessContent() {
                   ) : (
                     <>
                       <div className="text-gray-400 text-sm">Transaction Hash:</div>
-                      <div className="text-white font-mono text-sm break-all">
-                        {txHash}
-                      </div>
+                      <div className="text-white font-mono text-sm break-all">{txHash}</div>
                     </>
                   )}
                 </div>
@@ -226,19 +224,23 @@ function BoostPackSuccessContent() {
               <div className="text-center p-4 bg-cyan-500/10 rounded-lg">
                 <FaRocket className="w-8 h-8 text-cyan-400 mx-auto mb-2" />
                 <h4 className="font-semibold text-white mb-1">Climb the Board</h4>
-                <p className="text-gray-400 text-sm">Your tokens are now boosted and climbing the leaderboard</p>
+                <p className="text-gray-400 text-sm">
+                  Your tokens are now boosted and climbing the leaderboard
+                </p>
               </div>
-              
+
               <div className="text-center p-4 bg-purple-500/10 rounded-lg">
                 <FaCoins className="w-8 h-8 text-purple-400 mx-auto mb-2" />
                 <h4 className="font-semibold text-white mb-1">Track Progress</h4>
                 <p className="text-gray-400 text-sm">Monitor your token performance in real-time</p>
               </div>
-              
+
               <div className="text-center p-4 bg-green-500/10 rounded-lg">
                 <FaCheck className="w-8 h-8 text-green-400 mx-auto mb-2" />
                 <h4 className="font-semibold text-white mb-1">Enjoy Benefits</h4>
-                <p className="text-gray-400 text-sm">Access exclusive features and enhanced visibility</p>
+                <p className="text-gray-400 text-sm">
+                  Access exclusive features and enhanced visibility
+                </p>
               </div>
             </div>
           </div>
@@ -252,7 +254,7 @@ function BoostPackSuccessContent() {
               <FaHome />
               Go to Dashboard
             </button>
-            
+
             <button
               onClick={() => router.push('/pricing')}
               className="flex items-center justify-center gap-2 px-8 py-3 bg-gray-700 text-white font-medium rounded-lg hover:bg-gray-600 transition-colors"
@@ -265,12 +267,11 @@ function BoostPackSuccessContent() {
           {/* Footer Message */}
           <div className="text-center mt-12">
             <p className="text-gray-400">
-              {isFree 
+              {isFree
                 ? `Thank you for using promo code ${promoCode}! Your tokens are now supercharged for free. 🎉`
-                : promoCode 
+                : promoCode
                   ? `Thank you for choosing NYALTX Boost Packs! You saved with promo code ${promoCode}. Your tokens are now supercharged. 🚀`
-                  : 'Thank you for choosing NYALTX Boost Packs! Your tokens are now supercharged. 🚀'
-              }
+                  : 'Thank you for choosing NYALTX Boost Packs! Your tokens are now supercharged. 🚀'}
             </p>
           </div>
         </div>
@@ -281,11 +282,13 @@ function BoostPackSuccessContent() {
 
 export default function BoostPackSuccess() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-500"></div>
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-black flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-500"></div>
+        </div>
+      }
+    >
       <BoostPackSuccessContent />
     </Suspense>
   );

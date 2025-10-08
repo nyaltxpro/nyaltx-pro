@@ -1,7 +1,17 @@
 /**
  * Uniswap V2 DEX Integration
  */
-import { DexInterface, Token, PriceQuote, SwapRoute, DexConfig, CHAIN_IDS, DEX_PROTOCOL, QuoteParams, SwapParams } from './types';
+import {
+  DexInterface,
+  Token,
+  PriceQuote,
+  SwapRoute,
+  DexConfig,
+  CHAIN_IDS,
+  DEX_PROTOCOL,
+  QuoteParams,
+  SwapParams,
+} from './types';
 import { getCryptoIconUrl } from '../../utils/cryptoIcons';
 
 // Uniswap V2 configuration
@@ -12,13 +22,13 @@ export const UniswapV2Config: DexConfig = {
   supportedChains: [CHAIN_IDS.ETHEREUM, CHAIN_IDS.POLYGON, CHAIN_IDS.ARBITRUM, CHAIN_IDS.OPTIMISM],
   routerAddress: {
     [CHAIN_IDS.ETHEREUM]: '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D',
-    [CHAIN_IDS.POLYGON]: '0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff'
+    [CHAIN_IDS.POLYGON]: '0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff',
   },
   factoryAddress: {
     [CHAIN_IDS.ETHEREUM]: '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f',
-    [CHAIN_IDS.POLYGON]: '0x5757371414417b8C6CAad45bAeF941aBc7d3Ab32'
+    [CHAIN_IDS.POLYGON]: '0x5757371414417b8C6CAad45bAeF941aBc7d3Ab32',
   },
-  version: '2.0.0'
+  version: '2.0.0',
 };
 
 export class UniswapV2 implements DexInterface {
@@ -31,11 +41,15 @@ export class UniswapV2 implements DexInterface {
   async getQuote(params: QuoteParams): Promise<PriceQuote> {
     try {
       // Mock the output that would come from the SDK
-      const outputAmount = (parseFloat(params.amountIn) * 1950 * (1 - Math.random() * 0.02)).toString();
+      const outputAmount = (
+        parseFloat(params.amountIn) *
+        1950 *
+        (1 - Math.random() * 0.02)
+      ).toString();
       const fee = '0.3'; // 0.3% fee for Uniswap V2
 
       const routerAddress = this.config.routerAddress?.[params.chainId] || '';
-      
+
       const swapRoute: SwapRoute = {
         protocol: this.config.name,
         routerAddress,
@@ -43,9 +57,9 @@ export class UniswapV2 implements DexInterface {
         amountIn: params.amountIn,
         amountOut: outputAmount,
         priceImpact: (Math.random() * 0.5).toFixed(2),
-        fee
+        fee,
       };
-      
+
       return {
         protocol: this.config.name,
         inputAmount: params.amountIn,

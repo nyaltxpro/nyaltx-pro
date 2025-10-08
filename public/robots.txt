@@ -1,0 +1,25 @@
+# Robots.txt for NYALTX
+User-agent: *
+Allow: /
+
+# Important pages
+Allow: /dashboard
+Allow: /pricing
+Allow: /race-to-liberty
+Allow: /about-us
+Allow: /contact
+
+# API endpoints - allow for public data
+Allow: /api/tokens/
+Allow: /api/coingecko/
+
+# Disallow admin and private areas
+Disallow: /api/admin/
+Disallow: /admin/
+Disallow: /dashboard/admin/
+
+# Sitemap location
+Sitemap: https://nyaltx.com/sitemap.xml
+
+# Crawl delay (optional - be respectful to search engines)
+Crawl-delay: 1

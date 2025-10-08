@@ -11,7 +11,7 @@ const BOOST_PACKS: Record<string, BoostPack> = {
     duration: '6 hours',
     price: { usd: 1, eth: 0.0003, usdc: 1, nyax: 0.8 },
     features: ['6h visibility boost', 'Entry-level leaderboard placement'],
-    decayHours: 6
+    decayHours: 6,
   },
   starter: {
     id: 'starter',
@@ -19,8 +19,12 @@ const BOOST_PACKS: Record<string, BoostPack> = {
     basePoints: 200,
     duration: '1 week',
     price: { usd: 199, eth: 0.066, usdc: 199, nyax: 159 },
-    features: ['1 week visibility boost', 'Basic leaderboard placement', 'Social media eligibility'],
-    decayHours: 168
+    features: [
+      '1 week visibility boost',
+      'Basic leaderboard placement',
+      'Social media eligibility',
+    ],
+    decayHours: 168,
   },
   growth: {
     id: 'growth',
@@ -28,8 +32,13 @@ const BOOST_PACKS: Record<string, BoostPack> = {
     basePoints: 500,
     duration: '2 weeks',
     price: { usd: 399, eth: 0.133, usdc: 399, nyax: 319 },
-    features: ['2 weeks visibility boost', 'Enhanced leaderboard placement', 'Social media priority', 'Cross-promotion eligibility'],
-    decayHours: 336
+    features: [
+      '2 weeks visibility boost',
+      'Enhanced leaderboard placement',
+      'Social media priority',
+      'Cross-promotion eligibility',
+    ],
+    decayHours: 336,
   },
   pro: {
     id: 'pro',
@@ -37,8 +46,14 @@ const BOOST_PACKS: Record<string, BoostPack> = {
     basePoints: 1000,
     duration: '1 month',
     price: { usd: 599, eth: 0.2, usdc: 599, nyax: 479 },
-    features: ['1 month visibility boost', 'Featured leaderboard placement', 'Premium social media priority', 'Cross-promotion eligibility', 'Priority support'],
-    decayHours: 720
+    features: [
+      '1 month visibility boost',
+      'Featured leaderboard placement',
+      'Premium social media priority',
+      'Cross-promotion eligibility',
+      'Priority support',
+    ],
+    decayHours: 720,
   },
   elite: {
     id: 'elite',
@@ -46,9 +61,16 @@ const BOOST_PACKS: Record<string, BoostPack> = {
     basePoints: 5000,
     duration: '3 months',
     price: { usd: 2999, eth: 1.0, usdc: 2999, nyax: 2399 },
-    features: ['3 months visibility boost', 'Premium featured placement', 'Maximum social media priority', 'Guaranteed cross-promotion', 'Podcast appearance opportunity', 'Dedicated account manager'],
-    decayHours: 2160
-  }
+    features: [
+      '3 months visibility boost',
+      'Premium featured placement',
+      'Maximum social media priority',
+      'Guaranteed cross-promotion',
+      'Podcast appearance opportunity',
+      'Dedicated account manager',
+    ],
+    decayHours: 2160,
+  },
 };
 
 export async function POST(req: NextRequest) {
@@ -56,22 +78,28 @@ export async function POST(req: NextRequest) {
     const { tokenId, boostPackType, transactionHash, walletAddress } = await req.json();
 
     if (!tokenId || !boostPackType || !transactionHash || !walletAddress) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Missing required fields' 
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Missing required fields',
+        },
+        { status: 400 }
+      );
     }
 
     const boostPack = BOOST_PACKS[boostPackType];
     if (!boostPack) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Invalid boost pack type' 
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Invalid boost pack type',
+        },
+        { status: 400 }
+      );
     }
 
     const now = new Date();
-    const expiresAt = new Date(now.getTime() + (boostPack.decayHours * 60 * 60 * 1000));
+    const expiresAt = new Date(now.getTime() + boostPack.decayHours * 60 * 60 * 1000);
     const decayRate = boostPack.basePoints / boostPack.decayHours; // Points lost per hour
 
     const boostPoints: BoostPoints = {
@@ -84,7 +112,7 @@ export async function POST(req: NextRequest) {
       decayRate,
       isActive: true,
       transactionHash,
-      boostPackType: boostPack.id
+      boostPackType: boostPack.id,
     };
 
     // Store in database
@@ -97,15 +125,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       boostPoints,
-      message: `${boostPack.name} boost activated! ${boostPack.basePoints} points added.`
+      message: `${boostPack.name} boost activated! ${boostPack.basePoints} points added.`,
     });
-
   } catch (error) {
     console.error('Error creating boost:', error);
-    return NextResponse.json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      },
+      { status: 500 }
+    );
   }
 }
 
@@ -115,30 +145,35 @@ export async function GET(req: NextRequest) {
     const tokenId = searchParams.get('tokenId');
 
     if (!tokenId) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Token ID is required' 
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Token ID is required',
+        },
+        { status: 400 }
+      );
     }
 
     const boostCollection = await getCollection<BoostPoints>('boost_points');
-    
+
     // Get active boosts for the token
-    const activeBoosts = await boostCollection.find({
-      tokenId,
-      isActive: true,
-      expiresAt: { $gt: new Date() }
-    }).toArray();
+    const activeBoosts = await boostCollection
+      .find({
+        tokenId,
+        isActive: true,
+        expiresAt: { $gt: new Date() },
+      })
+      .toArray();
 
     // Calculate current points with decay
     const currentBoosts = activeBoosts.map(boost => {
       const now = new Date();
       const hoursElapsed = (now.getTime() - boost.createdAt.getTime()) / (1000 * 60 * 60);
-      const decayedPoints = Math.max(0, boost.originalPoints - (boost.decayRate * hoursElapsed));
-      
+      const decayedPoints = Math.max(0, boost.originalPoints - boost.decayRate * hoursElapsed);
+
       return {
         ...boost,
-        points: Math.round(decayedPoints)
+        points: Math.round(decayedPoints),
       };
     });
 
@@ -148,15 +183,17 @@ export async function GET(req: NextRequest) {
       success: true,
       activeBoosts: currentBoosts,
       totalPoints,
-      boostPacks: BOOST_PACKS
+      boostPacks: BOOST_PACKS,
     });
-
   } catch (error) {
     console.error('Error fetching boosts:', error);
-    return NextResponse.json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      },
+      { status: 500 }
+    );
   }
 }
 

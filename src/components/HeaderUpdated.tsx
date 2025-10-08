@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import Banner from './Banner'
+import Banner from './Banner';
 import ConnectWalletButton from './ConnectWalletButton';
 import BlockchainDropdown from './BlockchainDropdown';
 import './animations.css';
@@ -34,33 +34,63 @@ const Header = ({ toggleMobileMenu }: HeaderProps) => {
   const [showResults, setShowResults] = useState(false);
 
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
-    const searchRef = useRef<HTMLDivElement>(null);
-    
-    // Open search modal
-    const openSearchModal = () => {
-      setIsSearchModalOpen(true);
-    };
-  
-    // Close search modal
-    const closeSearchModal = () => {
-      setIsSearchModalOpen(false);
-    };
+  const searchRef = useRef<HTMLDivElement>(null);
+
+  // Open search modal
+  const openSearchModal = () => {
+    setIsSearchModalOpen(true);
+  };
+
+  // Close search modal
+  const closeSearchModal = () => {
+    setIsSearchModalOpen(false);
+  };
 
   // Popular token pairs for quick suggestions
   const popularPairs: TokenPair[] = [
-    { baseToken: 'BTC', quoteToken: 'USDT', baseName: getCryptoName('BTC'), quoteName: getCryptoName('USDT') },
-    { baseToken: 'ETH', quoteToken: 'USDT', baseName: getCryptoName('ETH'), quoteName: getCryptoName('USDT') },
-    { baseToken: 'BTC', quoteToken: 'USDC', baseName: getCryptoName('BTC'), quoteName: getCryptoName('USDC') },
-    { baseToken: 'ETH', quoteToken: 'USDC', baseName: getCryptoName('ETH'), quoteName: getCryptoName('USDC') },
-    { baseToken: 'SOL', quoteToken: 'USDT', baseName: getCryptoName('SOL'), quoteName: getCryptoName('USDT') },
-    { baseToken: 'BNB', quoteToken: 'USDT', baseName: getCryptoName('BNB'), quoteName: getCryptoName('USDT') },
+    {
+      baseToken: 'BTC',
+      quoteToken: 'USDT',
+      baseName: getCryptoName('BTC'),
+      quoteName: getCryptoName('USDT'),
+    },
+    {
+      baseToken: 'ETH',
+      quoteToken: 'USDT',
+      baseName: getCryptoName('ETH'),
+      quoteName: getCryptoName('USDT'),
+    },
+    {
+      baseToken: 'BTC',
+      quoteToken: 'USDC',
+      baseName: getCryptoName('BTC'),
+      quoteName: getCryptoName('USDC'),
+    },
+    {
+      baseToken: 'ETH',
+      quoteToken: 'USDC',
+      baseName: getCryptoName('ETH'),
+      quoteName: getCryptoName('USDC'),
+    },
+    {
+      baseToken: 'SOL',
+      quoteToken: 'USDT',
+      baseName: getCryptoName('SOL'),
+      quoteName: getCryptoName('USDT'),
+    },
+    {
+      baseToken: 'BNB',
+      quoteToken: 'USDT',
+      baseName: getCryptoName('BNB'),
+      quoteName: getCryptoName('USDT'),
+    },
   ];
 
   // Handle search input change
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchTerm(value);
-    
+
     if (value.trim() === '') {
       setSearchResults([]);
       return;
@@ -68,45 +98,47 @@ const Header = ({ toggleMobileMenu }: HeaderProps) => {
 
     // Search for token pairs
     const results: TokenPair[] = [];
-    
+
     // First check if the search term contains a trading pair format (e.g., BTC/USDT)
     const pairMatch = value.match(/([A-Za-z0-9]+)[/\\-]([A-Za-z0-9]+)/);
     if (pairMatch) {
       const baseToken = pairMatch[1].toUpperCase();
       const quoteToken = pairMatch[2].toUpperCase();
-      
+
       if (commonCryptoSymbols.includes(baseToken) && commonCryptoSymbols.includes(quoteToken)) {
-        results.push({ 
-          baseToken, 
-          quoteToken, 
+        results.push({
+          baseToken,
+          quoteToken,
           baseName: getCryptoName(baseToken),
-          quoteName: getCryptoName(quoteToken)
+          quoteName: getCryptoName(quoteToken),
         });
       }
     }
-    
+
     // Then search for individual tokens and create pairs with common quote currencies
     const upperSearch = value.toUpperCase();
-    const matchingTokens = commonCryptoSymbols.filter(symbol => 
-      symbol.includes(upperSearch) || getCryptoName(symbol).toLowerCase().includes(value.toLowerCase())
+    const matchingTokens = commonCryptoSymbols.filter(
+      symbol =>
+        symbol.includes(upperSearch) ||
+        getCryptoName(symbol).toLowerCase().includes(value.toLowerCase())
     );
-    
+
     // For each matching token, create pairs with common quote currencies
     const quoteCurrencies = ['USDT', 'USDC', 'ETH', 'BTC'];
     matchingTokens.forEach(token => {
       // Don't create pairs where base = quote
       quoteCurrencies.forEach(quote => {
         if (token !== quote) {
-          results.push({ 
-            baseToken: token, 
+          results.push({
+            baseToken: token,
             quoteToken: quote,
             baseName: getCryptoName(token),
-            quoteName: getCryptoName(quote)
+            quoteName: getCryptoName(quote),
           });
         }
       });
     });
-    
+
     // Limit results to avoid overwhelming the UI
     setSearchResults(results.slice(0, 10));
     setShowResults(true);
@@ -136,75 +168,68 @@ const Header = ({ toggleMobileMenu }: HeaderProps) => {
   // Handle search form submission
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (searchResults.length > 0) {
       handleResultClick(searchResults[0]);
     }
   };
-  
+
   return (
-    <div className='flex flex-col w-full items-center justify-center'>
-       <Banner />
-      
-            {/* Hot pairs ticker */}
-  
-            
-            {/* Header */}
-            <div className="flex w-full items-center justify-between p-4 border-b border-gray-800"> 
-              {/* Hamburger Menu Icon - visible on mobile */}
-              <div className="md:hidden">
-                <button onClick={toggleMobileMenu} className="p-2 rounded-full hover:bg-gray-700">
-                  <FiMenu className="text-white" size={24} />
-                </button>
-              </div>
-              <div className="hidden md:flex w-[25%] items-center space-x-4">
-              <BlockchainDropdown 
-                  onSelectNetwork={(networkId) => console.log(`Selected network: ${networkId}`)} 
-                />
-              </div>
-              
-            <div className="flex w-[60%] items-center justify-center mx-4">
-                           <div className="w-[80%] relative" ref={searchRef}>
-                             <div 
-                               className="relative cursor-pointer"
-                               onClick={openSearchModal}
-                             >
-                               <span className="absolute left-3 top-1/2 transform bg-gray-600 p-1 rounded-full -translate-y-1/2 text-secondary">
-                                 <BiSearch/>
-                               </span>
-                               <input
-                                 type="text"
-                                 placeholder="Search pair by symbol, name, contract or token"
-                                 className="w-full py-2 ml-1 px-8 rounded-full bg-opacity-10 bg-gray-800 border border-gray-700 focus:outline-none focus:border-primary cursor-pointer"
-                                 readOnly
-                                 onClick={openSearchModal}
-                               />
-                             </div>
-                           </div>
-                         </div>
-              
-              <div className="hidden md:flex w-[15%] items-center justify-between space-x-3">
-                {/* <Link href="/pricing" className="p-2 rounded-full hover:bg-gray-700 text-sm font-medium">
+    <div className="flex flex-col w-full items-center justify-center">
+      <Banner />
+
+      {/* Hot pairs ticker */}
+
+      {/* Header */}
+      <div className="flex w-full items-center justify-between p-4 border-b border-gray-800">
+        {/* Hamburger Menu Icon - visible on mobile */}
+        <div className="md:hidden">
+          <button onClick={toggleMobileMenu} className="p-2 rounded-full hover:bg-gray-700">
+            <FiMenu className="text-white" size={24} />
+          </button>
+        </div>
+        <div className="hidden md:flex w-[25%] items-center space-x-4">
+          <BlockchainDropdown
+            onSelectNetwork={networkId => console.log(`Selected network: ${networkId}`)}
+          />
+        </div>
+
+        <div className="flex w-[60%] items-center justify-center mx-4">
+          <div className="w-[80%] relative" ref={searchRef}>
+            <div className="relative cursor-pointer" onClick={openSearchModal}>
+              <span className="absolute left-3 top-1/2 transform bg-gray-600 p-1 rounded-full -translate-y-1/2 text-secondary">
+                <BiSearch />
+              </span>
+              <input
+                type="text"
+                placeholder="Search pair by symbol, name, contract or token"
+                className="w-full py-2 ml-1 px-8 rounded-full bg-opacity-10 bg-gray-800 border border-gray-700 focus:outline-none focus:border-primary cursor-pointer"
+                readOnly
+                onClick={openSearchModal}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="hidden md:flex w-[15%] items-center justify-between space-x-3">
+          {/* <Link href="/pricing" className="p-2 rounded-full hover:bg-gray-700 text-sm font-medium">
                   Pricing
                 </Link> */}
-                <Link href="/dashboard/settings" className="p-2 rounded-full hover:bg-gray-700">
-                  <FiSettings/>
-                  </Link>
-               
-                <Link href="/dashboard/favorites"className="p-2 rounded-full hover:bg-gray-700">
-                  <SlStar/>
-                </Link>
-               
-                <ConnectWalletButton />
-              </div>
-            </div>
-            <LivePriceTicker />
-            <SearchModal 
-              isOpen={isSearchModalOpen} 
-              onClose={closeSearchModal} 
-            />
-    </div>
-  )
-}
+          <Link href="/dashboard/settings" className="p-2 rounded-full hover:bg-gray-700">
+            <FiSettings />
+          </Link>
 
-export default Header
+          <Link href="/dashboard/favorites" className="p-2 rounded-full hover:bg-gray-700">
+            <SlStar />
+          </Link>
+
+          <ConnectWalletButton />
+        </div>
+      </div>
+      <LivePriceTicker />
+      <SearchModal isOpen={isSearchModalOpen} onClose={closeSearchModal} />
+    </div>
+  );
+};
+
+export default Header;

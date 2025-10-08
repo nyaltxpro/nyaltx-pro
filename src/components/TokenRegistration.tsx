@@ -44,7 +44,9 @@ export default function TokenRegistration({ onTokenRegistered }: TokenRegistrati
     category: 'community',
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
@@ -54,7 +56,7 @@ export default function TokenRegistration({ onTokenRegistered }: TokenRegistrati
     if (!formData.symbol.trim()) return 'Token symbol is required';
     if (!formData.contractAddress.trim()) return 'Contract address is required';
     if (!formData.description.trim()) return 'Token description is required';
-    
+
     // Basic contract address validation
     if (formData.chain === 'solana') {
       if (!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(formData.contractAddress)) {
@@ -71,7 +73,7 @@ export default function TokenRegistration({ onTokenRegistered }: TokenRegistrati
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!isConnected || !address) {
       setError('Please connect your wallet first');
       return;
@@ -114,8 +116,10 @@ export default function TokenRegistration({ onTokenRegistered }: TokenRegistrati
       const updatedTokens = [...existingTokens, tokenData];
       localStorage.setItem('registeredTokens', JSON.stringify(updatedTokens));
 
-      setSuccess(`Token "${formData.name}" registered successfully! It's now pending admin approval.`);
-      
+      setSuccess(
+        `Token "${formData.name}" registered successfully! It's now pending admin approval.`
+      );
+
       // Reset form
       setFormData({
         name: '',
@@ -131,7 +135,6 @@ export default function TokenRegistration({ onTokenRegistered }: TokenRegistrati
       });
 
       onTokenRegistered?.(tokenData);
-
     } catch (err) {
       setError('Failed to register token. Please try again.');
       console.error('Token registration error:', err);
@@ -176,9 +179,7 @@ export default function TokenRegistration({ onTokenRegistered }: TokenRegistrati
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Token Name *
-            </label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Token Name *</label>
             <input
               type="text"
               name="name"
@@ -191,9 +192,7 @@ export default function TokenRegistration({ onTokenRegistered }: TokenRegistrati
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Token Symbol *
-            </label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Token Symbol *</label>
             <input
               type="text"
               name="symbol"
@@ -208,9 +207,7 @@ export default function TokenRegistration({ onTokenRegistered }: TokenRegistrati
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Blockchain *
-            </label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Blockchain *</label>
             <select
               name="chain"
               value={formData.chain}
@@ -227,9 +224,7 @@ export default function TokenRegistration({ onTokenRegistered }: TokenRegistrati
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Category *
-            </label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Category *</label>
             <select
               name="category"
               value={formData.category}
@@ -247,9 +242,7 @@ export default function TokenRegistration({ onTokenRegistered }: TokenRegistrati
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
-            Contract Address *
-          </label>
+          <label className="block text-sm font-medium text-gray-300 mb-2">Contract Address *</label>
           <input
             type="text"
             name="contractAddress"
@@ -262,9 +255,7 @@ export default function TokenRegistration({ onTokenRegistered }: TokenRegistrati
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
-            Description *
-          </label>
+          <label className="block text-sm font-medium text-gray-300 mb-2">Description *</label>
           <textarea
             name="description"
             value={formData.description}
@@ -278,9 +269,7 @@ export default function TokenRegistration({ onTokenRegistered }: TokenRegistrati
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Logo URL
-            </label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Logo URL</label>
             <input
               type="url"
               name="logo"
@@ -292,9 +281,7 @@ export default function TokenRegistration({ onTokenRegistered }: TokenRegistrati
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Website
-            </label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Website</label>
             <input
               type="url"
               name="website"
@@ -308,9 +295,7 @@ export default function TokenRegistration({ onTokenRegistered }: TokenRegistrati
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Twitter
-            </label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Twitter</label>
             <input
               type="text"
               name="twitter"
@@ -322,9 +307,7 @@ export default function TokenRegistration({ onTokenRegistered }: TokenRegistrati
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Telegram
-            </label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Telegram</label>
             <input
               type="text"
               name="telegram"

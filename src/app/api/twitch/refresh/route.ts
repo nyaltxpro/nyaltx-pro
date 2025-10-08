@@ -42,7 +42,6 @@ export async function POST(request: NextRequest) {
       expires_in: tokenData.expires_in,
       scope: tokenData.scope,
     });
-
   } catch (error) {
     console.error('Token refresh error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

@@ -3,14 +3,11 @@ import { getCollection } from '@/lib/mongodb';
 import { promises as fs } from 'fs';
 import path from 'path';
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ symbol: string }> }
-) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ symbol: string }> }) {
   try {
     const { symbol: symbolParam } = await params;
     const symbol = symbolParam?.toUpperCase();
-    
+
     if (!symbol) {
       return NextResponse.json({ error: 'Symbol parameter is required' }, { status: 400 });
     }
@@ -18,12 +15,12 @@ export async function GET(
     // Try to fetch from MongoDB first
     try {
       const col = await getCollection<any>('token_registrations');
-      
+
       // Search by token symbol
       const token = await col.findOne({
         tokenSymbol: symbol,
         status: 'approved',
-        paused: { $ne: true }
+        paused: { $ne: true },
       });
 
       if (token) {
@@ -35,14 +32,14 @@ export async function GET(
           contractAddress: token.contractAddress,
           imageUri: token.imageUri,
           // Only include social links if admin has enabled them (default to true if not set)
-          website: (token.showWebsite !== false) ? token.website : undefined,
-          twitter: (token.showTwitter !== false) ? token.twitter : undefined,
-          telegram: (token.showTelegram !== false) ? token.telegram : undefined,
-          discord: (token.showDiscord !== false) ? token.discord : undefined,
-          github: (token.showGithub !== false) ? token.github : undefined,
+          website: token.showWebsite !== false ? token.website : undefined,
+          twitter: token.showTwitter !== false ? token.twitter : undefined,
+          telegram: token.showTelegram !== false ? token.telegram : undefined,
+          discord: token.showDiscord !== false ? token.discord : undefined,
+          github: token.showGithub !== false ? token.github : undefined,
           youtube: token.youtube, // YouTube doesn't have admin toggle yet
           status: token.status,
-          createdAt: token.createdAt
+          createdAt: token.createdAt,
         });
       }
     } catch (dbError) {
@@ -55,10 +52,8 @@ export async function GET(
       const raw = await fs.readFile(file, 'utf-8');
       const json = JSON.parse(raw);
       const tokens = Array.isArray(json?.tokens) ? json.tokens : [];
-      
-      const token = tokens.find((t: any) => 
-        t?.symbol?.toUpperCase() === symbol
-      );
+
+      const token = tokens.find((t: any) => t?.symbol?.toUpperCase() === symbol);
 
       if (token) {
         return NextResponse.json({
@@ -74,7 +69,7 @@ export async function GET(
           discord: token.discord,
           github: token.github,
           youtube: token.youtube,
-          status: 'approved'
+          status: 'approved',
         });
       }
     } catch (fallbackError) {

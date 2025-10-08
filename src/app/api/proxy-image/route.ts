@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function GET(req: NextRequest) {
   try {
     const url = req.nextUrl.searchParams.get('url');
-    
+
     if (!url) {
       return NextResponse.json({ error: 'URL parameter is required' }, { status: 400 });
     }
@@ -26,10 +26,10 @@ export async function GET(req: NextRequest) {
 
     // Get the image buffer
     const buffer = await response.arrayBuffer();
-    
+
     // Determine content type from the original response or URL
     const contentType = response.headers.get('content-type') || 'image/png';
-    
+
     // Return the image with proper headers for viewing
     return new NextResponse(buffer, {
       status: 200,

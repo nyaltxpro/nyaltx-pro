@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React, { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
@@ -14,26 +14,26 @@ const LivePriceTicker: React.FC = () => {
 
   useEffect(() => {
     setLoading(true);
-    
+
     // WebSocket callback function
     const handleTickerUpdate = (data: CoinTicker[]) => {
       setTickers(data);
       setLoading(false);
     };
-    
+
     // Subscribe to WebSocket updates
     priceWebSocketService.subscribe(handleTickerUpdate);
-    
+
     // Connect to WebSocket
     priceWebSocketService.connect(8);
-    
+
     // Cleanup on unmount
     return () => {
       priceWebSocketService.unsubscribe(handleTickerUpdate);
       priceWebSocketService.disconnect();
     };
   }, []);
-  
+
   // Auto-scrolling effect
   useEffect(() => {
     const scrollContainer = scrollRef.current;
@@ -82,38 +82,38 @@ const LivePriceTicker: React.FC = () => {
   const getCoinSymbol = (coinId: string): string => {
     // Map CoinGecko IDs to cryptocurrency symbols
     const coinIdToSymbol: Record<string, string> = {
-      'bitcoin': 'BTC',
-      'ethereum': 'ETH',
-      'tether': 'USDT',
-      'binancecoin': 'BNB',
-      'solana': 'SOL',
-      'ripple': 'XRP',
+      bitcoin: 'BTC',
+      ethereum: 'ETH',
+      tether: 'USDT',
+      binancecoin: 'BNB',
+      solana: 'SOL',
+      ripple: 'XRP',
       'usd-coin': 'USDC',
-      'cardano': 'ADA',
+      cardano: 'ADA',
       'avalanche-2': 'AVAX',
-      'dogecoin': 'DOGE',
-      'polkadot': 'DOT',
+      dogecoin: 'DOGE',
+      polkadot: 'DOT',
       'matic-network': 'MATIC',
-      'polygon': 'MATIC',
+      polygon: 'MATIC',
       'shiba-inu': 'SHIB',
-      'dai': 'DAI',
-      'tron': 'TRX',
-      'chainlink': 'LINK',
-      'litecoin': 'LTC',
-      'uniswap': 'UNI',
-      'stellar': 'XLM',
-      'cosmos': 'ATOM',
-      'monero': 'XMR',
+      dai: 'DAI',
+      tron: 'TRX',
+      chainlink: 'LINK',
+      litecoin: 'LTC',
+      uniswap: 'UNI',
+      stellar: 'XLM',
+      cosmos: 'ATOM',
+      monero: 'XMR',
       'bitcoin-cash': 'BCH',
       'wrapped-bitcoin': 'WBTC',
-      'near': 'NEAR',
-      'filecoin': 'FIL',
-      'vechain': 'VET',
-      'cronos': 'CRO',
+      near: 'NEAR',
+      filecoin: 'FIL',
+      vechain: 'VET',
+      cronos: 'CRO',
       'injective-protocol': 'INJ',
-      'the-open-network': 'TON'
+      'the-open-network': 'TON',
     };
-    
+
     return coinIdToSymbol[coinId?.toLowerCase()] || coinId?.toUpperCase() || 'GENERIC';
   };
 
@@ -131,13 +131,13 @@ const LivePriceTicker: React.FC = () => {
 
   return (
     <div className="w-full bg-gray-900 border-y border-gray-800 py-2 overflow-hidden">
-      <div 
+      <div
         ref={scrollRef}
         className="flex items-center space-x-6 overflow-x-auto scrollbar-hide"
-        style={{ 
+        style={{
           whiteSpace: 'nowrap',
           scrollbarWidth: 'none',
-          msOverflowStyle: 'none'
+          msOverflowStyle: 'none',
         }}
       >
         <div className="flex items-center mr-4 pl-4">
@@ -146,10 +146,10 @@ const LivePriceTicker: React.FC = () => {
           </div>
           <span className="text-yellow-500 font-medium text-sm">LIVE PRICES</span>
         </div>
-        
+
         {[...tickers, ...tickers].map((ticker, index) => (
-          <div 
-            key={`${ticker.coin_id}-${index}`} 
+          <div
+            key={`${ticker.coin_id}-${index}`}
             className="flex items-center space-x-2 px-2 hover:bg-gray-800 rounded-md cursor-pointer transition-colors duration-200"
             onClick={() => window.open(ticker.trade_url, '_blank')}
           >
@@ -157,32 +157,32 @@ const LivePriceTicker: React.FC = () => {
               <div className="flex items-center">
                 {/* Base currency icon */}
                 <div className="w-5 h-5 relative">
-                  <Image 
+                  <Image
                     src={getCryptoIconUrl(getCoinSymbol(ticker.base))}
                     alt={getCoinSymbol(ticker.base)}
                     width={20}
                     height={20}
                     className="rounded-full"
-                    onError={(e) => {
+                    onError={e => {
                       (e.target as HTMLImageElement).src = getCryptoIconUrl('generic');
                     }}
                   />
                 </div>
-                
+
                 {/* Target currency icon */}
                 <div className="w-5 h-5 relative -ml-2">
-                  <Image 
+                  <Image
                     src={getCryptoIconUrl(getCoinSymbol(ticker.target))}
                     alt={getCoinSymbol(ticker.target)}
                     width={20}
                     height={20}
                     className="rounded-full border border-gray-900"
-                    onError={(e) => {
+                    onError={e => {
                       (e.target as HTMLImageElement).src = getCryptoIconUrl('generic');
                     }}
                   />
                 </div>
-                
+
                 <span className="font-medium ml-1">
                   {getCoinSymbol(ticker.base)}/{getCoinSymbol(ticker.target)}
                 </span>

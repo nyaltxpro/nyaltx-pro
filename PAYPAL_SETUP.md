@@ -23,6 +23,7 @@ This document explains how to set up PayPal payments for the NYALTX pricing page
 ### 2. Get API Credentials
 
 After creating the app, you'll get:
+
 - **Client ID**: Used for authentication
 - **Client Secret**: Used for server-side authentication
 
@@ -47,12 +48,14 @@ For production, update `NEXT_PUBLIC_BASE_URL` to your live domain.
 - **Live (Production)**: Uses `https://api.paypal.com`
 
 The environment is automatically determined by `NODE_ENV`:
+
 - `development` = Sandbox
 - `production` = Live
 
 ### 5. Testing
 
 For testing in sandbox mode:
+
 1. Create sandbox accounts in PayPal Developer Dashboard
 2. Use sandbox credentials in your `.env.local`
 3. Test payments with sandbox buyer accounts
@@ -97,5 +100,6 @@ For testing in sandbox mode:
 ### Support
 
 For PayPal-specific issues, refer to:
+
 - [PayPal Developer Documentation](https://developer.paypal.com/docs/)
 - [PayPal API Reference](https://developer.paypal.com/api/rest/)

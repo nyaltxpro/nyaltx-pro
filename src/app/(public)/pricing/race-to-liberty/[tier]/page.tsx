@@ -12,9 +12,9 @@ const TIER_PRICES = {
   submarine: 599,
 };
 
-export default function RaceToLibertyPage({ 
-  params 
-}: { 
+export default function RaceToLibertyPage({
+  params,
+}: {
   params: Promise<{ tier: 'kayak' | 'speedboat' | 'helicopter' | 'submarine' }>;
 }) {
   const { tier } = use(params);
@@ -32,12 +32,16 @@ export default function RaceToLibertyPage({
 
       try {
         console.log('Loading user tokens for address:', address);
-        
-        const response = await fetch(`/api/tokens/by-wallet?address=${encodeURIComponent(address)}`);
+
+        const response = await fetch(
+          `/api/tokens/by-wallet?address=${encodeURIComponent(address)}`
+        );
         const data = await response.json();
-        
+
         if (data.success) {
-          const approvedTokens = data.tokens.filter((token: RegisteredToken) => token.status === 'approved');
+          const approvedTokens = data.tokens.filter(
+            (token: RegisteredToken) => token.status === 'approved'
+          );
           console.log('Loaded approved tokens:', approvedTokens);
           setUserTokens(approvedTokens);
         } else {
@@ -53,11 +57,5 @@ export default function RaceToLibertyPage({
     loadUserTokens();
   }, [address, isConnected]);
 
-  return (
-    <RaceToLibertyCheckout 
-      tier={tier} 
-      amount={amount}
-      userTokens={userTokens}
-    />
-  );
+  return <RaceToLibertyCheckout tier={tier} amount={amount} userTokens={userTokens} />;
 }

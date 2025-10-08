@@ -13,34 +13,34 @@ export interface ContractAddressResult {
  * Platform mapping from CoinGecko platform names to our chain identifiers
  */
 export const PLATFORM_MAPPING: { [key: string]: string } = {
-  'ethereum': 'ethereum',
+  ethereum: 'ethereum',
   'binance-smart-chain': 'binance',
   'polygon-pos': 'polygon',
   'arbitrum-one': 'arbitrum',
   'optimistic-ethereum': 'optimism',
-  'base': 'base',
-  'fantom': 'fantom',
-  'avalanche': 'avalanche',
-  'solana': 'solana',
-  'xdai': 'gnosis',
+  base: 'base',
+  fantom: 'fantom',
+  avalanche: 'avalanche',
+  solana: 'solana',
+  xdai: 'gnosis',
   'harmony-shard-0': 'harmony',
-  'moonbeam': 'moonbeam',
-  'cronos': 'cronos'
+  moonbeam: 'moonbeam',
+  cronos: 'cronos',
 };
 
 /**
  * Chain priority order for selecting primary chain
  */
 export const CHAIN_PRIORITY = [
-  'ethereum', 
-  'binance', 
-  'polygon', 
-  'arbitrum', 
-  'optimism', 
-  'base', 
-  'avalanche', 
-  'fantom', 
-  'solana'
+  'ethereum',
+  'binance',
+  'polygon',
+  'arbitrum',
+  'optimism',
+  'base',
+  'avalanche',
+  'fantom',
+  'solana',
 ];
 
 /**
@@ -58,12 +58,12 @@ export const isValidContractAddress = (address: string | null | undefined): bool
  */
 export const processContractAddresses = (platforms: any): ContractAddressResult => {
   const contractAddresses: { [key: string]: string } = {};
-  
+
   if (!platforms) {
     return {
       contractAddresses: {},
       primaryChain: null,
-      primaryAddress: null
+      primaryAddress: null,
     };
   }
 
@@ -76,13 +76,15 @@ export const processContractAddresses = (platforms: any): ContractAddressResult 
   });
 
   // Determine primary chain
-  const primaryChain = CHAIN_PRIORITY.find(chain => contractAddresses[chain]) || 
-                      Object.keys(contractAddresses)[0] || null;
+  const primaryChain =
+    CHAIN_PRIORITY.find(chain => contractAddresses[chain]) ||
+    Object.keys(contractAddresses)[0] ||
+    null;
 
   return {
     contractAddresses,
     primaryChain,
-    primaryAddress: primaryChain ? contractAddresses[primaryChain] : null
+    primaryAddress: primaryChain ? contractAddresses[primaryChain] : null,
   };
 };
 
@@ -90,27 +92,27 @@ export const processContractAddresses = (platforms: any): ContractAddressResult 
  * Fetches contract addresses for a coin from CoinGecko with retry logic
  */
 export const fetchContractAddresses = async (
-  coinId: string, 
+  coinId: string,
   retries = 3
 ): Promise<ContractAddressResult> => {
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 8000);
-      
+
       const response = await fetch(
         `https://api.coingecko.com/api/v3/coins/${coinId}?localization=false&tickers=false&market_data=false&community_data=false&developer_data=false`,
         {
           signal: controller.signal,
-          headers: { 
-            'Accept': 'application/json',
-            'User-Agent': 'NYALTX-Search/1.0'
-          }
+          headers: {
+            Accept: 'application/json',
+            'User-Agent': 'NYALTX-Search/1.0',
+          },
         }
       );
-      
+
       clearTimeout(timeoutId);
-      
+
       if (response.ok) {
         const data = await response.json();
         return processContractAddresses(data.platforms);
@@ -129,9 +131,12 @@ export const fetchContractAddresses = async (
       if (error.name === 'AbortError') {
         console.log(`⏱️ Timeout fetching ${coinId} contract addresses, attempt ${attempt + 1}`);
       } else {
-        console.log(`❌ Error fetching ${coinId} contract addresses, attempt ${attempt + 1}:`, error.message);
+        console.log(
+          `❌ Error fetching ${coinId} contract addresses, attempt ${attempt + 1}:`,
+          error.message
+        );
       }
-      
+
       if (attempt < retries) {
         const delay = 1000 * (attempt + 1);
         await new Promise(resolve => setTimeout(resolve, delay));
@@ -144,7 +149,7 @@ export const fetchContractAddresses = async (
   return {
     contractAddresses: {},
     primaryChain: null,
-    primaryAddress: null
+    primaryAddress: null,
   };
 };
 
@@ -158,19 +163,19 @@ export const generateTradeUrl = (
 ): string => {
   const params = new URLSearchParams();
   params.set('base', symbol.toUpperCase());
-  
+
   if (contractResult.primaryChain) {
     params.set('chain', contractResult.primaryChain);
   }
-  
+
   if (contractResult.primaryAddress) {
     params.set('address', contractResult.primaryAddress);
   }
-  
+
   if (coinGeckoId) {
     params.set('coingecko_id', coinGeckoId);
   }
-  
+
   return `/dashboard/trade?${params.toString()}`;
 };
 
@@ -182,21 +187,21 @@ export const updateUrlWithContractAddress = (
   coinGeckoId?: string
 ): void => {
   if (typeof window === 'undefined') return;
-  
+
   const currentUrl = new URL(window.location.href);
-  
+
   if (contractResult.primaryChain) {
     currentUrl.searchParams.set('chain', contractResult.primaryChain);
   }
-  
+
   if (contractResult.primaryAddress) {
     currentUrl.searchParams.set('address', contractResult.primaryAddress);
   }
-  
+
   if (coinGeckoId) {
     currentUrl.searchParams.set('coingecko_id', coinGeckoId);
   }
-  
+
   window.history.replaceState({}, '', currentUrl.toString());
   console.log(`🔄 Updated URL with contract address: ${currentUrl.toString()}`);
 };

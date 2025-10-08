@@ -35,7 +35,7 @@ const TradingViewChart: React.FC<TradingViewChartProps> = ({
   toolbar_bg = '#f1f3f6',
   enable_publishing = false,
   allow_symbol_change = true,
-  container_id
+  container_id,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const scriptRef = useRef<HTMLScriptElement | null>(null);
@@ -43,7 +43,7 @@ const TradingViewChart: React.FC<TradingViewChartProps> = ({
 
   useEffect(() => {
     const containerId = container_id || `tradingview_${Math.random().toString(36).substr(2, 9)}`;
-    
+
     // Clean up previous widget
     if (widgetRef.current) {
       try {
@@ -84,10 +84,7 @@ const TradingViewChart: React.FC<TradingViewChartProps> = ({
             hide_top_toolbar: false,
             hide_legend: false,
             save_image: false,
-            studies: [
-              'Volume@tv-basicstudies',
-              'MACD@tv-basicstudies'
-            ],
+            studies: ['Volume@tv-basicstudies', 'MACD@tv-basicstudies'],
             overrides: {
               'paneProperties.background': theme === 'dark' ? '#1a1a1a' : '#ffffff',
               'paneProperties.vertGridProperties.color': theme === 'dark' ? '#2a2a2a' : '#e1e1e1',
@@ -95,7 +92,7 @@ const TradingViewChart: React.FC<TradingViewChartProps> = ({
               'symbolWatermarkProperties.transparency': 90,
               'scalesProperties.textColor': theme === 'dark' ? '#b2b5be' : '#363c4e',
               'scalesProperties.backgroundColor': theme === 'dark' ? '#1a1a1a' : '#ffffff',
-            }
+            },
           });
         } catch (error) {
           console.error('Error creating TradingView widget:', error);
@@ -130,19 +127,32 @@ const TradingViewChart: React.FC<TradingViewChartProps> = ({
         scriptRef.current = null;
       }
     };
-  }, [symbol, theme, width, height, interval, timezone, style, locale, toolbar_bg, enable_publishing, allow_symbol_change, container_id]);
+  }, [
+    symbol,
+    theme,
+    width,
+    height,
+    interval,
+    timezone,
+    style,
+    locale,
+    toolbar_bg,
+    enable_publishing,
+    allow_symbol_change,
+    container_id,
+  ]);
 
   return (
     <div className="tradingview-widget-container">
-      <div 
+      <div
         ref={containerRef}
         className="tradingview-widget"
-        style={{ 
+        style={{
           width: typeof width === 'number' ? `${width}px` : width,
           height: typeof height === 'number' ? `${height}px` : height,
           backgroundColor: theme === 'dark' ? '#1a1a1a' : '#ffffff',
           borderRadius: '8px',
-          overflow: 'hidden'
+          overflow: 'hidden',
         }}
       />
     </div>

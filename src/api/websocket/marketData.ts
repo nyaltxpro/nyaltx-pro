@@ -34,43 +34,43 @@ class MarketDataWebSocket {
   private pollingIntervals: Map<string, NodeJS.Timeout> = new Map();
   private isConnected: boolean = false;
   private defaultPollingInterval: number = 30000; // 30 seconds by default
-  
+
   /**
    * Connect to the "websocket" (simulated with polling)
    */
   public connect(): void {
     if (this.isConnected) return;
-    
+
     this.isConnected = true;
     this.notifyAll({
       type: 'connection_status',
-      data: { status: 'connected' }
+      data: { status: 'connected' },
     });
-    
+
     console.log('Market data websocket connected');
   }
-  
+
   /**
    * Disconnect from the "websocket"
    */
   public disconnect(): void {
     if (!this.isConnected) return;
-    
+
     // Clear all polling intervals
-    this.pollingIntervals.forEach((interval) => {
+    this.pollingIntervals.forEach(interval => {
       clearInterval(interval);
     });
     this.pollingIntervals.clear();
-    
+
     this.isConnected = false;
     this.notifyAll({
       type: 'connection_status',
-      data: { status: 'disconnected' }
+      data: { status: 'disconnected' },
     });
-    
+
     console.log('Market data websocket disconnected');
   }
-  
+
   /**
    * Subscribe to market data updates for specific coins
    */
@@ -86,44 +86,44 @@ class MarketDataWebSocket {
     if (!this.isConnected) {
       this.connect();
     }
-    
+
     // Add subscriber to the channel
     if (!this.subscribers.has(channel)) {
       this.subscribers.set(channel, []);
     }
     this.subscribers.get(channel)?.push(callback);
-    
+
     // Set up polling for this channel if not already set
     if (!this.pollingIntervals.has(channel)) {
       const {
         coinIds = [],
         vsCurrency = 'usd',
-        pollingInterval = this.defaultPollingInterval
+        pollingInterval = this.defaultPollingInterval,
       } = options;
-      
+
       // Initial fetch
       this.fetchAndBroadcastMarketData(channel, coinIds, vsCurrency);
-      
+
       // Set up polling
       const intervalId = setInterval(() => {
         this.fetchAndBroadcastMarketData(channel, coinIds, vsCurrency);
       }, pollingInterval);
-      
+
       this.pollingIntervals.set(channel, intervalId);
     }
   }
-  
+
   /**
    * Unsubscribe from a channel
    */
   public unsubscribe(channel: string, callback?: SubscriberCallback): void {
     if (!this.subscribers.has(channel)) return;
-    
+
     if (callback) {
       // Remove specific callback
       const callbacks = this.subscribers.get(channel) || [];
       const filteredCallbacks = callbacks.filter(cb => cb !== callback);
-      
+
       if (filteredCallbacks.length === 0) {
         // No more subscribers, clear polling and remove channel
         this.clearChannelPolling(channel);
@@ -135,7 +135,7 @@ class MarketDataWebSocket {
       this.clearChannelPolling(channel);
     }
   }
-  
+
   /**
    * Clear polling and subscribers for a channel
    */
@@ -146,11 +146,11 @@ class MarketDataWebSocket {
       clearInterval(intervalId);
       this.pollingIntervals.delete(channel);
     }
-    
+
     // Remove subscribers
     this.subscribers.delete(channel);
   }
-  
+
   /**
    * Fetch market data and broadcast to subscribers
    */
@@ -170,37 +170,37 @@ class MarketDataWebSocket {
         false,
         '1h,24h,7d'
       );
-      
+
       this.notifyChannel(channel, {
         type: 'market_update',
-        data: marketData
+        data: marketData,
       });
     } catch (error) {
       console.error('Error fetching market data:', error);
       this.notifyChannel(channel, {
         type: 'error',
-        data: { message: 'Failed to fetch market data', error }
+        data: { message: 'Failed to fetch market data', error },
       });
     }
   }
-  
+
   /**
    * Notify all subscribers across all channels
    */
   private notifyAll(message: WebSocketMessage): void {
-    this.subscribers.forEach((callbacks) => {
-      callbacks.forEach((callback) => {
+    this.subscribers.forEach(callbacks => {
+      callbacks.forEach(callback => {
         callback(message);
       });
     });
   }
-  
+
   /**
    * Notify subscribers of a specific channel
    */
   private notifyChannel(channel: string, message: WebSocketMessage): void {
     const callbacks = this.subscribers.get(channel) || [];
-    callbacks.forEach((callback) => {
+    callbacks.forEach(callback => {
       callback(message);
     });
   }

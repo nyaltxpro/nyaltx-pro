@@ -11,29 +11,30 @@ const fs = require('fs');
 const path = require('path');
 
 const FILE = path.join(process.cwd(), 'nyax-tokens-data.json');
-const BASE_URL = process.env.BASE_URL || process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+const BASE_URL =
+  process.env.BASE_URL || process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 
 // Map NYAX network labels to our API's blockchain slugs
-const mapNetworkToChain = (network) => {
+const mapNetworkToChain = network => {
   if (!network) return null;
   const key = String(network).toLowerCase().trim();
   const mapping = {
-    'ethereum': 'ethereum',
-    'eth': 'ethereum',
-    'erc20': 'ethereum',
-    'bsc': 'binance',
-    'binance': 'binance',
+    ethereum: 'ethereum',
+    eth: 'ethereum',
+    erc20: 'ethereum',
+    bsc: 'binance',
+    binance: 'binance',
     'binance smart chain': 'binance',
-    'polygon': 'polygon',
-    'matic': 'polygon',
-    'avalanche': 'avalanche',
-    'avax': 'avalanche',
-    'fantom': 'fantom',
-    'base': 'base',
-    'arbitrum': 'arbitrum',
+    polygon: 'polygon',
+    matic: 'polygon',
+    avalanche: 'avalanche',
+    avax: 'avalanche',
+    fantom: 'fantom',
+    base: 'base',
+    arbitrum: 'arbitrum',
     'arbitrum one': 'arbitrum',
-    'optimism': 'optimism',
-    'solana': 'solana',
+    optimism: 'optimism',
+    solana: 'solana',
   };
   return mapping[key] || key;
 };
@@ -61,7 +62,9 @@ async function main() {
     const contractAddress = (t.contractAddress || '').trim();
 
     if (!tokenSymbol || !blockchain || !contractAddress) {
-      console.warn(`[skip] Missing fields for ${tokenSymbol || tokenName} — chain=${blockchain} addr=${contractAddress}`);
+      console.warn(
+        `[skip] Missing fields for ${tokenSymbol || tokenName} — chain=${blockchain} addr=${contractAddress}`
+      );
       skipped++;
       continue;
     }
@@ -94,7 +97,9 @@ async function main() {
       }
       if (!res.ok) {
         const text = await res.text().catch(() => '');
-        console.error(`[fail] ${tokenSymbol} on ${blockchain} — ${res.status} ${res.statusText} ${text}`);
+        console.error(
+          `[fail] ${tokenSymbol} on ${blockchain} — ${res.status} ${res.statusText} ${text}`
+        );
         failed++;
         continue;
       }
@@ -112,7 +117,7 @@ async function main() {
   if (failed > 0) process.exitCode = 1;
 }
 
-main().catch((e) => {
+main().catch(e => {
   console.error('[seedNyaxTokens] Unexpected error:', e);
   process.exit(1);
 });

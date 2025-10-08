@@ -69,8 +69,8 @@ export const useOptimizedCoinGecko = (
         const response = await fetch(url.toString(), {
           signal: abortControllerRef.current.signal,
           headers: {
-            'Accept': 'application/json',
-          }
+            Accept: 'application/json',
+          },
         });
 
         clearTimeout(timeoutId);
@@ -161,15 +161,15 @@ export const useRecentlyAddedCoins = (
 export const navigateToTrade = (coin: OptimizedCoin, router: any) => {
   const params = new URLSearchParams();
   params.set('base', coin.symbol.toUpperCase());
-  
+
   if (coin.primaryChain) {
     params.set('chain', coin.primaryChain);
   }
   if (coin.primaryAddress) {
     params.set('address', coin.primaryAddress);
   }
-  
+
   params.set('coingecko_id', coin.id);
-  
+
   router.push(`/dashboard/trade?${params.toString()}`);
 };

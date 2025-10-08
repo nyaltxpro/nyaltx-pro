@@ -10,7 +10,7 @@ type Campaign = {
   projectName: string;
   tierId: 'paddle' | 'motor' | 'helicopter';
   startDate: string; // ISO date
-  endDate: string;   // ISO date
+  endDate: string; // ISO date
   notes?: string;
   createdAt: string; // ISO
 };
@@ -49,7 +49,8 @@ export async function POST(req: NextRequest) {
 
   // Determine endDate based on tier
   const start = new Date(startDate);
-  if (isNaN(start.getTime())) return NextResponse.json({ error: 'Invalid startDate' }, { status: 400 });
+  if (isNaN(start.getTime()))
+    return NextResponse.json({ error: 'Invalid startDate' }, { status: 400 });
   const end = new Date(start);
   if (tierId === 'paddle') {
     end.setDate(end.getDate() + 7);
@@ -60,9 +61,17 @@ export async function POST(req: NextRequest) {
   }
 
   const all = await readAll();
-  const id = `${Date.now()}-${Math.random().toString(36).slice(2,8)}`;
+  const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   const createdAt = new Date().toISOString();
-  const record: Campaign = { id, projectName, tierId, startDate: start.toISOString(), endDate: end.toISOString(), notes, createdAt };
+  const record: Campaign = {
+    id,
+    projectName,
+    tierId,
+    startDate: start.toISOString(),
+    endDate: end.toISOString(),
+    notes,
+    createdAt,
+  };
   all.unshift(record);
   await writeAll(all);
   return NextResponse.json({ data: all, record });

@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
-export default function AdminHomePage() {
+export default function AdminDashboardComponent() {
   const [membershipsCount, setMembershipsCount] = useState<number | null>(null);
   const [tokensRegisteredCount, setTokensRegisteredCount] = useState<number | null>(null);
   const [usersCount, setUsersCount] = useState<number | null>(null);
@@ -14,7 +14,7 @@ export default function AdminHomePage() {
   const [limit, setLimit] = useState(10);
   const [total, setTotal] = useState(0);
 
-  type Status = "pending" | "approved" | "rejected";
+  type Status = 'pending' | 'approved' | 'rejected';
   type TokenRegistration = {
     id: string;
     tokenName: string;
@@ -33,9 +33,9 @@ export default function AdminHomePage() {
   };
 
   useEffect(() => {
-    fetch("/api/admin/dashboard-stats")
-      .then(async (r) => (r.ok ? r.json() : { data: {} }))
-      .then((d) => {
+    fetch('/api/admin/dashboard-stats')
+      .then(async r => (r.ok ? r.json() : { data: {} }))
+      .then(d => {
         setMembershipsCount(d?.data?.membershipsCount ?? 0);
         setTokensRegisteredCount(d?.data?.tokensRegisteredCount ?? 0);
         setUsersCount(d?.data?.usersCount ?? 0);
@@ -47,7 +47,6 @@ export default function AdminHomePage() {
         setUsersCount(0);
         setListingsCount(0);
       });
-
   }, []);
 
   // Load paginated pending tokens whenever page/limit changes
@@ -55,8 +54,8 @@ export default function AdminHomePage() {
     setPendingError(null);
     setPendingTokens(null);
     fetch(`/api/admin/tokens?status=pending&page=${page}&limit=${limit}`)
-      .then(async (r) => (r.ok ? r.json() : Promise.reject(await r.json())))
-      .then((d) => {
+      .then(async r => (r.ok ? r.json() : Promise.reject(await r.json())))
+      .then(d => {
         setPendingTokens(d?.data || []);
         setTotal(d?.total || 0);
       })
@@ -79,8 +78,8 @@ export default function AdminHomePage() {
       if (!r.ok) throw new Error(d?.error || 'Update failed');
       // After update, refetch current page
       fetch(`/api/admin/tokens?status=pending&page=${page}&limit=${limit}`)
-        .then(async (r) => (r.ok ? r.json() : Promise.reject(await r.json())))
-        .then((dd) => {
+        .then(async r => (r.ok ? r.json() : Promise.reject(await r.json())))
+        .then(dd => {
           setPendingTokens(dd?.data || []);
           setTotal(dd?.total || 0);
         })
@@ -106,8 +105,8 @@ export default function AdminHomePage() {
       setPage(nextPage);
       // Refetch list
       fetch(`/api/admin/tokens?status=pending&page=${nextPage}&limit=${limit}`)
-        .then(async (r) => (r.ok ? r.json() : Promise.reject(await r.json())))
-        .then((dd) => {
+        .then(async r => (r.ok ? r.json() : Promise.reject(await r.json())))
+        .then(dd => {
           setPendingTokens(dd?.data || []);
           setTotal(dd?.total || 0);
         })
@@ -144,7 +143,9 @@ export default function AdminHomePage() {
       <div className="rounded-xl border border-gray-800 p-6">
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-semibold text-lg">Pending Token Approvals</h3>
-          <a href="/admin/tokens" className="text-sm underline text-gray-300">View all</a>
+          <a href="/admin/tokens" className="text-sm underline text-gray-300">
+            View all
+          </a>
         </div>
         {pendingError && <div className="text-sm text-red-400 mb-2">{pendingError}</div>}
         {!pendingTokens ? (
@@ -164,25 +165,53 @@ export default function AdminHomePage() {
                 </tr>
               </thead>
               <tbody>
-                {pendingTokens.map((t) => (
+                {pendingTokens.map(t => (
                   <tr key={t.id} className="border-t border-gray-800">
-                    <td className="px-2 py-1 whitespace-nowrap">{new Date(t.createdAt).toLocaleString()}</td>
+                    <td className="px-2 py-1 whitespace-nowrap">
+                      {new Date(t.createdAt).toLocaleString()}
+                    </td>
                     <td className="px-2 py-1">
                       <div className="flex items-center gap-2">
-                        {t.imageUri && <img src={t.imageUri} alt="logo" className="w-6 h-6 rounded" />}
+                        {t.imageUri && (
+                          <img src={t.imageUri} alt="logo" className="w-6 h-6 rounded" />
+                        )}
                         <div className="min-w-0">
-                          <div className="font-medium">{t.tokenName} <span className="text-gray-400">({t.tokenSymbol})</span></div>
-                          <div className="text-xs text-gray-400 truncate max-w-[280px]">{t.website || t.twitter || t.github || '—'}</div>
+                          <div className="font-medium">
+                            {t.tokenName} <span className="text-gray-400">({t.tokenSymbol})</span>
+                          </div>
+                          <div className="text-xs text-gray-400 truncate max-w-[280px]">
+                            {t.website || t.twitter || t.github || '—'}
+                          </div>
                         </div>
                       </div>
                     </td>
                     <td className="px-2 py-1">{t.blockchain}</td>
-                    <td className="px-2 py-1"><code className="text-xs">{t.contractAddress}</code></td>
+                    <td className="px-2 py-1">
+                      <code className="text-xs">{t.contractAddress}</code>
+                    </td>
                     <td className="px-2 py-1">
                       <div className="flex gap-2">
-                        <button disabled={busyId === t.id} onClick={() => updateStatus(t.id, 'approved')} className="rounded bg-emerald-600 hover:bg-emerald-500 px-3 py-1 text-xs">Approve</button>
-                        <button disabled={busyId === t.id} onClick={() => updateStatus(t.id, 'rejected')} className="rounded bg-rose-600 hover:bg-rose-500 px-3 py-1 text-xs">Reject</button>
-                        <button disabled={busyId === t.id} onClick={() => remove(t.id)} className="rounded border border-gray-700 px-3 py-1 text-xs">Delete</button>
+                        <button
+                          disabled={busyId === t.id}
+                          onClick={() => updateStatus(t.id, 'approved')}
+                          className="rounded bg-emerald-600 hover:bg-emerald-500 px-3 py-1 text-xs"
+                        >
+                          Approve
+                        </button>
+                        <button
+                          disabled={busyId === t.id}
+                          onClick={() => updateStatus(t.id, 'rejected')}
+                          className="rounded bg-rose-600 hover:bg-rose-500 px-3 py-1 text-xs"
+                        >
+                          Reject
+                        </button>
+                        <button
+                          disabled={busyId === t.id}
+                          onClick={() => remove(t.id)}
+                          className="rounded border border-gray-700 px-3 py-1 text-xs"
+                        >
+                          Delete
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -197,14 +226,14 @@ export default function AdminHomePage() {
                 <button
                   className="rounded border border-gray-700 px-3 py-1 disabled:opacity-50"
                   disabled={page <= 1}
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
                 >
                   Prev
                 </button>
                 <button
                   className="rounded border border-gray-700 px-3 py-1 disabled:opacity-50"
                   disabled={page >= Math.max(1, Math.ceil(total / limit))}
-                  onClick={() => setPage((p) => p + 1)}
+                  onClick={() => setPage(p => p + 1)}
                 >
                   Next
                 </button>
@@ -217,29 +246,29 @@ export default function AdminHomePage() {
       <div className="rounded-xl border border-gray-800 p-6">
         <h3 className="font-semibold mb-2">Quick Actions</h3>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <a 
-            href="/admin/tokens" 
+          <a
+            href="/admin/tokens"
             className="block p-4 bg-gray-800 hover:bg-gray-700 rounded-lg border border-gray-700 transition-colors"
           >
             <h4 className="font-medium mb-2">Manage Tokens</h4>
             <p className="text-sm text-gray-400">View and manage all token registrations</p>
           </a>
-          <a 
-            href="/admin/points" 
+          <a
+            href="/admin/points"
             className="block p-4 bg-gray-800 hover:bg-gray-700 rounded-lg border border-gray-700 transition-colors"
           >
             <h4 className="font-medium mb-2">Token Points</h4>
             <p className="text-sm text-gray-400">Manage points for token race ranking</p>
           </a>
-          <a 
-            href="/admin/orders" 
+          <a
+            href="/admin/orders"
             className="block p-4 bg-gray-800 hover:bg-gray-700 rounded-lg border border-gray-700 transition-colors"
           >
             <h4 className="font-medium mb-2">Orders</h4>
             <p className="text-sm text-gray-400">View and manage user orders</p>
           </a>
-          <a 
-            href="/admin/banners" 
+          <a
+            href="/admin/banners"
             className="block p-4 bg-gray-800 hover:bg-gray-700 rounded-lg border border-gray-700 transition-colors"
           >
             <h4 className="font-medium mb-2">Banner Management</h4>

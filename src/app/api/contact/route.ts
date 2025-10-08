@@ -7,19 +7,13 @@ export async function POST(request: NextRequest) {
 
     // Validate required fields
     if (!name || !email || !subject || !message) {
-      return NextResponse.json(
-        { error: 'All fields are required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'All fields are required' }, { status: 400 });
     }
 
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      return NextResponse.json(
-        { error: 'Invalid email format' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid email format' }, { status: 400 });
     }
 
     // Create transporter for Gmail
@@ -112,20 +106,19 @@ export async function POST(request: NextRequest) {
     // Send both emails
     await Promise.all([
       transporter.sendMail(adminMailOptions),
-      transporter.sendMail(userMailOptions)
+      transporter.sendMail(userMailOptions),
     ]);
 
     return NextResponse.json(
-      { 
-        success: true, 
-        message: 'Message sent successfully! We will get back to you soon.' 
+      {
+        success: true,
+        message: 'Message sent successfully! We will get back to you soon.',
       },
       { status: 200 }
     );
-
   } catch (error) {
     console.error('Contact form error:', error);
-    
+
     // Return different error messages based on the error type
     if (error instanceof Error) {
       if (error.message.includes('Invalid login')) {

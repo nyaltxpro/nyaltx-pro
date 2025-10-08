@@ -7,32 +7,32 @@
  */
 export const blockchainLogoMap: Record<string, string> = {
   'arbitrum-one': '/cc/arbitrum.png',
-  'base': '/cc/base.png',
-  'fantom': '/cc/fantom.png',
+  base: '/cc/base.png',
+  fantom: '/cc/fantom.png',
   'optimistic-ethereum': '/cc/optimism.png',
-  'ronin': '/cc/ronin.png',
+  ronin: '/cc/ronin.png',
   'sei-v2': '/cc/sei.png',
-  'sui': '/cc/sui.png',
-  'xai': '/cc/xai.png',
+  sui: '/cc/sui.png',
+  xai: '/cc/xai.png',
 };
 
 /**
  * Map blockchain ID to a cryptocurrency symbol for icon lookup
  */
 export const blockchainSymbolMap: Record<string, string> = {
-  'ethereum': 'ETH',
-  'bitcoin': 'BTC',
+  ethereum: 'ETH',
+  bitcoin: 'BTC',
   'binance-smart-chain': 'BNB',
-  'solana': 'SOL',
+  solana: 'SOL',
   'polygon-pos': 'MATIC',
-  'avalanche': 'AVAX',
-  'tron': 'TRX',
-  'cardano': 'ADA',
-  'cosmos': 'ATOM',
-  'polkadot': 'DOT',
+  avalanche: 'AVAX',
+  tron: 'TRX',
+  cardano: 'ADA',
+  cosmos: 'ATOM',
+  polkadot: 'DOT',
   'near-protocol': 'NEAR',
   'internet-computer': 'ICP',
-  'celestia': 'TIA'
+  celestia: 'TIA',
 };
 
 /**
@@ -45,10 +45,10 @@ export function getBlockchainLogoUrl(blockchainId: string): string {
   if (blockchainLogoMap[blockchainId]) {
     return blockchainLogoMap[blockchainId];
   }
-  
+
   // Get the symbol for this blockchain
   const symbol = blockchainSymbolMap[blockchainId] || blockchainId.toUpperCase();
-  
+
   // Fallback to cryptocurrency icons
   return `/crypto-icons/color/${symbol.toLowerCase()}.svg`;
 }

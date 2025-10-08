@@ -1,8 +1,17 @@
-"use client";
+'use client';
 
 import { useState, useRef, useEffect } from 'react';
 import { useAccount } from 'wagmi';
-import { FaVideo, FaVideoSlash, FaMicrophone, FaMicrophoneSlash, FaCog, FaPlay, FaStop, FaTwitch } from 'react-icons/fa';
+import {
+  FaVideo,
+  FaVideoSlash,
+  FaMicrophone,
+  FaMicrophoneSlash,
+  FaCog,
+  FaPlay,
+  FaStop,
+  FaTwitch,
+} from 'react-icons/fa';
 import { twitchApi, TwitchUser, TwitchStreamKey } from '@/services/twitchApi';
 
 interface CreateLiveStreamProps {
@@ -20,7 +29,7 @@ export default function CreateLiveStream({ onStreamCreated, onClose }: CreateLiv
   const [isAudioEnabled, setIsAudioEnabled] = useState(true);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  
+
   // Twitch integration state
   const [twitchUser, setTwitchUser] = useState<TwitchUser | null>(null);
   const [streamKey, setStreamKey] = useState<TwitchStreamKey | null>(null);
@@ -35,7 +44,7 @@ export default function CreateLiveStream({ onStreamCreated, onClose }: CreateLiv
     { id: 'news', label: 'News & Updates' },
     { id: 'community', label: 'Community Chat' },
     { id: 'gaming', label: 'Gaming' },
-    { id: 'other', label: 'Other' }
+    { id: 'other', label: 'Other' },
   ];
 
   // Check Twitch authentication status on mount
@@ -46,11 +55,11 @@ export default function CreateLiveStream({ onStreamCreated, onClose }: CreateLiv
           const user = await twitchApi.getCurrentUser();
           setTwitchUser(user);
           setIsTwitchConnected(true);
-          
+
           // Get stream key
           const key = await twitchApi.getStreamKey(user.id);
           setStreamKey(key);
-          
+
           // Load Twitch categories
           const topCategories = await twitchApi.getTopCategories(10);
           setTwitchCategories(topCategories);
@@ -60,7 +69,7 @@ export default function CreateLiveStream({ onStreamCreated, onClose }: CreateLiv
         }
       }
     };
-    
+
     checkTwitchAuth();
   }, []);
 
@@ -76,9 +85,9 @@ export default function CreateLiveStream({ onStreamCreated, onClose }: CreateLiv
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: isVideoEnabled,
-        audio: isAudioEnabled
+        audio: isAudioEnabled,
       });
-      
+
       setStream(mediaStream);
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
@@ -143,16 +152,12 @@ export default function CreateLiveStream({ onStreamCreated, onClose }: CreateLiv
 
     try {
       setIsStreaming(true);
-      
+
       // Update Twitch stream info
       if (twitchUser) {
-        await twitchApi.updateStreamInfo(
-          twitchUser.id, 
-          streamTitle, 
-          selectedTwitchCategory
-        );
+        await twitchApi.updateStreamInfo(twitchUser.id, streamTitle, selectedTwitchCategory);
       }
-      
+
       const streamData = {
         id: Date.now().toString(),
         title: streamTitle,
@@ -166,11 +171,10 @@ export default function CreateLiveStream({ onStreamCreated, onClose }: CreateLiv
         startedAt: new Date().toISOString(),
         thumbnail: '/api/placeholder/320/180',
         streamKey: streamKey?.stream_key,
-        streamUrl: streamKey?.stream_url
+        streamUrl: streamKey?.stream_url,
       };
-      
+
       onStreamCreated(streamData);
-      
     } catch (error) {
       console.error('Failed to start stream:', error);
       setIsStreaming(false);
@@ -196,10 +200,7 @@ export default function CreateLiveStream({ onStreamCreated, onClose }: CreateLiv
             <FaTwitch className="text-purple-500" />
             Create Live Stream
           </h2>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-white transition-colors"
-          >
+          <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">
             ✕
           </button>
         </div>
@@ -211,7 +212,9 @@ export default function CreateLiveStream({ onStreamCreated, onClose }: CreateLiv
               <FaTwitch className="text-purple-500 text-xl" />
               <div>
                 <div className="text-white font-semibold">
-                  {isTwitchConnected ? `Connected as ${twitchUser?.display_name}` : 'Twitch Account'}
+                  {isTwitchConnected
+                    ? `Connected as ${twitchUser?.display_name}`
+                    : 'Twitch Account'}
                 </div>
                 <div className="text-gray-400 text-sm">
                   {isTwitchConnected ? 'Ready to stream' : 'Connect to start streaming'}
@@ -256,7 +259,7 @@ export default function CreateLiveStream({ onStreamCreated, onClose }: CreateLiv
                 playsInline
                 className="w-full h-full object-cover"
               />
-              
+
               {!isVideoEnabled && (
                 <div className="absolute inset-0 bg-gray-800 flex items-center justify-center">
                   <FaVideoSlash className="text-gray-400 text-4xl" />
@@ -282,8 +285,8 @@ export default function CreateLiveStream({ onStreamCreated, onClose }: CreateLiv
               <button
                 onClick={toggleVideo}
                 className={`p-3 rounded-full transition-colors ${
-                  isVideoEnabled 
-                    ? 'bg-gray-700 text-white hover:bg-gray-600' 
+                  isVideoEnabled
+                    ? 'bg-gray-700 text-white hover:bg-gray-600'
                     : 'bg-red-600 text-white hover:bg-red-700'
                 }`}
               >
@@ -293,8 +296,8 @@ export default function CreateLiveStream({ onStreamCreated, onClose }: CreateLiv
               <button
                 onClick={toggleAudio}
                 className={`p-3 rounded-full transition-colors ${
-                  isAudioEnabled 
-                    ? 'bg-gray-700 text-white hover:bg-gray-600' 
+                  isAudioEnabled
+                    ? 'bg-gray-700 text-white hover:bg-gray-600'
                     : 'bg-red-600 text-white hover:bg-red-700'
                 }`}
               >
@@ -314,7 +317,7 @@ export default function CreateLiveStream({ onStreamCreated, onClose }: CreateLiv
               <input
                 type="text"
                 value={streamTitle}
-                onChange={(e) => setStreamTitle(e.target.value)}
+                onChange={e => setStreamTitle(e.target.value)}
                 placeholder="Enter your stream title..."
                 className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:border-cyan-500 focus:outline-none"
                 disabled={isStreaming}
@@ -325,7 +328,7 @@ export default function CreateLiveStream({ onStreamCreated, onClose }: CreateLiv
               <label className="block text-white font-medium mb-2">Description</label>
               <textarea
                 value={streamDescription}
-                onChange={(e) => setStreamDescription(e.target.value)}
+                onChange={e => setStreamDescription(e.target.value)}
                 placeholder="Tell viewers what your stream is about..."
                 rows={3}
                 className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:border-cyan-500 focus:outline-none resize-none"
@@ -337,12 +340,14 @@ export default function CreateLiveStream({ onStreamCreated, onClose }: CreateLiv
               <label className="block text-white font-medium mb-2">Category</label>
               <select
                 value={category}
-                onChange={(e) => setCategory(e.target.value)}
+                onChange={e => setCategory(e.target.value)}
                 className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:border-cyan-500 focus:outline-none"
                 disabled={isStreaming}
               >
                 {categories.map(cat => (
-                  <option key={cat.id} value={cat.id}>{cat.label}</option>
+                  <option key={cat.id} value={cat.id}>
+                    {cat.label}
+                  </option>
                 ))}
               </select>
             </div>
@@ -353,13 +358,15 @@ export default function CreateLiveStream({ onStreamCreated, onClose }: CreateLiv
                 <label className="block text-white font-medium mb-2">Twitch Category</label>
                 <select
                   value={selectedTwitchCategory}
-                  onChange={(e) => setSelectedTwitchCategory(e.target.value)}
+                  onChange={e => setSelectedTwitchCategory(e.target.value)}
                   className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:border-purple-500 focus:outline-none"
                   disabled={isStreaming}
                 >
                   <option value="">Select Twitch Category</option>
                   {twitchCategories.map(cat => (
-                    <option key={cat.id} value={cat.id}>{cat.name}</option>
+                    <option key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -372,7 +379,9 @@ export default function CreateLiveStream({ onStreamCreated, onClose }: CreateLiv
                 <div className="space-y-2 text-sm">
                   <div>
                     <span className="text-gray-400">Stream URL:</span>
-                    <div className="text-purple-400 font-mono break-all">{streamKey.stream_url}</div>
+                    <div className="text-purple-400 font-mono break-all">
+                      {streamKey.stream_url}
+                    </div>
                   </div>
                   <div>
                     <span className="text-gray-400">Stream Key:</span>
@@ -387,7 +396,9 @@ export default function CreateLiveStream({ onStreamCreated, onClose }: CreateLiv
             {/* Wallet Connection Status */}
             <div className="p-4 bg-gray-800/50 rounded-lg">
               <div className="flex items-center gap-3">
-                <div className={`w-3 h-3 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                <div
+                  className={`w-3 h-3 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}
+                ></div>
                 <span className="text-white font-medium">
                   {isConnected ? 'Wallet Connected' : 'Wallet Not Connected'}
                 </span>

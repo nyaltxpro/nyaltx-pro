@@ -1,5 +1,5 @@
 [
-    {
+  {
     "id": "miu-2",
     "symbol": "miu",
     "name": "MIU",
@@ -26,8 +26,8 @@
     "atl_date": "2025-03-11T01:05:57.514Z",
     "roi": null,
     "last_updated": "2025-08-29T01:59:12.057Z"
-    },
-    {
+  },
+  {
     "id": "sudeng",
     "symbol": "hippo",
     "name": "sudeng",
@@ -54,8 +54,8 @@
     "atl_date": "2025-06-22T20:21:24.369Z",
     "roi": null,
     "last_updated": "2025-08-29T01:59:14.824Z"
-    },
-    {
+  },
+  {
     "id": "memefi-2",
     "symbol": "memefi",
     "name": "MemeFi",
@@ -82,8 +82,8 @@
     "atl_date": "2025-04-07T07:00:46.369Z",
     "roi": null,
     "last_updated": "2025-08-29T01:59:11.969Z"
-    },
-    {
+  },
+  {
     "id": "lofi-2",
     "symbol": "lofi",
     "name": "LOFI",
@@ -110,8 +110,8 @@
     "atl_date": "2025-04-07T07:02:25.275Z",
     "roi": null,
     "last_updated": "2025-08-29T01:59:11.719Z"
-    },
-    {
+  },
+  {
     "id": "blub",
     "symbol": "blub",
     "name": "BLUB",
@@ -138,8 +138,8 @@
     "atl_date": "2024-08-05T12:30:57.714Z",
     "roi": null,
     "last_updated": "2025-08-29T01:59:17.820Z"
-    },
-    {
+  },
+  {
     "id": "axol",
     "symbol": "axol",
     "name": "AXOL",
@@ -166,8 +166,8 @@
     "atl_date": "2025-05-23T07:35:26.586Z",
     "roi": null,
     "last_updated": "2025-08-29T01:56:18.687Z"
-    },
-    {
+  },
+  {
     "id": "manifest-3",
     "symbol": "manifest",
     "name": "manifest",
@@ -194,8 +194,8 @@
     "atl_date": "2025-08-21T15:45:22.274Z",
     "roi": null,
     "last_updated": "2025-08-29T01:58:58.663Z"
-    },
-    {
+  },
+  {
     "id": "fud-the-pug",
     "symbol": "fud",
     "name": "Fud the Pug",
@@ -222,8 +222,8 @@
     "atl_date": "2025-08-28T03:30:16.924Z",
     "roi": null,
     "last_updated": "2025-08-29T01:58:47.499Z"
-    },
-    {
+  },
+  {
     "id": "sui-trump",
     "symbol": "suitrump",
     "name": "SUI TRUMP",
@@ -250,8 +250,8 @@
     "atl_date": "2025-04-07T07:18:32.219Z",
     "roi": null,
     "last_updated": "2025-08-29T01:57:33.185Z"
-    },
-    {
+  },
+  {
     "id": "tardi",
     "symbol": "tardi",
     "name": "Tardi",
@@ -278,8 +278,8 @@
     "atl_date": "2025-04-07T07:15:44.900Z",
     "roi": null,
     "last_updated": "2025-08-29T01:57:47.006Z"
-    },
-    {
+  },
+  {
     "id": "suicune-on-sui",
     "symbol": "hsui",
     "name": "Suicune",
@@ -306,8 +306,8 @@
     "atl_date": "2025-04-07T07:06:39.983Z",
     "roi": null,
     "last_updated": "2025-08-29T01:53:55.038Z"
-    },
-    {
+  },
+  {
     "id": "culosui",
     "symbol": "culo",
     "name": "CULOSUI",
@@ -334,8 +334,8 @@
     "atl_date": "2025-08-14T04:19:50.178Z",
     "roi": null,
     "last_updated": "2025-08-29T01:59:12.145Z"
-    },
-    {
+  },
+  {
     "id": "toilet-dust",
     "symbol": "toilet",
     "name": "Toilet Dust",
@@ -362,8 +362,8 @@
     "atl_date": "2025-03-22T16:16:00.324Z",
     "roi": null,
     "last_updated": "2025-08-29T01:56:23.506Z"
-    },
-    {
+  },
+  {
     "id": "team-mysten",
     "symbol": "mysten",
     "name": "Team Mysten",
@@ -390,8 +390,8 @@
     "atl_date": "2025-06-22T17:40:20.337Z",
     "roi": null,
     "last_updated": "2025-08-29T01:58:47.150Z"
-    },
-    {
+  },
+  {
     "id": "uni",
     "symbol": "uni",
     "name": "Uni",
@@ -418,8 +418,8 @@
     "atl_date": "2025-03-25T20:47:03.666Z",
     "roi": null,
     "last_updated": "2025-08-29T01:57:46.161Z"
-    },
-    {
+  },
+  {
     "id": "super-suiyan",
     "symbol": "suiyan",
     "name": "Super Suiyan",
@@ -446,8 +446,8 @@
     "atl_date": "2025-04-07T12:15:45.954Z",
     "roi": null,
     "last_updated": "2025-08-29T01:57:49.708Z"
-    },
-    {
+  },
+  {
     "id": "pumpkin-token",
     "symbol": "pumpkin",
     "name": "PUMPKIN TOKEN",
@@ -474,8 +474,8 @@
     "atl_date": "2025-05-23T07:17:02.859Z",
     "roi": null,
     "last_updated": "2025-08-29T01:57:32.301Z"
-    },
-    {
+  },
+  {
     "id": "sonic-snipe-bot",
     "symbol": "sonic",
     "name": "Sonic Snipe Bot",
@@ -502,8 +502,8 @@
     "atl_date": "2024-10-20T09:16:45.889Z",
     "roi": null,
     "last_updated": "2025-08-29T01:57:47.382Z"
-    },
-    {
+  },
+  {
     "id": "aaa-cat",
     "symbol": "aaa",
     "name": "aaa cat",
@@ -530,8 +530,8 @@
     "atl_date": "2025-08-25T22:58:13.891Z",
     "roi": null,
     "last_updated": "2025-08-29T01:57:32.777Z"
-    },
-    {
+  },
+  {
     "id": "zenfrogs",
     "symbol": "zen",
     "name": "ZenFrogs",
@@ -558,8 +558,8 @@
     "atl_date": "2025-03-11T00:57:21.002Z",
     "roi": null,
     "last_updated": "2025-08-29T01:56:44.526Z"
-    },
-    {
+  },
+  {
     "id": "pigu",
     "symbol": "pigu",
     "name": "PIGU",
@@ -586,8 +586,8 @@
     "atl_date": "2025-04-07T09:23:49.447Z",
     "roi": null,
     "last_updated": "2025-08-28T22:02:34.639Z"
-    },
-    {
+  },
+  {
     "id": "pugwifhat",
     "symbol": "pugwif",
     "name": "PUGWIFHAT",
@@ -614,8 +614,8 @@
     "atl_date": "2025-06-22T14:33:18.775Z",
     "roi": null,
     "last_updated": "2025-08-29T01:55:35.773Z"
-    },
-    {
+  },
+  {
     "id": "hopper-the-rabbit",
     "symbol": "hopper",
     "name": "Hopper the Rabbit",
@@ -642,8 +642,8 @@
     "atl_date": "2025-04-07T07:10:31.309Z",
     "roi": null,
     "last_updated": "2025-08-29T01:55:35.630Z"
-    },
-    {
+  },
+  {
     "id": "suijak",
     "symbol": "suijak",
     "name": "Suijak",
@@ -670,8 +670,8 @@
     "atl_date": "2024-11-21T02:44:50.324Z",
     "roi": null,
     "last_updated": "2025-08-28T03:32:31.020Z"
-    },
-    {
+  },
+  {
     "id": "suiba-inu",
     "symbol": "suib",
     "name": "Suiba Inu",
@@ -698,8 +698,8 @@
     "atl_date": "2025-08-25T22:30:11.897Z",
     "roi": null,
     "last_updated": "2025-08-29T00:41:18.303Z"
-    },
-    {
+  },
+  {
     "id": "suiman",
     "symbol": "suiman",
     "name": "Suiman",
@@ -726,8 +726,8 @@
     "atl_date": "2025-06-22T20:29:46.042Z",
     "roi": null,
     "last_updated": "2025-08-29T01:59:09.474Z"
-    },
-    {
+  },
+  {
     "id": "suinami",
     "symbol": "nami",
     "name": "SUINAMI",
@@ -754,8 +754,8 @@
     "atl_date": "2025-08-19T19:07:44.795Z",
     "roi": null,
     "last_updated": "2025-08-20T17:32:18.704Z"
-    },
-    {
+  },
+  {
     "id": "neonet-ai-by-suiai",
     "symbol": "neonet",
     "name": "Neonet AI",
@@ -782,8 +782,8 @@
     "atl_date": "2025-05-23T07:34:12.223Z",
     "roi": null,
     "last_updated": "2025-08-28T23:41:18.220Z"
-    },
-    {
+  },
+  {
     "id": "scuba-dog",
     "symbol": "scuba",
     "name": "Scuba Dog",
@@ -810,8 +810,8 @@
     "atl_date": "2025-04-07T07:15:36.155Z",
     "roi": null,
     "last_updated": "2025-08-29T01:59:10.083Z"
-    },
-    {
+  },
+  {
     "id": "sui-plop",
     "symbol": "plop",
     "name": "SUI Plop",
@@ -838,8 +838,8 @@
     "atl_date": "2025-06-22T13:51:09.652Z",
     "roi": null,
     "last_updated": "2025-08-28T18:46:16.743Z"
-    },
-    {
+  },
+  {
     "id": "liquor",
     "symbol": "liq",
     "name": "Liquor",
@@ -866,8 +866,8 @@
     "atl_date": "2025-04-07T07:33:52.039Z",
     "roi": null,
     "last_updated": "2025-08-29T01:58:47.077Z"
-    },
-    {
+  },
+  {
     "id": "bullshark",
     "symbol": "bshark",
     "name": "BULLSHARK",
@@ -894,8 +894,8 @@
     "atl_date": "2025-08-20T13:38:25.916Z",
     "roi": null,
     "last_updated": "2025-08-29T01:59:11.356Z"
-    },
-    {
+  },
+  {
     "id": "grass-3",
     "symbol": "$grass",
     "name": "GRASS",
@@ -922,8 +922,8 @@
     "atl_date": "2025-04-07T06:58:37.359Z",
     "roi": null,
     "last_updated": "2025-08-27T06:18:44.874Z"
-    },
-    {
+  },
+  {
     "id": "suibeaver",
     "symbol": "dam",
     "name": "suibeaver",
@@ -950,8 +950,8 @@
     "atl_date": "2025-04-07T07:18:32.135Z",
     "roi": null,
     "last_updated": "2025-08-28T00:02:46.326Z"
-    },
-    {
+  },
+  {
     "id": "sui-chad",
     "symbol": "chad",
     "name": "Sui Chad",
@@ -978,8 +978,8 @@
     "atl_date": "2025-06-22T20:40:22.300Z",
     "roi": null,
     "last_updated": "2025-08-24T08:04:59.140Z"
-    },
-    {
+  },
+  {
     "id": "suishicat",
     "symbol": "suishi",
     "name": "Suishicat",
@@ -1006,8 +1006,8 @@
     "atl_date": "2025-04-07T06:58:38.887Z",
     "roi": null,
     "last_updated": "2025-08-25T01:02:09.502Z"
-    },
-    {
+  },
+  {
     "id": "wewe-2",
     "symbol": "wewe",
     "name": "WEWE",
@@ -1034,8 +1034,8 @@
     "atl_date": "2025-05-23T07:34:12.239Z",
     "roi": null,
     "last_updated": "2025-08-29T01:59:09.384Z"
-    },
-    {
+  },
+  {
     "id": "suilama",
     "symbol": "suilama",
     "name": "Suilama",
@@ -1062,8 +1062,8 @@
     "atl_date": "2025-04-06T10:20:19.868Z",
     "roi": null,
     "last_updated": "2025-08-23T09:56:32.943Z"
-    },
-    {
+  },
+  {
     "id": "win-2",
     "symbol": "win",
     "name": "WIN",
@@ -1090,8 +1090,8 @@
     "atl_date": "2025-08-06T01:40:41.465Z",
     "roi": null,
     "last_updated": "2025-08-29T01:55:35.666Z"
-    },
-    {
+  },
+  {
     "id": "sui-bull",
     "symbol": "bull",
     "name": "Sui Bull",
@@ -1118,8 +1118,8 @@
     "atl_date": "2025-08-26T00:54:36.095Z",
     "roi": null,
     "last_updated": "2025-08-28T11:32:25.168Z"
-    },
-    {
+  },
+  {
     "id": "suitard",
     "symbol": "std",
     "name": "suitard",
@@ -1146,8 +1146,8 @@
     "atl_date": "2025-05-23T07:31:54.084Z",
     "roi": null,
     "last_updated": "2025-08-29T01:58:47.416Z"
-    },
-    {
+  },
+  {
     "id": "jelly-ai",
     "symbol": "jai",
     "name": "JELLY AI",
@@ -1174,8 +1174,8 @@
     "atl_date": "2025-04-09T01:35:34.163Z",
     "roi": null,
     "last_updated": "2025-08-29T01:56:45.970Z"
-    },
-    {
+  },
+  {
     "id": "sui-dog",
     "symbol": "suidog",
     "name": "SUI Dog",
@@ -1202,8 +1202,8 @@
     "atl_date": "2025-06-25T08:55:08.081Z",
     "roi": null,
     "last_updated": "2025-08-20T06:59:23.307Z"
-    },
-    {
+  },
+  {
     "id": "loopy-sui",
     "symbol": "loopy",
     "name": "LOOPY",
@@ -1230,8 +1230,8 @@
     "atl_date": "2025-06-13T01:46:37.045Z",
     "roi": null,
     "last_updated": "2025-08-28T15:59:49.239Z"
-    },
-    {
+  },
+  {
     "id": "skeleton",
     "symbol": "skelsui",
     "name": "SKELETON",
@@ -1258,8 +1258,8 @@
     "atl_date": "2025-08-18T03:40:37.318Z",
     "roi": null,
     "last_updated": "2025-08-29T01:51:56.512Z"
-    },
-    {
+  },
+  {
     "id": "walrus-the-tusk",
     "symbol": "$tusk",
     "name": "Walrus the tusk",
@@ -1286,8 +1286,8 @@
     "atl_date": "2025-06-22T20:05:15.137Z",
     "roi": null,
     "last_updated": "2025-08-29T01:58:47.574Z"
-    },
-    {
+  },
+  {
     "id": "squidonsui",
     "symbol": "sqid",
     "name": "SquidOnSui",
@@ -1314,8 +1314,8 @@
     "atl_date": "2025-04-17T11:56:28.910Z",
     "roi": null,
     "last_updated": "2025-08-29T01:56:20.853Z"
-    },
-    {
+  },
+  {
     "id": "dak",
     "symbol": "dak",
     "name": "dak",
@@ -1342,8 +1342,8 @@
     "atl_date": "2025-05-23T07:15:54.621Z",
     "roi": null,
     "last_updated": "2025-08-28T19:44:37.555Z"
-    },
-    {
+  },
+  {
     "id": "stonefish-ai",
     "symbol": "sai",
     "name": "STONEFISH AI",
@@ -1370,8 +1370,8 @@
     "atl_date": "2025-06-22T20:25:35.024Z",
     "roi": null,
     "last_updated": "2025-08-28T00:59:47.053Z"
-    },
-    {
+  },
+  {
     "id": "babylofi",
     "symbol": "babylofi",
     "name": "BabyLofi",
@@ -1398,8 +1398,8 @@
     "atl_date": "2025-04-07T09:22:03.486Z",
     "roi": null,
     "last_updated": "2025-08-16T19:17:47.202Z"
-    },
-    {
+  },
+  {
     "id": "kong-sui",
     "symbol": "kong",
     "name": "KONG SUI",
@@ -1426,8 +1426,8 @@
     "atl_date": "2024-10-20T06:07:35.180Z",
     "roi": null,
     "last_updated": "2025-08-14T03:40:11.662Z"
-    },
-    {
+  },
+  {
     "id": "cap-2",
     "symbol": "cap",
     "name": "CAP",
@@ -1454,8 +1454,8 @@
     "atl_date": "2025-03-11T00:45:37.559Z",
     "roi": null,
     "last_updated": "2025-08-29T01:48:58.950Z"
-    },
-    {
+  },
+  {
     "id": "tism",
     "symbol": "tism",
     "name": "TISM",
@@ -1482,8 +1482,8 @@
     "atl_date": "2025-04-07T06:58:39.285Z",
     "roi": null,
     "last_updated": "2025-08-29T01:24:41.358Z"
-    },
-    {
+  },
+  {
     "id": "bubl",
     "symbol": "bubl",
     "name": "BUBL",
@@ -1510,8 +1510,8 @@
     "atl_date": "2025-04-09T12:39:07.677Z",
     "roi": null,
     "last_updated": "2025-08-28T22:31:42.514Z"
-    },
-    {
+  },
+  {
     "id": "boysclub-on-sui",
     "symbol": "boyss",
     "name": "Boysclub on Sui",
@@ -1538,8 +1538,8 @@
     "atl_date": "2025-05-23T07:17:44.895Z",
     "roi": null,
     "last_updated": "2025-08-29T00:28:31.154Z"
-    },
-    {
+  },
+  {
     "id": "shork",
     "symbol": "shork",
     "name": "Shork",
@@ -1566,8 +1566,8 @@
     "atl_date": "2025-04-03T03:23:55.181Z",
     "roi": null,
     "last_updated": "2025-08-24T08:30:29.538Z"
-    },
-    {
+  },
+  {
     "id": "infinite-sui-glitch",
     "symbol": "isg",
     "name": "Infinite Sui Glitch",
@@ -1594,8 +1594,8 @@
     "atl_date": "2025-08-25T21:50:35.538Z",
     "roi": null,
     "last_updated": "2025-08-29T01:59:11.747Z"
-    },
-    {
+  },
+  {
     "id": "seal-dog",
     "symbol": "sog",
     "name": "Seal Dog",
@@ -1622,8 +1622,8 @@
     "atl_date": "2025-08-28T00:45:06.115Z",
     "roi": null,
     "last_updated": "2025-08-29T01:52:56.575Z"
-    },
-    {
+  },
+  {
     "id": "frogg-and-ratt",
     "symbol": "fratt",
     "name": "Frogg and Ratt",
@@ -1650,8 +1650,8 @@
     "atl_date": "2025-06-22T20:33:44.342Z",
     "roi": null,
     "last_updated": "2025-08-29T01:59:11.869Z"
-    },
-    {
+  },
+  {
     "id": "sui-universe",
     "symbol": "su",
     "name": "Sui Universe",
@@ -1678,8 +1678,8 @@
     "atl_date": "2025-08-25T22:30:12.359Z",
     "roi": null,
     "last_updated": "2025-08-29T01:56:44.343Z"
-    },
-    {
+  },
+  {
     "id": "doctor-lui",
     "symbol": "lui",
     "name": "LUI",
@@ -1706,8 +1706,8 @@
     "atl_date": "2025-02-01T15:42:13.582Z",
     "roi": null,
     "last_updated": "2025-08-20T14:16:49.525Z"
-    },
-    {
+  },
+  {
     "id": "mochi-3",
     "symbol": "mochi",
     "name": "Mochi",
@@ -1734,8 +1734,8 @@
     "atl_date": "2025-08-14T13:35:34.275Z",
     "roi": null,
     "last_updated": "2025-08-27T04:35:46.652Z"
-    },
-    {
+  },
+  {
     "id": "pou-on-sui",
     "symbol": "pou",
     "name": "Pou On Sui",
@@ -1762,8 +1762,8 @@
     "atl_date": "2025-02-17T18:12:26.608Z",
     "roi": null,
     "last_updated": "2025-08-10T21:32:39.072Z"
-    },
-    {
+  },
+  {
     "id": "koi-5",
     "symbol": "koi",
     "name": "KOI",
@@ -1790,8 +1790,8 @@
     "atl_date": "2025-07-01T12:56:16.264Z",
     "roi": null,
     "last_updated": "2025-08-28T20:03:20.822Z"
-    },
-    {
+  },
+  {
     "id": "fate-on-sui",
     "symbol": "fate",
     "name": "FATE on SUI",
@@ -1818,8 +1818,8 @@
     "atl_date": "2025-06-21T14:53:09.107Z",
     "roi": null,
     "last_updated": "2025-08-28T19:51:37.990Z"
-    },
-    {
+  },
+  {
     "id": "suirex",
     "symbol": "rex",
     "name": "suirex",
@@ -1846,8 +1846,8 @@
     "atl_date": "2025-05-23T07:31:53.679Z",
     "roi": null,
     "last_updated": "2025-08-26T18:05:06.609Z"
-    },
-    {
+  },
+  {
     "id": "dewy",
     "symbol": "dewy",
     "name": "DEWY",
@@ -1874,8 +1874,8 @@
     "atl_date": "2024-10-12T07:21:56.690Z",
     "roi": null,
     "last_updated": "2025-08-29T01:19:59.211Z"
-    },
-    {
+  },
+  {
     "id": "suimon",
     "symbol": "suimon",
     "name": "Suimon",
@@ -1902,5 +1902,5 @@
     "atl_date": "2025-05-26T00:28:02.373Z",
     "roi": null,
     "last_updated": "2025-08-29T01:58:46.664Z"
-    }
-    ]
+  }
+]

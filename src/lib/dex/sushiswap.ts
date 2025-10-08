@@ -1,7 +1,17 @@
 /**
  * SushiSwap DEX Integration
  */
-import { DexInterface, Token, PriceQuote, SwapRoute, DexConfig, CHAIN_IDS, DEX_PROTOCOL, QuoteParams, SwapParams } from './types';
+import {
+  DexInterface,
+  Token,
+  PriceQuote,
+  SwapRoute,
+  DexConfig,
+  CHAIN_IDS,
+  DEX_PROTOCOL,
+  QuoteParams,
+  SwapParams,
+} from './types';
 import { getCryptoIconUrl } from '../../utils/cryptoIcons';
 // Uncomment when implementing real SDK calls
 // import { Token as SushiToken, Pair, Route, Trade, TokenAmount, TradeType, Percent } from '@sushiswap/sdk';
@@ -17,24 +27,24 @@ export const SushiSwapConfig: DexConfig = {
     [CHAIN_IDS.ETHEREUM]: '0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F',
     [CHAIN_IDS.POLYGON]: '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506',
     [CHAIN_IDS.ARBITRUM]: '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506',
-    [CHAIN_IDS.AVALANCHE]: '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506'
+    [CHAIN_IDS.AVALANCHE]: '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506',
   },
   factoryAddress: {
     [CHAIN_IDS.ETHEREUM]: '0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac',
     [CHAIN_IDS.POLYGON]: '0xc35DADB65012eC5796536bD9864eD8773aBc74C4',
     [CHAIN_IDS.ARBITRUM]: '0xc35DADB65012eC5796536bD9864eD8773aBc74C4',
-    [CHAIN_IDS.AVALANCHE]: '0xc35DADB65012eC5796536bD9864eD8773aBc74C4'
+    [CHAIN_IDS.AVALANCHE]: '0xc35DADB65012eC5796536bD9864eD8773aBc74C4',
   },
-  version: '1.0.0'
+  version: '1.0.0',
 };
 
 export class SushiSwap implements DexInterface {
   config: DexConfig;
-  
+
   constructor() {
     this.config = SushiSwapConfig;
   }
-  
+
   async getQuote(params: QuoteParams): Promise<PriceQuote> {
     try {
       // For now, we'll still use mock data but structure it as if we're using the SDK
@@ -48,7 +58,7 @@ export class SushiSwap implements DexInterface {
       //   params.tokenIn.symbol,
       //   params.tokenIn.name
       // );
-      // 
+      //
       // const sushiToToken = new SushiToken(
       //   params.tokenOut.chainId,
       //   params.tokenOut.address,
@@ -56,13 +66,13 @@ export class SushiSwap implements DexInterface {
       //   params.tokenOut.symbol,
       //   params.tokenOut.name
       // );
-      // 
+      //
       // // Fetch the pair data
       // const pair = await Pair.fetchData(sushiFromToken, sushiToToken);
-      // 
+      //
       // // Create a route using the pair
       // const route = new Route([pair], sushiFromToken);
-      // 
+      //
       // // Create a trade with the route
       // const trade = new Trade(
       //   route,
@@ -71,11 +81,15 @@ export class SushiSwap implements DexInterface {
       // );
 
       // Mock the output that would come from the SDK
-      const outputAmount = (parseFloat(params.amountIn) * 1948 * (1 - Math.random() * 0.02)).toString();
+      const outputAmount = (
+        parseFloat(params.amountIn) *
+        1948 *
+        (1 - Math.random() * 0.02)
+      ).toString();
       const fee = '0.3'; // 0.3% fee for SushiSwap
 
       const routerAddress = this.config.routerAddress?.[params.chainId] || '';
-      
+
       const swapRoute: SwapRoute = {
         protocol: this.config.name,
         routerAddress,
@@ -83,9 +97,9 @@ export class SushiSwap implements DexInterface {
         amountIn: params.amountIn,
         amountOut: outputAmount,
         priceImpact: (Math.random() * 0.45).toFixed(2),
-        fee
+        fee,
       };
-      
+
       return {
         protocol: this.config.name,
         inputAmount: params.amountIn,
@@ -100,7 +114,7 @@ export class SushiSwap implements DexInterface {
       throw error;
     }
   }
-  
+
   async executeSwap(params: SwapParams): Promise<string> {
     try {
       // In a real implementation, we would:
@@ -115,7 +129,7 @@ export class SushiSwap implements DexInterface {
       //   params.tokenIn.symbol,
       //   params.tokenIn.name
       // );
-      // 
+      //
       // const sushiToToken = new SushiToken(
       //   params.tokenOut.chainId,
       //   params.tokenOut.address,
@@ -123,30 +137,30 @@ export class SushiSwap implements DexInterface {
       //   params.tokenOut.symbol,
       //   params.tokenOut.name
       // );
-      // 
+      //
       // // Fetch the pair data
       // const pair = await Pair.fetchData(sushiFromToken, sushiToToken);
-      // 
+      //
       // // Create a route using the pair
       // const route = new Route([pair], sushiFromToken);
-      // 
+      //
       // // Create a trade with the route
       // const trade = new Trade(
       //   route,
       //   new TokenAmount(sushiFromToken, params.amountIn),
       //   TradeType.EXACT_INPUT
       // );
-      // 
+      //
       // // Set up slippage tolerance
       // const slippageTolerance = new Percent(Math.floor(parseFloat(params.slippageTolerance) * 100), 10000); // slippage as percentage
-      // 
+      //
       // // Get swap parameters
       // const swapParams = Router.swapCallParameters(trade, {
       //   ttl: params.deadline,
       //   recipient: params.recipient,
       //   allowedSlippage: slippageTolerance
       // });
-      // 
+      //
       // // Execute the transaction
       // const provider = getProvider(params.chainId);
       // const tx = await provider.getSigner().sendTransaction({
@@ -155,7 +169,7 @@ export class SushiSwap implements DexInterface {
       //   data: swapParams.calldata,
       //   value: swapParams.value
       // });
-      // 
+      //
       // return tx.hash;
 
       console.log(`Executing swap on ${this.config.name}:`);
@@ -174,7 +188,7 @@ export class SushiSwap implements DexInterface {
       throw error;
     }
   }
-  
+
   isChainSupported(chainId: number): boolean {
     return this.config.supportedChains.includes(chainId);
   }

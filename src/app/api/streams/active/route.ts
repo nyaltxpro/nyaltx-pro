@@ -16,7 +16,7 @@ const mockActiveStreams = [
     tags: ['bitcoin', 'analysis', 'trading'],
     chatEnabled: true,
     donationsEnabled: true,
-    thumbnail: '/api/placeholder/320/180'
+    thumbnail: '/api/placeholder/320/180',
   },
   {
     id: 'stream_2',
@@ -32,7 +32,7 @@ const mockActiveStreams = [
     tags: ['defi', 'yield', 'education'],
     chatEnabled: true,
     donationsEnabled: true,
-    thumbnail: '/api/placeholder/320/180'
+    thumbnail: '/api/placeholder/320/180',
   },
   {
     id: 'stream_3',
@@ -48,8 +48,8 @@ const mockActiveStreams = [
     tags: ['news', 'market', 'updates'],
     chatEnabled: true,
     donationsEnabled: true,
-    thumbnail: '/api/placeholder/320/180'
-  }
+    thumbnail: '/api/placeholder/320/180',
+  },
 ];
 
 export async function GET(request: NextRequest) {
@@ -57,52 +57,48 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
     const limit = parseInt(searchParams.get('limit') || '20');
-    
+
     let streams = [...mockActiveStreams];
-    
+
     // Filter by category if specified
     if (category && category !== 'all') {
       streams = streams.filter(stream => stream.category === category);
     }
-    
+
     // Limit results
     streams = streams.slice(0, limit);
-    
+
     // Add some randomization to viewer counts for demo
     streams = streams.map(stream => ({
       ...stream,
-      viewerCount: stream.viewerCount + Math.floor(Math.random() * 100) - 50
+      viewerCount: stream.viewerCount + Math.floor(Math.random() * 100) - 50,
     }));
-    
+
     return NextResponse.json({
       streams,
       total: streams.length,
-      totalViewers: streams.reduce((sum, stream) => sum + stream.viewerCount, 0)
+      totalViewers: streams.reduce((sum, stream) => sum + stream.viewerCount, 0),
     });
-    
   } catch (error) {
     console.error('Error fetching active streams:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch active streams' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch active streams' }, { status: 500 });
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { 
-      title, 
-      description, 
-      category, 
-      streamerId, 
+    const {
+      title,
+      description,
+      category,
+      streamerId,
       streamerName,
       tags = [],
       chatEnabled = true,
-      donationsEnabled = true 
+      donationsEnabled = true,
     } = body;
-    
+
     // Validate required fields
     if (!title || !streamerId || !streamerName) {
       return NextResponse.json(
@@ -110,7 +106,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    
+
     // Create new stream
     const newStream = {
       id: `stream_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -126,22 +122,21 @@ export async function POST(request: NextRequest) {
       tags: Array.isArray(tags) ? tags : [],
       chatEnabled,
       donationsEnabled,
-      thumbnail: '/api/placeholder/320/180'
+      thumbnail: '/api/placeholder/320/180',
     };
-    
+
     // In production, save to database
     mockActiveStreams.push(newStream);
-    
-    return NextResponse.json({
-      success: true,
-      stream: newStream
-    }, { status: 201 });
-    
+
+    return NextResponse.json(
+      {
+        success: true,
+        stream: newStream,
+      },
+      { status: 201 }
+    );
   } catch (error) {
     console.error('Error creating stream:', error);
-    return NextResponse.json(
-      { error: 'Failed to create stream' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create stream' }, { status: 500 });
   }
 }

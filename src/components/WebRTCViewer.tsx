@@ -4,7 +4,14 @@ import { useEffect, useRef, useState } from 'react';
 import { useAccount } from 'wagmi';
 import { streamingService, ChatMessage } from '@/services/StreamingService';
 import SimplePeer from 'simple-peer';
-import { FaComments, FaPaperPlane, FaUsers, FaSignal, FaExclamationTriangle, FaPlay } from 'react-icons/fa';
+import {
+  FaComments,
+  FaPaperPlane,
+  FaUsers,
+  FaSignal,
+  FaExclamationTriangle,
+  FaPlay,
+} from 'react-icons/fa';
 import toast from 'react-hot-toast';
 
 interface WebRTCViewerProps {
@@ -19,7 +26,11 @@ interface ConnectionStats {
   quality: 'excellent' | 'good' | 'fair' | 'poor';
 }
 
-export default function WebRTCViewer({ broadcasterId, streamTitle, onStreamEnd }: WebRTCViewerProps) {
+export default function WebRTCViewer({
+  broadcasterId,
+  streamTitle,
+  onStreamEnd,
+}: WebRTCViewerProps) {
   const { address, isConnected } = useAccount();
   const [isConnected2Stream, setIsConnected2Stream] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -31,7 +42,7 @@ export default function WebRTCViewer({ broadcasterId, streamTitle, onStreamEnd }
   const [connectionStats, setConnectionStats] = useState<ConnectionStats>({
     bitrate: 0,
     packetsLost: 0,
-    quality: 'good'
+    quality: 'good',
   });
   const [connected, setConnected] = useState(false);
 
@@ -51,31 +62,31 @@ export default function WebRTCViewer({ broadcasterId, streamTitle, onStreamEnd }
     }
 
     console.log('🔌 Viewer connecting to HTTP streaming service...');
-    
+
     const initializeViewer = async () => {
       try {
         // Join as viewer using HTTP service
         console.log('👀 Joining as viewer for broadcaster:', broadcasterId);
         await streamingService.joinAsViewer(viewerId.current, broadcasterId, address);
-        
+
         setConnected(true);
         setError(null);
         setIsLoading(false);
-        
+
         // Since this is HTTP-based, we'll simulate the stream connection
         // In a real WebRTC implementation, this would establish peer connections
         setIsConnected2Stream(true);
         toast.success('Connected to stream!');
-        
+
         // Start polling for chat messages
         startChatPolling();
-        
+
         // Start polling for stream updates
         startStreamPolling();
-        
+
         // Initialize WebRTC connection
         initializeWebRTC();
-        
+
         console.log('✅ Successfully joined as viewer');
       } catch (error) {
         console.error('❌ Failed to join as viewer:', error);
@@ -93,21 +104,21 @@ export default function WebRTCViewer({ broadcasterId, streamTitle, onStreamEnd }
 
   const startChatPolling = () => {
     let lastMessageTimestamp = 0;
-    
+
     chatPollingRef.current = setInterval(async () => {
       try {
         const messages = await streamingService.getChatMessages(broadcasterId);
-        
+
         // Check for new messages based on timestamp
         const newMessages = messages.filter(msg => msg.timestamp > lastMessageTimestamp);
-        
+
         if (newMessages.length > 0) {
           // Update last timestamp
           lastMessageTimestamp = Math.max(...newMessages.map(msg => msg.timestamp));
-          
+
           // Update all messages (for proper ordering)
           setChatMessages(messages);
-          
+
           console.log(`📨 Received ${newMessages.length} new chat messages`);
         }
       } catch (error) {
@@ -121,22 +132,22 @@ export default function WebRTCViewer({ broadcasterId, streamTitle, onStreamEnd }
       try {
         const streams = await streamingService.getActiveStreams();
         const currentStream = streams.find(s => s.broadcasterId === broadcasterId);
-        
+
         if (currentStream) {
           setViewerCount(currentStream.viewerCount);
-          
+
           // Simulate connection stats
           setConnectionStats(prev => ({
             bitrate: Math.floor(Math.random() * 1000) + 500,
             packetsLost: Math.floor(Math.random() * 10),
-            quality: Math.random() > 0.8 ? 'excellent' : Math.random() > 0.6 ? 'good' : 'fair'
+            quality: Math.random() > 0.8 ? 'excellent' : Math.random() > 0.6 ? 'good' : 'fair',
           }));
         } else {
           // Stream not found, it may have ended
           setError('Stream has ended');
           setIsConnected2Stream(false);
           toast('Stream has ended');
-          
+
           if (onStreamEnd) {
             onStreamEnd();
           }
@@ -149,16 +160,16 @@ export default function WebRTCViewer({ broadcasterId, streamTitle, onStreamEnd }
 
   const initializeWebRTC = () => {
     console.log('🔗 Initializing WebRTC peer connection as viewer');
-    
+
     const peer = new SimplePeer({
       initiator: false, // Viewer doesn't initiate
       trickle: false,
       config: {
         iceServers: [
           { urls: 'stun:stun.l.google.com:19302' },
-          { urls: 'stun:stun1.l.google.com:19302' }
-        ]
-      }
+          { urls: 'stun:stun1.l.google.com:19302' },
+        ],
+      },
     });
 
     peer.on('signal', async (signalData: any) => {
@@ -211,11 +222,11 @@ export default function WebRTCViewer({ broadcasterId, streamTitle, onStreamEnd }
     signalPollingRef.current = setInterval(async () => {
       try {
         const signals = await streamingService.getSignals(viewerId.current, 'viewer');
-        
+
         signals.forEach((signalData: any) => {
           const { fromId, signal } = signalData;
           console.log('📡 Received WebRTC signal from broadcaster:', fromId);
-          
+
           if (peerRef.current && fromId === broadcasterId) {
             try {
               peerRef.current.signal(signal);
@@ -235,7 +246,7 @@ export default function WebRTCViewer({ broadcasterId, streamTitle, onStreamEnd }
       clearInterval(chatPollingRef.current);
       chatPollingRef.current = null;
     }
-    
+
     if (streamPollingRef.current) {
       clearInterval(streamPollingRef.current);
       streamPollingRef.current = null;
@@ -250,7 +261,7 @@ export default function WebRTCViewer({ broadcasterId, streamTitle, onStreamEnd }
       peerRef.current.destroy();
       peerRef.current = null;
     }
-    
+
     streamingService.disconnect();
   };
 
@@ -262,31 +273,27 @@ export default function WebRTCViewer({ broadcasterId, streamTitle, onStreamEnd }
 
     try {
       console.log('📤 Viewer sending chat message:', messageToSend);
-      await streamingService.sendChatMessage(
-        broadcasterId,
-        messageToSend,
-        address,
-        'Viewer'
-      );
-      
+      await streamingService.sendChatMessage(broadcasterId, messageToSend, address, 'Viewer');
+
       // Optimistically add message to local state
       const newMessage: ChatMessage = {
         message: messageToSend,
         senderAddress: address,
         senderName: 'Viewer',
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
-      
+
       setChatMessages(prev => {
         // Check if message already exists to avoid duplicates
-        const exists = prev.some(msg => 
-          msg.message === newMessage.message && 
-          msg.senderAddress === newMessage.senderAddress &&
-          Math.abs(msg.timestamp - newMessage.timestamp) < 5000 // Within 5 seconds
+        const exists = prev.some(
+          msg =>
+            msg.message === newMessage.message &&
+            msg.senderAddress === newMessage.senderAddress &&
+            Math.abs(msg.timestamp - newMessage.timestamp) < 5000 // Within 5 seconds
         );
         return exists ? prev : [...prev, newMessage];
       });
-      
+
       toast.success('Message sent!');
     } catch (error) {
       console.error('Error sending chat message:', error);
@@ -298,11 +305,16 @@ export default function WebRTCViewer({ broadcasterId, streamTitle, onStreamEnd }
 
   const getQualityColor = (quality: string) => {
     switch (quality) {
-      case 'excellent': return 'text-green-400';
-      case 'good': return 'text-yellow-400';
-      case 'fair': return 'text-orange-400';
-      case 'poor': return 'text-red-400';
-      default: return 'text-gray-400';
+      case 'excellent':
+        return 'text-green-400';
+      case 'good':
+        return 'text-yellow-400';
+      case 'fair':
+        return 'text-orange-400';
+      case 'poor':
+        return 'text-red-400';
+      default:
+        return 'text-gray-400';
     }
   };
 
@@ -332,13 +344,13 @@ export default function WebRTCViewer({ broadcasterId, streamTitle, onStreamEnd }
               {connected ? '🟢 Connected via HTTP streaming' : '🔴 Disconnected'}
             </p>
           </div>
-          
+
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2 px-3 py-1 bg-red-500/20 text-red-400 rounded-full">
               <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
               LIVE
             </div>
-            
+
             <div className="flex items-center gap-2 text-gray-400">
               <FaUsers />
               <span>{viewerCount} viewers</span>
@@ -363,8 +375,7 @@ export default function WebRTCViewer({ broadcasterId, streamTitle, onStreamEnd }
               controls
               className="w-full h-full object-cover"
             />
-            
-            
+
             {/* Loading State */}
             {isLoading && (
               <div className="absolute inset-0 flex items-center justify-center bg-gray-900/80">
@@ -393,7 +404,9 @@ export default function WebRTCViewer({ broadcasterId, streamTitle, onStreamEnd }
                 <div className="text-center">
                   <FaExclamationTriangle className="w-16 h-16 text-red-400 mx-auto mb-4" />
                   <p className="text-red-400 text-lg">{error}</p>
-                  <p className="text-gray-500 text-sm mt-2">Stream may have ended or is not available</p>
+                  <p className="text-gray-500 text-sm mt-2">
+                    Stream may have ended or is not available
+                  </p>
                 </div>
               </div>
             )}
@@ -402,7 +415,12 @@ export default function WebRTCViewer({ broadcasterId, streamTitle, onStreamEnd }
             {isConnected2Stream && !error && (
               <div className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-sm rounded-lg p-3 text-white text-sm">
                 <div className="space-y-1">
-                  <div>Quality: <span className={getQualityColor(connectionStats.quality)}>{connectionStats.quality}</span></div>
+                  <div>
+                    Quality:{' '}
+                    <span className={getQualityColor(connectionStats.quality)}>
+                      {connectionStats.quality}
+                    </span>
+                  </div>
                   <div>Bitrate: {connectionStats.bitrate} kbps</div>
                   <div>Packets Lost: {connectionStats.packetsLost}</div>
                   <div className="text-green-400">HTTP Streaming</div>
@@ -420,17 +438,20 @@ export default function WebRTCViewer({ broadcasterId, streamTitle, onStreamEnd }
               Live Chat
             </h3>
           </div>
-          
+
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
             {chatMessages.length === 0 ? (
-              <p className="text-gray-500 text-center text-sm">No messages yet. Start the conversation!</p>
+              <p className="text-gray-500 text-center text-sm">
+                No messages yet. Start the conversation!
+              </p>
             ) : (
               chatMessages.map((msg, index) => (
                 <div key={index} className="text-sm">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-cyan-400 font-medium">
-                      {msg.senderName === 'Broadcaster' ? '🎥 Broadcaster' : 
-                       msg.senderName || formatAddress(msg.senderAddress)}
+                      {msg.senderName === 'Broadcaster'
+                        ? '🎥 Broadcaster'
+                        : msg.senderName || formatAddress(msg.senderAddress)}
                     </span>
                     <span className="text-gray-500 text-xs">
                       {new Date(msg.timestamp).toLocaleTimeString()}
@@ -441,14 +462,14 @@ export default function WebRTCViewer({ broadcasterId, streamTitle, onStreamEnd }
               ))
             )}
           </div>
-          
+
           <div className="p-4 border-t border-gray-800">
             <div className="flex gap-2">
               <input
                 type="text"
                 value={chatInput}
-                onChange={(e) => setChatInput(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && sendChatMessage()}
+                onChange={e => setChatInput(e.target.value)}
+                onKeyPress={e => e.key === 'Enter' && sendChatMessage()}
                 placeholder="Type a message..."
                 className="flex-1 px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500 text-sm"
               />

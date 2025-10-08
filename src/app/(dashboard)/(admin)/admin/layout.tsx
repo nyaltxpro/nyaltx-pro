@@ -1,13 +1,18 @@
-"use client";
+'use client';
 
-import type { ReactNode } from "react";
-import { useState } from "react";
-import { usePathname } from "next/navigation";
-import AdminSidebar from "@/components/AdminSidebar";
+import dynamic from 'next/dynamic';
+import { usePathname } from 'next/navigation';
+import type { ReactNode } from 'react';
+import { useState } from 'react';
+
+const AdminSidebar = dynamic(() => import('@/components/AdminSidebar'), {
+  ssr: false,
+  loading: () => <div className="fixed left-0 top-0 h-full bg-[#0f1923] w-16 z-50"></div>
+});
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const isLogin = pathname === "/admin/login";
+  const isLogin = pathname === '/admin/login';
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const toggleMobileMenu = () => {
@@ -17,9 +22,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   if (isLogin) {
     return (
       <div className="min-h-screen w-full">
-        <main className="min-h-screen w-full flex items-center justify-center">
-          {children}
-        </main>
+        <main className="min-h-screen w-full flex items-center justify-center">{children}</main>
       </div>
     );
   }
@@ -27,10 +30,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-[#0b0f14] text-white">
       {/* Admin Sidebar */}
-      <AdminSidebar 
-        isMobileMenuOpen={isMobileMenuOpen}
-        toggleMobileMenu={toggleMobileMenu}
-      />
+      <AdminSidebar isMobileMenuOpen={isMobileMenuOpen} toggleMobileMenu={toggleMobileMenu} />
 
       {/* Main Content Area */}
       <div className="md:ml-16 transition-all duration-300">
@@ -42,7 +42,12 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
               className="p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
               </svg>
             </button>
             <h1 className="text-lg font-semibold">NYAX Admin</h1>
@@ -51,9 +56,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         </header>
 
         {/* Main Content */}
-        <main className="p-6">
-          {children}
-        </main>
+        <main className="p-6">{children}</main>
       </div>
     </div>
   );

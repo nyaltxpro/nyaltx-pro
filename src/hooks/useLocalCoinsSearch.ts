@@ -51,27 +51,42 @@ export interface LocalCoin {
 export interface LocalSearchResult {
   coin: LocalCoin;
   relevanceScore: number;
-  matchType: 'exact_symbol' | 'exact_name' | 'symbol_contains' | 'name_contains' | 'description_contains';
+  matchType:
+    | 'exact_symbol'
+    | 'exact_name'
+    | 'symbol_contains'
+    | 'name_contains'
+    | 'description_contains';
 }
 
 // Platform mapping for consistent chain names
 const PLATFORM_MAPPING: { [key: string]: string } = {
-  'ethereum': 'ethereum',
+  ethereum: 'ethereum',
   'binance-smart-chain': 'binance',
   'polygon-pos': 'polygon',
   'arbitrum-one': 'arbitrum',
   'optimistic-ethereum': 'optimism',
-  'base': 'base',
-  'fantom': 'fantom',
-  'avalanche': 'avalanche',
-  'solana': 'solana',
-  'xdai': 'gnosis',
+  base: 'base',
+  fantom: 'fantom',
+  avalanche: 'avalanche',
+  solana: 'solana',
+  xdai: 'gnosis',
   'harmony-shard-0': 'harmony',
-  'moonbeam': 'moonbeam',
-  'cronos': 'cronos'
+  moonbeam: 'moonbeam',
+  cronos: 'cronos',
 };
 
-const CHAIN_PRIORITY = ['ethereum', 'binance', 'polygon', 'arbitrum', 'optimism', 'base', 'avalanche', 'fantom', 'solana'];
+const CHAIN_PRIORITY = [
+  'ethereum',
+  'binance',
+  'polygon',
+  'arbitrum',
+  'optimism',
+  'base',
+  'avalanche',
+  'fantom',
+  'solana',
+];
 
 export const useLocalCoinsSearch = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -83,16 +98,24 @@ export const useLocalCoinsSearch = () => {
   // Get primary chain from platforms
   const getPrimaryChain = (platforms: { [key: string]: string }): string | null => {
     const mappedPlatforms: { [key: string]: string } = {};
-    
+
     Object.entries(platforms).forEach(([platform, address]) => {
       const chainName = PLATFORM_MAPPING[platform];
-      if (chainName && address && address !== '' && address !== '0x0000000000000000000000000000000000000000') {
+      if (
+        chainName &&
+        address &&
+        address !== '' &&
+        address !== '0x0000000000000000000000000000000000000000'
+      ) {
         mappedPlatforms[chainName] = address;
       }
     });
 
-    return CHAIN_PRIORITY.find(chain => mappedPlatforms[chain]) || 
-           Object.keys(mappedPlatforms)[0] || null;
+    return (
+      CHAIN_PRIORITY.find(chain => mappedPlatforms[chain]) ||
+      Object.keys(mappedPlatforms)[0] ||
+      null
+    );
   };
 
   // Get primary address from platforms
@@ -132,12 +155,13 @@ export const useLocalCoinsSearch = () => {
   // Get trending coins (top 10 by market cap) - excluding XRP, Dogecoin, and TRX
   const getTrendingCoins = useMemo(() => {
     const excludedCoins = ['ripple', 'dogecoin', 'tron']; // XRP, DOGE, TRX
-    
+
     return coins
-      .filter(coin => 
-        coin.market_cap_rank && 
-        coin.market_cap_rank <= 50 && 
-        !excludedCoins.includes(coin.id.toLowerCase())
+      .filter(
+        coin =>
+          coin.market_cap_rank &&
+          coin.market_cap_rank <= 50 &&
+          !excludedCoins.includes(coin.id.toLowerCase())
       )
       .sort((a, b) => (a.market_cap_rank || 999) - (b.market_cap_rank || 999))
       .slice(0, 10)
@@ -150,7 +174,7 @@ export const useLocalCoinsSearch = () => {
         price_btc: coin.current_price ? coin.current_price / 100000 : 0, // Rough BTC price estimate
         contractAddresses: coin.platforms || {},
         primaryChain: getPrimaryChain(coin.platforms || {}),
-        primaryAddress: getPrimaryAddress(coin.platforms || {})
+        primaryAddress: getPrimaryAddress(coin.platforms || {}),
       }));
   }, [coins, getPrimaryChain, getPrimaryAddress]);
 
@@ -197,9 +221,11 @@ export const useLocalCoinsSearch = () => {
           matchType = 'description_contains';
         }
         // Contract address match
-        else if (Object.values(coin.platforms || {}).some(address => 
-          address && address.toLowerCase().includes(searchTerm)
-        )) {
+        else if (
+          Object.values(coin.platforms || {}).some(
+            address => address && address.toLowerCase().includes(searchTerm)
+          )
+        ) {
           relevanceScore = 85;
           matchType = 'symbol_contains'; // Treat as high priority
         }
@@ -218,10 +244,10 @@ export const useLocalCoinsSearch = () => {
               primaryAddress: getPrimaryAddress(coin.platforms || {}),
               // Convert image format
               thumb: coin.image?.thumb || coin.image?.small || '',
-              large: coin.image?.large || coin.image?.thumb || ''
+              large: coin.image?.large || coin.image?.thumb || '',
             } as any,
             relevanceScore,
-            matchType
+            matchType,
           });
         }
       }
@@ -233,7 +259,6 @@ export const useLocalCoinsSearch = () => {
 
       setIsLoading(false);
       return sortedResults;
-
     } catch (err) {
       console.error('Local search error:', err);
       setError(err instanceof Error ? err.message : 'Search failed');
@@ -250,9 +275,11 @@ export const useLocalCoinsSearch = () => {
   // Get coins by category
   const getCoinsByCategory = (category: string, limit: number = 10): LocalCoin[] => {
     return coins
-      .filter(coin => coin.categories && coin.categories.some(cat => 
-        cat.toLowerCase().includes(category.toLowerCase())
-      ))
+      .filter(
+        coin =>
+          coin.categories &&
+          coin.categories.some(cat => cat.toLowerCase().includes(category.toLowerCase()))
+      )
       .slice(0, limit);
   };
 
@@ -278,6 +305,6 @@ export const useLocalCoinsSearch = () => {
     isLoading: isLoading || !isDataLoaded,
     error,
     totalCoins: coins.length,
-    isDataLoaded
+    isDataLoaded,
   };
 };

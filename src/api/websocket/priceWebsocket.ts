@@ -22,29 +22,29 @@ class PriceWebSocketService {
 
   public connect(limit: number = 8): void {
     if (this.isConnected) return;
-    
+
     this.tickerLimit = limit;
     this.isConnected = true;
-    
+
     // Initial data fetch
     this.fetchAndBroadcast();
-    
+
     // Set up polling interval
     this.intervalId = setInterval(() => {
       this.fetchAndBroadcast();
     }, this.pollingInterval);
-    
+
     console.log('WebSocket connected');
   }
 
   public disconnect(): void {
     if (!this.isConnected) return;
-    
+
     if (this.intervalId) {
       clearInterval(this.intervalId);
       this.intervalId = null;
     }
-    
+
     this.isConnected = false;
     console.log('WebSocket disconnected');
   }

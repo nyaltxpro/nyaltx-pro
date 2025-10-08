@@ -6,7 +6,7 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const walletAddress = searchParams.get('address');
-    
+
     if (!walletAddress) {
       return NextResponse.json({ error: 'Wallet address is required' }, { status: 400 });
     }
@@ -14,11 +14,13 @@ export async function GET(req: NextRequest) {
     console.log('Fetching tokens for wallet:', walletAddress);
 
     const col = await getCollection<TokenRegistration>('token_registrations');
-    
+
     // Find tokens submitted by this wallet address (case-insensitive)
-    const tokens = await col.find({
-      submittedByAddressLower: walletAddress.toLowerCase()
-    }).toArray();
+    const tokens = await col
+      .find({
+        submittedByAddressLower: walletAddress.toLowerCase(),
+      })
+      .toArray();
 
     console.log(`Found ${tokens.length} tokens for wallet ${walletAddress}`);
 
@@ -42,22 +44,24 @@ export async function GET(req: NextRequest) {
       submittedAt: new Date(token.createdAt).getTime(),
       approvedAt: token.status === 'approved' ? new Date(token.updatedAt).getTime() : undefined,
       approvedBy: undefined, // Not stored in current schema
-      rejectionReason: undefined // Not stored in current schema
+      rejectionReason: undefined, // Not stored in current schema
     }));
 
     return NextResponse.json({
       success: true,
       tokens: transformedTokens,
-      count: transformedTokens.length
+      count: transformedTokens.length,
     });
-
   } catch (error) {
     console.error('Error fetching tokens by wallet:', error);
-    return NextResponse.json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-      tokens: []
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        tokens: [],
+      },
+      { status: 500 }
+    );
   }
 }
 

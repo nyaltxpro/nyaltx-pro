@@ -14,15 +14,13 @@ const ExchangeSelector: React.FC<ExchangeSelectorProps> = ({
   exchanges,
   selectedExchange,
   onSelectExchange,
-  chainId
+  chainId,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  
+
   // Filter exchanges by chain support
-  const compatibleExchanges = exchanges.filter(exchange => 
-    exchange.isChainSupported(chainId)
-  );
-  
+  const compatibleExchanges = exchanges.filter(exchange => exchange.isChainSupported(chainId));
+
   return (
     <div className="relative">
       <button
@@ -45,13 +43,15 @@ const ExchangeSelector: React.FC<ExchangeSelectorProps> = ({
           )}
           {!selectedExchange && <span>Select Exchange</span>}
         </div>
-        <FaChevronDown className={`ml-2 transition-transform ${isOpen ? 'transform rotate-180' : ''}`} />
+        <FaChevronDown
+          className={`ml-2 transition-transform ${isOpen ? 'transform rotate-180' : ''}`}
+        />
       </button>
-      
+
       {isOpen && (
         <div className="absolute z-10 w-full mt-1 bg-gray-800 rounded-lg shadow-lg overflow-hidden">
           {compatibleExchanges.length > 0 ? (
-            compatibleExchanges.map((exchange) => (
+            compatibleExchanges.map(exchange => (
               <div
                 key={exchange.config.id}
                 className="flex items-center p-3 hover:bg-gray-700 cursor-pointer"

@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
       token_name: fav.tokenName,
       chain_id: fav.chainId,
       image_uri: fav.imageUri || null,
-      created_at: fav.createdAt.toISOString()
+      created_at: fav.createdAt.toISOString(),
     }));
 
     return NextResponse.json({ favorites });
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
     const existing = await collection.findOne({
       walletAddress: walletAddress.toLowerCase(),
       tokenAddress: tokenAddress.toLowerCase(),
-      chainId: chainId || 1
+      chainId: chainId || 1,
     });
 
     if (existing) {
@@ -76,23 +76,25 @@ export async function POST(request: NextRequest) {
       tokenName: tokenName,
       chainId: chainId || 1,
       imageUri: imageUri || null,
-      createdAt: new Date()
+      createdAt: new Date(),
     };
 
     const result = await collection.insertOne(favorite);
     const insertedFavorite = await collection.findOne({ _id: result.insertedId });
 
     // Transform the data to match frontend interface
-    const transformedFavorite = insertedFavorite ? {
-      id: insertedFavorite._id?.toString() || '',
-      wallet_address: insertedFavorite.walletAddress,
-      token_address: insertedFavorite.tokenAddress,
-      token_symbol: insertedFavorite.tokenSymbol,
-      token_name: insertedFavorite.tokenName,
-      chain_id: insertedFavorite.chainId,
-      image_uri: insertedFavorite.imageUri || null,
-      created_at: insertedFavorite.createdAt.toISOString()
-    } : null;
+    const transformedFavorite = insertedFavorite
+      ? {
+          id: insertedFavorite._id?.toString() || '',
+          wallet_address: insertedFavorite.walletAddress,
+          token_address: insertedFavorite.tokenAddress,
+          token_symbol: insertedFavorite.tokenSymbol,
+          token_name: insertedFavorite.tokenName,
+          chain_id: insertedFavorite.chainId,
+          image_uri: insertedFavorite.imageUri || null,
+          created_at: insertedFavorite.createdAt.toISOString(),
+        }
+      : null;
 
     return NextResponse.json({ favorite: transformedFavorite });
   } catch (error) {
@@ -109,15 +111,18 @@ export async function DELETE(request: NextRequest) {
     const chainId = searchParams.get('chain') || '1';
 
     if (!walletAddress || !tokenAddress) {
-      return NextResponse.json({ error: 'Wallet address and token address are required' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Wallet address and token address are required' },
+        { status: 400 }
+      );
     }
 
     const collection = await getCollection<Favorite>('favorites');
-    
+
     const result = await collection.deleteOne({
       walletAddress: walletAddress.toLowerCase(),
       tokenAddress: tokenAddress.toLowerCase(),
-      chainId: parseInt(chainId)
+      chainId: parseInt(chainId),
     });
 
     if (result.deletedCount === 0) {

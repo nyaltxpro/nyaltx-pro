@@ -2,14 +2,24 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { FaCrown, FaTrophy, FaFire, FaClock, FaArrowUp, FaArrowDown, FaMinus } from 'react-icons/fa';
+import {
+  FaCrown,
+  FaTrophy,
+  FaFire,
+  FaClock,
+  FaArrowUp,
+  FaArrowDown,
+  FaMinus,
+} from 'react-icons/fa';
 import { LeaderboardEntry, WeeklyWinner } from '@/types/gamification';
 
 interface RaceToLibertyLeaderboardProps {
   className?: string;
 }
 
-export default function RaceToLibertyLeaderboard({ className = '' }: RaceToLibertyLeaderboardProps) {
+export default function RaceToLibertyLeaderboard({
+  className = '',
+}: RaceToLibertyLeaderboardProps) {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [weeklyWinners, setWeeklyWinners] = useState<WeeklyWinner[]>([]);
   const [timeframe, setTimeframe] = useState<'current' | 'weekly'>('current');
@@ -19,7 +29,7 @@ export default function RaceToLibertyLeaderboard({ className = '' }: RaceToLiber
   useEffect(() => {
     fetchLeaderboard();
     fetchWeeklyWinners();
-    
+
     // Auto-refresh every 30 seconds
     const interval = setInterval(fetchLeaderboard, 30000);
     return () => clearInterval(interval);
@@ -29,7 +39,7 @@ export default function RaceToLibertyLeaderboard({ className = '' }: RaceToLiber
     try {
       const response = await fetch(`/api/gamification/leaderboard?timeframe=${timeframe}&limit=20`);
       const data = await response.json();
-      
+
       if (data.success) {
         setLeaderboard(data.leaderboard);
         setLastUpdated(data.lastUpdated);
@@ -45,7 +55,7 @@ export default function RaceToLibertyLeaderboard({ className = '' }: RaceToLiber
     try {
       const response = await fetch('/api/gamification/weekly-winner?limit=5');
       const data = await response.json();
-      
+
       if (data.success) {
         setWeeklyWinners(data.winners);
       }
@@ -56,20 +66,20 @@ export default function RaceToLibertyLeaderboard({ className = '' }: RaceToLiber
 
   const formatTimeRemaining = (lastBoostTime: Date, decayHours: number) => {
     const now = new Date();
-    const expiresAt = new Date(lastBoostTime.getTime() + (decayHours * 60 * 60 * 1000));
+    const expiresAt = new Date(lastBoostTime.getTime() + decayHours * 60 * 60 * 1000);
     const remaining = expiresAt.getTime() - now.getTime();
-    
+
     if (remaining <= 0) return 'Expired';
-    
+
     const hours = Math.floor(remaining / (1000 * 60 * 60));
     const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
-    
+
     return `${hours}h ${minutes}m`;
   };
 
   const getPositionIcon = (position: number, previousPosition?: number) => {
     if (!previousPosition) return <FaMinus className="text-gray-400" />;
-    
+
     if (position < previousPosition) {
       return <FaArrowUp className="text-green-400" />;
     } else if (position > previousPosition) {
@@ -109,7 +119,9 @@ export default function RaceToLibertyLeaderboard({ className = '' }: RaceToLiber
 
   if (loading) {
     return (
-      <div className={`bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10 ${className}`}>
+      <div
+        className={`bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10 ${className}`}
+      >
         <div className="animate-pulse space-y-4">
           <div className="h-8 bg-white/10 rounded"></div>
           {[...Array(5)].map((_, i) => (
@@ -121,7 +133,9 @@ export default function RaceToLibertyLeaderboard({ className = '' }: RaceToLiber
   }
 
   return (
-    <div className={`bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10 ${className}`}>
+    <div
+      className={`bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10 ${className}`}
+    >
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
@@ -133,7 +147,7 @@ export default function RaceToLibertyLeaderboard({ className = '' }: RaceToLiber
             <p className="text-sm text-gray-400">Live Leaderboard</p>
           </div>
         </div>
-        
+
         <div className="flex gap-2">
           <button
             onClick={() => setTimeframe('current')}
@@ -166,14 +180,14 @@ export default function RaceToLibertyLeaderboard({ className = '' }: RaceToLiber
             Hall of Fame
           </h4>
           <div className="flex gap-3 overflow-x-auto">
-            {weeklyWinners.slice(0, 5).map((winner) => (
+            {weeklyWinners.slice(0, 5).map(winner => (
               <div key={winner.id} className="flex-shrink-0 text-center">
                 <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mb-2 relative">
-                  <Image 
-                    src={winner.tokenLogo} 
-                    alt={winner.tokenName} 
-                    width={32} 
-                    height={32} 
+                  <Image
+                    src={winner.tokenLogo}
+                    alt={winner.tokenName}
+                    width={32}
+                    height={32}
                     className="rounded-full"
                   />
                   <FaCrown className="absolute -top-1 -right-1 text-yellow-400 text-xs" />
@@ -226,7 +240,7 @@ export default function RaceToLibertyLeaderboard({ className = '' }: RaceToLiber
                       <FaCrown className="absolute -top-1 -right-1 text-yellow-400 text-sm" />
                     )}
                   </div>
-                  
+
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
                       <h4 className="font-bold">{entry.tokenSymbol}</h4>
@@ -248,23 +262,31 @@ export default function RaceToLibertyLeaderboard({ className = '' }: RaceToLiber
                       {timeframe === 'current' ? entry.currentPoints : entry.weeklyPoints}
                     </span>
                   </div>
-                  
+
                   {entry.decayingPoints.length > 0 && (
                     <div className="flex items-center gap-1 text-xs text-gray-400">
                       <FaClock className="text-xs" />
                       <span>
                         {formatTimeRemaining(
                           entry.lastBoostTime,
-                          Math.max(...entry.decayingPoints.map(b => {
-                            switch (b.boostPackType) {
-                              case 'kayak': return 6;
-                              case 'starter': return 168;
-                              case 'growth': return 336;
-                              case 'pro': return 720;
-                              case 'elite': return 2160;
-                              default: return 6;
-                            }
-                          }))
+                          Math.max(
+                            ...entry.decayingPoints.map(b => {
+                              switch (b.boostPackType) {
+                                case 'kayak':
+                                  return 6;
+                                case 'starter':
+                                  return 168;
+                                case 'growth':
+                                  return 336;
+                                case 'pro':
+                                  return 720;
+                                case 'elite':
+                                  return 2160;
+                                default:
+                                  return 6;
+                              }
+                            })
+                          )
                         )}
                       </span>
                     </div>
@@ -283,7 +305,7 @@ export default function RaceToLibertyLeaderboard({ className = '' }: RaceToLiber
                     <div
                       className="bg-gradient-to-r from-cyan-500 to-blue-500 h-2 rounded-full transition-all duration-1000"
                       style={{
-                        width: `${Math.max(10, (entry.currentPoints / entry.decayingPoints.reduce((sum, b) => sum + b.originalPoints, 0)) * 100)}%`
+                        width: `${Math.max(10, (entry.currentPoints / entry.decayingPoints.reduce((sum, b) => sum + b.originalPoints, 0)) * 100)}%`,
                       }}
                     />
                   </div>

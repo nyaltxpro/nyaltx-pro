@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
 import Image from 'next/image';
@@ -12,12 +12,18 @@ import TokenDebugger from '@/components/TokenDebugger';
 import { RegisteredToken } from '@/types/token';
 
 // Component to handle image loading with fallback
-const TokenImage = ({ src, alt, width, height, className }: { 
-  src: string; 
-  alt: string; 
-  width: number; 
-  height: number; 
-  className?: string; 
+const TokenImage = ({
+  src,
+  alt,
+  width,
+  height,
+  className,
+}: {
+  src: string;
+  alt: string;
+  width: number;
+  height: number;
+  className?: string;
 }) => {
   const [imgSrc, setImgSrc] = useState(src);
   const [hasError, setHasError] = useState(false);
@@ -28,11 +34,11 @@ const TokenImage = ({ src, alt, width, height, className }: {
   };
 
   return (
-    <Image 
-      src={imgSrc} 
-      alt={alt} 
-      width={width} 
-      height={height} 
+    <Image
+      src={imgSrc}
+      alt={alt}
+      width={width}
+      height={height}
       className={className}
       onError={handleError}
       unoptimized={hasError} // Use unoptimized for fallback images
@@ -47,7 +53,7 @@ const NO_WALLET_MESSAGE = {
   symbol: 'WALLET',
   logo: '/crypto-icons/color/generic.svg',
   basePoints: 0,
-  isUserToken: false
+  isUserToken: false,
 };
 
 interface CoinOption {
@@ -69,31 +75,41 @@ const TIER_MULTIPLIERS = {
 };
 
 // Payment configuration
-const DEFAULT_RECEIVER: `0x${string}` = "0x81bA7b98E49014Bff22F811E9405640bC2B39cC0";
-const DEFAULT_NYAX: `0x${string}` = "0x5eed5621b92be4473f99bacac77acfa27deb57d9";
-const DEFAULT_USDT: `0x${string}` = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
+const DEFAULT_RECEIVER: `0x${string}` = '0x81bA7b98E49014Bff22F811E9405640bC2B39cC0';
+const DEFAULT_NYAX: `0x${string}` = '0x5eed5621b92be4473f99bacac77acfa27deb57d9';
+const DEFAULT_USDT: `0x${string}` = '0xdAC17F958D2ee523a2206206994597C13D831ec7';
 
-const RECEIVER = (process.env.NEXT_PUBLIC_PAYMENT_RECEIVER_ADDRESS as `0x${string}` | undefined) ?? DEFAULT_RECEIVER;
-const NYAX_TOKEN = (process.env.NEXT_PUBLIC_NYAX_TOKEN_ADDRESS as `0x${string}` | undefined) ?? DEFAULT_NYAX;
+const RECEIVER =
+  (process.env.NEXT_PUBLIC_PAYMENT_RECEIVER_ADDRESS as `0x${string}` | undefined) ??
+  DEFAULT_RECEIVER;
+const NYAX_TOKEN =
+  (process.env.NEXT_PUBLIC_NYAX_TOKEN_ADDRESS as `0x${string}` | undefined) ?? DEFAULT_NYAX;
 const USDT_TOKEN = DEFAULT_USDT;
-const PAYMENT_CHAIN_ID = process.env.NEXT_PUBLIC_PAYMENT_CHAIN_ID ? Number(process.env.NEXT_PUBLIC_PAYMENT_CHAIN_ID) : 1; // Default to mainnet Ethereum
-const FALLBACK_ETH_PRICE = process.env.NEXT_PUBLIC_FALLBACK_ETH_PRICE ? Number(process.env.NEXT_PUBLIC_FALLBACK_ETH_PRICE) : 3000;
+const PAYMENT_CHAIN_ID = process.env.NEXT_PUBLIC_PAYMENT_CHAIN_ID
+  ? Number(process.env.NEXT_PUBLIC_PAYMENT_CHAIN_ID)
+  : 1; // Default to mainnet Ethereum
+const FALLBACK_ETH_PRICE = process.env.NEXT_PUBLIC_FALLBACK_ETH_PRICE
+  ? Number(process.env.NEXT_PUBLIC_FALLBACK_ETH_PRICE)
+  : 3000;
 
 // Promo codes configuration
 const PROMO_CODES = {
-  'FREE': { discount: 1, description: '100% Launch Discount' },
-  'LAUNCH10': { discount: 0.1, description: '10% Launch Discount' },
-  'EARLY20': { discount: 0.2, description: '20% Early Bird Discount' },
-  'LIBERTY15': { discount: 0.15, description: '15% Liberty Special' },
-  'NYAX25': { discount: 0.25, description: '25% NYAX Community Discount' },
-  'FREEDOM30': { discount: 0.3, description: '30% Freedom Discount' },
+  FREE: { discount: 1, description: '100% Launch Discount' },
+  LAUNCH10: { discount: 0.1, description: '10% Launch Discount' },
+  EARLY20: { discount: 0.2, description: '20% Early Bird Discount' },
+  LIBERTY15: { discount: 0.15, description: '15% Liberty Special' },
+  NYAX25: { discount: 0.25, description: '25% NYAX Community Discount' },
+  FREEDOM30: { discount: 0.3, description: '30% Freedom Discount' },
 } as const;
 
 // Fetch ETH price from multiple sources
 async function fetchETHPriceUSD(): Promise<number> {
   // Try CoinGecko first
   try {
-    const res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd", { cache: "no-store" });
+    const res = await fetch(
+      'https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd',
+      { cache: 'no-store' }
+    );
     if (res.ok) {
       const data = await res.json();
       const price = data?.ethereum?.usd;
@@ -103,7 +119,9 @@ async function fetchETHPriceUSD(): Promise<number> {
 
   // Fallback to Coinbase
   try {
-    const res = await fetch("https://api.coinbase.com/v2/prices/ETH-USD/spot", { cache: "no-store" });
+    const res = await fetch('https://api.coinbase.com/v2/prices/ETH-USD/spot', {
+      cache: 'no-store',
+    });
     if (res.ok) {
       const data = await res.json();
       const price = parseFloat(data?.data?.amount);
@@ -114,7 +132,15 @@ async function fetchETHPriceUSD(): Promise<number> {
   return FALLBACK_ETH_PRICE;
 }
 
-export default function RaceToLibertyCheckout({ tier, amount, userTokens }: { tier: 'kayak' | 'speedboat' | 'helicopter' | 'submarine', amount: number, userTokens: RegisteredToken[] }) {
+export default function RaceToLibertyCheckout({
+  tier,
+  amount,
+  userTokens,
+}: {
+  tier: 'kayak' | 'speedboat' | 'helicopter' | 'submarine';
+  amount: number;
+  userTokens: RegisteredToken[];
+}) {
   const { isConnected, address, chain } = useAccount();
   const { sendTransactionAsync } = useSendTransaction();
   const { writeContractAsync } = useWriteContract();
@@ -138,7 +164,9 @@ export default function RaceToLibertyCheckout({ tier, amount, userTokens }: { ti
 
   // Fetch ETH price
   useEffect(() => {
-    fetchETHPriceUSD().then(setEthPrice).catch(() => setEthPrice(null));
+    fetchETHPriceUSD()
+      .then(setEthPrice)
+      .catch(() => setEthPrice(null));
   }, []);
 
   // Clear tokens when wallet disconnected
@@ -166,7 +194,6 @@ export default function RaceToLibertyCheckout({ tier, amount, userTokens }: { ti
     }
   }, [userTokens]);
 
-
   // Crypto payment handlers
   const computeEthAmount = (usd: number) => {
     const ref = ethPrice && ethPrice > 0 ? ethPrice : FALLBACK_ETH_PRICE;
@@ -177,11 +204,21 @@ export default function RaceToLibertyCheckout({ tier, amount, userTokens }: { ti
   };
 
   const handlePayETH = async () => {
-    if (!RECEIVER) { setError("Receiver address not configured"); return; }
-    if (!isConnected) { setError("Please connect your wallet first"); return; }
+    if (!RECEIVER) {
+      setError('Receiver address not configured');
+      return;
+    }
+    if (!isConnected) {
+      setError('Please connect your wallet first');
+      return;
+    }
     if (PAYMENT_CHAIN_ID && chain?.id !== PAYMENT_CHAIN_ID) {
-      try { await switchChainAsync({ chainId: PAYMENT_CHAIN_ID }); }
-      catch { setError("Please switch to the correct chain to pay"); return; }
+      try {
+        await switchChainAsync({ chainId: PAYMENT_CHAIN_ID });
+      } catch {
+        setError('Please switch to the correct chain to pay');
+        return;
+      }
     }
 
     let ethAmt = computeEthAmount(finalAmount);
@@ -193,81 +230,107 @@ export default function RaceToLibertyCheckout({ tier, amount, userTokens }: { ti
       } catch {}
     }
     if (!ethAmt) {
-      setError("Unable to compute ETH amount. Please try again in a moment.");
+      setError('Unable to compute ETH amount. Please try again in a moment.');
       return;
     }
 
     setError(null);
-    setBusy("eth");
+    setBusy('eth');
     try {
-      const hash = await sendTransactionAsync({ 
-        to: RECEIVER, 
-        value: parseEther(ethAmt.toFixed(6)) 
+      const hash = await sendTransactionAsync({
+        to: RECEIVER,
+        value: parseEther(ethAmt.toFixed(6)),
       });
-      console.log("ETH payment tx:", hash);
+      console.log('ETH payment tx:', hash);
       // TODO: Handle successful payment
     } catch (e: any) {
-      setError(e?.shortMessage || e?.message || "ETH payment failed");
+      setError(e?.shortMessage || e?.message || 'ETH payment failed');
     } finally {
       setBusy(null);
     }
   };
 
   const handlePayNYAX = async () => {
-    if (!RECEIVER) { setError("Receiver address not configured"); return; }
-    if (!NYAX_TOKEN) { setError("NYAX token address not configured"); return; }
-    if (!isConnected) { setError("Please connect your wallet first"); return; }
+    if (!RECEIVER) {
+      setError('Receiver address not configured');
+      return;
+    }
+    if (!NYAX_TOKEN) {
+      setError('NYAX token address not configured');
+      return;
+    }
+    if (!isConnected) {
+      setError('Please connect your wallet first');
+      return;
+    }
     if (PAYMENT_CHAIN_ID && chain?.id !== PAYMENT_CHAIN_ID) {
-      try { await switchChainAsync({ chainId: PAYMENT_CHAIN_ID }); }
-      catch { setError("Please switch to the correct chain to pay"); return; }
+      try {
+        await switchChainAsync({ chainId: PAYMENT_CHAIN_ID });
+      } catch {
+        setError('Please switch to the correct chain to pay');
+        return;
+      }
     }
 
     // 20% discount for NYAX (applied after promo discount)
     const discountedUSD = finalAmount * 0.8;
-    
+
     setError(null);
-    setBusy("nyax");
+    setBusy('nyax');
     try {
       const value = parseUnits(discountedUSD.toFixed(6), 18);
       const hash = await writeContractAsync({
         abi: erc20Abi,
         address: NYAX_TOKEN,
-        functionName: "transfer",
+        functionName: 'transfer',
         args: [RECEIVER, value],
       });
-      console.log("NYAX payment tx:", hash);
+      console.log('NYAX payment tx:', hash);
       // TODO: Handle successful payment
     } catch (e: any) {
-      setError(e?.shortMessage || e?.message || "NYAX payment failed");
+      setError(e?.shortMessage || e?.message || 'NYAX payment failed');
     } finally {
       setBusy(null);
     }
   };
 
   const handlePayUSDT = async () => {
-    if (!RECEIVER) { setError("Receiver address not configured"); return; }
-    if (!USDT_TOKEN) { setError("USDT token address not configured"); return; }
-    if (!isConnected) { setError("Please connect your wallet first"); return; }
+    if (!RECEIVER) {
+      setError('Receiver address not configured');
+      return;
+    }
+    if (!USDT_TOKEN) {
+      setError('USDT token address not configured');
+      return;
+    }
+    if (!isConnected) {
+      setError('Please connect your wallet first');
+      return;
+    }
     if (PAYMENT_CHAIN_ID && chain?.id !== PAYMENT_CHAIN_ID) {
-      try { await switchChainAsync({ chainId: PAYMENT_CHAIN_ID }); }
-      catch { setError("Please switch to the correct chain to pay"); return; }
+      try {
+        await switchChainAsync({ chainId: PAYMENT_CHAIN_ID });
+      } catch {
+        setError('Please switch to the correct chain to pay');
+        return;
+      }
     }
 
     setError(null);
-    setBusy("usdt");
+    setBusy('usdt');
     try {
       // USDT uses 6 decimals on Ethereum
       const value = parseUnits(finalAmount.toFixed(2), 6);
       const hash = await writeContractAsync({
         abi: erc20Abi,
         address: USDT_TOKEN,
-        functionName: "transfer",
+        functionName: 'transfer',
         args: [RECEIVER, value],
       });
-      console.log("USDT payment tx:", hash);
+      console.log('USDT payment tx:', hash);
       // TODO: Handle successful payment
     } catch (e: any) {
-      setError(e?.shortMessage || e?.message || "USDT payment failed");
+      setError(e?.shortMessage || e?.message || 'USDT payment failed');
     } finally {
       setBusy(null);
     }
@@ -340,12 +403,13 @@ export default function RaceToLibertyCheckout({ tier, amount, userTokens }: { ti
         token: selectedCoinData,
         promoCode: promoCode.toUpperCase(),
         totalPoints,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
 
       // Redirect to success page with free promo parameters
-      router.push(`/pricing/race-to-liberty/success?tier=${tier}&token=${selectedCoin}&promo=${promoCode.toUpperCase()}&points=${totalPoints}&free=true`);
-      
+      router.push(
+        `/pricing/race-to-liberty/success?tier=${tier}&token=${selectedCoin}&promo=${promoCode.toUpperCase()}&points=${totalPoints}&free=true`
+      );
     } catch (error) {
       console.error('Free claim error:', error);
       setError('Failed to claim free boost. Please try again.');
@@ -373,8 +437,14 @@ export default function RaceToLibertyCheckout({ tier, amount, userTokens }: { ti
       const searchLower = searchTerm.toLowerCase();
       return availableCoins.filter(coin => {
         try {
-          return (coin.name && typeof coin.name === 'string' && coin.name.toLowerCase().includes(searchLower)) ||
-                 (coin.symbol && typeof coin.symbol === 'string' && coin.symbol.toLowerCase().includes(searchLower));
+          return (
+            (coin.name &&
+              typeof coin.name === 'string' &&
+              coin.name.toLowerCase().includes(searchLower)) ||
+            (coin.symbol &&
+              typeof coin.symbol === 'string' &&
+              coin.symbol.toLowerCase().includes(searchLower))
+          );
         } catch (err) {
           console.error('Error filtering coin:', coin, err);
           return false;
@@ -393,15 +463,14 @@ export default function RaceToLibertyCheckout({ tier, amount, userTokens }: { ti
   const totalPoints = useMemo(() => {
     if (!selectedCoinData) return 0;
     let points = selectedCoinData.basePoints * tierInfo.multiplier;
-    
+
     // Apply additional boost if it's a user token
     if (selectedCoinData.isUserToken && selectedCoinData.boostMultiplier) {
       points = Math.round(points * selectedCoinData.boostMultiplier);
     }
-    
+
     return points;
   }, [selectedCoinData, tierInfo.multiplier]);
-
 
   return (
     <div className="min-h-screen  text-white">
@@ -427,20 +496,20 @@ export default function RaceToLibertyCheckout({ tier, amount, userTokens }: { ti
               </div>
               Back to Pricing
             </button>
-            
+
             <div className="text-center mb-8">
               <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 mb-6">
                 <FaTrophy className="text-yellow-400" />
                 <span className="text-sm font-medium">{tierInfo.name} Tier</span>
                 <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
               </div>
-              
+
               <h1 className="text-5xl md:text-6xl font-bold mb-4">
                 <span className="bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
                   Race to Liberty
                 </span>
               </h1>
-              
+
               <p className="text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed">
                 {!isConnected ? (
                   'Connect your wallet to access your registered tokens with boost multipliers!'
@@ -448,7 +517,8 @@ export default function RaceToLibertyCheckout({ tier, amount, userTokens }: { ti
                   <>
                     Select your registered token and boost your points in the race!
                     <span className="block text-cyan-400 text-lg mt-2 font-medium">
-                      🎉 {userTokens.length} approved token{userTokens.length > 1 ? 's' : ''} ready for boost!
+                      🎉 {userTokens.length} approved token{userTokens.length > 1 ? 's' : ''} ready
+                      for boost!
                     </span>
                   </>
                 ) : (
@@ -489,7 +559,7 @@ export default function RaceToLibertyCheckout({ tier, amount, userTokens }: { ti
                       type="text"
                       placeholder="Search your tokens..."
                       value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
+                      onChange={e => setSearchTerm(e.target.value)}
                       className="block w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all"
                     />
                   </div>
@@ -500,12 +570,17 @@ export default function RaceToLibertyCheckout({ tier, amount, userTokens }: { ti
                   <div className="text-center py-16">
                     <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
                       <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                        <path
+                          fillRule="evenodd"
+                          d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z"
+                          clipRule="evenodd"
+                        />
                       </svg>
                     </div>
                     <h3 className="text-2xl font-bold mb-4">Connect Your Wallet</h3>
                     <p className="text-gray-400 mb-8 max-w-md mx-auto">
-                      Connect your wallet to access your registered tokens and unlock boost multipliers for the race.
+                      Connect your wallet to access your registered tokens and unlock boost
+                      multipliers for the race.
                     </p>
                     <ConnectWalletButton />
                   </div>
@@ -513,7 +588,7 @@ export default function RaceToLibertyCheckout({ tier, amount, userTokens }: { ti
                   /* User's Registered Tokens */
                   <div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {filteredCoins.map((coin) => (
+                      {filteredCoins.map(coin => (
                         <button
                           key={coin.id}
                           onClick={() => setSelectedCoin(coin.id)}
@@ -527,31 +602,45 @@ export default function RaceToLibertyCheckout({ tier, amount, userTokens }: { ti
                           <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 flex items-center justify-center shadow-lg">
                             <FaStar className="text-white text-xs" />
                           </div>
-                          
+
                           {/* Token Info */}
                           <div className="flex flex-col items-center text-center">
                             <div className="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center mb-4 group-hover:bg-white/20 transition-colors">
-                              <TokenImage src={coin.logo} alt={coin.name} width={40} height={40} className="rounded-xl" />
+                              <TokenImage
+                                src={coin.logo}
+                                alt={coin.name}
+                                width={40}
+                                height={40}
+                                className="rounded-xl"
+                              />
                             </div>
-                            
+
                             <h4 className="font-bold text-lg mb-1">{coin.symbol}</h4>
-                            <p className="text-gray-400 text-sm mb-3 truncate w-full">{coin.name}</p>
-                            
+                            <p className="text-gray-400 text-sm mb-3 truncate w-full">
+                              {coin.name}
+                            </p>
+
                             {/* Stats */}
                             <div className="w-full space-y-2">
                               <div className="flex justify-between items-center text-sm">
                                 <span className="text-gray-400">Points:</span>
                                 <span className="font-bold text-yellow-400">
-                                  {Math.round(coin.basePoints * tierInfo.multiplier * (coin.boostMultiplier || 1))}
+                                  {Math.round(
+                                    coin.basePoints *
+                                      tierInfo.multiplier *
+                                      (coin.boostMultiplier || 1)
+                                  )}
                                 </span>
                               </div>
                               <div className="flex justify-between items-center text-sm">
                                 <span className="text-gray-400">Boost:</span>
-                                <span className="font-bold text-cyan-400">{coin.boostMultiplier}x</span>
+                                <span className="font-bold text-cyan-400">
+                                  {coin.boostMultiplier}x
+                                </span>
                               </div>
                             </div>
                           </div>
-                          
+
                           {/* Selection Indicator */}
                           {selectedCoin === coin.id && (
                             <div className="absolute inset-0 rounded-2xl border-2 border-cyan-400 pointer-events-none">
@@ -570,10 +659,11 @@ export default function RaceToLibertyCheckout({ tier, amount, userTokens }: { ti
                     </div>
                     <h3 className="text-2xl font-bold mb-4">No Registered Tokens</h3>
                     <p className="text-gray-400 mb-8 max-w-md mx-auto">
-                      You haven't registered any tokens yet. Register your tokens to unlock boost multipliers and dominate the race!
+                      You haven't registered any tokens yet. Register your tokens to unlock boost
+                      multipliers and dominate the race!
                     </p>
-                    <a 
-                      href="/dashboard/register-token" 
+                    <a
+                      href="/dashboard/register-token"
                       className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-semibold rounded-xl transition-all duration-300 hover:scale-105 shadow-lg"
                     >
                       <FaCoins />
@@ -591,7 +681,7 @@ export default function RaceToLibertyCheckout({ tier, amount, userTokens }: { ti
                       </div>
                       Complete Purchase
                     </h3>
-                    
+
                     {/* Payment Methods */}
                     <div className="grid grid-cols-2 gap-4 mb-6">
                       <button
@@ -608,7 +698,7 @@ export default function RaceToLibertyCheckout({ tier, amount, userTokens }: { ti
                           <div className="text-xs text-gray-400">Credit & Debit Cards</div>
                         </div>
                       </button>
-                      
+
                       <button
                         onClick={() => setPaymentMethod('crypto')}
                         className={`p-4 rounded-xl border transition-all duration-300 ${
@@ -627,11 +717,13 @@ export default function RaceToLibertyCheckout({ tier, amount, userTokens }: { ti
 
                     {/* Email Input */}
                     <div className="mb-6">
-                      <label className="block text-sm font-medium text-gray-300 mb-3">Email Address</label>
+                      <label className="block text-sm font-medium text-gray-300 mb-3">
+                        Email Address
+                      </label>
                       <input
                         type="email"
                         value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                        onChange={e => setEmail(e.target.value)}
                         placeholder="your@email.com"
                         className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all duration-300"
                       />
@@ -646,7 +738,7 @@ export default function RaceToLibertyCheckout({ tier, amount, userTokens }: { ti
                         <input
                           type="text"
                           value={promoCode}
-                          onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                          onChange={e => setPromoCode(e.target.value.toUpperCase())}
                           placeholder="Enter promo code"
                           disabled={promoApplied}
                           className="flex-1 px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -668,19 +760,20 @@ export default function RaceToLibertyCheckout({ tier, amount, userTokens }: { ti
                           </button>
                         )}
                       </div>
-                      
+
                       {/* Promo Status Messages */}
-                      {promoError && (
-                        <div className="mt-2 text-sm text-red-400">
-                          {promoError}
-                        </div>
-                      )}
-                      
+                      {promoError && <div className="mt-2 text-sm text-red-400">{promoError}</div>}
+
                       {promoApplied && (
                         <div className="mt-2 p-3 rounded-lg bg-green-500/20 border border-green-500/30">
                           <div className="flex items-center justify-between">
                             <div className="text-sm text-green-400">
-                              ✅ {PROMO_CODES[promoCode.toUpperCase().trim() as keyof typeof PROMO_CODES]?.description}
+                              ✅{' '}
+                              {
+                                PROMO_CODES[
+                                  promoCode.toUpperCase().trim() as keyof typeof PROMO_CODES
+                                ]?.description
+                              }
                             </div>
                             <div className="text-sm font-bold text-green-400">
                               -{(promoDiscount * 100).toFixed(0)}%
@@ -703,10 +796,19 @@ export default function RaceToLibertyCheckout({ tier, amount, userTokens }: { ti
                         <input
                           type="checkbox"
                           checked={agree}
-                          onChange={(e) => setAgree(e.target.checked)}
+                          onChange={e => setAgree(e.target.checked)}
                           className="mt-1 w-4 h-4 text-cyan-500 bg-white/10 border-white/20 rounded focus:ring-cyan-500/50 focus:ring-2"
                         />
-                        <span>I agree to the <a href="#" className="text-cyan-400 hover:text-cyan-300">Terms of Service</a> and <a href="#" className="text-cyan-400 hover:text-cyan-300">Privacy Policy</a></span>
+                        <span>
+                          I agree to the{' '}
+                          <a href="#" className="text-cyan-400 hover:text-cyan-300">
+                            Terms of Service
+                          </a>{' '}
+                          and{' '}
+                          <a href="#" className="text-cyan-400 hover:text-cyan-300">
+                            Privacy Policy
+                          </a>
+                        </span>
                       </label>
                     </div>
 
@@ -736,8 +838,10 @@ export default function RaceToLibertyCheckout({ tier, amount, userTokens }: { ti
                           </div>
                         ) : (
                           <div className="space-y-4">
-                            <h4 className="text-lg font-semibold text-center mb-4">Choose Payment Method</h4>
-                            
+                            <h4 className="text-lg font-semibold text-center mb-4">
+                              Choose Payment Method
+                            </h4>
+
                             {error && (
                               <div className="p-3 rounded-lg bg-red-500/20 border border-red-500/30 text-red-200 text-sm">
                                 {error}
@@ -752,10 +856,17 @@ export default function RaceToLibertyCheckout({ tier, amount, userTokens }: { ti
                                 className="p-4 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                               >
                                 <div className="flex flex-col items-center space-y-2">
-                                  <Image src="/crypto-icons/color/eth.svg" alt="ETH" width={32} height={32} />
+                                  <Image
+                                    src="/crypto-icons/color/eth.svg"
+                                    alt="ETH"
+                                    width={32}
+                                    height={32}
+                                  />
                                   <div className="text-sm font-medium">Pay with ETH</div>
                                   <div className="text-xs text-gray-400">
-                                    {ethPrice ? `≈ ${computeEthAmount(finalAmount)?.toFixed(5)} ETH` : 'Loading...'}
+                                    {ethPrice
+                                      ? `≈ ${computeEthAmount(finalAmount)?.toFixed(5)} ETH`
+                                      : 'Loading...'}
                                   </div>
                                   {busy === 'eth' && (
                                     <div className="text-xs text-cyan-400">Processing...</div>
@@ -770,7 +881,12 @@ export default function RaceToLibertyCheckout({ tier, amount, userTokens }: { ti
                                 className="p-4 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                               >
                                 <div className="flex flex-col items-center space-y-2">
-                                  <Image src="/crypto-icons/color/usdt.svg" alt="USDT" width={32} height={32} />
+                                  <Image
+                                    src="/crypto-icons/color/usdt.svg"
+                                    alt="USDT"
+                                    width={32}
+                                    height={32}
+                                  />
                                   <div className="text-sm font-medium">Pay with USDT</div>
                                   <div className="text-xs text-gray-400">
                                     ${finalAmount.toFixed(2)} USDT
@@ -815,12 +931,14 @@ export default function RaceToLibertyCheckout({ tier, amount, userTokens }: { ti
                         <div className="text-center">
                           <div className="mb-4">
                             <FaGift className="w-12 h-12 text-green-400 mx-auto mb-3" />
-                            <h4 className="text-xl font-bold text-green-400 mb-2">🎉 Free Race to Liberty!</h4>
+                            <h4 className="text-xl font-bold text-green-400 mb-2">
+                              🎉 Free Race to Liberty!
+                            </h4>
                             <p className="text-gray-300 text-sm">
                               Your promo code "{promoCode.toUpperCase()}" gives you 100% off!
                             </p>
                           </div>
-                          
+
                           {error && (
                             <div className="p-3 rounded-lg bg-red-500/20 border border-red-500/30 text-red-200 text-sm mb-4">
                               {error}
@@ -844,7 +962,7 @@ export default function RaceToLibertyCheckout({ tier, amount, userTokens }: { ti
                               </>
                             )}
                           </button>
-                          
+
                           <div className="text-xs text-gray-400 text-center mt-3">
                             No payment required with your promo code!
                           </div>
@@ -853,8 +971,8 @@ export default function RaceToLibertyCheckout({ tier, amount, userTokens }: { ti
                     )}
                   </div>
                 )}
+              </div>
             </div>
-          </div>
 
             {/* Modern Summary Sidebar */}
             <div className="xl:col-span-1">
@@ -883,7 +1001,13 @@ export default function RaceToLibertyCheckout({ tier, amount, userTokens }: { ti
                   <div className="mb-6 p-4 bg-white/5 rounded-xl border border-white/10">
                     <div className="flex items-center gap-3 mb-3">
                       <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center">
-                        <Image src={selectedCoinData.logo} alt={selectedCoinData.name} width={32} height={32} className="rounded-lg" />
+                        <Image
+                          src={selectedCoinData.logo}
+                          alt={selectedCoinData.name}
+                          width={32}
+                          height={32}
+                          className="rounded-lg"
+                        />
                       </div>
                       <div>
                         <div className="font-bold">{selectedCoinData.name}</div>
@@ -896,7 +1020,8 @@ export default function RaceToLibertyCheckout({ tier, amount, userTokens }: { ti
                       )}
                     </div>
                     <div className="text-sm text-gray-300">
-                      Base Points: <span className="font-bold text-white">{selectedCoinData.basePoints}</span>
+                      Base Points:{' '}
+                      <span className="font-bold text-white">{selectedCoinData.basePoints}</span>
                     </div>
                   </div>
                 )}
@@ -905,7 +1030,9 @@ export default function RaceToLibertyCheckout({ tier, amount, userTokens }: { ti
                 <div className="mb-6 p-4 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 rounded-xl border border-yellow-500/30">
                   <div className="flex items-center gap-2 mb-3">
                     <h4 className="font-bold text-yellow-400">Points Earned</h4>
-                    {selectedCoinData?.isUserToken && <FaStar className="text-yellow-400 text-sm" />}
+                    {selectedCoinData?.isUserToken && (
+                      <FaStar className="text-yellow-400 text-sm" />
+                    )}
                   </div>
                   {selectedCoinData ? (
                     <div className="space-y-2">
@@ -920,7 +1047,9 @@ export default function RaceToLibertyCheckout({ tier, amount, userTokens }: { ti
                       {selectedCoinData.isUserToken && selectedCoinData.boostMultiplier && (
                         <div className="flex justify-between text-sm">
                           <span className="text-gray-300">Token Boost:</span>
-                          <span className="font-medium text-purple-400">{selectedCoinData.boostMultiplier}x</span>
+                          <span className="font-medium text-purple-400">
+                            {selectedCoinData.boostMultiplier}x
+                          </span>
                         </div>
                       )}
                       <div className="border-t border-yellow-500/30 pt-2 mt-3">
@@ -948,11 +1077,13 @@ export default function RaceToLibertyCheckout({ tier, amount, userTokens }: { ti
                   <div className="space-y-2">
                     <div className="flex justify-between items-center">
                       <span className="text-gray-300 font-medium">Base Price:</span>
-                      <span className={`font-bold ${promoApplied ? 'text-gray-400 line-through' : 'text-white'}`}>
+                      <span
+                        className={`font-bold ${promoApplied ? 'text-gray-400 line-through' : 'text-white'}`}
+                      >
                         ${amount}
                       </span>
                     </div>
-                    
+
                     {promoApplied && (
                       <>
                         <div className="flex justify-between items-center">
@@ -971,7 +1102,7 @@ export default function RaceToLibertyCheckout({ tier, amount, userTokens }: { ti
                         </div>
                       </>
                     )}
-                    
+
                     {!promoApplied && (
                       <div className="flex justify-between items-center">
                         <span className="text-gray-300 font-medium">Total Price:</span>
@@ -1006,7 +1137,8 @@ export default function RaceToLibertyCheckout({ tier, amount, userTokens }: { ti
                     {userTokens.length > 0 && (
                       <div className="flex items-center gap-2 text-purple-400 mt-3 pt-2 border-t border-white/10">
                         <FaStar className="text-sm" />
-                        Extra boost from your {userTokens.length} approved token{userTokens.length > 1 ? 's' : ''}
+                        Extra boost from your {userTokens.length} approved token
+                        {userTokens.length > 1 ? 's' : ''}
                       </div>
                     )}
                   </div>

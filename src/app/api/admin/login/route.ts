@@ -1,12 +1,12 @@
-import { NextResponse } from "next/server";
-import { AdminCookie, signAdminJWT } from "@/lib/adminAuth";
-import { getCollection } from "@/lib/mongodb";
-import { verifyPassword } from "@/lib/passwords";
+import { NextResponse } from 'next/server';
+import { AdminCookie, signAdminJWT } from '@/lib/adminAuth';
+import { getCollection } from '@/lib/mongodb';
+import { verifyPassword } from '@/lib/passwords';
 
 export async function POST(req: Request) {
-  const { identifier, password } = await req.json().catch(() => ({ identifier: "", password: "" }));
+  const { identifier, password } = await req.json().catch(() => ({ identifier: '', password: '' }));
   if (!password) {
-    return NextResponse.json({ message: "Password required" }, { status: 400 });
+    return NextResponse.json({ message: 'Password required' }, { status: 400 });
   }
 
   // Try MongoDB user lookup first
@@ -16,7 +16,10 @@ export async function POST(req: Request) {
     let user: any | null = null;
     if (identifier && typeof identifier === 'string') {
       const idLower = identifier.toLowerCase();
-      user = await users.findOne({ role: 'admin', $or: [ { emailLower: idLower }, { usernameLower: idLower } ] });
+      user = await users.findOne({
+        role: 'admin',
+        $or: [{ emailLower: idLower }, { usernameLower: idLower }],
+      });
     }
     if (user && user.passwordHash) {
       const ok = await verifyPassword(password, user.passwordHash);
@@ -26,9 +29,9 @@ export async function POST(req: Request) {
 
   // Fallback to env password if not authed via DB
   if (!authed) {
-    const expected = process.env.ADMIN_PASSWORD || "admin123"; // default for dev
+    const expected = process.env.ADMIN_PASSWORD || 'admin123'; // default for dev
     if (password !== expected) {
-      return NextResponse.json({ message: "Invalid credentials" }, { status: 401 });
+      return NextResponse.json({ message: 'Invalid credentials' }, { status: 401 });
     }
   }
 
@@ -38,12 +41,20 @@ export async function POST(req: Request) {
     name: AdminCookie.name,
     value: token,
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
     maxAge: AdminCookie.maxAge,
   });
   // Remove legacy cookie if present
-  res.cookies.set({ name: "admin_auth", value: "", httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", path: "/", maxAge: 0 });
+  res.cookies.set({
+    name: 'admin_auth',
+    value: '',
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 0,
+  });
   return res;
 }

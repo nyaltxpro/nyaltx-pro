@@ -35,7 +35,10 @@ export async function POST(req: NextRequest) {
     const now = new Date().toISOString();
     const id = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 
-    const submittedBy: string | undefined = (body.submittedByAddress && typeof body.submittedByAddress === 'string') ? body.submittedByAddress.trim() : undefined;
+    const submittedBy: string | undefined =
+      body.submittedByAddress && typeof body.submittedByAddress === 'string'
+        ? body.submittedByAddress.trim()
+        : undefined;
 
     const record: TokenRegistration = {
       id,
@@ -59,11 +62,20 @@ export async function POST(req: NextRequest) {
 
     const col = await getCollection<any>('token_registrations');
     // Ensure unique index once (idempotent)
-    await col.createIndex({ blockchain: 1, contractAddressLower: 1 }, { unique: true, name: 'uniq_chain_addrLower' });
+    await col.createIndex(
+      { blockchain: 1, contractAddressLower: 1 },
+      { unique: true, name: 'uniq_chain_addrLower' }
+    );
     // Prevent duplicate per chain by contract address (case-insensitive for EVM)
-    const dup = await col.findOne({ blockchain: record.blockchain, contractAddressLower: record.contractAddressLower });
+    const dup = await col.findOne({
+      blockchain: record.blockchain,
+      contractAddressLower: record.contractAddressLower,
+    });
     if (dup) {
-      return NextResponse.json({ error: 'A registration for this contract already exists', existing: dup }, { status: 409 });
+      return NextResponse.json(
+        { error: 'A registration for this contract already exists', existing: dup },
+        { status: 409 }
+      );
     }
 
     await col.insertOne(record);

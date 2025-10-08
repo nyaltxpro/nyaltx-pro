@@ -6,7 +6,7 @@ import { RegisteredToken } from '@/types/token';
 
 const ADMIN_ADDRESSES = [
   '0x77b6321d2888aa62f2a42620852fee8eedcfa77b',
-  '0x81ba7b98e49014bff22f811e9405640bc2b39cc0'
+  '0x81ba7b98e49014bff22f811e9405640bc2b39cc0',
 ];
 
 export default function TokenApproval() {
@@ -32,7 +32,11 @@ export default function TokenApproval() {
     }
   };
 
-  const updateTokenStatus = async (tokenId: string, status: 'approved' | 'rejected', rejectionReason?: string) => {
+  const updateTokenStatus = async (
+    tokenId: string,
+    status: 'approved' | 'rejected',
+    rejectionReason?: string
+  ) => {
     if (!isAdmin || !address) return;
 
     setProcessingTokens(prev => new Set(prev).add(tokenId));
@@ -75,9 +79,12 @@ export default function TokenApproval() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'approved': return 'text-green-400 bg-green-900/20 border-green-500';
-      case 'rejected': return 'text-red-400 bg-red-900/20 border-red-500';
-      default: return 'text-yellow-400 bg-yellow-900/20 border-yellow-500';
+      case 'approved':
+        return 'text-green-400 bg-green-900/20 border-green-500';
+      case 'rejected':
+        return 'text-red-400 bg-red-900/20 border-red-500';
+      default:
+        return 'text-yellow-400 bg-yellow-900/20 border-yellow-500';
     }
   };
 
@@ -87,7 +94,7 @@ export default function TokenApproval() {
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   };
 
@@ -146,7 +153,9 @@ export default function TokenApproval() {
       {/* Pending Tokens */}
       {pendingTokens.length > 0 && (
         <div className="bg-gray-900 rounded-lg p-6 border border-gray-700">
-          <h3 className="text-xl font-bold text-white mb-4">Pending Approval ({pendingTokens.length})</h3>
+          <h3 className="text-xl font-bold text-white mb-4">
+            Pending Approval ({pendingTokens.length})
+          </h3>
           <div className="space-y-4">
             {pendingTokens.map(token => (
               <div key={token.id} className="bg-gray-800 rounded-lg p-4 border border-gray-600">
@@ -157,16 +166,18 @@ export default function TokenApproval() {
                         <img src={token.logo} alt={token.name} className="w-8 h-8 rounded-full" />
                       )}
                       <div>
-                        <h4 className="text-lg font-semibold text-white">{token.name} ({token.symbol})</h4>
+                        <h4 className="text-lg font-semibold text-white">
+                          {token.name} ({token.symbol})
+                        </h4>
                         <p className="text-sm text-gray-400">
-                          {token.chain.charAt(0).toUpperCase() + token.chain.slice(1)} • 
-                          Boost: {token.boostMultiplier}x
+                          {token.chain.charAt(0).toUpperCase() + token.chain.slice(1)} • Boost:{' '}
+                          {token.boostMultiplier}x
                         </p>
                       </div>
                     </div>
-                    
+
                     <p className="text-gray-300 mb-3">{token.description}</p>
-                    
+
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
                         <span className="text-gray-400">Contract:</span>
@@ -182,17 +193,29 @@ export default function TokenApproval() {
                       </div>
                       <div className="flex gap-2">
                         {token.website && (
-                          <a href={token.website} target="_blank" rel="noopener noreferrer" 
-                             className="text-blue-400 hover:text-blue-300">Website</a>
+                          <a
+                            href={token.website}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-400 hover:text-blue-300"
+                          >
+                            Website
+                          </a>
                         )}
                         {token.twitter && (
-                          <a href={token.twitter} target="_blank" rel="noopener noreferrer" 
-                             className="text-blue-400 hover:text-blue-300">Twitter</a>
+                          <a
+                            href={token.twitter}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-400 hover:text-blue-300"
+                          >
+                            Twitter
+                          </a>
                         )}
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="flex gap-2 ml-4">
                     <button
                       onClick={() => handleApprove(token.id)}
@@ -219,7 +242,9 @@ export default function TokenApproval() {
       {/* Approved Tokens */}
       {approvedTokens.length > 0 && (
         <div className="bg-gray-900 rounded-lg p-6 border border-gray-700">
-          <h3 className="text-xl font-bold text-white mb-4">Approved Tokens ({approvedTokens.length})</h3>
+          <h3 className="text-xl font-bold text-white mb-4">
+            Approved Tokens ({approvedTokens.length})
+          </h3>
           <div className="grid gap-4">
             {approvedTokens.map(token => (
               <div key={token.id} className="bg-gray-800 rounded-lg p-4 border border-green-500/30">
@@ -229,7 +254,9 @@ export default function TokenApproval() {
                       <img src={token.logo} alt={token.name} className="w-6 h-6 rounded-full" />
                     )}
                     <div>
-                      <span className="text-white font-medium">{token.name} ({token.symbol})</span>
+                      <span className="text-white font-medium">
+                        {token.name} ({token.symbol})
+                      </span>
                       <span className="text-gray-400 ml-2">• {token.boostMultiplier}x boost</span>
                     </div>
                   </div>
@@ -247,7 +274,9 @@ export default function TokenApproval() {
       {/* Rejected Tokens */}
       {rejectedTokens.length > 0 && (
         <div className="bg-gray-900 rounded-lg p-6 border border-gray-700">
-          <h3 className="text-xl font-bold text-white mb-4">Rejected Tokens ({rejectedTokens.length})</h3>
+          <h3 className="text-xl font-bold text-white mb-4">
+            Rejected Tokens ({rejectedTokens.length})
+          </h3>
           <div className="grid gap-4">
             {rejectedTokens.map(token => (
               <div key={token.id} className="bg-gray-800 rounded-lg p-4 border border-red-500/30">
@@ -257,9 +286,13 @@ export default function TokenApproval() {
                       <img src={token.logo} alt={token.name} className="w-6 h-6 rounded-full" />
                     )}
                     <div>
-                      <span className="text-white font-medium">{token.name} ({token.symbol})</span>
+                      <span className="text-white font-medium">
+                        {token.name} ({token.symbol})
+                      </span>
                       {token.rejectionReason && (
-                        <p className="text-gray-400 text-sm mt-1">Reason: {token.rejectionReason}</p>
+                        <p className="text-gray-400 text-sm mt-1">
+                          Reason: {token.rejectionReason}
+                        </p>
                       )}
                     </div>
                   </div>

@@ -1,11 +1,14 @@
-"use client";
+'use client';
 
-import TokenPointsManager from '@/components/admin/TokenPointsManager';
+import dynamic from 'next/dynamic';
+
+const TokenPointsManager = dynamic(
+  () => import('@/components/admin/TokenPointsManager'),
+  { ssr: false }
+);
+
+
 
 export default function TokenPointsPage() {
-  return (
-    <div className="min-h-screen">
-      <TokenPointsManager />
-    </div>
-  );
+  return <TokenPointsManager />;
 }

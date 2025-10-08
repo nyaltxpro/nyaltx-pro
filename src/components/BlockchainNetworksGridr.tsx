@@ -4,57 +4,57 @@ import Image from 'next/image';
 // Define blockchain information
 export const blockchainInfo = {
   blockchains: [
-    "ethereum",
-    "filecoin",
-    "fio",
-    "gochain",
-    "groestlcoin",
-    "harmony",
-    "icon",
-    "iost",
-    "iotex",
-    "kava",
-    "kin",
-    "kusama",
-    "litecoin",
-    "lkscoin",
-    "loom",
-    "nano",
-    "near",
-    "nebulas",
-    "neo",
-    "nervos",
-    "nimiq",
-    "nuls",
-    "ontology",
-    "poa",
-    "polkadot",
-    "qtum",
-    "ravencoin",
-    "ripple",
-    "smartchain",
-    "solana",
-    "steem",
-    "stellar",
-    "terra",
-    "tezos",
-    "theta",
-    "thundertoken",
-    "tomochain",
-    "ton",
-    "tron",
-    "vechain",
-    "viacoin",
-    "wanchain",
-    "waves",
-    "xdai",
-    "xdc",
-    "xrp",
-    "zcash",
-    "zcoin",
-    "zelcash",
-    "zilliqa"
-  ]
+    'ethereum',
+    'filecoin',
+    'fio',
+    'gochain',
+    'groestlcoin',
+    'harmony',
+    'icon',
+    'iost',
+    'iotex',
+    'kava',
+    'kin',
+    'kusama',
+    'litecoin',
+    'lkscoin',
+    'loom',
+    'nano',
+    'near',
+    'nebulas',
+    'neo',
+    'nervos',
+    'nimiq',
+    'nuls',
+    'ontology',
+    'poa',
+    'polkadot',
+    'qtum',
+    'ravencoin',
+    'ripple',
+    'smartchain',
+    'solana',
+    'steem',
+    'stellar',
+    'terra',
+    'tezos',
+    'theta',
+    'thundertoken',
+    'tomochain',
+    'ton',
+    'tron',
+    'vechain',
+    'viacoin',
+    'wanchain',
+    'waves',
+    'xdai',
+    'xdc',
+    'xrp',
+    'zcash',
+    'zcoin',
+    'zelcash',
+    'zilliqa',
+  ],
 };
 
 interface BlockchainNetwork {
@@ -72,13 +72,13 @@ const blockchainNetworks: BlockchainNetwork[] = [];
 blockchainInfo.blockchains.forEach(id => {
   // Create a capitalized name from the ID
   const name = id.charAt(0).toUpperCase() + id.slice(1);
-  
+
   blockchainNetworks.push({
     id: id,
     name: name,
     symbol: name.substring(0, 3).toUpperCase(),
     logoPath: `/${id}.svg`,
-    folderPath: id
+    folderPath: id,
   });
 });
 
@@ -94,7 +94,7 @@ const BlockchainNetworksGrid: React.FC<BlockchainNetworksGridProps> = ({
   return (
     <div className={`${className}`}>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-        {blockchainNetworks.map((network) => (
+        {blockchainNetworks.map(network => (
           <div
             key={network.id}
             className="flex flex-col items-center justify-center p-4 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors cursor-pointer"
@@ -107,7 +107,7 @@ const BlockchainNetworksGrid: React.FC<BlockchainNetworksGridProps> = ({
                 width={48}
                 height={48}
                 className="object-contain"
-                onError={(e) => {
+                onError={e => {
                   // Fallback for missing images
                   (e.target as HTMLImageElement).src = '/globe.svg';
                 }}

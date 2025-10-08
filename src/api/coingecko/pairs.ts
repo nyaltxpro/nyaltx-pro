@@ -82,7 +82,7 @@ export const getSpecificTradingPairs = async (
   ids: string[]
 ): Promise<TradingPair[]> => {
   if (!ids.length) return [];
-  
+
   try {
     const params: Record<string, string> = {
       vs_currency: vsCurrency,
@@ -91,7 +91,7 @@ export const getSpecificTradingPairs = async (
       per_page: '250',
       page: '1',
       sparkline: 'false',
-      price_change_percentage: '1h,24h,7d'
+      price_change_percentage: '1h,24h,7d',
     };
 
     const data = await fetchCoinGeckoAPI('/coins/markets', params);
@@ -108,10 +108,7 @@ export const getSpecificTradingPairs = async (
  * @param days Number of days of data to retrieve
  * @returns Market chart data including volumes
  */
-export const getTradingVolumeData = async (
-  id: string,
-  days: number = 7
-): Promise<any> => {
+export const getTradingVolumeData = async (id: string, days: number = 7): Promise<any> => {
   try {
     const params: Record<string, string> = {
       vs_currency: 'usd',

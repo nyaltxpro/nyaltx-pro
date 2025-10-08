@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 :root {
   --background: #0b1217;
@@ -114,12 +114,30 @@ body {
   font-size: 12px;
 }
 
-.rank-1 { background-color: var(--rank-1st); color: #000; }
-.rank-2 { background-color: var(--rank-2nd); color: #000; }
-.rank-3 { background-color: var(--rank-3rd); color: #000; }
-.rank-4 { background-color: var(--rank-4th); color: #000; }
-.rank-5 { background-color: var(--rank-5th); color: #000; }
-.rank-6 { background-color: var(--rank-6th); color: #000; }
+.rank-1 {
+  background-color: var(--rank-1st);
+  color: #000;
+}
+.rank-2 {
+  background-color: var(--rank-2nd);
+  color: #000;
+}
+.rank-3 {
+  background-color: var(--rank-3rd);
+  color: #000;
+}
+.rank-4 {
+  background-color: var(--rank-4th);
+  color: #000;
+}
+.rank-5 {
+  background-color: var(--rank-5th);
+  color: #000;
+}
+.rank-6 {
+  background-color: var(--rank-6th);
+  color: #000;
+}
 
 .token-symbol {
   font-weight: bold;
@@ -151,10 +169,8 @@ body {
   justify-content: space-between;
 }
 
-.card-bg{
-
+.card-bg {
   background: linear-gradient(135deg, #1a2730 0%, #142028 100%);
-
 }
 
 .banner-title {
@@ -218,14 +234,16 @@ body {
   cursor: pointer;
 }
 
-.gainer-item, .loser-item {
+.gainer-item,
+.loser-item {
   display: flex;
   justify-content: space-between;
   padding: 8px;
   border-bottom: 1px solid var(--border-color);
 }
 
-.gainer-item:last-child, .loser-item:last-child {
+.gainer-item:last-child,
+.loser-item:last-child {
   border-bottom: none;
 }
 
@@ -328,8 +346,14 @@ body {
 
 /* Animation styles */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .animate-fadeIn {
@@ -337,8 +361,12 @@ body {
 }
 
 @keyframes scroll {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
 }
 
 .animate-scroll {
@@ -346,10 +374,10 @@ body {
 }
 
 .hide-scrollbar {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 }
 
 .hide-scrollbar::-webkit-scrollbar {
-  display: none;  /* Chrome, Safari and Opera */
+  display: none; /* Chrome, Safari and Opera */
 }

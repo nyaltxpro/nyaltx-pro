@@ -5,7 +5,19 @@ import { useAccount } from 'wagmi';
 import { streamingService, ChatMessage } from '@/services/StreamingService';
 import { v4 as uuidv4 } from 'uuid';
 import SimplePeer from 'simple-peer';
-import { FaVideo, FaVideoSlash, FaMicrophone, FaMicrophoneSlash, FaDesktop, FaStop, FaUsers, FaComments, FaPaperPlane, FaCamera, FaCameraRetro } from 'react-icons/fa';
+import {
+  FaVideo,
+  FaVideoSlash,
+  FaMicrophone,
+  FaMicrophoneSlash,
+  FaDesktop,
+  FaStop,
+  FaUsers,
+  FaComments,
+  FaPaperPlane,
+  FaCamera,
+  FaCameraRetro,
+} from 'react-icons/fa';
 import toast from 'react-hot-toast';
 
 interface WebRTCBroadcasterProps {
@@ -35,7 +47,7 @@ export default function WebRTCBroadcaster({ onStreamEnd, streamTitle }: WebRTCBr
     bitrate: 0,
     fps: 0,
     resolution: '1920x1080',
-    duration: 0
+    duration: 0,
   });
   const [connected, setConnected] = useState(false);
 
@@ -64,10 +76,11 @@ export default function WebRTCBroadcaster({ onStreamEnd, streamTitle }: WebRTCBr
     const handleChatMessage = (message: ChatMessage) => {
       setChatMessages(prev => {
         // Avoid duplicates by checking if message already exists
-        const exists = prev.some(msg => 
-          msg.timestamp === message.timestamp && 
-          msg.senderAddress === message.senderAddress &&
-          msg.message === message.message
+        const exists = prev.some(
+          msg =>
+            msg.timestamp === message.timestamp &&
+            msg.senderAddress === message.senderAddress &&
+            msg.message === message.message
         );
         return exists ? prev : [...prev, message];
       });
@@ -127,17 +140,17 @@ export default function WebRTCBroadcaster({ onStreamEnd, streamTitle }: WebRTCBr
         video: {
           width: { ideal: 1920, max: 1920 },
           height: { ideal: 1080, max: 1080 },
-          frameRate: { ideal: 30, max: 60 }
+          frameRate: { ideal: 30, max: 60 },
         },
         audio: {
           echoCancellation: true,
           noiseSuppression: true,
-          autoGainControl: true
-        }
+          autoGainControl: true,
+        },
       });
 
       console.log('📹 Screen share obtained');
-      
+
       // Get camera stream if webcam is enabled
       let cameraStream: MediaStream | null = null;
       if (isWebcamEnabled) {
@@ -146,17 +159,17 @@ export default function WebRTCBroadcaster({ onStreamEnd, streamTitle }: WebRTCBr
             video: {
               width: { ideal: 640, max: 1280 },
               height: { ideal: 480, max: 720 },
-              frameRate: { ideal: 30 }
+              frameRate: { ideal: 30 },
             },
-            audio: false // Use screen audio instead
+            audio: false, // Use screen audio instead
           });
           setWebcamStream(cameraStream);
-          
+
           // Display webcam in separate video element
           if (webcamVideoRef.current) {
             webcamVideoRef.current.srcObject = cameraStream;
           }
-          
+
           console.log('📷 Webcam obtained and enabled');
           toast.success('Webcam enabled!');
         } catch (err) {
@@ -168,7 +181,7 @@ export default function WebRTCBroadcaster({ onStreamEnd, streamTitle }: WebRTCBr
 
       // Combine streams
       const combinedStream = new MediaStream();
-      
+
       // Add screen tracks
       screenStream.getTracks().forEach(track => {
         console.log('➕ Adding screen track:', track.kind);
@@ -184,7 +197,7 @@ export default function WebRTCBroadcaster({ onStreamEnd, streamTitle }: WebRTCBr
       }
 
       streamRef.current = combinedStream;
-      
+
       if (localVideoRef.current) {
         localVideoRef.current.srcObject = combinedStream;
         console.log('📺 Video element updated');
@@ -210,13 +223,13 @@ export default function WebRTCBroadcaster({ onStreamEnd, streamTitle }: WebRTCBr
         tracks: combinedStream.getTracks().length,
         videoTracks: combinedStream.getVideoTracks().length,
       });
-      
+
       // Start polling for chat messages and viewer updates
       startPolling();
-      
+
       // Start WebRTC signaling polling
       startWebRTCSignaling();
-      
+
       const pollViewers = async () => {
         try {
           const streams = await streamingService.getActiveStreams();
@@ -231,7 +244,7 @@ export default function WebRTCBroadcaster({ onStreamEnd, streamTitle }: WebRTCBr
 
       // Poll every 5 seconds
       const viewerInterval = setInterval(pollViewers, 5000);
-      
+
       // Store cleanup function
       const cleanup = () => {
         clearInterval(viewerInterval);
@@ -239,15 +252,16 @@ export default function WebRTCBroadcaster({ onStreamEnd, streamTitle }: WebRTCBr
 
       // Store cleanup for later use
       (window as any).streamCleanup = cleanup;
-
     } catch (error) {
       console.error('❌ Error starting stream:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      
+
       if (errorMessage.includes('Permission denied')) {
         toast.error('Screen sharing permission denied. Please allow screen sharing and try again.');
       } else if (errorMessage.includes('not supported')) {
-        toast.error('Screen sharing not supported in this browser. Please use Chrome, Firefox, or Safari.');
+        toast.error(
+          'Screen sharing not supported in this browser. Please use Chrome, Firefox, or Safari.'
+        );
       } else {
         toast.error(`Failed to start stream: ${errorMessage}`);
       }
@@ -256,7 +270,7 @@ export default function WebRTCBroadcaster({ onStreamEnd, streamTitle }: WebRTCBr
 
   const stopStream = async () => {
     console.log('🛑 Stopping stream...');
-    
+
     // Stop all tracks
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => {
@@ -279,7 +293,7 @@ export default function WebRTCBroadcaster({ onStreamEnd, streamTitle }: WebRTCBr
     if (localVideoRef.current) {
       localVideoRef.current.srcObject = null;
     }
-    
+
     if (webcamVideoRef.current) {
       webcamVideoRef.current.srcObject = null;
     }
@@ -315,7 +329,7 @@ export default function WebRTCBroadcaster({ onStreamEnd, streamTitle }: WebRTCBr
     setViewerCount(0);
     setChatMessages([]);
     toast.success('Stream ended');
-    
+
     if (onStreamEnd) {
       onStreamEnd();
     }
@@ -349,19 +363,19 @@ export default function WebRTCBroadcaster({ onStreamEnd, streamTitle }: WebRTCBr
           video: {
             width: { ideal: 640, max: 1280 },
             height: { ideal: 480, max: 720 },
-            frameRate: { ideal: 30 }
+            frameRate: { ideal: 30 },
           },
-          audio: false
+          audio: false,
         });
-        
+
         setWebcamStream(cameraStream);
         setIsWebcamEnabled(true);
-        
+
         // Display webcam in video element
         if (webcamVideoRef.current) {
           webcamVideoRef.current.srcObject = cameraStream;
         }
-        
+
         console.log('📷 Webcam enabled');
         toast.success('Webcam enabled!');
       } catch (error) {
@@ -374,11 +388,11 @@ export default function WebRTCBroadcaster({ onStreamEnd, streamTitle }: WebRTCBr
         webcamStream.getTracks().forEach(track => track.stop());
         setWebcamStream(null);
       }
-      
+
       if (webcamVideoRef.current) {
         webcamVideoRef.current.srcObject = null;
       }
-      
+
       setIsWebcamEnabled(false);
       console.log('📷 Webcam disabled');
       toast('Webcam disabled');
@@ -387,7 +401,7 @@ export default function WebRTCBroadcaster({ onStreamEnd, streamTitle }: WebRTCBr
 
   const startPolling = () => {
     // Start chat polling using the streaming service
-    streamingService.startStreamPolling((streams) => {
+    streamingService.startStreamPolling(streams => {
       const myStream = streams.find(s => s.broadcasterId === broadcasterId);
       if (myStream) {
         setViewerCount(myStream.viewerCount);
@@ -400,16 +414,16 @@ export default function WebRTCBroadcaster({ onStreamEnd, streamTitle }: WebRTCBr
     const signalInterval = setInterval(async () => {
       try {
         const signals = await streamingService.getSignals(broadcasterId, 'broadcaster');
-        
+
         signals.forEach((signalData: any) => {
           const { fromId, signal } = signalData;
           console.log('📡 Received WebRTC signal from viewer:', fromId);
-          
+
           // Create or get existing peer connection
           if (!peersRef.current[fromId]) {
             createPeerConnection(fromId);
           }
-          
+
           // Process the signal
           if (peersRef.current[fromId]) {
             try {
@@ -430,16 +444,16 @@ export default function WebRTCBroadcaster({ onStreamEnd, streamTitle }: WebRTCBr
 
   const createPeerConnection = (viewerId: string) => {
     console.log('🔗 Creating peer connection for viewer:', viewerId);
-    
+
     const peer = new SimplePeer({
       initiator: true, // Broadcaster initiates
       trickle: false,
       config: {
         iceServers: [
           { urls: 'stun:stun.l.google.com:19302' },
-          { urls: 'stun:stun1.l.google.com:19302' }
-        ]
-      }
+          { urls: 'stun:stun1.l.google.com:19302' },
+        ],
+      },
     });
 
     // Add the stream to the peer connection
@@ -483,31 +497,27 @@ export default function WebRTCBroadcaster({ onStreamEnd, streamTitle }: WebRTCBr
 
     try {
       console.log('📤 Sending chat message:', messageToSend);
-      await streamingService.sendChatMessage(
-        broadcasterId,
-        messageToSend,
-        address,
-        'Broadcaster'
-      );
-      
+      await streamingService.sendChatMessage(broadcasterId, messageToSend, address, 'Broadcaster');
+
       // Optimistically add message to local state
       const newMessage: ChatMessage = {
         message: messageToSend,
         senderAddress: address,
         senderName: 'Broadcaster',
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
-      
+
       setChatMessages(prev => {
         // Check if message already exists to avoid duplicates
-        const exists = prev.some(msg => 
-          msg.message === newMessage.message && 
-          msg.senderAddress === newMessage.senderAddress &&
-          Math.abs(msg.timestamp - newMessage.timestamp) < 5000 // Within 5 seconds
+        const exists = prev.some(
+          msg =>
+            msg.message === newMessage.message &&
+            msg.senderAddress === newMessage.senderAddress &&
+            Math.abs(msg.timestamp - newMessage.timestamp) < 5000 // Within 5 seconds
         );
         return exists ? prev : [...prev, newMessage];
       });
-      
+
       toast.success('Message sent!');
     } catch (error) {
       console.error('Error sending chat message:', error);
@@ -521,7 +531,7 @@ export default function WebRTCBroadcaster({ onStreamEnd, streamTitle }: WebRTCBr
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
-    
+
     if (hours > 0) {
       return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     }
@@ -539,7 +549,7 @@ export default function WebRTCBroadcaster({ onStreamEnd, streamTitle }: WebRTCBr
             {connected ? '🟢 Connected to HTTP streaming service' : '🔴 Disconnected'}
           </p>
         </div>
-        
+
         <div className="flex items-center gap-4">
           {isStreaming && (
             <div className="flex items-center gap-2 px-3 py-1 bg-red-500/20 text-red-400 rounded-full">
@@ -547,7 +557,7 @@ export default function WebRTCBroadcaster({ onStreamEnd, streamTitle }: WebRTCBr
               LIVE
             </div>
           )}
-          
+
           <div className="flex items-center gap-2 text-gray-400">
             <FaUsers />
             <span>{viewerCount} viewers</span>
@@ -564,7 +574,7 @@ export default function WebRTCBroadcaster({ onStreamEnd, streamTitle }: WebRTCBr
           muted
           className="w-full h-full object-cover"
         />
-        
+
         {/* Webcam Overlay */}
         {isWebcamEnabled && webcamStream && (
           <div className="absolute bottom-4 right-4 w-48 h-36 bg-gray-800 rounded-lg overflow-hidden border-2 border-cyan-500">
@@ -580,7 +590,7 @@ export default function WebRTCBroadcaster({ onStreamEnd, streamTitle }: WebRTCBr
             </div>
           </div>
         )}
-        
+
         {!isStreaming && (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-900/80">
             <div className="text-center">
@@ -624,34 +634,34 @@ export default function WebRTCBroadcaster({ onStreamEnd, streamTitle }: WebRTCBr
                 <FaStop />
                 Stop Stream
               </button>
-              
+
               <button
                 onClick={toggleVideo}
                 className={`p-3 rounded-lg transition-colors ${
-                  isVideoEnabled 
-                    ? 'bg-gray-700 text-white hover:bg-gray-600' 
+                  isVideoEnabled
+                    ? 'bg-gray-700 text-white hover:bg-gray-600'
                     : 'bg-red-600 text-white hover:bg-red-700'
                 }`}
               >
                 {isVideoEnabled ? <FaVideo /> : <FaVideoSlash />}
               </button>
-              
+
               <button
                 onClick={toggleAudio}
                 className={`p-3 rounded-lg transition-colors ${
-                  isAudioEnabled 
-                    ? 'bg-gray-700 text-white hover:bg-gray-600' 
+                  isAudioEnabled
+                    ? 'bg-gray-700 text-white hover:bg-gray-600'
                     : 'bg-red-600 text-white hover:bg-red-700'
                 }`}
               >
                 {isAudioEnabled ? <FaMicrophone /> : <FaMicrophoneSlash />}
               </button>
-              
+
               <button
                 onClick={toggleWebcam}
                 className={`p-3 rounded-lg transition-colors ${
-                  isWebcamEnabled 
-                    ? 'bg-cyan-600 text-white hover:bg-cyan-700' 
+                  isWebcamEnabled
+                    ? 'bg-cyan-600 text-white hover:bg-cyan-700'
                     : 'bg-gray-700 text-white hover:bg-gray-600'
                 }`}
               >
@@ -674,28 +684,32 @@ export default function WebRTCBroadcaster({ onStreamEnd, streamTitle }: WebRTCBr
               <FaComments />
               Stream Chat
             </h3>
-            
+
             <div className="bg-gray-900 rounded-lg p-4 h-64 overflow-y-auto space-y-2">
               {chatMessages.length === 0 ? (
-                <p className="text-gray-500 text-center">No messages yet. Start the conversation!</p>
+                <p className="text-gray-500 text-center">
+                  No messages yet. Start the conversation!
+                </p>
               ) : (
                 chatMessages.map((msg, index) => (
                   <div key={index} className="text-sm">
                     <span className="text-cyan-400 font-medium">
-                      {msg.senderName || `${msg.senderAddress.slice(0, 6)}...${msg.senderAddress.slice(-4)}`}:
+                      {msg.senderName ||
+                        `${msg.senderAddress.slice(0, 6)}...${msg.senderAddress.slice(-4)}`}
+                      :
                     </span>
                     <span className="text-gray-300 ml-2">{msg.message}</span>
                   </div>
                 ))
               )}
             </div>
-            
+
             <div className="flex gap-2 mt-3">
               <input
                 type="text"
                 value={chatInput}
-                onChange={(e) => setChatInput(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && sendChatMessage()}
+                onChange={e => setChatInput(e.target.value)}
+                onKeyPress={e => e.key === 'Enter' && sendChatMessage()}
                 placeholder="Type a message..."
                 className="flex-1 px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500"
               />

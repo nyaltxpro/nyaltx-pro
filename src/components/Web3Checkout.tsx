@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React, { useMemo, useState, useEffect } from 'react';
 import Image from 'next/image';
@@ -9,28 +9,83 @@ import { useAccount, useSendTransaction, useWriteContract, useSwitchChain } from
 import { parseEther, erc20Abi, parseUnits } from 'viem';
 import { useAppKit } from '@reown/appkit/react';
 
-type Product = { id: number; name: string; desc: string; priceUsd: number; image: string; qty: number };
+type Product = {
+  id: number;
+  name: string;
+  desc: string;
+  priceUsd: number;
+  image: string;
+  qty: number;
+};
 
-export default function Web3Checkout({ selectedTier, paymentMethod }: { selectedTier?: string; paymentMethod?: string }) {
+export default function Web3Checkout({
+  selectedTier,
+  paymentMethod,
+}: {
+  selectedTier?: string;
+  paymentMethod?: string;
+}) {
   // Products for pricing flow
   const baseProducts: Record<string, Product[]> = {
     nyaltxpro: [
-      { id: 1, name: 'NyaltxPro Membership', desc: 'Project profile + socials + video', priceUsd: 200, image: '/logo.png', qty: 1 },
+      {
+        id: 1,
+        name: 'NyaltxPro Membership',
+        desc: 'Project profile + socials + video',
+        priceUsd: 200,
+        image: '/logo.png',
+        qty: 1,
+      },
     ],
     nyaltxpro1: [
-      { id: 1, name: 'NyaltxPro Starter', desc: 'Starter access to Pro features', priceUsd: 1, image: '/logo.png', qty: 1 },
+      {
+        id: 1,
+        name: 'NyaltxPro Starter',
+        desc: 'Starter access to Pro features',
+        priceUsd: 1,
+        image: '/logo.png',
+        qty: 1,
+      },
     ],
     paddle: [
-      { id: 1, name: 'Race to Liberty — Paddle Boat', desc: '1 week on Recently Updated', priceUsd: 300, image: '/banner/1.png', qty: 1 },
+      {
+        id: 1,
+        name: 'Race to Liberty — Paddle Boat',
+        desc: '1 week on Recently Updated',
+        priceUsd: 300,
+        image: '/banner/1.png',
+        qty: 1,
+      },
     ],
     motor: [
-      { id: 1, name: 'Race to Liberty — Motor Boat', desc: '1 month placement', priceUsd: 500, image: '/banner/2.png', qty: 1 },
+      {
+        id: 1,
+        name: 'Race to Liberty — Motor Boat',
+        desc: '1 month placement',
+        priceUsd: 500,
+        image: '/banner/2.png',
+        qty: 1,
+      },
     ],
     helicopter: [
-      { id: 1, name: 'Race to Liberty — Helicopter', desc: '3 months placement', priceUsd: 700, image: '/banner/3.png', qty: 1 },
+      {
+        id: 1,
+        name: 'Race to Liberty — Helicopter',
+        desc: '3 months placement',
+        priceUsd: 700,
+        image: '/banner/3.png',
+        qty: 1,
+      },
     ],
     default: [
-      { id: 1, name: 'NyaltxPro Membership', desc: 'Project profile + socials + video', priceUsd: 200, image: '/logo.png', qty: 1 },
+      {
+        id: 1,
+        name: 'NyaltxPro Membership',
+        desc: 'Project profile + socials + video',
+        priceUsd: 200,
+        image: '/logo.png',
+        qty: 1,
+      },
     ],
   };
 
@@ -80,11 +135,16 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
   const RECEIVER_ADDRESS = '0x81bA7b98E49014Bff22F811E9405640bC2B39cC0' as `0x${string}`;
   const USDT_MAINNET = '0xdAC17F958D2ee523a2206206994597C13D831ec7' as `0x${string}`; // Official USDT on Ethereum mainnet
 
-  const filteredTokens = useMemo(() => tokens.filter(t => {
-    if (network === 'solana') return t.chain === 'solana';
-    if (network === 'polygon') return t.chain === 'polygon' || t.symbol === 'USDC' || t.symbol === 'USDT';
-    return t.chain === 'ethereum' || ['arbitrum','optimism','base'].includes(network);
-  }), [network]);
+  const filteredTokens = useMemo(
+    () =>
+      tokens.filter(t => {
+        if (network === 'solana') return t.chain === 'solana';
+        if (network === 'polygon')
+          return t.chain === 'polygon' || t.symbol === 'USDC' || t.symbol === 'USDT';
+        return t.chain === 'ethereum' || ['arbitrum', 'optimism', 'base'].includes(network);
+      }),
+    [network]
+  );
 
   const subtotal = useMemo(() => products.reduce((s, p) => s + p.priceUsd * p.qty, 0), [products]);
   const discount = useMemo(() => {
@@ -124,7 +184,7 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
       const response = await fetch('/api/promo/validate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ promoCode: promo.trim(), tier: selectedTier || 'nyaltxpro' })
+        body: JSON.stringify({ promoCode: promo.trim(), tier: selectedTier || 'nyaltxpro' }),
       });
 
       if (!response.ok) {
@@ -134,7 +194,7 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
       const result = await response.json();
       setPromoValidation(result);
       setPromoApplied(result.valid);
-      
+
       if (!result.valid) {
         setError(result.message || 'Invalid promo code');
       } else {
@@ -176,8 +236,8 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
           promoCode: promo.trim(),
           tier: selectedTier || 'nyaltxpro',
           email: email.trim() || undefined,
-          walletAddress: address
-        })
+          walletAddress: address,
+        }),
       });
 
       if (!response.ok) {
@@ -185,14 +245,14 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
       }
 
       const result = await response.json();
-      
+
       if (result.success) {
         setSuccess(`${result.message} (Wallet: ${address})`);
         // Set cookie for pro status if nyaltxpro or nyaltxpro1
         const tierKey = (selectedTier || 'nyaltxpro').toLowerCase();
         if (tierKey.startsWith('nyaltxpro')) {
-          document.cookie = "nyaltx_pro=1; path=/; max-age=31536000"; // 1 year
-          
+          document.cookie = 'nyaltx_pro=1; path=/; max-age=31536000'; // 1 year
+
           // Redirect to register token page after successful free activation
           setTimeout(() => {
             window.location.href = '/dashboard/register-token?payment=free';
@@ -231,7 +291,9 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
         try {
           await switchChainAsync({ chainId: MAINNET_CHAIN_ID });
         } catch (switchError: any) {
-          throw new Error(`Failed to switch to Ethereum mainnet: ${switchError?.message || 'Please add Ethereum mainnet to your wallet'}`);
+          throw new Error(
+            `Failed to switch to Ethereum mainnet: ${switchError?.message || 'Please add Ethereum mainnet to your wallet'}`
+          );
         }
       }
 
@@ -240,14 +302,16 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
 
       if (token === 'ETH') {
         // Calculate ETH amount based on current ETH price and total USD amount
-        
+
         try {
           // Fetch current ETH price
-          const ethPriceResponse = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd');
+          const ethPriceResponse = await fetch(
+            'https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd'
+          );
           if (ethPriceResponse.ok) {
             const priceData = await ethPriceResponse.json();
             const currentEthPrice = priceData?.ethereum?.usd;
-            
+
             if (currentEthPrice && currentEthPrice > 0) {
               ethAmount = total / currentEthPrice;
             } else {
@@ -262,7 +326,7 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
           ethAmount = total / fallbackEthPrice;
           console.warn('Using fallback ETH price:', fallbackEthPrice, 'Error:', priceError);
         }
-        
+
         // Ensure minimum precision and reasonable bounds
         if (ethAmount < 0.000001) {
           throw new Error('Calculated ETH amount too small');
@@ -270,12 +334,12 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
         if (ethAmount > 10) {
           throw new Error('Calculated ETH amount seems too large - please check pricing');
         }
-        
+
         console.log(`Calculated ETH amount: ${ethAmount.toFixed(8)} ETH for $${total} USD`);
-        
+
         txHash = await sendTransactionAsync({
           to: RECEIVER_ADDRESS,
-          value: parseEther(ethAmount.toFixed(8)) // Use 8 decimal precision
+          value: parseEther(ethAmount.toFixed(8)), // Use 8 decimal precision
         });
       } else if (token === 'USDT') {
         // Send USDT equivalent (assuming $199 worth)
@@ -284,26 +348,26 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
           abi: erc20Abi,
           address: USDT_MAINNET,
           functionName: 'transfer',
-          args: [RECEIVER_ADDRESS, parseUnits(usdtAmount, 6)]
+          args: [RECEIVER_ADDRESS, parseUnits(usdtAmount, 6)],
         });
       } else {
         throw new Error('Unsupported payment method');
       }
 
       // Place order in admin panel
-      await placeOrder(txHash, token === 'ETH' ? (ethAmount?.toFixed(8) || '0') : total.toString());
-      
+      await placeOrder(txHash, token === 'ETH' ? ethAmount?.toFixed(8) || '0' : total.toString());
+
       // Set pro status cookie for nyaltxpro or nyaltxpro1 purchases
       const tierKey = (selectedTier || 'nyaltxpro').toLowerCase();
       if (tierKey.startsWith('nyaltxpro')) {
-        document.cookie = "nyaltx_pro=1; path=/; max-age=31536000"; // 1 year
-        
+        document.cookie = 'nyaltx_pro=1; path=/; max-age=31536000'; // 1 year
+
         // Redirect to register token page after successful payment
         setTimeout(() => {
           window.location.href = '/dashboard/register-token?payment=success';
         }, 2000);
       }
-      
+
       setSuccess(`Payment successful! Transaction: ${txHash}. Redirecting to register token...`);
     } catch (err: any) {
       console.error('Payment error:', err);
@@ -321,7 +385,7 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
         wallet: address,
         txHash,
         amount: amount,
-        chainId: MAINNET_CHAIN_ID
+        chainId: MAINNET_CHAIN_ID,
       };
 
       const response = await fetch('/api/admin/orders/onchain', {
@@ -329,7 +393,7 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(orderData)
+        body: JSON.stringify(orderData),
       });
 
       if (!response.ok) {
@@ -365,10 +429,14 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
             <div>
               <h2 className="text-xl font-semibold">Payment</h2>
               {selectedTier && (
-                <p className="text-gray-400 text-sm mt-1">Selected plan: <span className="text-white font-medium">{selectedTier}</span></p>
+                <p className="text-gray-400 text-sm mt-1">
+                  Selected plan: <span className="text-white font-medium">{selectedTier}</span>
+                </p>
               )}
               {paymentMethod === 'usdt' && selectedTier === 'nyaltxpro' && (
-                <p className="text-cyan-400 text-sm mt-1">Auto-payment mode: 0.1 ETH on Ethereum mainnet</p>
+                <p className="text-cyan-400 text-sm mt-1">
+                  Auto-payment mode: 0.1 ETH on Ethereum mainnet
+                </p>
               )}
             </div>
             <ConnectWalletButton />
@@ -385,13 +453,15 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
               {success}
             </div>
           )}
-          
+
           {/* Wallet Connection Status */}
           {promoValidation?.isFree && !isConnected && (
             <div className="mb-4 p-3 rounded-md border border-yellow-500 bg-yellow-900/30 text-yellow-200">
               <div className="flex items-center gap-2">
                 <FaWallet />
-                <span>Please connect your wallet to activate the free subscription with promo code.</span>
+                <span>
+                  Please connect your wallet to activate the free subscription with promo code.
+                </span>
               </div>
             </div>
           )}
@@ -404,7 +474,7 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
                 <input
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={e => setEmail(e.target.value)}
                   placeholder="you@example.com"
                   className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
                 />
@@ -415,11 +485,11 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
                   <input
                     type="text"
                     value={promo}
-                    onChange={(e) => setPromo(e.target.value)}
+                    onChange={e => setPromo(e.target.value)}
                     placeholder="FREEPRO, ADMIN2024, NYAX10"
                     className="flex-1 px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
                   />
-                  <button 
+                  <button
                     onClick={validatePromoCode}
                     disabled={processing}
                     className="px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-gray-300 hover:text-white disabled:opacity-50"
@@ -435,7 +505,9 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
                 {!promoValidation?.valid && promo && promoApplied === false && (
                   <p className="text-xs text-red-400 mt-1">Invalid promo code</p>
                 )}
-                <p className="text-xs text-gray-500 mt-1">Try: FREEPRO (free), ADMIN2024 (free), NYAX10 (10% off)</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Try: FREEPRO (free), ADMIN2024 (free), NYAX10 (10% off)
+                </p>
               </div>
             </div>
           </div>
@@ -445,13 +517,21 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
             <div className="mb-6">
               <div className="p-4 rounded-lg bg-white border border-blue-500/30">
                 <div className="flex items-center gap-3 mb-4">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className="text-blue-400">
-                    <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a9.124 9.124 0 0 1-.077.437c-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287z"/>
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    className="text-blue-400"
+                  >
+                    <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a9.124 9.124 0 0 1-.077.437c-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287z" />
                   </svg>
                   <h3 className="text-lg font-semibold text-blue-400">PayPal Payment</h3>
                 </div>
-                <p className="text-gray-300 text-sm mb-4">Complete your payment securely with PayPal.</p>
-                
+                <p className="text-gray-300 text-sm mb-4">
+                  Complete your payment securely with PayPal.
+                </p>
+
                 {agree && !promoValidation?.isFree && (
                   <PayPalCheckout
                     amount={total.toFixed(2)}
@@ -461,7 +541,7 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
                     onError={handlePayPalError}
                   />
                 )}
-                
+
                 {!agree && (
                   <div className="text-yellow-400 text-sm">
                     Please accept the Terms of Service to continue with PayPal payment.
@@ -476,11 +556,13 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
                   <label className="block text-sm text-gray-300 mb-1">Network</label>
                   <select
                     value={network}
-                    onChange={(e) => setNetwork(e.target.value)}
+                    onChange={e => setNetwork(e.target.value)}
                     className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
                   >
                     {networks.map(n => (
-                      <option key={n.id} value={n.id}>{n.label}</option>
+                      <option key={n.id} value={n.id}>
+                        {n.label}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -488,11 +570,13 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
                   <label className="block text-sm text-gray-300 mb-1">Pay With</label>
                   <select
                     value={token}
-                    onChange={(e) => setToken(e.target.value)}
+                    onChange={e => setToken(e.target.value)}
                     className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
                   >
                     {filteredTokens.map(t => (
-                      <option key={t.symbol} value={t.symbol}>{t.symbol} • {t.name}</option>
+                      <option key={t.symbol} value={t.symbol}>
+                        {t.symbol} • {t.name}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -507,7 +591,12 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
           {/* Terms */}
           <div className="mb-4">
             <label className="inline-flex items-center gap-2 text-sm text-gray-300">
-              <input type="checkbox" className="accent-[#00b8d8]" checked={agree} onChange={(e) => setAgree(e.target.checked)} />
+              <input
+                type="checkbox"
+                className="accent-[#00b8d8]"
+                checked={agree}
+                onChange={e => setAgree(e.target.checked)}
+              />
               I agree to the Terms of Service and Refund Policy
             </label>
           </div>
@@ -523,7 +612,11 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
                 disabled={processing}
                 className={`px-6 py-3 rounded-md font-medium transition-colors ${processing ? 'bg-gray-600' : 'bg-green-600 hover:bg-green-500'} text-white`}
               >
-                {processing ? 'Activating…' : isConnected ? 'Activate Free Subscription' : 'Connect Wallet & Activate'}
+                {processing
+                  ? 'Activating…'
+                  : isConnected
+                    ? 'Activate Free Subscription'
+                    : 'Connect Wallet & Activate'}
               </button>
             ) : paymentMethod === 'paypal' ? (
               <div className="text-center text-sm text-gray-400">
@@ -564,14 +657,20 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
           </div>
 
           <div className="border-t border-gray-800 pt-3 space-y-2 text-sm">
-            <div className="flex justify-between text-gray-300"><span>Subtotal</span><span>${subtotal.toFixed(2)}</span></div>
+            <div className="flex justify-between text-gray-300">
+              <span>Subtotal</span>
+              <span>${subtotal.toFixed(2)}</span>
+            </div>
             {discount > 0 && (
               <div className="flex justify-between text-green-400">
                 <span>Discount ({promoValidation?.description})</span>
                 <span>-${discount.toFixed(2)}</span>
               </div>
             )}
-            <div className="flex justify-between text-gray-300"><span>Fees</span><span>${fees.toFixed(2)}</span></div>
+            <div className="flex justify-between text-gray-300">
+              <span>Fees</span>
+              <span>${fees.toFixed(2)}</span>
+            </div>
             <div className="flex justify-between text-white font-semibold text-base pt-2">
               <span>Total</span>
               <span className={promoValidation?.isFree ? 'text-green-400' : ''}>
@@ -586,8 +685,16 @@ export default function Web3Checkout({ selectedTier, paymentMethod }: { selected
           </div>
 
           <div className="mt-4 p-3 rounded-md bg-[#102530] border border-gray-800 text-gray-300 text-xs">
-            <div className="flex items-center gap-2 mb-1"><FaInfoCircle className="text-gray-400" /><span>Network fees vary by chain and are paid separately in the network's native token.</span></div>
-            <div className="flex items-center gap-2"><FaCheckCircle className="text-green-500" /><span>No custody — funds go directly from your wallet.</span></div>
+            <div className="flex items-center gap-2 mb-1">
+              <FaInfoCircle className="text-gray-400" />
+              <span>
+                Network fees vary by chain and are paid separately in the network's native token.
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <FaCheckCircle className="text-green-500" />
+              <span>No custody — funds go directly from your wallet.</span>
+            </div>
           </div>
         </div>
       </div>

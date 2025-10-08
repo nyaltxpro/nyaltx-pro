@@ -51,6 +51,7 @@ ADMIN_EMAIL=admin@nyaltx.com
 ## Step 4: Test the Configuration
 
 1. Start your development server:
+
    ```bash
    npm run dev
    ```
@@ -68,11 +69,13 @@ ADMIN_EMAIL=admin@nyaltx.com
 The contact form sends two emails:
 
 ### 1. Admin Notification Email
+
 - **To**: ADMIN_EMAIL
 - **Subject**: "Contact Form: [Subject]"
 - **Content**: Formatted contact form details with sender information
 
 ### 2. Auto-Reply Email
+
 - **To**: User's email address
 - **Subject**: "Thank you for contacting NYALTX"
 - **Content**: Professional thank you message with copy of their submission
@@ -138,18 +141,21 @@ For production deployment:
 If you prefer not to use Gmail, you can configure other SMTP services by updating these variables:
 
 ### Outlook/Hotmail:
+
 ```bash
 SMTP_HOST=smtp-mail.outlook.com
 SMTP_PORT=587
 ```
 
 ### Yahoo Mail:
+
 ```bash
 SMTP_HOST=smtp.mail.yahoo.com
 SMTP_PORT=587
 ```
 
 ### Custom SMTP Server:
+
 ```bash
 SMTP_HOST=your-smtp-server.com
 SMTP_PORT=587

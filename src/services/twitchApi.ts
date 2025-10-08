@@ -46,8 +46,11 @@ class TwitchApiService {
   constructor() {
     this.clientId = process.env.NEXT_PUBLIC_TWITCH_CLIENT_ID || '';
     this.clientSecret = process.env.TWITCH_CLIENT_SECRET || '';
-    this.redirectUri = process.env.NEXT_PUBLIC_TWITCH_REDIRECT_URI || 
-      (typeof window !== 'undefined' ? `${window.location.origin}/auth/twitch/callback` : 'http://localhost:3000/auth/twitch/callback');
+    this.redirectUri =
+      process.env.NEXT_PUBLIC_TWITCH_REDIRECT_URI ||
+      (typeof window !== 'undefined'
+        ? `${window.location.origin}/auth/twitch/callback`
+        : 'http://localhost:3000/auth/twitch/callback');
   }
 
   // OAuth URL for Twitch authentication
@@ -57,7 +60,7 @@ class TwitchApiService {
       'channel:read:stream_key',
       'user:read:email',
       'chat:read',
-      'chat:edit'
+      'chat:edit',
     ].join(' ');
 
     const params = new URLSearchParams({
@@ -65,14 +68,16 @@ class TwitchApiService {
       redirect_uri: this.redirectUri,
       response_type: 'code',
       scope: scopes,
-      state: Math.random().toString(36).substring(7) // CSRF protection
+      state: Math.random().toString(36).substring(7), // CSRF protection
     });
 
     return `https://id.twitch.tv/oauth2/authorize?${params.toString()}`;
   }
 
   // Exchange authorization code for access token
-  async exchangeCodeForToken(code: string): Promise<{ access_token: string; refresh_token: string }> {
+  async exchangeCodeForToken(
+    code: string
+  ): Promise<{ access_token: string; refresh_token: string }> {
     const response = await fetch('/api/twitch/token', {
       method: 'POST',
       headers: {
@@ -88,7 +93,7 @@ class TwitchApiService {
     const data = await response.json();
     this.accessToken = data.access_token;
     this.refreshToken = data.refresh_token;
-    
+
     // Store tokens in localStorage for persistence
     if (typeof window !== 'undefined') {
       localStorage.setItem('twitch_access_token', data.access_token);
@@ -101,18 +106,20 @@ class TwitchApiService {
   // Get stored access token
   getAccessToken(): string | null {
     if (this.accessToken) return this.accessToken;
-    
+
     if (typeof window !== 'undefined') {
       this.accessToken = localStorage.getItem('twitch_access_token');
     }
-    
+
     return this.accessToken;
   }
 
   // Refresh access token
   async refreshAccessToken(): Promise<string> {
-    const refreshToken = this.refreshToken || (typeof window !== 'undefined' ? localStorage.getItem('twitch_refresh_token') : null);
-    
+    const refreshToken =
+      this.refreshToken ||
+      (typeof window !== 'undefined' ? localStorage.getItem('twitch_refresh_token') : null);
+
     if (!refreshToken) {
       throw new Error('No refresh token available');
     }
@@ -131,7 +138,7 @@ class TwitchApiService {
 
     const data = await response.json();
     this.accessToken = data.access_token;
-    
+
     if (typeof window !== 'undefined') {
       localStorage.setItem('twitch_access_token', data.access_token);
     }
@@ -142,7 +149,7 @@ class TwitchApiService {
   // Make authenticated API request
   private async makeApiRequest(endpoint: string, options: RequestInit = {}): Promise<any> {
     let token = this.getAccessToken();
-    
+
     if (!token) {
       throw new Error('No access token available');
     }
@@ -151,7 +158,7 @@ class TwitchApiService {
       ...options,
       headers: {
         'Client-ID': this.clientId,
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
         ...options.headers,
       },
@@ -165,16 +172,16 @@ class TwitchApiService {
           ...options,
           headers: {
             'Client-ID': this.clientId,
-            'Authorization': `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
             ...options.headers,
           },
         });
-        
+
         if (!retryResponse.ok) {
           throw new Error(`API request failed: ${retryResponse.statusText}`);
         }
-        
+
         return retryResponse.json();
       } catch (error) {
         throw new Error('Authentication failed');
@@ -199,7 +206,7 @@ class TwitchApiService {
     const response = await this.makeApiRequest(`/streams/key?broadcaster_id=${userId}`);
     return {
       stream_key: response.data[0].stream_key,
-      stream_url: 'rtmp://live.twitch.tv/live/'
+      stream_url: 'rtmp://live.twitch.tv/live/',
     };
   }
 
@@ -243,7 +250,7 @@ class TwitchApiService {
   logout(): void {
     this.accessToken = null;
     this.refreshToken = null;
-    
+
     if (typeof window !== 'undefined') {
       localStorage.removeItem('twitch_access_token');
       localStorage.removeItem('twitch_refresh_token');

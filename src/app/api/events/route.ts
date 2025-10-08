@@ -8,11 +8,11 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const page = searchParams.get('page') || '1';
     const max = searchParams.get('max') || '50';
-    
+
     const response = await fetch(`${BASE_URL}?page=${page}&max=${max}`, {
       headers: {
         'x-api-key': API_KEY,
-        'Accept': 'application/json',
+        Accept: 'application/json',
       },
       cache: 'no-store', // Ensure fresh data
     });
@@ -22,13 +22,10 @@ export async function GET(request: NextRequest) {
     }
 
     const data = await response.json();
-    
+
     return NextResponse.json(data);
   } catch (error) {
     console.error('Error fetching events:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch events' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch events' }, { status: 500 });
   }
 }

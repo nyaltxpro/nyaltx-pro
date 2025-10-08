@@ -2,7 +2,15 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { FaRocket, FaFire, FaClock, FaCoins, FaTwitter, FaTelegram, FaMicrophone } from 'react-icons/fa';
+import {
+  FaRocket,
+  FaFire,
+  FaClock,
+  FaCoins,
+  FaTwitter,
+  FaTelegram,
+  FaMicrophone,
+} from 'react-icons/fa';
 import { useAccount, useSendTransaction, useWriteContract, useSwitchChain } from 'wagmi';
 import { parseEther, erc20Abi, parseUnits } from 'viem';
 import { BoostPack } from '@/types/gamification';
@@ -26,9 +34,9 @@ const BOOST_PACKS: BoostPack[] = [
       '25 Boost Points',
       '6h visibility boost',
       'Entry-level leaderboard placement',
-      'Points decay over 6h'
+      'Points decay over 6h',
     ],
-    decayHours: 6
+    decayHours: 6,
   },
   {
     id: 'starter',
@@ -41,9 +49,9 @@ const BOOST_PACKS: BoostPack[] = [
       '1 week visibility boost',
       'Basic leaderboard placement',
       'Social media eligibility',
-      'Points decay over 7 days'
+      'Points decay over 7 days',
     ],
-    decayHours: 168
+    decayHours: 168,
   },
   {
     id: 'growth',
@@ -57,9 +65,9 @@ const BOOST_PACKS: BoostPack[] = [
       'Enhanced leaderboard placement',
       'Social media priority',
       'Cross-promotion eligibility',
-      'Points decay over 14 days'
+      'Points decay over 14 days',
     ],
-    decayHours: 336
+    decayHours: 336,
   },
   {
     id: 'pro',
@@ -74,9 +82,9 @@ const BOOST_PACKS: BoostPack[] = [
       'Premium social media priority',
       'Cross-promotion eligibility',
       'Priority support',
-      'Points decay over 30 days'
+      'Points decay over 30 days',
     ],
-    decayHours: 720
+    decayHours: 720,
   },
   {
     id: 'elite',
@@ -92,28 +100,33 @@ const BOOST_PACKS: BoostPack[] = [
       'Guaranteed cross-promotion',
       'Podcast appearance opportunity',
       'Dedicated account manager',
-      'Points decay over 90 days'
+      'Points decay over 90 days',
     ],
-    decayHours: 2160
-  }
+    decayHours: 2160,
+  },
 ];
 
 // Payment configuration (same as Race to Liberty)
-const DEFAULT_RECEIVER: `0x${string}` = "0x81bA7b98E49014Bff22F811E9405640bC2B39cC0";
-const DEFAULT_NYAX: `0x${string}` = "0x5eed5621b92be4473f99bacac77acfa27deb57d9";
-const DEFAULT_USDC: `0x${string}` = "0xA0b86a33E6441c8C06DD2b7c94b7E0c8f8c8b8c8";
+const DEFAULT_RECEIVER: `0x${string}` = '0x81bA7b98E49014Bff22F811E9405640bC2B39cC0';
+const DEFAULT_NYAX: `0x${string}` = '0x5eed5621b92be4473f99bacac77acfa27deb57d9';
+const DEFAULT_USDC: `0x${string}` = '0xA0b86a33E6441c8C06DD2b7c94b7E0c8f8c8b8c8';
 
-const RECEIVER = (process.env.NEXT_PUBLIC_PAYMENT_RECEIVER_ADDRESS as `0x${string}` | undefined) ?? DEFAULT_RECEIVER;
-const NYAX_TOKEN = (process.env.NEXT_PUBLIC_NYAX_TOKEN_ADDRESS as `0x${string}` | undefined) ?? DEFAULT_NYAX;
+const RECEIVER =
+  (process.env.NEXT_PUBLIC_PAYMENT_RECEIVER_ADDRESS as `0x${string}` | undefined) ??
+  DEFAULT_RECEIVER;
+const NYAX_TOKEN =
+  (process.env.NEXT_PUBLIC_NYAX_TOKEN_ADDRESS as `0x${string}` | undefined) ?? DEFAULT_NYAX;
 const USDC_TOKEN = DEFAULT_USDC;
-const PAYMENT_CHAIN_ID = process.env.NEXT_PUBLIC_PAYMENT_CHAIN_ID ? Number(process.env.NEXT_PUBLIC_PAYMENT_CHAIN_ID) : 1; // Default to mainnet Ethereum
+const PAYMENT_CHAIN_ID = process.env.NEXT_PUBLIC_PAYMENT_CHAIN_ID
+  ? Number(process.env.NEXT_PUBLIC_PAYMENT_CHAIN_ID)
+  : 1; // Default to mainnet Ethereum
 
-export default function BoostPackSelector({ 
-  tokenId, 
-  tokenName, 
-  tokenSymbol, 
+export default function BoostPackSelector({
+  tokenId,
+  tokenName,
+  tokenSymbol,
   onBoostSuccess,
-  className = '' 
+  className = '',
 }: BoostPackSelectorProps) {
   const { address, isConnected, chain } = useAccount();
   const { switchChainAsync } = useSwitchChain();
@@ -133,7 +146,9 @@ export default function BoostPackSelector({
 
   const fetchETHPrice = async () => {
     try {
-      const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd');
+      const response = await fetch(
+        'https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd'
+      );
       const data = await response.json();
       if (data.ethereum?.usd) {
         setEthPrice(data.ethereum.usd);
@@ -169,7 +184,7 @@ export default function BoostPackSelector({
         const ethAmount = selectedPack.price.usd / ethPrice;
         const hash = await sendTransactionAsync({
           to: RECEIVER,
-          value: parseEther(ethAmount.toFixed(6))
+          value: parseEther(ethAmount.toFixed(6)),
         });
         transactionHash = hash;
       } else if (paymentMethod === 'usdc') {
@@ -177,15 +192,16 @@ export default function BoostPackSelector({
           abi: erc20Abi,
           address: USDC_TOKEN,
           functionName: 'transfer',
-          args: [RECEIVER, parseUnits(selectedPack.price.usdc.toString(), 6)]
+          args: [RECEIVER, parseUnits(selectedPack.price.usdc.toString(), 6)],
         });
         transactionHash = hash;
-      } else { // nyax
+      } else {
+        // nyax
         const hash = await writeContractAsync({
           abi: erc20Abi,
           address: NYAX_TOKEN,
           functionName: 'transfer',
-          args: [RECEIVER, parseUnits(selectedPack.price.nyax.toString(), 18)]
+          args: [RECEIVER, parseUnits(selectedPack.price.nyax.toString(), 18)],
         });
         transactionHash = hash;
       }
@@ -198,20 +214,21 @@ export default function BoostPackSelector({
           tokenId,
           boostPackType: selectedPack.id,
           transactionHash,
-          walletAddress: address
-        })
+          walletAddress: address,
+        }),
       });
 
       const boostData = await boostResponse.json();
 
       if (boostData.success) {
-        setSuccess(`🚀 ${selectedPack.name} boost activated! ${selectedPack.basePoints} points added to ${tokenSymbol}.`);
+        setSuccess(
+          `🚀 ${selectedPack.name} boost activated! ${selectedPack.basePoints} points added to ${tokenSymbol}.`
+        );
         onBoostSuccess?.(boostData);
         setSelectedPack(null);
       } else {
         throw new Error(boostData.error || 'Failed to activate boost');
       }
-
     } catch (err: any) {
       setError(err?.shortMessage || err?.message || 'Payment failed');
     } finally {
@@ -221,28 +238,42 @@ export default function BoostPackSelector({
 
   const getPackIcon = (packId: string) => {
     switch (packId) {
-      case 'kayak': return '🛶';
-      case 'starter': return '🚀';
-      case 'growth': return '📈';
-      case 'pro': return '⭐';
-      case 'elite': return '👑';
-      default: return '🚀';
+      case 'kayak':
+        return '🛶';
+      case 'starter':
+        return '🚀';
+      case 'growth':
+        return '📈';
+      case 'pro':
+        return '⭐';
+      case 'elite':
+        return '👑';
+      default:
+        return '🚀';
     }
   };
 
   const getPackColor = (packId: string) => {
     switch (packId) {
-      case 'kayak': return 'from-green-500/20 to-teal-500/20 border-green-500/30';
-      case 'starter': return 'from-blue-500/20 to-cyan-500/20 border-blue-500/30';
-      case 'growth': return 'from-purple-500/20 to-pink-500/20 border-purple-500/30';
-      case 'pro': return 'from-yellow-500/20 to-orange-500/20 border-yellow-500/30';
-      case 'elite': return 'from-red-500/20 to-rose-500/20 border-red-500/30';
-      default: return 'from-gray-500/20 to-gray-600/20 border-gray-500/30';
+      case 'kayak':
+        return 'from-green-500/20 to-teal-500/20 border-green-500/30';
+      case 'starter':
+        return 'from-blue-500/20 to-cyan-500/20 border-blue-500/30';
+      case 'growth':
+        return 'from-purple-500/20 to-pink-500/20 border-purple-500/30';
+      case 'pro':
+        return 'from-yellow-500/20 to-orange-500/20 border-yellow-500/30';
+      case 'elite':
+        return 'from-red-500/20 to-rose-500/20 border-red-500/30';
+      default:
+        return 'from-gray-500/20 to-gray-600/20 border-gray-500/30';
     }
   };
 
   return (
-    <div className={`bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10 ${className}`}>
+    <div
+      className={`bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10 ${className}`}
+    >
       <div className="flex items-center gap-3 mb-6">
         <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 flex items-center justify-center">
           <FaRocket className="text-white" />
@@ -267,7 +298,7 @@ export default function BoostPackSelector({
 
       {/* Boost Packs */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-6">
-        {BOOST_PACKS.map((pack) => (
+        {BOOST_PACKS.map(pack => (
           <div
             key={pack.id}
             onClick={() => setSelectedPack(pack)}
@@ -294,9 +325,7 @@ export default function BoostPackSelector({
 
             <div className="text-center">
               <div className="text-2xl font-bold mb-1">${pack.price.usd}</div>
-              <div className="text-xs text-gray-400">
-                NYAX: ${pack.price.nyax} (20% off)
-              </div>
+              <div className="text-xs text-gray-400">NYAX: ${pack.price.nyax} (20% off)</div>
             </div>
 
             {pack.id === 'elite' && (
@@ -315,7 +344,7 @@ export default function BoostPackSelector({
       {selectedPack && (
         <div className="border-t border-white/10 pt-6">
           <h4 className="font-bold mb-4">Payment Method</h4>
-          
+
           <div className="grid grid-cols-3 gap-3 mb-4">
             <button
               onClick={() => setPaymentMethod('eth')}
@@ -326,7 +355,13 @@ export default function BoostPackSelector({
               }`}
             >
               <div className="text-center">
-                <Image src="/crypto-icons/color/eth.svg" alt="ETH" width={24} height={24} className="mx-auto mb-2" />
+                <Image
+                  src="/crypto-icons/color/eth.svg"
+                  alt="ETH"
+                  width={24}
+                  height={24}
+                  className="mx-auto mb-2"
+                />
                 <div className="text-sm font-medium">ETH</div>
                 <div className="text-xs text-gray-400">
                   ≈{(selectedPack.price.usd / ethPrice).toFixed(4)}
@@ -343,11 +378,15 @@ export default function BoostPackSelector({
               }`}
             >
               <div className="text-center">
-                <Image src="/crypto-icons/color/usdc.svg" alt="USDC" width={24} height={24} className="mx-auto mb-2" />
+                <Image
+                  src="/crypto-icons/color/usdc.svg"
+                  alt="USDC"
+                  width={24}
+                  height={24}
+                  className="mx-auto mb-2"
+                />
                 <div className="text-sm font-medium">USDC</div>
-                <div className="text-xs text-gray-400">
-                  ${selectedPack.price.usdc}
-                </div>
+                <div className="text-xs text-gray-400">${selectedPack.price.usdc}</div>
               </div>
             </button>
 
@@ -362,9 +401,7 @@ export default function BoostPackSelector({
               <div className="text-center">
                 <Image src="/logo.png" alt="NYAX" width={24} height={24} className="mx-auto mb-2" />
                 <div className="text-sm font-medium">NYAX</div>
-                <div className="text-xs text-cyan-400">
-                  ${selectedPack.price.nyax} (20% off)
-                </div>
+                <div className="text-xs text-cyan-400">${selectedPack.price.nyax} (20% off)</div>
               </div>
             </button>
           </div>
@@ -374,13 +411,11 @@ export default function BoostPackSelector({
             disabled={loading || !isConnected}
             className="w-full py-3 bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-semibold rounded-lg hover:from-cyan-700 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
           >
-            {loading ? (
-              'Processing...'
-            ) : !isConnected ? (
-              'Connect Wallet'
-            ) : (
-              `Boost ${tokenSymbol} with ${selectedPack.name}`
-            )}
+            {loading
+              ? 'Processing...'
+              : !isConnected
+                ? 'Connect Wallet'
+                : `Boost ${tokenSymbol} with ${selectedPack.name}`}
           </button>
 
           <div className="mt-4 p-3 bg-white/5 rounded-lg">

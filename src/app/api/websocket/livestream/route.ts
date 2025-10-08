@@ -13,14 +13,14 @@ interface StreamRoom {
 class LiveStreamManager {
   private streams = new Map<string, StreamRoom>();
   private static instance: LiveStreamManager;
-  
+
   static getInstance() {
     if (!LiveStreamManager.instance) {
       LiveStreamManager.instance = new LiveStreamManager();
     }
     return LiveStreamManager.instance;
   }
-  
+
   createStream(streamData: any) {
     const streamId = `stream_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const stream: StreamRoom = {
@@ -30,35 +30,38 @@ class LiveStreamManager {
         id: streamId,
         isLive: true,
         viewerCount: 0,
-        startedAt: new Date().toISOString()
+        startedAt: new Date().toISOString(),
       },
       viewers: new Set(),
       messages: [],
-      createdAt: Date.now()
+      createdAt: Date.now(),
     };
-    
+
     this.streams.set(streamId, stream);
     return stream;
   }
-  
+
   getStream(streamId: string) {
     return this.streams.get(streamId);
   }
-  
+
   endStream(streamId: string) {
     const stream = this.streams.get(streamId);
     if (stream) {
       stream.streamData.isLive = false;
       stream.streamData.endedAt = new Date().toISOString();
-      
+
       // Schedule cleanup
-      setTimeout(() => {
-        this.streams.delete(streamId);
-      }, 5 * 60 * 1000);
+      setTimeout(
+        () => {
+          this.streams.delete(streamId);
+        },
+        5 * 60 * 1000
+      );
     }
     return stream;
   }
-  
+
   getActiveStreams() {
     return Array.from(this.streams.values())
       .filter(stream => stream.streamData.isLive)
@@ -74,7 +77,7 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({
     message: 'WebSocket endpoint for live streaming',
     status: 'available',
-    activeStreams: liveStreamManager.getActiveStreams().length
+    activeStreams: liveStreamManager.getActiveStreams().length,
   });
 }
 
@@ -82,20 +85,20 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { action, streamData, streamId } = body;
-    
+
     switch (action) {
       case 'create_stream':
         const newStream = liveStreamManager.createStream(streamData);
         return NextResponse.json({ success: true, stream: newStream.streamData });
-        
+
       case 'end_stream':
         const endedStream = liveStreamManager.endStream(streamId);
         return NextResponse.json({ success: true, stream: endedStream?.streamData });
-        
+
       case 'get_active_streams':
         const activeStreams = liveStreamManager.getActiveStreams();
         return NextResponse.json({ streams: activeStreams });
-        
+
       default:
         return NextResponse.json({ error: 'Unknown action' }, { status: 400 });
     }

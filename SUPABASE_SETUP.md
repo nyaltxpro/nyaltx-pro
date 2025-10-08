@@ -41,6 +41,7 @@ SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 ## Usage
 
 Once configured, admins can:
+
 1. Upload banner images through `/admin/banners`
 2. View all uploaded banners with previews
 3. Copy public URLs for use in components

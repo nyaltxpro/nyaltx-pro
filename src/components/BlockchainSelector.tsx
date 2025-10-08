@@ -21,14 +21,16 @@ const BlockchainSelector: React.FC<BlockchainSelectorProps> = ({
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild>
-        <button className={`flex items-center text-sm text-gray-300 px-3 py-1.5 rounded hover:bg-gray-800 focus:outline-none ${className}`}>
+        <button
+          className={`flex items-center text-sm text-gray-300 px-3 py-1.5 rounded hover:bg-gray-800 focus:outline-none ${className}`}
+        >
           {selectedBlockchain ? (
             <>
               <div className="flex items-center">
                 {selectedBlockchain.logoURI && (
                   <div className="w-5 h-5 mr-2 relative">
-                    <Image 
-                      src={selectedBlockchain.logoURI} 
+                    <Image
+                      src={selectedBlockchain.logoURI}
                       alt={selectedBlockchain.name}
                       width={20}
                       height={20}
@@ -45,18 +47,21 @@ const BlockchainSelector: React.FC<BlockchainSelectorProps> = ({
         </button>
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>
-        <DropdownMenu.Content className="min-w-[320px] max-h-[400px] overflow-y-auto bg-gray-900 rounded-md p-3 shadow-lg border border-gray-800" sideOffset={5}>
+        <DropdownMenu.Content
+          className="min-w-[320px] max-h-[400px] overflow-y-auto bg-gray-900 rounded-md p-3 shadow-lg border border-gray-800"
+          sideOffset={5}
+        >
           <div className="grid grid-cols-3 gap-2">
-            {supportedBlockchains.map((blockchain) => (
-              <DropdownMenu.Item 
+            {supportedBlockchains.map(blockchain => (
+              <DropdownMenu.Item
                 key={blockchain.id}
                 className="flex flex-col items-center text-center text-sm text-gray-300 rounded p-2 cursor-pointer hover:bg-gray-800 focus:outline-none"
                 onClick={() => onSelectBlockchain(blockchain)}
               >
                 <div className="w-8 h-8 mb-1 relative">
                   {blockchain.logoURI && (
-                    <Image 
-                      src={blockchain.logoURI} 
+                    <Image
+                      src={blockchain.logoURI}
                       alt={blockchain.name}
                       width={32}
                       height={32}

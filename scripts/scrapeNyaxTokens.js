@@ -57,23 +57,25 @@ const tokenUrls = [
   'https://www.nyaltx.com/token-new/?logoid=585',
   'https://www.nyaltx.com/token-bnb-new/?logoid=527',
   'https://www.nyaltx.com/token-new/?logoid=241',
-  'https://www.nyaltx.com/token-new/?logoid=512'
+  'https://www.nyaltx.com/token-new/?logoid=512',
 ];
 
 // Function to fetch HTML content from URL
 function fetchHtml(url) {
   return new Promise((resolve, reject) => {
-    https.get(url, (res) => {
-      let data = '';
-      res.on('data', (chunk) => {
-        data += chunk;
+    https
+      .get(url, res => {
+        let data = '';
+        res.on('data', chunk => {
+          data += chunk;
+        });
+        res.on('end', () => {
+          resolve(data);
+        });
+      })
+      .on('error', err => {
+        reject(err);
       });
-      res.on('end', () => {
-        resolve(data);
-      });
-    }).on('error', (err) => {
-      reject(err);
-    });
   });
 }
 
@@ -81,7 +83,7 @@ function fetchHtml(url) {
 function extractTokenData(html, url) {
   const dom = new JSDOM(html);
   const document = dom.window.document;
-  
+
   const tokenData = {
     url: url,
     logoId: url.match(/logoid=(\d+)/)?.[1] || null,
@@ -104,7 +106,7 @@ function extractTokenData(html, url) {
     etherscan: null,
     video: null,
     aboutUs: null,
-    additionalInfo: {}
+    additionalInfo: {},
   };
 
   try {
@@ -121,34 +123,37 @@ function extractTokenData(html, url) {
 
     // Extract structured token details from the page
     const allText = document.body.textContent;
-    
+
     // Look for token details section patterns
-    const lines = allText.split('\n').map(line => line.trim()).filter(line => line);
-    
+    const lines = allText
+      .split('\n')
+      .map(line => line.trim())
+      .filter(line => line);
+
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
       const nextLine = lines[i + 1] || '';
-      
+
       // Extract symbol
       if (line === 'SYMBOL' && nextLine && nextLine !== 'WHITEPAPER') {
         tokenData.symbol = nextLine;
       }
-      
+
       // Extract total supply
       if (line === 'TOTAL SUPPLY' && nextLine && nextLine !== 'CIRCULATING') {
         tokenData.totalSupply = nextLine.replace(/,/g, '');
       }
-      
+
       // Extract circulating supply
       if (line === 'CIRCULATING' && nextLine && nextLine !== 'WEBSITE') {
         tokenData.circulatingSupply = nextLine.replace(/,/g, '');
       }
-      
+
       // Extract email
       if (line === 'EMAIL' && nextLine && nextLine.includes('@')) {
         tokenData.email = nextLine;
       }
-      
+
       // Extract about us
       if (line === 'ABOUT US' && nextLine && nextLine !== 'CONTRACT ADDRESS') {
         tokenData.aboutUs = nextLine;
@@ -161,9 +166,9 @@ function extractTokenData(html, url) {
       const href = link.getAttribute('href');
       const text = link.textContent.trim();
       const parentText = link.parentElement?.textContent?.trim() || '';
-      
+
       if (!href || href === '#') return;
-      
+
       // Whitepaper
       if (parentText.includes('WHITEPAPER') || href.includes('whitepaper')) {
         tokenData.whitepaper = href;
@@ -226,32 +231,39 @@ function extractTokenData(html, url) {
 
     // Extract logo/image with multiple strategies
     let logoSrc = null;
-    
+
     // Strategy 1: Look for images with specific patterns
     const logoSelectors = [
       'img[src*="logo"]',
-      'img[alt*="logo"]', 
+      'img[alt*="logo"]',
       'img[alt*="Logo"]',
       '.logo img',
       'img[src*="token"]',
       'img[src*="coin"]',
       'img[class*="logo"]',
-      'img[id*="logo"]'
+      'img[id*="logo"]',
     ];
-    
+
     for (const selector of logoSelectors) {
       const logoImg = document.querySelector(selector);
       if (logoImg) {
         const src = logoImg.getAttribute('src');
-        if (src && !src.includes('bitcoin.svg') && !src.includes('ethereum.svg') && !src.includes('bnb.svg') && 
-            !src.includes('tether.svg') && !src.includes('cryptocurrency-price-ticker-widget') &&
-            !src.includes('coin-logos/') && !src.includes('generic')) {
+        if (
+          src &&
+          !src.includes('bitcoin.svg') &&
+          !src.includes('ethereum.svg') &&
+          !src.includes('bnb.svg') &&
+          !src.includes('tether.svg') &&
+          !src.includes('cryptocurrency-price-ticker-widget') &&
+          !src.includes('coin-logos/') &&
+          !src.includes('generic')
+        ) {
           logoSrc = src;
           break;
         }
       }
     }
-    
+
     // Strategy 2: Look for images in specific containers or with token-related attributes
     if (!logoSrc) {
       const allImages = document.querySelectorAll('img[src]');
@@ -259,51 +271,75 @@ function extractTokenData(html, url) {
         const src = img.getAttribute('src');
         const alt = img.getAttribute('alt') || '';
         const className = img.getAttribute('class') || '';
-        
+
         // Skip generic crypto icons
-        if (src.includes('bitcoin.svg') || src.includes('ethereum.svg') || src.includes('bnb.svg') || 
-            src.includes('tether.svg') || src.includes('cryptocurrency-price-ticker-widget') ||
-            src.includes('coin-logos/') || src.includes('generic')) {
+        if (
+          src.includes('bitcoin.svg') ||
+          src.includes('ethereum.svg') ||
+          src.includes('bnb.svg') ||
+          src.includes('tether.svg') ||
+          src.includes('cryptocurrency-price-ticker-widget') ||
+          src.includes('coin-logos/') ||
+          src.includes('generic')
+        ) {
           continue;
         }
-        
+
         // Look for token-specific images
-        if (src.includes('token') || src.includes('logo') || src.includes('coin') ||
-            alt.toLowerCase().includes('logo') || alt.toLowerCase().includes('token') ||
-            className.includes('logo') || className.includes('token')) {
+        if (
+          src.includes('token') ||
+          src.includes('logo') ||
+          src.includes('coin') ||
+          alt.toLowerCase().includes('logo') ||
+          alt.toLowerCase().includes('token') ||
+          className.includes('logo') ||
+          className.includes('token')
+        ) {
           logoSrc = src;
           break;
         }
       }
     }
-    
+
     // Strategy 3: Look for WordPress uploaded images or custom token images
     if (!logoSrc) {
       const allImages = document.querySelectorAll('img[src]');
       for (const img of allImages) {
         const src = img.getAttribute('src');
-        
+
         // Look for WordPress uploads or custom images that might be token logos
-        if (src && (src.includes('wp-content/uploads/') || src.includes('uploads/') || 
-                   src.includes('.png') || src.includes('.jpg') || src.includes('.jpeg') || src.includes('.gif')) &&
-            !src.includes('cryptocurrency-price-ticker-widget') && !src.includes('coin-logos/') &&
-            !src.includes('bitcoin') && !src.includes('ethereum') && !src.includes('tether')) {
-          
+        if (
+          src &&
+          (src.includes('wp-content/uploads/') ||
+            src.includes('uploads/') ||
+            src.includes('.png') ||
+            src.includes('.jpg') ||
+            src.includes('.jpeg') ||
+            src.includes('.gif')) &&
+          !src.includes('cryptocurrency-price-ticker-widget') &&
+          !src.includes('coin-logos/') &&
+          !src.includes('bitcoin') &&
+          !src.includes('ethereum') &&
+          !src.includes('tether')
+        ) {
           // Additional checks for likely token logos
           const imgWidth = img.getAttribute('width') || img.style.width;
           const imgHeight = img.getAttribute('height') || img.style.height;
-          
+
           // Prefer square images (common for logos) or reasonably sized images
-          if (!imgWidth || !imgHeight || 
-              (parseInt(imgWidth) >= 50 && parseInt(imgWidth) <= 500) ||
-              (parseInt(imgHeight) >= 50 && parseInt(imgHeight) <= 500)) {
+          if (
+            !imgWidth ||
+            !imgHeight ||
+            (parseInt(imgWidth) >= 50 && parseInt(imgWidth) <= 500) ||
+            (parseInt(imgHeight) >= 50 && parseInt(imgHeight) <= 500)
+          ) {
             logoSrc = src;
             break;
           }
         }
       }
     }
-    
+
     // Strategy 4: Extract from URL parameters or page content
     if (!logoSrc) {
       const logoIdMatch = url.match(/logoid=(\d+)/);
@@ -314,14 +350,14 @@ function extractTokenData(html, url) {
           `https://www.nyaltx.com/wp-content/uploads/${logoId}.png`,
           `https://www.nyaltx.com/wp-content/uploads/${logoId}.jpg`,
           `https://www.nyaltx.com/wp-content/uploads/logos/${logoId}.png`,
-          `https://www.nyaltx.com/logos/${logoId}.png`
+          `https://www.nyaltx.com/logos/${logoId}.png`,
         ];
-        
+
         // For now, we'll note the logoId and potential URLs
         tokenData.additionalInfo.possibleLogoUrls = possibleLogoUrls;
       }
     }
-    
+
     // Strategy 4: Look for base64 or data URLs
     if (!logoSrc) {
       const dataUrlImg = document.querySelector('img[src^="data:image"]');
@@ -329,7 +365,7 @@ function extractTokenData(html, url) {
         logoSrc = dataUrlImg.getAttribute('src');
       }
     }
-    
+
     if (logoSrc) {
       // Make sure it's a full URL
       if (logoSrc.startsWith('//')) {
@@ -339,7 +375,6 @@ function extractTokenData(html, url) {
       }
       tokenData.logo = logoSrc;
     }
-
   } catch (error) {
     console.error(`Error parsing token data for ${url}:`, error.message);
   }
@@ -351,9 +386,9 @@ function extractTokenData(html, url) {
 async function scrapeAllTokens() {
   const allTokens = [];
   const batchSize = 5; // Process 5 tokens at a time to avoid overwhelming the server
-  
+
   console.log(`Starting to scrape ${tokenUrls.length} tokens...`);
-  
+
   for (let i = 0; i < tokenUrls.length; i += batchSize) {
     const batch = tokenUrls.slice(i, i + batchSize);
     const batchPromises = batch.map(async (url, index) => {
@@ -367,21 +402,21 @@ async function scrapeAllTokens() {
         return {
           url: url,
           error: error.message,
-          logoId: url.match(/logoid=(\d+)/)?.[1] || null
+          logoId: url.match(/logoid=(\d+)/)?.[1] || null,
         };
       }
     });
-    
+
     const batchResults = await Promise.all(batchPromises);
     allTokens.push(...batchResults);
-    
+
     // Add delay between batches to be respectful to the server
     if (i + batchSize < tokenUrls.length) {
       console.log('Waiting 2 seconds before next batch...');
       await new Promise(resolve => setTimeout(resolve, 2000));
     }
   }
-  
+
   // Save to JSON file
   const outputFile = 'nyax-tokens-data.json';
   const jsonData = {
@@ -389,14 +424,14 @@ async function scrapeAllTokens() {
     totalTokens: allTokens.length,
     successfulScrapes: allTokens.filter(t => !t.error).length,
     failedScrapes: allTokens.filter(t => t.error).length,
-    tokens: allTokens
+    tokens: allTokens,
   };
-  
+
   fs.writeFileSync(outputFile, JSON.stringify(jsonData, null, 2));
   console.log(`\nScraping completed! Data saved to ${outputFile}`);
   console.log(`Successfully scraped: ${jsonData.successfulScrapes} tokens`);
   console.log(`Failed scrapes: ${jsonData.failedScrapes} tokens`);
-  
+
   return jsonData;
 }
 

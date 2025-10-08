@@ -54,12 +54,12 @@ export const getTopTickers = async (limit = 10): Promise<CoinTicker[]> => {
   try {
     const response = await axios.get(`${BASE_URL}/exchanges/binance`);
     const data = response.data as ExchangeData;
-    
+
     // Sort by volume and get the top tickers
     const sortedTickers = data.tickers
       .sort((a, b) => b.converted_volume.usd - a.converted_volume.usd)
       .slice(0, limit);
-    
+
     return sortedTickers;
   } catch (error) {
     console.error('Error fetching top tickers:', error);
@@ -89,5 +89,5 @@ export * from './pairs';
 export default {
   getTopTickers,
   getCoinData,
-  getCoinIcon
+  getCoinIcon,
 };

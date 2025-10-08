@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
 
   const nowIso = new Date().toISOString();
   const all = await readAll();
-  const id = `${Date.now()}-${Math.random().toString(36).slice(2,8)}`;
+  const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   const record: Profile = {
     id,
     projectName,

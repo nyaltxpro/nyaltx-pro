@@ -17,24 +17,36 @@ export async function POST(req: NextRequest) {
 
   const uname = (username && typeof username === 'string' ? username : 'admin').trim();
   const mail = (email && typeof email === 'string' ? email : 'admin@example.com').trim();
-  const pass = (password && typeof password === 'string' ? password : (process.env.ADMIN_PASSWORD || 'admin123')).trim();
+  const pass = (
+    password && typeof password === 'string' ? password : process.env.ADMIN_PASSWORD || 'admin123'
+  ).trim();
 
   const usernameLower = uname.toLowerCase();
   const emailLower = mail.toLowerCase();
 
   // Ensure indexes (idempotent)
-  await users.createIndex({ usernameLower: 1 }, { unique: true, sparse: true, name: 'uniq_usernameLower' });
-  await users.createIndex({ emailLower: 1 }, { unique: true, sparse: true, name: 'uniq_emailLower' });
+  await users.createIndex(
+    { usernameLower: 1 },
+    { unique: true, sparse: true, name: 'uniq_usernameLower' }
+  );
+  await users.createIndex(
+    { emailLower: 1 },
+    { unique: true, sparse: true, name: 'uniq_emailLower' }
+  );
 
-  const existing = await users.findOne({ $or: [ { usernameLower }, { emailLower } ], role: 'admin' });
+  const existing = await users.findOne({ $or: [{ usernameLower }, { emailLower }], role: 'admin' });
   if (existing) {
-    return NextResponse.json({ ok: true, message: 'Admin already exists', user: { username: existing.username, email: existing.email } });
+    return NextResponse.json({
+      ok: true,
+      message: 'Admin already exists',
+      user: { username: existing.username, email: existing.email },
+    });
   }
 
   const passwordHash = await hashPassword(pass);
   const now = new Date().toISOString();
   const user = {
-    id: `${Date.now()}-${Math.random().toString(36).slice(2,8)}`,
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     role: 'admin' as const,
     username: uname,
     usernameLower,

@@ -1,9 +1,26 @@
-"use client";
+'use client';
 
 import { useState, useRef, useEffect } from 'react';
 import { useAccount } from 'wagmi';
-import { FaVideo, FaVideoSlash, FaMicrophone, FaMicrophoneSlash, FaPlay, FaStop, FaUsers, FaComments, FaPaperPlane, FaTimes, FaGift } from 'react-icons/fa';
-import { liveStreamWebSocket, LiveStreamData, StreamMessage, WebSocketStreamMessage } from '@/services/LiveStreamWebSocket';
+import {
+  FaVideo,
+  FaVideoSlash,
+  FaMicrophone,
+  FaMicrophoneSlash,
+  FaPlay,
+  FaStop,
+  FaUsers,
+  FaComments,
+  FaPaperPlane,
+  FaTimes,
+  FaGift,
+} from 'react-icons/fa';
+import {
+  liveStreamWebSocket,
+  LiveStreamData,
+  StreamMessage,
+  WebSocketStreamMessage,
+} from '@/services/LiveStreamWebSocket';
 
 interface PumpFunLiveStreamProps {
   onClose: () => void;
@@ -11,39 +28,39 @@ interface PumpFunLiveStreamProps {
 
 export default function PumpFunLiveStream({ onClose }: PumpFunLiveStreamProps) {
   const { address, isConnected } = useAccount();
-  
+
   // Stream creation state
   const [isCreating, setIsCreating] = useState(false);
   const [streamTitle, setStreamTitle] = useState('');
   const [streamDescription, setStreamDescription] = useState('');
   const [category, setCategory] = useState('trading');
-  
+
   // Stream state
   const [currentStream, setCurrentStream] = useState<LiveStreamData | null>(null);
   const [isStreaming, setIsStreaming] = useState(false);
   const [viewerCount, setViewerCount] = useState(0);
-  
+
   // Media state
   const [isVideoEnabled, setIsVideoEnabled] = useState(true);
   const [isAudioEnabled, setIsAudioEnabled] = useState(true);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  
+
   // Chat state
   const [messages, setMessages] = useState<StreamMessage[]>([]);
   const [chatMessage, setChatMessage] = useState('');
   const [isChatVisible, setIsChatVisible] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  
+
   // Connection state is now handled by liveStreamWebSocket.connected
-  
+
   const categories = [
     { id: 'trading', label: '📈 Trading & Analysis' },
     { id: 'education', label: '🎓 Crypto Education' },
     { id: 'news', label: '📰 News & Updates' },
     { id: 'community', label: '💬 Community Chat' },
     { id: 'gaming', label: '🎮 Gaming' },
-    { id: 'other', label: '🔥 Other' }
+    { id: 'other', label: '🔥 Other' },
   ];
 
   // Initialize WebSocket connection
@@ -92,7 +109,7 @@ export default function PumpFunLiveStream({ onClose }: PumpFunLiveStreamProps) {
     };
 
     liveStreamWebSocket.subscribeToGlobal(handleWebSocketMessage);
-    
+
     return () => {
       liveStreamWebSocket.unsubscribeFromGlobal(handleWebSocketMessage);
     };
@@ -119,9 +136,9 @@ export default function PumpFunLiveStream({ onClose }: PumpFunLiveStreamProps) {
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: isVideoEnabled,
-        audio: isAudioEnabled
+        audio: isAudioEnabled,
       });
-      
+
       setStream(mediaStream);
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
@@ -179,10 +196,10 @@ export default function PumpFunLiveStream({ onClose }: PumpFunLiveStreamProps) {
     }
 
     setIsCreating(true);
-    
+
     try {
       await startPreview();
-      
+
       const streamData = {
         title: streamTitle,
         description: streamDescription,
@@ -192,11 +209,10 @@ export default function PumpFunLiveStream({ onClose }: PumpFunLiveStreamProps) {
         tags: [category, 'crypto', 'live'],
         chatEnabled: true,
         donationsEnabled: true,
-        thumbnail: '/api/placeholder/320/180'
+        thumbnail: '/api/placeholder/320/180',
       };
-      
+
       liveStreamWebSocket.createStream(streamData);
-      
     } catch (error) {
       console.error('Failed to create stream:', error);
       alert('Failed to create stream. Please try again.');
@@ -213,15 +229,10 @@ export default function PumpFunLiveStream({ onClose }: PumpFunLiveStreamProps) {
 
   const sendChatMessage = () => {
     if (!chatMessage.trim() || !currentStream || !address) return;
-    
+
     const username = `${address.slice(0, 6)}...${address.slice(-4)}`;
-    liveStreamWebSocket.sendChatMessage(
-      currentStream.id,
-      chatMessage.trim(),
-      address,
-      username
-    );
-    
+    liveStreamWebSocket.sendChatMessage(currentStream.id, chatMessage.trim(), address, username);
+
     setChatMessage('');
   };
 
@@ -242,15 +253,18 @@ export default function PumpFunLiveStream({ onClose }: PumpFunLiveStreamProps) {
   const renderMessage = (msg: StreamMessage) => {
     if (msg.type === 'donation') {
       return (
-        <div key={msg.id} className="p-3 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/30 rounded-lg mb-2">
+        <div
+          key={msg.id}
+          className="p-3 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/30 rounded-lg mb-2"
+        >
           <div className="flex items-center gap-2 mb-1">
             <FaGift className="text-yellow-400" />
             <span className="font-bold text-yellow-400">{msg.username}</span>
-            <span className="text-yellow-300">donated {msg.amount} {msg.token}</span>
+            <span className="text-yellow-300">
+              donated {msg.amount} {msg.token}
+            </span>
           </div>
-          {msg.message && (
-            <div className="text-gray-300 text-sm">{msg.message}</div>
-          )}
+          {msg.message && <div className="text-gray-300 text-sm">{msg.message}</div>}
         </div>
       );
     }
@@ -283,14 +297,11 @@ export default function PumpFunLiveStream({ onClose }: PumpFunLiveStreamProps) {
   return (
     <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50">
       <div className="bg-gradient-to-b from-gray-900 to-black border border-gray-700 rounded-xl w-full max-w-6xl mx-4 max-h-[95vh] overflow-hidden">
-        
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
-              {isStreaming && (
-                <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-              )}
+              {isStreaming && <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>}
               <h2 className="text-xl font-bold text-white">
                 {isStreaming ? 'Live Stream' : 'Create Live Stream'}
               </h2>
@@ -301,15 +312,15 @@ export default function PumpFunLiveStream({ onClose }: PumpFunLiveStreamProps) {
                   <FaUsers />
                   <span>{viewerCount} viewers</span>
                 </div>
-                <div className="text-gray-400">
-                  {currentStream?.title}
-                </div>
+                <div className="text-gray-400">{currentStream?.title}</div>
               </div>
             )}
           </div>
-          
+
           <div className="flex items-center gap-2">
-            <div className={`w-2 h-2 rounded-full ${liveStreamWebSocket.connected ? 'bg-green-500' : 'bg-red-500'}`}></div>
+            <div
+              className={`w-2 h-2 rounded-full ${liveStreamWebSocket.connected ? 'bg-green-500' : 'bg-red-500'}`}
+            ></div>
             <span className="text-xs text-gray-400">
               {liveStreamWebSocket.connected ? 'Connected' : 'Disconnected'}
             </span>
@@ -323,10 +334,8 @@ export default function PumpFunLiveStream({ onClose }: PumpFunLiveStreamProps) {
         </div>
 
         <div className="flex h-[calc(95vh-80px)]">
-          
           {/* Main Content */}
           <div className="flex-1 flex flex-col">
-            
             {/* Video Preview */}
             <div className="relative flex-1 bg-gray-900">
               <video
@@ -336,7 +345,7 @@ export default function PumpFunLiveStream({ onClose }: PumpFunLiveStreamProps) {
                 playsInline
                 className="w-full h-full object-cover"
               />
-              
+
               {!isVideoEnabled && (
                 <div className="absolute inset-0 bg-gray-800 flex items-center justify-center">
                   <FaVideoSlash className="text-gray-400 text-6xl" />
@@ -365,14 +374,13 @@ export default function PumpFunLiveStream({ onClose }: PumpFunLiveStreamProps) {
             {/* Controls */}
             <div className="p-4 bg-gray-800 border-t border-gray-700">
               <div className="flex items-center justify-between">
-                
                 {/* Media Controls */}
                 <div className="flex items-center gap-3">
                   <button
                     onClick={toggleVideo}
                     className={`p-3 rounded-full transition-colors ${
-                      isVideoEnabled 
-                        ? 'bg-gray-700 text-white hover:bg-gray-600' 
+                      isVideoEnabled
+                        ? 'bg-gray-700 text-white hover:bg-gray-600'
                         : 'bg-red-600 text-white hover:bg-red-700'
                     }`}
                   >
@@ -382,8 +390,8 @@ export default function PumpFunLiveStream({ onClose }: PumpFunLiveStreamProps) {
                   <button
                     onClick={toggleAudio}
                     className={`p-3 rounded-full transition-colors ${
-                      isAudioEnabled 
-                        ? 'bg-gray-700 text-white hover:bg-gray-600' 
+                      isAudioEnabled
+                        ? 'bg-gray-700 text-white hover:bg-gray-600'
                         : 'bg-red-600 text-white hover:bg-red-700'
                     }`}
                   >
@@ -418,7 +426,6 @@ export default function PumpFunLiveStream({ onClose }: PumpFunLiveStreamProps) {
 
           {/* Chat Sidebar */}
           <div className="w-80 bg-gray-900 border-l border-gray-700 flex flex-col">
-            
             {/* Chat Header */}
             <div className="p-4 border-b border-gray-700 flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -456,7 +463,7 @@ export default function PumpFunLiveStream({ onClose }: PumpFunLiveStreamProps) {
                       <input
                         type="text"
                         value={chatMessage}
-                        onChange={(e) => setChatMessage(e.target.value)}
+                        onChange={e => setChatMessage(e.target.value)}
                         onKeyPress={handleKeyPress}
                         placeholder="Type a message..."
                         className="flex-1 px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-cyan-500 focus:outline-none text-sm"
@@ -471,9 +478,7 @@ export default function PumpFunLiveStream({ onClose }: PumpFunLiveStreamProps) {
                       </button>
                     </div>
                     {!isConnected && (
-                      <div className="text-xs text-gray-400 mt-2">
-                        Connect wallet to chat
-                      </div>
+                      <div className="text-xs text-gray-400 mt-2">Connect wallet to chat</div>
                     )}
                   </div>
                 )}
@@ -487,14 +492,14 @@ export default function PumpFunLiveStream({ onClose }: PumpFunLiveStreamProps) {
           <div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center">
             <div className="bg-gray-900 border border-gray-700 rounded-xl p-6 w-full max-w-md mx-4">
               <h3 className="text-xl font-bold text-white mb-4">Stream Setup</h3>
-              
+
               <div className="space-y-4">
                 <div>
                   <label className="block text-white font-medium mb-2">Stream Title *</label>
                   <input
                     type="text"
                     value={streamTitle}
-                    onChange={(e) => setStreamTitle(e.target.value)}
+                    onChange={e => setStreamTitle(e.target.value)}
                     placeholder="Enter your stream title..."
                     className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:border-cyan-500 focus:outline-none"
                   />
@@ -504,7 +509,7 @@ export default function PumpFunLiveStream({ onClose }: PumpFunLiveStreamProps) {
                   <label className="block text-white font-medium mb-2">Description</label>
                   <textarea
                     value={streamDescription}
-                    onChange={(e) => setStreamDescription(e.target.value)}
+                    onChange={e => setStreamDescription(e.target.value)}
                     placeholder="Tell viewers what your stream is about..."
                     rows={3}
                     className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:border-cyan-500 focus:outline-none resize-none"
@@ -515,11 +520,13 @@ export default function PumpFunLiveStream({ onClose }: PumpFunLiveStreamProps) {
                   <label className="block text-white font-medium mb-2">Category</label>
                   <select
                     value={category}
-                    onChange={(e) => setCategory(e.target.value)}
+                    onChange={e => setCategory(e.target.value)}
                     className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:border-cyan-500 focus:outline-none"
                   >
                     {categories.map(cat => (
-                      <option key={cat.id} value={cat.id}>{cat.label}</option>
+                      <option key={cat.id} value={cat.id}>
+                        {cat.label}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -527,7 +534,12 @@ export default function PumpFunLiveStream({ onClose }: PumpFunLiveStreamProps) {
                 <div className="flex gap-3 pt-4">
                   <button
                     onClick={handleCreateStream}
-                    disabled={!isConnected || !liveStreamWebSocket.connected || !streamTitle.trim() || isCreating}
+                    disabled={
+                      !isConnected ||
+                      !liveStreamWebSocket.connected ||
+                      !streamTitle.trim() ||
+                      isCreating
+                    }
                     className="flex-1 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white font-medium rounded-lg hover:from-red-700 hover:to-red-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                   >
                     {isCreating ? 'Creating...' : 'Create Stream'}

@@ -9,13 +9,14 @@ This guide explains how to set up the email newsletter functionality using Nodem
 ✅ **Admin Notifications** for new subscriptions  
 ✅ **Email Validation** and error handling  
 ✅ **Professional HTML Email Templates**  
-✅ **Responsive Form UI** with loading states  
+✅ **Responsive Form UI** with loading states
 
 ## Setup Instructions
 
 ### 1. Install Dependencies
 
 The required packages are already installed:
+
 ```bash
 npm install nodemailer @types/nodemailer
 ```
@@ -50,6 +51,7 @@ For Gmail SMTP:
 ### 4. Alternative Email Providers
 
 #### SendGrid
+
 ```bash
 SMTP_HOST=smtp.sendgrid.net
 SMTP_PORT=587
@@ -58,6 +60,7 @@ SMTP_PASS=your-sendgrid-api-key
 ```
 
 #### Mailgun
+
 ```bash
 SMTP_HOST=smtp.mailgun.org
 SMTP_PORT=587
@@ -66,6 +69,7 @@ SMTP_PASS=your-mailgun-smtp-password
 ```
 
 #### AWS SES
+
 ```bash
 SMTP_HOST=email-smtp.us-east-1.amazonaws.com
 SMTP_PORT=587
@@ -80,6 +84,7 @@ SMTP_PASS=your-ses-smtp-password
 Subscribe a user to the newsletter.
 
 **Request Body:**
+
 ```json
 {
   "email": "user@example.com",
@@ -88,6 +93,7 @@ Subscribe a user to the newsletter.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -100,6 +106,7 @@ Subscribe a user to the newsletter.
 Check service status.
 
 **Response:**
+
 ```json
 {
   "service": "NYALTX Newsletter API",
@@ -111,6 +118,7 @@ Check service status.
 ## Email Templates
 
 ### Welcome Email Features:
+
 - 🎨 Professional HTML design with NYALTX branding
 - 📱 Mobile-responsive layout
 - 🔗 Links to dashboard and social media
@@ -118,6 +126,7 @@ Check service status.
 - 🎯 Call-to-action buttons
 
 ### Admin Notification Features:
+
 - 📧 New subscriber details
 - 🕒 Timestamp and IP tracking
 - 📊 Simple format for easy processing
@@ -125,6 +134,7 @@ Check service status.
 ## Form Features
 
 ### User Experience:
+
 - **Name Field**: Optional for personalization
 - **Email Validation**: Client and server-side validation
 - **Loading States**: "Signing Up..." indicator
@@ -132,6 +142,7 @@ Check service status.
 - **Form Reset**: Clears after successful submission
 
 ### UI Components:
+
 - **Responsive Design**: Works on mobile and desktop
 - **Gradient Styling**: Matches NYALTX brand colors
 - **Disabled States**: Prevents double submissions
@@ -142,6 +153,7 @@ Check service status.
 ### Test the Newsletter Signup:
 
 1. **Start the development server:**
+
    ```bash
    npm run dev
    ```
@@ -187,6 +199,7 @@ curl -X POST http://localhost:3000/api/newsletter \
 ### Debug Mode:
 
 Add this to your `.env.local` for detailed logging:
+
 ```bash
 DEBUG=nodemailer:*
 ```
@@ -202,12 +215,14 @@ DEBUG=nodemailer:*
 ## Production Deployment
 
 ### Recommended Services:
+
 1. **SendGrid** - Reliable, good free tier
 2. **Mailgun** - Developer-friendly
 3. **AWS SES** - Cost-effective for high volume
 4. **Postmark** - High deliverability
 
 ### Environment Setup:
+
 - Use production SMTP credentials
 - Set proper FROM_EMAIL domain
 - Configure SPF/DKIM records
@@ -216,6 +231,7 @@ DEBUG=nodemailer:*
 ## Future Enhancements
 
 Potential improvements:
+
 - 📊 Subscriber management dashboard
 - 📧 Email templates editor
 - 📈 Analytics and open rates
@@ -228,6 +244,7 @@ Potential improvements:
 ## Support
 
 For issues or questions:
+
 - Check the console for error messages
 - Verify environment variables
 - Test SMTP connection manually

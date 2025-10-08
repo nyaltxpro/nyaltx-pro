@@ -19,16 +19,16 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    
+
     // In a real implementation, you would:
     // 1. Validate admin authentication
     // 2. Update settings in database
     // 3. Return updated settings
-    
-    return NextResponse.json({ 
-      ok: true, 
+
+    return NextResponse.json({
+      ok: true,
       message: 'Settings updated successfully',
-      settings: body 
+      settings: body,
     });
   } catch (error) {
     console.error('Error updating admin settings:', error);

@@ -29,24 +29,28 @@ STREAM_API_SECRET=your_stream_api_secret_here
 ## Stream.io Features Enabled
 
 ### ✅ Live Streaming
+
 - **Professional Quality**: HD video streaming with adaptive bitrate
 - **Low Latency**: Sub-second latency for real-time interaction
 - **Scalable**: Handles thousands of concurrent viewers
 - **Global CDN**: Worldwide content delivery network
 
 ### ✅ Video Calling
+
 - **WebRTC**: Direct peer-to-peer connections
 - **Screen Sharing**: Built-in screen sharing capabilities
 - **Camera Controls**: Toggle camera/microphone
 - **Recording**: Optional stream recording
 
 ### ✅ Chat Integration
+
 - **Real-time Chat**: Built-in messaging system
 - **Moderation**: Chat moderation tools
 - **Reactions**: Emoji reactions and interactions
 - **User Management**: Participant management
 
 ### ✅ Advanced Features
+
 - **Analytics**: Stream performance metrics
 - **Authentication**: JWT-based security
 - **Webhooks**: Real-time event notifications
@@ -55,6 +59,7 @@ STREAM_API_SECRET=your_stream_api_secret_here
 ## Pricing
 
 Stream.io offers:
+
 - **Free Tier**: 10,000 minutes/month
 - **Growth Plan**: $99/month for 100,000 minutes
 - **Enterprise**: Custom pricing for high-volume usage

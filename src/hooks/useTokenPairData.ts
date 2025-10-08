@@ -25,7 +25,7 @@ export function useTokenPairData(
       try {
         setIsLoading(true);
         const pairData = await fetchTokenPairData(baseToken, quoteToken);
-        
+
         if (isMounted) {
           setData(pairData);
           setError(null);

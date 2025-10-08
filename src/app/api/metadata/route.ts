@@ -11,14 +11,14 @@ export async function GET(request: NextRequest) {
   try {
     // Validate URI format
     const url = new URL(uri);
-    
+
     // IPFS gateways in order of preference (fastest/most reliable first)
     const ipfsGateways = [
       'https://cloudflare-ipfs.com/ipfs/',
       'https://gateway.pinata.cloud/ipfs/',
       'https://dweb.link/ipfs/',
       'https://ipfs.io/ipfs/',
-      'https://nftstorage.link/ipfs/'
+      'https://nftstorage.link/ipfs/',
     ];
 
     // Add security check for allowed domains
@@ -29,13 +29,13 @@ export async function GET(request: NextRequest) {
       'cloudflare-ipfs.com',
       'dweb.link',
       'nftstorage.link',
-      'arweave.net'
+      'arweave.net',
     ];
-    
-    const isAllowedDomain = allowedDomains.some(domain => 
-      url.hostname === domain || url.hostname.endsWith('.' + domain)
+
+    const isAllowedDomain = allowedDomains.some(
+      domain => url.hostname === domain || url.hostname.endsWith('.' + domain)
     );
-    
+
     if (!isAllowedDomain) {
       return NextResponse.json({ error: 'Domain not allowed' }, { status: 403 });
     }
@@ -49,13 +49,13 @@ export async function GET(request: NextRequest) {
         const response = await fetch(fetchUri, {
           method: 'GET',
           headers: {
-            'Accept': 'application/json, text/plain, */*',
+            Accept: 'application/json, text/plain, */*',
             'User-Agent': 'NYALTX-Metadata-Fetcher/1.0',
-            'Cache-Control': 'no-cache'
+            'Cache-Control': 'no-cache',
           },
-          signal: controller.signal
+          signal: controller.signal,
         });
-        
+
         clearTimeout(timeoutId);
 
         if (!response.ok) {
@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
         }
 
         const text = await response.text();
-        
+
         // Validate it's not empty or HTML error page
         if (!text.trim() || text.trim().startsWith('<')) {
           throw new Error('Empty or HTML response');
@@ -93,11 +93,11 @@ export async function GET(request: NextRequest) {
 
     let metadata: any;
     let lastError: any;
-    
+
     // Try each URL/gateway until one works
     for (let i = 0; i < urlsToTry.length; i++) {
       const currentUri = urlsToTry[i];
-      
+
       try {
         console.log(`Trying gateway ${i + 1}/${urlsToTry.length}: ${currentUri}`);
         metadata = await fetchFromGateway(currentUri, 3000);
@@ -105,13 +105,16 @@ export async function GET(request: NextRequest) {
         break;
       } catch (error) {
         lastError = error;
-        console.log(`Gateway ${i + 1} failed:`, error instanceof Error ? error.message : 'Unknown error');
-        
+        console.log(
+          `Gateway ${i + 1} failed:`,
+          error instanceof Error ? error.message : 'Unknown error'
+        );
+
         // If this is the last attempt, throw the error
         if (i === urlsToTry.length - 1) {
           throw lastError;
         }
-        
+
         // Small delay before trying next gateway
         await new Promise(resolve => setTimeout(resolve, 100));
       }
@@ -130,14 +133,18 @@ export async function GET(request: NextRequest) {
         metadata.image = `https://cloudflare-ipfs.com/ipfs/${ipfsHash}`;
         metadata.imageBackups = [
           `https://ipfs.io/ipfs/${ipfsHash}`,
-          `https://gateway.pinata.cloud/ipfs/${ipfsHash}`
+          `https://gateway.pinata.cloud/ipfs/${ipfsHash}`,
         ];
       }
     }
-    
+
     // Process other IPFS fields
     ['animation_url', 'external_url'].forEach(field => {
-      if (metadata[field] && typeof metadata[field] === 'string' && metadata[field].startsWith('ipfs://')) {
+      if (
+        metadata[field] &&
+        typeof metadata[field] === 'string' &&
+        metadata[field].startsWith('ipfs://')
+      ) {
         const ipfsHash = metadata[field].replace('ipfs://', '');
         metadata[field] = `https://cloudflare-ipfs.com/ipfs/${ipfsHash}`;
       }
@@ -151,13 +158,12 @@ export async function GET(request: NextRequest) {
     headers.set('Cache-Control', 'public, max-age=300'); // Cache for 5 minutes
 
     return NextResponse.json(metadata, { headers });
-
   } catch (error) {
     console.error('Error fetching metadata:', error);
-    
+
     let errorMessage = 'Failed to fetch metadata';
     let statusCode = 500;
-    
+
     if (error instanceof DOMException && error.name === 'AbortError') {
       errorMessage = 'All IPFS gateways timed out - content may be unavailable';
       statusCode = 504;
@@ -180,12 +186,12 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { 
+      {
         error: errorMessage,
         uri: uri,
         timestamp: new Date().toISOString(),
-        suggestion: 'Try again later or check if the IPFS content exists'
-      }, 
+        suggestion: 'Try again later or check if the IPFS content exists',
+      },
       { status: statusCode }
     );
   }

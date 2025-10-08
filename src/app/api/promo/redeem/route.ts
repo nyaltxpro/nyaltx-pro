@@ -1,59 +1,62 @@
-import { NextResponse } from "next/server";
-import { getCollection } from "@/lib/mongodb";
+import { NextResponse } from 'next/server';
+import { getCollection } from '@/lib/mongodb';
 
 export async function POST(req: Request) {
   try {
     const { promoCode, tier, email, walletAddress } = await req.json();
-    
+
     if (!promoCode || !tier) {
-      return NextResponse.json({ 
-        success: false, 
-        message: "Promo code and tier are required" 
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'Promo code and tier are required',
+        },
+        { status: 400 }
+      );
     }
 
     // Validate promo code first - use direct validation instead of fetch to avoid URL issues
     const PROMO_CODES = {
-      'FREEPRO': {
+      FREEPRO: {
         type: 'free_subscription',
         description: 'Free NyaltxPro Membership',
         discount: 100,
         validFor: ['nyaltxpro'],
         maxUses: null,
-        active: true
+        active: true,
       },
-      'FREERACE': {
-        type: 'free_subscription', 
+      FREERACE: {
+        type: 'free_subscription',
         description: 'Free Race to Liberty Access',
         discount: 100,
         validFor: ['paddle', 'motor', 'helicopter'],
         maxUses: null,
-        active: true
+        active: true,
       },
-      'ADMIN2024': {
+      ADMIN2024: {
         type: 'free_subscription',
         description: 'Admin Free Access',
         discount: 100,
         validFor: ['nyaltxpro', 'paddle', 'motor', 'helicopter'],
         maxUses: null,
-        active: true
+        active: true,
       },
-      'NYAX10': {
+      NYAX10: {
         type: 'percentage_discount',
         description: '10% Discount',
         discount: 10,
         validFor: ['nyaltxpro', 'paddle', 'motor', 'helicopter'],
         maxUses: null,
-        active: true
+        active: true,
       },
-      'NYAX50': {
+      NYAX50: {
         type: 'percentage_discount',
         description: '50% Discount',
         discount: 50,
         validFor: ['nyaltxpro', 'paddle', 'motor', 'helicopter'],
         maxUses: null,
-        active: true
-      }
+        active: true,
+      },
     };
 
     const code = promoCode.trim().toUpperCase();
@@ -61,31 +64,31 @@ export async function POST(req: Request) {
 
     let validation;
     if (!promo) {
-      validation = { valid: false, message: "Invalid promo code" };
+      validation = { valid: false, message: 'Invalid promo code' };
     } else if (!promo.active) {
-      validation = { valid: false, message: "This promo code has expired" };
+      validation = { valid: false, message: 'This promo code has expired' };
     } else if (!promo.validFor.includes(tier.toLowerCase())) {
       validation = { valid: false, message: `This promo code is not valid for ${tier}` };
     } else {
-      validation = { 
+      validation = {
         valid: true,
         type: promo.type,
         discount: promo.discount,
         description: promo.description,
-        isFree: promo.discount === 100
+        isFree: promo.discount === 100,
       };
     }
-    
+
     if (!validation.valid || !validation.isFree) {
-      return NextResponse.json({ 
-        success: false, 
-        message: validation.message || "Invalid promo code for free subscription" 
+      return NextResponse.json({
+        success: false,
+        message: validation.message || 'Invalid promo code for free subscription',
       });
     }
 
     // Create free subscription order
     const subscriptions = await getCollection<any>('subscription_orders');
-    
+
     const freeSubscription = {
       id: `promo_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       type: 'pro_subscription',
@@ -99,7 +102,7 @@ export async function POST(req: Request) {
       promoCode: promoCode.toUpperCase(),
       tier: tier.toLowerCase(),
       createdAt: new Date().toISOString(),
-      expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString() // 1 year from now
+      expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(), // 1 year from now
     };
 
     await subscriptions.insertOne(freeSubscription);
@@ -107,7 +110,7 @@ export async function POST(req: Request) {
     // If it's a race tier, also create onchain order record
     if (['paddle', 'motor', 'helicopter'].includes(tier.toLowerCase())) {
       const onchainOrders = await getCollection<any>('onchain_orders');
-      
+
       const raceOrder = {
         id: `race_promo_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         method: 'PROMO' as const,
@@ -117,23 +120,25 @@ export async function POST(req: Request) {
         amount: '0.00',
         chainId: 0, // Promo code, no actual chain
         promoCode: promoCode.toUpperCase(),
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
       };
 
       await onchainOrders.insertOne(raceOrder);
     }
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: true,
       message: `Free ${tier} subscription activated successfully!`,
-      subscription: freeSubscription
+      subscription: freeSubscription,
     });
-
   } catch (error) {
-    console.error("Promo redemption error:", error);
-    return NextResponse.json({ 
-      success: false, 
-      message: "Failed to redeem promo code" 
-    }, { status: 500 });
+    console.error('Promo redemption error:', error);
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'Failed to redeem promo code',
+      },
+      { status: 500 }
+    );
   }
 }

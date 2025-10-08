@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import Banner from '@/components/Banner';
 import ConnectWalletButton from '@/components/ConnectWalletButton';
-import Image from "next/image";
-import Link from "next/link";
+import Image from 'next/image';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import BlockchainSelector from '@/components/BlockchainSelector';
 import TokenSection from '@/components/TokenSection';
@@ -15,7 +15,12 @@ import DailyGainers from '@/components/DailyGainers';
 import TokenCreator from '@/components/TokenCreator';
 import RecentSocials from '@/components/RecentSocials';
 import { Blockchain, Token } from '@/lib/types/blockchain';
-import { supportedBlockchains, getMemeTokens, getTronNewTokens, getTronPreLaunchedTokens } from '@/lib/blockchain/blockchainUtils';
+import {
+  supportedBlockchains,
+  getMemeTokens,
+  getTronNewTokens,
+  getTronPreLaunchedTokens,
+} from '@/lib/blockchain/blockchainUtils';
 import memeTokensData from '@/data/memetoken.json';
 import Header from '@/components/Header';
 import RecentlyAddedCoins from '@/components/RecentlyAddedCoins';
@@ -58,7 +63,7 @@ const fallbackTokenRaceData: TokenRaceItem[] = topTokens.map((token, index) => (
   symbol: token.symbol.toUpperCase(),
   price: token.current_price.toString(),
   rank: index + 1,
-  image: token.image
+  image: token.image,
 }));
 
 // Mock data for token categories (NEW, PRE LAUNCHED, LAUNCHED)
@@ -66,138 +71,138 @@ const tokenCategories = {
   new: [
     {
       id: 1,
-      name: "Memewear",
-      fullName: "Memewear",
-      symbol: "BRXL_pump",
-      mcap: "-",
-      vol: "-",
-      holders: "-",
-      time: "12 s",
-      percentage: "17.6%"
+      name: 'Memewear',
+      fullName: 'Memewear',
+      symbol: 'BRXL_pump',
+      mcap: '-',
+      vol: '-',
+      holders: '-',
+      time: '12 s',
+      percentage: '17.6%',
     },
     {
       id: 2,
-      name: "Sparky",
-      fullName: "Sparky",
-      symbol: "BWGX_pump",
-      mcap: "-",
-      vol: "-",
-      holders: "-",
-      time: "16 s",
-      percentage: "7.2%"
+      name: 'Sparky',
+      fullName: 'Sparky',
+      symbol: 'BWGX_pump',
+      mcap: '-',
+      vol: '-',
+      holders: '-',
+      time: '16 s',
+      percentage: '7.2%',
     },
     {
       id: 3,
-      name: "Garbage",
-      fullName: "Garbagecoin",
-      symbol: "GWXG_pump",
-      mcap: "-",
-      vol: "-",
-      holders: "-",
-      time: "",
-      percentage: ""
-    }
+      name: 'Garbage',
+      fullName: 'Garbagecoin',
+      symbol: 'GWXG_pump',
+      mcap: '-',
+      vol: '-',
+      holders: '-',
+      time: '',
+      percentage: '',
+    },
   ],
   preLaunched: [
     {
       id: 1,
-      name: "jotchua",
-      fullName: "jotchua",
-      symbol: "SimW_pump",
-      mcap: "$67.71K",
-      vol: "$352.75K",
-      holders: "226",
-      time: "48 m",
-      percentage: "96%"
+      name: 'jotchua',
+      fullName: 'jotchua',
+      symbol: 'SimW_pump',
+      mcap: '$67.71K',
+      vol: '$352.75K',
+      holders: '226',
+      time: '48 m',
+      percentage: '96%',
     },
     {
       id: 2,
-      name: "GDP",
-      fullName: "Gross Domestic Product",
-      symbol: "3Mmm_pump",
-      mcap: "$60.73K",
-      vol: "$14.99K",
-      holders: "714",
-      time: "2 h",
-      percentage: "93%"
+      name: 'GDP',
+      fullName: 'Gross Domestic Product',
+      symbol: '3Mmm_pump',
+      mcap: '$60.73K',
+      vol: '$14.99K',
+      holders: '714',
+      time: '2 h',
+      percentage: '93%',
     },
     {
       id: 3,
-      name: "Cope",
-      fullName: "Cope",
-      symbol: "EhxJ_zSs",
-      mcap: "$60.95K",
-      vol: "",
-      holders: "",
-      time: "",
-      percentage: ""
-    }
+      name: 'Cope',
+      fullName: 'Cope',
+      symbol: 'EhxJ_zSs',
+      mcap: '$60.95K',
+      vol: '',
+      holders: '',
+      time: '',
+      percentage: '',
+    },
   ],
   launched: [
     {
       id: 1,
-      name: "POT",
-      fullName: "Juppot",
-      symbol: "HjPsG_hyds",
-      mcap: "$467.25",
-      vol: "$514.94",
-      holders: "58",
-      time: "4 m",
-      percentage: "100%"
+      name: 'POT',
+      fullName: 'Juppot',
+      symbol: 'HjPsG_hyds',
+      mcap: '$467.25',
+      vol: '$514.94',
+      holders: '58',
+      time: '4 m',
+      percentage: '100%',
     },
     {
       id: 2,
-      name: "Rule34",
-      fullName: "Rule 34",
-      symbol: "CyAu_pump",
-      mcap: "$114.02K",
-      vol: "$335.32K",
-      holders: "763",
-      time: "16 m",
-      percentage: "100%"
+      name: 'Rule34',
+      fullName: 'Rule 34',
+      symbol: 'CyAu_pump',
+      mcap: '$114.02K',
+      vol: '$335.32K',
+      holders: '763',
+      time: '16 m',
+      percentage: '100%',
     },
     {
       id: 3,
-      name: "VWH",
-      fullName: "Video Wifi Hat",
-      symbol: "HT.Zc_2RqW",
-      mcap: "$646.08",
-      vol: "",
-      holders: "",
-      time: "",
-      percentage: ""
-    }
-  ]
+      name: 'VWH',
+      fullName: 'Video Wifi Hat',
+      symbol: 'HT.Zc_2RqW',
+      mcap: '$646.08',
+      vol: '',
+      holders: '',
+      time: '',
+      percentage: '',
+    },
+  ],
 };
 
 // Mock data for banner items
 const bannerItems = [
   {
     id: 1,
-    title: "DEXTools x Nibiru Chain AMA",
-    subtitle: "Join Us Here!",
-    date: "Wed August 27th",
-    time: "7PM CEST / 5PM UTC"
+    title: 'DEXTools x Nibiru Chain AMA',
+    subtitle: 'Join Us Here!',
+    date: 'Wed August 27th',
+    time: '7PM CEST / 5PM UTC',
   },
   {
     id: 2,
-    title: "DEXTools API V2",
-    subtitle: "Powering The Future Of DeFi"
+    title: 'DEXTools API V2',
+    subtitle: 'Powering The Future Of DeFi',
   },
   {
     id: 3,
-    title: "DEXTools Meme Board",
-    subtitle: "Discover Hottest Meme Tokens"
+    title: 'DEXTools Meme Board',
+    subtitle: 'Discover Hottest Meme Tokens',
   },
   {
     id: 4,
-    title: "Follow Us On TikTok!",
-    subtitle: "Official DEXTools Account"
+    title: 'Follow Us On TikTok!',
+    subtitle: 'Official DEXTools Account',
   },
   {
     id: 5,
-    title: "Follow Us On TikTok!",
-    subtitle: "Official DEXTools Account"
+    title: 'Follow Us On TikTok!',
+    subtitle: 'Official DEXTools Account',
   },
 ];
 
@@ -232,7 +237,9 @@ type TronPreLaunchedToken = {
 export default function Home() {
   const router = useRouter();
   const [selectedBlockchain, setSelectedBlockchain] = useState<Blockchain | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<'new' | 'pre-launched' | 'launched'>('new');
+  const [selectedCategory, setSelectedCategory] = useState<'new' | 'pre-launched' | 'launched'>(
+    'new'
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [tokenRaceData, setTokenRaceData] = useState<TokenRaceItem[]>(fallbackTokenRaceData);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
@@ -273,8 +280,8 @@ export default function Home() {
         const result = await response.json();
         if (result.success && result.data.length > 0) {
           // Sort by points (highest first)
-          const sortedTokens = result.data.sort((a: TokenRaceItem, b: TokenRaceItem) =>
-            (b.points || 0) - (a.points || 0)
+          const sortedTokens = result.data.sort(
+            (a: TokenRaceItem, b: TokenRaceItem) => (b.points || 0) - (a.points || 0)
           );
           setTokenRaceData(sortedTokens);
         }
@@ -291,14 +298,15 @@ export default function Home() {
   const filteredTokenRaceData = useChainFilter(tokenRaceData, {
     chainField: 'blockchain',
     includeUnknown: true,
-    caseSensitive: false
+    caseSensitive: false,
   });
 
   // Removed auto-slider - now manual navigation only
 
   // Update selected blockchain when chain is selected from All Chains dropdown
   useEffect(() => {
-    const blockchain = supportedBlockchains.find(bc => bc.id === selectedChain) || supportedBlockchains[0];
+    const blockchain =
+      supportedBlockchains.find(bc => bc.id === selectedChain) || supportedBlockchains[0];
     setSelectedBlockchain(blockchain);
   }, [selectedChain]);
 
@@ -354,8 +362,6 @@ export default function Home() {
     }, 2000);
     return () => clearTimeout(timer);
   }, []);
-
-
 
   return (
     <div className={`flex flex-col min-h-screen ${!darkMode ? 'light' : ''}`}>
@@ -491,7 +497,9 @@ export default function Home() {
                 <span className="text-xl font-bold">TOKEN RACE</span>
               </div>
               <div className="flex space-x-2 items-center">
-                <button className="py-1 px-3 bg-gray-700 text-white font-bold rounded-md">RANKING</button>
+                <button className="py-1 px-3 bg-gray-700 text-white font-bold rounded-md">
+                  RANKING
+                </button>
               </div>
             </div>
 
@@ -508,10 +516,9 @@ export default function Home() {
                     display: 'flex',
                     width: `${filteredTokenRaceData.length * 200}px`,
                     animation: 'ticker 60s linear infinite',
-                    animationFillMode: 'forwards'
+                    animationFillMode: 'forwards',
                   }}
                 >
-
                   {/* Duplicate the array for seamless loop */}
                   {[...filteredTokenRaceData, ...filteredTokenRaceData].map((token, index) => (
                     <div
@@ -523,15 +530,24 @@ export default function Home() {
                         className="relative flex flex-row justify-between items-center mt-3 p-3 bg-gradient-to-br from-gray-800 to-gray-700 rounded-lg shadow-lg border border-gray-600 h-32 transform hover:scale-105 transition-transform duration-300 cursor-pointer hover:border-[#00c3ff]"
                       >
                         {/* Position tag on top right based on points ranking */}
-                        <div className={`absolute -top-1 -right-1 px-2 py-1 rounded-full text-xs font-bold ${(index % filteredTokenRaceData.length) === 0 ? 'bg-yellow-500 text-black' :
-                            (index % filteredTokenRaceData.length) === 1 ? 'bg-gray-400 text-black' :
-                              (index % filteredTokenRaceData.length) === 2 ? 'bg-orange-500 text-black' :
-                                'bg-blue-500 text-white'
-                          }`}>
-                          {(index % filteredTokenRaceData.length) === 0 ? '1st' :
-                            (index % filteredTokenRaceData.length) === 1 ? '2nd' :
-                              (index % filteredTokenRaceData.length) === 2 ? '3rd' :
-                                `${(index % filteredTokenRaceData.length) + 1}th`}
+                        <div
+                          className={`absolute -top-1 -right-1 px-2 py-1 rounded-full text-xs font-bold ${
+                            index % filteredTokenRaceData.length === 0
+                              ? 'bg-yellow-500 text-black'
+                              : index % filteredTokenRaceData.length === 1
+                                ? 'bg-gray-400 text-black'
+                                : index % filteredTokenRaceData.length === 2
+                                  ? 'bg-orange-500 text-black'
+                                  : 'bg-blue-500 text-white'
+                          }`}
+                        >
+                          {index % filteredTokenRaceData.length === 0
+                            ? '1st'
+                            : index % filteredTokenRaceData.length === 1
+                              ? '2nd'
+                              : index % filteredTokenRaceData.length === 2
+                                ? '3rd'
+                                : `${(index % filteredTokenRaceData.length) + 1}th`}
                         </div>
 
                         <div className="flex items-center gap-2 mb-1">
@@ -550,23 +566,22 @@ export default function Home() {
                           <div className="token-symbol flex flex-col text-sm font-bold text-white truncate">
                             {token.symbol || token.name || 'Unknown'}
                             <span className="text-green-400">
-                            ${token.price || (token.current_price ? token.current_price.toFixed(4) : 'N/A')}
-                          </span>
+                              $
+                              {token.price ||
+                                (token.current_price ? token.current_price.toFixed(4) : 'N/A')}
+                            </span>
                           </div>
                         </div>
 
-                        <div className='flex flex-col items-center'>
-
-                        {/* Points display */}
-                        <div className="text-center mb-1">
-                          <div className="text-lg font-bold text-[#00c3ff]">
-                            {token.points || 0} pts
+                        <div className="flex flex-col items-center">
+                          {/* Points display */}
+                          <div className="text-center mb-1">
+                            <div className="text-lg font-bold text-[#00c3ff]">
+                              {token.points || 0} pts
+                            </div>
                           </div>
-                        </div>
 
-                        <div className="token-price text-xs font-semibold text-center">
-                       
-                        </div>
+                          <div className="token-price text-xs font-semibold text-center"></div>
                         </div>
                       </div>
                     </div>
@@ -576,14 +591,17 @@ export default function Home() {
 
               {/* Add inline keyframes */}
               <style jsx>{`
-            @keyframes ticker {
-              0% { transform: translateX(0); }
-              100% { transform: translateX(-50%); }
-            }
-          `}</style>
+                @keyframes ticker {
+                  0% {
+                    transform: translateX(0);
+                  }
+                  100% {
+                    transform: translateX(-50%);
+                  }
+                }
+              `}</style>
             </div>
           </div>
-
 
           {/* Main Content Grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4">
@@ -623,9 +641,7 @@ export default function Home() {
         </div> */}
 
             {/* Token section  */}
-            <TokenSection
-
-            />
+            <TokenSection />
           </div>
         </>
       )}

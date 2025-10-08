@@ -5,13 +5,15 @@ import path from 'path';
 
 export async function GET(req: NextRequest) {
   // Parse query params first so both primary and fallback paths can use them
-  const limit = Math.min(1000, Math.max(1, parseInt(req.nextUrl.searchParams.get('limit') || '20', 10)));
+  const limit = Math.min(
+    1000,
+    Math.max(1, parseInt(req.nextUrl.searchParams.get('limit') || '20', 10))
+  );
   const statusRaw = req.nextUrl.searchParams.get('status');
   const status = (statusRaw ? statusRaw : 'approved').toLowerCase();
   const all = req.nextUrl.searchParams.get('all') === '1';
 
   try {
-
     const col = await getCollection<any>('token_registrations');
     const query: any = {};
     if (!all && ['approved', 'pending', 'rejected'].includes(status)) {
@@ -41,22 +43,22 @@ export async function GET(req: NextRequest) {
         if (!network) return undefined;
         const key = String(network).toLowerCase();
         const mapping: Record<string, string> = {
-          'ethereum': 'ethereum',
-          'eth': 'ethereum',
-          'erc20': 'ethereum',
-          'bsc': 'binance',
-          'binance': 'binance',
+          ethereum: 'ethereum',
+          eth: 'ethereum',
+          erc20: 'ethereum',
+          bsc: 'binance',
+          binance: 'binance',
           'binance smart chain': 'binance',
-          'polygon': 'polygon',
-          'matic': 'polygon',
-          'avalanche': 'avalanche',
-          'avax': 'avalanche',
-          'fantom': 'fantom',
-          'base': 'base',
-          'arbitrum': 'arbitrum',
+          polygon: 'polygon',
+          matic: 'polygon',
+          avalanche: 'avalanche',
+          avax: 'avalanche',
+          fantom: 'fantom',
+          base: 'base',
+          arbitrum: 'arbitrum',
           'arbitrum one': 'arbitrum',
-          'optimism': 'optimism',
-          'solana': 'solana',
+          optimism: 'optimism',
+          solana: 'solana',
         };
         return mapping[key] || key;
       };

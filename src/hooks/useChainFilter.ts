@@ -23,7 +23,7 @@ interface BaseToken {
  * @returns Filtered tokens array
  */
 export const useChainFilter = <T extends BaseToken>(
-  tokens: T[], 
+  tokens: T[],
   options: {
     chainField?: keyof T; // Which field contains the chain info
     includeUnknown?: boolean; // Whether to include tokens without chain info
@@ -31,12 +31,8 @@ export const useChainFilter = <T extends BaseToken>(
   } = {}
 ) => {
   const selectedChain = useAppSelector(selectSelectedChain);
-  
-  const {
-    chainField = 'chain',
-    includeUnknown = true,
-    caseSensitive = false
-  } = options;
+
+  const { chainField = 'chain', includeUnknown = true, caseSensitive = false } = options;
 
   const filteredTokens = useMemo(() => {
     if (!selectedChain || !tokens || tokens.length === 0) {
@@ -51,10 +47,10 @@ export const useChainFilter = <T extends BaseToken>(
     const selectedChainId = caseSensitive ? selectedChain.id : selectedChain.id.toLowerCase();
     const selectedChainName = caseSensitive ? selectedChain.name : selectedChain.name.toLowerCase();
 
-    return tokens.filter((token) => {
+    return tokens.filter(token => {
       // Get the chain value from the token
       const tokenChain = token[chainField] || token.chain || token.blockchain || token.network;
-      
+
       // If token has no chain info, include based on includeUnknown setting
       if (!tokenChain) {
         return includeUnknown;
@@ -77,9 +73,13 @@ export const useChainFilter = <T extends BaseToken>(
   useEffect(() => {
     if (selectedChain && tokens.length > 0) {
       if (selectedChain.id === 'all-networks') {
-        console.log(`🌐 Chain Filter: ${selectedChain.name} | Showing all ${tokens.length} tokens (no filtering)`);
+        console.log(
+          `🌐 Chain Filter: ${selectedChain.name} | Showing all ${tokens.length} tokens (no filtering)`
+        );
       } else {
-        console.log(`🔍 Chain Filter: ${selectedChain.name} | Total: ${tokens.length} → Filtered: ${filteredTokens.length}`);
+        console.log(
+          `🔍 Chain Filter: ${selectedChain.name} | Total: ${tokens.length} → Filtered: ${filteredTokens.length}`
+        );
       }
     }
   }, [selectedChain, tokens.length, filteredTokens.length]);
@@ -90,31 +90,36 @@ export const useChainFilter = <T extends BaseToken>(
 /**
  * Helper function to match chain names with common variations
  */
-function isChainMatch(tokenChain: string, selectedChainId: string, selectedChainName: string): boolean {
+function isChainMatch(
+  tokenChain: string,
+  selectedChainId: string,
+  selectedChainName: string
+): boolean {
   // Common chain name mappings
   const chainMappings: Record<string, string[]> = {
-    'ethereum': ['eth', 'ethereum', 'mainnet', 'ethereum-mainnet'],
+    ethereum: ['eth', 'ethereum', 'mainnet', 'ethereum-mainnet'],
     'binance-smart-chain': ['bsc', 'binance', 'bnb', 'binance-smart-chain', 'bep20'],
     'polygon-pos': ['polygon', 'matic', 'polygon-pos', 'polygon-mainnet'],
     'arbitrum-one': ['arbitrum', 'arb', 'arbitrum-one', 'arbitrum-mainnet'],
     'optimistic-ethereum': ['optimism', 'op', 'optimistic-ethereum', 'optimism-mainnet'],
-    'avalanche': ['avax', 'avalanche', 'avalanche-mainnet'],
-    'fantom': ['ftm', 'fantom', 'fantom-mainnet'],
-    'solana': ['sol', 'solana', 'solana-mainnet'],
-    'base': ['base', 'base-mainnet'],
+    avalanche: ['avax', 'avalanche', 'avalanche-mainnet'],
+    fantom: ['ftm', 'fantom', 'fantom-mainnet'],
+    solana: ['sol', 'solana', 'solana-mainnet'],
+    base: ['base', 'base-mainnet'],
     'near-protocol': ['near', 'near-protocol', 'near-mainnet'],
-    'cosmos': ['atom', 'cosmos', 'cosmos-hub'],
-    'polkadot': ['dot', 'polkadot'],
-    'cardano': ['ada', 'cardano'],
-    'tron': ['trx', 'tron', 'tron-mainnet']
+    cosmos: ['atom', 'cosmos', 'cosmos-hub'],
+    polkadot: ['dot', 'polkadot'],
+    cardano: ['ada', 'cardano'],
+    tron: ['trx', 'tron', 'tron-mainnet'],
   };
 
   // Check if the token chain matches any of the variations for the selected chain
-  const selectedChainVariations = chainMappings[selectedChainId] || [selectedChainId, selectedChainName];
-  
-  return selectedChainVariations.some(variation => 
-    tokenChain === variation.toLowerCase()
-  );
+  const selectedChainVariations = chainMappings[selectedChainId] || [
+    selectedChainId,
+    selectedChainName,
+  ];
+
+  return selectedChainVariations.some(variation => tokenChain === variation.toLowerCase());
 }
 
 /**
@@ -122,12 +127,12 @@ function isChainMatch(tokenChain: string, selectedChainId: string, selectedChain
  */
 export const useChainFilterStatus = () => {
   const selectedChain = useAppSelector(selectSelectedChain);
-  
+
   return {
     isFiltering: !!selectedChain && selectedChain.id !== 'all-networks',
     selectedChain,
     chainName: selectedChain?.name || 'All Networks',
-    chainId: selectedChain?.id || 'all-networks'
+    chainId: selectedChain?.id || 'all-networks',
   };
 };
 

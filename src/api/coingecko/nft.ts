@@ -12,7 +12,7 @@ export const getTrendingNFTs = async (limit: number = 10): Promise<any> => {
     const data = await fetchCoinGeckoAPI('/nfts/list', {
       order: 'h24_volume_native_desc',
       per_page: limit.toString(),
-      page: '1'
+      page: '1',
     });
     return data;
   } catch (error) {
@@ -45,7 +45,7 @@ export const getNFTsByPlatform = async (
       asset_platform_id: assetPlatformId,
       order: 'h24_volume_native_desc',
       per_page: limit.toString(),
-      page: '1'
+      page: '1',
     });
     return data;
   } catch (error) {
@@ -68,7 +68,7 @@ export const loadNFTsFromCache = () => {
       if (cachedData) {
         const { data, timestamp } = JSON.parse(cachedData);
         const now = Date.now();
-        
+
         // Check if cache is still valid (not expired)
         if (now - timestamp < NFT_CACHE_EXPIRY) {
           console.log('Loading NFT collections from cache');
@@ -91,7 +91,7 @@ export const saveNFTsToCache = (data: any) => {
     if (typeof window !== 'undefined') {
       const cacheData = {
         data,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
       localStorage.setItem(NFT_STORAGE_KEY, JSON.stringify(cacheData));
     }

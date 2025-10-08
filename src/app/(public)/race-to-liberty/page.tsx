@@ -5,7 +5,15 @@ import { useAccount } from 'wagmi';
 import RaceToLibertyLeaderboard from '@/components/RaceToLibertyLeaderboard';
 import BoostPackSelector from '@/components/BoostPackSelector';
 import ConnectWalletButton from '@/components/ConnectWalletButton';
-import { FaTrophy, FaRocket, FaCrown, FaFire, FaTwitter, FaTelegram, FaMicrophone } from 'react-icons/fa';
+import {
+  FaTrophy,
+  FaRocket,
+  FaCrown,
+  FaFire,
+  FaTwitter,
+  FaTelegram,
+  FaMicrophone,
+} from 'react-icons/fa';
 
 export default function RaceToLibertyPage() {
   const { address, isConnected } = useAccount();
@@ -25,7 +33,7 @@ export default function RaceToLibertyPage() {
     try {
       const response = await fetch(`/api/tokens/by-wallet?address=${address}`);
       const data = await response.json();
-      
+
       if (data.success) {
         const approvedTokens = data.tokens.filter((token: any) => token.status === 'approved');
         setUserTokens(approvedTokens);
@@ -77,16 +85,18 @@ export default function RaceToLibertyPage() {
               Race to Liberty
             </h1>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-8">
-              The ultimate crypto marketing competition. Boost your token, climb the leaderboard, 
+              The ultimate crypto marketing competition. Boost your token, climb the leaderboard,
               and win exclusive rewards including social media features and podcast mentions.
             </p>
-            
+
             {/* Key Features */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
               <div className="p-4 bg-white/5 rounded-xl border border-white/10">
                 <FaFire className="text-orange-400 text-2xl mx-auto mb-2" />
                 <h3 className="font-bold mb-1">Point Decay</h3>
-                <p className="text-sm text-gray-400">Points fade over 24-48h keeping competition active</p>
+                <p className="text-sm text-gray-400">
+                  Points fade over 24-48h keeping competition active
+                </p>
               </div>
               <div className="p-4 bg-white/5 rounded-xl border border-white/10">
                 <FaCrown className="text-yellow-400 text-2xl mx-auto mb-2" />
@@ -104,7 +114,9 @@ export default function RaceToLibertyPage() {
               <div className="p-4 bg-white/5 rounded-xl border border-white/10">
                 <FaMicrophone className="text-purple-400 text-2xl mx-auto mb-2" />
                 <h3 className="font-bold mb-1">Podcast Ads</h3>
-                <p className="text-sm text-gray-400">Top 3 featured in Off Road with Frank Ferraro</p>
+                <p className="text-sm text-gray-400">
+                  Top 3 featured in Off Road with Frank Ferraro
+                </p>
               </div>
             </div>
           </div>
@@ -131,11 +143,11 @@ export default function RaceToLibertyPage() {
             </div>
             <h2 className="text-3xl font-bold mb-4">No Approved Tokens</h2>
             <p className="text-gray-300 mb-8 max-w-md mx-auto">
-              You need approved tokens to participate in the Race to Liberty. 
-              Register your tokens first and wait for admin approval.
+              You need approved tokens to participate in the Race to Liberty. Register your tokens
+              first and wait for admin approval.
             </p>
-            <a 
-              href="/dashboard/register-token" 
+            <a
+              href="/dashboard/register-token"
               className="inline-block px-8 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-semibold rounded-lg hover:from-cyan-700 hover:to-blue-700 transition-all duration-300"
             >
               Register Token
@@ -150,7 +162,7 @@ export default function RaceToLibertyPage() {
                 <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10">
                   <h3 className="text-lg font-bold mb-4">Select Token to Boost</h3>
                   <div className="grid grid-cols-1 gap-3">
-                    {userTokens.map((token) => (
+                    {userTokens.map(token => (
                       <button
                         key={token.id}
                         onClick={() => setSelectedToken(token)}
@@ -161,8 +173,8 @@ export default function RaceToLibertyPage() {
                         }`}
                       >
                         <div className="flex items-center gap-3">
-                          <img 
-                            src={token.logo || '/crypto-icons/color/generic.svg'} 
+                          <img
+                            src={token.logo || '/crypto-icons/color/generic.svg'}
                             alt={token.name}
                             className="w-10 h-10 rounded-full"
                           />
@@ -201,7 +213,8 @@ export default function RaceToLibertyPage() {
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold mb-4">How It Works</h2>
           <p className="text-gray-300 max-w-2xl mx-auto">
-            The Race to Liberty gamifies crypto marketing with decaying points, weekly competitions, and exclusive rewards.
+            The Race to Liberty gamifies crypto marketing with decaying points, weekly competitions,
+            and exclusive rewards.
           </p>
         </div>
 
@@ -211,7 +224,9 @@ export default function RaceToLibertyPage() {
               <span className="text-white font-bold text-xl">1</span>
             </div>
             <h3 className="text-xl font-bold mb-2">Connect Wallet</h3>
-            <p className="text-gray-400">Connect your wallet with ETH, USDC, or NYAX for payments</p>
+            <p className="text-gray-400">
+              Connect your wallet with ETH, USDC, or NYAX for payments
+            </p>
           </div>
 
           <div className="text-center">
@@ -219,7 +234,9 @@ export default function RaceToLibertyPage() {
               <span className="text-white font-bold text-xl">2</span>
             </div>
             <h3 className="text-xl font-bold mb-2">Select Boost Pack</h3>
-            <p className="text-gray-400">Choose from Paddle Boat, Motor Boat, or Helicopter boosts</p>
+            <p className="text-gray-400">
+              Choose from Paddle Boat, Motor Boat, or Helicopter boosts
+            </p>
           </div>
 
           <div className="text-center">
@@ -235,7 +252,9 @@ export default function RaceToLibertyPage() {
               <span className="text-white font-bold text-xl">4</span>
             </div>
             <h3 className="text-xl font-bold mb-2">Win Rewards</h3>
-            <p className="text-gray-400">Weekly winners get crown badges and social media features</p>
+            <p className="text-gray-400">
+              Weekly winners get crown badges and social media features
+            </p>
           </div>
         </div>
       </div>

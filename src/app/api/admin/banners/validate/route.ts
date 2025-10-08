@@ -30,15 +30,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ valid: false, error: 'Invalid or corrupted image file' });
     }
 
-    return NextResponse.json({ 
-      valid: true, 
+    return NextResponse.json({
+      valid: true,
       fileInfo: {
         name: file.name,
         size: file.size,
-        type: file.type
-      }
+        type: file.type,
+      },
     });
-
   } catch (error: any) {
     console.error('File validation error:', error);
     return NextResponse.json({ valid: false, error: 'File validation failed' });
@@ -50,24 +49,37 @@ function validateImageHeader(buffer: Uint8Array, mimeType: string): boolean {
 
   // JPEG validation
   if (mimeType === 'image/jpeg' || mimeType === 'image/jpg') {
-    return buffer[0] === 0xFF && buffer[1] === 0xD8 && buffer[2] === 0xFF;
+    return buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;
   }
 
   // PNG validation
   if (mimeType === 'image/png') {
-    return buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47;
+    return buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4e && buffer[3] === 0x47;
   }
 
   // GIF validation
   if (mimeType === 'image/gif') {
-    return (buffer[0] === 0x47 && buffer[1] === 0x49 && buffer[2] === 0x46) &&
-           (buffer[3] === 0x38 && (buffer[4] === 0x37 || buffer[4] === 0x39));
+    return (
+      buffer[0] === 0x47 &&
+      buffer[1] === 0x49 &&
+      buffer[2] === 0x46 &&
+      buffer[3] === 0x38 &&
+      (buffer[4] === 0x37 || buffer[4] === 0x39)
+    );
   }
 
   // WebP validation
   if (mimeType === 'image/webp') {
-    return buffer[0] === 0x52 && buffer[1] === 0x49 && buffer[2] === 0x46 && buffer[3] === 0x46 &&
-           buffer[8] === 0x57 && buffer[9] === 0x45 && buffer[10] === 0x42 && buffer[11] === 0x50;
+    return (
+      buffer[0] === 0x52 &&
+      buffer[1] === 0x49 &&
+      buffer[2] === 0x46 &&
+      buffer[3] === 0x46 &&
+      buffer[8] === 0x57 &&
+      buffer[9] === 0x45 &&
+      buffer[10] === 0x42 &&
+      buffer[11] === 0x50
+    );
   }
 
   return false;

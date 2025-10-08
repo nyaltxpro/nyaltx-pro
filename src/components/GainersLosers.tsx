@@ -60,7 +60,8 @@ const GainersLosers = () => {
 
     const list = tokens as Array<{ symbol: string; chain: string; address: string; name: string }>;
     const matches = list.filter(t => t.symbol.toUpperCase() === base);
-    const selected = matches.find(t => t.chain && t.chain.toLowerCase() === 'ethereum') || matches[0];
+    const selected =
+      matches.find(t => t.chain && t.chain.toLowerCase() === 'ethereum') || matches[0];
     const chain = selected?.chain;
     const address = selected?.address;
 
@@ -79,9 +80,7 @@ const GainersLosers = () => {
           <button
             onClick={() => setActiveTab('gainers')}
             className={`px-4 py-2 rounded-lg ${
-              activeTab === 'gainers'
-                ? 'bg-green-500 text-white'
-                : 'bg-gray-800 text-gray-300'
+              activeTab === 'gainers' ? 'bg-green-500 text-white' : 'bg-gray-800 text-gray-300'
             }`}
           >
             Top Gainers
@@ -89,9 +88,7 @@ const GainersLosers = () => {
           <button
             onClick={() => setActiveTab('losers')}
             className={`px-4 py-2 rounded-lg ${
-              activeTab === 'losers'
-                ? 'bg-red-500 text-white'
-                : 'bg-gray-800 text-gray-300'
+              activeTab === 'losers' ? 'bg-red-500 text-white' : 'bg-gray-800 text-gray-300'
             }`}
           >
             Top Losers
@@ -125,12 +122,7 @@ const GainersLosers = () => {
                   <td className="py-3">
                     <div className="flex items-center">
                       <div className="w-8 h-8 mr-3 rounded-full overflow-hidden">
-                        <Image
-                          src={coin.image}
-                          alt={coin.name}
-                          width={32}
-                          height={32}
-                        />
+                        <Image src={coin.image} alt={coin.name} width={32} height={32} />
                       </div>
                       <div>
                         <div className="font-medium text-white">{coin.name}</div>
@@ -138,14 +130,12 @@ const GainersLosers = () => {
                       </div>
                     </div>
                   </td>
-                  <td className="py-3 text-right text-white">
-                    ${formatPrice(coin.current_price)}
-                  </td>
-                  <td className={`py-3 text-right ${
-                    coin.price_change_percentage_24h >= 0
-                      ? 'text-green-500'
-                      : 'text-red-500'
-                  }`}>
+                  <td className="py-3 text-right text-white">${formatPrice(coin.current_price)}</td>
+                  <td
+                    className={`py-3 text-right ${
+                      coin.price_change_percentage_24h >= 0 ? 'text-green-500' : 'text-red-500'
+                    }`}
+                  >
                     {coin.price_change_percentage_24h >= 0 ? '+' : ''}
                     {coin.price_change_percentage_24h.toFixed(2)}%
                   </td>
@@ -160,4 +150,3 @@ const GainersLosers = () => {
 };
 
 export default GainersLosers;
-

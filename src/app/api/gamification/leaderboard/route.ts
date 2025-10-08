@@ -13,45 +13,50 @@ export async function GET(req: NextRequest) {
     const winnersCollection = await getCollection<WeeklyWinner>('weekly_winners');
 
     const now = new Date();
-    
+
     // Get all active boosts
-    const activeBoosts = await boostCollection.find({
-      isActive: true,
-      expiresAt: { $gt: now }
-    }).toArray();
+    const activeBoosts = await boostCollection
+      .find({
+        isActive: true,
+        expiresAt: { $gt: now },
+      })
+      .toArray();
 
     // Calculate current points with decay for each token
-    const tokenPointsMap = new Map<string, {
-      currentPoints: number;
-      weeklyPoints: number;
-      boosts: BoostPoints[];
-      lastBoostTime: Date;
-    }>();
+    const tokenPointsMap = new Map<
+      string,
+      {
+        currentPoints: number;
+        weeklyPoints: number;
+        boosts: BoostPoints[];
+        lastBoostTime: Date;
+      }
+    >();
 
     activeBoosts.forEach(boost => {
       const hoursElapsed = (now.getTime() - boost.createdAt.getTime()) / (1000 * 60 * 60);
-      const decayedPoints = Math.max(0, boost.originalPoints - (boost.decayRate * hoursElapsed));
-      
+      const decayedPoints = Math.max(0, boost.originalPoints - boost.decayRate * hoursElapsed);
+
       if (!tokenPointsMap.has(boost.tokenId)) {
         tokenPointsMap.set(boost.tokenId, {
           currentPoints: 0,
           weeklyPoints: 0,
           boosts: [],
-          lastBoostTime: boost.createdAt
+          lastBoostTime: boost.createdAt,
         });
       }
 
       const tokenData = tokenPointsMap.get(boost.tokenId)!;
       tokenData.currentPoints += Math.round(decayedPoints);
       tokenData.boosts.push(boost);
-      
+
       // Update last boost time
       if (boost.createdAt > tokenData.lastBoostTime) {
         tokenData.lastBoostTime = boost.createdAt;
       }
 
       // Calculate weekly points (last 7 days)
-      const weekAgo = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
+      const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
       if (boost.createdAt >= weekAgo) {
         tokenData.weeklyPoints += Math.round(decayedPoints);
       }
@@ -59,15 +64,19 @@ export async function GET(req: NextRequest) {
 
     // Get token details and crown badges
     const tokenIds = Array.from(tokenPointsMap.keys());
-    const tokens = await tokenCollection.find({
-      id: { $in: tokenIds },
-      status: 'approved'
-    }).toArray();
+    const tokens = await tokenCollection
+      .find({
+        id: { $in: tokenIds },
+        status: 'approved',
+      })
+      .toArray();
 
-    const crownBadges = await winnersCollection.find({
-      tokenId: { $in: tokenIds },
-      crownBadgeAwarded: true
-    }).toArray();
+    const crownBadges = await winnersCollection
+      .find({
+        tokenId: { $in: tokenIds },
+        crownBadgeAwarded: true,
+      })
+      .toArray();
 
     const crownBadgeSet = new Set(crownBadges.map(w => w.tokenId));
 
@@ -88,7 +97,7 @@ export async function GET(req: NextRequest) {
           hasCrownBadge: crownBadgeSet.has(token.id),
           isTopThree: false, // Will be set after sorting
           lastBoostTime: pointsData.lastBoostTime,
-          decayingPoints: pointsData.boosts
+          decayingPoints: pointsData.boosts,
         };
       })
       .filter(entry => entry !== null) as LeaderboardEntry[];
@@ -110,7 +119,7 @@ export async function GET(req: NextRequest) {
     const currentWeekStart = getWeekStart(now);
     const currentWeekWinner = await winnersCollection.findOne({
       weekStartDate: { $gte: currentWeekStart },
-      weekEndDate: { $lt: getWeekEnd(currentWeekStart) }
+      weekEndDate: { $lt: getWeekEnd(currentWeekStart) },
     });
 
     return NextResponse.json({
@@ -119,15 +128,17 @@ export async function GET(req: NextRequest) {
       totalEntries: leaderboardEntries.length,
       timeframe,
       currentWeekWinner,
-      lastUpdated: now.toISOString()
+      lastUpdated: now.toISOString(),
     });
-
   } catch (error) {
     console.error('Error fetching leaderboard:', error);
-    return NextResponse.json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      },
+      { status: 500 }
+    );
   }
 }
 

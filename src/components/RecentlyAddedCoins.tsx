@@ -38,7 +38,7 @@ export default function RecentlyAddedCoins() {
           if (cachedData) {
             const { data, timestamp } = JSON.parse(cachedData);
             const now = Date.now();
-            
+
             // Check if cache is still valid (not expired)
             if (now - timestamp < CACHE_EXPIRY) {
               console.log('Loading recently added coins from cache');
@@ -54,14 +54,14 @@ export default function RecentlyAddedCoins() {
         return false;
       }
     };
-    
+
     // Function to save data to cache
     const saveToCache = (data: RecentCoin[]) => {
       try {
         if (typeof window !== 'undefined') {
           const cacheData = {
             data,
-            timestamp: Date.now()
+            timestamp: Date.now(),
           };
           localStorage.setItem(STORAGE_KEY, JSON.stringify(cacheData));
         }
@@ -76,7 +76,7 @@ export default function RecentlyAddedCoins() {
         if (loading && loadFromCache()) {
           return; // Exit if we successfully loaded from cache
         }
-        
+
         setLoading(true);
         const data = await getRecentlyAddedCoins('usd', 10);
         setCoins(data);
@@ -85,12 +85,12 @@ export default function RecentlyAddedCoins() {
         setLoading(false);
       } catch (err) {
         console.error('Error fetching recently added coins:', err);
-        
+
         // If API call fails but we have cached data, use it
         if (!loadFromCache()) {
           setError('Failed to load recently added coins');
         }
-        
+
         setLoading(false);
       }
     };
@@ -102,7 +102,7 @@ export default function RecentlyAddedCoins() {
 
     // Refresh data every 5 minutes
     const intervalId = setInterval(fetchRecentCoins, 5 * 60 * 1000);
-    
+
     return () => clearInterval(intervalId);
   }, [loading]);
 
@@ -142,15 +142,15 @@ export default function RecentlyAddedCoins() {
         const platforms = await fetchCoinPlatforms(coin.id);
         if (platforms) {
           const platformToChain: Record<string, string> = {
-            'ethereum': 'ethereum',
+            ethereum: 'ethereum',
             'binance-smart-chain': 'binance',
             'polygon-pos': 'polygon',
-            'avalanche': 'avalanche',
-            'fantom': 'fantom',
-            'base': 'base',
+            avalanche: 'avalanche',
+            fantom: 'fantom',
+            base: 'base',
             'arbitrum-one': 'arbitrum',
             'optimistic-ethereum': 'optimism',
-            'solana': 'solana',
+            solana: 'solana',
           };
           const preference = [
             'ethereum',
@@ -187,18 +187,16 @@ export default function RecentlyAddedCoins() {
   return (
     <div className="w-full">
       <h2 className="text-xl font-semibold mb-4">Recently Added Coins</h2>
-      
+
       {loading ? (
         <div className="flex justify-center items-center h-32">
           <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-500"></div>
         </div>
       ) : error ? (
-        <div className="text-red-500 p-4 bg-red-900 bg-opacity-20 rounded">
-          {error}
-        </div>
+        <div className="text-red-500 p-4 bg-red-900 bg-opacity-20 rounded">{error}</div>
       ) : (
         <div className="space-y-4">
-          {coins.map((coin) => (
+          {coins.map(coin => (
             <div
               key={coin.id}
               className="rounded-lg p-2 flex flex-col sm:flex-row sm:justify-between sm:items-center cursor-pointer hover:bg-gray-800/40"
@@ -219,21 +217,21 @@ export default function RecentlyAddedCoins() {
                   <div className="text-gray-400 text-xs">{coin.symbol.toUpperCase()}</div>
                 </div>
               </div>
-              
+
               <div className="text-right w-full sm:w-auto mt-2 sm:mt-0 flex justify-between sm:block">
                 <div className="font-medium">${formatPrice(coin.current_price)}</div>
-                <div className={`text-xs ${coin.price_change_percentage_24h >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                <div
+                  className={`text-xs ${coin.price_change_percentage_24h >= 0 ? 'text-green-500' : 'text-red-500'}`}
+                >
                   {coin.price_change_percentage_24h >= 0 ? '+' : ''}
                   {coin.price_change_percentage_24h?.toFixed(2)}%
                 </div>
               </div>
             </div>
           ))}
-          
+
           {coins.length === 0 && (
-            <div className="text-center text-gray-400 py-4">
-              No recently added coins found
-            </div>
+            <div className="text-center text-gray-400 py-4">No recently added coins found</div>
           )}
         </div>
       )}

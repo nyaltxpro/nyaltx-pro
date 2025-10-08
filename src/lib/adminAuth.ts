@@ -10,7 +10,10 @@ function getSecret() {
   return new TextEncoder().encode(secret);
 }
 
-export async function signAdminJWT(payload: Record<string, any> = {}, ttlSeconds = DEFAULT_TTL_SECONDS) {
+export async function signAdminJWT(
+  payload: Record<string, any> = {},
+  ttlSeconds = DEFAULT_TTL_SECONDS
+) {
   const now = Math.floor(Date.now() / 1000);
   const exp = now + ttlSeconds;
   const token = await new SignJWT({ role: 'admin', ...payload })
@@ -23,7 +26,10 @@ export async function signAdminJWT(payload: Record<string, any> = {}, ttlSeconds
 }
 
 export async function verifyAdminJWT(token: string): Promise<JWTPayload & { role?: string }> {
-  const { payload } = await jwtVerify(token, getSecret(), { algorithms: ['HS256'], audience: undefined });
+  const { payload } = await jwtVerify(token, getSecret(), {
+    algorithms: ['HS256'],
+    audience: undefined,
+  });
   if (payload.sub !== 'admin' || payload.role !== 'admin') {
     throw new Error('Invalid admin token');
   }

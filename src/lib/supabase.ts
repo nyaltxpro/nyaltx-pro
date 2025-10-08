@@ -12,6 +12,6 @@ export const supabase = createClient(supabaseUrl, supabaseKey);
 // For server-side operations with service role key
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-export const supabaseAdmin = supabaseServiceKey 
+export const supabaseAdmin = supabaseServiceKey
   ? createClient(supabaseUrl, supabaseServiceKey)
   : null;

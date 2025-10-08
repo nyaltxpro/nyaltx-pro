@@ -9,9 +9,9 @@ interface ChainFilterIndicatorProps {
   showClearButton?: boolean;
 }
 
-const ChainFilterIndicator: React.FC<ChainFilterIndicatorProps> = ({ 
+const ChainFilterIndicator: React.FC<ChainFilterIndicatorProps> = ({
   className = '',
-  showClearButton = true 
+  showClearButton = true,
 }) => {
   const dispatch = useAppDispatch();
   const { isFiltering, selectedChain, chainName } = useChainFilterStatus();
@@ -25,7 +25,9 @@ const ChainFilterIndicator: React.FC<ChainFilterIndicatorProps> = ({
   }
 
   return (
-    <div className={`flex items-center gap-2 px-3 py-2 bg-blue-900/20 border border-blue-500/30 rounded-lg text-blue-300 ${className}`}>
+    <div
+      className={`flex items-center gap-2 px-3 py-2 bg-blue-900/20 border border-blue-500/30 rounded-lg text-blue-300 ${className}`}
+    >
       <FiFilter className="w-4 h-4" />
       <span className="text-sm font-medium">
         Filtering by: <span className="text-blue-400 font-semibold">{chainName}</span>

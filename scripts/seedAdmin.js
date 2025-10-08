@@ -81,7 +81,7 @@ async function main() {
     };
 
     const res = await users.updateOne(
-      { role: 'admin', $or: [ { usernameLower }, { emailLower } ] },
+      { role: 'admin', $or: [{ usernameLower }, { emailLower }] },
       update,
       { upsert: true }
     );
@@ -99,7 +99,7 @@ async function main() {
   }
 }
 
-main().catch((err) => {
+main().catch(err => {
   console.error('Seeding failed:', err);
   process.exit(1);
 });
