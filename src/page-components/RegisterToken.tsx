@@ -20,6 +20,7 @@ import {
     FaLink
 } from 'react-icons/fa';
 import { useAccount } from 'wagmi';
+import { validateContractAddress, getAddressFormatDescription, getExampleAddress } from '@/utils/addressValidation';
 
 interface FAQ {
     question: string;
@@ -137,13 +138,19 @@ function RegisterTokenContent() {
         {
             question: 'What is token registration?',
             answer:
-                'Registering a token lets users discover your asset in search, charts, and analytics across supported chains.',
+                'Registering a token lets users discover your asset in search, charts, and analytics across supported chains including Ethereum, Solana, BSC, Polygon, and more.',
+            isOpen: false,
+        },
+        {
+            question: 'What blockchains are supported?',
+            answer:
+                'We support EVM chains (Ethereum, BSC, Polygon, Arbitrum, Optimism, Base, Fantom, Avalanche) and non-EVM chains (Solana, Bitcoin, Cardano, Polkadot, Cosmos). Each blockchain has its own address format.',
             isOpen: false,
         },
         {
             question: 'What information is required?',
             answer:
-                'Provide your token name, symbol, the blockchain, and the contract address. Make sure the address is correct and verified.',
+                'Provide your token name, symbol, the blockchain, and the contract address. The address format varies by blockchain - EVM chains use 0x addresses, Solana uses Base58, etc.',
             isOpen: false,
         },
         {
@@ -169,14 +176,16 @@ function RegisterTokenContent() {
                 return false;
             }
 
-            // Check if it's a valid Ethereum address (starts with 0x and 42 characters)
             const cleanAddress = contractAddress.trim();
-            if (!cleanAddress.startsWith('0x') || cleanAddress.length !== 42) {
-                console.warn('Invalid contract address format:', cleanAddress);
+            
+            // Validate address format for the specific blockchain
+            const validation = validateContractAddress(cleanAddress, blockchain);
+            if (!validation.isValid) {
+                console.warn('Invalid contract address format:', cleanAddress, validation.error);
                 return false;
             }
 
-            console.log('Checking contract address:', cleanAddress, 'on blockchain:', blockchain);
+            console.log('Checking contract address:', cleanAddress, 'on blockchain:', blockchain, 'format:', validation.format);
             
             const response = await fetch(`/api/tokens/by-address/${encodeURIComponent(cleanAddress)}?blockchain=${blockchain}&checkExists=true`);
             if (response.ok) {
@@ -206,12 +215,14 @@ function RegisterTokenContent() {
                 return;
             }
 
-            // Validate contract address format
+            // Validate contract address format for the selected blockchain
             const cleanAddress = formData.contractAddress.trim();
-            if (!cleanAddress.startsWith('0x') || cleanAddress.length !== 42) {
+            const validation = validateContractAddress(cleanAddress, formData.blockchain);
+            
+            if (!validation.isValid) {
                 dispatch({
                     type: 'tokens/setError',
-                    payload: 'Please enter a valid contract address (must start with 0x and be 42 characters long).',
+                    payload: validation.error || `Please enter a valid ${formData.blockchain} contract address.`,
                 });
                 return;
             }
@@ -449,15 +460,23 @@ function RegisterTokenContent() {
                                         }
                                         required
                                     >
-                                        <option value="ethereum">Ethereum</option>
-                                        <option value="binance">BSC</option>
-                                        <option value="polygon">Polygon</option>
-                                        <option value="avalanche">Avalanche</option>
-                                        <option value="arbitrum">Arbitrum</option>
-                                        <option value="optimism">Optimism</option>
-                                        <option value="base">Base</option>
-                                        <option value="fantom">Fantom</option>
-                                        <option value="solana">Solana</option>
+                                        <optgroup label="EVM Chains">
+                                            <option value="ethereum">Ethereum</option>
+                                            <option value="binance">BSC (Binance Smart Chain)</option>
+                                            <option value="polygon">Polygon</option>
+                                            <option value="avalanche">Avalanche</option>
+                                            <option value="arbitrum">Arbitrum</option>
+                                            <option value="optimism">Optimism</option>
+                                            <option value="base">Base</option>
+                                            <option value="fantom">Fantom</option>
+                                        </optgroup>
+                                        <optgroup label="Non-EVM Chains">
+                                            <option value="solana">Solana</option>
+                                            <option value="bitcoin">Bitcoin</option>
+                                            <option value="cardano">Cardano</option>
+                                            <option value="polkadot">Polkadot</option>
+                                            <option value="cosmos">Cosmos</option>
+                                        </optgroup>
                                     </select>
                                 </div>
 
@@ -468,14 +487,16 @@ function RegisterTokenContent() {
                                     <input
                                         type="text"
                                         className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
-                                        placeholder="0x... or Solana address"
+                                        placeholder={getExampleAddress(formData.blockchain)}
                                         value={formData.contractAddress}
                                         onChange={e =>
                                             dispatch(updateFormField({ field: 'contractAddress', value: e.target.value }))
                                         }
                                         required
                                     />
-                                    <p className="text-xs text-gray-500 mt-1">Paste the verified contract address</p>
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        {getAddressFormatDescription(formData.blockchain)}
+                                    </p>
                                 </div>
 
                                 {/* Email Address (Optional) */}
