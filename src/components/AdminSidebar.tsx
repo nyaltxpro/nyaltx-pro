@@ -17,6 +17,7 @@ import {
   FaImage,
   FaRocket,
   FaSignOutAlt,
+  FaFootballBall,
 } from 'react-icons/fa';
 import Image from 'next/image';
 
@@ -176,6 +177,7 @@ export default function AdminSidebar({ isMobileMenuOpen, toggleMobileMenu }: Adm
     { icon: <FaGift />, text: 'Token Points', href: '/admin/points' },
     { icon: <FaImage />, text: 'Banners', href: '/admin/banners' },
     { icon: <FaRocket />, text: 'Campaigns', href: '/admin/campaigns' },
+    { icon: <FaFootballBall />, text: 'Footer Settings', href: '/admin/footer-settings' },
   ];
 
   const sidebarExpanded = isDesktop ? isExpanded : isMobileMenuOpen;
