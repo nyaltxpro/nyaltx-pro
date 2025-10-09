@@ -9,7 +9,28 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const db = await getDb();
+    let db;
+    try {
+      db = await getDb();
+    } catch (dbError) {
+      console.error('Database connection error:', dbError);
+      // Return empty analytics data if database is not available
+      return NextResponse.json({ 
+        data: {
+          onlineUsers: 0,
+          recentVisitors: [],
+          trafficByCountry: [],
+          browserStats: [],
+          deviceStats: [],
+          pageViews: { today: 0, thisWeek: 0, thisMonth: 0 },
+          uniqueVisitors: { today: 0, thisWeek: 0, thisMonth: 0 },
+          topPages: [],
+          walletConnections: 0,
+          walletConnectionsStats: [],
+          hourlyTraffic: Array.from({ length: 24 }, (_, hour) => ({ hour, visits: 0 }))
+        }
+      });
+    }
     const now = new Date();
     const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
     const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -17,18 +38,30 @@ export async function GET() {
 
     // Online users (active in last 5 minutes)
     const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
-    const onlineUsers = await db.collection('user_sessions').countDocuments({
-      isActive: true,
-      lastActivity: { $gte: fiveMinutesAgo }
-    });
+    let onlineUsers = 0;
+    try {
+      onlineUsers = await db.collection('user_sessions').countDocuments({
+        isActive: true,
+        lastActivity: { $gte: fiveMinutesAgo }
+      });
+    } catch (error) {
+      console.warn('Error fetching online users:', error);
+    }
 
     // Recent visitors (last 24 hours) with enhanced data
-    const recentVisitors = await db.collection('user_sessions').find({
-      createdAt: { $gte: oneDayAgo }
-    }).sort({ createdAt: -1 }).limit(50).toArray();
+    let recentVisitors: any[] = [];
+    try {
+      recentVisitors = await db.collection('user_sessions').find({
+        createdAt: { $gte: oneDayAgo }
+      }).sort({ createdAt: -1 }).limit(50).toArray();
+    } catch (error) {
+      console.warn('Error fetching recent visitors:', error);
+    }
     
     // Device and browser statistics (last 7 days)
-    const deviceStats = await db.collection('page_visits').aggregate([
+    let deviceStats: any[] = [];
+    try {
+      deviceStats = await db.collection('page_visits').aggregate([
       {
         $match: {
           timestamp: { $gte: oneWeekAgo },
@@ -50,10 +83,15 @@ export async function GET() {
         }
       },
       { $sort: { visits: -1 } }
-    ]).toArray();
+      ]).toArray();
+    } catch (error) {
+      console.warn('Error fetching device stats:', error);
+    }
 
     // Traffic by country (last 7 days)
-    const trafficByCountry = await db.collection('page_visits').aggregate([
+    let trafficByCountry: any[] = [];
+    try {
+      trafficByCountry = await db.collection('page_visits').aggregate([
       {
         $match: {
           timestamp: { $gte: oneWeekAgo },
@@ -78,10 +116,15 @@ export async function GET() {
       },
       { $sort: { visits: -1 } },
       { $limit: 20 }
-    ]).toArray();
+      ]).toArray();
+    } catch (error) {
+      console.warn('Error fetching traffic by country:', error);
+    }
 
     // Browser statistics (last 7 days)
-    const browserStats = await db.collection('page_visits').aggregate([
+    let browserStats: any[] = [];
+    try {
+      browserStats = await db.collection('page_visits').aggregate([
       {
         $match: {
           timestamp: { $gte: oneWeekAgo },
@@ -103,36 +146,51 @@ export async function GET() {
         }
       },
       { $sort: { visits: -1 } }
-    ]).toArray();
+      ]).toArray();
+    } catch (error) {
+      console.warn('Error fetching browser stats:', error);
+    }
 
     // Page views statistics
-    const pageViews = {
-      today: await db.collection('page_visits').countDocuments({
-        timestamp: { $gte: oneDayAgo }
-      }),
-      thisWeek: await db.collection('page_visits').countDocuments({
-        timestamp: { $gte: oneWeekAgo }
-      }),
-      thisMonth: await db.collection('page_visits').countDocuments({
-        timestamp: { $gte: oneMonthAgo }
-      })
-    };
+    let pageViews = { today: 0, thisWeek: 0, thisMonth: 0 };
+    try {
+      pageViews = {
+        today: await db.collection('page_visits').countDocuments({
+          timestamp: { $gte: oneDayAgo }
+        }),
+        thisWeek: await db.collection('page_visits').countDocuments({
+          timestamp: { $gte: oneWeekAgo }
+        }),
+        thisMonth: await db.collection('page_visits').countDocuments({
+          timestamp: { $gte: oneMonthAgo }
+        })
+      };
+    } catch (error) {
+      console.warn('Error fetching page views:', error);
+    }
 
     // Unique visitors
-    const uniqueVisitors = {
-      today: (await db.collection('page_visits').distinct('ipAddress', {
-        timestamp: { $gte: oneDayAgo }
-      })).length,
-      thisWeek: (await db.collection('page_visits').distinct('ipAddress', {
-        timestamp: { $gte: oneWeekAgo }
-      })).length,
-      thisMonth: (await db.collection('page_visits').distinct('ipAddress', {
-        timestamp: { $gte: oneMonthAgo }
-      })).length
-    };
+    let uniqueVisitors = { today: 0, thisWeek: 0, thisMonth: 0 };
+    try {
+      uniqueVisitors = {
+        today: (await db.collection('page_visits').distinct('ipAddress', {
+          timestamp: { $gte: oneDayAgo }
+        })).length,
+        thisWeek: (await db.collection('page_visits').distinct('ipAddress', {
+          timestamp: { $gte: oneWeekAgo }
+        })).length,
+        thisMonth: (await db.collection('page_visits').distinct('ipAddress', {
+          timestamp: { $gte: oneMonthAgo }
+        })).length
+      };
+    } catch (error) {
+      console.warn('Error fetching unique visitors:', error);
+    }
 
     // Top pages (last 7 days)
-    const topPages = await db.collection('page_visits').aggregate([
+    let topPages: any[] = [];
+    try {
+      topPages = await db.collection('page_visits').aggregate([
       {
         $match: {
           timestamp: { $gte: oneWeekAgo }
@@ -154,10 +212,15 @@ export async function GET() {
       },
       { $sort: { visits: -1 } },
       { $limit: 10 }
-    ]).toArray();
+      ]).toArray();
+    } catch (error) {
+      console.warn('Error fetching top pages:', error);
+    }
 
     // Wallet connections statistics (last 7 days)
-    const walletConnectionsStats = await db.collection('wallet_connections').aggregate([
+    let walletConnectionsStats: any[] = [];
+    try {
+      walletConnectionsStats = await db.collection('wallet_connections').aggregate([
       {
         $match: {
           timestamp: { $gte: oneWeekAgo }
@@ -182,12 +245,17 @@ export async function GET() {
         }
       },
       { $sort: { connections: -1 } }
-    ]).toArray();
+      ]).toArray();
+    } catch (error) {
+      console.warn('Error fetching wallet connections:', error);
+    }
     
     const totalWalletConnections = walletConnectionsStats.reduce((sum, wallet) => sum + wallet.connections, 0);
 
     // Hourly traffic pattern (last 24 hours)
-    const hourlyTraffic = await db.collection('page_visits').aggregate([
+    let hourlyTraffic: any[] = [];
+    try {
+      hourlyTraffic = await db.collection('page_visits').aggregate([
       {
         $match: {
           timestamp: { $gte: oneDayAgo }
@@ -200,7 +268,10 @@ export async function GET() {
         }
       },
       { $sort: { '_id': 1 } }
-    ]).toArray();
+      ]).toArray();
+    } catch (error) {
+      console.warn('Error fetching hourly traffic:', error);
+    }
 
     // Format hourly traffic data
     const formattedHourlyTraffic = Array.from({ length: 24 }, (_, hour) => {
