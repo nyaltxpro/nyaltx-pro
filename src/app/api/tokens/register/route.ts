@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 // Function to send email notifications
 async function sendTokenRegistrationEmails(tokenData: TokenRegistration) {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://nyaltx-pro-5hqd.vercel.app';
+  const baseUrl = 'https://nyaltx-pro-5hqd.vercel.app';
   
   // Send user confirmation email (if we have user email)
   if (tokenData.userEmail) {
