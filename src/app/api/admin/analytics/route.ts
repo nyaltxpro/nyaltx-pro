@@ -1,13 +1,16 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 import { getDb } from '@/lib/mongodb';
+import { getAdminFromRequest } from '@/lib/adminAuth';
 
 export async function GET() {
   try {
-    const c = await cookies();
-    if (c.get('admin_auth')?.value !== '1') {
+    const admin = await getAdminFromRequest();
+    if (!admin) {
+      console.log('Analytics API: No admin authentication found');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+    
+    console.log('Analytics API: Admin authenticated successfully');
 
     let db;
     try {

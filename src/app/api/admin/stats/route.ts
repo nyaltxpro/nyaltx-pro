@@ -1,15 +1,16 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { getDb } from '@/lib/mongodb';
+import { getAdminFromRequest } from '@/lib/adminAuth';
 
 const dataPath = (file: string) => path.join(process.cwd(), 'src', 'app', 'data', file);
 
 export async function GET() {
-  const c = await cookies();
-  if (c.get('admin_auth')?.value !== '1')
+  const admin = await getAdminFromRequest();
+  if (!admin) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
 
   // Load local JSON resources (best-effort)
   const readJson = async (file: string) => {
