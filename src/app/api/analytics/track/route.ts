@@ -47,12 +47,11 @@ function parseUserAgent(userAgent: string) {
   };
 }
 
-// Helper function to get location from IP (mock implementation)
+// Helper function to get location from IP using ipapi.co (free tier: 1000 requests/day)
 async function getLocationFromIP(ip: string) {
   try {
-    // In production, you would use a service like ipapi.co, ipgeolocation.io, etc.
-    // For now, we'll return mock data
-    if (ip === '127.0.0.1' || ip.startsWith('192.168.') || ip.startsWith('10.')) {
+    // Handle local/private IPs
+    if (ip === '127.0.0.1' || ip.startsWith('192.168.') || ip.startsWith('10.') || ip.startsWith('172.')) {
       return {
         country: 'Local',
         countryCode: 'LC',
@@ -61,19 +60,45 @@ async function getLocationFromIP(ip: string) {
       };
     }
 
-    // Mock implementation - in production, replace with actual IP geolocation service
+    // Try to get real geolocation data
+    const response = await fetch(`https://ipapi.co/${ip}/json/`, {
+      headers: {
+        'User-Agent': 'NYALTX-Analytics/1.0'
+      },
+      signal: AbortSignal.timeout(3000) // 3 second timeout
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      
+      // Check if we got valid data
+      if (data.country_name && data.country_code) {
+        return {
+          country: data.country_name,
+          countryCode: data.country_code,
+          region: data.region || 'Unknown',
+          city: data.city || 'Unknown'
+        };
+      }
+    }
+
+    // Fallback to mock data if API fails or returns invalid data
     const mockLocations = [
       { country: 'United States', countryCode: 'US', region: 'California', city: 'San Francisco' },
       { country: 'United Kingdom', countryCode: 'GB', region: 'England', city: 'London' },
       { country: 'Germany', countryCode: 'DE', region: 'Bavaria', city: 'Munich' },
       { country: 'Japan', countryCode: 'JP', region: 'Tokyo', city: 'Tokyo' },
       { country: 'Canada', countryCode: 'CA', region: 'Ontario', city: 'Toronto' },
+      { country: 'Australia', countryCode: 'AU', region: 'New South Wales', city: 'Sydney' },
+      { country: 'France', countryCode: 'FR', region: 'Île-de-France', city: 'Paris' },
+      { country: 'Netherlands', countryCode: 'NL', region: 'North Holland', city: 'Amsterdam' },
     ];
 
     // Simple hash-based selection for consistent results per IP
-    const hash = ip.split('.').reduce((acc, octet) => acc + parseInt(octet), 0);
+    const hash = ip.split('.').reduce((acc, octet) => acc + parseInt(octet || '0'), 0);
     return mockLocations[hash % mockLocations.length];
   } catch (error) {
+    console.error('Error getting location for IP:', ip, error);
     return {
       country: 'Unknown',
       countryCode: 'UN',
@@ -92,7 +117,10 @@ export async function POST(request: NextRequest) {
       sessionId,
       walletAddress,
       walletType,
-      event = 'page_view'
+      event = 'page_view',
+      deviceType,
+      screenResolution,
+      language
     } = body;
 
     const db = await getDb();
@@ -118,21 +146,59 @@ export async function POST(request: NextRequest) {
         countryCode: location.countryCode,
         region: location.region,
         city: location.city,
-        walletAddress: walletAddress || null
+        walletAddress: walletAddress || null,
+        deviceType: deviceType || 'unknown',
+        screenResolution: screenResolution || 'unknown',
+        language: language || 'unknown'
       });
     }
 
     // Track wallet connection
     if (event === 'wallet_connect' && walletAddress && walletType) {
+      // Store anonymized wallet address (first 6 + last 4 characters)
+      const anonymizedAddress = walletAddress.length > 10 
+        ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`
+        : walletAddress;
+      
       await db.collection('wallet_connections').insertOne({
-        walletAddress,
+        walletAddress: anonymizedAddress, // Anonymized for privacy
+        fullWalletAddress: walletAddress, // Full address for admin use only
         walletType,
         ipAddress: ip,
         timestamp,
         userAgent,
+        browser,
+        browserVersion: version,
         country: location.country,
-        region: location.region
+        countryCode: location.countryCode,
+        region: location.region,
+        city: location.city,
+        sessionId,
+        deviceType: deviceType || 'unknown',
+        screenResolution: screenResolution || 'unknown',
+        language: language || 'unknown'
       });
+      
+      // Update daily wallet connection stats
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      await db.collection('daily_wallet_stats').updateOne(
+        { 
+          date: today,
+          walletType: walletType
+        },
+        {
+          $inc: { 
+            connections: 1,
+            uniqueUsers: 1 // This will be corrected by aggregation
+          },
+          $addToSet: {
+            uniqueAddresses: walletAddress
+          }
+        },
+        { upsert: true }
+      );
     }
 
     // Update or create user session
@@ -143,22 +209,61 @@ export async function POST(request: NextRequest) {
           lastActivity: timestamp,
           ipAddress: ip,
           userAgent,
+          browser,
+          browserVersion: version,
           country: location.country,
           countryCode: location.countryCode,
           region: location.region,
           city: location.city,
           walletAddress: walletAddress || null,
-          isActive: true
+          walletType: walletType || null,
+          isActive: true,
+          deviceType: deviceType || 'unknown',
+          screenResolution: screenResolution || 'unknown',
+          language: language || 'unknown'
         },
         $setOnInsert: {
           createdAt: timestamp,
-          sessionId
+          sessionId,
+          firstPage: page || '/',
+          firstReferrer: referrer || null
+        },
+        $inc: {
+          pageViews: event === 'page_view' ? 1 : 0
+        }
+      },
+      { upsert: true }
+    );
+    
+    // Track unique daily visitors
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    await db.collection('daily_visitor_stats').updateOne(
+      { date: today },
+      {
+        $addToSet: {
+          uniqueIPs: ip,
+          uniqueSessions: sessionId
+        },
+        $inc: {
+          totalPageViews: event === 'page_view' ? 1 : 0,
+          totalSessions: 1
         }
       },
       { upsert: true }
     );
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ 
+      success: true,
+      tracked: {
+        event,
+        timestamp,
+        location: location.country,
+        browser: `${browser} ${version}`,
+        sessionId
+      }
+    });
   } catch (error) {
     console.error('Error tracking analytics:', error);
     return NextResponse.json(

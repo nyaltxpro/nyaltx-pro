@@ -7,6 +7,28 @@ const generateSessionId = () => {
   return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 };
 
+// Get device and browser information
+const getDeviceInfo = () => {
+  if (typeof window === 'undefined') return {};
+  
+  const userAgent = navigator.userAgent;
+  let deviceType = 'desktop';
+  
+  if (/tablet|ipad|playbook|silk/i.test(userAgent)) {
+    deviceType = 'tablet';
+  } else if (/mobile|iphone|ipod|android|blackberry|opera|mini|windows\sce|palm|smartphone|iemobile/i.test(userAgent)) {
+    deviceType = 'mobile';
+  }
+  
+  return {
+    deviceType,
+    screenResolution: `${screen.width}x${screen.height}`,
+    language: navigator.language || 'unknown',
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'unknown',
+    userAgent
+  };
+};
+
 // Get or create session ID
 const getSessionId = () => {
   if (typeof window === 'undefined') return null;
@@ -35,6 +57,8 @@ export const useAnalytics = () => {
 
     const trackPageView = async () => {
       try {
+        const deviceInfo = getDeviceInfo();
+        
         await fetch('/api/analytics/track', {
           method: 'POST',
           headers: {
@@ -46,6 +70,7 @@ export const useAnalytics = () => {
             referrer: document.referrer || null,
             sessionId: sessionId.current,
             walletAddress: address || null,
+            ...deviceInfo
           }),
         });
         
@@ -64,6 +89,8 @@ export const useAnalytics = () => {
 
     const trackWalletConnection = async () => {
       try {
+        const deviceInfo = getDeviceInfo();
+        
         await fetch('/api/analytics/track', {
           method: 'POST',
           headers: {
@@ -75,6 +102,7 @@ export const useAnalytics = () => {
             walletType: connector.name,
             sessionId: sessionId.current,
             page: pathname,
+            ...deviceInfo
           }),
         });
       } catch (error) {
@@ -93,6 +121,8 @@ export const useAnalytics = () => {
     const updateActivity = () => {
       if (!sessionId.current) return;
       
+      const deviceInfo = getDeviceInfo();
+      
       fetch('/api/analytics/track', {
         method: 'POST',
         headers: {
@@ -102,6 +132,7 @@ export const useAnalytics = () => {
           event: 'activity',
           sessionId: sessionId.current,
           walletAddress: address || null,
+          ...deviceInfo
         }),
       }).catch(() => {
         // Silently fail for activity updates

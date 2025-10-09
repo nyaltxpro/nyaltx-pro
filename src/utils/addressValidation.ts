@@ -123,6 +123,8 @@ export function validateCosmosAddress(address: string, prefix: string = 'cosmos'
  * Main validation function that detects blockchain and validates address
  */
 export function validateContractAddress(address: string, blockchain: string): AddressValidationResult {
+  console.log('🔍 Validating address:', address, 'for blockchain:', blockchain);
+  
   if (!address || typeof address !== 'string') {
     return {
       isValid: false,
@@ -318,18 +320,25 @@ export function getAddressFormatDescription(blockchain: string): string {
 export function getExampleAddress(blockchain: string): string {
   switch (blockchain.toLowerCase()) {
     case 'ethereum':
+      return '0xA0b86a33E6441e4C8C7C7b0b2C4C4C4C4C4C4C4C';
     case 'binance':
     case 'bsc':
+      return '0x55d398326f99059fF775485246999027B3197955';
     case 'polygon':
+      return '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174';
     case 'avalanche':
+      return '0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E';
     case 'arbitrum':
+      return '0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8';
     case 'optimism':
+      return '0x7F5c764cBc14f9669B88837ca1490cCa17c31607';
     case 'base':
+      return '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
     case 'fantom':
-      return '0x742d35Cc6634C0532925a3b8D4C9db4C2b7e9';
+      return '0x04068DA6C83AFCFA0e13ba15A6696662335D5B75';
       
     case 'solana':
-      return 'DYw8jCTfwHNRJhhmFcbXvVDTqWMEVFBX6ZKUmG5CNSKK';
+      return 'So11111111111111111111111111111111111111112';
       
     case 'bitcoin':
     case 'btc':

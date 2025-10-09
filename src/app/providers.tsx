@@ -3,6 +3,7 @@ import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 import { useEffect, useState } from 'react';
 import ReduxProvider from '../components/providers/ReduxProvider';
 import ContextProvider from '../providers/Web3Provider';
+import AnalyticsProvider from '../components/AnalyticsProvider';
 // Import web3modal to initialize it
 import '../lib/web3modal';
 
@@ -20,14 +21,18 @@ export default function Providers({
   }, []);
 
   return (
-
     <ReduxProvider>
-      <ContextProvider cookies={cookies}>  <PayPalScriptProvider options={{
-        clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "test",
-        currency: "USD",
-        intent: "capture"
-      }}>{children}</PayPalScriptProvider></ContextProvider>
+      <ContextProvider cookies={cookies}>
+        <AnalyticsProvider>
+          <PayPalScriptProvider options={{
+            clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "test",
+            currency: "USD",
+            intent: "capture"
+          }}>
+            {children}
+          </PayPalScriptProvider>
+        </AnalyticsProvider>
+      </ContextProvider>
     </ReduxProvider>
-
   );
 }
