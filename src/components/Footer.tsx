@@ -82,8 +82,7 @@ const Footer = () => {
               <h1 className="text-2xl  font-medium mb-4">NYALTX</h1>
               {/* <h2 className="text-xl font-medium mb-4">Get news about cryptocurrencies every day!</h2> */}
               <h3 className="text-lg font-medium mb-4">
-                Stay Ahead in Crypto – Join NYALTX Venture Access Network Get daily insights, market
-                news, and exclusive invites to networking events.
+                The Web3 Community for Creativity, Culture, and Fun.
               </h3>
 
               {/* Newsletter Signup */}
