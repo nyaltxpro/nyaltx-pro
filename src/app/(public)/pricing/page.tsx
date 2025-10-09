@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { erc20Abi, parseEther, parseUnits } from 'viem';
 import { useAccount, useSendTransaction, useSwitchChain, useWriteContract } from 'wagmi';
+import { getNYAXPriceUSD } from '@/utils/nyaxPriceApi';
 
 // Pricing tiers in USD (Race to Liberty tiers)
 const TIERS = [
@@ -156,6 +157,7 @@ export default function PricingPage() {
   const { switchChainAsync } = useSwitchChain();
   const isPro = useIsPro();
   const [ethPrice, setEthPrice] = useState<number | null>(null);
+  const [nyaxPrice, setNyaxPrice] = useState<number | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -167,9 +169,15 @@ export default function PricingPage() {
   const { writeContractAsync } = useWriteContract();
 
   useEffect(() => {
+    // Fetch ETH price
     fetchETHPriceUSD()
       .then(setEthPrice)
       .catch(() => setEthPrice(null));
+    
+    // Fetch NYAX price
+    getNYAXPriceUSD()
+      .then(setNyaxPrice)
+      .catch(() => setNyaxPrice(null));
   }, []);
 
   useEffect(() => {
@@ -186,6 +194,19 @@ export default function PricingPage() {
       return usd / ref;
     },
     [ethPrice]
+  );
+
+  const computeNyaxAmount = useCallback(
+    (usd: number) => {
+      // Apply 20% discount first
+      const discountedUSD = usd * 0.8;
+      
+      // Use real NYAX price if available, otherwise fallback to $1 assumption
+      const nyaxPriceUSD = nyaxPrice && nyaxPrice > 0 ? nyaxPrice : 1.0;
+      
+      return discountedUSD / nyaxPriceUSD;
+    },
+    [nyaxPrice]
   );
 
   const handleStripeCheckout = useCallback(async (tierId: string) => {
@@ -292,18 +313,31 @@ export default function PricingPage() {
         }
       }
 
-      // 20% discount
-      const discountedUSD = priceUSD * 0.8;
-
-      // For NYAX, assume 1 NYAX = 1 USD unless otherwise specified; if you need market pricing, integrate a price feed.
-      // Here we treat NYAX as a stable-like pricing unit for simplicity. Adjust if NYAX has volatility and an oracle is required.
-      const nyaxAmountWhole = discountedUSD; // 1 NYAX = $1 assumption
+      // Calculate NYAX amount using real market price
+      let nyaxAmount = computeNyaxAmount(priceUSD);
+      if (!nyaxAmount) {
+        // Fallback: try to fetch fresh NYAX price
+        try {
+          const freshNyaxPrice = await getNYAXPriceUSD();
+          if (freshNyaxPrice && freshNyaxPrice > 0) {
+            setNyaxPrice(freshNyaxPrice);
+            const discountedUSD = priceUSD * 0.8;
+            nyaxAmount = discountedUSD / freshNyaxPrice;
+          } else {
+            // Final fallback: use $1 assumption
+            nyaxAmount = priceUSD * 0.8; // 20% discount, 1 NYAX = $1
+          }
+        } catch {
+          // Final fallback: use $1 assumption
+          nyaxAmount = priceUSD * 0.8; // 20% discount, 1 NYAX = $1
+        }
+      }
 
       setError(null);
       setBusy(tierId + ':nyax');
       try {
-        // Convert to token units (assume NYAX has 18 decimals)
-        const value = parseUnits(discountedUSD.toFixed(6), 18);
+        // Convert to token units (NYAX has 18 decimals)
+        const value = parseUnits(nyaxAmount.toFixed(6), 18);
         const hash = await writeContractAsync({
           abi: erc20Abi,
           address: NYAX_TOKEN,
@@ -317,7 +351,7 @@ export default function PricingPage() {
         setBusy(null);
       }
     },
-    [chain?.id, isConnected, writeContractAsync]
+    [chain?.id, isConnected, writeContractAsync, computeNyaxAmount]
   );
 
   const handlePayUSDT = useCallback(
@@ -564,6 +598,7 @@ export default function PricingPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {TIERS.map((t, idx) => {
                 const ethAmt = ethPrice ? computeEthAmount(t.priceUSD) : null;
+                const nyaxAmount = computeNyaxAmount(t.priceUSD);
                 const nyaxUSD = t.priceUSD * 0.8;
                 return (
                   <div
@@ -604,7 +639,7 @@ export default function PricingPage() {
                             height={20}
                             className="opacity-60"
                           />{' '}
-                          <span>NYAX discounted: ${nyaxUSD.toFixed(2)} (−20%)</span>
+                          <span>NYAX: {nyaxAmount ? `${nyaxAmount.toFixed(2)} NYAX` : `${nyaxUSD.toFixed(2)} USD`} (−20%)</span>
                         </div>
                       </div>
                     </div>
@@ -679,6 +714,7 @@ export default function PricingPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {BOOST_PACKS.map((pack, idx) => {
                 const ethAmt = ethPrice ? computeEthAmount(pack.priceUSD) : null;
+                const nyaxAmount = computeNyaxAmount(pack.priceUSD);
                 const nyaxUSD = pack.priceUSD * 0.8; // 20% discount for NYAX
                 return (
                   <div
@@ -728,7 +764,7 @@ export default function PricingPage() {
                           height={16}
                           className="opacity-60"
                         />
-                        <span>NYAX: ${nyaxUSD.toFixed(2)} + bonus pts</span>
+                        <span>NYAX: {nyaxAmount ? `${nyaxAmount.toFixed(2)} NYAX` : `${nyaxUSD.toFixed(2)} USD`} + bonus pts</span>
                       </div>
                     </div>
 

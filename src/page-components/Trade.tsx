@@ -16,6 +16,7 @@ import {
 import { getCryptoIconUrl, getCryptoIconUrlWithFallback } from '@/utils/cryptoIcons';
 import { getCryptoName } from '@/utils/cryptoNames';
 import { geckoTerminalAPI } from '@/utils/geckoTerminalApi';
+import { fetchNYAXPrice, isNYAXToken } from '@/utils/nyaxPriceApi';
 import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
 import React, { Suspense, useEffect, useState } from 'react';
@@ -603,6 +604,27 @@ function TradingViewWithParams({
                     `🔄 Fetching price for ${chain}:${address} ${isManualRefresh ? '(Manual Refresh)' : ''}`
                 );
 
+                // Special handling for NYAX token - use dedicated API endpoint
+                if (isNYAXToken(baseToken, address)) {
+                    try {
+                        console.log('🟦 Trying NYAX dedicated price API...');
+                        const nyaxResponse = await fetchNYAXPrice();
+                        if (nyaxResponse.success && nyaxResponse.data) {
+                            if (aborted) return;
+                            console.log('✅ NYAX API: Price found', nyaxResponse.data.price_usd);
+                            setDexPriceUsd(nyaxResponse.data.price_usd);
+                            setPriceSource('geckoterminal');
+                            const change24h = parseFloat(nyaxResponse.data.price_change_24h);
+                            setDexChange24h(isNaN(change24h) ? null : change24h);
+                            return; // Success, exit early
+                        } else {
+                            console.log('❌ NYAX API returned error:', nyaxResponse.error || nyaxResponse.message);
+                        }
+                    } catch (e) {
+                        console.log('❌ NYAX dedicated API failed:', e);
+                    }
+                }
+
                 // Method 2: Try GeckoTerminal as fallback
                 try {
                     console.log('🟩 Trying GeckoTerminal API...');
@@ -637,7 +659,7 @@ function TradingViewWithParams({
                 aborted = true;
             };
         },
-        [chainParam, addressParam, resolveToken]
+        [chainParam, addressParam, resolveToken, baseToken]
     );
 
     // Manual refresh function
