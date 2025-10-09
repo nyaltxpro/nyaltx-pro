@@ -18,6 +18,7 @@ import {
   FaRocket,
   FaSignOutAlt,
   FaFootballBall,
+  FaChartPie,
 } from 'react-icons/fa';
 import Image from 'next/image';
 
@@ -173,6 +174,7 @@ export default function AdminSidebar({ isMobileMenuOpen, toggleMobileMenu }: Adm
     { icon: <FaCoins />, text: 'Tokens', href: '/admin/tokens' },
     { icon: <FaShoppingCart />, text: 'Orders', href: '/admin/orders' },
     { icon: <FaUsers />, text: 'Profiles', href: '/admin/profiles' },
+    { icon: <FaChartPie />, text: 'Analytics', href: '/admin/statistics' },
     { icon: <FaChartLine />, text: 'Stats', href: '/admin/stats' },
     { icon: <FaGift />, text: 'Token Points', href: '/admin/points' },
     { icon: <FaImage />, text: 'Banners', href: '/admin/banners' },
@@ -242,7 +244,7 @@ export default function AdminSidebar({ isMobileMenuOpen, toggleMobileMenu }: Adm
                 </motion.div>
               )}
             </AnimatePresence>
-            {navItems.slice(0, 5).map(item => (
+            {navItems.slice(0, 6).map(item => (
               <SidebarItem
                 key={item.href}
                 icon={item.icon}
@@ -272,7 +274,7 @@ export default function AdminSidebar({ isMobileMenuOpen, toggleMobileMenu }: Adm
                 </motion.div>
               )}
             </AnimatePresence>
-            {navItems.slice(5).map(item => (
+            {navItems.slice(6).map(item => (
               <SidebarItem
                 key={item.href}
                 icon={item.icon}
