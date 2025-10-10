@@ -96,29 +96,53 @@ function RegisterTokenContent() {
             
             // Register the token after successful payment
             const handlePostPaymentRegistration = async () => {
+                const postPaymentToast = toast.loading('🔄 Processing post-payment token registration...');
+                
                 try {
                     const pendingTokenData = localStorage.getItem('pendingTokenRegistration');
                     if (pendingTokenData) {
                         const tokenData = JSON.parse(pendingTokenData);
                         
+                        // Update toast for database registration
+                        toast.dismiss(postPaymentToast);
+                        const registeringToast = toast.loading('📤 Registering token in database...');
+                        
                         // Register the token in the database now that payment is successful
                         await dispatch(registerToken(tokenData)).unwrap();
                         
+                        toast.dismiss(registeringToast);
+                        
                         // Clear the pending registration data
                         localStorage.removeItem('pendingTokenRegistration');
+                        
+                        toast.success('🎉 Payment successful! Token registered with NyaltxPro benefits!');
+                        toast.success('✨ Your token now has premium features enabled', {
+                            duration: 4000,
+                            style: {
+                                background: '#065f46',
+                                color: '#d1fae5',
+                                border: '1px solid #10b981',
+                            }
+                        });
                         
                         dispatch({
                             type: 'tokens/setSuccess',
                             payload: '🎉 Payment successful! Your token has been registered with NyaltxPro benefits.',
                         });
                     } else {
+                        toast.dismiss(postPaymentToast);
+                        toast.success('🎉 Payment successful! You can now register tokens with NyaltxPro benefits.');
+                        
                         dispatch({
                             type: 'tokens/setSuccess',
                             payload: '🎉 Payment successful! You can now register your token with NyaltxPro benefits.',
                         });
                     }
                 } catch (error) {
+                    toast.dismiss(postPaymentToast);
                     console.error('Post-payment token registration failed:', error);
+                    toast.error('❌ Payment successful, but token registration failed. Please try again.');
+                    
                     dispatch({
                         type: 'tokens/setError',
                         payload: 'Payment successful, but token registration failed. Please try registering again.',
@@ -129,6 +153,7 @@ function RegisterTokenContent() {
             handlePostPaymentRegistration();
         } else if (paymentStatus === 'free') {
             setPaymentSuccess(true);
+            toast.success('🎉 Free registration successful! Your token has been registered.');
             dispatch({
                 type: 'tokens/setSuccess',
                 payload: '🎉 Free registration successful! Your token has been registered.',
@@ -210,15 +235,19 @@ function RegisterTokenContent() {
         // Start loading state
         dispatch({ type: 'tokens/setSubmitting', payload: true });
 
+        // Show initial validation toast
+        const initialToast = toast.loading('🔍 Validating form data...');
+
         try {
             // Validate required fields
             if (!formData.tokenName || !formData.tokenSymbol || !formData.contractAddress) {
                 const errorMsg = 'Please fill in all required fields.';
+                toast.dismiss(initialToast);
                 dispatch({
                     type: 'tokens/setError',
                     payload: errorMsg,
                 });
-                toast.error(errorMsg);
+                toast.error('❌ ' + errorMsg);
                 return;
             }
 
@@ -228,16 +257,18 @@ function RegisterTokenContent() {
             
             if (!validation.isValid) {
                 const errorMsg = validation.error || `Please enter a valid ${formData.blockchain} contract address.`;
+                toast.dismiss(initialToast);
                 dispatch({
                     type: 'tokens/setError',
                     payload: errorMsg,
                 });
-                toast.error(errorMsg);
+                toast.error('❌ ' + errorMsg);
                 return;
             }
 
-            // Show checking toast
-            const checkingToast = toast.loading('Checking contract address...');
+            // Update toast for contract checking
+            toast.dismiss(initialToast);
+            const checkingToast = toast.loading('🔍 Checking contract address uniqueness...');
 
             // Check if contract address already exists
             const contractExists = await checkContractExists(formData.contractAddress, formData.blockchain);
@@ -249,12 +280,16 @@ function RegisterTokenContent() {
                     type: 'tokens/setError',
                     payload: errorMsg,
                 });
-                toast.error(errorMsg);
+                toast.error('❌ ' + errorMsg);
                 return;
             }
 
+            toast.success('✅ Contract address is unique and valid!');
+
             // If redirecting to checkout, store token data temporarily in localStorage for registration after payment
             if (redirectPath && paymentMethod) {
+                const savingToast = toast.loading('💾 Saving token data for checkout...');
+                
                 // Store token data temporarily in localStorage (not in database yet)
                 const tokenData = {
                     tokenName: formData.tokenName,
@@ -275,7 +310,11 @@ function RegisterTokenContent() {
                 // Store in localStorage for post-payment registration
                 localStorage.setItem('pendingTokenRegistration', JSON.stringify(tokenData));
 
-                toast.success('Token data saved! Redirecting to checkout...');
+                toast.dismiss(savingToast);
+                toast.success('💾 Token data saved! Redirecting to checkout...');
+                
+                // Show redirect toast
+                toast.loading('🔄 Redirecting to checkout page...');
                 
                 // Redirect to checkout immediately (no database registration yet)
                 setTimeout(() => {
@@ -283,7 +322,7 @@ function RegisterTokenContent() {
                 }, 1000);
             } else {
                 // Show submitting toast
-                const submittingToast = toast.loading('Submitting token registration...');
+                const submittingToast = toast.loading('📤 Submitting token registration to database...');
 
                 // Submit to API for immediate registration
                 const result = await dispatch(registerToken({
@@ -304,12 +343,20 @@ function RegisterTokenContent() {
                 toast.dismiss(submittingToast);
 
                 if (registerToken.fulfilled.match(result)) {
-                    toast.success('🎉 Token registration submitted successfully! Our team will review it shortly.');
+                    toast.success('🎉 Token registration submitted successfully!');
+                    toast.success('📋 Our team will review your submission shortly', {
+                        duration: 4000,
+                        style: {
+                            background: '#065f46',
+                            color: '#d1fae5',
+                            border: '1px solid #10b981',
+                        }
+                    });
                     setSubmitted(true);
                     dispatch(resetForm());
                 } else {
                     const errorMsg = result.payload as string || 'Failed to submit token registration';
-                    toast.error(errorMsg);
+                    toast.error('❌ ' + errorMsg);
                     dispatch({
                         type: 'tokens/setError',
                         payload: errorMsg,
@@ -317,9 +364,10 @@ function RegisterTokenContent() {
                 }
             }
         } catch (err: any) {
+            toast.dismiss(initialToast);
             console.error('Token registration error:', err);
             const errorMsg = err.message || 'An unexpected error occurred';
-            toast.error(errorMsg);
+            toast.error('❌ ' + errorMsg);
             dispatch({
                 type: 'tokens/setError',
                 payload: errorMsg,

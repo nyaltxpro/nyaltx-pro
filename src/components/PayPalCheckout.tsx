@@ -29,7 +29,10 @@ export default function PayPalCheckout({
     process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID !== 'test';
 
   const handleSuccess = async (details: any) => {
+    const processingToast = toast.loading('🔄 Processing your payment...');
+    
     try {
+      toast.dismiss(processingToast);
       toast.success('🎉 PayPal payment successful!');
       
       // Set pro status cookie for nyaltxpro purchases
@@ -39,31 +42,71 @@ export default function PayPalCheckout({
         // Check if there's a pending token registration to process
         const pendingTokenData = localStorage.getItem('pendingTokenRegistration');
         if (pendingTokenData) {
-          // Register the token after successful payment (this will create the token registration record)
-          await handleTokenRegistrationAfterPayment(details, pendingTokenData);
+          const tokenToast = toast.loading('🪙 Registering your token...');
+          try {
+            // Register the token after successful payment (this will create the token registration record)
+            await handleTokenRegistrationAfterPayment(details, pendingTokenData);
+            toast.dismiss(tokenToast);
+          } catch (error) {
+            toast.dismiss(tokenToast);
+            throw error;
+          }
         } else {
-          // No pending token registration, so store the PayPal payment order
-          await storePayPalOrder(details);
-          // Redirect to register token page after successful payment
-          setTimeout(() => {
-            window.location.href = '/dashboard/register-token?payment=paypal_success';
-          }, 2000);
+          const orderToast = toast.loading('📝 Saving payment details...');
+          try {
+            // No pending token registration, so store the PayPal payment order
+            await storePayPalOrder(details);
+            toast.dismiss(orderToast);
+            toast.success('✅ Payment saved successfully!');
+            // Redirect to register token page after successful payment
+            toast.loading('🔄 Redirecting to token registration...');
+            setTimeout(() => {
+              window.location.href = '/dashboard/register-token?payment=paypal_success';
+            }, 2000);
+          } catch (error) {
+            toast.dismiss(orderToast);
+            throw error;
+          }
         }
       } else if (tier.toLowerCase().includes('race-') || ['paddle', 'motor', 'helicopter'].includes(tier.toLowerCase())) {
-        // Handle Race to Liberty payments - store PayPal order for these
-        await storePayPalOrder(details);
-        setTimeout(() => {
-          window.location.href = `/pricing/race-to-liberty/success?tier=${tier}&payment=paypal_success`;
-        }, 2000);
+        const raceToast = toast.loading('🏁 Processing Race to Liberty payment...');
+        try {
+          // Handle Race to Liberty payments - store PayPal order for these
+          await storePayPalOrder(details);
+          toast.dismiss(raceToast);
+          toast.success('🏆 Race to Liberty payment processed!');
+          toast.loading('🔄 Redirecting to success page...');
+          setTimeout(() => {
+            window.location.href = `/pricing/race-to-liberty/success?tier=${tier}&payment=paypal_success`;
+          }, 2000);
+        } catch (error) {
+          toast.dismiss(raceToast);
+          throw error;
+        }
       } else {
         // For other payments, check if there's a pending token registration
         const pendingTokenData = localStorage.getItem('pendingTokenRegistration');
         if (pendingTokenData) {
-          // Register the token after successful payment (this will create the token registration record)
-          await handleTokenRegistrationAfterPayment(details, pendingTokenData);
+          const tokenToast = toast.loading('🪙 Registering your token...');
+          try {
+            // Register the token after successful payment (this will create the token registration record)
+            await handleTokenRegistrationAfterPayment(details, pendingTokenData);
+            toast.dismiss(tokenToast);
+          } catch (error) {
+            toast.dismiss(tokenToast);
+            throw error;
+          }
         } else {
-          // No token registration, store as regular PayPal order
-          await storePayPalOrder(details);
+          const orderToast = toast.loading('📝 Saving payment details...');
+          try {
+            // No token registration, store as regular PayPal order
+            await storePayPalOrder(details);
+            toast.dismiss(orderToast);
+            toast.success('✅ Payment processed successfully!');
+          } catch (error) {
+            toast.dismiss(orderToast);
+            throw error;
+          }
         }
       }
 
@@ -71,8 +114,9 @@ export default function PayPalCheckout({
         onSuccess(details);
       }
     } catch (error) {
+      toast.dismiss(processingToast);
       console.error('Post-payment processing error:', error);
-      toast.error('Payment processing failed. Please contact support.');
+      toast.error('❌ Payment processing failed. Please contact support.');
       if (onError) {
         onError(error);
       }
@@ -81,7 +125,7 @@ export default function PayPalCheckout({
 
   const handleError = (error: any) => {
     console.error('PayPal payment error:', error);
-    toast.error('PayPal payment failed. Please try again.');
+    toast.error('❌ PayPal payment failed. Please try again.');
     if (onError) {
       onError(error);
     }
@@ -159,6 +203,8 @@ export default function PayPalCheckout({
       // Clear pending registration data
       localStorage.removeItem('pendingTokenRegistration');
       
+      toast.success('🪙 Token registered successfully!');
+      
       // Redirect to success page with token and payment details
       const successUrl = new URL('/dashboard/checkout/success', window.location.origin);
       successUrl.searchParams.set('method', 'paypal');
@@ -167,12 +213,14 @@ export default function PayPalCheckout({
       successUrl.searchParams.set('txId', paymentDetails.id);
       successUrl.searchParams.set('regId', result.record.id);
       
+      toast.loading('🔄 Redirecting to success page...');
       setTimeout(() => {
         window.location.href = successUrl.toString();
       }, 2000);
       
     } catch (error) {
       console.error('Token registration after payment failed:', error);
+      toast.error('❌ Token registration failed, but payment was successful');
       
       // Still redirect to success page but show error
       const successUrl = new URL('/dashboard/checkout/success', window.location.origin);
@@ -180,6 +228,7 @@ export default function PayPalCheckout({
       successUrl.searchParams.set('error', 'registration_failed');
       successUrl.searchParams.set('txId', paymentDetails.id);
       
+      toast.loading('🔄 Redirecting to success page...');
       setTimeout(() => {
         window.location.href = successUrl.toString();
       }, 2000);
@@ -221,37 +270,56 @@ export default function PayPalCheckout({
           }}
           createOrder={async (_, actions) => {
             setProcessing(true);
-            return actions.order.create({
-              intent: 'CAPTURE',
-              purchase_units: [
-                {
-                  amount: {
-                    value: amount,
-                    currency_code: 'USD',
+            const orderToast = toast.loading('💳 Creating PayPal order...');
+            
+            try {
+              const order = await actions.order.create({
+                intent: 'CAPTURE',
+                purchase_units: [
+                  {
+                    amount: {
+                      value: amount,
+                      currency_code: 'USD',
+                    },
+                    description: `NYALTX ${tier} subscription`,
+                    custom_id: `${tier}_${Date.now()}`,
                   },
-                  description: `NYALTX ${tier} subscription`,
-                  custom_id: `${tier}_${Date.now()}`,
+                ],
+                application_context: {
+                  brand_name: 'NYALTX',
+                  landing_page: 'BILLING',
+                  user_action: 'PAY_NOW',
                 },
-              ],
-              application_context: {
-                brand_name: 'NYALTX',
-                landing_page: 'BILLING',
-                user_action: 'PAY_NOW',
-              },
-            });
+              });
+              
+              toast.dismiss(orderToast);
+              toast.success('✅ PayPal order created! Complete your payment.');
+              return order;
+            } catch (error) {
+              toast.dismiss(orderToast);
+              toast.error('❌ Failed to create PayPal order');
+              throw error;
+            }
           }}
           onApprove={async (_, actions) => {
+            const captureToast = toast.loading('💰 Capturing your payment...');
+            
             try {
               const details = await actions.order?.capture();
               console.log('Payment Approved: ', details);
 
+              toast.dismiss(captureToast);
+              
               if (details?.status === 'COMPLETED') {
                 handleSuccess(details);
               } else {
+                toast.error('❌ Payment not completed');
                 throw new Error('Payment not completed');
               }
             } catch (error) {
+              toast.dismiss(captureToast);
               console.error('Payment capture error:', error);
+              toast.error('❌ Failed to capture payment');
               if (onError) {
                 onError(error);
               }
@@ -266,6 +334,14 @@ export default function PayPalCheckout({
           }}
           onCancel={() => {
             console.log('Payment cancelled by user');
+            toast('⚠️ Payment cancelled by user', { 
+              icon: '❌',
+              style: {
+                background: '#374151',
+                color: '#f9fafb',
+                border: '1px solid #6b7280',
+              }
+            });
             setProcessing(false);
           }}
           disabled={processing}

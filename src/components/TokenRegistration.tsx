@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useAccount } from 'wagmi';
 import { RegisteredToken } from '@/types/token';
+import toast from 'react-hot-toast';
 
 interface TokenRegistrationProps {
   onTokenRegistered?: (token: RegisteredToken) => void;
@@ -75,13 +76,16 @@ export default function TokenRegistration({ onTokenRegistered }: TokenRegistrati
     e.preventDefault();
 
     if (!isConnected || !address) {
-      setError('Please connect your wallet first');
+      const errorMsg = 'Please connect your wallet first';
+      setError(errorMsg);
+      toast.error(errorMsg);
       return;
     }
 
     const validationError = validateForm();
     if (validationError) {
       setError(validationError);
+      toast.error(validationError);
       return;
     }
 
@@ -89,9 +93,16 @@ export default function TokenRegistration({ onTokenRegistered }: TokenRegistrati
     setError(null);
     setSuccess(null);
 
+    // Show initial loading toast
+    const loadingToast = toast.loading('🔄 Preparing token registration...');
+
     try {
       const selectedCategory = TOKEN_CATEGORIES.find(cat => cat.id === formData.category);
       const boostMultiplier = selectedCategory?.baseMultiplier || 1.0;
+
+      // Update loading message for validation
+      toast.dismiss(loadingToast);
+      const validationToast = toast.loading('✅ Validating token data...');
 
       const tokenData: RegisteredToken = {
         id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -111,14 +122,30 @@ export default function TokenRegistration({ onTokenRegistered }: TokenRegistrati
         submittedAt: Date.now(),
       };
 
+      // Update loading message for saving
+      toast.dismiss(validationToast);
+      const savingToast = toast.loading('💾 Saving token registration...');
+
       // Save to localStorage for now (in production, this would be an API call)
       const existingTokens = JSON.parse(localStorage.getItem('registeredTokens') || '[]');
       const updatedTokens = [...existingTokens, tokenData];
       localStorage.setItem('registeredTokens', JSON.stringify(updatedTokens));
 
-      setSuccess(
-        `Token "${formData.name}" registered successfully! It's now pending admin approval.`
-      );
+      toast.dismiss(savingToast);
+      
+      const successMsg = `Token "${formData.name}" registered successfully! It's now pending admin approval.`;
+      setSuccess(successMsg);
+      toast.success('🎉 Token registered successfully!');
+
+      // Show additional info toast
+      toast.success('📋 Token submitted for admin approval', {
+        duration: 4000,
+        style: {
+          background: '#065f46',
+          color: '#d1fae5',
+          border: '1px solid #10b981',
+        }
+      });
 
       // Reset form
       setFormData({
@@ -136,7 +163,9 @@ export default function TokenRegistration({ onTokenRegistered }: TokenRegistrati
 
       onTokenRegistered?.(tokenData);
     } catch (err) {
-      setError('Failed to register token. Please try again.');
+      const errorMsg = 'Failed to register token. Please try again.';
+      setError(errorMsg);
+      toast.error('❌ Token registration failed');
       console.error('Token registration error:', err);
     } finally {
       setIsSubmitting(false);
