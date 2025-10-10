@@ -1,9 +1,8 @@
-import CampaignsPageClient from '@/page-components/Admin/Campaigns';
-
+import { AdminCampaignsComponent } from '@/page-components/Admin';
 
 const page = () => {
     return (
-        <CampaignsPageClient />
+        <AdminCampaignsComponent />
     )
 }
 
