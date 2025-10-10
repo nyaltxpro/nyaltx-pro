@@ -109,6 +109,18 @@ const AdminOrdersComponent = () => {
     return colors[method as keyof typeof colors] || 'bg-gray-900 text-gray-300';
   };
 
+  const getPaymentMethodName = (method: string) => {
+    const names = {
+      eth: 'Ethereum',
+      sol: 'Solana', 
+      nyax: 'NYAX Token',
+      paypal: 'PayPal',
+      stripe: 'Stripe',
+      free_promo: 'Free Promo'
+    };
+    return names[method as keyof typeof names] || method.toUpperCase();
+  };
+
   const formatAmount = (amount: string, currency: string) => {
     const num = parseFloat(amount);
     if (currency === 'USD') return `$${num.toFixed(2)}`;
@@ -272,7 +284,7 @@ const AdminOrdersComponent = () => {
                     </td>
                     <td className="px-4 py-3">
                       <span className={`px-2 py-1 rounded text-xs ${getPaymentMethodBadge(order.paymentMethod)}`}>
-                        {order.paymentMethod.toUpperCase()}
+                        {getPaymentMethodName(order.paymentMethod)}
                       </span>
                       {order.txHash && (
                         <div className="text-xs text-blue-400 mt-1">

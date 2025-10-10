@@ -127,7 +127,12 @@ export async function POST(request: NextRequest) {
     const ip = getClientIP(request);
     const userAgent = request.headers.get('user-agent') || 'Unknown';
     const { browser, version } = parseUserAgent(userAgent);
-    const location = await getLocationFromIP(ip);
+    const location = await getLocationFromIP(ip) || {
+      country: 'Unknown',
+      countryCode: 'UN',
+      region: 'Unknown',
+      city: 'Unknown'
+    };
 
     const timestamp = new Date();
 
@@ -142,10 +147,10 @@ export async function POST(request: NextRequest) {
         userAgent,
         browser,
         browserVersion: version,
-        country: location.country,
-        countryCode: location.countryCode,
-        region: location.region,
-        city: location.city,
+        country: location?.country || 'Unknown',
+        countryCode: location?.countryCode || 'UN',
+        region: location?.region || 'Unknown',
+        city: location?.city || 'Unknown',
         walletAddress: walletAddress || null,
         deviceType: deviceType || 'unknown',
         screenResolution: screenResolution || 'unknown',
@@ -211,10 +216,10 @@ export async function POST(request: NextRequest) {
           userAgent,
           browser,
           browserVersion: version,
-          country: location.country,
-          countryCode: location.countryCode,
-          region: location.region,
-          city: location.city,
+          country: location?.country || 'Unknown',
+          countryCode: location?.countryCode || 'UN',
+          region: location?.region || 'Unknown',
+          city: location?.city || 'Unknown',
           walletAddress: walletAddress || null,
           walletType: walletType || null,
           isActive: true,

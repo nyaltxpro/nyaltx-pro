@@ -29,8 +29,11 @@ export default function PayPalCheckout({
 
   const handleSuccess = async (details: any) => {
     try {
+      // Store the PayPal payment order in the database
+      await storePayPalOrder(details);
+
       // Set pro status cookie for nyaltxpro purchases
-      if (tier.toLowerCase() === 'nyaltxpro') {
+      if (tier.toLowerCase() === 'nyaltxpro' || tier.toLowerCase() === 'nyaltxpro1') {
         document.cookie = 'nyaltx_pro=1; path=/; max-age=31536000'; // 1 year
 
         // Check if there's a pending token registration to process
@@ -44,7 +47,7 @@ export default function PayPalCheckout({
             window.location.href = '/dashboard/register-token?payment=paypal_success';
           }, 2000);
         }
-      } else if (tier.toLowerCase().includes('race-')) {
+      } else if (tier.toLowerCase().includes('race-') || ['paddle', 'motor', 'helicopter'].includes(tier.toLowerCase())) {
         // Handle Race to Liberty payments
         setTimeout(() => {
           window.location.href = `/pricing/race-to-liberty/success?tier=${tier}&payment=paypal_success`;
@@ -66,6 +69,44 @@ export default function PayPalCheckout({
       if (onError) {
         onError(error);
       }
+    }
+  };
+
+  // Store PayPal payment order in database
+  const storePayPalOrder = async (paymentDetails: any) => {
+    try {
+      const orderData = {
+        type: tier.toLowerCase() === 'nyaltxpro' || tier.toLowerCase() === 'nyaltxpro1' ? 'pro_subscription' : 
+              ['paddle', 'motor', 'helicopter'].includes(tier.toLowerCase()) ? 'race_to_liberty' : 'pro_subscription',
+        paymentMethod: 'paypal',
+        amount: amount,
+        currency: 'USD',
+        paymentId: paymentDetails.id,
+        email: email,
+        productName: `${tier.toUpperCase()} - PayPal Payment`,
+        tier: tier,
+        status: 'completed',
+        metadata: {
+          paypalDetails: paymentDetails,
+          paymentSource: 'paypal_checkout'
+        }
+      };
+
+      const response = await fetch('/api/orders/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(orderData),
+      });
+
+      if (!response.ok) {
+        console.error('Failed to store PayPal order');
+      } else {
+        console.log('✅ PayPal order stored successfully');
+      }
+    } catch (error) {
+      console.error('Error storing PayPal order:', error);
     }
   };
 

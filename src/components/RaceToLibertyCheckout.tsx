@@ -12,6 +12,48 @@ import PayPalCheckout from '@/components/PayPalCheckout';
 import ConnectWalletButton from '@/components/ConnectWalletButton';
 import TokenDebugger from '@/components/TokenDebugger';
 import { RegisteredToken } from '@/types/token';
+import { FaTrophy, FaCoins, FaSearch, FaStar, FaGift } from 'react-icons/fa';
+
+// Store payment order helper function
+const storePaymentOrder = async (params: {
+  paymentMethod: 'eth' | 'nyax' | 'sol';
+  txHash: string;
+  amount: string;
+  currency: string;
+  ethAmount?: number;
+}) => {
+  try {
+    const orderData = {
+      type: 'race_to_liberty',
+      paymentMethod: params.paymentMethod,
+      amount: params.amount,
+      currency: params.currency,
+      txHash: params.txHash,
+      productName: `Race to Liberty - Crypto Payment`,
+      status: 'completed',
+      metadata: {
+        paymentSource: 'race_to_liberty_checkout',
+        ethAmount: params.ethAmount
+      }
+    };
+
+    const response = await fetch('/api/orders/create', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(orderData),
+    });
+
+    if (!response.ok) {
+      console.error('Failed to store payment order');
+    } else {
+      console.log('✅ Payment order stored successfully');
+    }
+  } catch (error) {
+    console.error('Error storing payment order:', error);
+  }
+};
 
 // Component to handle image loading with fallback
 const TokenImage = ({
@@ -155,11 +197,11 @@ export default function RaceToLibertyCheckout({
   const [agree, setAgree] = useState(true);
   const [availableCoins, setAvailableCoins] = useState<CoinOption[]>([]);
   const [ethPrice, setEthPrice] = useState<number | null>(null);
-  const [busy, setBusy] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState<string | undefined>(undefined);
+  const [error, setError] = useState<string | undefined>(undefined);
   const [promoCode, setPromoCode] = useState('');
   const [promoDiscount, setPromoDiscount] = useState(0);
-  const [promoError, setPromoError] = useState<string | null>(null);
+  const [promoError, setPromoError] = useState<string | undefined>(undefined);
   const [promoApplied, setPromoApplied] = useState(false);
 
   const tierInfo = TIER_MULTIPLIERS[tier];
@@ -236,7 +278,7 @@ export default function RaceToLibertyCheckout({
       return;
     }
 
-    setError(null);
+    setError(undefined);
     setBusy('eth');
     try {
       const hash = await sendTransactionAsync({
@@ -244,11 +286,19 @@ export default function RaceToLibertyCheckout({
         value: parseEther(ethAmt.toFixed(6)),
       });
       console.log('ETH payment tx:', hash);
-      // TODO: Handle successful payment
+      
+      // Store the ETH payment order
+      await storePaymentOrder({
+        paymentMethod: 'eth',
+        txHash: hash,
+        amount: finalAmount.toString(),
+        currency: 'ETH',
+        ethAmount: ethAmt
+      });
     } catch (e: any) {
       setError(e?.shortMessage || e?.message || 'ETH payment failed');
     } finally {
-      setBusy(null);
+      setBusy(undefined);
     }
   };
 
@@ -277,7 +327,7 @@ export default function RaceToLibertyCheckout({
     // 20% discount for NYAX (applied after promo discount)
     const discountedUSD = finalAmount * 0.8;
 
-    setError(null);
+    setError(undefined);
     setBusy('nyax');
     try {
       const value = parseUnits(discountedUSD.toFixed(6), 18);
@@ -288,11 +338,18 @@ export default function RaceToLibertyCheckout({
         args: [RECEIVER, value],
       });
       console.log('NYAX payment tx:', hash);
-      // TODO: Handle successful payment
+      
+      // Store the NYAX payment order
+      await storePaymentOrder({
+        paymentMethod: 'nyax',
+        txHash: hash,
+        amount: discountedUSD.toString(),
+        currency: 'NYAX'
+      });
     } catch (e: any) {
       setError(e?.shortMessage || e?.message || 'NYAX payment failed');
     } finally {
-      setBusy(null);
+      setBusy(undefined);
     }
   };
 
@@ -318,7 +375,7 @@ export default function RaceToLibertyCheckout({
       }
     }
 
-    setError(null);
+    setError(undefined);
     setBusy('sol');
     try {
       // SOL uses 9 decimals (like native Solana)
@@ -330,11 +387,18 @@ export default function RaceToLibertyCheckout({
         args: [RECEIVER, value],
       });
       console.log('SOL payment tx:', hash);
-      // TODO: Handle successful payment
+      
+      // Store the SOL payment order
+      await storePaymentOrder({
+        paymentMethod: 'sol',
+        txHash: hash,
+        amount: finalAmount.toString(),
+        currency: 'SOL'
+      });
     } catch (e: any) {
       setError(e?.shortMessage || e?.message || 'SOL payment failed');
     } finally {
-      setBusy(null);
+      setBusy(undefined);
     }
   };
 
@@ -350,10 +414,10 @@ export default function RaceToLibertyCheckout({
         amount: solAmount.toFixed(6),
         currency: 'SOL',
         walletAddress: undefined, // Phantom wallet address will be in the transaction
-        email: email ?? undefined,
+        email: email || undefined,
         tier: tier,
         tierInfo: tierInfo,
-        selectedCoin: selectedCoin,
+        selectedCoin: selectedCoin || undefined,
         coinName: userTokens.find((c: any) => c.symbol === selectedCoin)?.name,
         totalPoints: totalPoints,
         promoCode: promoApplied ? promoCode : undefined,
@@ -384,7 +448,7 @@ export default function RaceToLibertyCheckout({
       const promoData = PROMO_CODES[upperCode as keyof typeof PROMO_CODES];
       setPromoDiscount(promoData.discount);
       setPromoApplied(true);
-      setPromoError(null);
+      setPromoError(undefined);
       return true;
     }
     return false;
@@ -398,9 +462,9 @@ export default function RaceToLibertyCheckout({
 
     if (validatePromoCode(promoCode)) {
       const promoData = PROMO_CODES[promoCode.toUpperCase().trim() as keyof typeof PROMO_CODES];
-      setPromoError(null);
+      setPromoError(undefined);
       // Show success message briefly
-      setTimeout(() => setPromoError(null), 3000);
+      setTimeout(() => setPromoError(undefined), 3000);
     } else {
       setPromoError('Invalid promo code');
       setPromoDiscount(0);
@@ -412,7 +476,7 @@ export default function RaceToLibertyCheckout({
     setPromoCode('');
     setPromoDiscount(0);
     setPromoApplied(false);
-    setPromoError(null);
+    setPromoError(undefined);
   };
 
   // Handle free promo code claim
@@ -428,7 +492,7 @@ export default function RaceToLibertyCheckout({
     }
 
     setBusy('free-claim');
-    setError(null);
+    setError(undefined);
 
     try {
       // Simulate adding the token to Race to Liberty with boost points
@@ -455,7 +519,7 @@ export default function RaceToLibertyCheckout({
       console.error('Free claim error:', error);
       setError('Failed to claim free boost. Please try again.');
     } finally {
-      setBusy(null);
+      setBusy(undefined);
     }
   };
 

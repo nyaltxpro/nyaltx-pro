@@ -41,8 +41,9 @@ export const metadata: Metadata = {
   },
   manifest: '/manifest.json',
   themeColor: '#06b6d4',
-  viewport: 'width=device-width, initial-scale=1',
 };
+
+export const viewport = 'width=device-width, initial-scale=1';
 
 
 const poppins = Poppins({
