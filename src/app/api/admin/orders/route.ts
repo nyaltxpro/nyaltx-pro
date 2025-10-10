@@ -132,8 +132,45 @@ export async function GET(req: NextRequest) {
       }
     }));
 
+    // Get token registrations data
+    const tokenRegistrationsCollection = await getCollection('token_registrations');
+    const tokenRegistrations = await tokenRegistrationsCollection
+      .find({})
+      .sort({ createdAt: -1 })
+      .toArray();
+
+    // Convert token registrations to orders
+    const convertedTokenOrders: Order[] = tokenRegistrations.map((token: any) => ({
+      id: `token_${token._id || token.id}`,
+      type: 'token_registration' as const,
+      status: token.status === 'approved' ? 'completed' : token.status === 'rejected' ? 'failed' : 'pending',
+      paymentMethod: 'free_promo' as const, // Token registrations are free
+      amount: '0',
+      currency: 'USD' as const,
+      walletAddress: token.submittedByAddress,
+      email: token.userEmail,
+      productName: `Token Registration - ${token.tokenSymbol}`,
+      tokenSymbol: token.tokenSymbol,
+      tokenName: token.tokenName,
+      createdAt: token.createdAt || new Date().toISOString(),
+      updatedAt: token.updatedAt || token.createdAt || new Date().toISOString(),
+      completedAt: token.status === 'approved' ? token.updatedAt : undefined,
+      metadata: {
+        source: 'token_registrations',
+        blockchain: token.blockchain,
+        contractAddress: token.contractAddress,
+        imageUri: token.imageUri,
+        website: token.website,
+        twitter: token.twitter,
+        telegram: token.telegram,
+        discord: token.discord,
+        github: token.github,
+        originalData: token
+      }
+    }));
+
     // Combine all orders
-    let allOrders = [...mainOrders, ...convertedOnchainOrders, ...convertedBoostOrders];
+    let allOrders = [...mainOrders, ...convertedOnchainOrders, ...convertedBoostOrders, ...convertedTokenOrders];
 
     // Apply filters to combined data
     if (type) {
@@ -163,6 +200,7 @@ export async function GET(req: NextRequest) {
         mainOrders: mainOrders.length,
         onchainOrders: convertedOnchainOrders.length,
         boostOrders: convertedBoostOrders.length,
+        tokenOrders: convertedTokenOrders.length,
         total: allOrders.length
       }
     });
