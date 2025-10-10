@@ -29,9 +29,6 @@ export default function PayPalCheckout({
 
   const handleSuccess = async (details: any) => {
     try {
-      // Store the PayPal payment order in the database
-      await storePayPalOrder(details);
-
       // Set pro status cookie for nyaltxpro purchases
       if (tier.toLowerCase() === 'nyaltxpro' || tier.toLowerCase() === 'nyaltxpro1') {
         document.cookie = 'nyaltx_pro=1; path=/; max-age=31536000'; // 1 year
@@ -39,16 +36,19 @@ export default function PayPalCheckout({
         // Check if there's a pending token registration to process
         const pendingTokenData = localStorage.getItem('pendingTokenRegistration');
         if (pendingTokenData) {
-          // Register the token after successful payment
+          // Register the token after successful payment (this will create the token registration record)
           await handleTokenRegistrationAfterPayment(details, pendingTokenData);
         } else {
+          // No pending token registration, so store the PayPal payment order
+          await storePayPalOrder(details);
           // Redirect to register token page after successful payment
           setTimeout(() => {
             window.location.href = '/dashboard/register-token?payment=paypal_success';
           }, 2000);
         }
       } else if (tier.toLowerCase().includes('race-') || ['paddle', 'motor', 'helicopter'].includes(tier.toLowerCase())) {
-        // Handle Race to Liberty payments
+        // Handle Race to Liberty payments - store PayPal order for these
+        await storePayPalOrder(details);
         setTimeout(() => {
           window.location.href = `/pricing/race-to-liberty/success?tier=${tier}&payment=paypal_success`;
         }, 2000);
@@ -56,8 +56,11 @@ export default function PayPalCheckout({
         // For other payments, check if there's a pending token registration
         const pendingTokenData = localStorage.getItem('pendingTokenRegistration');
         if (pendingTokenData) {
-          // Register the token after successful payment
+          // Register the token after successful payment (this will create the token registration record)
           await handleTokenRegistrationAfterPayment(details, pendingTokenData);
+        } else {
+          // No token registration, store as regular PayPal order
+          await storePayPalOrder(details);
         }
       }
 
@@ -115,13 +118,23 @@ export default function PayPalCheckout({
     try {
       const tokenData = JSON.parse(pendingTokenDataString);
       
-      // Register the token via API
+      // Add payment information to the token registration
+      const tokenDataWithPayment = {
+        ...tokenData,
+        paymentMethod: 'paypal',
+        paymentId: paymentDetails.id,
+        paymentAmount: amount,
+        paymentCurrency: 'USD',
+        tier: tier
+      };
+      
+      // Register the token via API with payment information
       const response = await fetch('/api/tokens/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(tokenData),
+        body: JSON.stringify(tokenDataWithPayment),
       });
 
       if (!response.ok) {

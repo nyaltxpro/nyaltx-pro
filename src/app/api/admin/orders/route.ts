@@ -144,9 +144,9 @@ export async function GET(req: NextRequest) {
       id: `token_${token._id || token.id}`,
       type: 'token_registration' as const,
       status: token.status === 'approved' ? 'completed' : token.status === 'rejected' ? 'failed' : 'pending',
-      paymentMethod: 'free_promo' as const, // Token registrations are free
-      amount: '0',
-      currency: 'USD' as const,
+      paymentMethod: token.paymentMethod || 'free_promo',
+      amount: token.paymentAmount || '0',
+      currency: token.paymentCurrency || 'USD',
       walletAddress: token.submittedByAddress,
       email: token.userEmail,
       productName: `Token Registration - ${token.tokenSymbol}`,
@@ -155,6 +155,8 @@ export async function GET(req: NextRequest) {
       createdAt: token.createdAt || new Date().toISOString(),
       updatedAt: token.updatedAt || token.createdAt || new Date().toISOString(),
       completedAt: token.status === 'approved' ? token.updatedAt : undefined,
+      paymentId: token.paymentId,
+      tier: token.tier,
       metadata: {
         source: 'token_registrations',
         blockchain: token.blockchain,
@@ -165,6 +167,9 @@ export async function GET(req: NextRequest) {
         telegram: token.telegram,
         discord: token.discord,
         github: token.github,
+        paymentMethod: token.paymentMethod,
+        paymentId: token.paymentId,
+        tier: token.tier,
         originalData: token
       }
     }));

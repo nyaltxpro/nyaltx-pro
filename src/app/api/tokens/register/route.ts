@@ -73,7 +73,7 @@ async function sendTokenRegistrationEmails(tokenData: TokenRegistration) {
   }
 }
 
-export type TokenRegistration = {
+export interface TokenRegistration {
   id: string;
   tokenName: string;
   tokenSymbol: string;
@@ -92,12 +92,17 @@ export type TokenRegistration = {
   status: 'pending' | 'approved' | 'rejected';
   createdAt: string;
   updatedAt: string;
+  // Payment information (when paid via PayPal/crypto)
+  paymentMethod?: 'paypal' | 'eth' | 'sol' | 'nyax';
+  paymentId?: string; // PayPal payment ID or crypto transaction hash
+  paymentAmount?: string;
+  paymentCurrency?: string;
+  tier?: string; // nyaltxpro, nyaltxpro1, etc.
 };
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-
     const required = ['tokenName', 'tokenSymbol', 'blockchain', 'contractAddress'];
     for (const k of required) {
       if (!body[k] || typeof body[k] !== 'string' || !body[k].trim()) {
@@ -132,6 +137,12 @@ export async function POST(req: NextRequest) {
       status: 'pending',
       createdAt: now,
       updatedAt: now,
+      // Include payment information if provided
+      paymentMethod: body.paymentMethod || undefined,
+      paymentId: body.paymentId?.trim() || undefined,
+      paymentAmount: body.paymentAmount?.trim() || undefined,
+      paymentCurrency: body.paymentCurrency?.trim() || undefined,
+      tier: body.tier?.trim() || undefined,
     };
 
     const col = await getCollection<any>('token_registrations');
