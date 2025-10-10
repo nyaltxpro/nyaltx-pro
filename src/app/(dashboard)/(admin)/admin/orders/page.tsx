@@ -1,8 +1,8 @@
-import AdminOrdersClient from '@/page-components/Admin/Order'
+import AdminOrdersComponent from '@/page-components/Admin/Orders'
 
 const page = () => {
   return (
-    <AdminOrdersClient />
+    <AdminOrdersComponent />
   )
 }
 

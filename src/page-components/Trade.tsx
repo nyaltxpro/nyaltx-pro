@@ -767,9 +767,7 @@ function TradingViewWithParams({
                 <div className="lg:col-span-1">
                     <div className="bg-[#0f1923] rounded-xl overflow-hidden mb-4">
                         <iframe src={infoDexEmbedUrl} width="100%" height="600" style={{ border: 0 }} />
-                        <button className="w-full py-3 text-center text-gray-400 hover:text-white bg-[#1a2932] border-t border-gray-800">
-                            More info <FaChevronDown className="inline ml-1" />
-                        </button>
+
                     </div>
                     <SwapPage />
                     {/* <iframe
