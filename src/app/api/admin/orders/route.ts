@@ -9,9 +9,9 @@ export interface Order {
   status: 'pending' | 'completed' | 'failed' | 'refunded';
   
   // Payment details
-  paymentMethod: 'eth' | 'usdt' | 'nyax' | 'paypal' | 'stripe' | 'free_promo';
+  paymentMethod: 'eth' | 'sol' | 'nyax' | 'paypal' | 'stripe' | 'free_promo';
   amount: string;
-  currency: 'USD' | 'ETH' | 'USDT' | 'NYAX';
+  currency: 'USD' | 'ETH' | 'SOL' | 'NYAX';
   
   // Blockchain details (for crypto payments)
   txHash?: string;

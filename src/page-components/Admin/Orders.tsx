@@ -8,9 +8,9 @@ interface Order {
   id: string;
   type: 'race_to_liberty' | 'boost_pack' | 'pro_subscription' | 'token_registration';
   status: 'pending' | 'completed' | 'failed' | 'refunded';
-  paymentMethod: 'eth' | 'usdt' | 'nyax' | 'paypal' | 'stripe' | 'free_promo';
+  paymentMethod: 'eth' | 'sol' | 'nyax' | 'paypal' | 'stripe' | 'free_promo';
   amount: string;
-  currency: 'USD' | 'ETH' | 'USDT' | 'NYAX';
+  currency: 'USD' | 'ETH' | 'SOL' | 'NYAX';
   txHash?: string;
   chainId?: number;
   walletAddress?: string;
@@ -100,7 +100,7 @@ const AdminOrdersComponent = () => {
   const getPaymentMethodBadge = (method: string) => {
     const colors = {
       eth: 'bg-blue-900 text-blue-300',
-      usdt: 'bg-green-900 text-green-300',
+      sol: 'bg-purple-900 text-purple-300',
       nyax: 'bg-cyan-900 text-cyan-300',
       paypal: 'bg-blue-900 text-blue-300',
       stripe: 'bg-purple-900 text-purple-300',
@@ -113,7 +113,7 @@ const AdminOrdersComponent = () => {
     const num = parseFloat(amount);
     if (currency === 'USD') return `$${num.toFixed(2)}`;
     if (currency === 'ETH') return `${num.toFixed(6)} ETH`;
-    if (currency === 'USDT') return `${num.toFixed(2)} USDT`;
+    if (currency === 'SOL') return `${num.toFixed(6)} SOL`;
     if (currency === 'NYAX') return `${num.toFixed(2)} NYAX`;
     return `${amount} ${currency}`;
   };
@@ -179,7 +179,7 @@ const AdminOrdersComponent = () => {
             >
               <option value="">All Methods</option>
               <option value="eth">ETH</option>
-              <option value="usdt">USDT</option>
+              <option value="sol">SOL</option>
               <option value="nyax">NYAX</option>
               <option value="paypal">PayPal</option>
               <option value="stripe">Stripe</option>

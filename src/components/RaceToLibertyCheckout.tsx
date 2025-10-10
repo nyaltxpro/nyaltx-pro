@@ -77,14 +77,14 @@ const TIER_MULTIPLIERS = {
 // Payment configuration
 const DEFAULT_RECEIVER: `0x${string}` = '0x81bA7b98E49014Bff22F811E9405640bC2B39cC0';
 const DEFAULT_NYAX: `0x${string}` = '0x5eed5621b92be4473f99bacac77acfa27deb57d9';
-const DEFAULT_USDT: `0x${string}` = '0xdAC17F958D2ee523a2206206994597C13D831ec7';
+const DEFAULT_SOL: `0x${string}` = '0xD31a59c85aE9D8edEFeC411D448f90841571b89c';
 
 const RECEIVER =
   (process.env.NEXT_PUBLIC_PAYMENT_RECEIVER_ADDRESS as `0x${string}` | undefined) ??
   DEFAULT_RECEIVER;
 const NYAX_TOKEN =
   (process.env.NEXT_PUBLIC_NYAX_TOKEN_ADDRESS as `0x${string}` | undefined) ?? DEFAULT_NYAX;
-const USDT_TOKEN = DEFAULT_USDT;
+const SOL_TOKEN = DEFAULT_SOL;
 const PAYMENT_CHAIN_ID = process.env.NEXT_PUBLIC_PAYMENT_CHAIN_ID
   ? Number(process.env.NEXT_PUBLIC_PAYMENT_CHAIN_ID)
   : 1; // Default to mainnet Ethereum
@@ -294,13 +294,13 @@ export default function RaceToLibertyCheckout({
     }
   };
 
-  const handlePayUSDT = async () => {
+  const handlePaySOL = async () => {
     if (!RECEIVER) {
       setError('Receiver address not configured');
       return;
     }
-    if (!USDT_TOKEN) {
-      setError('USDT token address not configured');
+    if (!SOL_TOKEN) {
+      setError('SOL token address not configured');
       return;
     }
     if (!isConnected) {
@@ -317,20 +317,20 @@ export default function RaceToLibertyCheckout({
     }
 
     setError(null);
-    setBusy('usdt');
+    setBusy('sol');
     try {
-      // USDT uses 6 decimals on Ethereum
-      const value = parseUnits(finalAmount.toFixed(2), 6);
+      // SOL uses 9 decimals (like native Solana)
+      const value = parseUnits(finalAmount.toFixed(2), 9);
       const hash = await writeContractAsync({
         abi: erc20Abi,
-        address: USDT_TOKEN,
+        address: SOL_TOKEN,
         functionName: 'transfer',
         args: [RECEIVER, value],
       });
-      console.log('USDT payment tx:', hash);
+      console.log('SOL payment tx:', hash);
       // TODO: Handle successful payment
     } catch (e: any) {
-      setError(e?.shortMessage || e?.message || 'USDT payment failed');
+      setError(e?.shortMessage || e?.message || 'SOL payment failed');
     } finally {
       setBusy(null);
     }
@@ -874,24 +874,24 @@ export default function RaceToLibertyCheckout({
                                 </div>
                               </button>
 
-                              {/* USDT Payment */}
+                              {/* SOL Payment */}
                               <button
-                                onClick={handlePayUSDT}
+                                onClick={handlePaySOL}
                                 disabled={busy !== null}
                                 className="p-4 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                               >
                                 <div className="flex flex-col items-center space-y-2">
                                   <Image
-                                    src="/crypto-icons/color/usdt.svg"
-                                    alt="USDT"
+                                    src="/crypto-icons/color/sol.svg"
+                                    alt="SOL"
                                     width={32}
                                     height={32}
                                   />
-                                  <div className="text-sm font-medium">Pay with USDT</div>
+                                  <div className="text-sm font-medium">Pay with SOL</div>
                                   <div className="text-xs text-gray-400">
-                                    ${finalAmount.toFixed(2)} USDT
+                                    ${finalAmount.toFixed(2)} SOL
                                   </div>
-                                  {busy === 'usdt' && (
+                                  {busy === 'sol' && (
                                     <div className="text-xs text-cyan-400">Processing...</div>
                                   )}
                                 </div>

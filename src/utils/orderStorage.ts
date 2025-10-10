@@ -2,9 +2,9 @@
 
 export interface OrderData {
   type: 'race_to_liberty' | 'boost_pack' | 'pro_subscription' | 'token_registration';
-  paymentMethod: 'eth' | 'usdt' | 'nyax' | 'paypal' | 'stripe' | 'free_promo';
+  paymentMethod: 'eth' | 'sol' | 'nyax' | 'paypal' | 'stripe' | 'free_promo';
   amount: string;
-  currency: 'USD' | 'ETH' | 'USDT' | 'NYAX';
+  currency: 'USD' | 'ETH' | 'SOL' | 'NYAX';
   txHash?: string;
   paymentId?: string;
   chainId?: number;
@@ -49,11 +49,11 @@ export const storeOrder = async (orderData: OrderData): Promise<any> => {
 
 // Helper function for Race to Liberty orders
 export const storeRaceToLibertyOrder = async (params: {
-  paymentMethod: 'eth' | 'usdt' | 'nyax' | 'paypal' | 'free_promo';
+  paymentMethod: 'eth' | 'sol' | 'nyax' | 'paypal' | 'free_promo';
   txHash?: string;
   paymentId?: string;
   amount: string;
-  currency: 'USD' | 'ETH' | 'USDT' | 'NYAX';
+  currency: 'USD' | 'ETH' | 'SOL' | 'NYAX';
   chainId?: number;
   walletAddress?: string;
   email?: string;

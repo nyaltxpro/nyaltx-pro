@@ -61,17 +61,17 @@ const BOOST_PACKS = [
 // Payment configuration (with sensible defaults per request)
 const DEFAULT_RECEIVER: `0x${string}` = '0x81bA7b98E49014Bff22F811E9405640bC2B39cC0';
 const DEFAULT_NYAX: `0x${string}` = '0x5eed5621b92be4473f99bacac77acfa27deb57d9'; // NYAX on Ethereum
-// Default USDT (Tether) on Ethereum mainnet
-const DEFAULT_USDT: `0x${string}` =
-  (process.env.NEXT_PUBLIC_USDT_TOKEN_ADDRESS as `0x${string}` | undefined) ??
-  ('0xdAC17F958D2ee523a2206206994597C13D831ec7' as `0x${string}`);
+// Solana native token (SOL) - using wrapped SOL on Ethereum for cross-chain compatibility
+const DEFAULT_SOL: `0x${string}` =
+  (process.env.NEXT_PUBLIC_SOL_TOKEN_ADDRESS as `0x${string}` | undefined) ??
+  ('0xD31a59c85aE9D8edEFeC411D448f90841571b89c' as `0x${string}`); // Wrapped SOL on Ethereum
 
 const RECEIVER =
   (process.env.NEXT_PUBLIC_PAYMENT_RECEIVER_ADDRESS as `0x${string}` | undefined) ??
   DEFAULT_RECEIVER;
 const NYAX_TOKEN =
   (process.env.NEXT_PUBLIC_NYAX_TOKEN_ADDRESS as `0x${string}` | undefined) ?? DEFAULT_NYAX;
-const USDT_TOKEN = DEFAULT_USDT;
+const SOL_TOKEN = DEFAULT_SOL;
 const PAYMENT_CHAIN_ID = process.env.NEXT_PUBLIC_PAYMENT_CHAIN_ID
   ? Number(process.env.NEXT_PUBLIC_PAYMENT_CHAIN_ID)
   : 1; // Default to mainnet Ethereum
@@ -354,14 +354,14 @@ export default function PricingPage() {
     [chain?.id, isConnected, writeContractAsync, computeNyaxAmount]
   );
 
-  const handlePayUSDT = useCallback(
+  const handlePaySOL = useCallback(
     async (tierId: string, priceUSD: number) => {
       if (!RECEIVER) {
         setError('Receiver address not configured');
         return;
       }
-      if (!USDT_TOKEN) {
-        setError('USDT token address not configured');
+      if (!SOL_TOKEN) {
+        setError('SOL token address not configured');
         return;
       }
       if (!isConnected) {
@@ -380,19 +380,19 @@ export default function PricingPage() {
       }
 
       setError(null);
-      setBusy(tierId + ':usdt');
+      setBusy(tierId + ':sol');
       try {
-        // USDT uses 6 decimals on Ethereum
-        const value = parseUnits(priceUSD.toFixed(2), 6);
+        // SOL uses 9 decimals (like native Solana)
+        const value = parseUnits(priceUSD.toFixed(2), 9);
         const hash = await writeContractAsync({
           abi: erc20Abi,
-          address: USDT_TOKEN,
+          address: SOL_TOKEN,
           functionName: 'transfer',
           args: [RECEIVER, value],
         });
-        console.log('USDT payment tx:', hash);
+        console.log('SOL payment tx:', hash);
       } catch (e: any) {
-        setError(e?.shortMessage || e?.message || 'USDT payment failed');
+        setError(e?.shortMessage || e?.message || 'SOL payment failed');
       } finally {
         setBusy(null);
       }
@@ -495,14 +495,14 @@ export default function PricingPage() {
                   <button
                     onClick={() =>
                       router.push(
-                        `/dashboard/register-token?redirect=pricing/checkout/nyaltxpro&method=usdt`
+                        `/dashboard/register-token?redirect=pricing/checkout/nyaltxpro&method=sol`
                       )
                     }
                     className="w-full py-2 rounded-lg border border-zinc-600 text-white font-medium hover:bg-emerald-500"
                   >
                     <span className="inline-flex items-center gap-2">
-                      <Image src="/crypto-icons/color/usdt.svg" width={16} height={16} alt="usdt" />{' '}
-                      Register Token & Pay $199 with USDT
+                      <Image src="/crypto-icons/color/sol.svg" width={16} height={16} alt="sol" />{' '}
+                      Register Token & Pay $199 with SOL
                     </span>
                   </button>
                   <button
@@ -538,10 +538,10 @@ export default function PricingPage() {
                     <span className="inline-flex items-center gap-2"><Image src="/crypto-icons/color/eth.svg" width={16} height={16} alt="eth" /> Register Token & Pay $1 with ETH</span>
                   </button>
                   <button
-                    onClick={() => router.push(`/dashboard/register-token?redirect=pricing/checkout/nyaltxpro1&method=usdt`)}
+                    onClick={() => router.push(`/dashboard/register-token?redirect=pricing/checkout/nyaltxpro1&method=sol`)}
                     className="w-full py-2 rounded-lg border border-zinc-600 text-white font-medium hover:bg-emerald-500"
                   >
-                    <span className="inline-flex items-center gap-2"><Image src="/crypto-icons/color/usdt.svg" width={16} height={16} alt="usdt" /> Register Token & Pay $1 with USDT</span>
+                    <span className="inline-flex items-center gap-2"><Image src="/crypto-icons/color/sol.svg" width={16} height={16} alt="sol" /> Register Token & Pay $1 with SOL</span>
                   </button>
                 </div>
                 {isPro && (
@@ -623,13 +623,13 @@ export default function PricingPage() {
                         </div>
                         <div className="flex items-center gap-2">
                           <Image
-                            src="/crypto-icons/color/usdt.svg"
-                            alt="USDT"
+                            src="/crypto-icons/color/sol.svg"
+                            alt="SOL"
                             width={20}
                             height={20}
                             className="opacity-60"
                           />{' '}
-                          <span>USDT: ${t.priceUSD.toFixed(2)}</span>
+                          <span>SOL: ${t.priceUSD.toFixed(2)}</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <Image
@@ -788,7 +788,7 @@ export default function PricingPage() {
           </section>
 
           <div className="mt-10 text-sm text-gray-400">
-            <p>Accepted payment methods: PayPal, ETH, USDT, or NYAX token (with 20% discount).</p>
+            <p>Accepted payment methods: PayPal, ETH, SOL, or NYAX token (with 20% discount).</p>
             <p className="mt-1">
               On-chain payments are sent to {RECEIVER}. Default NYAX token: {NYAX_TOKEN}. You can
               override via env vars.

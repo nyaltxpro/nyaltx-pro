@@ -190,7 +190,7 @@ const fetchUserRegisteredTokens = async (walletAddress: string) => {
 // Payment configuration
 const DEFAULT_RECEIVER: `0x${string}` = '0x81bA7b98E49014Bff22F811E9405640bC2B39cC0';
 const DEFAULT_NYAX: `0x${string}` = '0x5eed5621b92be4473f99bacac77acfa27deb57d9';
-const DEFAULT_USDT: `0x${string}` = '0xdAC17F958D2ee523a2206206994597C13D831ec7';
+const DEFAULT_SOL: `0x${string}` = '0xD31a59c85aE9D8edEFeC411D448f90841571b89c';
 
 export default function BoostPackCheckout() {
   const params = useParams();
@@ -210,7 +210,7 @@ export default function BoostPackCheckout() {
 
   const [selectedTokens, setSelectedTokens] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState<'eth' | 'usdt' | 'nyax'>('eth');
+  const [paymentMethod, setPaymentMethod] = useState<'eth' | 'sol' | 'nyax'>('eth');
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [ethPrice, setEthPrice] = useState<number>(3000);
@@ -446,12 +446,12 @@ export default function BoostPackCheckout() {
           });
           break;
 
-        case 'usdt':
+        case 'sol':
           txHash = await writeContractAsync({
             abi: erc20Abi,
-            address: DEFAULT_USDT,
+            address: DEFAULT_SOL,
             functionName: 'transfer',
-            args: [DEFAULT_RECEIVER, parseUnits(pricing.finalPrice.toFixed(2), 6)],
+            args: [DEFAULT_RECEIVER, parseUnits(pricing.finalPrice.toFixed(2), 9)],
           });
           break;
 
@@ -863,9 +863,9 @@ export default function BoostPackCheckout() {
                   </button>
 
                   <button
-                    onClick={() => setPaymentMethod('usdt')}
+                    onClick={() => setPaymentMethod('sol')}
                     className={`w-full p-3 rounded-lg border transition-colors ${
-                      paymentMethod === 'usdt'
+                      paymentMethod === 'sol'
                         ? 'border-cyan-500 bg-cyan-500/10'
                         : 'border-gray-700 hover:border-gray-600'
                     }`}
@@ -873,12 +873,12 @@ export default function BoostPackCheckout() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <Image
-                          src="/crypto-icons/color/usdt.svg"
+                          src="/crypto-icons/color/sol.svg"
                           width={24}
                           height={24}
-                          alt="USDT"
+                          alt="SOL"
                         />
-                        <span className="text-white">USDT</span>
+                        <span className="text-white">SOL</span>
                       </div>
                       <span className="text-gray-300">${pricing.finalPrice.toFixed(2)}</span>
                     </div>

@@ -133,7 +133,7 @@ export default function Web3Checkout({
   // Mainnet Ethereum configuration
   const MAINNET_CHAIN_ID = 1;
   const RECEIVER_ADDRESS = '0x81bA7b98E49014Bff22F811E9405640bC2B39cC0' as `0x${string}`;
-  const USDT_MAINNET = '0xdAC17F958D2ee523a2206206994597C13D831ec7' as `0x${string}`; // Official USDT on Ethereum mainnet
+  const SOL_MAINNET = '0xD31a59c85aE9D8edEFeC411D448f90841571b89c' as `0x${string}`; // Wrapped SOL on Ethereum mainnet
 
   const filteredTokens = useMemo(
     () =>
@@ -164,7 +164,7 @@ export default function Web3Checkout({
 
   // Auto-open wallet and initiate payment when component loads with specific conditions
   useEffect(() => {
-    if (paymentMethod === 'usdt' && selectedTier === 'nyaltxpro') {
+    if (paymentMethod === 'sol' && selectedTier === 'nyaltxpro') {
       // Auto-trigger wallet connection and payment flow only if no promo code is being used
       setTimeout(() => {
         if (!promo.trim()) {
@@ -412,14 +412,14 @@ export default function Web3Checkout({
           to: RECEIVER_ADDRESS,
           value: parseEther(ethAmount.toFixed(8)), // Use 8 decimal precision
         });
-      } else if (token === 'USDT') {
-        // Send USDT equivalent (assuming $199 worth)
-        const usdtAmount = total.toString();
+      } else if (token === 'SOL') {
+        // Send SOL equivalent (assuming $199 worth)
+        const solAmount = total.toString();
         txHash = await writeContractAsync({
           abi: erc20Abi,
-          address: USDT_MAINNET,
+          address: SOL_MAINNET,
           functionName: 'transfer',
-          args: [RECEIVER_ADDRESS, parseUnits(usdtAmount, 6)],
+          args: [RECEIVER_ADDRESS, parseUnits(solAmount, 9)],
         });
       } else {
         throw new Error('Unsupported payment method');
@@ -656,7 +656,7 @@ export default function Web3Checkout({
                   Selected plan: <span className="text-white font-medium">{selectedTier}</span>
                 </p>
               )}
-              {paymentMethod === 'usdt' && selectedTier === 'nyaltxpro' && (
+              {paymentMethod === 'sol' && selectedTier === 'nyaltxpro' && (
                 <p className="text-cyan-400 text-sm mt-1">
                   Auto-payment mode: 0.1 ETH on Ethereum mainnet
                 </p>
