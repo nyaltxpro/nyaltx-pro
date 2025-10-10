@@ -24,8 +24,15 @@ const LivePriceTicker: React.FC = () => {
     // Subscribe to WebSocket updates
     priceWebSocketService.subscribe(handleTickerUpdate);
 
-    // Connect to WebSocket
-    priceWebSocketService.connect(8);
+    // Connect to WebSocket with error handling
+    try {
+      priceWebSocketService.connect(8);
+    } catch (error) {
+      console.error('Failed to connect to price WebSocket:', error);
+      setLoading(false);
+      // Set fallback data
+      setTickers([]);
+    }
 
     // Cleanup on unmount
     return () => {
@@ -124,6 +131,20 @@ const LivePriceTicker: React.FC = () => {
           <div className="h-4 w-24 bg-gray-700 rounded"></div>
           <div className="h-4 w-16 bg-gray-700 rounded"></div>
           <div className="h-4 w-12 bg-gray-700 rounded"></div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show fallback message if no tickers available
+  if (!tickers || tickers.length === 0) {
+    return (
+      <div className="w-full bg-gray-900 border-y border-gray-800 py-2 flex items-center justify-center">
+        <div className="flex items-center space-x-2 text-gray-400">
+          <div className="w-5 h-5 rounded-full bg-gray-600 flex items-center justify-center">
+            <span className="text-xs">📊</span>
+          </div>
+          <span className="text-sm">Live prices temporarily unavailable</span>
         </div>
       </div>
     );

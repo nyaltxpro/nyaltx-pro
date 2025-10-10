@@ -10,8 +10,10 @@ class PriceWebSocketService {
   private callbacks: WebSocketCallback[] = [];
   private intervalId: NodeJS.Timeout | null = null;
   private isConnected: boolean = false;
-  private pollingInterval: number = 10000; // 10 seconds
+  private pollingInterval: number = 30000; // 30 seconds to reduce API calls
   private tickerLimit: number = 8;
+  private retryCount: number = 0;
+  private maxRetries: number = 3;
 
   constructor() {
     this.connect = this.connect.bind(this);
@@ -61,8 +63,23 @@ class PriceWebSocketService {
     try {
       const tickers = await getTopTickers(this.tickerLimit);
       this.broadcast(tickers);
+      this.retryCount = 0; // Reset retry count on success
     } catch (error) {
       console.error('Error fetching ticker data:', error);
+      
+      this.retryCount++;
+      if (this.retryCount >= this.maxRetries) {
+        console.warn('Max retries reached, using fallback data');
+        // Broadcast empty array or cached data as fallback
+        this.broadcast([]);
+        this.retryCount = 0; // Reset for next cycle
+      } else {
+        console.log(`Retrying in ${this.retryCount * 5} seconds... (${this.retryCount}/${this.maxRetries})`);
+        // Retry with exponential backoff
+        setTimeout(() => {
+          this.fetchAndBroadcast();
+        }, this.retryCount * 5000);
+      }
     }
   }
 
