@@ -1,0 +1,452 @@
+'use client';
+
+import Link from 'next/link';
+import React, { useEffect, useState } from 'react';
+import { FaEye, FaSearch, FaWallet, FaEnvelope, FaUser, FaCoins, FaStar, FaFilter } from 'react-icons/fa';
+
+interface UserRecord {
+  id: string;
+  email?: string;
+  walletAddress?: string;
+  name?: string;
+  registeredAt: string;
+  lastActive?: string;
+  totalOrders: number;
+  totalSpent: number;
+  favoriteTokens: number;
+  registeredTokens: number;
+  source: string;
+  metadata?: Record<string, any>;
+}
+
+interface UserStats {
+  totalUsers: number;
+  usersWithEmails: number;
+  usersWithWallets: number;
+  activeUsers: number;
+  totalRevenue: number;
+}
+
+const AdminUsersComponent = () => {
+  const [users, setUsers] = useState<UserRecord[] | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedUser, setSelectedUser] = useState<UserRecord | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [stats, setStats] = useState<UserStats | null>(null);
+  
+  // Filters
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [sourceFilter, setSourceFilter] = useState<string>('');
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      const params = new URLSearchParams();
+      if (searchTerm) params.append('search', searchTerm);
+      params.append('limit', '200');
+
+      const response = await fetch(`/api/admin/users?${params.toString()}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch users');
+      }
+
+      const result = await response.json();
+      setUsers(result.data || []);
+      setStats(result.stats || null);
+    } catch (err: any) {
+      setError(err.message || 'Failed to fetch users');
+      setUsers([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredUsers = users?.filter(user => {
+    if (sourceFilter && !user.source.includes(sourceFilter)) return false;
+    return true;
+  }) || [];
+
+  const formatCurrency = (amount: number) => {
+    return `$${amount.toFixed(2)}`;
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString();
+  };
+
+  const formatWalletAddress = (address: string) => {
+    return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  };
+
+  const getSourceBadge = (source: string) => {
+    const sources = source.split(', ');
+    return sources.map((s, index) => {
+      const colors = {
+        orders: 'bg-blue-900 text-blue-300',
+        onchain_orders: 'bg-purple-900 text-purple-300',
+        favorites: 'bg-yellow-900 text-yellow-300',
+        token_registrations: 'bg-green-900 text-green-300',
+        newsletter: 'bg-cyan-900 text-cyan-300'
+      };
+      const color = colors[s as keyof typeof colors] || 'bg-gray-900 text-gray-300';
+      return (
+        <span key={index} className={`px-2 py-1 rounded text-xs ${color} mr-1`}>
+          {s.replace('_', ' ')}
+        </span>
+      );
+    });
+  };
+
+  const openUserModal = (user: UserRecord) => {
+    setSelectedUser(user);
+    setShowModal(true);
+  };
+
+  const closeUserModal = () => {
+    setSelectedUser(null);
+    setShowModal(false);
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-semibold">User Records</h2>
+        <Link href="/admin" className="text-sm underline text-gray-300">
+          Back to Dashboard
+        </Link>
+      </div>
+
+      {/* Stats Cards */}
+      {stats && (
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          <div className="bg-gray-800 rounded-xl p-4 border border-gray-700">
+            <div className="flex items-center gap-2">
+              <FaUser className="text-cyan-400" />
+              <div>
+                <div className="text-2xl font-bold text-white">{stats.totalUsers}</div>
+                <div className="text-sm text-gray-400">Total Users</div>
+              </div>
+            </div>
+          </div>
+          <div className="bg-gray-800 rounded-xl p-4 border border-gray-700">
+            <div className="flex items-center gap-2">
+              <FaEnvelope className="text-green-400" />
+              <div>
+                <div className="text-2xl font-bold text-green-400">{stats.usersWithEmails}</div>
+                <div className="text-sm text-gray-400">With Emails</div>
+              </div>
+            </div>
+          </div>
+          <div className="bg-gray-800 rounded-xl p-4 border border-gray-700">
+            <div className="flex items-center gap-2">
+              <FaWallet className="text-purple-400" />
+              <div>
+                <div className="text-2xl font-bold text-purple-400">{stats.usersWithWallets}</div>
+                <div className="text-sm text-gray-400">With Wallets</div>
+              </div>
+            </div>
+          </div>
+          <div className="bg-gray-800 rounded-xl p-4 border border-gray-700">
+            <div className="flex items-center gap-2">
+              <FaCoins className="text-yellow-400" />
+              <div>
+                <div className="text-2xl font-bold text-yellow-400">{stats.activeUsers}</div>
+                <div className="text-sm text-gray-400">Active Users</div>
+              </div>
+            </div>
+          </div>
+          <div className="bg-gray-800 rounded-xl p-4 border border-gray-700">
+            <div className="flex items-center gap-2">
+              <FaCoins className="text-cyan-400" />
+              <div>
+                <div className="text-2xl font-bold text-cyan-400">{formatCurrency(stats.totalRevenue)}</div>
+                <div className="text-sm text-gray-400">Total Revenue</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Filters */}
+      <div className="bg-gray-800 rounded-xl p-4 border border-gray-700">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-sm text-gray-300 mb-1">Search</label>
+            <div className="relative">
+              <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm" />
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Email, wallet address..."
+                className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 pl-10 text-white text-sm"
+              />
+            </div>
+          </div>
+          
+          <div>
+            <label className="block text-sm text-gray-300 mb-1">Source</label>
+            <select
+              value={sourceFilter}
+              onChange={(e) => setSourceFilter(e.target.value)}
+              className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm"
+            >
+              <option value="">All Sources</option>
+              <option value="orders">Orders</option>
+              <option value="onchain_orders">Onchain Orders</option>
+              <option value="favorites">Favorites</option>
+              <option value="token_registrations">Token Registrations</option>
+              <option value="newsletter">Newsletter</option>
+            </select>
+          </div>
+
+          <div className="flex items-end">
+            <button
+              onClick={fetchUsers}
+              className="w-full bg-cyan-600 hover:bg-cyan-500 px-4 py-2 rounded text-white font-medium flex items-center justify-center gap-2"
+            >
+              <FaFilter />
+              Apply Filters
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Users Table */}
+      <div className="bg-gray-800 rounded-xl border border-gray-700">
+        {loading ? (
+          <div className="p-8 text-center text-gray-400">Loading users...</div>
+        ) : error ? (
+          <div className="p-8 text-center text-red-400">Error: {error}</div>
+        ) : filteredUsers.length === 0 ? (
+          <div className="p-8 text-center text-gray-400">No users found</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-700 text-gray-300">
+                <tr>
+                  <th className="px-4 py-3 text-left">User</th>
+                  <th className="px-4 py-3 text-left">Contact</th>
+                  <th className="px-4 py-3 text-left">Activity</th>
+                  <th className="px-4 py-3 text-left">Spending</th>
+                  <th className="px-4 py-3 text-left">Engagement</th>
+                  <th className="px-4 py-3 text-left">Source</th>
+                  <th className="px-4 py-3 text-left">Registered</th>
+                  <th className="px-4 py-3 text-left">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="text-gray-300">
+                {filteredUsers.map((user) => (
+                  <tr key={user.id} className="border-b border-gray-700 hover:bg-gray-750">
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <FaUser className="text-gray-400" />
+                        <div>
+                          <div className="text-sm font-medium">
+                            {user.name || user.email || formatWalletAddress(user.walletAddress || '')}
+                          </div>
+                          <div className="text-xs text-gray-400">
+                            ID: {user.id.slice(-8)}...
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="space-y-1">
+                        {user.email && (
+                          <div className="flex items-center gap-1 text-xs">
+                            <FaEnvelope className="text-green-400" />
+                            <span>{user.email}</span>
+                          </div>
+                        )}
+                        {user.walletAddress && (
+                          <div className="flex items-center gap-1 text-xs">
+                            <FaWallet className="text-purple-400" />
+                            <span className="font-mono">{formatWalletAddress(user.walletAddress)}</span>
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="text-sm">
+                        <div className="text-cyan-400 font-medium">{user.totalOrders} orders</div>
+                        {user.lastActive && (
+                          <div className="text-xs text-gray-400">
+                            Last: {formatDate(user.lastActive)}
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="text-sm font-medium text-green-400">
+                        {formatCurrency(user.totalSpent)}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="space-y-1">
+                        {user.favoriteTokens > 0 && (
+                          <div className="flex items-center gap-1 text-xs">
+                            <FaStar className="text-yellow-400" />
+                            <span>{user.favoriteTokens} favorites</span>
+                          </div>
+                        )}
+                        {user.registeredTokens > 0 && (
+                          <div className="flex items-center gap-1 text-xs">
+                            <FaCoins className="text-green-400" />
+                            <span>{user.registeredTokens} tokens</span>
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex flex-wrap gap-1">
+                        {getSourceBadge(user.source)}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-xs">
+                      {formatDate(user.registeredAt)}
+                    </td>
+                    <td className="px-4 py-3">
+                      <button
+                        onClick={() => openUserModal(user)}
+                        className="text-cyan-400 hover:text-cyan-300 p-1"
+                        title="View Details"
+                      >
+                        <FaEye />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* User Details Modal */}
+      {showModal && selectedUser && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-800 border border-gray-700 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-semibold text-white">User Details</h3>
+                <button
+                  onClick={closeUserModal}
+                  className="text-gray-400 hover:text-white text-xl"
+                >
+                  ×
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm text-gray-300 mb-1">User ID</label>
+                    <div className="text-sm text-white font-mono bg-gray-700 p-2 rounded">
+                      {selectedUser.id}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-300 mb-1">Sources</label>
+                    <div className="flex flex-wrap gap-1">
+                      {getSourceBadge(selectedUser.source)}
+                    </div>
+                  </div>
+                </div>
+
+                {selectedUser.email && (
+                  <div>
+                    <label className="block text-sm text-gray-300 mb-1">Email</label>
+                    <div className="text-sm text-white">{selectedUser.email}</div>
+                  </div>
+                )}
+
+                {selectedUser.walletAddress && (
+                  <div>
+                    <label className="block text-sm text-gray-300 mb-1">Wallet Address</label>
+                    <div className="text-sm text-white font-mono bg-gray-700 p-2 rounded">
+                      {selectedUser.walletAddress}
+                    </div>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm text-gray-300 mb-1">Total Orders</label>
+                    <div className="text-sm text-cyan-400 font-medium">{selectedUser.totalOrders}</div>
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-300 mb-1">Total Spent</label>
+                    <div className="text-sm text-green-400 font-medium">
+                      {formatCurrency(selectedUser.totalSpent)}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm text-gray-300 mb-1">Favorite Tokens</label>
+                    <div className="text-sm text-yellow-400 font-medium">{selectedUser.favoriteTokens}</div>
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-300 mb-1">Registered Tokens</label>
+                    <div className="text-sm text-green-400 font-medium">{selectedUser.registeredTokens}</div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm text-gray-300 mb-1">Registered</label>
+                    <div className="text-sm text-white">
+                      {new Date(selectedUser.registeredAt).toLocaleString()}
+                    </div>
+                  </div>
+                  {selectedUser.lastActive && (
+                    <div>
+                      <label className="block text-sm text-gray-300 mb-1">Last Active</label>
+                      <div className="text-sm text-white">
+                        {new Date(selectedUser.lastActive).toLocaleString()}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {selectedUser.metadata && Object.keys(selectedUser.metadata).length > 0 && (
+                  <div>
+                    <label className="block text-sm text-gray-300 mb-1">Metadata</label>
+                    <div className="text-sm text-white bg-gray-700 p-3 rounded">
+                      <pre className="whitespace-pre-wrap">
+                        {JSON.stringify(selectedUser.metadata, null, 2)}
+                      </pre>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex justify-end mt-6">
+                <button
+                  onClick={closeUserModal}
+                  className="bg-gray-600 hover:bg-gray-500 px-4 py-2 rounded text-white"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Summary */}
+      <div className="text-center text-sm text-gray-400">
+        Showing {filteredUsers.length} users from multiple data sources
+      </div>
+    </div>
+  );
+};
+
+export default AdminUsersComponent;

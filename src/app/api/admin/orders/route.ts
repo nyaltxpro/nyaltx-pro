@@ -56,35 +56,114 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const type = searchParams.get('type');
     const status = searchParams.get('status');
-    const limit = parseInt(searchParams.get('limit') || '50');
+    const limit = parseInt(searchParams.get('limit') || '100');
     const offset = parseInt(searchParams.get('offset') || '0');
 
-    const collection = await getCollection<Order>('orders');
+    // Get orders from main orders collection
+    const ordersCollection = await getCollection<Order>('orders');
     
-    // Build filter
+    // Build filter for main orders
     const filter: any = {};
     if (type) filter.type = type;
     if (status) filter.status = status;
 
-    // Get orders with pagination
-    const orders = await collection
+    const mainOrders = await ordersCollection
       .find(filter)
       .sort({ createdAt: -1 })
-      .skip(offset)
-      .limit(limit)
       .toArray();
 
-    // Get total count
-    const total = await collection.countDocuments(filter);
+    // Get onchain orders and convert to standard format
+    const onchainCollection = await getCollection('onchain_orders');
+    const onchainOrders = await onchainCollection
+      .find({})
+      .sort({ createdAt: -1 })
+      .toArray();
+
+    // Convert onchain orders to standard Order format
+    const convertedOnchainOrders: Order[] = onchainOrders.map((order: any) => ({
+      id: order.id || `onchain_${order._id}`,
+      type: 'race_to_liberty' as const,
+      status: 'completed' as const,
+      paymentMethod: order.method?.toLowerCase() === 'eth' ? 'eth' : 'nyax',
+      amount: order.amount || '0',
+      currency: order.method === 'ETH' ? 'ETH' : 'NYAX',
+      txHash: order.txHash,
+      chainId: order.chainId,
+      walletAddress: order.wallet,
+      productName: `Race to Liberty - ${order.tierId || 'Unknown Tier'}`,
+      tier: order.tierId,
+      createdAt: order.createdAt || new Date().toISOString(),
+      updatedAt: order.createdAt || new Date().toISOString(),
+      completedAt: order.createdAt || new Date().toISOString(),
+      metadata: {
+        source: 'onchain_orders',
+        originalData: order
+      }
+    }));
+
+    // Get boost points data
+    const boostPointsCollection = await getCollection('boost_points');
+    const boostPoints = await boostPointsCollection
+      .find({})
+      .sort({ createdAt: -1 })
+      .toArray();
+
+    // Convert boost points to orders
+    const convertedBoostOrders: Order[] = boostPoints.map((boost: any) => ({
+      id: `boost_${boost._id}`,
+      type: 'boost_pack' as const,
+      status: 'completed' as const,
+      paymentMethod: boost.paymentMethod || 'unknown',
+      amount: boost.amount?.toString() || '0',
+      currency: boost.currency || 'USD',
+      txHash: boost.txHash,
+      walletAddress: boost.walletAddress,
+      productName: `Boost Pack - ${boost.packType || 'Unknown'}`,
+      tier: boost.packType,
+      tokenSymbol: boost.tokenSymbol,
+      createdAt: boost.createdAt || new Date().toISOString(),
+      updatedAt: boost.createdAt || new Date().toISOString(),
+      completedAt: boost.createdAt || new Date().toISOString(),
+      metadata: {
+        source: 'boost_points',
+        points: boost.points,
+        decayHours: boost.decayHours,
+        originalData: boost
+      }
+    }));
+
+    // Combine all orders
+    let allOrders = [...mainOrders, ...convertedOnchainOrders, ...convertedBoostOrders];
+
+    // Apply filters to combined data
+    if (type) {
+      allOrders = allOrders.filter(order => order.type === type);
+    }
+    if (status) {
+      allOrders = allOrders.filter(order => order.status === status);
+    }
+
+    // Sort by creation date (newest first)
+    allOrders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    // Apply pagination
+    const paginatedOrders = allOrders.slice(offset, offset + limit);
+    const total = allOrders.length;
 
     return NextResponse.json({
       success: true,
-      data: orders,
+      data: paginatedOrders,
       pagination: {
         total,
         limit,
         offset,
         hasMore: offset + limit < total
+      },
+      sources: {
+        mainOrders: mainOrders.length,
+        onchainOrders: convertedOnchainOrders.length,
+        boostOrders: convertedBoostOrders.length,
+        total: allOrders.length
       }
     });
   } catch (error) {

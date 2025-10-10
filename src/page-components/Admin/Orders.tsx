@@ -264,6 +264,11 @@ const AdminOrdersComponent = () => {
                       {order.promoCode && (
                         <div className="text-xs text-green-400">Promo: {order.promoCode}</div>
                       )}
+                      {order.metadata?.source && (
+                        <div className="text-xs text-gray-500">
+                          Source: {order.metadata.source.replace('_', ' ')}
+                        </div>
+                      )}
                     </td>
                     <td className="px-4 py-3">
                       <span className={`px-2 py-1 rounded text-xs ${getPaymentMethodBadge(order.paymentMethod)}`}>
@@ -471,6 +476,7 @@ const AdminOrdersComponent = () => {
         <div className="bg-gray-800 rounded-xl p-4 border border-gray-700">
           <div className="text-2xl font-bold text-white">{filteredOrders.length}</div>
           <div className="text-sm text-gray-400">Total Orders</div>
+          <div className="text-xs text-cyan-400 mt-1">All Sources Combined</div>
         </div>
         <div className="bg-gray-800 rounded-xl p-4 border border-gray-700">
           <div className="text-2xl font-bold text-green-400">
@@ -492,6 +498,34 @@ const AdminOrdersComponent = () => {
               .toFixed(2)}
           </div>
           <div className="text-sm text-gray-400">Total Revenue (USD)</div>
+        </div>
+      </div>
+
+      {/* Data Sources Info */}
+      <div className="bg-gray-800 rounded-xl p-4 border border-gray-700">
+        <h3 className="text-lg font-semibold text-white mb-3">Data Sources</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+          <div className="flex items-center justify-between">
+            <span className="text-gray-300">Main Orders Collection:</span>
+            <span className="text-blue-400 font-medium">
+              {filteredOrders.filter(o => !o.metadata?.source || o.metadata.source === 'orders').length}
+            </span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-gray-300">Onchain Orders:</span>
+            <span className="text-purple-400 font-medium">
+              {filteredOrders.filter(o => o.metadata?.source === 'onchain_orders').length}
+            </span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-gray-300">Boost Points:</span>
+            <span className="text-green-400 font-medium">
+              {filteredOrders.filter(o => o.metadata?.source === 'boost_points').length}
+            </span>
+          </div>
+        </div>
+        <div className="text-xs text-gray-400 mt-2">
+          This page now shows historical orders from all database collections including legacy data.
         </div>
       </div>
     </div>

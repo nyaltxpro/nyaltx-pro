@@ -19,6 +19,7 @@ import {
   FaSignOutAlt,
   FaFootballBall,
   FaChartPie,
+  FaUserFriends,
 } from 'react-icons/fa';
 import Image from 'next/image';
 
@@ -173,6 +174,7 @@ export default function AdminSidebar({ isMobileMenuOpen, toggleMobileMenu }: Adm
     { icon: <FaHome />, text: 'Dashboard', href: '/admin' },
     { icon: <FaCoins />, text: 'Tokens', href: '/admin/tokens' },
     { icon: <FaShoppingCart />, text: 'Orders', href: '/admin/orders' },
+    { icon: <FaUserFriends />, text: 'Users', href: '/admin/users' },
     { icon: <FaUsers />, text: 'Profiles', href: '/admin/profiles' },
     { icon: <FaChartPie />, text: 'Analytics', href: '/admin/statistics' },
     { icon: <FaChartLine />, text: 'Stats', href: '/admin/stats' },
