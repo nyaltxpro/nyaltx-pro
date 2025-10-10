@@ -1,7 +1,8 @@
 'use client';
 
-import { PayPalButtons } from '@paypal/react-paypal-js';
-import { useEffect, useState } from 'react';
+import { PayPalButtons, PayPalScriptProvider } from '@paypal/react-paypal-js';
+import React, { useState } from 'react';
+import toast from 'react-hot-toast';
 
 interface PayPalCheckoutProps {
   amount: string;
@@ -29,6 +30,8 @@ export default function PayPalCheckout({
 
   const handleSuccess = async (details: any) => {
     try {
+      toast.success('🎉 PayPal payment successful!');
+      
       // Set pro status cookie for nyaltxpro purchases
       if (tier.toLowerCase() === 'nyaltxpro' || tier.toLowerCase() === 'nyaltxpro1') {
         document.cookie = 'nyaltx_pro=1; path=/; max-age=31536000'; // 1 year
@@ -69,9 +72,18 @@ export default function PayPalCheckout({
       }
     } catch (error) {
       console.error('Post-payment processing error:', error);
+      toast.error('Payment processing failed. Please contact support.');
       if (onError) {
         onError(error);
       }
+    }
+  };
+
+  const handleError = (error: any) => {
+    console.error('PayPal payment error:', error);
+    toast.error('PayPal payment failed. Please try again.');
+    if (onError) {
+      onError(error);
     }
   };
 
@@ -241,10 +253,8 @@ export default function PayPalCheckout({
         }}
         onError={err => {
           console.error('PayPal Checkout Error', err);
+          handleError(err);
           setProcessing(false);
-          if (onError) {
-            onError(err);
-          }
         }}
         onCancel={() => {
           console.log('Payment cancelled by user');

@@ -11,6 +11,7 @@ import {
   FaTelegram,
   FaMicrophone,
 } from 'react-icons/fa';
+import toast from 'react-hot-toast';
 import { useAccount, useSendTransaction, useWriteContract, useSwitchChain } from 'wagmi';
 import { parseEther, erc20Abi, parseUnits } from 'viem';
 import { BoostPack } from '@/types/gamification';
@@ -160,22 +161,29 @@ export default function BoostPackSelector({
 
   const handlePayment = async () => {
     if (!selectedPack || !isConnected || !address) {
-      setError('Please connect wallet and select a boost pack');
+      const errorMsg = 'Please connect wallet and select a boost pack';
+      setError(errorMsg);
+      toast.error(errorMsg);
       return;
     }
 
     // Check and switch to correct chain if needed
     if (PAYMENT_CHAIN_ID && chain?.id !== PAYMENT_CHAIN_ID) {
       try {
+        toast.loading('Switching network...');
         await switchChainAsync({ chainId: PAYMENT_CHAIN_ID });
+        toast.dismiss();
       } catch (error) {
-        setError('Please switch to Ethereum mainnet to complete payment');
+        const errorMsg = 'Please switch to Ethereum mainnet to complete payment';
+        setError(errorMsg);
+        toast.error(errorMsg);
         return;
       }
     }
 
     setLoading(true);
     setError(null);
+    const paymentToast = toast.loading(`Processing ${selectedPack.name} boost payment...`);
 
     try {
       let transactionHash: string;
@@ -221,16 +229,20 @@ export default function BoostPackSelector({
       const boostData = await boostResponse.json();
 
       if (boostData.success) {
-        setSuccess(
-          `🚀 ${selectedPack.name} boost activated! ${selectedPack.basePoints} points added to ${tokenSymbol}.`
-        );
+        const successMsg = `🚀 ${selectedPack.name} boost activated! ${selectedPack.basePoints} points added to ${tokenSymbol}.`;
+        setSuccess(successMsg);
+        toast.dismiss(paymentToast);
+        toast.success(successMsg);
         onBoostSuccess?.(boostData);
         setSelectedPack(null);
       } else {
         throw new Error(boostData.error || 'Failed to activate boost');
       }
     } catch (err: any) {
-      setError(err?.shortMessage || err?.message || 'Payment failed');
+      const errorMsg = err?.shortMessage || err?.message || 'Payment failed';
+      setError(errorMsg);
+      toast.dismiss(paymentToast);
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }

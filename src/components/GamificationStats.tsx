@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAccount } from 'wagmi';
 import { FaTrophy, FaFire, FaCrown, FaArrowRight, FaRocket } from 'react-icons/fa';
+import toast from 'react-hot-toast';
 
 interface QuickStats {
   userPosition?: number;
@@ -94,6 +95,7 @@ export default function GamificationStats() {
       }
     } catch (error) {
       console.error('Error fetching gamification stats:', error);
+      toast.error('Failed to load gamification stats');
     } finally {
       setLoading(false);
     }

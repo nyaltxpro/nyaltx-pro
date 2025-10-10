@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useAccount } from 'wagmi';
 import { useState, useEffect } from 'react';
 import { useAppKit } from '@reown/appkit/react';
+import toast from 'react-hot-toast';
 
 interface ConnectWalletButtonProps {
   className?: string;
@@ -22,10 +23,14 @@ export default function ConnectWalletButton({
   useEffect(() => {
     if (isConnected && address) {
       setDisplayAddress(`${address.slice(0, 6)}...${address.slice(-4)}`);
+      toast.success(`🔗 Wallet connected: ${address.slice(0, 6)}...${address.slice(-4)}`);
+      if (onConnect) {
+        onConnect();
+      }
     } else {
       setDisplayAddress('');
     }
-  }, [isConnected, address]);
+  }, [isConnected, address, onConnect]);
 
   const handleClick = () => {
     if (onConnect) {

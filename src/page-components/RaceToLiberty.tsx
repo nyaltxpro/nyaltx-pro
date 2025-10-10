@@ -3,7 +3,10 @@
 import BoostPackSelector from '@/components/BoostPackSelector';
 import ConnectWalletButton from '@/components/ConnectWalletButton';
 import RaceToLibertyLeaderboard from '@/components/RaceToLibertyLeaderboard';
+import UserAnalyticsDashboard from '@/components/UserAnalyticsDashboard';
+import { useUserPosition } from '@/hooks/useUserPosition';
 import { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 import {
     FaCrown,
     FaFire,
@@ -22,6 +25,10 @@ export default function DashboardRaceToLibertyPage() {
   const [selectedToken, setSelectedToken] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showInfo, setShowInfo] = useState(false);
+  const [showAnalytics, setShowAnalytics] = useState(false);
+  
+  // Use position tracking hook
+  const { userPosition, refreshPosition } = useUserPosition();
 
   useEffect(() => {
     if (isConnected && address) {
@@ -42,9 +49,19 @@ export default function DashboardRaceToLibertyPage() {
         if (approvedTokens.length > 0 && !selectedToken) {
           setSelectedToken(approvedTokens[0]);
         }
+        
+        if (approvedTokens.length === 0) {
+          toast('No approved tokens found. Register a token to participate in Race to Liberty!', {
+            icon: '💡',
+            duration: 5000,
+          });
+        }
+      } else {
+        throw new Error(data.error || 'Failed to fetch tokens');
       }
     } catch (error) {
       console.error('Error fetching user tokens:', error);
+      toast.error('Failed to load your tokens');
     } finally {
       setLoading(false);
     }
@@ -52,7 +69,13 @@ export default function DashboardRaceToLibertyPage() {
 
   const handleBoostSuccess = (boostData: any) => {
     console.log('Boost successful:', boostData);
-    // Optionally refresh leaderboard or show success notification
+    toast.success(`🚀 Boost activated! Your token is now climbing the leaderboard!`);
+    
+    // Refresh position tracking and leaderboard
+    setTimeout(() => {
+      refreshPosition();
+      window.location.reload();
+    }, 2000);
   };
 
   if (loading) {
@@ -83,12 +106,34 @@ export default function DashboardRaceToLibertyPage() {
           </div>
         </div>
 
-        <button
-          onClick={() => setShowInfo(!showInfo)}
-          className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
-        >
-          <FaInfoCircle className="text-gray-400" />
-        </button>
+        <div className="flex gap-2">
+          {isConnected && userPosition?.position && (
+            <div className="px-4 py-2 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 rounded-lg">
+              <div className="flex items-center gap-2">
+                <FaTrophy className="text-cyan-400" />
+                <span className="text-sm font-semibold">#{userPosition.position}</span>
+                <span className="text-xs text-gray-400">({userPosition.points} pts)</span>
+              </div>
+            </div>
+          )}
+          
+          {isConnected && (
+            <button
+              onClick={() => setShowAnalytics(!showAnalytics)}
+              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
+              title="Toggle Analytics"
+            >
+              <FaFire className="text-orange-400" />
+            </button>
+          )}
+          
+          <button
+            onClick={() => setShowInfo(!showInfo)}
+            className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
+          >
+            <FaInfoCircle className="text-gray-400" />
+          </button>
+        </div>
       </div>
 
       {/* Info Panel */}
@@ -144,6 +189,11 @@ export default function DashboardRaceToLibertyPage() {
             </ul>
           </div>
         </div>
+      )}
+
+      {/* Analytics Panel */}
+      {showAnalytics && isConnected && (
+        <UserAnalyticsDashboard className="mb-6" />
       )}
 
       {!isConnected ? (

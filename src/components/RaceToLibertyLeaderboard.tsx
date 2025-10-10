@@ -10,11 +10,14 @@ import {
   FaArrowUp,
   FaArrowDown,
   FaMinus,
+  FaSync,
 } from 'react-icons/fa';
+import toast from 'react-hot-toast';
 import { LeaderboardEntry, WeeklyWinner } from '@/types/gamification';
 
 interface RaceToLibertyLeaderboardProps {
   className?: string;
+  onRefresh?: () => void;
 }
 
 export default function RaceToLibertyLeaderboard({
@@ -25,6 +28,7 @@ export default function RaceToLibertyLeaderboard({
   const [timeframe, setTimeframe] = useState<'current' | 'weekly'>('current');
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<string>('');
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     fetchLeaderboard();
@@ -43,9 +47,12 @@ export default function RaceToLibertyLeaderboard({
       if (data.success) {
         setLeaderboard(data.leaderboard);
         setLastUpdated(data.lastUpdated);
+      } else {
+        throw new Error(data.error || 'Failed to fetch leaderboard');
       }
     } catch (error) {
       console.error('Error fetching leaderboard:', error);
+      toast.error('Failed to load leaderboard data');
     } finally {
       setLoading(false);
     }
@@ -58,9 +65,27 @@ export default function RaceToLibertyLeaderboard({
 
       if (data.success) {
         setWeeklyWinners(data.winners);
+      } else {
+        throw new Error(data.error || 'Failed to fetch weekly winners');
       }
     } catch (error) {
       console.error('Error fetching weekly winners:', error);
+      toast.error('Failed to load weekly winners');
+    }
+  };
+
+  const handleManualRefresh = async () => {
+    setRefreshing(true);
+    toast.loading('Refreshing leaderboard...', { id: 'refresh' });
+    
+    try {
+      await fetchLeaderboard();
+      await fetchWeeklyWinners();
+      toast.success('Leaderboard updated!', { id: 'refresh' });
+    } catch (error) {
+      toast.error('Failed to refresh leaderboard', { id: 'refresh' });
+    } finally {
+      setRefreshing(false);
     }
   };
 
@@ -149,6 +174,14 @@ export default function RaceToLibertyLeaderboard({
         </div>
 
         <div className="flex gap-2">
+          <button
+            onClick={handleManualRefresh}
+            disabled={refreshing}
+            className="px-3 py-2 rounded-lg text-sm font-medium transition-all bg-white/10 text-gray-300 hover:bg-white/20 disabled:opacity-50"
+            title="Refresh leaderboard"
+          >
+            <FaSync className={`${refreshing ? 'animate-spin' : ''}`} />
+          </button>
           <button
             onClick={() => setTimeframe('current')}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${

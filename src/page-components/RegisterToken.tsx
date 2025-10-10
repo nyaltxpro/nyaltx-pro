@@ -17,8 +17,10 @@ import {
     FaChevronUp,
     FaInfoCircle,
     FaImage,
-    FaLink
+    FaLink,
+    FaSpinner
 } from 'react-icons/fa';
+import toast from 'react-hot-toast';
 import { useAccount } from 'wagmi';
 import { validateContractAddress, getAddressFormatDescription, getExampleAddress } from '@/utils/addressValidation';
 
@@ -205,13 +207,18 @@ function RegisterTokenContent() {
         e.preventDefault();
         dispatch(clearError());
 
+        // Start loading state
+        dispatch({ type: 'tokens/setSubmitting', payload: true });
+
         try {
             // Validate required fields
             if (!formData.tokenName || !formData.tokenSymbol || !formData.contractAddress) {
+                const errorMsg = 'Please fill in all required fields.';
                 dispatch({
                     type: 'tokens/setError',
-                    payload: 'Please fill in all required fields.',
+                    payload: errorMsg,
                 });
+                toast.error(errorMsg);
                 return;
             }
 
@@ -220,20 +227,29 @@ function RegisterTokenContent() {
             const validation = validateContractAddress(cleanAddress, formData.blockchain);
             
             if (!validation.isValid) {
+                const errorMsg = validation.error || `Please enter a valid ${formData.blockchain} contract address.`;
                 dispatch({
                     type: 'tokens/setError',
-                    payload: validation.error || `Please enter a valid ${formData.blockchain} contract address.`,
+                    payload: errorMsg,
                 });
+                toast.error(errorMsg);
                 return;
             }
 
+            // Show checking toast
+            const checkingToast = toast.loading('Checking contract address...');
+
             // Check if contract address already exists
             const contractExists = await checkContractExists(formData.contractAddress, formData.blockchain);
+            toast.dismiss(checkingToast);
+            
             if (contractExists) {
+                const errorMsg = 'Contract address already exists in the database. Please use a different contract address.';
                 dispatch({
                     type: 'tokens/setError',
-                    payload: 'Contract address already exists in the database. Please use a different contract address.',
+                    payload: errorMsg,
                 });
+                toast.error(errorMsg);
                 return;
             }
 
@@ -259,15 +275,20 @@ function RegisterTokenContent() {
                 // Store in localStorage for post-payment registration
                 localStorage.setItem('pendingTokenRegistration', JSON.stringify(tokenData));
 
+                toast.success('Token data saved! Redirecting to checkout...');
+                
                 // Redirect to checkout immediately (no database registration yet)
-                router.push(`/${redirectPath}?method=${paymentMethod}`);
+                setTimeout(() => {
+                    router.push(`/${redirectPath}?method=${paymentMethod}`);
+                }, 1000);
             } else {
-                // Store in localStorage for regular registration
-                const registeredTokens = JSON.parse(localStorage.getItem('registeredTokens') || '[]');
-                const newToken = {
-                    id: Date.now().toString(),
-                    name: formData.tokenName,
-                    symbol: formData.tokenSymbol,
+                // Show submitting toast
+                const submittingToast = toast.loading('Submitting token registration...');
+
+                // Submit to API for immediate registration
+                const result = await dispatch(registerToken({
+                    tokenName: formData.tokenName,
+                    tokenSymbol: formData.tokenSymbol,
                     blockchain: formData.blockchain,
                     contractAddress: formData.contractAddress,
                     imageUri: formData.imageUri,
@@ -276,20 +297,36 @@ function RegisterTokenContent() {
                     telegram: formData.telegram,
                     discord: formData.discord,
                     github: formData.github,
-                    youtube,
-                    submittedBy: address,
-                    submittedAt: new Date().toISOString(),
-                    status: 'pending',
-                };
+                    submittedByAddress: address,
+                    userEmail: formData.userEmail || '',
+                }));
 
-                registeredTokens.push(newToken);
-                localStorage.setItem('registeredTokens', JSON.stringify(registeredTokens));
+                toast.dismiss(submittingToast);
 
-                setSubmitted(true);
-                dispatch(resetForm());
+                if (registerToken.fulfilled.match(result)) {
+                    toast.success('🎉 Token registration submitted successfully! Our team will review it shortly.');
+                    setSubmitted(true);
+                    dispatch(resetForm());
+                } else {
+                    const errorMsg = result.payload as string || 'Failed to submit token registration';
+                    toast.error(errorMsg);
+                    dispatch({
+                        type: 'tokens/setError',
+                        payload: errorMsg,
+                    });
+                }
             }
         } catch (err: any) {
             console.error('Token registration error:', err);
+            const errorMsg = err.message || 'An unexpected error occurred';
+            toast.error(errorMsg);
+            dispatch({
+                type: 'tokens/setError',
+                payload: errorMsg,
+            });
+        } finally {
+            // Always stop loading state
+            dispatch({ type: 'tokens/setSubmitting', payload: false });
         }
     };
 
@@ -710,12 +747,15 @@ function RegisterTokenContent() {
                                     <button
                                         type="submit"
                                         disabled={isSubmitting || !isConnected}
-                                        className={`bg-[#00b8d8] hover:bg-[#00a6c4] text-white font-medium py-2 px-6 rounded-full transition duration-200 ${isSubmitting || !isConnected ? 'opacity-60 cursor-not-allowed' : ''}`}
+                                        className={`bg-[#00b8d8] hover:bg-[#00a6c4] text-white font-medium py-3 px-8 rounded-full transition duration-200 flex items-center justify-center gap-2 mx-auto ${isSubmitting || !isConnected ? 'opacity-60 cursor-not-allowed' : ''}`}
                                     >
+                                        {isSubmitting && (
+                                            <FaSpinner className="animate-spin" />
+                                        )}
                                         {isSubmitting
                                             ? 'Submitting…'
                                             : isConnected
-                                                ? 'Submit'
+                                                ? 'Submit Token Registration'
                                                 : 'Connect wallet to submit'}
                                     </button>
                                 </div>

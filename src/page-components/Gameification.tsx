@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 import {
     FaArrowRight,
     FaCalendarAlt,
@@ -65,6 +66,7 @@ export default function GamificationOverviewPage() {
             }
         } catch (error) {
             console.error('Error fetching game stats:', error);
+            toast.error('Failed to load gamification statistics');
         } finally {
             setLoading(false);
         }
@@ -81,6 +83,7 @@ export default function GamificationOverviewPage() {
             }
         } catch (error) {
             console.error('Error fetching user tokens:', error);
+            toast.error('Failed to load your tokens');
         }
     };
 

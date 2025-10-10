@@ -1,10 +1,10 @@
-'use client';
-
 import React, { useState, useMemo, useEffect } from 'react';
 import Image from 'next/image';
 import { useAppKit } from '@reown/appkit/react';
-import { erc20Abi, parseEther, parseUnits } from 'viem';
-import { useAccount, useSendTransaction, useSwitchChain, useWriteContract } from 'wagmi';
+import { useAccount, useWriteContract, useSendTransaction, useSwitchChain } from 'wagmi';
+import { parseEther, parseUnits } from 'viem';
+import { erc20Abi } from 'viem';
+import toast from 'react-hot-toast';
 import { PhantomWalletButton } from './PhantomWalletButton';
 import { storeRaceToLibertyOrder } from '@/utils/orderStorage';
 import { useRouter } from 'next/navigation';
@@ -249,18 +249,26 @@ export default function RaceToLibertyCheckout({
 
   const handlePayETH = async () => {
     if (!RECEIVER) {
-      setError('Receiver address not configured');
+      const errorMsg = 'Receiver address not configured';
+      setError(errorMsg);
+      toast.error(errorMsg);
       return;
     }
     if (!isConnected) {
-      setError('Please connect your wallet first');
+      const errorMsg = 'Please connect your wallet first';
+      setError(errorMsg);
+      toast.error(errorMsg);
       return;
     }
     if (PAYMENT_CHAIN_ID && chain?.id !== PAYMENT_CHAIN_ID) {
       try {
+        toast.loading('Switching network...');
         await switchChainAsync({ chainId: PAYMENT_CHAIN_ID });
+        toast.dismiss();
       } catch {
-        setError('Please switch to the correct chain to pay');
+        const errorMsg = 'Please switch to the correct chain to pay';
+        setError(errorMsg);
+        toast.error(errorMsg);
         return;
       }
     }
@@ -274,12 +282,16 @@ export default function RaceToLibertyCheckout({
       } catch {}
     }
     if (!ethAmt) {
-      setError('Unable to compute ETH amount. Please try again in a moment.');
+      const errorMsg = 'Unable to compute ETH amount. Please try again in a moment.';
+      setError(errorMsg);
+      toast.error(errorMsg);
       return;
     }
 
     setError(undefined);
     setBusy('eth');
+    const paymentToast = toast.loading('Processing ETH payment...');
+    
     try {
       const hash = await sendTransactionAsync({
         to: RECEIVER,
@@ -295,8 +307,20 @@ export default function RaceToLibertyCheckout({
         currency: 'ETH',
         ethAmount: ethAmt
       });
+      
+      toast.dismiss(paymentToast);
+      toast.success('🎉 ETH payment successful! Redirecting...');
+      
+      // Redirect to success page
+      setTimeout(() => {
+        router.push(`/pricing/race-to-liberty/success?tier=${tier}&token=${selectedCoin}&txHash=${hash}&method=eth&points=${totalPoints}${promoApplied ? `&promo=${promoCode}` : ''}`);
+      }, 2000);
+      
     } catch (e: any) {
-      setError(e?.shortMessage || e?.message || 'ETH payment failed');
+      toast.dismiss(paymentToast);
+      const errorMsg = e?.shortMessage || e?.message || 'ETH payment failed';
+      setError(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setBusy(undefined);
     }
@@ -304,15 +328,21 @@ export default function RaceToLibertyCheckout({
 
   const handlePayNYAX = async () => {
     if (!RECEIVER) {
-      setError('Receiver address not configured');
+      const errorMsg = 'Receiver address not configured';
+      setError(errorMsg);
+      toast.error(errorMsg);
       return;
     }
     if (!NYAX_TOKEN) {
-      setError('NYAX token address not configured');
+      const errorMsg = 'NYAX token address not configured';
+      setError(errorMsg);
+      toast.error(errorMsg);
       return;
     }
     if (!isConnected) {
-      setError('Please connect your wallet first');
+      const errorMsg = 'Please connect your wallet first';
+      setError(errorMsg);
+      toast.error(errorMsg);
       return;
     }
     if (PAYMENT_CHAIN_ID && chain?.id !== PAYMENT_CHAIN_ID) {
@@ -329,6 +359,8 @@ export default function RaceToLibertyCheckout({
 
     setError(undefined);
     setBusy('nyax');
+    const nyaxToast = toast.loading('Processing NYAX payment...');
+    
     try {
       const value = parseUnits(discountedUSD.toFixed(6), 18);
       const hash = await writeContractAsync({
@@ -346,8 +378,20 @@ export default function RaceToLibertyCheckout({
         amount: discountedUSD.toString(),
         currency: 'NYAX'
       });
+      
+      toast.dismiss(nyaxToast);
+      toast.success('🎉 NYAX payment successful! Redirecting...');
+      
+      // Redirect to success page
+      setTimeout(() => {
+        router.push(`/pricing/race-to-liberty/success?tier=${tier}&token=${selectedCoin}&txHash=${hash}&method=nyax&points=${totalPoints}${promoApplied ? `&promo=${promoCode}` : ''}`);
+      }, 2000);
+      
     } catch (e: any) {
-      setError(e?.shortMessage || e?.message || 'NYAX payment failed');
+      toast.dismiss(nyaxToast);
+      const errorMsg = e?.shortMessage || e?.message || 'NYAX payment failed';
+      setError(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setBusy(undefined);
     }
@@ -456,19 +500,22 @@ export default function RaceToLibertyCheckout({
 
   const handleApplyPromo = () => {
     if (!promoCode.trim()) {
-      setPromoError('Please enter a promo code');
+      const errorMsg = 'Please enter a promo code';
+      setPromoError(errorMsg);
+      toast.error(errorMsg);
       return;
     }
 
     if (validatePromoCode(promoCode)) {
       const promoData = PROMO_CODES[promoCode.toUpperCase().trim() as keyof typeof PROMO_CODES];
       setPromoError(undefined);
-      // Show success message briefly
-      setTimeout(() => setPromoError(undefined), 3000);
+      toast.success(`🎉 Promo code "${promoCode.toUpperCase()}" applied! ${Math.round(promoData.discount * 100)}% discount`);
     } else {
-      setPromoError('Invalid promo code');
+      const errorMsg = 'Invalid promo code';
+      setPromoError(errorMsg);
       setPromoDiscount(0);
       setPromoApplied(false);
+      toast.error(errorMsg);
     }
   };
 
@@ -477,22 +524,28 @@ export default function RaceToLibertyCheckout({
     setPromoDiscount(0);
     setPromoApplied(false);
     setPromoError(undefined);
+    toast.success('Promo code removed');
   };
 
   // Handle free promo code claim
   const handleFreePromoClaim = async () => {
     if (!selectedCoin) {
-      setError('Please select a token first');
+      const errorMsg = 'Please select a token first';
+      setError(errorMsg);
+      toast.error(errorMsg);
       return;
     }
 
     if (!promoApplied || promoDiscount !== 1) {
-      setError('Please apply a valid free promo code first');
+      const errorMsg = 'Please apply a valid free promo code first';
+      setError(errorMsg);
+      toast.error(errorMsg);
       return;
     }
 
     setBusy('free-claim');
     setError(undefined);
+    const claimToast = toast.loading('🎁 Claiming free boost...');
 
     try {
       // Simulate adding the token to Race to Liberty with boost points
@@ -511,13 +564,21 @@ export default function RaceToLibertyCheckout({
         timestamp: new Date().toISOString(),
       });
 
+      toast.dismiss(claimToast);
+      toast.success('🎉 Free boost claimed successfully! Redirecting...');
+      
       // Redirect to success page with free promo parameters
-      router.push(
-        `/pricing/race-to-liberty/success?tier=${tier}&token=${selectedCoin}&promo=${promoCode.toUpperCase()}&points=${totalPoints}&free=true`
-      );
+      setTimeout(() => {
+        router.push(
+          `/pricing/race-to-liberty/success?tier=${tier}&token=${selectedCoin}&promo=${promoCode.toUpperCase()}&points=${totalPoints}&free=true`
+        );
+      }, 2000);
     } catch (error) {
       console.error('Free claim error:', error);
-      setError('Failed to claim free boost. Please try again.');
+      toast.dismiss(claimToast);
+      const errorMsg = 'Failed to claim free boost. Please try again.';
+      setError(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setBusy(undefined);
     }

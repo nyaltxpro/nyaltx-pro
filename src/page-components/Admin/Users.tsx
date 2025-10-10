@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import { FaEye, FaSearch, FaWallet, FaEnvelope, FaUser, FaCoins, FaStar, FaFilter } from 'react-icons/fa';
+import toast from 'react-hot-toast';
 
 interface UserRecord {
   id: string;
@@ -46,6 +47,8 @@ const AdminUsersComponent = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
+      setError(null);
+      
       const params = new URLSearchParams();
       if (searchTerm) params.append('search', searchTerm);
       params.append('limit', '200');
@@ -58,9 +61,15 @@ const AdminUsersComponent = () => {
       const result = await response.json();
       setUsers(result.data || []);
       setStats(result.stats || null);
+      
+      if (searchTerm) {
+        toast.success(`Found ${result.data?.length || 0} users matching "${searchTerm}"`);
+      }
     } catch (err: any) {
-      setError(err.message || 'Failed to fetch users');
+      const errorMsg = err.message || 'Failed to fetch users';
+      setError(errorMsg);
       setUsers([]);
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }

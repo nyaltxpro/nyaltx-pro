@@ -2,6 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 
 // Ensure this component only renders on the client side
 const CampaignsPageClient = dynamic(() => Promise.resolve(CampaignsPageComponent), {
@@ -108,8 +109,10 @@ function CampaignsPageComponent() {
                 setCampaigns(paginatedCampaigns);
                 setTotal(filteredCampaigns.length);
             } catch (err) {
-                setError('Failed to load campaigns');
+                const errorMsg = 'Failed to load campaigns';
+                setError(errorMsg);
                 setCampaigns([]);
+                toast.error(errorMsg);
             } finally {
                 setLoading(false);
             }
@@ -119,6 +122,8 @@ function CampaignsPageComponent() {
     }, [page, limit, statusFilter]);
 
     const updateCampaignStatus = async (id: string, newStatus: Campaign['status']) => {
+        const loadingToast = toast.loading(`Updating campaign status to ${newStatus}...`);
+        
         try {
             setBusyId(id);
             setError(null);
@@ -135,8 +140,14 @@ function CampaignsPageComponent() {
                             : campaign
                     ) || null
             );
+            
+            toast.dismiss(loadingToast);
+            toast.success(`Campaign status updated to ${newStatus}`);
         } catch (err) {
-            setError('Failed to update campaign status');
+            const errorMsg = 'Failed to update campaign status';
+            setError(errorMsg);
+            toast.dismiss(loadingToast);
+            toast.error(errorMsg);
         } finally {
             setBusyId(null);
         }

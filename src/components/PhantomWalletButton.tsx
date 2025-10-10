@@ -3,6 +3,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import Image from 'next/image';
 import { FaSpinner, FaExternalLinkAlt } from 'react-icons/fa';
+import toast from 'react-hot-toast';
 
 interface PhantomWalletButtonProps {
   amount: number; // Amount in USD
@@ -95,19 +96,29 @@ export const PhantomWalletButton: React.FC<PhantomWalletButtonProps> = ({
   // Connect to Phantom wallet
   const connectWallet = useCallback(async () => {
     if (!window.solana?.isPhantom) {
-      onError('Phantom wallet not found. Please install Phantom wallet extension.');
+      const errorMsg = 'Phantom wallet not found. Please install Phantom wallet extension.';
+      onError(errorMsg);
+      toast.error(errorMsg);
       return;
     }
 
+    const connectingToast = toast.loading('Connecting to Phantom wallet...');
+    
     try {
       const response = await window.solana.connect();
       const address = response.publicKey.toString();
       setIsConnected(true);
       setWalletAddress(address);
       console.log('✅ Connected to Phantom wallet:', address);
+      
+      toast.dismiss(connectingToast);
+      toast.success(`🔗 Phantom wallet connected: ${address.slice(0, 8)}...${address.slice(-8)}`);
     } catch (error: any) {
       console.error('❌ Failed to connect wallet:', error);
-      onError('Failed to connect to Phantom wallet');
+      const errorMsg = 'Failed to connect to Phantom wallet';
+      onError(errorMsg);
+      toast.dismiss(connectingToast);
+      toast.error(errorMsg);
     }
   }, [onError]);
 
@@ -119,8 +130,10 @@ export const PhantomWalletButton: React.FC<PhantomWalletButtonProps> = ({
         setIsConnected(false);
         setWalletAddress('');
         console.log('🔌 Disconnected from Phantom wallet');
+        toast.success('Phantom wallet disconnected');
       } catch (error) {
         console.error('Error disconnecting wallet:', error);
+        toast.error('Failed to disconnect wallet');
       }
     }
   }, []);
@@ -134,16 +147,21 @@ export const PhantomWalletButton: React.FC<PhantomWalletButtonProps> = ({
   // Handle Solana payment using Phantom wallet
   const handleSolanaPayment = useCallback(async () => {
     if (!isConnected || !window.solana) {
-      onError('Please connect your Phantom wallet first');
+      const errorMsg = 'Please connect your Phantom wallet first';
+      onError(errorMsg);
+      toast.error(errorMsg);
       return;
     }
 
     if (!SOLANA_RECEIVER || SOLANA_RECEIVER === 'YourSolanaWalletAddressHere') {
-      onError('Solana receiver address not configured');
+      const errorMsg = 'Solana receiver address not configured';
+      onError(errorMsg);
+      toast.error(errorMsg);
       return;
     }
 
     setIsProcessing(true);
+    const paymentToast = toast.loading('Processing Solana payment...');
 
     try {
       // Calculate SOL amount
@@ -183,6 +201,9 @@ export const PhantomWalletButton: React.FC<PhantomWalletButtonProps> = ({
       console.log(`   Transaction: ${mockSignature}`);
       console.log(`   Explorer: https://solscan.io/tx/${mockSignature}`);
 
+      toast.dismiss(paymentToast);
+      toast.success(`🎉 Solana payment successful! ${solAmount.toFixed(4)} SOL sent`);
+      
       onSuccess(mockSignature, solAmount);
 
     } catch (error: any) {
@@ -197,6 +218,8 @@ export const PhantomWalletButton: React.FC<PhantomWalletButtonProps> = ({
         errorMessage = error.message;
       }
       
+      toast.dismiss(paymentToast);
+      toast.error(errorMessage);
       onError(errorMessage);
     } finally {
       setIsProcessing(false);

@@ -1,11 +1,11 @@
 import { Inter, Poppins, Roboto } from "next/font/google";
-import Footer from "../components/Footer";
+import { Providers } from '@/components/providers/Providers';
+import Footer from '@/components/Footer';
+import { Toaster } from 'react-hot-toast';
 import "./globals.css";
-import Providers from "./providers";
 import type { Metadata } from 'next';
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://nyaltx.com';
-
 export const metadata: Metadata = {
   title: 'NYALTX | Crypto Token Tracker & DeFi Platform',
   description: 'Track meme tokens, view real-time charts, participate in Race to Liberty gamification, and discover trending cryptocurrencies across multiple blockchains.',
@@ -110,6 +110,31 @@ export default function RootLayout({
             </main>
             <Footer />
           </div>
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              duration: 4000,
+              style: {
+                background: '#1f2937',
+                color: '#f9fafb',
+                border: '1px solid #374151',
+              },
+              success: {
+                style: {
+                  background: '#065f46',
+                  color: '#d1fae5',
+                  border: '1px solid #10b981',
+                },
+              },
+              error: {
+                style: {
+                  background: '#7f1d1d',
+                  color: '#fecaca',
+                  border: '1px solid #ef4444',
+                },
+              },
+            }}
+          />
         </Providers>
       </body>
     </html>
