@@ -202,70 +202,79 @@ export default function PayPalCheckout({
     );
   }
 
+  const paypalScriptOptions = {
+    clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID!,
+    currency: 'USD',
+    intent: 'capture',
+    components: 'buttons',
+  };
+
   return (
     <div className="w-full">
-      <PayPalButtons
-        style={{
-          layout: 'vertical',
-          color: 'gold',
-          shape: 'rect',
-          label: 'paypal',
-        }}
-        createOrder={async (_, actions) => {
-          setProcessing(true);
-          return actions.order.create({
-            intent: 'CAPTURE',
-            purchase_units: [
-              {
-                amount: {
-                  value: amount,
-                  currency_code: 'USD',
+      <PayPalScriptProvider options={paypalScriptOptions}>
+        <PayPalButtons
+          style={{
+            layout: 'vertical',
+            color: 'gold',
+            shape: 'rect',
+            label: 'paypal',
+          }}
+          createOrder={async (_, actions) => {
+            setProcessing(true);
+            return actions.order.create({
+              intent: 'CAPTURE',
+              purchase_units: [
+                {
+                  amount: {
+                    value: amount,
+                    currency_code: 'USD',
+                  },
+                  description: `NYALTX ${tier} subscription`,
+                  custom_id: `${tier}_${Date.now()}`,
                 },
-                description: `NYALTX ${tier} subscription`,
-                custom_id: `${tier}_${Date.now()}`,
+              ],
+              application_context: {
+                brand_name: 'NYALTX',
+                landing_page: 'BILLING',
+                user_action: 'PAY_NOW',
               },
-            ],
-            application_context: {
-              brand_name: 'NYALTX',
-              landing_page: 'BILLING',
-              user_action: 'PAY_NOW',
-            },
-          });
-        }}
-        onApprove={async (_, actions) => {
-          try {
-            const details = await actions.order?.capture();
-            console.log('Payment Approved: ', details);
+            });
+          }}
+          onApprove={async (_, actions) => {
+            try {
+              const details = await actions.order?.capture();
+              console.log('Payment Approved: ', details);
 
-            if (details?.status === 'COMPLETED') {
-              handleSuccess(details);
-            } else {
-              throw new Error('Payment not completed');
+              if (details?.status === 'COMPLETED') {
+                handleSuccess(details);
+              } else {
+                throw new Error('Payment not completed');
+              }
+            } catch (error) {
+              console.error('Payment capture error:', error);
+              if (onError) {
+                onError(error);
+              }
+            } finally {
+              setProcessing(false);
             }
-          } catch (error) {
-            console.error('Payment capture error:', error);
-            if (onError) {
-              onError(error);
-            }
-          } finally {
+          }}
+          onError={err => {
+            console.error('PayPal Checkout Error', err);
+            handleError(err);
             setProcessing(false);
-          }
-        }}
-        onError={err => {
-          console.error('PayPal Checkout Error', err);
-          handleError(err);
-          setProcessing(false);
-        }}
-        onCancel={() => {
-          console.log('Payment cancelled by user');
-          setProcessing(false);
-        }}
-        disabled={processing}
-      />
+          }}
+          onCancel={() => {
+            console.log('Payment cancelled by user');
+            setProcessing(false);
+          }}
+          disabled={processing}
+        />
 
-      {processing && (
-        <div className="mt-2 text-center text-sm text-gray-400">Processing payment...</div>
-      )}
+        {processing && (
+          <div className="mt-2 text-center text-sm text-gray-400">Processing payment...</div>
+        )}
+      </PayPalScriptProvider>
     </div>
   );
 }
