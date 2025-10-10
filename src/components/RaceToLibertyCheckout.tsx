@@ -2,9 +2,11 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import Image from 'next/image';
-import { FaSearch, FaTrophy, FaCoins, FaArrowRight, FaStar, FaGift } from 'react-icons/fa';
-import { useAccount, useSendTransaction, useWriteContract, useSwitchChain } from 'wagmi';
-import { parseEther, erc20Abi, parseUnits } from 'viem';
+import { useAppKit } from '@reown/appkit/react';
+import { erc20Abi, parseEther, parseUnits } from 'viem';
+import { useAccount, useSendTransaction, useSwitchChain, useWriteContract } from 'wagmi';
+import { PhantomWalletButton } from './PhantomWalletButton';
+import { storeRaceToLibertyOrder } from '@/utils/orderStorage';
 import { useRouter } from 'next/navigation';
 import PayPalCheckout from '@/components/PayPalCheckout';
 import ConnectWalletButton from '@/components/ConnectWalletButton';
@@ -334,6 +336,45 @@ export default function RaceToLibertyCheckout({
     } finally {
       setBusy(null);
     }
+  };
+
+  // Handle Solana payment success
+  const handleSolanaSuccess = async (txHash: string, solAmount: number) => {
+    try {
+      console.log('✅ Solana payment successful:', txHash);
+      
+      // Store order after successful Solana payment
+      await storeRaceToLibertyOrder({
+        paymentMethod: 'sol',
+        txHash: txHash,
+        amount: solAmount.toFixed(6),
+        currency: 'SOL',
+        walletAddress: undefined, // Phantom wallet address will be in the transaction
+        email: email ?? undefined,
+        tier: tier,
+        tierInfo: tierInfo,
+        selectedCoin: selectedCoin,
+        coinName: userTokens.find((c: any) => c.symbol === selectedCoin)?.name,
+        totalPoints: totalPoints,
+        promoCode: promoApplied ? promoCode : undefined,
+        promoDiscount: promoApplied ? promoDiscount : undefined,
+        finalAmount: finalAmount,
+        boostMultiplier: selectedCoin ? userTokens.find((c: any) => c.symbol === selectedCoin)?.boostMultiplier : undefined
+      });
+
+      // Redirect to success page
+      const successUrl = `/pricing/race-to-liberty/success?tier=${tier}&token=${selectedCoin}&txHash=${txHash}&method=sol&points=${totalPoints}${promoApplied ? `&promo=${promoCode}` : ''}`;
+      router.push(successUrl);
+    } catch (error) {
+      console.error('Error handling Solana payment success:', error);
+      setError('Payment successful, but processing failed. Please contact support.');
+    }
+  };
+
+  // Handle Solana payment error
+  const handleSolanaError = (error: string) => {
+    console.error('❌ Solana payment error:', error);
+    setError(error);
   };
 
   // Promo code handlers
@@ -874,28 +915,13 @@ export default function RaceToLibertyCheckout({
                                 </div>
                               </button>
 
-                              {/* SOL Payment */}
-                              <button
-                                onClick={handlePaySOL}
+                              {/* Native Solana Payment with Phantom Wallet */}
+                              <PhantomWalletButton
+                                amount={finalAmount}
+                                onSuccess={handleSolanaSuccess}
+                                onError={handleSolanaError}
                                 disabled={busy !== null}
-                                className="p-4 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                              >
-                                <div className="flex flex-col items-center space-y-2">
-                                  <Image
-                                    src="/crypto-icons/color/sol.svg"
-                                    alt="SOL"
-                                    width={32}
-                                    height={32}
-                                  />
-                                  <div className="text-sm font-medium">Pay with SOL</div>
-                                  <div className="text-xs text-gray-400">
-                                    ${finalAmount.toFixed(2)} SOL
-                                  </div>
-                                  {busy === 'sol' && (
-                                    <div className="text-xs text-cyan-400">Processing...</div>
-                                  )}
-                                </div>
-                              </button>
+                              />
 
                               {/* NYAX Payment */}
                               <button
