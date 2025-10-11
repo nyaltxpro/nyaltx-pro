@@ -186,19 +186,29 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
       return;
     }
 
+    console.log('🔍 SearchModal: Starting search for:', query);
     setUnifiedTokensLoading(true);
     
     try {
-      const response = await fetch(`/api/tokens?query=${encodeURIComponent(query)}&source=all&limit=10`);
+      const apiUrl = `/api/tokens?query=${encodeURIComponent(query)}&source=all&limit=10`;
+      console.log('📡 SearchModal: Calling API:', apiUrl);
+      
+      const response = await fetch(apiUrl);
+      console.log('📊 SearchModal: Response status:', response.status);
       
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ SearchModal: API Error:', response.status, errorText);
         throw new Error('Failed to fetch unified tokens');
       }
 
       const data = await response.json();
+      console.log('✅ SearchModal: Response data:', data);
+      console.log('🎯 SearchModal: Tokens array:', data.tokens);
+      
       setUnifiedTokens(data.tokens || []);
     } catch (error) {
-      console.error('Unified token search failed:', error);
+      console.error('💥 SearchModal: Search failed:', error);
       setUnifiedTokens([]);
     } finally {
       setUnifiedTokensLoading(false);
