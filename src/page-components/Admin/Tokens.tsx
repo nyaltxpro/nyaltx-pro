@@ -441,7 +441,7 @@ function AdminTokensComponent() {
                                                 <img src={t.imageUri.replace('gateway.pinata.cloud', 'ipfs.io')} alt="logo" className="w-6 h-6 rounded" />
                                             )}
                                             <div className="min-w-0">
-                                                <div className="font-medium">
+                                                <div className="font-medium text-gray-400">
                                                     {t.tokenName} <span className="text-gray-400">({t.tokenSymbol})</span>
                                                 </div>
                                                 <div className="text-xs text-gray-400 truncate max-w-[320px]">
