@@ -264,19 +264,19 @@ function AdminTokensComponent() {
             </div>
 
             {/* Filters & Controls */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 border border-gray-200 dark:border-gray-700">
+            <div className=" bg-gray-800 rounded-lg shadow-md p-4 border  border-gray-700">
                 <div className="flex flex-col lg:flex-row lg:items-center gap-4">
                     {/* Status Filter */}
                     <div className="flex items-center gap-3">
                         <label
                             htmlFor="status-filter"
-                            className="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap"
+                            className="text-sm font-medium text-gray-300 whitespace-nowrap"
                         >
                             Status:
                         </label>
                         <select
                             id="status-filter"
-                            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                            className=" border border-gray-300  text-sm rounded-lg  block p-2.5 bg-gray-700 border-gray-600placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500"
                             value={statusFilter}
                             onChange={e => {
                                 setStatusFilter(e.target.value as any);
@@ -294,13 +294,13 @@ function AdminTokensComponent() {
                     <div className="flex items-center gap-3">
                         <label
                             htmlFor="chain-filter"
-                            className="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap"
+                            className="text-sm font-medium text-gray-300 whitespace-nowrap"
                         >
                             Chain:
                         </label>
                         <select
                             id="chain-filter"
-                            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                            className=" border  text-sm rounded-lg block p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500"
                             value={chainFilter}
                             onChange={e => setChainFilter(e.target.value)}
                         >
@@ -320,7 +320,7 @@ function AdminTokensComponent() {
                         <div className="relative">
                             <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                                 <svg
-                                    className="w-4 h-4 text-gray-500 dark:text-gray-400"
+                                    className="w-4 h-4 text-gray-400"
                                     aria-hidden="true"
                                     xmlns="http://www.w3.org/2000/svg"
                                     fill="none"
@@ -338,7 +338,7 @@ function AdminTokensComponent() {
                             <input
                                 type="text"
                                 id="table-search"
-                                className="block p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-full bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                className="block p-2 pl-10 text-sm  border  rounded-lg w-full   bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500"
                                 placeholder="Search by name, symbol, or contract..."
                                 value={search}
                                 onChange={e => setSearch(e.target.value)}
@@ -350,13 +350,13 @@ function AdminTokensComponent() {
                     <div className="flex items-center gap-3">
                         <label
                             htmlFor="per-page"
-                            className="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap"
+                            className="text-sm font-medium text-gray-300 whitespace-nowrap"
                         >
                             Show:
                         </label>
                         <select
                             id="per-page"
-                            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                            className=" border  text-sm rounded-lg  block p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500"
                             value={limit}
                             onChange={e => {
                                 setLimit(parseInt(e.target.value, 10));
