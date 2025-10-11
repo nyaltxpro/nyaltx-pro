@@ -532,28 +532,39 @@ export default function RaceToLibertyCheckout({
     if (!selectedCoin) {
       const errorMsg = 'Please select a token first';
       setError(errorMsg);
-      toast.error(errorMsg);
+      toast.error('❌ ' + errorMsg);
       return;
     }
 
     if (!promoApplied || promoDiscount !== 1) {
       const errorMsg = 'Please apply a valid free promo code first';
       setError(errorMsg);
-      toast.error(errorMsg);
+      toast.error('❌ ' + errorMsg);
       return;
     }
 
     setBusy('free-claim');
     setError(undefined);
-    const claimToast = toast.loading('🎁 Claiming free boost...');
+    
+    // Enhanced loading toasts for free claim
+    const preparingToast = toast.loading('🔄 Preparing free Race to Liberty claim...');
 
     try {
+      // Update toast for validation
+      toast.dismiss(preparingToast);
+      const validatingToast = toast.loading('✅ Validating promo code and token selection...');
+
       // Simulate adding the token to Race to Liberty with boost points
       const selectedCoinData = availableCoins.find(coin => coin.id === selectedCoin);
       const basePoints = selectedCoinData?.basePoints || 100;
       const tierMultiplier = tierInfo.multiplier;
       const boostMultiplier = selectedCoinData?.boostMultiplier || 1;
       const totalPoints = Math.round(basePoints * tierMultiplier * boostMultiplier);
+
+      toast.dismiss(validatingToast);
+      
+      // Update toast for processing
+      const processingToast = toast.loading('🎁 Processing free boost claim...');
 
       // Log the free claim
       console.log('Free promo claim:', {
@@ -564,8 +575,19 @@ export default function RaceToLibertyCheckout({
         timestamp: new Date().toISOString(),
       });
 
-      toast.dismiss(claimToast);
-      toast.success('🎉 Free boost claimed successfully! Redirecting...');
+      // Simulate processing time
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      toast.dismiss(processingToast);
+      toast.success('🎉 Free Race to Liberty claimed successfully!');
+      toast.success(`🏆 You earned ${totalPoints} points with ${selectedCoinData?.name}!`, {
+        duration: 4000,
+        style: {
+          background: '#065f46',
+          color: '#d1fae5',
+          border: '1px solid #10b981',
+        }
+      });
       
       // Redirect to success page with free promo parameters
       setTimeout(() => {
@@ -575,10 +597,10 @@ export default function RaceToLibertyCheckout({
       }, 2000);
     } catch (error) {
       console.error('Free claim error:', error);
-      toast.dismiss(claimToast);
+      toast.dismiss(preparingToast);
       const errorMsg = 'Failed to claim free boost. Please try again.';
       setError(errorMsg);
-      toast.error(errorMsg);
+      toast.error('❌ ' + errorMsg);
     } finally {
       setBusy(undefined);
     }
@@ -1077,7 +1099,7 @@ export default function RaceToLibertyCheckout({
                     )}
 
                     {/* Free Promo Code Claim Button */}
-                    {promoApplied && promoDiscount === 1 && selectedCoin && agree && (
+                    {promoApplied && promoDiscount === 1 && selectedCoin && (
                       <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20 rounded-2xl p-6 backdrop-blur-sm">
                         <div className="text-center">
                           <div className="mb-4">
@@ -1115,7 +1137,7 @@ export default function RaceToLibertyCheckout({
                           </button>
 
                           <div className="text-xs text-gray-400 text-center mt-3">
-                            No payment required with your promo code!
+                            No payment required with your promo code! Terms acceptance not needed for free claims.
                           </div>
                         </div>
                       </div>

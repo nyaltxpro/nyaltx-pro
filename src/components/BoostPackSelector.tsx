@@ -183,10 +183,16 @@ export default function BoostPackSelector({
 
     setLoading(true);
     setError(null);
-    const paymentToast = toast.loading(`Processing ${selectedPack.name} boost payment...`);
+    
+    // Enhanced loading toasts
+    const preparingToast = toast.loading(`🔄 Preparing ${selectedPack.name} boost payment...`);
 
     try {
       let transactionHash: string;
+
+      // Update toast for transaction processing
+      toast.dismiss(preparingToast);
+      const txToast = toast.loading(`💳 Processing ${paymentMethod.toUpperCase()} payment...`);
 
       if (paymentMethod === 'eth') {
         const ethAmount = selectedPack.price.usd / ethPrice;
@@ -214,6 +220,60 @@ export default function BoostPackSelector({
         transactionHash = hash;
       }
 
+      toast.dismiss(txToast);
+      toast.success(`✅ Payment successful! Transaction: ${transactionHash.slice(0, 8)}...${transactionHash.slice(-8)}`);
+
+      // Update toast for order saving
+      const orderToast = toast.loading('📋 Saving order to admin system...');
+
+      // Save order to admin/orders system
+      const orderData = {
+        type: 'boost_pack',
+        paymentMethod: paymentMethod,
+        amount: selectedPack.price[paymentMethod === 'eth' ? 'usd' : paymentMethod].toString(),
+        currency: paymentMethod.toUpperCase(),
+        txHash: transactionHash,
+        productName: `${selectedPack.name} Boost Pack - ${tokenSymbol}`,
+        status: 'completed',
+        metadata: {
+          paymentSource: 'boost_pack_selector',
+          tokenId: tokenId,
+          tokenName: tokenName,
+          tokenSymbol: tokenSymbol,
+          boostPackType: selectedPack.id,
+          boostPackName: selectedPack.name,
+          basePoints: selectedPack.basePoints,
+          duration: selectedPack.duration,
+          decayHours: selectedPack.decayHours,
+          walletAddress: address,
+          ethAmount: paymentMethod === 'eth' ? (selectedPack.price.usd / ethPrice) : undefined
+        }
+      };
+
+      try {
+        const orderResponse = await fetch('/api/orders/create', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(orderData),
+        });
+
+        if (!orderResponse.ok) {
+          console.error('Failed to save boost pack order to admin system');
+        } else {
+          console.log('✅ Boost pack order saved to admin system successfully');
+        }
+      } catch (orderError) {
+        console.error('Error saving boost pack order:', orderError);
+        // Don't fail the boost activation if order saving fails
+      }
+
+      toast.dismiss(orderToast);
+
+      // Update toast for boost activation
+      const boostToast = toast.loading('🚀 Activating boost pack...');
+
       // Register the boost
       const boostResponse = await fetch('/api/gamification/boost', {
         method: 'POST',
@@ -228,21 +288,30 @@ export default function BoostPackSelector({
 
       const boostData = await boostResponse.json();
 
+      toast.dismiss(boostToast);
+
       if (boostData.success) {
         const successMsg = `🚀 ${selectedPack.name} boost activated! ${selectedPack.basePoints} points added to ${tokenSymbol}.`;
         setSuccess(successMsg);
-        toast.dismiss(paymentToast);
         toast.success(successMsg);
+        toast.success('📋 Order saved to admin system', {
+          duration: 3000,
+          style: {
+            background: '#065f46',
+            color: '#d1fae5',
+            border: '1px solid #10b981',
+          }
+        });
         onBoostSuccess?.(boostData);
         setSelectedPack(null);
       } else {
         throw new Error(boostData.error || 'Failed to activate boost');
       }
     } catch (err: any) {
+      toast.dismiss(preparingToast);
       const errorMsg = err?.shortMessage || err?.message || 'Payment failed';
       setError(errorMsg);
-      toast.dismiss(paymentToast);
-      toast.error(errorMsg);
+      toast.error('❌ ' + errorMsg);
     } finally {
       setLoading(false);
     }
