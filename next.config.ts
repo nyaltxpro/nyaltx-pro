@@ -20,7 +20,7 @@ const nextConfig: NextConfig = {
     NEXT_PHASE: process.env.NEXT_PHASE || '',
   },
   webpack: (config) => {
-    config.externals.push("pino-pretty", "lokijs", "encoding",'@solana/web3.js', '@solana/wallet-adapter-wallets');
+    config.externals.push("pino-pretty", "lokijs", "encoding",'@solana/web3.js', '@solana/wallet-adapter-wallets','@solana/wallet-adapter-react-ui','@reown/appkit-adapter-solana','@reown/appkit-adapter-wagmi');
     
     // Suppress punycode deprecation warnings
     config.ignoreWarnings = [
