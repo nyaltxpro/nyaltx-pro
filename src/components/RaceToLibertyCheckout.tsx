@@ -902,8 +902,8 @@ export default function RaceToLibertyCheckout({
                           key={coin.id}
                           onClick={() => setSelectedCoin(coin.id)}
                           className={`group relative p-6 rounded-2xl border transition-all duration-300 hover:scale-105 ${selectedCoin === coin.id
-                              ? 'border-cyan-400 bg-gradient-to-br from-cyan-500/20 to-purple-500/20 shadow-lg shadow-cyan-500/25'
-                              : 'border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10'
+                            ? 'border-cyan-400 bg-gradient-to-br from-cyan-500/20 to-purple-500/20 shadow-lg shadow-cyan-500/25'
+                            : 'border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10'
                             }`}
                         >
                           {/* Boost Badge */}
@@ -995,8 +995,8 @@ export default function RaceToLibertyCheckout({
                       <button
                         onClick={() => setPaymentMethod('paypal')}
                         className={`p-4 rounded-xl border transition-all duration-300 ${paymentMethod === 'paypal'
-                            ? 'border-blue-400 bg-blue-500/20 shadow-lg shadow-blue-500/25'
-                            : 'border-white/10 bg-white/5 hover:border-white/20'
+                          ? 'border-blue-400 bg-blue-500/20 shadow-lg shadow-blue-500/25'
+                          : 'border-white/10 bg-white/5 hover:border-white/20'
                           }`}
                       >
                         <div className="text-center">
@@ -1009,8 +1009,8 @@ export default function RaceToLibertyCheckout({
                       <button
                         onClick={() => setPaymentMethod('crypto')}
                         className={`p-4 rounded-xl border transition-all duration-300 ${paymentMethod === 'crypto'
-                            ? 'border-cyan-400 bg-cyan-500/20 shadow-lg shadow-cyan-500/25'
-                            : 'border-white/10 bg-white/5 hover:border-white/20'
+                          ? 'border-cyan-400 bg-cyan-500/20 shadow-lg shadow-cyan-500/25'
+                          : 'border-white/10 bg-white/5 hover:border-white/20'
                           }`}
                       >
                         <div className="text-center">
@@ -1218,7 +1218,7 @@ export default function RaceToLibertyCheckout({
 
                     {/* Free Promo Code Claim Button */}
                     {promoApplied && promoDiscount === 1 && selectedCoin && (
-                      <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20 rounded-2xl p-6 backdrop-blur-sm">
+                      <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20 rounded-2xl mt-2 p-6 backdrop-blur-sm">
                         <div className="text-center">
                           <div className="mb-4">
                             <FaGift className="w-12 h-12 text-green-400 mx-auto mb-3" />
