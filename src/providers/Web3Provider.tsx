@@ -27,7 +27,6 @@ export const wagmiAdapter = new WagmiAdapter({
 const solanaWeb3JsAdapter = new SolanaAdapter()
 
 
-
 // Set up metadata
 const metadata = {
   name: 'appkit-example',

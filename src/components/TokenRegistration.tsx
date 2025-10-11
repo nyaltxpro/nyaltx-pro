@@ -5,6 +5,7 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useAccount } from 'wagmi';
 
+
 interface TokenRegistrationProps {
   onTokenRegistered?: (token: RegisteredToken) => void;
 }
