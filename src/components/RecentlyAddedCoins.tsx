@@ -7,6 +7,7 @@ import tokens from '@/data/tokens.json';
 import { fetchCoinPlatforms } from '@/api/coingecko/api';
 import { useRecentlyAddedCoins } from '@/hooks/useRecentlyAddedCoins';
 import { CachedRecentlyAddedCoin } from '@/store/slices/searchCacheSlice';
+import TokenAvatar from '@/components/TokenAvatar';
 
 export default function RecentlyAddedCoins() {
   const router = useRouter();
@@ -210,13 +211,13 @@ export default function RecentlyAddedCoins() {
               onClick={() => handleNavigate(coin)}
             >
               <div className="flex items-center">
-                <div className="relative h-8 w-8 mr-3">
-                  <Image
+                <div className="mr-3">
+                  <TokenAvatar
                     src={coin.image}
-                    alt={coin.name}
-                    fill
-                    className="rounded-full object-cover"
-                    unoptimized
+                    symbol={coin.symbol}
+                    name={coin.name}
+                    size={32}
+                    className="flex-shrink-0"
                   />
                 </div>
                 <div>

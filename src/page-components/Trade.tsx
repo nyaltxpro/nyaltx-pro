@@ -14,6 +14,7 @@ import {
     updateUrlWithContractAddress,
 } from '@/utils/contractAddressUtils';
 import { getCryptoIconUrl, getCryptoIconUrlWithFallback } from '@/utils/cryptoIcons';
+import TokenAvatar from '@/components/TokenAvatar';
 import { getCryptoName } from '@/utils/cryptoNames';
 import { geckoTerminalAPI } from '@/utils/geckoTerminalApi';
 import { fetchMoralisTokenData, fetchMoralisTokenPrice, isMoralisSupportedChain } from '@/utils/moralisApi';
@@ -902,35 +903,21 @@ function TradingViewWithParams({
                         <div className="flex justify-between items-center mb-4">
                             {/* Token Header Bar */}
                             <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full overflow-hidden bg-[#1a2932] flex items-center justify-center">
-                                    {/* Priority: API imageUri > Moralis logo > headerImageUrl > fallback icon */}
-                                    {tokenSocialLinks?.imageUri ? (
-                                        // eslint-disable-next-line @next/next/no-img-element
-                                        <img
-                                            src={tokenSocialLinks.imageUri.replace('gateway.pinata.cloud', 'ipfs.io')}
-                                            alt={baseToken}
-                                            className="w-10 h-10 object-cover"
-                                        />
-                                    ) : moralisTokenData?.metadata?.logo ? (
-                                        // eslint-disable-next-line @next/next/no-img-element
-                                        <img
-                                            src={moralisTokenData.metadata.logo}
-                                            alt={baseToken}
-                                            className="w-10 h-10 object-cover"
-                                        />
-                                    ) : headerImageUrl ? (
-                                        // eslint-disable-next-line @next/next/no-img-element
-                                        <img src={headerImageUrl} alt={baseToken} className="w-10 h-10 object-cover" />
-                                    ) : (
-                                        <Image
-                                            src={getCryptoIconUrl(baseToken)}
-                                            alt={baseToken}
-                                            width={40}
-                                            height={40}
-                                            unoptimized
-                                        />
-                                    )}
-                                </div>
+                                <TokenAvatar
+                                    src={
+                                        tokenSocialLinks?.imageUri?.replace('gateway.pinata.cloud', 'ipfs.io') ||
+                                        moralisTokenData?.metadata?.logo ||
+                                        headerImageUrl
+                                    }
+                                    symbol={baseToken}
+                                    name={
+                                        tokenSocialLinks?.tokenName ||
+                                        moralisTokenData?.metadata?.name ||
+                                        getCryptoName(baseToken)
+                                    }
+                                    size={40}
+                                    className="flex-shrink-0"
+                                />
                                 <div>
                                     <div className="flex items-center gap-2">
                                         <h3 className="text-lg font-semibold">
@@ -1492,13 +1479,12 @@ function TradingViewWithParams({
                                     >
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center">
-                                                <div className="w-8 h-8 rounded-full flex items-center justify-center mr-3 overflow-hidden bg-[#0f1923]">
-                                                    <Image
-                                                        src={getCryptoIconUrl(favorite.token_symbol)}
-                                                        alt={favorite.token_symbol}
-                                                        width={32}
-                                                        height={32}
-                                                        unoptimized
+                                                <div className="mr-3">
+                                                    <TokenAvatar
+                                                        symbol={favorite.token_symbol}
+                                                        name={favorite.token_name}
+                                                        size={32}
+                                                        className="flex-shrink-0"
                                                     />
                                                 </div>
                                                 <div>

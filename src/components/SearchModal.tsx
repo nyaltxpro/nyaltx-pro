@@ -19,6 +19,7 @@ import { commonCryptoSymbols, getCryptoIconUrl } from '../utils/cryptoIcons';
 import { getCryptoName } from '../utils/cryptoNames';
 import { usePumpFunTokensMoralis } from '../hooks/usePumpFunTokensMoralis';
 import { TokenPair, PumpFunToken, SearchResult } from '../types/token';
+import TokenAvatar from './TokenAvatar';
 import catalog from '@/data/tokens.json';
 import nyaxTokensData from '../../nyax-tokens-data.json';
 import nyaxLogoMappings from '../../nyax-logo-mappings.json';
@@ -530,20 +531,13 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
           onClick={() => handleResultClick(result)}
         >
           <div className="flex items-center mr-3">
-            {token.image ? (
-              <img
-                src={token.image}
-                alt={token.symbol || 'Token'}
-                className="w-8 h-8 rounded-full object-cover"
-                onError={e => {
-                  e.currentTarget.style.display = 'none';
-                }}
-              />
-            ) : (
-              <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white text-sm font-bold">
-                {token.symbol?.[0] || '?'}
-              </div>
-            )}
+            <TokenAvatar
+              src={token.image}
+              symbol={token.symbol || 'UNKNOWN'}
+              name={token.name}
+              size={32}
+              className="flex-shrink-0"
+            />
           </div>
           <div className="flex-1">
             <div className="flex items-center gap-2">
@@ -1183,14 +1177,13 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                             #{index + 1}
                           </div>
                           <div className="flex items-center mb-2">
-                            <div className="w-8 h-8 mr-2 rounded-full overflow-hidden">
-                              <img
+                            <div className="mr-2">
+                              <TokenAvatar
                                 src={coin.image?.thumb || coin.image?.small || coin.thumb}
-                                alt={coin.name}
-                                className="w-full h-full object-cover"
-                                onError={e => {
-                                  e.currentTarget.style.display = 'none';
-                                }}
+                                symbol={coin.symbol}
+                                name={coin.name}
+                                size={32}
+                                className="flex-shrink-0"
                               />
                             </div>
                             <div className="text-sm font-bold text-white">
