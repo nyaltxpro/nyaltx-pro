@@ -101,6 +101,8 @@ function TradePageContent() {
     const addressParam = searchParams?.get('address') || ''; // Preserve case for Solana addresses
     const quoteToken = searchParams?.get('quote') || 'USDT';
     const videoId = searchParams?.get('video') || 'VNTK2Bwyq7s';
+    const imageUriParam = searchParams?.get('imageUri') || '';
+    const nameParam = searchParams?.get('name') || '';
 
     // Scroll to top when route changes
     useEffect(() => {
@@ -114,6 +116,8 @@ function TradePageContent() {
             chainParam={chainParam}
             addressParam={addressParam}
             videoId={videoId}
+            imageUriParam={imageUriParam}
+            nameParam={nameParam}
         />
     );
 }
@@ -136,12 +140,16 @@ function TradingViewWithParams({
     chainParam,
     addressParam,
     videoId,
+    imageUriParam,
+    nameParam,
 }: {
     baseToken: string;
     quoteToken: string;
     chainParam?: string;
     addressParam?: string;
     videoId?: string;
+    imageUriParam?: string;
+    nameParam?: string;
 }) {
     const { address, isConnected } = useAccount();
     const [favorited, setFavorited] = useState(false);
@@ -268,12 +276,30 @@ function TradingViewWithParams({
                         } else {
                             console.log('⚠️ Token not found by symbol either');
                             setIsRegisteredToken(false);
-                            setTokenSocialLinks(null);
+                            // Use imageUriParam as fallback if available
+                            if (imageUriParam) {
+                                setTokenSocialLinks({
+                                    imageUri: imageUriParam,
+                                    tokenName: nameParam || baseToken,
+                                    tokenSymbol: baseToken,
+                                });
+                            } else {
+                                setTokenSocialLinks(null);
+                            }
                         }
                     } catch (error) {
                         console.log('❌ Symbol lookup failed:', error);
                         setIsRegisteredToken(false);
-                        setTokenSocialLinks(null);
+                        // Use imageUriParam as fallback if available
+                        if (imageUriParam) {
+                            setTokenSocialLinks({
+                                imageUri: imageUriParam,
+                                tokenName: nameParam || baseToken,
+                                tokenSymbol: baseToken,
+                            });
+                        } else {
+                            setTokenSocialLinks(null);
+                        }
                     }
                 }
 
@@ -329,7 +355,16 @@ function TradingViewWithParams({
             } catch (error) {
                 console.error('❌ Error fetching token data:', error);
                 setIsRegisteredToken(false);
-                setTokenSocialLinks(null);
+                // Use imageUriParam as fallback if available
+                if (imageUriParam) {
+                    setTokenSocialLinks({
+                        imageUri: imageUriParam,
+                        tokenName: nameParam || baseToken,
+                        tokenSymbol: baseToken,
+                    });
+                } else {
+                    setTokenSocialLinks(null);
+                }
             }
         };
 

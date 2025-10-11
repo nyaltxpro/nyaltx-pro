@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { BiSearch } from 'react-icons/bi';
 import { IoMdClose } from 'react-icons/io';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowRight } from 'lucide-react';
 import { useAppSelector } from '@/store';
 import {
   selectCoinGeckoSearchResults,
@@ -87,14 +88,42 @@ interface NyaxToken {
   additionalInfo?: any;
 }
 
+interface UnifiedToken {
+  id: string;
+  address: string;
+  name: string;
+  symbol: string;
+  logo?: string;
+  chain: string;
+  price?: number;
+  marketCap?: number;
+  liquidity?: number;
+  createdAt?: string;
+  source: 'local' | 'solana';
+  status?: string;
+  // Additional fields
+  volume?: number;
+  volume24h?: number;
+  holders?: number;
+  transactions?: number;
+  socials?: {
+    twitter?: string;
+    website?: string;
+    telegram?: string;
+  };
+}
+
 const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [localSearchResults, setLocalSearchResults] = useState<LocalSearchResult[]>([]);
+  const [unifiedTokens, setUnifiedTokens] = useState<UnifiedToken[]>([]);
+  const [unifiedTokensLoading, setUnifiedTokensLoading] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const unifiedSearchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { tokens: pumpFunTokens, loading: pumpFunLoading, connected: pumpFunConnected } = usePumpFunTokensMoralis({ 
     limit: 50,
     autoRefresh: true,
@@ -148,6 +177,48 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
   // Function to get logo URL from mappings
   const getNyaxLogoUrl = (logoId: string): string | null => {
     return nyaxLogoMappings[logoId as keyof typeof nyaxLogoMappings] || null;
+  };
+
+  // Unified token search function
+  const searchUnifiedTokens = async (query: string) => {
+    if (!query || query.trim().length < 2) {
+      setUnifiedTokens([]);
+      return;
+    }
+
+    setUnifiedTokensLoading(true);
+    
+    try {
+      const response = await fetch(`/api/tokens?query=${encodeURIComponent(query)}&source=all&limit=10`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch unified tokens');
+      }
+
+      const data = await response.json();
+      setUnifiedTokens(data.tokens || []);
+    } catch (error) {
+      console.error('Unified token search failed:', error);
+      setUnifiedTokens([]);
+    } finally {
+      setUnifiedTokensLoading(false);
+    }
+  };
+
+  // Navigation function for unified tokens
+  const navigateToUnifiedToken = (token: UnifiedToken) => {
+    const params = new URLSearchParams();
+    
+    if (token.symbol) params.set('base', token.symbol);
+    if (token.name) params.set('name', token.name);
+    if (token.chain) params.set('chain', token.chain);
+    if (token.address && token.address !== 'N/A') params.set('address', token.address);
+    if (token.logo) params.set('imageUri', token.logo);
+    if (token.source) params.set('source', token.source);
+    
+    const tradeUrl = `/dashboard/trade?${params.toString()}`;
+    router.push(tradeUrl);
+    onClose();
   };
 
   // Search CoinGecko with caching - wrapper function
@@ -224,14 +295,18 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
     const value = e.target.value;
     setSearchTerm(value);
 
-    // Cancel previous search timeout
+    // Cancel previous search timeouts
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current);
+    }
+    if (unifiedSearchTimeoutRef.current) {
+      clearTimeout(unifiedSearchTimeoutRef.current);
     }
 
     if (value.trim() === '') {
       setSearchResults([]);
       setLocalSearchResults([]);
+      setUnifiedTokens([]);
       return;
     }
 
@@ -244,6 +319,11 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
         console.error('Local search failed:', error);
         setLocalSearchResults([]);
       }
+    }, 300);
+
+    // Search unified tokens (registered + Solana) with debounce
+    unifiedSearchTimeoutRef.current = setTimeout(async () => {
+      await searchUnifiedTokens(value);
     }, 300);
 
     const results: SearchResult[] = [];
@@ -730,6 +810,23 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
     };
   }, [isOpen, onClose]);
 
+  // Cleanup timeouts when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+      if (unifiedSearchTimeoutRef.current) {
+        clearTimeout(unifiedSearchTimeoutRef.current);
+      }
+      // Reset search states
+      setSearchTerm('');
+      setSearchResults([]);
+      setLocalSearchResults([]);
+      setUnifiedTokens([]);
+    }
+  }, [isOpen]);
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -881,6 +978,96 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                         </div>
                       </div>
                     ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Unified Tokens (Registered + Solana) */}
+            {searchTerm && searchTerm.length >= 2 && (unifiedTokens.length > 0 || unifiedTokensLoading) && (
+              <div className="border-b border-gray-800">
+                <div className="p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-cyan-400 font-bold flex items-center gap-2">
+                      <span>🚀 REGISTERED & SOLANA TOKENS</span>
+                      {unifiedTokensLoading && (
+                        <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-cyan-400"></div>
+                      )}
+                    </h3>
+                    <div className="text-xs text-gray-400">
+                      {unifiedTokens.length} results from unified search
+                    </div>
+                  </div>
+                  <div className="max-h-60 overflow-y-auto">
+                    {unifiedTokensLoading ? (
+                      <div className="flex items-center justify-center py-8">
+                        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-cyan-400"></div>
+                      </div>
+                    ) : (
+                      unifiedTokens.map((token, index) => (
+                        <div
+                          key={`unified-${token.id}-${index}`}
+                          className="flex items-center p-3 hover:bg-gray-700 cursor-pointer border-b border-gray-700 last:border-b-0 rounded-lg mb-1 group"
+                          onClick={() => navigateToUnifiedToken(token)}
+                        >
+                          <div className="flex items-center flex-1">
+                            <div className="w-10 h-10 mr-3 rounded-full overflow-hidden bg-gray-600 flex items-center justify-center">
+                              {token.logo ? (
+                                <TokenAvatar
+                                  src={token.logo}
+                                  symbol={token.symbol}
+                                  name={token.name}
+                                  size={40}
+                                />
+                              ) : (
+                                <div className="text-white font-bold text-sm">
+                                  {token.symbol.slice(0, 2)}
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <div className="font-semibold text-white truncate">
+                                  {token.name}
+                                </div>
+                                <span className="px-2 py-1 bg-blue-500/30 rounded text-blue-200 text-xs font-bold">
+                                  {token.symbol}
+                                </span>
+                                <span className={`px-2 py-1 rounded text-xs font-bold ${
+                                  token.chain === 'solana' ? 'bg-purple-500/30 text-purple-200' :
+                                  token.chain === 'ethereum' ? 'bg-blue-500/30 text-blue-200' :
+                                  token.chain === 'binance' ? 'bg-yellow-500/30 text-yellow-200' :
+                                  'bg-gray-500/30 text-gray-200'
+                                }`}>
+                                  {token.chain.toUpperCase()}
+                                </span>
+                                <span className={`px-2 py-1 rounded text-xs font-bold ${
+                                  token.source === 'local' ? 'bg-green-500/30 text-green-200' : 'bg-orange-500/30 text-orange-200'
+                                }`}>
+                                  {token.source === 'local' ? 'REG' : 'LIVE'}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-4 text-xs text-gray-400">
+                                {token.price && (
+                                  <span>${parseFloat(token.price.toString()).toFixed(6)}</span>
+                                )}
+                                {token.marketCap && (
+                                  <span>MC: ${(token.marketCap / 1e6).toFixed(2)}M</span>
+                                )}
+                                {token.address && token.address !== 'N/A' && (
+                                  <span className="font-mono truncate max-w-[100px]" title={token.address}>
+                                    {token.address}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <ArrowRight size={16} className="text-cyan-400" />
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
               </div>
