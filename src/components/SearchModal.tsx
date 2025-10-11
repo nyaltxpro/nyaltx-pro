@@ -1,35 +1,35 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import { BiSearch } from 'react-icons/bi';
-import { IoMdClose } from 'react-icons/io';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
+import catalog from '@/data/tokens.json';
+import { useCoinGeckoSearch } from '@/hooks/useCoinGeckoSearch';
+import { LocalCoin, LocalSearchResult, useLocalCoinsSearch } from '@/hooks/useLocalCoinsSearch';
 import { useAppSelector } from '@/store';
 import {
   selectCoinGeckoSearchResults,
-  selectTrendingCoins,
   selectSearchLoading,
+  selectTrendingCoins,
   selectTrendingLoading,
 } from '@/store/slices/searchCacheSlice';
-import { useCoinGeckoSearch } from '@/hooks/useCoinGeckoSearch';
-import { useLocalCoinsSearch, LocalCoin, LocalSearchResult } from '@/hooks/useLocalCoinsSearch';
-import { commonCryptoSymbols, getCryptoIconUrl } from '../utils/cryptoIcons';
-import { getCryptoName } from '../utils/cryptoNames';
-import { usePumpFunTokensMoralis } from '../hooks/usePumpFunTokensMoralis';
-import { TokenPair, PumpFunToken, SearchResult } from '../types/token';
-import TokenAvatar from './TokenAvatar';
-import catalog from '@/data/tokens.json';
-import nyaxTokensData from '../../nyax-tokens-data.json';
-import nyaxLogoMappings from '../../nyax-logo-mappings.json';
 import {
+  ContractAddressResult,
   fetchContractAddresses,
   generateTradeUrl,
   logContractAddressInfo,
-  ContractAddressResult,
 } from '@/utils/contractAddressUtils';
+import { AnimatePresence, motion } from 'framer-motion';
+import { ArrowRight } from 'lucide-react';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import React, { useEffect, useRef, useState } from 'react';
+import { BiSearch } from 'react-icons/bi';
+import { IoMdClose } from 'react-icons/io';
+import nyaxLogoMappings from '../../nyax-logo-mappings.json';
+import nyaxTokensData from '../../nyax-tokens-data.json';
+import { usePumpFunTokensMoralis } from '../hooks/usePumpFunTokensMoralis';
+import { PumpFunToken, SearchResult, TokenPair } from '../types/token';
+import { commonCryptoSymbols, getCryptoIconUrl } from '../utils/cryptoIcons';
+import { getCryptoName } from '../utils/cryptoNames';
+import TokenAvatar from './TokenAvatar';
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -124,7 +124,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const unifiedSearchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const { tokens: pumpFunTokens, loading: pumpFunLoading, connected: pumpFunConnected } = usePumpFunTokensMoralis({ 
+  const { tokens: pumpFunTokens, loading: pumpFunLoading, connected: pumpFunConnected } = usePumpFunTokensMoralis({
     limit: 50,
     autoRefresh: true,
     refreshInterval: 60000 // 1 minute
@@ -188,14 +188,14 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
 
     console.log('🔍 SearchModal: Starting search for:', query);
     setUnifiedTokensLoading(true);
-    
+
     try {
-      const apiUrl = `/api/tokens?query=${encodeURIComponent(query)}&source=all&limit=10`;
+      const apiUrl = `/api/solanatokens?query=${encodeURIComponent(query)}&source=all&limit=10`;
       console.log('📡 SearchModal: Calling API:', apiUrl);
-      
+
       const response = await fetch(apiUrl);
       console.log('📊 SearchModal: Response status:', response.status);
-      
+
       if (!response.ok) {
         const errorText = await response.text();
         console.error('❌ SearchModal: API Error:', response.status, errorText);
@@ -205,7 +205,8 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
       const data = await response.json();
       console.log('✅ SearchModal: Response data:', data);
       console.log('🎯 SearchModal: Tokens array:', data.tokens);
-      
+      console.log('📊 SearchModal: Token count:', data.tokens?.length || 0);
+
       setUnifiedTokens(data.tokens || []);
     } catch (error) {
       console.error('💥 SearchModal: Search failed:', error);
@@ -218,14 +219,14 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
   // Navigation function for unified tokens
   const navigateToUnifiedToken = (token: UnifiedToken) => {
     const params = new URLSearchParams();
-    
+
     if (token.symbol) params.set('base', token.symbol);
     if (token.name) params.set('name', token.name);
     if (token.chain) params.set('chain', token.chain);
     if (token.address && token.address !== 'N/A') params.set('address', token.address);
     if (token.logo) params.set('imageUri', token.logo);
     if (token.source) params.set('source', token.source);
-    
+
     const tradeUrl = `/dashboard/trade?${params.toString()}`;
     router.push(tradeUrl);
     onClose();
@@ -406,7 +407,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
           results.push({ type: 'catalog', data: item });
         }
       });
-    } catch {}
+    } catch { }
 
     // Search for traditional token pairs
     const pairMatch = value.match(/([A-Za-z0-9]+)[/\\-]([A-Za-z0-9]+)/);
@@ -927,8 +928,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                             </div>
                             {/* Match type indicator */}
                             <div
-                              className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border border-gray-800 ${
-                                result.matchType === 'exact_symbol'
+                              className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border border-gray-800 ${result.matchType === 'exact_symbol'
                                   ? 'bg-green-500'
                                   : result.matchType === 'exact_name'
                                     ? 'bg-blue-500'
@@ -937,7 +937,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                                       : result.matchType === 'name_contains'
                                         ? 'bg-orange-500'
                                         : 'bg-gray-500'
-                              }`}
+                                }`}
                               title={`Match: ${result.matchType.replace('_', ' ')}`}
                             />
                           </div>
@@ -961,11 +961,10 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                             )}
                             {result.coin.price_change_percentage_24h !== null && (
                               <span
-                                className={`text-xs ${
-                                  result.coin.price_change_percentage_24h > 0
+                                className={`text-xs ${result.coin.price_change_percentage_24h > 0
                                     ? 'text-green-400'
                                     : 'text-red-400'
-                                }`}
+                                  }`}
                               >
                                 {result.coin.price_change_percentage_24h > 0 ? '+' : ''}
                                 {result.coin.price_change_percentage_24h.toFixed(2)}%
@@ -1043,17 +1042,15 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                                 <span className="px-2 py-1 bg-blue-500/30 rounded text-blue-200 text-xs font-bold">
                                   {token.symbol}
                                 </span>
-                                <span className={`px-2 py-1 rounded text-xs font-bold ${
-                                  token.chain === 'solana' ? 'bg-purple-500/30 text-purple-200' :
-                                  token.chain === 'ethereum' ? 'bg-blue-500/30 text-blue-200' :
-                                  token.chain === 'binance' ? 'bg-yellow-500/30 text-yellow-200' :
-                                  'bg-gray-500/30 text-gray-200'
-                                }`}>
+                                <span className={`px-2 py-1 rounded text-xs font-bold ${token.chain === 'solana' ? 'bg-purple-500/30 text-purple-200' :
+                                    token.chain === 'ethereum' ? 'bg-blue-500/30 text-blue-200' :
+                                      token.chain === 'binance' ? 'bg-yellow-500/30 text-yellow-200' :
+                                        'bg-gray-500/30 text-gray-200'
+                                  }`}>
                                   {token.chain.toUpperCase()}
                                 </span>
-                                <span className={`px-2 py-1 rounded text-xs font-bold ${
-                                  token.source === 'local' ? 'bg-green-500/30 text-green-200' : 'bg-orange-500/30 text-orange-200'
-                                }`}>
+                                <span className={`px-2 py-1 rounded text-xs font-bold ${token.source === 'local' ? 'bg-green-500/30 text-green-200' : 'bg-orange-500/30 text-orange-200'
+                                  }`}>
                                   {token.source === 'local' ? 'REG' : 'LIVE'}
                                 </span>
                               </div>
@@ -1178,8 +1175,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                                 {/* Source indicator */}
                                 {coin.source && (
                                   <div
-                                    className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border border-gray-800 ${
-                                      coin.source === 'dexscreener'
+                                    className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border border-gray-800 ${coin.source === 'dexscreener'
                                         ? 'bg-blue-500'
                                         : coin.source === 'coinpaprika'
                                           ? 'bg-orange-500'
@@ -1188,7 +1184,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                                             : coin.source === 'multiapi'
                                               ? 'bg-green-500'
                                               : 'bg-gray-500'
-                                    }`}
+                                      }`}
                                     title={`Source: ${coin.source}`}
                                   />
                                 )}
@@ -1199,8 +1195,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                                 <span className="font-medium text-white">{coin.name}</span>
                                 {/* Source badge */}
                                 <span
-                                  className={`text-xs text-white px-2 py-0.5 rounded-full ${
-                                    coin.source === 'dexscreener'
+                                  className={`text-xs text-white px-2 py-0.5 rounded-full ${coin.source === 'dexscreener'
                                       ? 'bg-blue-600'
                                       : coin.source === 'coinpaprika'
                                         ? 'bg-orange-600'
@@ -1209,7 +1204,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                                           : coin.source === 'multiapi'
                                             ? 'bg-green-600'
                                             : 'bg-orange-600'
-                                  }`}
+                                    }`}
                                 >
                                   {coin.source === 'dexscreener'
                                     ? 'DexScreener'
@@ -1361,15 +1356,14 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                           onClick={() => handleLocalCoinClick(coin)}
                         >
                           <div
-                            className={`absolute top-1 right-1 px-2 py-1 text-xs font-bold rounded-full ${
-                              index === 0
+                            className={`absolute top-1 right-1 px-2 py-1 text-xs font-bold rounded-full ${index === 0
                                 ? 'bg-yellow-500 text-black'
                                 : index === 1
                                   ? 'bg-gray-400 text-black'
                                   : index === 2
                                     ? 'bg-amber-600 text-white'
                                     : 'bg-purple-500 text-white'
-                            }`}
+                              }`}
                           >
                             #{index + 1}
                           </div>
