@@ -27,7 +27,7 @@ export const solanaWeb3JsAdapter = new SolanaAdapter({
 
 // Create the modal
 const modal = createAppKit({
-  adapters: [wagmiAdapter],
+  adapters: [wagmiAdapter, solanaWeb3JsAdapter],
   projectId,
   networks: [mainnet, arbitrum, base, scroll, polygon, solana, solanaTestnet, solanaDevnet],
   defaultNetwork: mainnet,
