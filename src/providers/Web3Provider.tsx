@@ -1,15 +1,12 @@
 'use client';
 import { SolanaAdapter } from '@reown/appkit-adapter-solana/react';
-import { solana, solanaDevnet, solanaTestnet } from '@reown/appkit/networks';
-import { PhantomWalletAdapter, SolflareWalletAdapter } from '@solana/wallet-adapter-wallets';
-
-import { arbitrum, base, mainnet, polygon, scroll } from '@reown/appkit/networks';
+import { arbitrum, base, mainnet, polygon, scroll, solana, solanaDevnet, solanaTestnet } from '@reown/appkit/networks';
 import { createAppKit } from '@reown/appkit/react';
+import { PhantomWalletAdapter, SolflareWalletAdapter } from '@solana/wallet-adapter-wallets';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { type ReactNode } from 'react';
 import { cookieToInitialState, WagmiProvider, type Config } from 'wagmi';
 import { projectId, wagmiAdapter } from '../lib/web3modal';
-// Set up queryClient
 const queryClient = new QueryClient();
 
 if (!projectId) {
