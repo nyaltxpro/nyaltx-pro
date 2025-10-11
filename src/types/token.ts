@@ -13,6 +13,11 @@ export interface PumpFunToken {
   // Live fields (from trades or metadata augmentation)
   price?: number; // latest trade price (quote in SOL or USD if provided)
   marketCap?: number; // derived or provided market cap
+  // Additional Moralis API fields
+  priceUsd?: number; // USD price from Moralis
+  priceNative?: number; // Native token price (SOL)
+  liquidity?: number; // Token liquidity
+  decimals?: number; // Token decimals
 }
 
 export interface TokenPair {

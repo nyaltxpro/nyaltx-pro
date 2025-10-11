@@ -17,7 +17,7 @@ import { useCoinGeckoSearch } from '@/hooks/useCoinGeckoSearch';
 import { useLocalCoinsSearch, LocalCoin, LocalSearchResult } from '@/hooks/useLocalCoinsSearch';
 import { commonCryptoSymbols, getCryptoIconUrl } from '../utils/cryptoIcons';
 import { getCryptoName } from '../utils/cryptoNames';
-import { usePumpFunTokens } from '../hooks/usePumpFunTokens';
+import { usePumpFunTokensMoralis } from '../hooks/usePumpFunTokensMoralis';
 import { TokenPair, PumpFunToken, SearchResult } from '../types/token';
 import catalog from '@/data/tokens.json';
 import nyaxTokensData from '../../nyax-tokens-data.json';
@@ -94,7 +94,11 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const { tokens: pumpFunTokens } = usePumpFunTokens();
+  const { tokens: pumpFunTokens, loading: pumpFunLoading, connected: pumpFunConnected } = usePumpFunTokensMoralis({ 
+    limit: 50,
+    autoRefresh: true,
+    refreshInterval: 60000 // 1 minute
+  });
   const [nyaxTokens] = useState<NyaxToken[]>(nyaxTokensData.tokens || []);
 
   // Local coins search hook
@@ -246,13 +250,13 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
 
     // Search PumpFun tokens first
     const matchingPumpFunTokens = pumpFunTokens.filter(
-      token =>
+      (token: PumpFunToken) =>
         (token.name && token.name.toLowerCase().includes(value.toLowerCase())) ||
         (token.symbol && token.symbol.toLowerCase().includes(value.toLowerCase())) ||
         (token.mint && token.mint.toLowerCase().includes(value.toLowerCase()))
     );
 
-    matchingPumpFunTokens.forEach(token => {
+    matchingPumpFunTokens.forEach((token: PumpFunToken) => {
       results.push({
         type: 'pumpfun',
         data: token,
