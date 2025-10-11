@@ -845,8 +845,7 @@ export default function RegisterTokenPage() {
                     <div className="flex justify-between items-center mb-6">
                         <h1 className="text-2xl font-bold text-white">Register Token</h1>
                         <ConnectWalletButton />
-                        <appkit-network-button />
-                        <appkit-button />
+
                     </div>
                     <div className="animate-pulse">
                         <div className="h-4 bg-gray-700 rounded w-3/4 mb-4"></div>
