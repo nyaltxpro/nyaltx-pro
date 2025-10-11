@@ -1,31 +1,29 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { useAccount, useSendTransaction, useWriteContract, useSwitchChain } from 'wagmi';
-import { useAppKit } from '@reown/appkit/react';
-import { parseUnits, formatUnits, parseEther } from 'viem';
-import { erc20Abi } from 'viem';
-import {
-  FaCoins,
-  FaCheck,
-  FaSearch,
-  FaTimes,
-  FaExternalLinkAlt,
-  FaArrowLeft,
-  FaRocket,
-  FaTag,
-  FaGift,
-} from 'react-icons/fa';
-import Image from 'next/image';
 import PublicHeader from '@/components/PublicHeader';
 import { useAppDispatch, useAppSelector } from '@/store';
 import {
-  fetchUserTokens,
   addTokenBoost,
+  fetchUserTokens,
   loadTokenBoostsFromStorage,
   saveTokenBoostsToStorage,
 } from '@/store/slices/tokenSlice';
+import { useAppKit } from '@reown/appkit/react';
+import Image from 'next/image';
+import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
+import {
+  FaArrowLeft,
+  FaCheck,
+  FaCoins,
+  FaGift,
+  FaRocket,
+  FaSearch,
+  FaTag,
+  FaTimes
+} from 'react-icons/fa';
+import { erc20Abi, parseEther, parseUnits } from 'viem';
+import { useAccount, useSendTransaction, useSwitchChain, useWriteContract } from 'wagmi';
 
 // Boost pack configurations
 const BOOST_PACKS = {
@@ -748,11 +746,10 @@ export default function BoostPackCheckout() {
                       return (
                         <div
                           key={token.id}
-                          className={`p-4 rounded-lg border cursor-pointer transition-all ${
-                            selectedTokens.includes(token.id)
+                          className={`p-4 rounded-lg border cursor-pointer transition-all ${selectedTokens.includes(token.id)
                               ? 'border-cyan-500 bg-cyan-500/10'
                               : 'border-gray-700 bg-gray-800/50 hover:border-gray-600'
-                          }`}
+                            }`}
                           onClick={() => handleTokenToggle(token.id)}
                         >
                           <div className="flex items-center justify-between">
@@ -801,11 +798,10 @@ export default function BoostPackCheckout() {
                               </div>
 
                               <div
-                                className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-                                  selectedTokens.includes(token.id)
+                                className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${selectedTokens.includes(token.id)
                                     ? 'border-cyan-500 bg-cyan-500'
                                     : 'border-gray-600'
-                                }`}
+                                  }`}
                               >
                                 {selectedTokens.includes(token.id) && (
                                   <FaCheck className="text-white text-xs" />
@@ -955,11 +951,10 @@ export default function BoostPackCheckout() {
                 <div className="space-y-3">
                   <button
                     onClick={() => setPaymentMethod('eth')}
-                    className={`w-full p-3 rounded-lg border transition-colors ${
-                      paymentMethod === 'eth'
+                    className={`w-full p-3 rounded-lg border transition-colors ${paymentMethod === 'eth'
                         ? 'border-cyan-500 bg-cyan-500/10'
                         : 'border-gray-700 hover:border-gray-600'
-                    }`}
+                      }`}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
@@ -972,11 +967,10 @@ export default function BoostPackCheckout() {
 
                   <button
                     onClick={() => setPaymentMethod('sol')}
-                    className={`w-full p-3 rounded-lg border transition-colors ${
-                      paymentMethod === 'sol'
+                    className={`w-full p-3 rounded-lg border transition-colors ${paymentMethod === 'sol'
                         ? 'border-cyan-500 bg-cyan-500/10'
                         : 'border-gray-700 hover:border-gray-600'
-                    }`}
+                      }`}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
@@ -994,11 +988,10 @@ export default function BoostPackCheckout() {
 
                   <button
                     onClick={() => setPaymentMethod('nyax')}
-                    className={`w-full p-3 rounded-lg border transition-colors ${
-                      paymentMethod === 'nyax'
+                    className={`w-full p-3 rounded-lg border transition-colors ${paymentMethod === 'nyax'
                         ? 'border-cyan-500 bg-cyan-500/10'
                         : 'border-gray-700 hover:border-gray-600'
-                    }`}
+                      }`}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
@@ -1094,12 +1087,11 @@ export default function BoostPackCheckout() {
               {/* Purchase Button */}
               <button
                 onClick={handlePayment}
-                disabled={selectedTokens.length === 0 || isProcessing}
-                className={`w-full py-4 text-white font-bold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 ${
-                  appliedPromo && appliedPromo.type === 'free'
+                // disabled={selectedTokens.length === 0 || isProcessing}
+                className={`w-full py-4 text-white font-bold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 ${appliedPromo && appliedPromo.type === 'free'
                     ? 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700'
                     : 'bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-700 hover:to-indigo-700'
-                }`}
+                  }`}
               >
                 {isProcessing ? (
                   <>
