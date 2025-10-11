@@ -9,20 +9,21 @@ import {
     resetForm,
     updateFormField
 } from '@/store/slices/tokenSlice';
+import { getAddressFormatDescription, getExampleAddress, validateContractAddress } from '@/utils/addressValidation';
+import { useAppKitAccount } from '@reown/appkit/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import React, { Suspense, useState } from 'react';
+import toast from 'react-hot-toast';
 import {
     FaCheck,
     FaChevronDown,
     FaChevronUp,
-    FaInfoCircle,
     FaImage,
+    FaInfoCircle,
     FaLink,
     FaSpinner
 } from 'react-icons/fa';
-import toast from 'react-hot-toast';
-import { useAccount } from 'wagmi';
-import { validateContractAddress, getAddressFormatDescription, getExampleAddress } from '@/utils/addressValidation';
+
 
 interface FAQ {
     question: string;
@@ -31,7 +32,8 @@ interface FAQ {
 }
 
 function RegisterTokenContent() {
-    const { isConnected, address } = useAccount();
+
+    const { isConnected, address } = useAppKitAccount();
     const router = useRouter();
     const searchParams = useSearchParams();
     const dispatch = useAppDispatch();
@@ -68,7 +70,7 @@ function RegisterTokenContent() {
     React.useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const paymentStatus = urlParams.get('payment');
-        
+
         // If no payment success status and user is on the register page, check for pending registration
         if (!paymentStatus && !paymentSuccess) {
             const pendingData = localStorage.getItem('pendingTokenRegistration');
@@ -90,31 +92,31 @@ function RegisterTokenContent() {
     React.useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const paymentStatus = urlParams.get('payment');
-        
+
         if (paymentStatus === 'success' || paymentStatus === 'paypal_success') {
             setPaymentSuccess(true);
-            
+
             // Register the token after successful payment
             const handlePostPaymentRegistration = async () => {
                 const postPaymentToast = toast.loading('🔄 Processing post-payment token registration...');
-                
+
                 try {
                     const pendingTokenData = localStorage.getItem('pendingTokenRegistration');
                     if (pendingTokenData) {
                         const tokenData = JSON.parse(pendingTokenData);
-                        
+
                         // Update toast for database registration
                         toast.dismiss(postPaymentToast);
                         const registeringToast = toast.loading('📤 Registering token in database...');
-                        
+
                         // Register the token in the database now that payment is successful
                         await dispatch(registerToken(tokenData)).unwrap();
-                        
+
                         toast.dismiss(registeringToast);
-                        
+
                         // Clear the pending registration data
                         localStorage.removeItem('pendingTokenRegistration');
-                        
+
                         toast.success('🎉 Payment successful! Token registered with NyaltxPro benefits!');
                         toast.success('✨ Your token now has premium features enabled', {
                             duration: 4000,
@@ -124,7 +126,7 @@ function RegisterTokenContent() {
                                 border: '1px solid #10b981',
                             }
                         });
-                        
+
                         dispatch({
                             type: 'tokens/setSuccess',
                             payload: '🎉 Payment successful! Your token has been registered with NyaltxPro benefits.',
@@ -132,7 +134,7 @@ function RegisterTokenContent() {
                     } else {
                         toast.dismiss(postPaymentToast);
                         toast.success('🎉 Payment successful! You can now register tokens with NyaltxPro benefits.');
-                        
+
                         dispatch({
                             type: 'tokens/setSuccess',
                             payload: '🎉 Payment successful! You can now register your token with NyaltxPro benefits.',
@@ -142,14 +144,14 @@ function RegisterTokenContent() {
                     toast.dismiss(postPaymentToast);
                     console.error('Post-payment token registration failed:', error);
                     toast.error('❌ Payment successful, but token registration failed. Please try again.');
-                    
+
                     dispatch({
                         type: 'tokens/setError',
                         payload: 'Payment successful, but token registration failed. Please try registering again.',
                     });
                 }
             };
-            
+
             handlePostPaymentRegistration();
         } else if (paymentStatus === 'free') {
             setPaymentSuccess(true);
@@ -204,7 +206,7 @@ function RegisterTokenContent() {
             }
 
             const cleanAddress = contractAddress.trim();
-            
+
             // Validate address format for the specific blockchain
             const validation = validateContractAddress(cleanAddress, blockchain);
             if (!validation.isValid) {
@@ -213,7 +215,7 @@ function RegisterTokenContent() {
             }
 
             console.log('Checking contract address:', cleanAddress, 'on blockchain:', blockchain, 'format:', validation.format);
-            
+
             const response = await fetch(`/api/tokens/by-address/${encodeURIComponent(cleanAddress)}?blockchain=${blockchain}&checkExists=true`);
             if (response.ok) {
                 const data = await response.json();
@@ -254,7 +256,7 @@ function RegisterTokenContent() {
             // Validate contract address format for the selected blockchain
             const cleanAddress = formData.contractAddress.trim();
             const validation = validateContractAddress(cleanAddress, formData.blockchain);
-            
+
             if (!validation.isValid) {
                 const errorMsg = validation.error || `Please enter a valid ${formData.blockchain} contract address.`;
                 toast.dismiss(initialToast);
@@ -273,7 +275,7 @@ function RegisterTokenContent() {
             // Check if contract address already exists
             const contractExists = await checkContractExists(formData.contractAddress, formData.blockchain);
             toast.dismiss(checkingToast);
-            
+
             if (contractExists) {
                 const errorMsg = 'Contract address already exists in the database. Please use a different contract address.';
                 dispatch({
@@ -289,7 +291,7 @@ function RegisterTokenContent() {
             // If redirecting to checkout, store token data temporarily in localStorage for registration after payment
             if (redirectPath && paymentMethod) {
                 const savingToast = toast.loading('💾 Saving token data for checkout...');
-                
+
                 // Store token data temporarily in localStorage (not in database yet)
                 const tokenData = {
                     tokenName: formData.tokenName,
@@ -312,10 +314,10 @@ function RegisterTokenContent() {
 
                 toast.dismiss(savingToast);
                 toast.success('💾 Token data saved! Redirecting to checkout...');
-                
+
                 // Show redirect toast
                 toast.loading('🔄 Redirecting to checkout page...');
-                
+
                 // Redirect to checkout immediately (no database registration yet)
                 setTimeout(() => {
                     router.push(`/${redirectPath}?method=${paymentMethod}`);
@@ -608,17 +610,16 @@ function RegisterTokenContent() {
                                     <label className="block text-sm font-medium text-gray-300 mb-3">
                                         Token Logo (400x300 recommended)
                                     </label>
-                                    
+
                                     {/* Upload Method Toggle */}
                                     <div className="flex space-x-1 mb-4 bg-gray-800 rounded-lg p-1">
                                         <button
                                             type="button"
                                             onClick={() => setImageUploadMethod('upload')}
-                                            className={`flex-1 flex items-center justify-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                                                imageUploadMethod === 'upload'
-                                                    ? 'bg-[#00b8d8] text-white'
-                                                    : 'text-gray-400 hover:text-gray-300'
-                                            }`}
+                                            className={`flex-1 flex items-center justify-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${imageUploadMethod === 'upload'
+                                                ? 'bg-[#00b8d8] text-white'
+                                                : 'text-gray-400 hover:text-gray-300'
+                                                }`}
                                         >
                                             <FaImage className="h-4 w-4" />
                                             <span>Upload Image</span>
@@ -626,11 +627,10 @@ function RegisterTokenContent() {
                                         <button
                                             type="button"
                                             onClick={() => setImageUploadMethod('url')}
-                                            className={`flex-1 flex items-center justify-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                                                imageUploadMethod === 'url'
-                                                    ? 'bg-[#00b8d8] text-white'
-                                                    : 'text-gray-400 hover:text-gray-300'
-                                            }`}
+                                            className={`flex-1 flex items-center justify-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${imageUploadMethod === 'url'
+                                                ? 'bg-[#00b8d8] text-white'
+                                                : 'text-gray-400 hover:text-gray-300'
+                                                }`}
                                         >
                                             <FaLink className="h-4 w-4" />
                                             <span>Image URL</span>
@@ -845,6 +845,8 @@ export default function RegisterTokenPage() {
                     <div className="flex justify-between items-center mb-6">
                         <h1 className="text-2xl font-bold text-white">Register Token</h1>
                         <ConnectWalletButton />
+                        <appkit-network-button />
+                        <appkit-button />
                     </div>
                     <div className="animate-pulse">
                         <div className="h-4 bg-gray-700 rounded w-3/4 mb-4"></div>

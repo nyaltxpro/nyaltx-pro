@@ -1,9 +1,8 @@
 'use client';
 
+import { useAppKit, useAppKitAccount } from '@reown/appkit/react';
 import { useRouter } from 'next/navigation';
-import { useAccount } from 'wagmi';
-import { useState, useEffect } from 'react';
-import { useAppKit } from '@reown/appkit/react';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 interface ConnectWalletButtonProps {
@@ -16,7 +15,7 @@ export default function ConnectWalletButton({
   onConnect,
 }: ConnectWalletButtonProps) {
   const router = useRouter();
-  const { address, isConnected } = useAccount();
+  const { address, isConnected } = useAppKitAccount();
   const { open, close } = useAppKit();
   const [displayAddress, setDisplayAddress] = useState<string>('');
 
