@@ -427,7 +427,7 @@ function AdminTokensComponent() {
                             {viewRows.map(t => (
                                 <tr
                                     key={t.id}
-                                    className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600"
+                                    className=" border-b bg-gray-800 border-gray-700  hover:bg-gray-600"
                                 >
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         {new Date(t.createdAt).toLocaleString()}
