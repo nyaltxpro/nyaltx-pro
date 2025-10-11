@@ -51,6 +51,11 @@ export async function GET(request: NextRequest) {
   };
 
   console.log('🔍 API Request params:', params);
+  console.log('🌍 Environment:', {
+    NODE_ENV: process.env.NODE_ENV,
+    BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
+    HAS_MONGODB_URI: !!process.env.MONGODB_URI
+  });
 
   try {
     let allTokens: NormalizedToken[] = [];
@@ -209,8 +214,19 @@ async function fetchLocalTokens(params: TokenSearchParams): Promise<NormalizedTo
 
 async function fetchSolanaTokens(params: TokenSearchParams): Promise<{ tokens: NormalizedToken[], total: number, hasMore: boolean }> {
   try {
-    // Use the working internal API endpoint instead of direct external call
-    const url = new URL(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/solanatokens`);
+    // Try direct external API call first, fallback to internal API
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    const isProduction = process.env.NODE_ENV === 'production';
+    
+    console.log('🌐 Solana API strategy:', { baseUrl, isProduction });
+    
+    if (isProduction) {
+      // In production, call Solana Tracker directly to avoid internal API issues
+      return await fetchSolanaTokensDirect(params);
+    }
+    
+    // In development, use internal API
+    const url = new URL(`${baseUrl}/api/solanatokens`);
     
     // Use the correct parameter names that the solanatokens endpoint expects
     if (params.query) url.searchParams.append('query', params.query);
@@ -265,6 +281,76 @@ async function fetchSolanaTokens(params: TokenSearchParams): Promise<{ tokens: N
     };
   } catch (error) {
     console.error('Error fetching Solana tokens:', error);
+    return { tokens: [], total: 0, hasMore: false };
+  }
+}
+
+// Direct Solana Tracker API call for production to avoid internal API issues
+async function fetchSolanaTokensDirect(params: TokenSearchParams): Promise<{ tokens: NormalizedToken[], total: number, hasMore: boolean }> {
+  try {
+    const API_KEY = 'd82b528d-a84d-4008-ac0f-cea123d8203c';
+    const API_URL = 'https://data.solanatracker.io/search';
+    
+    const url = new URL(API_URL);
+    if (params.query) url.searchParams.append('query', params.query);
+    if (params.symbol) url.searchParams.append('symbol', params.symbol);
+    url.searchParams.append('page', (params.page || 1).toString());
+    url.searchParams.append('limit', (params.limit || 20).toString());
+    url.searchParams.append('sortBy', 'createdAt');
+    url.searchParams.append('sortOrder', 'desc');
+    url.searchParams.append('showAllPools', 'false');
+
+    console.log('🌐 Direct Solana Tracker API URL:', url.toString());
+
+    const response = await fetch(url.toString(), {
+      headers: {
+        'x-api-key': API_KEY,
+      },
+    });
+
+    console.log('📡 Direct Solana Tracker Response:', response.status, response.statusText);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Direct Solana Tracker API error: ${response.status} - ${errorText}`);
+      return { tokens: [], total: 0, hasMore: false };
+    }
+
+    const apiData = await response.json();
+    console.log('📊 Direct Solana API data structure:', { 
+      hasData: !!apiData.data, 
+      dataLength: apiData.data?.length || 0,
+      status: apiData.status 
+    });
+
+    // Normalize the data to match our expected format
+    const normalizedTokens: NormalizedToken[] = (apiData.data || []).map((token: any) => ({
+      id: `solana-${token.mint || token.poolAddress}`,
+      address: token.mint || token.poolAddress || '',
+      name: token.name || 'Unknown',
+      symbol: token.symbol || '',
+      logo: token.image,
+      chain: 'solana',
+      price: token.priceUsd,
+      marketCap: token.marketCapUsd,
+      liquidity: token.liquidityUsd,
+      createdAt: token.createdAt ? new Date(token.createdAt).toISOString() : new Date().toISOString(),
+      source: 'solana' as const,
+      status: 'active',
+      volume: token.volume,
+      volume24h: token.volume_24h,
+      holders: token.holders,
+      transactions: token.totalTransactions,
+      socials: token.socials
+    }));
+
+    return {
+      tokens: normalizedTokens,
+      total: apiData.total || 0,
+      hasMore: apiData.hasMore || false
+    };
+  } catch (error) {
+    console.error('Error in direct Solana Tracker API call:', error);
     return { tokens: [], total: 0, hasMore: false };
   }
 }

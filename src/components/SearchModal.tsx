@@ -190,7 +190,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
     setUnifiedTokensLoading(true);
 
     try {
-      const apiUrl = `/api/solanatokens?query=${encodeURIComponent(query)}&source=all&limit=10`;
+      const apiUrl = `/api/tokens?query=${encodeURIComponent(query)}&source=all&limit=10`;
       console.log('📡 SearchModal: Calling API:', apiUrl);
 
       const response = await fetch(apiUrl);
