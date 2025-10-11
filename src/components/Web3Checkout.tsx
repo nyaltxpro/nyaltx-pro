@@ -8,6 +8,8 @@ import { FaWallet, FaShieldAlt, FaCheckCircle, FaInfoCircle } from 'react-icons/
 import { useAccount, useSendTransaction, useWriteContract, useSwitchChain } from 'wagmi';
 import { parseEther, erc20Abi, parseUnits } from 'viem';
 import { useAppKit } from '@reown/appkit/react';
+import { SolanaPaymentButton } from '@/components/SolanaPaymentButton';
+import { useWallet } from '@solana/wallet-adapter-react';
 
 type Product = {
   id: number;
@@ -44,6 +46,16 @@ export default function Web3Checkout({
         desc: 'Starter access to Pro features',
         priceUsd: 1,
         image: '/logo.png',
+        qty: 1,
+      },
+    ],
+    solanatest: [
+      {
+        id: 1,
+        name: 'Solana Testnet Trial',
+        desc: 'Test Solana wallet connectivity - $1 trial',
+        priceUsd: 1,
+        image: '/crypto-icons/color/sol.svg',
         qty: 1,
       },
     ],
@@ -109,7 +121,8 @@ export default function Web3Checkout({
     { id: 'optimism', label: 'Optimism' },
     { id: 'base', label: 'Base' },
     { id: 'polygon', label: 'Polygon' },
-    { id: 'solana', label: 'Solana' },
+    { id: 'solana', label: 'Solana Mainnet' },
+    { id: 'solana-testnet', label: 'Solana Testnet' },
   ];
 
   const [network, setNetwork] = useState('ethereum');
@@ -130,6 +143,9 @@ export default function Web3Checkout({
   const { writeContractAsync } = useWriteContract();
   const { switchChainAsync } = useSwitchChain();
 
+  // Solana wallet hooks
+  const { connected: solanaConnected, publicKey: solanaPublicKey } = useWallet();
+
   // Mainnet Ethereum configuration
   const MAINNET_CHAIN_ID = 1;
   const RECEIVER_ADDRESS = '0x81bA7b98E49014Bff22F811E9405640bC2B39cC0' as `0x${string}`;
@@ -138,7 +154,7 @@ export default function Web3Checkout({
   const filteredTokens = useMemo(
     () =>
       tokens.filter(t => {
-        if (network === 'solana') return t.chain === 'solana';
+        if (network === 'solana' || network === 'solana-testnet') return t.chain === 'solana';
         if (network === 'polygon')
           return t.chain === 'polygon' || t.symbol === 'USDC' || t.symbol === 'USDT';
         return t.chain === 'ethereum' || ['arbitrum', 'optimism', 'base'].includes(network);
@@ -640,6 +656,106 @@ export default function Web3Checkout({
     setSuccess(null);
   };
 
+  const handleSolanaSuccess = async (txHash: string) => {
+    try {
+      setSuccess(`Solana payment successful! Transaction: ${txHash}. Processing...`);
+      setError(null);
+      
+      // Set pro status cookie for nyaltxpro or nyaltxpro1 purchases
+      const tierKey = (selectedTier || 'nyaltxpro').toLowerCase();
+      if (tierKey.startsWith('nyaltxpro') || tierKey === 'solanatest') {
+        document.cookie = 'nyaltx_pro=1; path=/; max-age=31536000'; // 1 year
+
+        // Check if there's a pending token registration to process
+        const pendingTokenData = localStorage.getItem('pendingTokenRegistration');
+        if (pendingTokenData) {
+          // Register the token after successful payment
+          await handleTokenRegistrationAfterSolanaPayment(txHash, pendingTokenData);
+        } else {
+          // Redirect to register token page after successful payment
+          setTimeout(() => {
+            window.location.href = '/dashboard/register-token?payment=success';
+          }, 2000);
+        }
+      }
+
+      if (!localStorage.getItem('pendingTokenRegistration')) {
+        setSuccess(`Solana payment successful! Transaction: ${txHash}. Redirecting to register token...`);
+      }
+    } catch (error) {
+      console.error('Solana success handling error:', error);
+      setError(`Payment successful, but processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  };
+
+  const handleSolanaError = (error: string) => {
+    setError(`Solana payment failed: ${error}`);
+    setSuccess(null);
+  };
+
+  // Handle token registration after successful Solana payment
+  const handleTokenRegistrationAfterSolanaPayment = async (txHash: string, pendingTokenDataString: string) => {
+    try {
+      const tokenData = JSON.parse(pendingTokenDataString);
+      
+      setSuccess(`Solana payment successful! Registering your token...`);
+      
+      // Register the token via API
+      const response = await fetch('/api/tokens/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(tokenData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Token registration failed');
+      }
+
+      const result = await response.json();
+      
+      // Log email success to console
+      console.log('✅ Solana Token registration successful:', result);
+      if (result.emailSent) {
+        console.log('📧 Email notifications sent successfully for Solana payment!');
+      }
+      
+      // Clear pending registration data
+      localStorage.removeItem('pendingTokenRegistration');
+      
+      setSuccess(`Solana payment and token registration successful! Redirecting...`);
+      
+      // Redirect to success page with token and payment details
+      const successUrl = new URL('/dashboard/checkout/success', window.location.origin);
+      successUrl.searchParams.set('method', 'solana');
+      successUrl.searchParams.set('tokenName', tokenData.tokenName);
+      successUrl.searchParams.set('tokenSymbol', tokenData.tokenSymbol);
+      successUrl.searchParams.set('txId', txHash);
+      successUrl.searchParams.set('regId', result.record.id);
+      
+      setTimeout(() => {
+        window.location.href = successUrl.toString();
+      }, 2000);
+      
+    } catch (error) {
+      console.error('Token registration after Solana payment failed:', error);
+      
+      setError(`Payment successful, but token registration failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      
+      // Still redirect to success page but show error
+      const successUrl = new URL('/dashboard/checkout/success', window.location.origin);
+      successUrl.searchParams.set('method', 'solana');
+      successUrl.searchParams.set('error', 'registration_failed');
+      successUrl.searchParams.set('txId', txHash);
+      
+      setTimeout(() => {
+        window.location.href = successUrl.toString();
+      }, 3000);
+    }
+  };
+
   const handlePay = handlePayment;
 
   return (
@@ -768,6 +884,65 @@ export default function Web3Checkout({
                 {!agree && (
                   <div className="text-yellow-400 text-sm">
                     Please accept the Terms of Service to continue with PayPal payment.
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : paymentMethod === 'solana' || (network === 'solana' || network === 'solana-testnet') && token === 'SOL' ? (
+            <div className="mb-6">
+              <div className="p-4 rounded-lg bg-purple-500/10 border border-purple-500/30">
+                <div className="flex items-center gap-3 mb-4">
+                  <Image
+                    src="/crypto-icons/color/sol.svg"
+                    alt="SOL"
+                    width={24}
+                    height={24}
+                  />
+                  <h3 className="text-lg font-semibold text-purple-400">
+                    Solana Payment {network === 'solana-testnet' ? '(Testnet)' : ''}
+                  </h3>
+                </div>
+                <p className="text-gray-300 text-sm mb-4">
+                  Pay directly with SOL from your Phantom wallet.
+                  {network === 'solana-testnet' && (
+                    <span className="block text-yellow-300 mt-1">
+                      ⚠️ Testnet mode - Get free SOL from Solana Faucet
+                    </span>
+                  )}
+                </p>
+
+                {agree && !promoValidation?.isFree && (
+                  <SolanaPaymentButton
+                    amount={total}
+                    onSuccess={handleSolanaSuccess}
+                    onError={handleSolanaError}
+                    disabled={processing}
+                    className="w-full"
+                  />
+                )}
+
+                {!agree && (
+                  <div className="text-yellow-400 text-sm">
+                    Please accept the Terms of Service to continue with Solana payment.
+                  </div>
+                )}
+
+                {network === 'solana-testnet' && (
+                  <div className="mt-3 p-3 bg-blue-900/30 border border-blue-500 rounded-lg">
+                    <p className="text-blue-300 text-sm">
+                      💡 <strong>Testnet Instructions:</strong>
+                      <br />1. Get free testnet SOL from{' '}
+                      <a 
+                        href="https://faucet.solana.com/" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-400 underline"
+                      >
+                        Solana Faucet
+                      </a>
+                      <br />2. Connect your Phantom wallet
+                      <br />3. Test the payment with ${total.toFixed(2)} worth of SOL
+                    </p>
                   </div>
                 )}
               </div>

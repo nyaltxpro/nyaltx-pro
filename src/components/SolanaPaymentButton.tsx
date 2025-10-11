@@ -12,6 +12,7 @@ import {
 } from '@solana/web3.js';
 import Image from 'next/image';
 import { FaSpinner } from 'react-icons/fa';
+import toast from 'react-hot-toast';
 
 interface SolanaPaymentButtonProps {
   amount: number; // Amount in USD
@@ -67,18 +68,29 @@ export const SolanaPaymentButton: React.FC<SolanaPaymentButtonProps> = ({
 
   const handlePayment = useCallback(async () => {
     if (!connected || !publicKey) {
-      onError('Please connect your Phantom wallet first');
+      const errorMsg = 'Please connect your Phantom wallet first';
+      toast.error('❌ ' + errorMsg);
+      onError(errorMsg);
       return;
     }
 
     if (!SOLANA_RECEIVER || SOLANA_RECEIVER === 'YourSolanaWalletAddressHere') {
-      onError('Solana receiver address not configured');
+      const errorMsg = 'Solana receiver address not configured';
+      toast.error('❌ ' + errorMsg);
+      onError(errorMsg);
       return;
     }
 
     setIsProcessing(true);
 
+    // Show initial loading toast
+    const loadingToast = toast.loading('🔄 Preparing Solana payment...');
+
     try {
+      // Update toast for price fetching
+      toast.dismiss(loadingToast);
+      const priceToast = toast.loading('💰 Fetching SOL price...');
+
       // Calculate SOL amount
       const solAmount = await calculateSolAmount();
       const lamports = Math.floor(solAmount * LAMPORTS_PER_SOL);
@@ -93,6 +105,12 @@ export const SolanaPaymentButton: React.FC<SolanaPaymentButtonProps> = ({
       if (lamports <= 0) {
         throw new Error('Invalid payment amount');
       }
+
+      toast.dismiss(priceToast);
+      toast.success(`💰 Payment: ${solAmount.toFixed(6)} SOL ($${amount})`);
+
+      // Update toast for transaction preparation
+      const txToast = toast.loading('📝 Creating Solana transaction...');
 
       // Get recent blockhash
       const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
@@ -113,21 +131,30 @@ export const SolanaPaymentButton: React.FC<SolanaPaymentButtonProps> = ({
 
       transaction.add(transferInstruction);
 
+      toast.dismiss(txToast);
+
       // Send transaction
+      const sendToast = toast.loading('📤 Sending Solana transaction...');
       console.log('📤 Sending Solana transaction...');
+      
       const signature = await sendTransaction(transaction, connection, {
         skipPreflight: false,
         preflightCommitment: 'confirmed',
       });
 
+      toast.dismiss(sendToast);
+
+      // Wait for confirmation
+      const confirmToast = toast.loading('⏳ Confirming transaction on Solana...');
       console.log('⏳ Confirming transaction...');
       
-      // Wait for confirmation
       const confirmation = await connection.confirmTransaction({
         signature,
         blockhash,
         lastValidBlockHeight,
       }, 'confirmed');
+
+      toast.dismiss(confirmToast);
 
       if (confirmation.value.err) {
         throw new Error(`Transaction failed: ${confirmation.value.err}`);
@@ -137,18 +164,34 @@ export const SolanaPaymentButton: React.FC<SolanaPaymentButtonProps> = ({
       console.log(`   Transaction: ${signature}`);
       console.log(`   Explorer: https://solscan.io/tx/${signature}`);
 
+      toast.success('🎉 Solana payment successful!');
+      toast.success(`🔗 Transaction: ${signature.slice(0, 8)}...${signature.slice(-8)}`, {
+        duration: 4000,
+        style: {
+          background: '#065f46',
+          color: '#d1fae5',
+          border: '1px solid #10b981',
+        }
+      });
+
       onSuccess(signature);
 
     } catch (error: any) {
+      toast.dismiss(loadingToast);
       console.error('❌ Solana payment failed:', error);
       
       let errorMessage = 'Payment failed';
       if (error.message?.includes('User rejected')) {
         errorMessage = 'Payment cancelled by user';
+        toast.error('⚠️ Payment cancelled by user');
       } else if (error.message?.includes('insufficient funds')) {
         errorMessage = 'Insufficient SOL balance';
+        toast.error('❌ Insufficient SOL balance');
       } else if (error.message) {
         errorMessage = error.message;
+        toast.error('❌ ' + errorMessage);
+      } else {
+        toast.error('❌ Solana payment failed');
       }
       
       onError(errorMessage);

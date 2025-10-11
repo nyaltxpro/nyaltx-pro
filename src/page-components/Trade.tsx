@@ -837,8 +837,8 @@ function TradingViewWithParams({
                                         </h3>
                                     </div>
                                     <div className="text-sm text-gray-400">
-                                        {tokenSocialLinks?.tokenSymbol || baseToken}{' '}
-                                        <span className="text-gray-500">/</span> {quoteToken}
+                                        {/* {tokenSocialLinks?.tokenSymbol || baseToken}{' '}
+                                        <span className="text-gray-500">/</span> {quoteToken} */}
                                         {tokenSocialLinks?.blockchain && (
                                             <span className="ml-2 text-xs bg-[#1a2932] px-2 py-1 rounded capitalize">
                                                 {tokenSocialLinks.blockchain}
