@@ -1,15 +1,14 @@
 'use client';
 
-import React, { useMemo, useState, useEffect } from 'react';
-import Image from 'next/image';
 import ConnectWalletButton from '@/components/ConnectWalletButton';
 import PayPalCheckout from '@/components/PayPalCheckout';
-import { FaWallet, FaShieldAlt, FaCheckCircle, FaInfoCircle } from 'react-icons/fa';
-import { useAccount, useSendTransaction, useWriteContract, useSwitchChain } from 'wagmi';
-import { parseEther, erc20Abi, parseUnits } from 'viem';
 import { useAppKit } from '@reown/appkit/react';
-import { SolanaPaymentButton } from '@/components/SolanaPaymentButton';
-import { useWallet } from '@solana/wallet-adapter-react';
+import Image from 'next/image';
+import { useEffect, useMemo, useState } from 'react';
+import { FaCheckCircle, FaInfoCircle, FaShieldAlt, FaWallet } from 'react-icons/fa';
+import { erc20Abi, parseEther, parseUnits } from 'viem';
+import { useAccount, useSendTransaction, useSwitchChain, useWriteContract } from 'wagmi';
+
 
 type Product = {
   id: number;
@@ -144,7 +143,7 @@ export default function Web3Checkout({
   const { switchChainAsync } = useSwitchChain();
 
   // Solana wallet hooks
-  const { connected: solanaConnected, publicKey: solanaPublicKey } = useWallet();
+  // const { connected: solanaConnected, publicKey: solanaPublicKey } = useWallet();
 
   // Mainnet Ethereum configuration
   const MAINNET_CHAIN_ID = 1;
@@ -297,9 +296,9 @@ export default function Web3Checkout({
   const handleTokenRegistrationAfterFreeActivation = async (activationResult: any, pendingTokenDataString: string) => {
     try {
       const tokenData = JSON.parse(pendingTokenDataString);
-      
+
       setSuccess(`Free activation successful! Registering your token...`);
-      
+
       // Register the token via API
       const response = await fetch('/api/tokens/register', {
         method: 'POST',
@@ -315,18 +314,18 @@ export default function Web3Checkout({
       }
 
       const result = await response.json();
-      
+
       // Log email success to console
       console.log('✅ Free activation Token registration successful:', result);
       if (result.emailSent) {
         console.log('📧 Email notifications sent successfully for free activation!');
       }
-      
+
       // Clear pending registration data
       localStorage.removeItem('pendingTokenRegistration');
-      
+
       setSuccess(`Free activation and token registration successful! Redirecting...`);
-      
+
       // Redirect to success page with token and activation details
       const successUrl = new URL('/dashboard/checkout/success', window.location.origin);
       successUrl.searchParams.set('method', 'free');
@@ -334,22 +333,22 @@ export default function Web3Checkout({
       successUrl.searchParams.set('tokenSymbol', tokenData.tokenSymbol);
       successUrl.searchParams.set('txId', 'free_activation');
       successUrl.searchParams.set('regId', result.record.id);
-      
+
       setTimeout(() => {
         window.location.href = successUrl.toString();
       }, 2000);
-      
+
     } catch (error) {
       console.error('Token registration after free activation failed:', error);
-      
+
       setError(`Free activation successful, but token registration failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      
+
       // Still redirect to success page but show error
       const successUrl = new URL('/dashboard/checkout/success', window.location.origin);
       successUrl.searchParams.set('method', 'free');
       successUrl.searchParams.set('error', 'registration_failed');
       successUrl.searchParams.set('txId', 'free_activation');
-      
+
       setTimeout(() => {
         window.location.href = successUrl.toString();
       }, 3000);
@@ -477,9 +476,9 @@ export default function Web3Checkout({
   const handleTokenRegistrationAfterPayPalPayment = async (paymentDetails: any, pendingTokenDataString: string) => {
     try {
       const tokenData = JSON.parse(pendingTokenDataString);
-      
+
       setSuccess(`Payment successful! Registering your token...`);
-      
+
       // Register the token via API
       const response = await fetch('/api/tokens/register', {
         method: 'POST',
@@ -495,18 +494,18 @@ export default function Web3Checkout({
       }
 
       const result = await response.json();
-      
+
       // Log email success to console
       console.log('✅ PayPal Token registration successful:', result);
       if (result.emailSent) {
         console.log('📧 Email notifications sent successfully for PayPal payment!');
       }
-      
+
       // Clear pending registration data
       localStorage.removeItem('pendingTokenRegistration');
-      
+
       setSuccess(`Payment and token registration successful! Redirecting...`);
-      
+
       // Redirect to success page with token and payment details
       const successUrl = new URL('/dashboard/checkout/success', window.location.origin);
       successUrl.searchParams.set('method', 'paypal');
@@ -514,22 +513,22 @@ export default function Web3Checkout({
       successUrl.searchParams.set('tokenSymbol', tokenData.tokenSymbol);
       successUrl.searchParams.set('txId', paymentDetails.id);
       successUrl.searchParams.set('regId', result.record.id);
-      
+
       setTimeout(() => {
         window.location.href = successUrl.toString();
       }, 2000);
-      
+
     } catch (error) {
       console.error('Token registration after PayPal payment failed:', error);
-      
+
       setError(`Payment successful, but token registration failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      
+
       // Still redirect to success page but show error
       const successUrl = new URL('/dashboard/checkout/success', window.location.origin);
       successUrl.searchParams.set('method', 'paypal');
       successUrl.searchParams.set('error', 'registration_failed');
       successUrl.searchParams.set('txId', paymentDetails.id);
-      
+
       setTimeout(() => {
         window.location.href = successUrl.toString();
       }, 3000);
@@ -540,9 +539,9 @@ export default function Web3Checkout({
   const handleTokenRegistrationAfterCryptoPayment = async (txHash: string, pendingTokenDataString: string) => {
     try {
       const tokenData = JSON.parse(pendingTokenDataString);
-      
+
       setSuccess(`Payment successful! Registering your token...`);
-      
+
       // Register the token via API
       const response = await fetch('/api/tokens/register', {
         method: 'POST',
@@ -558,18 +557,18 @@ export default function Web3Checkout({
       }
 
       const result = await response.json();
-      
+
       // Log email success to console
       console.log('✅ Crypto Token registration successful:', result);
       if (result.emailSent) {
         console.log('📧 Email notifications sent successfully for crypto payment!');
       }
-      
+
       // Clear pending registration data
       localStorage.removeItem('pendingTokenRegistration');
-      
+
       setSuccess(`Payment and token registration successful! Redirecting...`);
-      
+
       // Redirect to success page with token and payment details
       const successUrl = new URL('/dashboard/checkout/success', window.location.origin);
       successUrl.searchParams.set('method', 'crypto');
@@ -577,22 +576,22 @@ export default function Web3Checkout({
       successUrl.searchParams.set('tokenSymbol', tokenData.tokenSymbol);
       successUrl.searchParams.set('txId', txHash);
       successUrl.searchParams.set('regId', result.record.id);
-      
+
       setTimeout(() => {
         window.location.href = successUrl.toString();
       }, 2000);
-      
+
     } catch (error) {
       console.error('Token registration after crypto payment failed:', error);
-      
+
       setError(`Payment successful, but token registration failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      
+
       // Still redirect to success page but show error
       const successUrl = new URL('/dashboard/checkout/success', window.location.origin);
       successUrl.searchParams.set('method', 'crypto');
       successUrl.searchParams.set('error', 'registration_failed');
       successUrl.searchParams.set('txId', txHash);
-      
+
       setTimeout(() => {
         window.location.href = successUrl.toString();
       }, 3000);
@@ -633,7 +632,7 @@ export default function Web3Checkout({
     try {
       setSuccess(`Payment successful! Transaction ID: ${details?.id}. Processing...`);
       setError(null);
-      
+
       // Check if there's a pending token registration to process
       const pendingTokenData = localStorage.getItem('pendingTokenRegistration');
       if (pendingTokenData) {
@@ -660,7 +659,7 @@ export default function Web3Checkout({
     try {
       setSuccess(`Solana payment successful! Transaction: ${txHash}. Processing...`);
       setError(null);
-      
+
       // Set pro status cookie for nyaltxpro or nyaltxpro1 purchases
       const tierKey = (selectedTier || 'nyaltxpro').toLowerCase();
       if (tierKey.startsWith('nyaltxpro') || tierKey === 'solanatest') {
@@ -697,9 +696,9 @@ export default function Web3Checkout({
   const handleTokenRegistrationAfterSolanaPayment = async (txHash: string, pendingTokenDataString: string) => {
     try {
       const tokenData = JSON.parse(pendingTokenDataString);
-      
+
       setSuccess(`Solana payment successful! Registering your token...`);
-      
+
       // Register the token via API
       const response = await fetch('/api/tokens/register', {
         method: 'POST',
@@ -715,18 +714,18 @@ export default function Web3Checkout({
       }
 
       const result = await response.json();
-      
+
       // Log email success to console
       console.log('✅ Solana Token registration successful:', result);
       if (result.emailSent) {
         console.log('📧 Email notifications sent successfully for Solana payment!');
       }
-      
+
       // Clear pending registration data
       localStorage.removeItem('pendingTokenRegistration');
-      
+
       setSuccess(`Solana payment and token registration successful! Redirecting...`);
-      
+
       // Redirect to success page with token and payment details
       const successUrl = new URL('/dashboard/checkout/success', window.location.origin);
       successUrl.searchParams.set('method', 'solana');
@@ -734,22 +733,22 @@ export default function Web3Checkout({
       successUrl.searchParams.set('tokenSymbol', tokenData.tokenSymbol);
       successUrl.searchParams.set('txId', txHash);
       successUrl.searchParams.set('regId', result.record.id);
-      
+
       setTimeout(() => {
         window.location.href = successUrl.toString();
       }, 2000);
-      
+
     } catch (error) {
       console.error('Token registration after Solana payment failed:', error);
-      
+
       setError(`Payment successful, but token registration failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      
+
       // Still redirect to success page but show error
       const successUrl = new URL('/dashboard/checkout/success', window.location.origin);
       successUrl.searchParams.set('method', 'solana');
       successUrl.searchParams.set('error', 'registration_failed');
       successUrl.searchParams.set('txId', txHash);
-      
+
       setTimeout(() => {
         window.location.href = successUrl.toString();
       }, 3000);
@@ -911,7 +910,7 @@ export default function Web3Checkout({
                   )}
                 </p>
 
-                {agree && !promoValidation?.isFree && (
+                {/* {agree && !promoValidation?.isFree && (
                   <SolanaPaymentButton
                     amount={total}
                     onSuccess={handleSolanaSuccess}
@@ -919,7 +918,7 @@ export default function Web3Checkout({
                     disabled={processing}
                     className="w-full"
                   />
-                )}
+                )} */}
 
                 {!agree && (
                   <div className="text-yellow-400 text-sm">
@@ -932,9 +931,9 @@ export default function Web3Checkout({
                     <p className="text-blue-300 text-sm">
                       💡 <strong>Testnet Instructions:</strong>
                       <br />1. Get free testnet SOL from{' '}
-                      <a 
-                        href="https://faucet.solana.com/" 
-                        target="_blank" 
+                      <a
+                        href="https://faucet.solana.com/"
+                        target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-400 underline"
                       >

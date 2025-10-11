@@ -24,7 +24,6 @@
     "@reown/appkit": "^1.8.9",
     "@reown/appkit-adapter-solana": "^1.8.9",
     "@reown/appkit-adapter-wagmi": "^1.8.1",
-    "@solana/wallet-adapter-react": "^0.15.39",
     "@stream-io/video-client": "^1.32.0",
     "@stream-io/video-react-sdk": "^1.22.0",
     "@supabase/supabase-js": "^2.57.4",
