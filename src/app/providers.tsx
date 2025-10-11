@@ -1,6 +1,6 @@
 'use client';
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
-import '@solana/wallet-adapter-react-ui/styles.css';
+// import '@solana/wallet-adapter-react-ui/styles.css';
 import { useEffect, useState } from 'react';
 import AnalyticsProvider from '../components/AnalyticsProvider';
 import ReduxProvider from '../components/providers/ReduxProvider';
