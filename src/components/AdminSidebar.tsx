@@ -1,27 +1,21 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useEffect, useState } from 'react';
 import {
-  FaHome,
-  FaChartBar,
-  FaUsers,
-  FaCoins,
-  FaBullhorn,
-  FaChartLine,
-  FaGift,
-  FaCog,
-  FaShoppingCart,
-  FaImage,
-  FaRocket,
-  FaSignOutAlt,
-  FaFootballBall,
   FaChartPie,
-  FaUserFriends,
+  FaCoins,
+  FaFootballBall,
+  FaGift,
+  FaHome,
+  FaImage,
+  FaShoppingCart,
+  FaSignOutAlt,
+  FaUserFriends
 } from 'react-icons/fa';
-import Image from 'next/image';
 
 interface AdminSidebarProps {
   isMobileMenuOpen: boolean;
@@ -45,11 +39,10 @@ const SidebarItem = ({ icon, text, href, isActive, isExpanded }: SidebarItemProp
     >
       <Link
         href={href}
-        className={`flex items-center py-3 px-3 mb-1 rounded-md transition-all duration-200 ${
-          isActive
-            ? 'bg-[#1a2932] text-[#00b8d8]'
-            : 'text-gray-400 hover:bg-[#1a2932] hover:text-white'
-        }`}
+        className={`flex items-center py-3 px-3 mb-1 rounded-md transition-all duration-200 ${isActive
+          ? 'bg-[#1a2932] text-[#00b8d8]'
+          : 'text-gray-400 hover:bg-[#1a2932] hover:text-white'
+          }`}
       >
         <motion.div
           className="text-xl"
@@ -175,12 +168,12 @@ export default function AdminSidebar({ isMobileMenuOpen, toggleMobileMenu }: Adm
     { icon: <FaCoins />, text: 'Tokens', href: '/admin/tokens' },
     { icon: <FaShoppingCart />, text: 'Orders', href: '/admin/orders' },
     { icon: <FaUserFriends />, text: 'Users', href: '/admin/users' },
-    { icon: <FaUsers />, text: 'Profiles', href: '/admin/profiles' },
+    // { icon: <FaUsers />, text: 'Profiles', href: '/admin/profiles' },
     { icon: <FaChartPie />, text: 'Analytics', href: '/admin/statistics' },
-    { icon: <FaChartLine />, text: 'Stats', href: '/admin/stats' },
+    // { icon: <FaChartLine />, text: 'Stats', href: '/admin/stats' },
     { icon: <FaGift />, text: 'Token Points', href: '/admin/points' },
     { icon: <FaImage />, text: 'Banners', href: '/admin/banners' },
-    { icon: <FaRocket />, text: 'Campaigns', href: '/admin/campaigns' },
+    // { icon: <FaRocket />, text: 'Campaigns', href: '/admin/campaigns' },
     { icon: <FaFootballBall />, text: 'Footer Settings', href: '/admin/footer-settings' },
   ];
 
@@ -192,9 +185,8 @@ export default function AdminSidebar({ isMobileMenuOpen, toggleMobileMenu }: Adm
         <div className="fixed inset-0 bg-black bg-opacity-50 z-40" onClick={toggleMobileMenu} />
       )}
       <motion.div
-        className={`fixed left-0 top-0 h-full bg-[#0f1923] z-50 ${
-          !isDesktop && (isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full')
-        }`}
+        className={`fixed left-0 top-0 h-full bg-[#0f1923] z-50 ${!isDesktop && (isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full')
+          }`}
         initial={false}
         animate={{
           width: isDesktop ? (isExpanded ? 224 : 64) : 224, // 224px = 14rem, 64px = 4rem
