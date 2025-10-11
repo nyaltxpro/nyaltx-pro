@@ -260,7 +260,7 @@ const Footer = () => {
               </div>
 
               <div className="text-xs text-gray-400/90 text-center px-2 max-w-full break-words">
-                © Nyaltx.io 2025 - 2149.0 - info@Nyaltx.io | Ads & Marketing: marketing@Nyaltx.io
+                © 2025 Corporate Roadshow,Inc. | Nyaltx.pro
               </div>
             </div>
           </div>
