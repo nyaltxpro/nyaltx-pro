@@ -1,18 +1,15 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import Image from 'next/image';
-import { useAppKit } from '@reown/appkit/react';
-import { useAccount, useWriteContract, useSendTransaction, useSwitchChain } from 'wagmi';
-import { parseEther, parseUnits } from 'viem';
-import { erc20Abi } from 'viem';
-import toast from 'react-hot-toast';
-import { PhantomWalletButton } from './PhantomWalletButton';
-import { storeRaceToLibertyOrder } from '@/utils/orderStorage';
-import { useRouter } from 'next/navigation';
-import PayPalCheckout from '@/components/PayPalCheckout';
 import ConnectWalletButton from '@/components/ConnectWalletButton';
-import TokenDebugger from '@/components/TokenDebugger';
+import PayPalCheckout from '@/components/PayPalCheckout';
 import { RegisteredToken } from '@/types/token';
-import { FaTrophy, FaCoins, FaSearch, FaStar, FaGift } from 'react-icons/fa';
+import { storeRaceToLibertyOrder } from '@/utils/orderStorage';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
+import toast from 'react-hot-toast';
+import { FaCoins, FaGift, FaSearch, FaStar, FaTrophy } from 'react-icons/fa';
+import { erc20Abi, parseEther, parseUnits } from 'viem';
+import { useAccount, useSendTransaction, useSwitchChain, useWriteContract } from 'wagmi';
+import { PhantomWalletButton } from './PhantomWalletButton';
 
 // Store payment order helper function
 const storePaymentOrder = async (params: {
@@ -186,7 +183,7 @@ async function fetchETHPriceUSD(): Promise<number> {
       const price = data?.ethereum?.usd;
       if (typeof price === 'number' && price > 0) return price;
     }
-  } catch {}
+  } catch { }
 
   // Fallback to Coinbase
   try {
@@ -198,7 +195,7 @@ async function fetchETHPriceUSD(): Promise<number> {
       const price = parseFloat(data?.data?.amount);
       if (!Number.isNaN(price) && price > 0) return price;
     }
-  } catch {}
+  } catch { }
 
   return FALLBACK_ETH_PRICE;
 }
@@ -306,7 +303,7 @@ export default function RaceToLibertyCheckout({
         const latest = await fetchETHPriceUSD();
         setEthPrice(latest);
         ethAmt = latest > 0 ? finalAmount / latest : null;
-      } catch {}
+      } catch { }
     }
     if (!ethAmt) {
       const errorMsg = 'Unable to compute ETH amount. Please try again in a moment.';
@@ -318,14 +315,14 @@ export default function RaceToLibertyCheckout({
     setError(undefined);
     setBusy('eth');
     const paymentToast = toast.loading('Processing ETH payment...');
-    
+
     try {
       const hash = await sendTransactionAsync({
         to: RECEIVER,
         value: parseEther(ethAmt.toFixed(6)),
       });
       console.log('ETH payment tx:', hash);
-      
+
       // Store the ETH payment order with comprehensive metadata
       const selectedCoinData = availableCoins.find(coin => coin.id === selectedCoin);
       const basePoints = selectedCoinData?.basePoints || 100;
@@ -357,15 +354,15 @@ export default function RaceToLibertyCheckout({
         } : undefined,
         totalPoints: totalPoints
       });
-      
+
       toast.dismiss(paymentToast);
       toast.success('🎉 ETH payment successful! Redirecting...');
-      
+
       // Redirect to success page
       setTimeout(() => {
         router.push(`/pricing/race-to-liberty/success?tier=${tier}&token=${selectedCoin}&txHash=${hash}&method=eth&points=${totalPoints}${promoApplied ? `&promo=${promoCode}` : ''}`);
       }, 2000);
-      
+
     } catch (e: any) {
       toast.dismiss(paymentToast);
       const errorMsg = e?.shortMessage || e?.message || 'ETH payment failed';
@@ -410,7 +407,7 @@ export default function RaceToLibertyCheckout({
     setError(undefined);
     setBusy('nyax');
     const nyaxToast = toast.loading('Processing NYAX payment...');
-    
+
     try {
       const value = parseUnits(discountedUSD.toFixed(6), 18);
       const hash = await writeContractAsync({
@@ -420,7 +417,7 @@ export default function RaceToLibertyCheckout({
         args: [RECEIVER, value],
       });
       console.log('NYAX payment tx:', hash);
-      
+
       // Store the NYAX payment order with comprehensive metadata
       const selectedCoinData = availableCoins.find(coin => coin.id === selectedCoin);
       const basePoints = selectedCoinData?.basePoints || 100;
@@ -451,15 +448,15 @@ export default function RaceToLibertyCheckout({
         } : undefined,
         totalPoints: totalPoints
       });
-      
+
       toast.dismiss(nyaxToast);
       toast.success('🎉 NYAX payment successful! Redirecting...');
-      
+
       // Redirect to success page
       setTimeout(() => {
         router.push(`/pricing/race-to-liberty/success?tier=${tier}&token=${selectedCoin}&txHash=${hash}&method=nyax&points=${totalPoints}${promoApplied ? `&promo=${promoCode}` : ''}`);
       }, 2000);
-      
+
     } catch (e: any) {
       toast.dismiss(nyaxToast);
       const errorMsg = e?.shortMessage || e?.message || 'NYAX payment failed';
@@ -504,7 +501,7 @@ export default function RaceToLibertyCheckout({
         args: [RECEIVER, value],
       });
       console.log('SOL payment tx:', hash);
-      
+
       // Store the SOL payment order
       await storePaymentOrder({
         paymentMethod: 'sol',
@@ -523,7 +520,7 @@ export default function RaceToLibertyCheckout({
   const handleSolanaSuccess = async (txHash: string, solAmount: number) => {
     try {
       console.log('✅ Solana payment successful:', txHash);
-      
+
       // Store order after successful Solana payment
       await storeRaceToLibertyOrder({
         paymentMethod: 'sol',
@@ -618,7 +615,7 @@ export default function RaceToLibertyCheckout({
 
     setBusy('free-claim');
     setError(undefined);
-    
+
     // Enhanced loading toasts for free claim
     const preparingToast = toast.loading('🔄 Preparing free Race to Liberty claim...');
 
@@ -635,7 +632,7 @@ export default function RaceToLibertyCheckout({
       const totalPoints = Math.round(basePoints * tierMultiplier * boostMultiplier);
 
       toast.dismiss(validatingToast);
-      
+
       // Update toast for processing
       const processingToast = toast.loading('🎁 Processing free boost claim...');
 
@@ -712,7 +709,7 @@ export default function RaceToLibertyCheckout({
           border: '1px solid #10b981',
         }
       });
-      
+
       // Redirect to success page with free promo parameters
       setTimeout(() => {
         router.push(
@@ -904,11 +901,10 @@ export default function RaceToLibertyCheckout({
                         <button
                           key={coin.id}
                           onClick={() => setSelectedCoin(coin.id)}
-                          className={`group relative p-6 rounded-2xl border transition-all duration-300 hover:scale-105 ${
-                            selectedCoin === coin.id
+                          className={`group relative p-6 rounded-2xl border transition-all duration-300 hover:scale-105 ${selectedCoin === coin.id
                               ? 'border-cyan-400 bg-gradient-to-br from-cyan-500/20 to-purple-500/20 shadow-lg shadow-cyan-500/25'
                               : 'border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10'
-                          }`}
+                            }`}
                         >
                           {/* Boost Badge */}
                           <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 flex items-center justify-center shadow-lg">
@@ -939,8 +935,8 @@ export default function RaceToLibertyCheckout({
                                 <span className="font-bold text-yellow-400">
                                   {Math.round(
                                     coin.basePoints *
-                                      tierInfo.multiplier *
-                                      (coin.boostMultiplier || 1)
+                                    tierInfo.multiplier *
+                                    (coin.boostMultiplier || 1)
                                   )}
                                 </span>
                               </div>
@@ -998,11 +994,10 @@ export default function RaceToLibertyCheckout({
                     <div className="grid grid-cols-2 gap-4 mb-6">
                       <button
                         onClick={() => setPaymentMethod('paypal')}
-                        className={`p-4 rounded-xl border transition-all duration-300 ${
-                          paymentMethod === 'paypal'
+                        className={`p-4 rounded-xl border transition-all duration-300 ${paymentMethod === 'paypal'
                             ? 'border-blue-400 bg-blue-500/20 shadow-lg shadow-blue-500/25'
                             : 'border-white/10 bg-white/5 hover:border-white/20'
-                        }`}
+                          }`}
                       >
                         <div className="text-center">
                           <div className="text-2xl mb-2">💳</div>
@@ -1013,11 +1008,10 @@ export default function RaceToLibertyCheckout({
 
                       <button
                         onClick={() => setPaymentMethod('crypto')}
-                        className={`p-4 rounded-xl border transition-all duration-300 ${
-                          paymentMethod === 'crypto'
+                        className={`p-4 rounded-xl border transition-all duration-300 ${paymentMethod === 'crypto'
                             ? 'border-cyan-400 bg-cyan-500/20 shadow-lg shadow-cyan-500/25'
                             : 'border-white/10 bg-white/5 hover:border-white/20'
-                        }`}
+                          }`}
                       >
                         <div className="text-center">
                           <div className="text-2xl mb-2">🪙</div>
@@ -1244,7 +1238,7 @@ export default function RaceToLibertyCheckout({
 
                           <button
                             onClick={handleFreePromoClaim}
-                            disabled={busy !== null}
+                            // disabled={busy !== null}
                             className="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold text-lg hover:from-green-700 hover:to-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center gap-3"
                           >
                             {busy === 'free-claim' ? (
