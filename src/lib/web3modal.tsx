@@ -1,6 +1,6 @@
-import { cookieStorage, createStorage, http } from '@wagmi/core';
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';
-import { mainnet, arbitrum, polygon, base, scroll } from '@reown/appkit/networks';
+import { arbitrum, base, mainnet, polygon, scroll } from '@reown/appkit/networks';
+import { cookieStorage, createStorage, http } from '@wagmi/core';
 
 // Get projectId from https://dashboard.reown.com
 export const projectId = 'f56614799c9232532c3e3e76536d3be3';

@@ -1,16 +1,32 @@
 'use client';
-import { SolanaAdapter } from '@reown/appkit-adapter-solana/react';
-import { arbitrum, base, mainnet, polygon, scroll, solana, solanaDevnet, solanaTestnet } from '@reown/appkit/networks';
+import { SolanaAdapter } from '@reown/appkit-adapter-solana';
+import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';
+import type { AppKitNetwork } from "@reown/appkit/networks";
+import { arbitrum, mainnet, solana, solanaDevnet, solanaTestnet } from '@reown/appkit/networks';
 import { createAppKit } from '@reown/appkit/react';
-import { PhantomWalletAdapter } from '@solana/wallet-adapter-wallets';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { type ReactNode } from 'react';
 import { cookieToInitialState, WagmiProvider, type Config } from 'wagmi';
-import { projectId, wagmiAdapter } from '../lib/web3modal';
+import { projectId, } from '../lib/web3modal';
+
 const queryClient = new QueryClient();
 if (!projectId) {
   throw new Error('Project ID is not defined');
 }
+
+const networks: [AppKitNetwork, ...AppKitNetwork[]] = [mainnet, arbitrum, solana, solanaTestnet, solanaDevnet]
+
+
+export const wagmiAdapter = new WagmiAdapter({
+  ssr: true,
+  projectId,
+  networks
+})
+
+// 2. Create Solana adapter
+const solanaWeb3JsAdapter = new SolanaAdapter()
+
+
 
 // Set up metadata
 const metadata = {
@@ -20,41 +36,55 @@ const metadata = {
   icons: ['https://avatars.githubusercontent.com/u/179229932'],
 };
 
-export const solanaWeb3JsAdapter = new SolanaAdapter({
-  wallets: [new PhantomWalletAdapter(),]
-})
+
 
 
 // Create the modal
+// const modal = createAppKit({
+//   adapters: [wagmiAdapter, solanaWeb3JsAdapter],
+//   projectId,
+//   networks: [mainnet, arbitrum, base, scroll, polygon, solana, solanaTestnet, solanaDevnet],
+//   defaultNetwork: mainnet,
+//   metadata: metadata,
+//   features: {
+//     analytics: true,
+//     connectMethodsOrder: ['wallet', 'social'],
+//     onramp: false,
+//   },
+//   enableWalletConnect: true,
+//   enableInjected: true,
+//   enableEIP6963: true,
+//   enableCoinbase: true,
+//   allWallets: 'SHOW',
+//   featuredWalletIds: [
+//     'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96', // MetaMask
+//     'fd20dc426fb37566d803205b19bbc1d4096b248ac04548e3cfb6b3a38bd033aa', // Coinbase
+//     '4622a2b2d6af1c9844944291e5e7351a6aa24cd7b23099efac1b2fd875da31a0', // Trust Wallet
+//   ],
+//   themeMode: 'dark',
+//   themeVariables: {
+//     '--w3m-font-family': 'Roboto, sans-serif',
+//     '--w3m-accent': '#00b8d8',
+//     '--w3m-color-mix': '#00b8d8',
+//     '--w3m-color-mix-strength': 20,
+//   },
+// });
+
 const modal = createAppKit({
   adapters: [wagmiAdapter, solanaWeb3JsAdapter],
+  networks,
+  metadata,
   projectId,
-  networks: [mainnet, arbitrum, base, scroll, polygon, solana, solanaTestnet, solanaDevnet],
-  defaultNetwork: mainnet,
-  metadata: metadata,
   features: {
     analytics: true,
-    connectMethodsOrder: ['wallet', 'social'],
-    onramp: false,
-  },
-  enableWalletConnect: true,
-  enableInjected: true,
-  enableEIP6963: true,
-  enableCoinbase: true,
-  allWallets: 'SHOW',
-  featuredWalletIds: [
-    'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96', // MetaMask
-    'fd20dc426fb37566d803205b19bbc1d4096b248ac04548e3cfb6b3a38bd033aa', // Coinbase
-    '4622a2b2d6af1c9844944291e5e7351a6aa24cd7b23099efac1b2fd875da31a0', // Trust Wallet
-  ],
-  themeMode: 'dark',
+  }, themeMode: 'dark',
   themeVariables: {
     '--w3m-font-family': 'Roboto, sans-serif',
     '--w3m-accent': '#00b8d8',
     '--w3m-color-mix': '#00b8d8',
     '--w3m-color-mix-strength': 20,
   },
-});
+})
 
 function ContextProvider({ children, cookies }: { children: ReactNode; cookies: string | null }) {
   const initialState = cookieToInitialState(wagmiAdapter.wagmiConfig as Config, cookies);
