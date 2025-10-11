@@ -430,6 +430,59 @@ export default function BoostPackCheckout() {
         dispatch(saveTokenBoostsToStorage());
         await refreshUserTokens();
 
+        // Save free promo order to admin/orders system
+        try {
+          const selectedTokenData = userTokens.filter(token => selectedTokens.includes(token.id));
+          const orderData = {
+            type: 'boost_pack',
+            paymentMethod: 'free_promo',
+            amount: '0.00',
+            currency: 'FREE',
+            txHash: null,
+            productName: `${boostPack.name} - Free Promo (${promoCode.toUpperCase()})`,
+            status: 'completed',
+            metadata: {
+              paymentSource: 'boost_pack_checkout',
+              boostPackType: packId,
+              boostPackName: boostPack.name,
+              basePoints: boostPack.points,
+              promoCode: promoCode.toUpperCase(),
+              promoDiscount: 100,
+              isFreePromo: true,
+              walletAddress: address,
+              selectedTokens: selectedTokenData.map(token => ({
+                tokenId: token.id,
+                tokenName: token.name || token.tokenName,
+                tokenSymbol: token.symbol || token.tokenSymbol,
+                multiplier: token.multiplier || 1.0,
+                finalBoost: Math.floor(boostPack.points * (token.multiplier || 1.0))
+              })),
+              totalTokens: selectedTokenData.length,
+              totalBoostApplied: selectedTokenData.reduce(
+                (sum, t) => sum + Math.floor(boostPack.points * (t.multiplier || 1.0)),
+                0
+              )
+            }
+          };
+
+          const orderResponse = await fetch('/api/orders/create', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(orderData),
+          });
+
+          if (orderResponse.ok) {
+            console.log('✅ Free promo boost pack order saved to admin system successfully');
+          } else {
+            console.error('❌ Failed to save free promo boost pack order to admin system');
+          }
+        } catch (orderError) {
+          console.error('❌ Error saving free promo boost pack order:', orderError);
+          // Don't fail the boost activation if order saving fails
+        }
+
         // Redirect to success page with promo flag
         router.push(
           `/pricing/boost-pack/success?pack=${packId}&tokens=${selectedTokens.join(',')}&promo=${promoCode.toUpperCase()}&free=true`
@@ -528,6 +581,61 @@ export default function BoostPackCheckout() {
       });
 
       console.log('Payment successful:', txHash);
+
+      // Save paid order to admin/orders system
+      try {
+        const selectedTokenData = userTokens.filter(token => selectedTokens.includes(token.id));
+        const orderData = {
+          type: 'boost_pack',
+          paymentMethod: paymentMethod,
+          amount: pricing.finalPrice.toString(),
+          currency: paymentMethod.toUpperCase(),
+          txHash: txHash,
+          productName: `${boostPack.name} - ${selectedTokenData.length} Token${selectedTokenData.length > 1 ? 's' : ''}`,
+          status: 'completed',
+          metadata: {
+            paymentSource: 'boost_pack_checkout',
+            boostPackType: packId,
+            boostPackName: boostPack.name,
+            basePoints: boostPack.points,
+            originalPrice: boostPack.priceUSD,
+            finalPrice: pricing.finalPrice,
+            promoCode: appliedPromo ? promoCode.toUpperCase() : null,
+            promoDiscount: appliedPromo ? appliedPromo.discount : 0,
+            walletAddress: address,
+            selectedTokens: selectedTokenData.map(token => ({
+              tokenId: token.id,
+              tokenName: token.name || token.tokenName,
+              tokenSymbol: token.symbol || token.tokenSymbol,
+              multiplier: token.multiplier || 1.0,
+              finalBoost: Math.floor(boostPack.points * (token.multiplier || 1.0))
+            })),
+            totalTokens: selectedTokenData.length,
+            totalBoostApplied: selectedTokenData.reduce(
+              (sum, t) => sum + Math.floor(boostPack.points * (t.multiplier || 1.0)),
+              0
+            )
+          }
+        };
+
+        const orderResponse = await fetch('/api/orders/create', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(orderData),
+        });
+
+        if (orderResponse.ok) {
+          console.log('✅ Paid boost pack order saved to admin system successfully');
+        } else {
+          console.error('❌ Failed to save paid boost pack order to admin system');
+        }
+      } catch (orderError) {
+        console.error('❌ Error saving paid boost pack order:', orderError);
+        // Don't fail the boost activation if order saving fails
+      }
+
       const promoParam = appliedPromo
         ? `&promo=${promoCode.toUpperCase()}&discount=${pricing.discountAmount}`
         : '';

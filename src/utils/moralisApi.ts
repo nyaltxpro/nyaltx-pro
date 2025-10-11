@@ -24,9 +24,34 @@ interface MoralisTokenPrice {
   isVerifiedContract?: boolean;
 }
 
+interface MoralisTokenMetadata {
+  address: string;
+  name: string;
+  symbol: string;
+  decimals: number;
+  logo?: string;
+  thumbnail?: string;
+  possible_spam: boolean;
+  verified_contract: boolean;
+  total_supply?: string;
+  total_supply_formatted?: string;
+  percentage_relative_to_total_supply?: number;
+}
+
+interface MoralisTokenData {
+  price?: MoralisTokenPrice;
+  metadata?: MoralisTokenMetadata;
+}
+
 interface MoralisApiResponse {
   success: boolean;
   data?: MoralisTokenPrice;
+  error?: string;
+}
+
+interface MoralisTokenResponse {
+  success: boolean;
+  data?: MoralisTokenData;
   error?: string;
 }
 
@@ -198,6 +223,190 @@ export const isMoralisSupportedChain = (chain: string): boolean => {
 };
 
 /**
+ * Fetch token metadata from Moralis API
+ * Supports both EVM chains and Solana
+ */
+export const fetchMoralisTokenMetadata = async (
+  chain: string,
+  tokenAddress: string,
+  retries = 2
+): Promise<MoralisTokenResponse> => {
+  const moralisChain = getMoralisChain(chain);
+  
+  if (!moralisChain) {
+    return {
+      success: false,
+      error: `Unsupported chain: ${chain}`,
+    };
+  }
+
+  if (!tokenAddress) {
+    return {
+      success: false,
+      error: 'Token address is required',
+    };
+  }
+
+  // Build API URL based on chain type
+  let metadataUrl: string;
+  if (isSolanaChain(chain)) {
+    // Solana token metadata endpoint
+    metadataUrl = `https://solana-gateway.moralis.io/token/${moralisChain}/${tokenAddress}/metadata`;
+  } else {
+    // EVM chains metadata endpoint
+    metadataUrl = `https://deep-index.moralis.io/api/v2.2/erc20/${tokenAddress}/metadata?chain=${moralisChain}`;
+  }
+
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      console.log(`🟣 Moralis Metadata API attempt ${attempt + 1}/${retries + 1} for ${chain}:${tokenAddress}`);
+      
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+      const response = await fetch(metadataUrl, {
+        method: 'GET',
+        headers: {
+          'accept': 'application/json',
+          'X-API-Key': MORALIS_API_KEY,
+          'User-Agent': 'NYALTX-Trade/1.0',
+        },
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (response.status === 429) {
+        const waitTime = Math.min(1000 * Math.pow(2, attempt), 5000);
+        console.log(`⏳ Moralis metadata rate limit, waiting ${waitTime}ms...`);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+        continue;
+      }
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      
+      // Handle different response formats for Solana vs EVM
+      let normalizedMetadata: MoralisTokenMetadata;
+      
+      if (isSolanaChain(chain)) {
+        // Solana response format
+        normalizedMetadata = {
+          address: tokenAddress,
+          name: data.name || '',
+          symbol: data.symbol || '',
+          decimals: data.decimals || 9,
+          logo: data.logo,
+          thumbnail: data.thumbnail,
+          possible_spam: data.possible_spam || false,
+          verified_contract: data.verified_contract || false,
+          total_supply: data.total_supply,
+          total_supply_formatted: data.total_supply_formatted,
+        };
+      } else {
+        // EVM response format
+        normalizedMetadata = {
+          address: tokenAddress,
+          name: data.name || '',
+          symbol: data.symbol || '',
+          decimals: parseInt(data.decimals) || 18,
+          logo: data.logo,
+          thumbnail: data.thumbnail,
+          possible_spam: data.possible_spam || false,
+          verified_contract: data.verified_contract || false,
+          total_supply: data.total_supply,
+          total_supply_formatted: data.total_supply_formatted,
+        };
+      }
+
+      console.log(`✅ Moralis Metadata API success: ${normalizedMetadata.name} (${normalizedMetadata.symbol}) for ${chain}:${tokenAddress}`);
+      return {
+        success: true,
+        data: {
+          metadata: normalizedMetadata,
+        },
+      };
+
+    } catch (error: any) {
+      console.log(`❌ Moralis Metadata API attempt ${attempt + 1} failed:`, error.message);
+      
+      if (attempt < retries) {
+        const waitTime = 500 * (attempt + 1);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+        continue;
+      }
+      
+      return {
+        success: false,
+        error: error.message || 'Failed to fetch metadata from Moralis',
+      };
+    }
+  }
+
+  return {
+    success: false,
+    error: 'All retry attempts failed',
+  };
+};
+
+/**
+ * Fetch both price and metadata for a token from Moralis API
+ */
+export const fetchMoralisTokenData = async (
+  chain: string,
+  tokenAddress: string,
+  retries = 2
+): Promise<MoralisTokenResponse> => {
+  try {
+    console.log(`🟣 Fetching complete token data from Moralis for ${chain}:${tokenAddress}`);
+    
+    // Fetch both price and metadata in parallel
+    const [priceResponse, metadataResponse] = await Promise.allSettled([
+      fetchMoralisTokenPrice(chain, tokenAddress, retries),
+      fetchMoralisTokenMetadata(chain, tokenAddress, retries)
+    ]);
+
+    const tokenData: MoralisTokenData = {};
+
+    // Handle price data
+    if (priceResponse.status === 'fulfilled' && priceResponse.value.success) {
+      tokenData.price = priceResponse.value.data;
+    } else {
+      console.log('⚠️ Price data not available from Moralis');
+    }
+
+    // Handle metadata
+    if (metadataResponse.status === 'fulfilled' && metadataResponse.value.success) {
+      tokenData.metadata = metadataResponse.value.data?.metadata;
+    } else {
+      console.log('⚠️ Metadata not available from Moralis');
+    }
+
+    // Return success if we got at least one type of data
+    if (tokenData.price || tokenData.metadata) {
+      return {
+        success: true,
+        data: tokenData,
+      };
+    }
+
+    return {
+      success: false,
+      error: 'No data available from Moralis API',
+    };
+
+  } catch (error: any) {
+    return {
+      success: false,
+      error: error.message || 'Failed to fetch token data from Moralis',
+    };
+  }
+};
+
+/**
  * Get supported chains list
  */
 export const getMoralisSupportedChains = (): string[] => {
@@ -206,6 +415,8 @@ export const getMoralisSupportedChains = (): string[] => {
 
 export default {
   fetchMoralisTokenPrice,
+  fetchMoralisTokenMetadata,
+  fetchMoralisTokenData,
   isMoralisSupportedChain,
   getMoralisSupportedChains,
 };
