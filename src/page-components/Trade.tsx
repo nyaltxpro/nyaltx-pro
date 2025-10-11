@@ -16,8 +16,8 @@ import {
 import { getCryptoIconUrl, getCryptoIconUrlWithFallback } from '@/utils/cryptoIcons';
 import { getCryptoName } from '@/utils/cryptoNames';
 import { geckoTerminalAPI } from '@/utils/geckoTerminalApi';
+import { fetchMoralisTokenData, fetchMoralisTokenPrice, isMoralisSupportedChain } from '@/utils/moralisApi';
 import { fetchNYAXPrice, isNYAXToken } from '@/utils/nyaxPriceApi';
-import { fetchMoralisTokenPrice, fetchMoralisTokenData, isMoralisSupportedChain } from '@/utils/moralisApi';
 import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
 import React, { Suspense, useEffect, useState } from 'react';
@@ -82,12 +82,12 @@ const getChainName = (chainId: number): string => {
 // Helper function to compare addresses (case-insensitive for EVM, case-sensitive for Solana)
 const compareAddresses = (addr1: string, addr2: string, chain?: string): boolean => {
     if (!addr1 || !addr2) return false;
-    
+
     // Solana addresses are case-sensitive
     if (chain?.toLowerCase() === 'solana') {
         return addr1 === addr2;
     }
-    
+
     // EVM addresses are case-insensitive
     return addr1.toLowerCase() === addr2.toLowerCase();
 };
@@ -163,7 +163,7 @@ function TradingViewWithParams({
     const [isRefreshingPrice, setIsRefreshingPrice] = useState(false);
     const [userFavorites, setUserFavorites] = useState<any[]>([]);
     const [isLoadingFavorites, setIsLoadingFavorites] = useState(false);
-    
+
     // Moralis token data state
     const [moralisTokenData, setMoralisTokenData] = useState<any>(null);
     const [isLoadingMoralisData, setIsLoadingMoralisData] = useState(false);
@@ -388,7 +388,7 @@ function TradingViewWithParams({
     useEffect(() => {
         const fetchMoralisData = async () => {
             if (!addressParam || !chainParam) return;
-            
+
             if (!isMoralisSupportedChain(chainParam)) {
                 console.log(`⚠️ Chain "${chainParam}" not supported by Moralis for token data`);
                 return;
@@ -398,11 +398,11 @@ function TradingViewWithParams({
             try {
                 console.log(`🟣 Fetching comprehensive token data from Moralis for ${chainParam}:${addressParam}`);
                 const response = await fetchMoralisTokenData(chainParam, addressParam);
-                
+
                 if (response.success && response.data) {
                     setMoralisTokenData(response.data);
                     console.log('✅ Moralis token data loaded:', response.data);
-                    
+
                     // If we have metadata with logo and no header image yet, use it
                     if (response.data.metadata?.logo && !headerImageUrl) {
                         setHeaderImageUrl(response.data.metadata.logo);
@@ -708,7 +708,7 @@ function TradingViewWithParams({
                         console.log(
                             `🔍 Trade Page: Calling Moralis with chain="${chain}", address="${address}" (case preserved)`
                         );
-                        
+
                         // Use comprehensive token data if available, otherwise fetch price only
                         let moralisResponse;
                         if (moralisTokenData?.price) {
@@ -720,7 +720,7 @@ function TradingViewWithParams({
                         } else {
                             moralisResponse = await fetchMoralisTokenPrice(chain, address);
                         }
-                        
+
                         if (moralisResponse.success && moralisResponse.data && moralisResponse.data.usdPrice > 0) {
                             if (aborted) return;
                             console.log('✅ Moralis: Price found', moralisResponse.data.usdPrice);
@@ -913,10 +913,10 @@ function TradingViewWithParams({
                                         />
                                     ) : moralisTokenData?.metadata?.logo ? (
                                         // eslint-disable-next-line @next/next/no-img-element
-                                        <img 
-                                            src={moralisTokenData.metadata.logo} 
-                                            alt={baseToken} 
-                                            className="w-10 h-10 object-cover" 
+                                        <img
+                                            src={moralisTokenData.metadata.logo}
+                                            alt={baseToken}
+                                            className="w-10 h-10 object-cover"
                                         />
                                     ) : headerImageUrl ? (
                                         // eslint-disable-next-line @next/next/no-img-element
@@ -934,9 +934,9 @@ function TradingViewWithParams({
                                 <div>
                                     <div className="flex items-center gap-2">
                                         <h3 className="text-lg font-semibold">
-                                            {tokenSocialLinks?.tokenName || 
-                                             moralisTokenData?.metadata?.name || 
-                                             getCryptoName(baseToken)}
+                                            {tokenSocialLinks?.tokenName ||
+                                                moralisTokenData?.metadata?.name ||
+                                                getCryptoName(baseToken)}
                                         </h3>
                                         {moralisTokenData?.metadata && (
                                             <span className="text-xs bg-purple-500/20 text-purple-400 px-2 py-1 rounded">
@@ -1001,21 +1001,20 @@ function TradingViewWithParams({
                                                     ? formatCurrency(pairData.price, 'USD', pairData.price < 1 ? 6 : 2)
                                                     : '$0.00'}
                                         </div>
-                                        {priceSource && (
-                                            <div className={`text-xs px-2 py-1 rounded-full font-medium ${
-                                                priceSource === 'dexscreener' 
-                                                    ? 'bg-blue-500/20 text-blue-400' 
+                                        {/* {priceSource && (
+                                            <div className={`text-xs px-2 py-1 rounded-full font-medium ${priceSource === 'dexscreener'
+                                                    ? 'bg-blue-500/20 text-blue-400'
                                                     : priceSource === 'geckoterminal'
-                                                    ? 'bg-green-500/20 text-green-400'
-                                                    : priceSource === 'moralis'
-                                                    ? 'bg-purple-500/20 text-purple-400'
-                                                    : 'bg-orange-500/20 text-orange-400'
-                                            }`}>
-                                                {priceSource === 'dexscreener' ? 'DexScreener' : 
-                                                 priceSource === 'geckoterminal' ? 'GeckoTerminal' : 
-                                                 priceSource === 'moralis' ? 'Moralis' : 'CoinGecko'}
+                                                        ? 'bg-green-500/20 text-green-400'
+                                                        : priceSource === 'moralis'
+                                                            ? 'bg-purple-500/20 text-purple-400'
+                                                            : 'bg-orange-500/20 text-orange-400'
+                                                }`}>
+                                                {priceSource === 'dexscreener' ? 'DexScreener' :
+                                                    priceSource === 'geckoterminal' ? 'GeckoTerminal' :
+                                                        priceSource === 'moralis' ? 'Moralis' : 'CoinGecko'}
                                             </div>
-                                        )}
+                                        )} */}
                                         <button
                                             onClick={handleRefreshPrice}
                                             disabled={isRefreshingPrice}
@@ -1043,7 +1042,7 @@ function TradingViewWithParams({
                         </div>
 
                         {/* Moralis Token Metadata */}
-                        {moralisTokenData?.metadata && (
+                        {/* {moralisTokenData?.metadata && (
                             <div className="bg-[#1a2932] rounded-lg p-3 mb-3">
                                 <div className="flex items-center gap-2 mb-2">
                                     <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
@@ -1086,7 +1085,7 @@ function TradingViewWithParams({
                                     )}
                                 </div>
                             </div>
-                        )}
+                        )} */}
 
                         {/* Quick Links Row */}
                         <div className="flex items-center gap-3 mb-3 text-gray-300">
