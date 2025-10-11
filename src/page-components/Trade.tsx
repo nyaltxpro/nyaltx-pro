@@ -17,6 +17,7 @@ import { getCryptoIconUrl, getCryptoIconUrlWithFallback } from '@/utils/cryptoIc
 import { getCryptoName } from '@/utils/cryptoNames';
 import { geckoTerminalAPI } from '@/utils/geckoTerminalApi';
 import { fetchNYAXPrice, isNYAXToken } from '@/utils/nyaxPriceApi';
+import { fetchMoralisTokenPrice, isMoralisSupportedChain } from '@/utils/moralisApi';
 import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
 import React, { Suspense, useEffect, useState } from 'react';
@@ -144,7 +145,7 @@ function TradingViewWithParams({
     const [dexPriceUsd, setDexPriceUsd] = useState<string | null>(null);
     const [dexChange24h, setDexChange24h] = useState<number | null>(null);
     const [priceSource, setPriceSource] = useState<
-        'dexscreener' | 'geckoterminal' | 'coingecko' | null
+        'dexscreener' | 'geckoterminal' | 'coingecko' | 'moralis' | null
     >(null);
     const [isRefreshingPrice, setIsRefreshingPrice] = useState(false);
     const [userFavorites, setUserFavorites] = useState<any[]>([]);
@@ -645,7 +646,33 @@ function TradingViewWithParams({
                     console.log('❌ GeckoTerminal failed:', e);
                 }
 
-                // Method 3: If both fail, the existing CoinGecko fallback in pairData will be used
+                // Method 3: Try Moralis API as fallback (supports Solana and EVM chains)
+                if (isMoralisSupportedChain(chain)) {
+                    try {
+                        console.log('🟣 Trying Moralis API...');
+                        console.log(
+                            `🔍 Trade Page: Calling Moralis with chain="${chain}", address="${address}"`
+                        );
+                        const moralisResponse = await fetchMoralisTokenPrice(chain, address);
+                        if (moralisResponse.success && moralisResponse.data && moralisResponse.data.usdPrice > 0) {
+                            if (aborted) return;
+                            console.log('✅ Moralis: Price found', moralisResponse.data.usdPrice);
+                            setDexPriceUsd(moralisResponse.data.usdPrice.toString());
+                            setPriceSource('moralis');
+                            const change24h = moralisResponse.data.usdPrice24hrPercentChange;
+                            setDexChange24h(change24h && !isNaN(change24h) ? change24h : null);
+                            return; // Success, exit early
+                        } else {
+                            console.log('❌ Moralis API returned no valid price data:', moralisResponse.error);
+                        }
+                    } catch (e) {
+                        console.log('❌ Moralis failed:', e);
+                    }
+                } else {
+                    console.log(`⚠️ Chain "${chain}" not supported by Moralis API`);
+                }
+
+                // Method 4: If all fail, the existing CoinGecko fallback in pairData will be used
                 console.log('⚠️ All price APIs failed, falling back to CoinGecko pair data');
             } catch (e) {
                 console.error('💥 Price fetching error:', e);
@@ -667,7 +694,7 @@ function TradingViewWithParams({
         fetchPriceData(true);
     };
 
-    // Fetch price data with multiple fallbacks: DexScreener -> GeckoTerminal -> CoinGecko
+    // Fetch price data with multiple fallbacks: NYAX -> GeckoTerminal -> Moralis -> CoinGecko
     useEffect(() => {
         fetchPriceData();
     }, [fetchPriceData]);
@@ -893,18 +920,21 @@ function TradingViewWithParams({
                                                     ? formatCurrency(pairData.price, 'USD', pairData.price < 1 ? 6 : 2)
                                                     : '$0.00'}
                                         </div>
-                                        {/* {priceSource && (
-                      <div className={`text-xs px-2 py-1 rounded-full font-medium ${
-                        priceSource === 'dexscreener' 
-                          ? 'bg-blue-500/20 text-blue-400' 
-                          : priceSource === 'geckoterminal'
-                          ? 'bg-green-500/20 text-green-400'
-                          : 'bg-purple-500/20 text-purple-400'
-                      }`}>
-                        {priceSource === 'dexscreener' ? 'DexScreener' : 
-                         priceSource === 'geckoterminal' ? 'GeckoTerminal' : 'CoinGecko'}
-                      </div>
-                    )} */}
+                                        {priceSource && (
+                                            <div className={`text-xs px-2 py-1 rounded-full font-medium ${
+                                                priceSource === 'dexscreener' 
+                                                    ? 'bg-blue-500/20 text-blue-400' 
+                                                    : priceSource === 'geckoterminal'
+                                                    ? 'bg-green-500/20 text-green-400'
+                                                    : priceSource === 'moralis'
+                                                    ? 'bg-purple-500/20 text-purple-400'
+                                                    : 'bg-orange-500/20 text-orange-400'
+                                            }`}>
+                                                {priceSource === 'dexscreener' ? 'DexScreener' : 
+                                                 priceSource === 'geckoterminal' ? 'GeckoTerminal' : 
+                                                 priceSource === 'moralis' ? 'Moralis' : 'CoinGecko'}
+                                            </div>
+                                        )}
                                         <button
                                             onClick={handleRefreshPrice}
                                             disabled={isRefreshingPrice}
