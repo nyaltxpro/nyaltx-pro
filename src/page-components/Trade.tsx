@@ -79,12 +79,25 @@ const getChainName = (chainId: number): string => {
     return chainNames[chainId] || 'ethereum';
 };
 
+// Helper function to compare addresses (case-insensitive for EVM, case-sensitive for Solana)
+const compareAddresses = (addr1: string, addr2: string, chain?: string): boolean => {
+    if (!addr1 || !addr2) return false;
+    
+    // Solana addresses are case-sensitive
+    if (chain?.toLowerCase() === 'solana') {
+        return addr1 === addr2;
+    }
+    
+    // EVM addresses are case-insensitive
+    return addr1.toLowerCase() === addr2.toLowerCase();
+};
+
 // Move useSearchParams into a child and wrap with Suspense to satisfy Next.js requirements
 function TradePageContent() {
     const searchParams = useSearchParams();
     const baseToken = (searchParams?.get('base') || '').toUpperCase();
     const chainParam = searchParams?.get('chain')?.toLowerCase() || '';
-    const addressParam = searchParams?.get('address')?.toLowerCase() || '';
+    const addressParam = searchParams?.get('address') || ''; // Preserve case for Solana addresses
     const quoteToken = searchParams?.get('quote') || 'USDT';
     const videoId = searchParams?.get('video') || 'VNTK2Bwyq7s';
 
@@ -355,7 +368,7 @@ function TradingViewWithParams({
                 if (response.ok) {
                     const { favorites } = await response.json();
                     const isFavorited = favorites.some(
-                        (fav: any) => fav.token_address.toLowerCase() === addressParam.toLowerCase()
+                        (fav: any) => compareAddresses(fav.token_address, addressParam, chainParam)
                     );
                     setFavorited(isFavorited);
                 }
@@ -472,7 +485,7 @@ function TradingViewWithParams({
 
         // If explicit address is provided, resolve by address (and optional chain)
         if (addressParam) {
-            const byAddress = list.filter(t => t.address.toLowerCase() === addressParam);
+            const byAddress = list.filter(t => compareAddresses(t.address, addressParam, chainParam));
             if (byAddress.length) {
                 if (chainParam) {
                     const byChain = byAddress.find(t => t.chain.toLowerCase() === chainParam.toLowerCase());
@@ -530,8 +543,7 @@ function TradingViewWithParams({
                 if (nyaxList && nyaxList.length > 0) {
                     let found: any = null;
                     if (addressParam) {
-                        const lower = addressParam.toLowerCase();
-                        found = nyaxList.find(t => (t.contractAddress || '').toLowerCase() === lower);
+                        found = nyaxList.find(t => compareAddresses(t.contractAddress || '', addressParam, chainParam));
                     }
                     if (!found) {
                         const desiredChain = chainParam;
@@ -651,7 +663,7 @@ function TradingViewWithParams({
                     try {
                         console.log('🟣 Trying Moralis API...');
                         console.log(
-                            `🔍 Trade Page: Calling Moralis with chain="${chain}", address="${address}"`
+                            `🔍 Trade Page: Calling Moralis with chain="${chain}", address="${address}" (case preserved)`
                         );
                         const moralisResponse = await fetchMoralisTokenPrice(chain, address);
                         if (moralisResponse.success && moralisResponse.data && moralisResponse.data.usdPrice > 0) {
