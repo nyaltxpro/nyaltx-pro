@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
     // Disable ESLint during builds
     ignoreDuringBuilds: true,
   },
+  
   typescript: {
     // Disable TypeScript errors during builds (optional)
     ignoreBuildErrors: true,

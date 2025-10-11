@@ -1,5 +1,5 @@
 'use client';
-import { SolanaAdapter } from '@reown/appkit-adapter-solana';
+import { SolanaAdapter } from '@reown/appkit-adapter-solana/react';
 import { arbitrum, base, mainnet, polygon, scroll, solana, solanaDevnet, solanaTestnet } from '@reown/appkit/networks';
 import { createAppKit } from '@reown/appkit/react';
 import { PhantomWalletAdapter } from '@solana/wallet-adapter-wallets';
