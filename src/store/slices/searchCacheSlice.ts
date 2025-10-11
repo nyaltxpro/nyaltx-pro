@@ -35,14 +35,22 @@ export interface CachedRecentlyAddedCoin {
   name: string;
   symbol: string;
   image: string;
-  current_price: number;
-  market_cap: number;
-  total_volume: number;
-  price_change_percentage_24h: number;
-  market_cap_rank: number;
-  contractAddresses?: { [key: string]: string };
-  primaryChain?: string | null;
-  primaryAddress?: string | null;
+  current_price: number | null;
+  market_cap: number | null;
+  total_volume: number | null;
+  price_change_percentage_24h: number | null;
+  market_cap_rank: number | null;
+  contractAddresses: { [key: string]: string };
+  primaryChain: string | null;
+  primaryAddress: string | null;
+  // Additional DexScreener fields
+  description?: string;
+  links?: Array<{
+    type?: string;
+    label?: string;
+    url: string;
+  }>;
+  dexscreenerUrl?: string;
 }
 
 // Market mover coin interface
@@ -105,7 +113,7 @@ interface SearchCacheState {
 
 const SEARCH_CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 const TRENDING_CACHE_DURATION = 30 * 60 * 1000; // 30 minutes
-const RECENTLY_ADDED_CACHE_DURATION = 30 * 60 * 1000; // 30 minutes
+const RECENTLY_ADDED_CACHE_DURATION = 10 * 60 * 1000; // 10 minutes (DexScreener updates frequently)
 
 const initialState: SearchCacheState = {
   coinGeckoSearchCache: {},

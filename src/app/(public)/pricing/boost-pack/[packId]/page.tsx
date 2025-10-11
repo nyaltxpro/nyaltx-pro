@@ -439,6 +439,7 @@ export default function BoostPackCheckout() {
             txHash: null,
             productName: `${boostPack.name} - Free Promo (${promoCode.toUpperCase()})`,
             status: 'completed',
+            contractAddress: selectedTokenData.length > 0 ? selectedTokenData[0].address : undefined,
             metadata: {
               paymentSource: 'boost_pack_checkout',
               boostPackType: packId,
@@ -452,6 +453,8 @@ export default function BoostPackCheckout() {
                 tokenId: token.id,
                 tokenName: token.name || token.tokenName,
                 tokenSymbol: token.symbol || token.tokenSymbol,
+                contractAddress: token.address,
+                chain: token.blockchain || 'ethereum',
                 multiplier: token.multiplier || 1.0,
                 finalBoost: Math.floor(boostPack.points * (token.multiplier || 1.0))
               })),
@@ -591,6 +594,7 @@ export default function BoostPackCheckout() {
           txHash: txHash,
           productName: `${boostPack.name} - ${selectedTokenData.length} Token${selectedTokenData.length > 1 ? 's' : ''}`,
           status: 'completed',
+          contractAddress: selectedTokenData.length > 0 ? selectedTokenData[0].address : undefined,
           metadata: {
             paymentSource: 'boost_pack_checkout',
             boostPackType: packId,
@@ -605,6 +609,8 @@ export default function BoostPackCheckout() {
               tokenId: token.id,
               tokenName: token.name || token.tokenName,
               tokenSymbol: token.symbol || token.tokenSymbol,
+              contractAddress: token.address,
+              chain: token.blockchain || 'ethereum',
               multiplier: token.multiplier || 1.0,
               finalBoost: Math.floor(boostPack.points * (token.multiplier || 1.0))
             })),

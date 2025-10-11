@@ -132,16 +132,16 @@ export default function RecentlyAddedCoins() {
     <div className="w-full">
       <div className="flex justify-between items-center mb-4">
         <div>
-          <h2 className="text-xl font-semibold">Recently Added Coins</h2>
+          <h2 className="text-xl font-semibold">🔥 Latest Token Profiles</h2>
           <div className="flex items-center gap-2 mt-1">
             {hasCachedData && !loading && (
               <span className="text-xs text-green-400 bg-green-900/20 px-2 py-1 rounded">
-                📱 Recently Added Cached
+                📱 DexScreener Cached
               </span>
             )}
             {loading && (
               <span className="text-xs text-blue-400 bg-blue-900/20 px-2 py-1 rounded animate-pulse">
-                🔄 Loading Recently Added...
+                🔄 Loading DexScreener...
               </span>
             )}
             {coins.length > 0 && !loading && (

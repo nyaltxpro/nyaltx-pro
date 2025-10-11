@@ -33,10 +33,10 @@ export const useRecentlyAddedCoins = () => {
       dispatch(cleanExpiredCache());
 
       dispatch(setRecentlyAddedLoading(true));
-      console.log('🔄 Fetching fresh recently added coins data from API...');
+      console.log('🔄 Fetching fresh recently added coins data from DexScreener API...');
 
-      // Use the optimized API endpoint
-      const response = await fetch('/api/coingecko/recently-added', {
+      // Use the new DexScreener API endpoint
+      const response = await fetch('/api/dexscreener/recently-added?limit=20', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -44,13 +44,13 @@ export const useRecentlyAddedCoins = () => {
       });
 
       if (!response.ok) {
-        throw new Error(`API error: ${response.status} ${response.statusText}`);
+        throw new Error(`DexScreener API error: ${response.status} ${response.statusText}`);
       }
 
       const data = await response.json();
 
       if (data && data.coins) {
-        // The API already returns enhanced coins with contract addresses
+        // Transform DexScreener data to our cached format
         const enhancedCoins: CachedRecentlyAddedCoin[] = data.coins.map((coin: any) => ({
           id: coin.id,
           name: coin.name,
@@ -64,19 +64,23 @@ export const useRecentlyAddedCoins = () => {
           contractAddresses: coin.contractAddresses || {},
           primaryChain: coin.primaryChain || null,
           primaryAddress: coin.primaryAddress || null,
+          // Additional DexScreener fields
+          description: coin.description,
+          links: coin.links,
+          dexscreenerUrl: coin.dexscreenerUrl,
         }));
 
         dispatch(setRecentlyAddedCoins(enhancedCoins));
         console.log(
-          `✅ Cached ${enhancedCoins.length} recently added coins with contract addresses from API`
+          `✅ Cached ${enhancedCoins.length} recently added tokens from DexScreener API`
         );
         return enhancedCoins;
       } else {
-        throw new Error('Invalid recently added coins data structure from API');
+        throw new Error('Invalid recently added tokens data structure from DexScreener API');
       }
     } catch (err) {
-      console.error('❌ Error fetching recently added coins:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Failed to load recently added coins';
+      console.error('❌ Error fetching recently added tokens from DexScreener:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load recently added tokens';
       dispatch(setRecentlyAddedError(errorMessage));
       throw err;
     }
@@ -112,15 +116,15 @@ export const useRecentlyAddedCoins = () => {
 
     initializeData();
 
-    // Refresh every 30 minutes
+    // Refresh every 10 minutes (DexScreener updates more frequently)
     const intervalId = setInterval(
       () => {
-        console.log('⏰ Auto-refreshing recently added coins...');
+        console.log('⏰ Auto-refreshing DexScreener tokens...');
         fetchRecentlyAddedCoins().catch(error => {
           console.error('❌ Error in auto-refresh:', error);
         });
       },
-      30 * 60 * 1000
+      10 * 60 * 1000
     );
 
     return () => clearInterval(intervalId);

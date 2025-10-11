@@ -26,6 +26,7 @@ const storePaymentOrder = async (params: {
   promoCode?: string;
   promoDiscount?: number;
   walletAddress?: string;
+  email?: string;
   selectedToken?: {
     tokenId: string;
     tokenName?: string;
@@ -33,6 +34,8 @@ const storePaymentOrder = async (params: {
     basePoints?: number;
     boostMultiplier?: number;
     finalPoints?: number;
+    contractAddress?: string;
+    chain?: string;
   };
   totalPoints?: number;
 }) => {
@@ -45,6 +48,8 @@ const storePaymentOrder = async (params: {
       txHash: params.txHash,
       productName: `Race to Liberty ${params.tierName || 'Tier'} - ${params.currency} Payment`,
       status: 'completed',
+      email: params.email,
+      contractAddress: params.selectedToken?.contractAddress,
       metadata: {
         paymentSource: 'race_to_liberty_checkout',
         tier: params.tier,
@@ -55,6 +60,7 @@ const storePaymentOrder = async (params: {
         promoCode: params.promoCode,
         promoDiscount: params.promoDiscount,
         walletAddress: params.walletAddress,
+        email: params.email,
         selectedToken: params.selectedToken,
         totalPoints: params.totalPoints,
         ethAmount: params.ethAmount
@@ -133,6 +139,8 @@ interface CoinOption {
   isUserToken: boolean;
   boostMultiplier?: number;
   tokenId?: string;
+  contractAddress?: string;
+  chain?: string;
 }
 
 const TIER_MULTIPLIERS = {
@@ -257,6 +265,8 @@ export default function RaceToLibertyCheckout({
         isUserToken: true,
         boostMultiplier: token.boostMultiplier || 1,
         tokenId: token.id,
+        contractAddress: token.contractAddress,
+        chain: token.chain,
       }));
       setAvailableCoins(userCoinOptions);
     }
@@ -344,13 +354,16 @@ export default function RaceToLibertyCheckout({
         promoCode: promoApplied ? promoCode.toUpperCase() : undefined,
         promoDiscount: promoApplied ? promoDiscount * 100 : undefined,
         walletAddress: address,
+        email: email || undefined,
         selectedToken: selectedCoin ? {
           tokenId: selectedCoin,
           tokenName: selectedCoinData?.name,
           tokenSymbol: selectedCoinData?.symbol,
           basePoints: basePoints,
           boostMultiplier: boostMultiplier,
-          finalPoints: totalPoints
+          finalPoints: totalPoints,
+          contractAddress: selectedCoinData?.contractAddress,
+          chain: selectedCoinData?.chain
         } : undefined,
         totalPoints: totalPoints
       });
@@ -438,13 +451,16 @@ export default function RaceToLibertyCheckout({
         promoCode: promoApplied ? promoCode.toUpperCase() : undefined,
         promoDiscount: promoApplied ? promoDiscount * 100 : undefined,
         walletAddress: address,
+        email: email || undefined,
         selectedToken: selectedCoin ? {
           tokenId: selectedCoin,
           tokenName: selectedCoinData?.name,
           tokenSymbol: selectedCoinData?.symbol,
           basePoints: basePoints,
           boostMultiplier: boostMultiplier,
-          finalPoints: totalPoints
+          finalPoints: totalPoints,
+          contractAddress: selectedCoinData?.contractAddress,
+          chain: selectedCoinData?.chain
         } : undefined,
         totalPoints: totalPoints
       });
@@ -660,6 +676,8 @@ export default function RaceToLibertyCheckout({
           txHash: null,
           productName: `Race to Liberty ${tierInfo.name} - Free Promo (${promoCode.toUpperCase()})`,
           status: 'completed',
+          email: email || undefined,
+          contractAddress: selectedCoinData?.contractAddress,
           metadata: {
             paymentSource: 'race_to_liberty_checkout',
             tier: tier,
@@ -670,13 +688,16 @@ export default function RaceToLibertyCheckout({
             promoDiscount: 100,
             isFreePromo: true,
             walletAddress: address,
+            email: email || undefined,
             selectedToken: {
               tokenId: selectedCoin,
               tokenName: selectedCoinData?.name,
               tokenSymbol: selectedCoinData?.symbol,
               basePoints: basePoints,
               boostMultiplier: boostMultiplier,
-              finalPoints: totalPoints
+              finalPoints: totalPoints,
+              contractAddress: selectedCoinData?.contractAddress,
+              chain: selectedCoinData?.chain
             },
             totalPoints: totalPoints
           }
