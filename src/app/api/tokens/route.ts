@@ -187,44 +187,59 @@ async function fetchLocalTokens(params: TokenSearchParams): Promise<NormalizedTo
 
 async function fetchSolanaTokens(params: TokenSearchParams): Promise<{ tokens: NormalizedToken[], total: number, hasMore: boolean }> {
   try {
-    const url = new URL(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/solanatokens`);
+    // Direct API call to Solana Tracker instead of internal API call to fix Vercel issues
+    const API_KEY = 'd82b528d-a84d-4008-ac0f-cea123d8203c';
+    const API_URL = 'https://data.solanatracker.io/search';
     
-    if (params.query) url.searchParams.append('query', params.query);
-    if (params.symbol) url.searchParams.append('symbol', params.symbol);
-    if (params.page) url.searchParams.append('page', params.page.toString());
-    if (params.limit) url.searchParams.append('limit', params.limit.toString());
+    const url = new URL(API_URL);
+    if (params.query) url.searchParams.append('q', params.query);
+    if (params.symbol) url.searchParams.append('q', params.symbol);
+    url.searchParams.append('limit', (params.limit || 20).toString());
+    url.searchParams.append('page', (params.page || 1).toString());
 
-    const response = await fetch(url.toString());
+    const response = await fetch(url.toString(), {
+      headers: {
+        'Authorization': `Bearer ${API_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
     if (!response.ok) {
-      throw new Error(`Solana API error: ${response.status}`);
+      console.error(`Solana Tracker API error: ${response.status}`);
+      return { tokens: [], total: 0, hasMore: false };
     }
 
     const data = await response.json();
     
-    const normalizedTokens: NormalizedToken[] = data.tokens.map((token: any) => ({
-      id: `solana-${token.address}`,
-      address: token.address,
+    if (!data.data || !Array.isArray(data.data)) {
+      console.error('Invalid Solana Tracker response format');
+      return { tokens: [], total: 0, hasMore: false };
+    }
+    
+    const normalizedTokens: NormalizedToken[] = data.data.map((token: any) => ({
+      id: `solana-${token.mint || token.address}`,
+      address: token.mint || token.address || '',
       name: token.name || 'Unknown',
       symbol: token.symbol || '',
-      logo: token.logo,
+      logo: token.image,
       chain: 'solana',
-      price: token.price,
-      marketCap: token.marketCap,
-      liquidity: token.liquidity,
-      createdAt: token.createdAt,
+      price: token.priceUsd || token.price,
+      marketCap: token.marketCapUsd || token.marketCap,
+      liquidity: token.liquidityUsd || token.liquidity,
+      createdAt: token.createdAt ? new Date(token.createdAt * 1000).toISOString() : new Date().toISOString(),
       source: 'solana' as const,
       status: 'active',
       volume: token.volume,
-      volume24h: token.volume24h,
+      volume24h: token.volume_24h || token.volume24h,
       holders: token.holders,
-      transactions: token.transactions,
+      transactions: token.totalTransactions || token.transactions,
       socials: token.socials
     }));
 
     return {
       tokens: normalizedTokens,
-      total: data.pagination?.total || 0,
-      hasMore: data.pagination?.hasMore || false
+      total: data.total || 0,
+      hasMore: data.hasMore || false
     };
   } catch (error) {
     console.error('Error fetching Solana tokens:', error);
