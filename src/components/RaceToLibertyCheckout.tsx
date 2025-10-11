@@ -21,6 +21,23 @@ const storePaymentOrder = async (params: {
   amount: string;
   currency: string;
   ethAmount?: number;
+  tier?: string;
+  tierName?: string;
+  tierMultiplier?: number;
+  originalPrice?: number;
+  finalPrice?: number;
+  promoCode?: string;
+  promoDiscount?: number;
+  walletAddress?: string;
+  selectedToken?: {
+    tokenId: string;
+    tokenName?: string;
+    tokenSymbol?: string;
+    basePoints?: number;
+    boostMultiplier?: number;
+    finalPoints?: number;
+  };
+  totalPoints?: number;
 }) => {
   try {
     const orderData = {
@@ -29,10 +46,20 @@ const storePaymentOrder = async (params: {
       amount: params.amount,
       currency: params.currency,
       txHash: params.txHash,
-      productName: `Race to Liberty - Crypto Payment`,
+      productName: `Race to Liberty ${params.tierName || 'Tier'} - ${params.currency} Payment`,
       status: 'completed',
       metadata: {
         paymentSource: 'race_to_liberty_checkout',
+        tier: params.tier,
+        tierName: params.tierName,
+        tierMultiplier: params.tierMultiplier,
+        originalPrice: params.originalPrice,
+        finalPrice: params.finalPrice,
+        promoCode: params.promoCode,
+        promoDiscount: params.promoDiscount,
+        walletAddress: params.walletAddress,
+        selectedToken: params.selectedToken,
+        totalPoints: params.totalPoints,
         ethAmount: params.ethAmount
       }
     };
@@ -299,13 +326,36 @@ export default function RaceToLibertyCheckout({
       });
       console.log('ETH payment tx:', hash);
       
-      // Store the ETH payment order
+      // Store the ETH payment order with comprehensive metadata
+      const selectedCoinData = availableCoins.find(coin => coin.id === selectedCoin);
+      const basePoints = selectedCoinData?.basePoints || 100;
+      const tierMultiplier = tierInfo.multiplier;
+      const boostMultiplier = selectedCoinData?.boostMultiplier || 1;
+      const totalPoints = Math.round(basePoints * tierMultiplier * boostMultiplier);
+
       await storePaymentOrder({
         paymentMethod: 'eth',
         txHash: hash,
         amount: finalAmount.toString(),
         currency: 'ETH',
-        ethAmount: ethAmt
+        ethAmount: ethAmt,
+        tier: tier,
+        tierName: tierInfo.name,
+        tierMultiplier: tierMultiplier,
+        originalPrice: amount,
+        finalPrice: finalAmount,
+        promoCode: promoApplied ? promoCode.toUpperCase() : undefined,
+        promoDiscount: promoApplied ? promoDiscount * 100 : undefined,
+        walletAddress: address,
+        selectedToken: selectedCoin ? {
+          tokenId: selectedCoin,
+          tokenName: selectedCoinData?.name,
+          tokenSymbol: selectedCoinData?.symbol,
+          basePoints: basePoints,
+          boostMultiplier: boostMultiplier,
+          finalPoints: totalPoints
+        } : undefined,
+        totalPoints: totalPoints
       });
       
       toast.dismiss(paymentToast);
@@ -371,12 +421,35 @@ export default function RaceToLibertyCheckout({
       });
       console.log('NYAX payment tx:', hash);
       
-      // Store the NYAX payment order
+      // Store the NYAX payment order with comprehensive metadata
+      const selectedCoinData = availableCoins.find(coin => coin.id === selectedCoin);
+      const basePoints = selectedCoinData?.basePoints || 100;
+      const tierMultiplier = tierInfo.multiplier;
+      const boostMultiplier = selectedCoinData?.boostMultiplier || 1;
+      const totalPoints = Math.round(basePoints * tierMultiplier * boostMultiplier);
+
       await storePaymentOrder({
         paymentMethod: 'nyax',
         txHash: hash,
         amount: discountedUSD.toString(),
-        currency: 'NYAX'
+        currency: 'NYAX',
+        tier: tier,
+        tierName: tierInfo.name,
+        tierMultiplier: tierMultiplier,
+        originalPrice: amount,
+        finalPrice: discountedUSD,
+        promoCode: promoApplied ? promoCode.toUpperCase() : undefined,
+        promoDiscount: promoApplied ? promoDiscount * 100 : undefined,
+        walletAddress: address,
+        selectedToken: selectedCoin ? {
+          tokenId: selectedCoin,
+          tokenName: selectedCoinData?.name,
+          tokenSymbol: selectedCoinData?.symbol,
+          basePoints: basePoints,
+          boostMultiplier: boostMultiplier,
+          finalPoints: totalPoints
+        } : undefined,
+        totalPoints: totalPoints
       });
       
       toast.dismiss(nyaxToast);
@@ -579,6 +652,57 @@ export default function RaceToLibertyCheckout({
       await new Promise(resolve => setTimeout(resolve, 1500));
 
       toast.dismiss(processingToast);
+
+      // Save free promo order to admin/orders system
+      try {
+        const orderData = {
+          type: 'race_to_liberty',
+          paymentMethod: 'free_promo',
+          amount: '0.00',
+          currency: 'FREE',
+          txHash: null,
+          productName: `Race to Liberty ${tierInfo.name} - Free Promo (${promoCode.toUpperCase()})`,
+          status: 'completed',
+          metadata: {
+            paymentSource: 'race_to_liberty_checkout',
+            tier: tier,
+            tierName: tierInfo.name,
+            tierMultiplier: tierMultiplier,
+            originalPrice: amount,
+            promoCode: promoCode.toUpperCase(),
+            promoDiscount: 100,
+            isFreePromo: true,
+            walletAddress: address,
+            selectedToken: {
+              tokenId: selectedCoin,
+              tokenName: selectedCoinData?.name,
+              tokenSymbol: selectedCoinData?.symbol,
+              basePoints: basePoints,
+              boostMultiplier: boostMultiplier,
+              finalPoints: totalPoints
+            },
+            totalPoints: totalPoints
+          }
+        };
+
+        const orderResponse = await fetch('/api/orders/create', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(orderData),
+        });
+
+        if (orderResponse.ok) {
+          console.log('✅ Free promo Race to Liberty order saved to admin system successfully');
+        } else {
+          console.error('❌ Failed to save free promo Race to Liberty order to admin system');
+        }
+      } catch (orderError) {
+        console.error('❌ Error saving free promo Race to Liberty order:', orderError);
+        // Don't fail the claim if order saving fails
+      }
+
       toast.success('🎉 Free Race to Liberty claimed successfully!');
       toast.success(`🏆 You earned ${totalPoints} points with ${selectedCoinData?.name}!`, {
         duration: 4000,

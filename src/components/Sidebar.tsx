@@ -1,38 +1,28 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useEffect, useState } from 'react';
 import {
-  FaHome,
-  FaChartBar,
-  FaExchangeAlt,
-  FaRocket,
-  FaGift,
-  FaLayerGroup,
-  FaSyncAlt,
-  FaLightbulb,
-  FaWallet,
-  FaUser,
-  FaPlus,
-  FaImage,
-  FaGlobe,
-  FaShoppingCart,
-  FaFire,
-  FaCoins,
+  FaCalendarAlt,
   FaChartLine,
   FaCog,
-  FaNewspaper,
-  FaStar,
-  FaCalendarAlt,
-  FaPlay,
-  FaTrophy,
+  FaCoins,
   FaGamepad,
+  FaHome,
+  FaImage,
   FaListOl,
-  FaVideo,
+  FaNewspaper,
+  FaPlay,
+  FaPlus,
+  FaRocket,
+  FaStar,
+  FaSyncAlt,
+  FaUser,
+  FaWallet
 } from 'react-icons/fa';
-import Image from 'next/image';
 
 interface SidebarProps {
   isMobileMenuOpen: boolean;
@@ -56,11 +46,10 @@ const SidebarItem = ({ icon, text, href, isActive, isExpanded }: SidebarItemProp
     >
       <Link
         href={href}
-        className={`flex items-center py-3 px-3 mb-1 rounded-md transition-all duration-200 ${
-          isActive
+        className={`flex items-center py-3 px-3 mb-1 rounded-md transition-all duration-200 ${isActive
             ? 'bg-[#1a2932] text-[#00b8d8]'
             : 'text-gray-400 hover:bg-[#1a2932] hover:text-white'
-        }`}
+          }`}
       >
         <motion.div
           className="text-xl"
@@ -125,7 +114,7 @@ export default function Sidebar({ isMobileMenuOpen, toggleMobileMenu }: SidebarP
     { icon: <FaListOl />, text: 'Leaderboard', href: '/dashboard/leaderboard' },
     // { icon: <FaTrophy />, text: 'Race to Liberty', href: '/dashboard/race-to-liberty' },
     { icon: <FaCoins />, text: 'Create Token', href: '/dashboard/create-token' },
-    { icon: <FaPlus />, text: 'Register Token', href: '/dashboard/register-token' },
+    { icon: <FaPlus />, text: 'Register Token', href: '/pricing' },
     // { icon: <FaShoppingCart />, text: 'Checkout', href: '/dashboard/checkout' },
     { icon: <FaWallet />, text: 'Connect', href: '/dashboard/connect' },
     { icon: <FaSyncAlt />, text: 'Swap', href: '/dashboard/swap' },
@@ -144,9 +133,8 @@ export default function Sidebar({ isMobileMenuOpen, toggleMobileMenu }: SidebarP
         <div className="fixed inset-0 bg-black bg-opacity-50 z-40" onClick={toggleMobileMenu} />
       )}
       <motion.div
-        className={`fixed left-0 top-0 h-full bg-[#0f1923] z-50 ${
-          !isDesktop && (isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full')
-        }`}
+        className={`fixed left-0 top-0 h-full bg-[#0f1923] z-50 ${!isDesktop && (isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full')
+          }`}
         initial={false}
         animate={{
           width: isDesktop ? (isExpanded ? 224 : 64) : 224, // 56 = 14rem, 16 = 4rem in pixels
