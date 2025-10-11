@@ -1,11 +1,14 @@
 'use client';
+import { SolanaAdapter } from '@reown/appkit-adapter-solana/react';
+import { solana, solanaDevnet, solanaTestnet } from '@reown/appkit/networks';
+import { PhantomWalletAdapter, SolflareWalletAdapter } from '@solana/wallet-adapter-wallets';
 
-import { wagmiAdapter, projectId } from '../lib/web3modal';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { arbitrum, base, mainnet, polygon, scroll } from '@reown/appkit/networks';
 import { createAppKit } from '@reown/appkit/react';
-import React, { type ReactNode } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { type ReactNode } from 'react';
 import { cookieToInitialState, WagmiProvider, type Config } from 'wagmi';
-import { mainnet, arbitrum, base, scroll, polygon } from '@reown/appkit/networks';
+import { projectId, wagmiAdapter } from '../lib/web3modal';
 // Set up queryClient
 const queryClient = new QueryClient();
 
@@ -21,11 +24,16 @@ const metadata = {
   icons: ['https://avatars.githubusercontent.com/u/179229932'],
 };
 
+export const solanaWeb3JsAdapter = new SolanaAdapter({
+  wallets: [new PhantomWalletAdapter(), new SolflareWalletAdapter()]
+})
+
+
 // Create the modal
 const modal = createAppKit({
-  adapters: [wagmiAdapter],
+  adapters: [wagmiAdapter, solanaWeb3JsAdapter],
   projectId,
-  networks: [mainnet, arbitrum, base, scroll, polygon],
+  networks: [mainnet, arbitrum, base, scroll, polygon, solana, solanaTestnet, solanaDevnet],
   defaultNetwork: mainnet,
   metadata: metadata,
   features: {

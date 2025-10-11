@@ -1,10 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useAccount } from 'wagmi';
 import { RegisteredToken } from '@/types/token';
+import { useState } from 'react';
 import toast from 'react-hot-toast';
-import { usePhantomWallet } from '@/hooks/usePhantomWallet';
+import { useAccount } from 'wagmi';
 
 interface TokenRegistrationProps {
   onTokenRegistered?: (token: RegisteredToken) => void;
@@ -28,21 +27,10 @@ const TOKEN_CATEGORIES = [
 ];
 
 export default function TokenRegistration({ onTokenRegistered }: TokenRegistrationProps) {
-  const { address: evmAddress, isConnected: isEvmConnected } = useAccount();
-  const { 
-    publicKey: phantomAddress, 
-    isConnected: isPhantomConnected, 
-    connect: connectPhantom, 
-    disconnect: disconnectPhantom,
-    connecting: phantomConnecting,
-    isPhantomInstalled,
-    error: phantomError 
-  } = usePhantomWallet();
-  
+  const { address, isConnected } = useAccount();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [selectedWalletType, setSelectedWalletType] = useState<'evm' | 'solana'>('evm');
 
   const [formData, setFormData] = useState({
     name: '',
@@ -56,30 +44,6 @@ export default function TokenRegistration({ onTokenRegistered }: TokenRegistrati
     telegram: '',
     category: 'community',
   });
-
-  // Helper functions to determine current wallet state
-  const getCurrentWalletAddress = () => {
-    if (selectedWalletType === 'solana') {
-      return phantomAddress;
-    }
-    return evmAddress;
-  };
-
-  const isCurrentWalletConnected = () => {
-    if (selectedWalletType === 'solana') {
-      return isPhantomConnected;
-    }
-    return isEvmConnected;
-  };
-
-  // Auto-switch to Solana wallet type when Solana chain is selected
-  useEffect(() => {
-    if (formData.chain === 'solana') {
-      setSelectedWalletType('solana');
-    } else {
-      setSelectedWalletType('evm');
-    }
-  }, [formData.chain]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -111,11 +75,8 @@ export default function TokenRegistration({ onTokenRegistered }: TokenRegistrati
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const currentAddress = getCurrentWalletAddress();
-    const isWalletConnected = isCurrentWalletConnected();
-
-    if (!isWalletConnected || !currentAddress) {
-      const errorMsg = `Please connect your ${selectedWalletType === 'solana' ? 'Phantom' : 'EVM'} wallet first`;
+    if (!isConnected || !address) {
+      const errorMsg = 'Please connect your wallet first';
       setError(errorMsg);
       toast.error(errorMsg);
       return;
@@ -154,8 +115,8 @@ export default function TokenRegistration({ onTokenRegistered }: TokenRegistrati
         website: formData.website.trim() || undefined,
         twitter: formData.twitter.trim() || undefined,
         telegram: formData.telegram.trim() || undefined,
-        userId: currentAddress,
-        walletAddress: currentAddress,
+        userId: address,
+        walletAddress: address,
         status: 'pending',
         boostMultiplier,
         submittedAt: Date.now(),
@@ -171,7 +132,7 @@ export default function TokenRegistration({ onTokenRegistered }: TokenRegistrati
       localStorage.setItem('registeredTokens', JSON.stringify(updatedTokens));
 
       toast.dismiss(savingToast);
-      
+
       const successMsg = `Token "${formData.name}" registered successfully! It's now pending admin approval.`;
       setSuccess(successMsg);
       toast.success('🎉 Token registered successfully!');
@@ -211,124 +172,26 @@ export default function TokenRegistration({ onTokenRegistered }: TokenRegistrati
     }
   };
 
-  // Wallet connection UI
-  const renderWalletConnection = () => {
+  if (!isConnected) {
     return (
       <div className="bg-gray-900 rounded-lg p-6 border border-gray-700">
         <h3 className="text-xl font-bold text-white mb-4">Register Your Token</h3>
-        <p className="text-gray-400 mb-6">
+        <p className="text-gray-400 mb-4">
           Connect your wallet to register tokens for Race to Liberty boosts.
         </p>
-
-        <div className="space-y-4">
-          {/* EVM Wallet Connection */}
-          <div className="bg-gray-800 rounded-lg p-4">
-            <h4 className="text-lg font-semibold text-white mb-2">EVM Chains (Ethereum, BSC, Polygon, etc.)</h4>
-            <p className="text-gray-400 text-sm mb-3">
-              For tokens on Ethereum, BSC, Polygon, Arbitrum, and Optimism
-            </p>
-            {isEvmConnected ? (
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-green-400 text-sm">✅ EVM Wallet Connected</p>
-                  <p className="text-gray-400 text-xs font-mono">{evmAddress}</p>
-                </div>
-              </div>
-            ) : (
-              <p className="text-gray-500 text-sm">Connect via wallet button in header</p>
-            )}
-          </div>
-
-          {/* Phantom Wallet Connection */}
-          <div className="bg-gray-800 rounded-lg p-4">
-            <h4 className="text-lg font-semibold text-white mb-2">Solana Network</h4>
-            <p className="text-gray-400 text-sm mb-3">
-              For Solana tokens using Phantom wallet
-            </p>
-            {!isPhantomInstalled ? (
-              <div>
-                <p className="text-yellow-400 text-sm mb-2">⚠️ Phantom wallet not detected</p>
-                <a
-                  href="https://phantom.app/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-block bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm transition-colors"
-                >
-                  Install Phantom Wallet
-                </a>
-              </div>
-            ) : isPhantomConnected ? (
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-green-400 text-sm">✅ Phantom Wallet Connected</p>
-                  <p className="text-gray-400 text-xs font-mono">{phantomAddress}</p>
-                </div>
-                <button
-                  onClick={disconnectPhantom}
-                  className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm transition-colors"
-                >
-                  Disconnect
-                </button>
-              </div>
-            ) : (
-              <div>
-                <button
-                  onClick={connectPhantom}
-                  disabled={phantomConnecting}
-                  className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm transition-colors"
-                >
-                  {phantomConnecting ? 'Connecting...' : 'Connect Phantom Wallet'}
-                </button>
-                {phantomError && (
-                  <p className="text-red-400 text-sm mt-2">{phantomError}</p>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="mt-4 text-center">
-          <p className="text-gray-500 text-sm">
-            Connect the appropriate wallet for your token's blockchain
-          </p>
+        <div className="text-center">
+          <p className="text-gray-500">Please connect your wallet to continue</p>
         </div>
       </div>
     );
-  };
-
-  // Show wallet connection UI if no wallet is connected
-  if (!isEvmConnected && !isPhantomConnected) {
-    return renderWalletConnection();
   }
 
   return (
     <div className="bg-gray-900 rounded-lg p-6 border border-gray-700">
       <h3 className="text-xl font-bold text-white mb-4">Register Your Token</h3>
-      <p className="text-gray-400 mb-4">
+      <p className="text-gray-400 mb-6">
         Submit your token for admin approval to unlock boost multipliers in Race to Liberty.
       </p>
-
-      {/* Current Wallet Status */}
-      <div className="bg-gray-800 rounded-lg p-3 mb-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-white">
-              Connected Wallet: {selectedWalletType === 'solana' ? 'Phantom (Solana)' : 'EVM Wallet'}
-            </p>
-            <p className="text-xs text-gray-400 font-mono">
-              {getCurrentWalletAddress()}
-            </p>
-          </div>
-          {selectedWalletType === 'solana' && isPhantomConnected && (
-            <button
-              onClick={disconnectPhantom}
-              className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs transition-colors"
-            >
-              Disconnect
-            </button>
-          )}
-        </div>
-      </div>
 
       {success && (
         <div className="bg-green-900/20 border border-green-500 rounded-lg p-4 mb-6">
@@ -387,22 +250,6 @@ export default function TokenRegistration({ onTokenRegistered }: TokenRegistrati
                 </option>
               ))}
             </select>
-            {formData.chain === 'solana' && !isPhantomConnected && (
-              <div className="mt-2 p-2 bg-purple-900/20 border border-purple-500/50 rounded">
-                <p className="text-purple-400 text-xs">
-                  ⚠️ Solana selected but Phantom wallet not connected. 
-                  {!isPhantomInstalled ? (
-                    <a href="https://phantom.app/" target="_blank" rel="noopener noreferrer" className="underline ml-1">
-                      Install Phantom
-                    </a>
-                  ) : (
-                    <button onClick={connectPhantom} className="underline ml-1">
-                      Connect Phantom
-                    </button>
-                  )}
-                </p>
-              </div>
-            )}
           </div>
 
           <div>
