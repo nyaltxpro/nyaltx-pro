@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 
 interface TokenAvatarProps {
@@ -57,26 +57,69 @@ const TokenAvatar: React.FC<TokenAvatarProps> = ({
 }) => {
   const [imageError, setImageError] = useState(false);
   const [iconError, setIconError] = useState(false);
+  const [imageLoading, setImageLoading] = useState(!!src);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   const handleImageError = () => {
     setImageError(true);
+    setImageLoading(false);
+  };
+
+  const handleImageLoad = () => {
+    setImageLoaded(true);
+    setImageLoading(false);
   };
 
   const handleIconError = () => {
     setIconError(true);
   };
 
-  // If we have a valid image source and no error, show the image
+  // Reset states when src changes
+  useEffect(() => {
+    if (src) {
+      setImageError(false);
+      setImageLoading(true);
+      setImageLoaded(false);
+    } else {
+      setImageLoading(false);
+      setImageLoaded(false);
+    }
+    setIconError(false);
+  }, [src]);
+
+  // Generate avatar with initials and color for skeleton/fallback
+  const backgroundColor = generateAvatarColor(symbol);
+  const initials = generateInitials(symbol, name);
+  const fontSize = Math.max(size * 0.35, 12);
+
+  // If we have a valid image source and no error, show the image with skeleton
   if (src && !imageError) {
     return (
       <div className={`relative overflow-hidden rounded-full ${className}`} style={{ width: size, height: size }}>
+        {/* Show skeleton/avatar while loading */}
+        {imageLoading && (
+          <div
+            className="absolute inset-0 flex items-center justify-center text-white font-bold"
+            style={{
+              backgroundColor: backgroundColor + 'CC', // More opaque for better visibility
+              fontSize: `${fontSize}px`,
+            }}
+          >
+            <div className="animate-pulse">{initials}</div>
+          </div>
+        )}
+        
+        {/* Actual image */}
         <Image
           src={src}
           alt={symbol}
           width={size}
           height={size}
-          className="object-cover w-full h-full"
+          className={`object-cover w-full h-full transition-opacity duration-300 ${
+            imageLoaded ? 'opacity-100' : 'opacity-0'
+          }`}
           onError={handleImageError}
+          onLoad={handleImageLoad}
           unoptimized
         />
       </div>
@@ -88,23 +131,31 @@ const TokenAvatar: React.FC<TokenAvatarProps> = ({
     const iconPath = `/crypto-icons/color/${symbol.toLowerCase()}.svg`;
     return (
       <div className={`relative overflow-hidden rounded-full ${className}`} style={{ width: size, height: size }}>
+        {/* Show avatar skeleton while icon loads */}
+        <div
+          className="absolute inset-0 flex items-center justify-center text-white font-bold"
+          style={{
+            backgroundColor,
+            fontSize: `${fontSize}px`,
+          }}
+        >
+          {initials}
+        </div>
+        
+        {/* Crypto icon overlay */}
         <Image
           src={iconPath}
           alt={symbol}
           width={size}
           height={size}
-          className="object-cover w-full h-full"
+          className="absolute inset-0 object-cover w-full h-full transition-opacity duration-300"
           onError={handleIconError}
+          onLoad={() => {}} // Icon loaded successfully
           unoptimized
         />
       </div>
     );
   }
-
-  // Generate avatar with initials and color
-  const backgroundColor = generateAvatarColor(symbol);
-  const initials = generateInitials(symbol, name);
-  const fontSize = Math.max(size * 0.35, 12);
 
   return (
     <div
