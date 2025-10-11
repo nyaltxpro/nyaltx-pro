@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import React, { useEffect, useState } from 'react';
-import { FaEye, FaExternalLinkAlt, FaFilter, FaSearch } from 'react-icons/fa';
+import { useEffect, useState } from 'react';
+import { FaExternalLinkAlt, FaEye, FaFilter, FaSearch } from 'react-icons/fa';
 
 interface Order {
   id: string;
@@ -37,7 +37,7 @@ const AdminOrdersComponent = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [showModal, setShowModal] = useState(false);
-  
+
   // Filters
   const [typeFilter, setTypeFilter] = useState<string>('');
   const [statusFilter, setStatusFilter] = useState<string>('');
@@ -112,7 +112,7 @@ const AdminOrdersComponent = () => {
   const getPaymentMethodName = (method: string) => {
     const names = {
       eth: 'Ethereum',
-      sol: 'Solana', 
+      sol: 'Solana',
       nyax: 'NYAX Token',
       paypal: 'PayPal',
       stripe: 'Stripe',
@@ -150,7 +150,7 @@ const AdminOrdersComponent = () => {
       </div>
 
       {/* Filters */}
-      <div className="bg-gray-800 rounded-xl p-4 border border-gray-700">
+      <div className=" rounded-xl p-4 border border-gray-700">
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           <div>
             <label className="block text-sm text-gray-300 mb-1">Type</label>
@@ -166,7 +166,7 @@ const AdminOrdersComponent = () => {
               <option value="token_registration">Token Registration</option>
             </select>
           </div>
-          
+
           <div>
             <label className="block text-sm text-gray-300 mb-1">Status</label>
             <select
