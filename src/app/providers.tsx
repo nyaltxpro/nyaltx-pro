@@ -1,9 +1,10 @@
 'use client';
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
+import '@solana/wallet-adapter-react-ui/styles.css';
 import { useEffect, useState } from 'react';
+import AnalyticsProvider from '../components/AnalyticsProvider';
 import ReduxProvider from '../components/providers/ReduxProvider';
 import ContextProvider from '../providers/Web3Provider';
-import AnalyticsProvider from '../components/AnalyticsProvider';
 // Import web3modal to initialize it
 import '../lib/web3modal';
 
