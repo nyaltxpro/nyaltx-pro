@@ -1,5 +1,4 @@
 import Footer from '@/components/Footer';
-import "@radix-ui/themes/styles.css";
 import type { Metadata } from 'next';
 import { Inter, Poppins, Roboto } from "next/font/google";
 import { Toaster } from 'react-hot-toast';
@@ -108,7 +107,7 @@ export default function RootLayout({
         <Providers>
           {/* DexScreener-inspired background pattern */}
           <div className="dex-bg-pattern"></div>
-          
+
           <div className="relative transition-all duration-300 flex flex-col min-h-screen">
             <main className="flex-grow relative z-10">
               {children}
