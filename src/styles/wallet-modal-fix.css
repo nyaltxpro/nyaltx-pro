@@ -1,36 +1,65 @@
 /* Fix for wallet modal z-index issues */
 .wallet-adapter-modal-wrapper {
-  z-index: 10000 !important;
+  z-index: 100000 !important;
 }
 
 .wallet-adapter-modal-overlay {
-  z-index: 10000 !important;
+  z-index: 100000 !important;
 }
 
 .wallet-adapter-modal {
-  z-index: 10001 !important;
+  z-index: 100001 !important;
 }
 
 /* Reown AppKit modal z-index fix */
 w3m-modal {
-  z-index: 10000 !important;
+  z-index: 100000 !important;
 }
 
 wcm-modal {
-  z-index: 10000 !important;
+  z-index: 100000 !important;
 }
 
 /* General modal backdrop fix */
 [data-headlessui-state="open"] {
-  z-index: 9999 !important;
+  z-index: 99999 !important;
 }
 
 /* Ensure dropdown appears above everything */
 .unified-wallet-dropdown {
-  z-index: 10002 !important;
+  z-index: 100002 !important;
   position: relative;
 }
 
 .unified-wallet-backdrop {
-  z-index: 10001 !important;
+  z-index: 100001 !important;
+}
+
+/* Additional fixes for home page elements */
+.wallet-dropdown-container {
+  z-index: 99999 !important;
+  position: relative;
+}
+
+/* Ensure wallet button and dropdown are always on top */
+[data-wallet-button] {
+  z-index: 99999 !important;
+  position: relative;
+}
+
+/* Fix for any competing z-index elements */
+.hero-section,
+.banner-section,
+.header-section {
+  z-index: 1 !important;
+}
+
+/* Ensure wallet modals are above everything */
+.wallet-adapter-modal-container {
+  z-index: 100000 !important;
+}
+
+/* Fix for Solana wallet modal specifically */
+.wallet-adapter-modal-wrapper .wallet-adapter-modal {
+  z-index: 100001 !important;
 }

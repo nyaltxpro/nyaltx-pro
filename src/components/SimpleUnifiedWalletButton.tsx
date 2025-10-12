@@ -3,7 +3,8 @@
 import { useAppKit } from '@reown/appkit/react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { ChevronDownIcon, PersonIcon } from '@radix-ui/react-icons';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { useUnifiedWallet } from '@/hooks/useUnifiedWallet';
 
 interface SimpleUnifiedWalletButtonProps {
@@ -28,11 +29,23 @@ export default function SimpleUnifiedWalletButton({
   
   const { open: openEvmModal } = useAppKit();
   const [showDropdown, setShowDropdown] = useState(false);
+  const [isModalOpening, setIsModalOpening] = useState(false);
 
-  const handleConnectEvm = () => {
+  const handleConnectEvm = async () => {
     console.log('Opening EVM modal...');
-    openEvmModal();
+    setIsModalOpening(true);
     setShowDropdown(false);
+    
+    try {
+      await openEvmModal();
+    } catch (error) {
+      console.log('Modal was closed or cancelled');
+    } finally {
+      // Reset modal opening state after a short delay
+      setTimeout(() => {
+        setIsModalOpening(false);
+      }, 1000);
+    }
   };
 
   const handleAccountClick = () => {
@@ -52,7 +65,7 @@ export default function SimpleUnifiedWalletButton({
     }
   };
 
-  if (isConnecting) {
+  if (isConnecting || isModalOpening) {
     return (
       <button
         className={`py-2 px-4 rounded-xl bg-gradient-to-r from-[#00b8d8]/20 to-[#3b82f6]/20 text-white font-medium border border-[#00b8d8]/30 transition-all duration-200 text-sm tracking-wide flex items-center gap-2 ${className}`}
@@ -82,10 +95,11 @@ export default function SimpleUnifiedWalletButton({
   }
 
   return (
-    <div className="relative" style={{ zIndex: 10002 }}>
+    <div className="relative wallet-dropdown-container" style={{ zIndex: 99999 }}>
       <button
         className={`py-2 px-4 rounded-xl bg-gradient-to-r from-[#00b8d8] to-[#3b82f6] text-white font-medium hover:from-[#00b8d8]/90 hover:to-[#3b82f6]/90 transition-all duration-200 text-sm tracking-wide flex items-center gap-2 shadow-lg shadow-[#00b8d8]/20 ${className}`}
         onClick={handleMainButtonClick}
+        data-wallet-button
       >
         <PersonIcon className="w-4 h-4" />
         Connect Wallet
@@ -98,14 +112,14 @@ export default function SimpleUnifiedWalletButton({
           {/* Backdrop */}
           <div 
             className="fixed inset-0" 
-            style={{ zIndex: 10001 }}
+            style={{ zIndex: 99998 }}
             onClick={() => setShowDropdown(false)}
           />
           
           {/* Dropdown Content */}
           <div 
             className="absolute top-full right-0 mt-2 w-80 bg-black/95 backdrop-blur-xl border border-gray-800/50 rounded-xl shadow-2xl overflow-hidden"
-            style={{ zIndex: 10002 }}
+            style={{ zIndex: 99999 }}
           >
             <div className="p-4">
               {isConnected ? (
@@ -175,7 +189,13 @@ export default function SimpleUnifiedWalletButton({
                       className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-gradient-to-r from-[#627eea]/20 to-[#8b5cf6]/20 hover:from-[#627eea]/30 hover:to-[#8b5cf6]/30 transition-colors duration-200 text-left group border border-[#627eea]/30"
                     >
                       <div className="w-10 h-10 bg-gradient-to-r from-[#627eea] to-[#8b5cf6] rounded-lg flex items-center justify-center">
-                        <PersonIcon className="w-5 h-5 text-white" />
+                        <Image 
+                          src="/ethereum.svg" 
+                          alt="Ethereum" 
+                          width={20} 
+                          height={20} 
+                          className="w-5 h-5"
+                        />
                       </div>
                       <div className="flex-1">
                         <div className="text-white font-medium group-hover:text-[#00b8d8] transition-colors">
