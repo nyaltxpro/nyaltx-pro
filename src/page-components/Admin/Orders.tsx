@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { FaExternalLinkAlt, FaEye, FaFilter, FaSearch } from 'react-icons/fa';
+import { FaExternalLinkAlt, FaEye, FaFilter, FaSearch, FaShoppingCart, FaCoins, FaEthereum, FaWallet, FaCreditCard, FaGift } from 'react-icons/fa';
 
 interface Order {
   id: string;
@@ -143,14 +143,21 @@ const AdminOrdersComponent = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-semibold">All Orders</h2>
-        <Link href="/admin" className="text-sm underline text-gray-300">
+        <div>
+          <h2 className="text-2xl font-semibold text-white" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+            All Orders
+          </h2>
+          <p className="text-gray-400 text-sm mt-1" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+            Comprehensive order management and tracking
+          </p>
+        </div>
+        <Link href="/admin" className="text-sm text-gray-300 hover:text-white transition-colors" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
           Back to Dashboard
         </Link>
       </div>
 
       {/* Filters */}
-      <div className=" rounded-xl p-4 border border-gray-700">
+      <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl p-6 shadow-xl">
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           <div>
             <label className="block text-sm text-gray-300 mb-1">Type</label>
@@ -226,104 +233,183 @@ const AdminOrdersComponent = () => {
       </div>
 
       {/* Orders Table */}
-      <div className="bg-gray-800 rounded-xl border border-gray-700">
+      <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl shadow-xl">
         {loading ? (
-          <div className="p-8 text-center text-gray-400">Loading orders...</div>
+          <div className="text-center py-12">
+            <div className="w-16 h-16 bg-gray-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
+              <FaShoppingCart className="w-8 h-8 text-gray-400 animate-pulse" />
+            </div>
+            <p className="text-gray-400 font-medium" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+              Loading orders...
+            </p>
+          </div>
         ) : error ? (
-          <div className="p-8 text-center text-red-400">Error: {error}</div>
+          <div className="text-center py-12">
+            <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <FaExternalLinkAlt className="w-8 h-8 text-red-400" />
+            </div>
+            <p className="text-red-400 font-medium mb-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+              Error loading orders
+            </p>
+            <p className="text-gray-400 text-sm" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+              {error}
+            </p>
+          </div>
         ) : filteredOrders.length === 0 ? (
-          <div className="p-8 text-center text-gray-400">No orders found</div>
+          <div className="text-center py-12">
+            <div className="w-16 h-16 bg-gray-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
+              <FaShoppingCart className="w-8 h-8 text-gray-400" />
+            </div>
+            <p className="text-gray-400 font-medium mb-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+              No orders found
+            </p>
+            <p className="text-gray-400 text-sm" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+              Try adjusting your filters or check back later
+            </p>
+          </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-700 text-gray-300">
+            <table className="w-full overflow-hidden">
+              <thead className="bg-gray-700/30 border-b border-gray-600/20">
                 <tr>
-                  <th className="px-4 py-3 text-left">Order ID</th>
-                  <th className="px-4 py-3 text-left">Type</th>
-                  <th className="px-4 py-3 text-left">Product</th>
-                  <th className="px-4 py-3 text-left">Customer</th>
-                  <th className="px-4 py-3 text-left">Payment</th>
-                  <th className="px-4 py-3 text-left">Amount</th>
-                  <th className="px-4 py-3 text-left">Status</th>
-                  <th className="px-4 py-3 text-left">Date</th>
-                  <th className="px-4 py-3 text-left">Actions</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                    Order ID
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                    Type
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                    Product
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                    Customer
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                    Payment
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                    Amount
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                    Status
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                    Date
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                    Actions
+                  </th>
                 </tr>
               </thead>
-              <tbody className="text-gray-300">
+              <tbody className="divide-y divide-gray-700/20">
                 {filteredOrders.map((order) => (
-                  <tr key={order.id} className="border-b border-gray-700 hover:bg-gray-750">
-                    <td className="px-4 py-3 font-mono text-xs">
-                      {order.id.slice(-8)}...
+                  <tr key={order.id} className="hover:bg-gray-700/20 transition-colors duration-200">
+                    <td className="px-4 py-3 text-sm border-r border-gray-700/20">
+                      <code className="text-white bg-gray-700/30 px-2 py-1 rounded border border-gray-600/30 text-xs" style={{ fontFamily: 'JetBrains Mono, Consolas, Monaco, monospace' }}>
+                        {order.id.slice(-8)}...
+                      </code>
                     </td>
-                    <td className="px-4 py-3">
-                      <span className="capitalize text-xs bg-gray-600 px-2 py-1 rounded">
+                    <td className="px-4 py-3 text-sm border-r border-gray-700/20">
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-500/10 text-purple-300 border border-purple-500/20 capitalize" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                         {order.type.replace('_', ' ')}
                       </span>
                     </td>
-                    <td className="px-4 py-3">
-                      <div className="text-sm">{order.productName || 'N/A'}</div>
+                    <td className="px-4 py-3 text-sm border-r border-gray-700/20">
+                      <div className="text-white font-medium" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                        {order.productName || 'N/A'}
+                      </div>
                       {order.tier && (
-                        <div className="text-xs text-gray-400">Tier: {order.tier}</div>
+                        <div className="text-xs text-gray-400 mt-1" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                          Tier: {order.tier}
+                        </div>
                       )}
                       {order.tokenSymbol && (
-                        <div className="text-xs text-cyan-400">Token: {order.tokenSymbol}</div>
+                        <div className="text-xs text-cyan-400 mt-1" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                          Token: {order.tokenSymbol}
+                        </div>
                       )}
                     </td>
-                    <td className="px-4 py-3">
-                      <div className="text-sm">
-                        {order.email || order.walletAddress?.slice(0, 8) + '...' || 'N/A'}
+                    <td className="px-4 py-3 text-sm border-r border-gray-700/20">
+                      <div className="text-white font-medium" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                        {order.email || (order.walletAddress ? `${order.walletAddress.slice(0, 8)}...` : 'N/A')}
                       </div>
                       {order.promoCode && (
-                        <div className="text-xs text-green-400">Promo: {order.promoCode}</div>
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-500/10 text-green-300 border border-green-500/20 mt-1" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                          Promo: {order.promoCode}
+                        </span>
                       )}
                       {order.metadata?.source && (
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-gray-400 mt-1" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                           Source: {order.metadata.source.replace('_', ' ')}
                         </div>
                       )}
                     </td>
-                    <td className="px-4 py-3">
-                      <span className={`px-2 py-1 rounded text-xs ${getPaymentMethodBadge(order.paymentMethod)}`}>
-                        {getPaymentMethodName(order.paymentMethod)}
-                      </span>
+                    <td className="px-4 py-3 text-sm border-r border-gray-700/20">
+                      <div className="flex items-center gap-2">
+                        {order.paymentMethod === 'eth' ? (
+                          <FaEthereum className="w-4 h-4 text-blue-400" />
+                        ) : order.paymentMethod === 'sol' ? (
+                          <FaCoins className="w-4 h-4 text-purple-400" />
+                        ) : order.paymentMethod === 'nyax' ? (
+                          <FaCoins className="w-4 h-4 text-cyan-400" />
+                        ) : order.paymentMethod === 'free_promo' ? (
+                          <FaGift className="w-4 h-4 text-green-400" />
+                        ) : (
+                          <FaCreditCard className="w-4 h-4 text-gray-400" />
+                        )}
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getPaymentMethodBadge(order.paymentMethod).replace('bg-', 'bg-').replace('text-', 'text-')} border`} style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                          {getPaymentMethodName(order.paymentMethod)}
+                        </span>
+                      </div>
                       {order.txHash && (
-                        <div className="text-xs text-blue-400 mt-1">
+                        <div className="mt-2">
                           <a
                             href={`https://etherscan.io/tx/${order.txHash}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="hover:underline flex items-center gap-1"
+                            className="flex items-center gap-2 text-cyan-400 hover:text-cyan-300 transition-colors duration-200"
+                            style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                           >
-                            TX <FaExternalLinkAlt />
+                            <code className="bg-gray-700/30 px-2 py-1 rounded border border-gray-600/30 text-xs">
+                              {order.txHash.slice(0, 8)}...
+                            </code>
+                            <FaExternalLinkAlt className="w-3 h-3" />
                           </a>
                         </div>
                       )}
                     </td>
-                    <td className="px-4 py-3">
-                      <div className="text-sm font-medium">
+                    <td className="px-4 py-3 text-sm border-r border-gray-700/20">
+                      <div className="text-white font-medium" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                         {formatAmount(order.amount, order.currency)}
                       </div>
                       {order.originalAmount && order.promoDiscount && (
-                        <div className="text-xs text-gray-400 line-through">
+                        <div className="text-xs text-gray-400 line-through mt-1" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                           ${order.originalAmount}
                         </div>
                       )}
                     </td>
-                    <td className="px-4 py-3">
-                      <span className={`px-2 py-1 rounded text-xs ${getStatusBadge(order.status)}`}>
+                    <td className="px-4 py-3 text-sm border-r border-gray-700/20">
+                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${getStatusBadge(order.status).replace('bg-', 'bg-').replace('text-', 'text-')} ${
+                        order.status === 'completed' ? 'border-green-500/20' :
+                        order.status === 'pending' ? 'border-yellow-500/20' :
+                        order.status === 'failed' ? 'border-red-500/20' :
+                        'border-gray-500/20'
+                      }`} style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                         {order.status}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-xs">
-                      {new Date(order.createdAt).toLocaleDateString()}
+                    <td className="px-4 py-3 text-sm border-r border-gray-700/20">
+                      <span className="text-gray-300 text-xs" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                        {new Date(order.createdAt).toLocaleDateString()}
+                      </span>
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3 text-sm">
                       <button
                         onClick={() => openOrderModal(order)}
-                        className="text-cyan-400 hover:text-cyan-300 p-1"
+                        className="flex items-center justify-center w-8 h-8 text-cyan-400 hover:text-cyan-300 hover:bg-gray-700/30 rounded-lg transition-all duration-200"
                         title="View Details"
                       >
-                        <FaEye />
+                        <FaEye className="w-4 h-4" />
                       </button>
                     </td>
                   </tr>
@@ -484,60 +570,135 @@ const AdminOrdersComponent = () => {
       )}
 
       {/* Summary Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-gray-800 rounded-xl p-4 border border-gray-700">
-          <div className="text-2xl font-bold text-white">{filteredOrders.length}</div>
-          <div className="text-sm text-gray-400">Total Orders</div>
-          <div className="text-xs text-cyan-400 mt-1">All Sources Combined</div>
-        </div>
-        <div className="bg-gray-800 rounded-xl p-4 border border-gray-700">
-          <div className="text-2xl font-bold text-green-400">
-            {filteredOrders.filter(o => o.status === 'completed').length}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl p-6 shadow-xl hover:bg-gray-800/50 transition-all duration-200">
+          <div className="flex items-center justify-between mb-4">
+            <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center border border-blue-500/30">
+              <FaShoppingCart className="w-6 h-6 text-blue-400" />
+            </div>
+            <div className="text-right">
+              <div className="text-2xl font-bold text-blue-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                {filteredOrders.length}
+              </div>
+            </div>
           </div>
-          <div className="text-sm text-gray-400">Completed</div>
-        </div>
-        <div className="bg-gray-800 rounded-xl p-4 border border-gray-700">
-          <div className="text-2xl font-bold text-yellow-400">
-            {filteredOrders.filter(o => o.status === 'pending').length}
+          <div className="space-y-1">
+            <div className="text-sm font-medium text-gray-300" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+              Total Orders
+            </div>
+            <div className="text-xs text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+              All Sources Combined
+            </div>
           </div>
-          <div className="text-sm text-gray-400">Pending</div>
         </div>
-        <div className="bg-gray-800 rounded-xl p-4 border border-gray-700">
-          <div className="text-2xl font-bold text-cyan-400">
-            ${filteredOrders
-              .filter(o => o.currency === 'USD')
-              .reduce((sum, o) => sum + parseFloat(o.amount), 0)
-              .toFixed(2)}
+
+        <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl p-6 shadow-xl hover:bg-gray-800/50 transition-all duration-200">
+          <div className="flex items-center justify-between mb-4">
+            <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center border border-green-500/30">
+              <FaShoppingCart className="w-6 h-6 text-green-400" />
+            </div>
+            <div className="text-right">
+              <div className="text-2xl font-bold text-green-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                {filteredOrders.filter(o => o.status === 'completed').length}
+              </div>
+            </div>
           </div>
-          <div className="text-sm text-gray-400">Total Revenue (USD)</div>
+          <div className="space-y-1">
+            <div className="text-sm font-medium text-gray-300" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+              Completed Orders
+            </div>
+            <div className="text-xs text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+              Successfully processed
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl p-6 shadow-xl hover:bg-gray-800/50 transition-all duration-200">
+          <div className="flex items-center justify-between mb-4">
+            <div className="w-12 h-12 bg-yellow-500/20 rounded-lg flex items-center justify-center border border-yellow-500/30">
+              <FaShoppingCart className="w-6 h-6 text-yellow-400" />
+            </div>
+            <div className="text-right">
+              <div className="text-2xl font-bold text-yellow-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                {filteredOrders.filter(o => o.status === 'pending').length}
+              </div>
+            </div>
+          </div>
+          <div className="space-y-1">
+            <div className="text-sm font-medium text-gray-300" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+              Pending Orders
+            </div>
+            <div className="text-xs text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+              Awaiting completion
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl p-6 shadow-xl hover:bg-gray-800/50 transition-all duration-200">
+          <div className="flex items-center justify-between mb-4">
+            <div className="w-12 h-12 bg-cyan-500/20 rounded-lg flex items-center justify-center border border-cyan-500/30">
+              <FaWallet className="w-6 h-6 text-cyan-400" />
+            </div>
+            <div className="text-right">
+              <div className="text-2xl font-bold text-cyan-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                ${filteredOrders
+                  .filter(o => o.currency === 'USD')
+                  .reduce((sum, o) => sum + parseFloat(o.amount), 0)
+                  .toFixed(2)}
+              </div>
+            </div>
+          </div>
+          <div className="space-y-1">
+            <div className="text-sm font-medium text-gray-300" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+              Total Revenue
+            </div>
+            <div className="text-xs text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+              USD payments only
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Data Sources Info */}
-      <div className="bg-gray-800 rounded-xl p-4 border border-gray-700">
-        <h3 className="text-lg font-semibold text-white mb-3">Data Sources</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-          <div className="flex items-center justify-between">
-            <span className="text-gray-300">Main Orders Collection:</span>
-            <span className="text-blue-400 font-medium">
-              {filteredOrders.filter(o => !o.metadata?.source || o.metadata.source === 'orders').length}
-            </span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-gray-300">Onchain Orders:</span>
-            <span className="text-purple-400 font-medium">
-              {filteredOrders.filter(o => o.metadata?.source === 'onchain_orders').length}
-            </span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-gray-300">Boost Points:</span>
-            <span className="text-green-400 font-medium">
-              {filteredOrders.filter(o => o.metadata?.source === 'boost_points').length}
-            </span>
-          </div>
+      <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl shadow-xl">
+        <div className="p-6 border-b border-gray-700/20">
+          <h3 className="text-lg font-semibold text-white flex items-center gap-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+            <FaFilter className="text-blue-400" />
+            Data Sources
+          </h3>
         </div>
-        <div className="text-xs text-gray-400 mt-2">
-          This page now shows historical orders from all database collections including legacy data.
+        <div className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="flex items-center justify-between p-4 bg-gray-700/30 border border-gray-600/30 rounded-lg">
+              <span className="text-gray-300 font-medium" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                Main Orders Collection:
+              </span>
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-500/10 text-blue-300 border border-blue-500/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                {filteredOrders.filter(o => !o.metadata?.source || o.metadata.source === 'orders').length}
+              </span>
+            </div>
+            <div className="flex items-center justify-between p-4 bg-gray-700/30 border border-gray-600/30 rounded-lg">
+              <span className="text-gray-300 font-medium" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                Onchain Orders:
+              </span>
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-500/10 text-purple-300 border border-purple-500/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                {filteredOrders.filter(o => o.metadata?.source === 'onchain_orders').length}
+              </span>
+            </div>
+            <div className="flex items-center justify-between p-4 bg-gray-700/30 border border-gray-600/30 rounded-lg">
+              <span className="text-gray-300 font-medium" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                Boost Points:
+              </span>
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-500/10 text-green-300 border border-green-500/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                {filteredOrders.filter(o => o.metadata?.source === 'boost_points').length}
+              </span>
+            </div>
+          </div>
+          <div className="mt-4 p-4 bg-gray-700/20 rounded-lg border border-gray-600/20">
+            <p className="text-sm text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+              This page now shows historical orders from all database collections including legacy data.
+            </p>
+          </div>
         </div>
       </div>
     </div>
