@@ -1,6 +1,6 @@
-// import { SolanaAdapter } from '@reown/appkit-adapter-solana';
+import { SolanaAdapter } from '@reown/appkit-adapter-solana';
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';
-import { arbitrum, base, mainnet, polygon, scroll } from '@reown/appkit/networks';
+import { arbitrum, base, mainnet, polygon, scroll, solana, solanaTestnet, solanaDevnet } from '@reown/appkit/networks';
 import { cookieStorage, createStorage, http } from '@wagmi/core';
 
 // Get projectId from https://dashboard.reown.com
@@ -10,12 +10,14 @@ if (!projectId) {
   throw new Error('Project ID is not defined');
 }
 
-export const networks = [mainnet, arbitrum, polygon, base, scroll]; // Removed sepolia, mainnet is default
+export const networks = [mainnet, arbitrum, polygon, base, scroll]; // EVM networks
+export const solanaNetworks = [solana, solanaTestnet, solanaDevnet]; // Solana networks
 
-// export const solanaWeb3JsAdapter = new SolanaAdapter({
-//   registerWalletStandard: true,
-//   wallets: [/* only show these specific wallets */]
-// })
+// Configure Solana Adapter
+export const solanaWeb3JsAdapter = new SolanaAdapter({
+  registerWalletStandard: true,
+  wallets: [] // This will show all available Solana wallets
+});
 
 //Set up the Wagmi Adapter (Config)
 export const wagmiAdapter = new WagmiAdapter({

@@ -3,7 +3,7 @@
 import { RegisteredToken } from '@/types/token';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
-import { useAccount } from 'wagmi';
+import { useUnifiedWallet } from '@/hooks/useUnifiedWallet';
 
 
 interface TokenRegistrationProps {
@@ -28,7 +28,7 @@ const TOKEN_CATEGORIES = [
 ];
 
 export default function TokenRegistration({ onTokenRegistered }: TokenRegistrationProps) {
-  const { address, isConnected } = useAccount();
+  const { address, isConnected, walletType } = useUnifiedWallet();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);

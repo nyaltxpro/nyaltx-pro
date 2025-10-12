@@ -4,7 +4,8 @@ import { createAppKit } from '@reown/appkit/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { type ReactNode } from 'react';
 import { cookieToInitialState, WagmiProvider, type Config } from 'wagmi';
-import { projectId, wagmiAdapter } from '../lib/web3modal';
+import { projectId, wagmiAdapter, solanaWeb3JsAdapter } from '../lib/web3modal';
+import { SolanaWalletProvider } from './SolanaWalletProvider';
 
 
 const queryClient = new QueryClient();
@@ -12,22 +13,18 @@ if (!projectId) {
   throw new Error('Project ID is not defined');
 }
 
-// Set up metadata
-const metadata = {
-  name: 'appkit-example',
-  description: 'AppKit Example',
-  url: 'https://appkitexampleapp.com', // origin must match your domain & subdomain
-  icons: ['https://avatars.githubusercontent.com/u/179229932'],
-};
-
-
-// Create the modal
+// Create the modal with both EVM and Solana adapters
 const modal = createAppKit({
-  adapters: [wagmiAdapter],
+  adapters: [wagmiAdapter, solanaWeb3JsAdapter],
   projectId,
   networks: [mainnet, solana, solanaTestnet, solanaDevnet],
   defaultNetwork: mainnet,
-  metadata: metadata,
+  metadata: {
+    name: 'NYALTX',
+    description: 'NYALTX - Crypto Trading Platform',
+    url: 'https://nyaltx.com',
+    icons: ['https://nyaltx.com/logo.png'],
+  },
   features: {
     analytics: true,
     connectMethodsOrder: ['wallet', 'social'],
@@ -45,7 +42,7 @@ const modal = createAppKit({
   ],
   themeMode: 'dark',
   themeVariables: {
-    '--w3m-font-family': 'Roboto, sans-serif',
+    '--w3m-font-family': 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
     '--w3m-accent': '#00b8d8',
     '--w3m-color-mix': '#00b8d8',
     '--w3m-color-mix-strength': 20,
@@ -62,7 +59,11 @@ function ContextProvider({ children, cookies }: { children: ReactNode; cookies: 
       initialState={initialState}
       reconnectOnMount={false}
     >
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      <QueryClientProvider client={queryClient}>
+        <SolanaWalletProvider>
+          {children}
+        </SolanaWalletProvider>
+      </QueryClientProvider>
     </WagmiProvider>
   );
 }
