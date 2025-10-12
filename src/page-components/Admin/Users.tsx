@@ -124,57 +124,123 @@ const AdminUsersComponent = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-semibold">User Records</h2>
-        <Link href="/admin" className="text-sm underline text-gray-300">
+        <div>
+          <h2 className="text-2xl font-semibold text-white" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+            User Records
+          </h2>
+          <p className="text-gray-400 text-sm mt-1" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+            Comprehensive user management and email collection tracking
+          </p>
+        </div>
+        <Link href="/admin" className="text-sm text-gray-300 hover:text-white transition-colors" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
           Back to Dashboard
         </Link>
       </div>
 
       {/* Stats Cards */}
       {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-          <div className="bg-gray-800 rounded-xl p-4 border border-gray-700">
-            <div className="flex items-center gap-2">
-              <FaUser className="text-cyan-400" />
-              <div>
-                <div className="text-2xl font-bold text-white">{stats.totalUsers}</div>
-                <div className="text-sm text-gray-400">Total Users</div>
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+          <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl p-6 shadow-xl hover:bg-gray-800/50 transition-all duration-200">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 bg-cyan-500/20 rounded-lg flex items-center justify-center border border-cyan-500/30">
+                <FaUser className="w-6 h-6 text-cyan-400" />
+              </div>
+              <div className="text-right">
+                <div className="text-2xl font-bold text-cyan-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                  {stats.totalUsers}
+                </div>
+              </div>
+            </div>
+            <div className="space-y-1">
+              <div className="text-sm font-medium text-gray-300" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                Total Users
+              </div>
+              <div className="text-xs text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                All registered users
               </div>
             </div>
           </div>
-          <div className="bg-gray-800 rounded-xl p-4 border border-gray-700">
-            <div className="flex items-center gap-2">
-              <FaEnvelope className="text-green-400" />
-              <div>
-                <div className="text-2xl font-bold text-green-400">{stats.usersWithEmails}</div>
-                <div className="text-sm text-gray-400">With Emails</div>
+
+          <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl p-6 shadow-xl hover:bg-gray-800/50 transition-all duration-200">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center border border-green-500/30">
+                <FaEnvelope className="w-6 h-6 text-green-400" />
+              </div>
+              <div className="text-right">
+                <div className="text-2xl font-bold text-green-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                  {stats.usersWithEmails}
+                </div>
+              </div>
+            </div>
+            <div className="space-y-1">
+              <div className="text-sm font-medium text-gray-300" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                With Emails
+              </div>
+              <div className="text-xs text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                Email collection rate: {stats.totalUsers > 0 ? Math.round((stats.usersWithEmails / stats.totalUsers) * 100) : 0}%
               </div>
             </div>
           </div>
-          <div className="bg-gray-800 rounded-xl p-4 border border-gray-700">
-            <div className="flex items-center gap-2">
-              <FaWallet className="text-purple-400" />
-              <div>
-                <div className="text-2xl font-bold text-purple-400">{stats.usersWithWallets}</div>
-                <div className="text-sm text-gray-400">With Wallets</div>
+
+          <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl p-6 shadow-xl hover:bg-gray-800/50 transition-all duration-200">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center border border-purple-500/30">
+                <FaWallet className="w-6 h-6 text-purple-400" />
+              </div>
+              <div className="text-right">
+                <div className="text-2xl font-bold text-purple-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                  {stats.usersWithWallets}
+                </div>
+              </div>
+            </div>
+            <div className="space-y-1">
+              <div className="text-sm font-medium text-gray-300" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                With Wallets
+              </div>
+              <div className="text-xs text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                Wallet connection rate
               </div>
             </div>
           </div>
-          <div className="bg-gray-800 rounded-xl p-4 border border-gray-700">
-            <div className="flex items-center gap-2">
-              <FaCoins className="text-yellow-400" />
-              <div>
-                <div className="text-2xl font-bold text-yellow-400">{stats.activeUsers}</div>
-                <div className="text-sm text-gray-400">Active Users</div>
+
+          <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl p-6 shadow-xl hover:bg-gray-800/50 transition-all duration-200">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 bg-yellow-500/20 rounded-lg flex items-center justify-center border border-yellow-500/30">
+                <FaCoins className="w-6 h-6 text-yellow-400" />
+              </div>
+              <div className="text-right">
+                <div className="text-2xl font-bold text-yellow-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                  {stats.activeUsers}
+                </div>
+              </div>
+            </div>
+            <div className="space-y-1">
+              <div className="text-sm font-medium text-gray-300" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                Active Users
+              </div>
+              <div className="text-xs text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                Recent activity
               </div>
             </div>
           </div>
-          <div className="bg-gray-800 rounded-xl p-4 border border-gray-700">
-            <div className="flex items-center gap-2">
-              <FaCoins className="text-cyan-400" />
-              <div>
-                <div className="text-2xl font-bold text-cyan-400">{formatCurrency(stats.totalRevenue)}</div>
-                <div className="text-sm text-gray-400">Total Revenue</div>
+
+          <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl p-6 shadow-xl hover:bg-gray-800/50 transition-all duration-200">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center border border-green-500/30">
+                <FaCoins className="w-6 h-6 text-green-400" />
+              </div>
+              <div className="text-right">
+                <div className="text-2xl font-bold text-green-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                  {formatCurrency(stats.totalRevenue)}
+                </div>
+              </div>
+            </div>
+            <div className="space-y-1">
+              <div className="text-sm font-medium text-gray-300" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                Total Revenue
+              </div>
+              <div className="text-xs text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                All user payments
               </div>
             </div>
           </div>

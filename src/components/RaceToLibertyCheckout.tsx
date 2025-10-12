@@ -226,6 +226,7 @@ export default function RaceToLibertyCheckout({
   const [searchTerm, setSearchTerm] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'paypal' | 'crypto'>('paypal');
   const [email, setEmail] = useState('');
+  const [emailError, setEmailError] = useState('');
   const [agree, setAgree] = useState(true);
   const [availableCoins, setAvailableCoins] = useState<CoinOption[]>([]);
   const [ethPrice, setEthPrice] = useState<number | null>(null);
@@ -236,7 +237,25 @@ export default function RaceToLibertyCheckout({
   const [promoError, setPromoError] = useState<string | undefined>(undefined);
   const [promoApplied, setPromoApplied] = useState(false);
 
-  const tierInfo = TIER_MULTIPLIERS[tier];
+  // Email validation function
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  // Check email validity and set error
+  const handleEmailChange = (value: string) => {
+    setEmail(value);
+    if (!value.trim()) {
+      setEmailError('Email is required');
+    } else if (!validateEmail(value)) {
+      setEmailError('Please enter a valid email address');
+    } else {
+      setEmailError('');
+    }
+  };
+
+  const targetChainId = parseInt(process.env.NEXT_PUBLIC_PAYMENT_CHAIN_ID || '1', 10);
 
   // Fetch ETH price
   useEffect(() => {
@@ -282,16 +301,21 @@ export default function RaceToLibertyCheckout({
   };
 
   const handlePayETH = async () => {
+    // Validate email first
+    if (!email.trim()) {
+      setEmailError('Email is required');
+      setError('Please enter your email address');
+      return;
+    }
+    if (!validateEmail(email)) {
+      setEmailError('Please enter a valid email address');
+      setError('Please enter a valid email address');
+      return;
+    }
+
     if (!RECEIVER) {
       const errorMsg = 'Receiver address not configured';
       setError(errorMsg);
-      toast.error(errorMsg);
-      return;
-    }
-    if (!isConnected) {
-      const errorMsg = 'Please connect your wallet first';
-      setError(errorMsg);
-      toast.error(errorMsg);
       return;
     }
     if (PAYMENT_CHAIN_ID && chain?.id !== PAYMENT_CHAIN_ID) {
@@ -382,14 +406,6 @@ export default function RaceToLibertyCheckout({
       setError(errorMsg);
       toast.error(errorMsg);
     } finally {
-      setBusy(undefined);
-    }
-  };
-
-  const handlePayNYAX = async () => {
-    if (!RECEIVER) {
-      const errorMsg = 'Receiver address not configured';
-      setError(errorMsg);
       toast.error(errorMsg);
       return;
     }
@@ -1045,15 +1061,25 @@ export default function RaceToLibertyCheckout({
                     {/* Email Input */}
                     <div className="mb-6">
                       <label className="block text-sm font-medium text-gray-300 mb-3">
-                        Email Address
+                        Email Address <span className="text-red-400">*</span>
                       </label>
                       <input
                         type="email"
                         value={email}
-                        onChange={e => setEmail(e.target.value)}
+                        onChange={e => handleEmailChange(e.target.value)}
                         placeholder="your@email.com"
-                        className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all duration-300"
+                        required
+                        className={`w-full px-4 py-3 rounded-xl bg-white/5 border text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-cyan-500/50 transition-all duration-300 ${
+                          emailError 
+                            ? 'border-red-500/50 focus:ring-red-500/50' 
+                            : 'border-white/10 focus:ring-cyan-500/50'
+                        }`}
                       />
+                      {emailError && (
+                        <p className="mt-2 text-sm text-red-400">
+                          {emailError}
+                        </p>
+                      )}
                     </div>
 
                     {/* Promo Code Section */}

@@ -127,6 +127,7 @@ export default function Web3Checkout({
   const [network, setNetwork] = useState('ethereum');
   const [token, setToken] = useState(paymentMethod?.toUpperCase() || 'USDT');
   const [email, setEmail] = useState('');
+  const [emailError, setEmailError] = useState('');
   const [promo, setPromo] = useState('');
   const [promoApplied, setPromoApplied] = useState(false);
   const [promoValidation, setPromoValidation] = useState<any>(null);
@@ -134,6 +135,24 @@ export default function Web3Checkout({
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  // Email validation function
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  // Check email validity and set error
+  const handleEmailChange = (value: string) => {
+    setEmail(value);
+    if (!value.trim()) {
+      setEmailError('Email is required');
+    } else if (!validateEmail(value)) {
+      setEmailError('Please enter a valid email address');
+    } else {
+      setEmailError('');
+    }
+  };
 
   // Wagmi hooks
   const { isConnected, address, chain } = useAccount();
@@ -356,6 +375,18 @@ export default function Web3Checkout({
   };
 
   const handlePayment = async () => {
+    // Validate email first
+    if (!email.trim()) {
+      setEmailError('Email is required');
+      setError('Please enter your email address');
+      return;
+    }
+    if (!validateEmail(email)) {
+      setEmailError('Please enter a valid email address');
+      setError('Please enter a valid email address');
+      return;
+    }
+
     if (!agree) {
       setError('Please accept Terms to continue.');
       return;
@@ -808,14 +839,26 @@ export default function Web3Checkout({
           <div className="mb-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm text-gray-300 mb-1">Email</label>
+                <label className="block text-sm text-gray-300 mb-1">
+                  Email <span className="text-red-400">*</span>
+                </label>
                 <input
                   type="email"
                   value={email}
-                  onChange={e => setEmail(e.target.value)}
+                  onChange={e => handleEmailChange(e.target.value)}
                   placeholder="you@example.com"
-                  className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
+                  required
+                  className={`w-full px-3 py-2 bg-[#1a2932] border rounded-md text-white focus:outline-none focus:ring-1 ${
+                    emailError 
+                      ? 'border-red-500 focus:ring-red-500' 
+                      : 'border-gray-700 focus:ring-[#00b8d8]'
+                  }`}
                 />
+                {emailError && (
+                  <p className="mt-1 text-sm text-red-400">
+                    {emailError}
+                  </p>
+                )}
               </div>
               <div>
                 <label className="block text-sm text-gray-300 mb-1">Promo Code</label>
