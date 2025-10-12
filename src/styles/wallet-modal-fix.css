@@ -84,7 +84,7 @@ div[class*="sidebar"],
 .nav-menu,
 .menu-container,
 aside {
-  z-index: 50000 !important;
+  z-index: 5000000000 !important;
 }
 
 /* Portal dropdown should be above everything */
