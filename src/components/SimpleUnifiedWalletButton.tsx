@@ -3,7 +3,8 @@
 import { useAppKit } from '@reown/appkit/react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { ChevronDownIcon, PersonIcon } from '@radix-ui/react-icons';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import { useUnifiedWallet } from '@/hooks/useUnifiedWallet';
 
@@ -16,26 +17,28 @@ export default function SimpleUnifiedWalletButton({
   className = '',
   onConnect,
 }: SimpleUnifiedWalletButtonProps) {
-  const { 
-    isConnected, 
-    isConnecting, 
-    address, 
-    walletType, 
+  const {
+    isConnected,
+    isConnecting,
+    address,
+    walletType,
     chainName,
     formatAddress,
     isEvmConnected,
-    isSolanaConnected 
+    isSolanaConnected
   } = useUnifiedWallet();
-  
+
   const { open: openEvmModal } = useAppKit();
   const [showDropdown, setShowDropdown] = useState(false);
   const [isModalOpening, setIsModalOpening] = useState(false);
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 });
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   const handleConnectEvm = async () => {
     console.log('Opening EVM modal...');
     setIsModalOpening(true);
     setShowDropdown(false);
-    
+
     try {
       await openEvmModal();
     } catch (error) {
@@ -57,10 +60,24 @@ export default function SimpleUnifiedWalletButton({
     }
   };
 
+  const calculateDropdownPosition = () => {
+    if (buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+      
+      setDropdownPosition({
+        top: rect.bottom + scrollTop + 8, // 8px margin
+        right: window.innerWidth - rect.right - scrollLeft
+      });
+    }
+  };
+
   const handleMainButtonClick = () => {
     if (isConnected) {
       handleAccountClick();
     } else {
+      calculateDropdownPosition();
       setShowDropdown(!showDropdown);
     }
   };
@@ -95,31 +112,38 @@ export default function SimpleUnifiedWalletButton({
   }
 
   return (
-    <div className="relative wallet-dropdown-container" style={{ zIndex: 99999 }}>
-      <button
-        className={`py-2 px-4 rounded-xl bg-gradient-to-r from-[#00b8d8] to-[#3b82f6] text-white font-medium hover:from-[#00b8d8]/90 hover:to-[#3b82f6]/90 transition-all duration-200 text-sm tracking-wide flex items-center gap-2 shadow-lg shadow-[#00b8d8]/20 ${className}`}
-        onClick={handleMainButtonClick}
-        data-wallet-button
-      >
-        <PersonIcon className="w-4 h-4" />
-        Connect Wallet
-        <ChevronDownIcon className={`w-4 h-4 transition-transform duration-200 ${showDropdown ? 'rotate-180' : ''}`} />
-      </button>
+    <>
+      <div className="relative wallet-dropdown-container">
+        <button
+          ref={buttonRef}
+          className={`py-2 px-4 rounded-xl bg-gradient-to-r from-[#00b8d8] to-[#3b82f6] text-white font-medium hover:from-[#00b8d8]/90 hover:to-[#3b82f6]/90 transition-all duration-200 text-sm tracking-wide flex items-center gap-2 shadow-lg shadow-[#00b8d8]/20 ${className}`}
+          onClick={handleMainButtonClick}
+          data-wallet-button
+        >
+          <PersonIcon className="w-4 h-4" />
+          Connect Wallet
+          <ChevronDownIcon className={`w-4 h-4 transition-transform duration-200 ${showDropdown ? 'rotate-180' : ''}`} />
+        </button>
+      </div>
 
-      {/* Dropdown Menu */}
-      {showDropdown && (
+      {/* Portal Dropdown Menu */}
+      {showDropdown && typeof window !== 'undefined' && createPortal(
         <>
           {/* Backdrop */}
           <div 
             className="fixed inset-0" 
-            style={{ zIndex: 99998 }}
+            style={{ zIndex: 999998 }}
             onClick={() => setShowDropdown(false)}
           />
           
           {/* Dropdown Content */}
           <div 
-            className="absolute top-full right-0 mt-2 w-80 bg-black/95 backdrop-blur-xl border border-gray-800/50 rounded-xl shadow-2xl overflow-hidden"
-            style={{ zIndex: 99999 }}
+            className="fixed w-80 bg-black/95 backdrop-blur-xl border border-gray-800/50 rounded-xl shadow-2xl overflow-hidden"
+            style={{ 
+              zIndex: 999999,
+              top: `${dropdownPosition.top}px`,
+              right: `${dropdownPosition.right}px`
+            }}
           >
             <div className="p-4">
               {isConnected ? (
@@ -128,7 +152,7 @@ export default function SimpleUnifiedWalletButton({
                   <div className="text-sm text-gray-300 mb-4 font-medium">
                     Wallet Account
                   </div>
-                  
+
                   {/* Current Wallet Info */}
                   <div className="mb-4 p-3 rounded-lg bg-gradient-to-r from-[#00b8d8]/10 to-[#3b82f6]/10 border border-[#00b8d8]/30">
                     <div className="flex items-center gap-3">
@@ -153,11 +177,11 @@ export default function SimpleUnifiedWalletButton({
                       className="w-full mb-3 px-4 py-3 rounded-lg bg-gradient-to-r from-[#627eea]/20 to-[#8b5cf6]/20 hover:from-[#627eea]/30 hover:to-[#8b5cf6]/30 transition-colors duration-200 text-left border border-[#627eea]/30 flex items-center gap-3"
                     >
                       <div className="w-8 h-8 bg-gradient-to-r from-[#627eea] to-[#8b5cf6] rounded-lg flex items-center justify-center">
-                        <Image 
-                          src="/ethereum.svg" 
-                          alt="Ethereum" 
-                          width={16} 
-                          height={16} 
+                        <Image
+                          src="/ethereum.svg"
+                          alt="Ethereum"
+                          width={16}
+                          height={16}
                           className="w-4 h-4"
                         />
                       </div>
@@ -172,15 +196,15 @@ export default function SimpleUnifiedWalletButton({
                     <div className="w-full rounded-lg bg-gradient-to-r from-[#9945ff]/20 to-[#14f195]/20 border border-[#9945ff]/30 overflow-hidden relative">
                       {/* Solana Icon */}
                       <div className="absolute left-3 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-gradient-to-r from-[#9945ff] to-[#14f195] rounded-lg flex items-center justify-center z-10">
-                        <Image 
-                          src="/solana.svg" 
-                          alt="Solana" 
-                          width={16} 
-                          height={16} 
+                        <Image
+                          src="/solana.svg"
+                          alt="Solana"
+                          width={16}
+                          height={16}
                           className="w-4 h-4"
                         />
                       </div>
-                      <WalletMultiButton 
+                      <WalletMultiButton
                         style={{
                           background: 'transparent',
                           border: 'none',
@@ -201,7 +225,7 @@ export default function SimpleUnifiedWalletButton({
                   <div className="text-sm text-gray-300 mb-4 font-medium">
                     Choose Wallet Type
                   </div>
-                  
+
                   {/* EVM Wallet Option */}
                   <div className="mb-4">
                     <div className="text-xs text-gray-400 mb-2">EVM Wallets (Ethereum, Polygon, etc.)</div>
@@ -210,11 +234,11 @@ export default function SimpleUnifiedWalletButton({
                       className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-gradient-to-r from-[#627eea]/20 to-[#8b5cf6]/20 hover:from-[#627eea]/30 hover:to-[#8b5cf6]/30 transition-colors duration-200 text-left group border border-[#627eea]/30"
                     >
                       <div className="w-10 h-10 bg-gradient-to-r from-[#627eea] to-[#8b5cf6] rounded-lg flex items-center justify-center">
-                        <Image 
-                          src="/ethereum.svg" 
-                          alt="Ethereum" 
-                          width={20} 
-                          height={20} 
+                        <Image
+                          src="/ethereum.svg"
+                          alt="Ethereum"
+                          width={20}
+                          height={20}
                           className="w-5 h-5"
                         />
                       </div>
@@ -238,15 +262,15 @@ export default function SimpleUnifiedWalletButton({
                     <div className="w-full rounded-lg bg-gradient-to-r from-[#9945ff]/20 to-[#14f195]/20 border border-[#9945ff]/30 overflow-hidden relative">
                       {/* Solana Icon */}
                       <div className="absolute left-3 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-gradient-to-r from-[#9945ff] to-[#14f195] rounded-lg flex items-center justify-center z-10">
-                        <Image 
-                          src="/solana.svg" 
-                          alt="Solana" 
-                          width={16} 
-                          height={16} 
+                        <Image
+                          src="/solana.svg"
+                          alt="Solana"
+                          width={16}
+                          height={16}
                           className="w-4 h-4"
                         />
                       </div>
-                      <WalletMultiButton 
+                      <WalletMultiButton
                         style={{
                           background: 'transparent',
                           border: 'none',
@@ -274,8 +298,9 @@ export default function SimpleUnifiedWalletButton({
               </div>
             </div>
           </div>
-        </>
+        </>,
+        document.body
       )}
-    </div>
+    </>
   );
 }

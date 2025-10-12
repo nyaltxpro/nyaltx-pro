@@ -37,21 +37,42 @@ wcm-modal {
 
 /* Additional fixes for home page elements */
 .wallet-dropdown-container {
-  z-index: 99999 !important;
-  position: relative;
+  z-index: 999999 !important;
+  position: relative !important;
 }
 
 /* Ensure wallet button and dropdown are always on top */
 [data-wallet-button] {
-  z-index: 99999 !important;
-  position: relative;
+  z-index: 999999 !important;
+  position: relative !important;
 }
 
 /* Fix for any competing z-index elements */
 .hero-section,
 .banner-section,
-.header-section {
+.header-section,
+.main-content,
+.page-content,
+.container,
+.section {
   z-index: 1 !important;
+}
+
+/* Force all common layout elements to low z-index */
+main,
+section,
+div:not(.wallet-dropdown-container):not([data-wallet-button]),
+article,
+aside,
+nav:not(.wallet-dropdown-container) {
+  z-index: auto !important;
+}
+
+/* Ensure dropdown appears above everything */
+.wallet-dropdown-container > div[style*="position: absolute"] {
+  z-index: 999999 !important;
+  position: fixed !important;
+  transform: none !important;
 }
 
 /* Ensure wallet modals are above everything */
