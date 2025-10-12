@@ -208,7 +208,7 @@ export default function BoostPackCheckout() {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTokens, setSelectedTokens] = useState<string[]>([]);
-  const [paymentMethod, setPaymentMethod] = useState<'eth' | 'sol' | 'nyax'>('eth');
+  const [paymentMethod, setPaymentMethod] = useState<'eth' | 'sol' | 'nyax' | 'paypal'>('eth');
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [ethPrice, setEthPrice] = useState(3000);
@@ -532,7 +532,6 @@ export default function BoostPackCheckout() {
         // Redirect to success page with promo flag
         router.push(
           `/pricing/boost-pack/success?pack=${packId}&tokens=${selectedTokens.join(',')}&promo=${promoCode.toUpperCase()}&free=true`
-        );
         return;
       }
 
@@ -562,12 +561,10 @@ export default function BoostPackCheckout() {
             args: [DEFAULT_RECEIVER, parseUnits(nyaxPrice.toFixed(6), 18)],
           });
           break;
-      }
 
-      // Apply boost to selected user-registered tokens
-      const selectedTokenData = userTokens.filter(token => selectedTokens.includes(token.id));
-
-      // Update boost points for each selected token in database
+        case 'paypal':
+          // Handle PayPal payment via Stripe
+          const selectedTokenData = userTokens.filter(token => selectedTokens.includes(token.id));
       const pointsUpdatePromises = selectedTokenData.map(async token => {
         const baseBoost = boostPack.points;
         const categoryMultiplier = token.multiplier || 1.0;
@@ -1118,6 +1115,24 @@ export default function BoostPackCheckout() {
                         </div>
                       </div>
                       <span className="text-gray-300">${nyaxPrice.toFixed(2)}</span>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => setPaymentMethod('paypal')}
+                    className={`w-full p-3 rounded-lg border transition-colors ${paymentMethod === 'paypal'
+                        ? 'border-cyan-500 bg-cyan-500/10'
+                        : 'border-gray-700 hover:border-gray-600'
+                      }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center text-white text-xs font-bold">
+                          PP
+                        </div>
+                        <span className="text-white">PayPal</span>
+                      </div>
+                      <span className="text-gray-300">${pricing.finalPrice.toFixed(2)}</span>
                     </div>
                   </button>
                 </div>
