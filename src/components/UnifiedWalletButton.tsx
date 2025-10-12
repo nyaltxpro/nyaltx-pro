@@ -48,13 +48,23 @@ export default function UnifiedWalletButton({
   }, [isConnected, address, walletType, formatAddress, onConnect]);
 
   const handleConnectEvm = () => {
-    openEvmModal();
-    setShowDropdown(false);
+    console.log('Attempting to open EVM wallet modal...');
+    try {
+      openEvmModal();
+      setShowDropdown(false);
+    } catch (error) {
+      console.error('Error opening EVM modal:', error);
+    }
   };
 
   const handleConnectSolana = () => {
-    setSolanaModalVisible(true);
-    setShowDropdown(false);
+    console.log('Attempting to open Solana wallet modal...');
+    try {
+      setSolanaModalVisible(true);
+      setShowDropdown(false);
+    } catch (error) {
+      console.error('Error opening Solana modal:', error);
+    }
   };
 
   const handleAccountClick = () => {
@@ -103,7 +113,7 @@ export default function UnifiedWalletButton({
   }
 
   return (
-    <div className="relative">
+    <div className="relative unified-wallet-dropdown">
       <button
         className={`py-2 px-4 rounded-xl bg-gradient-to-r from-[#00b8d8] to-[#3b82f6] text-white font-medium hover:from-[#00b8d8]/90 hover:to-[#3b82f6]/90 transition-all duration-200 text-sm tracking-wide flex items-center gap-2 shadow-lg shadow-[#00b8d8]/20 ${className}`}
         onClick={handleMainButtonClick}
@@ -118,12 +128,12 @@ export default function UnifiedWalletButton({
         <>
           {/* Backdrop */}
           <div 
-            className="fixed inset-0 z-40" 
+            className="fixed inset-0 unified-wallet-backdrop" 
             onClick={() => setShowDropdown(false)}
           />
           
           {/* Dropdown Content */}
-          <div className="absolute top-full right-0 mt-2 w-64 bg-black/95 backdrop-blur-xl border border-gray-800/50 rounded-xl shadow-2xl z-50 overflow-hidden">
+          <div className="absolute top-full right-0 mt-2 w-64 bg-black/95 backdrop-blur-xl border border-gray-800/50 rounded-xl shadow-2xl overflow-hidden" style={{ zIndex: 10002 }}>
             <div className="p-2">
               <div className="text-xs text-gray-400 px-3 py-2 font-medium">
                 Choose Wallet Type

@@ -1,0 +1,36 @@
+/* Fix for wallet modal z-index issues */
+.wallet-adapter-modal-wrapper {
+  z-index: 10000 !important;
+}
+
+.wallet-adapter-modal-overlay {
+  z-index: 10000 !important;
+}
+
+.wallet-adapter-modal {
+  z-index: 10001 !important;
+}
+
+/* Reown AppKit modal z-index fix */
+w3m-modal {
+  z-index: 10000 !important;
+}
+
+wcm-modal {
+  z-index: 10000 !important;
+}
+
+/* General modal backdrop fix */
+[data-headlessui-state="open"] {
+  z-index: 9999 !important;
+}
+
+/* Ensure dropdown appears above everything */
+.unified-wallet-dropdown {
+  z-index: 10002 !important;
+  position: relative;
+}
+
+.unified-wallet-backdrop {
+  z-index: 10001 !important;
+}
