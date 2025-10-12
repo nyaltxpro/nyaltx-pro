@@ -414,19 +414,19 @@ export default function PricingPage() {
 
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-10">
           {/* Header row */}
-          <div className="flex items-start justify-between gap-4 mb-6">
+          <div className="flex items-start justify-between gap-4 mb-8">
             <div>
-              <h1 className="text-7xl md:text-7xl font-extrabold tracking-tight bg-clip-text my-5 p-2 text-transparent bg-gradient-to-r from-cyan-400 to-indigo-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+              <h1 className="text-6xl md:text-7xl font-extrabold tracking-tight bg-clip-text my-6 p-3 text-transparent bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                 Pricing
               </h1>
-              <p className="text-gray-300 mt-2 max-w-2xl" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                Start with <strong>NyaltxPro</strong> to unlock your project profile and media. Then
-                upgrade to the <strong>Race to Liberty</strong> campaign for broader visibility.
+              <p className="text-gray-300 mt-4 max-w-2xl text-lg leading-relaxed" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                Start with <strong className="text-cyan-400">NyaltxPro</strong> to unlock your project profile and media. Then
+                upgrade to the <strong className="text-indigo-400">Race to Liberty</strong> campaign for broader visibility.
               </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               {chain?.name && (
-                <span className="text-xs px-2 py-1 rounded-full border border-gray-700 bg-black/30 text-gray-300">
+                <span className="text-xs px-3 py-2 rounded-full border border-cyan-500/30 bg-cyan-500/10 text-cyan-300 font-medium backdrop-blur-sm">
                   {chain.name}
                 </span>
               )}
@@ -435,42 +435,46 @@ export default function PricingPage() {
           </div>
 
           {/* NyaltxPro primary offer */}
-          <section aria-labelledby="nyaltxpro" className="mb-10">
-            <h2 id="nyaltxpro" className="text-2xl font-bold text-white mb-4" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-              NyaltxPro
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <section aria-labelledby="nyaltxpro" className="mb-12">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-1 h-8 bg-gradient-to-b from-cyan-400 to-blue-500 rounded-full"></div>
+              <h2 id="nyaltxpro" className="text-3xl font-bold text-white" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                NyaltxPro
+              </h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div
-                className={`group relative bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl p-6 shadow-xl flex flex-col min-h-[360px] transition-all duration-500 ease-out hover:-translate-y-1 hover:shadow-[0_0_40px_-10px_rgba(6,182,212,0.4)]`}
+                className={`group relative bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-2xl p-8 shadow-2xl flex flex-col min-h-[400px] transition-all duration-500 ease-out hover:-translate-y-2 hover:shadow-[0_0_50px_-10px_rgba(6,182,212,0.5)] hover:border-cyan-500/30`}
               >
-                <span className="absolute -top-2 right-4 text-[10px] uppercase tracking-wider px-2 py-1 rounded-full bg-cyan-600 text-black font-bold shadow shadow-cyan-500/30">
+                <span className="absolute -top-3 right-6 text-xs uppercase tracking-wider px-3 py-2 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold shadow-lg">
                   Start Here
                 </span>
-                <h3 className="text-xl font-semibold mb-1">NyaltxPro Membership</h3>
-                <p className="text-gray-400 text-sm mb-4">Unlock your project profile on NYALTX.</p>
-                <div className="mb-4">
-                  <div className="text-3xl font-bold">$199</div>
+                <h3 className="text-2xl font-semibold mb-2 text-white" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>NyaltxPro Membership</h3>
+                <p className="text-gray-300 text-base mb-6" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>Unlock your project profile on NYALTX.</p>
+                <div className="mb-6">
+                  <div className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>$199</div>
                 </div>
-                <ul className="text-sm text-gray-300 space-y-1 mb-4 list-disc pl-5">
-                  <li>Dedicated project profile page</li>
-                  <li>Social media links (Twitter/X, Telegram, Website, etc.)</li>
-                  <li>
-                    Embedded project video
-                    <span className="text-gray-400">
+                <ul className="text-sm text-gray-300 space-y-2 mb-6 list-none pl-0" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                  <li className="flex items-center gap-3"><span className="w-2 h-2 bg-cyan-400 rounded-full flex-shrink-0"></span>Dedicated project profile page</li>
+                  <li className="flex items-center gap-3"><span className="w-2 h-2 bg-cyan-400 rounded-full flex-shrink-0"></span>Social media links (Twitter/X, Telegram, Website, etc.)</li>
+                  <li className="flex items-center gap-3">
+                    <span className="w-2 h-2 bg-cyan-400 rounded-full flex-shrink-0"></span>
+                    <span>Embedded project video
+                    <span className="text-gray-400 text-xs">
                       {' '}
                       — default video provided if none purchased
-                    </span>
+                    </span></span>
                   </li>
-                  <li className="text-cyan-400 font-medium">Valid for 1 year</li>
+                  <li className="flex items-center gap-3 text-cyan-400 font-medium"><span className="w-2 h-2 bg-cyan-400 rounded-full flex-shrink-0"></span>Valid for 1 year</li>
                 </ul>
-                <div className="mt-auto flex flex-col gap-2">
+                <div className="mt-auto flex flex-col gap-3">
                   <button
                     onClick={() =>
                       router.push(
                         `/dashboard/register-token?redirect=pricing/checkout/nyaltxpro&method=paypal`
                       )
                     }
-                    className="w-full py-2 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors"
+                    className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-300 transform hover:scale-105 shadow-lg" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                   >
                     <span className="inline-flex items-center gap-2">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -485,7 +489,7 @@ export default function PricingPage() {
                         `/dashboard/register-token?redirect=pricing/checkout/nyaltxpro&method=eth`
                       )
                     }
-                    className="w-full py-2 rounded-lg border border-zinc-600 text-white font-medium hover:bg-indigo-500"
+                    className="w-full py-3 rounded-xl border border-gray-600/50 bg-gray-800/30 text-white font-semibold hover:bg-indigo-600/20 hover:border-indigo-500/50 transition-all duration-300" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                   >
                     <span className="inline-flex items-center gap-2">
                       <Image src="/crypto-icons/color/eth.svg" width={16} height={16} alt="eth" />{' '}
@@ -498,7 +502,7 @@ export default function PricingPage() {
                         `/dashboard/register-token?redirect=pricing/checkout/nyaltxpro&method=sol`
                       )
                     }
-                    className="w-full py-2 rounded-lg border border-zinc-600 text-white font-medium hover:bg-emerald-500"
+                    className="w-full py-3 rounded-xl border border-gray-600/50 bg-gray-800/30 text-white font-semibold hover:bg-emerald-600/20 hover:border-emerald-500/50 transition-all duration-300" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                   >
                     <span className="inline-flex items-center gap-2">
                       <Image src="/crypto-icons/color/sol.svg" width={16} height={16} alt="sol" />{' '}
@@ -511,7 +515,7 @@ export default function PricingPage() {
                         `/dashboard/register-token?redirect=pricing/checkout/nyaltxpro&method=nyax`
                       )
                     }
-                    className="w-full py-2 rounded-lg border border-zinc-600 text-white font-medium hover:bg-cyan-500"
+                    className="w-full py-3 rounded-xl border border-gray-600/50 bg-gray-800/30 text-white font-semibold hover:bg-cyan-600/20 hover:border-cyan-500/50 transition-all duration-300" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                   >
                     <span className="inline-flex items-center gap-2">
                       <Image src="/logo.png" width={16} height={16} alt="nyax" /> Register Token &
@@ -519,11 +523,12 @@ export default function PricingPage() {
                     </span>
                   </button>
                   {/* $1 trial offer */}
-                  <div className="mt-4 text-xs text-gray-400">Or try NyaltxPro with our $1 starter:</div>
-                  <button
-                    onClick={() => router.push(`/dashboard/register-token?redirect=pricing/checkout/nyaltxpro1&method=paypal`)}
-                    className="w-full py-2 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors"
-                  >
+                  <div className="mt-6 pt-4 border-t border-gray-700/30">
+                    <div className="text-sm text-gray-400 mb-3" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>Or try NyaltxPro with our $1 starter:</div>
+                    <button
+                      onClick={() => router.push(`/dashboard/register-token?redirect=pricing/checkout/nyaltxpro1&method=paypal`)}
+                      className="w-full py-3 rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold hover:from-green-700 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105 shadow-lg" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                    >
                     <span className="inline-flex items-center gap-2">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a9.124 9.124 0 0 1-.077.437c-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287z" />
@@ -531,28 +536,29 @@ export default function PricingPage() {
                       Register Token & Pay $1 with PayPal
                     </span>
                   </button>
-                  <button
-                    onClick={() => router.push(`/dashboard/register-token?redirect=pricing/checkout/nyaltxpro1&method=eth`)}
-                    className="w-full py-2 rounded-lg border border-zinc-600 text-white font-medium hover:bg-indigo-500"
-                  >
-                    <span className="inline-flex items-center gap-2"><Image src="/crypto-icons/color/eth.svg" width={16} height={16} alt="eth" /> Register Token & Pay $1 with ETH</span>
-                  </button>
-                  <button
-                    onClick={() => router.push(`/dashboard/register-token?redirect=pricing/checkout/nyaltxpro1&method=sol`)}
-                    className="w-full py-2 rounded-lg border border-zinc-600 text-white font-medium hover:bg-emerald-500"
-                  >
-                    <span className="inline-flex items-center gap-2"><Image src="/crypto-icons/color/sol.svg" width={16} height={16} alt="sol" /> Register Token & Pay $1 with SOL</span>
-                  </button>
+                    <button
+                      onClick={() => router.push(`/dashboard/register-token?redirect=pricing/checkout/nyaltxpro1&method=eth`)}
+                      className="w-full py-3 rounded-xl border border-gray-600/50 bg-gray-800/30 text-white font-semibold hover:bg-indigo-600/20 hover:border-indigo-500/50 transition-all duration-300" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                    >
+                      <span className="inline-flex items-center gap-2"><Image src="/crypto-icons/color/eth.svg" width={16} height={16} alt="eth" /> Register Token & Pay $1 with ETH</span>
+                    </button>
+                    <button
+                      onClick={() => router.push(`/dashboard/register-token?redirect=pricing/checkout/nyaltxpro1&method=sol`)}
+                      className="w-full py-3 rounded-xl border border-gray-600/50 bg-gray-800/30 text-white font-semibold hover:bg-emerald-600/20 hover:border-emerald-500/50 transition-all duration-300" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                    >
+                      <span className="inline-flex items-center gap-2"><Image src="/crypto-icons/color/sol.svg" width={16} height={16} alt="sol" /> Register Token & Pay $1 with SOL</span>
+                    </button>
+                  </div>
                 </div>
                 {isPro && (
-                  <div className="mt-3 text-sm text-cyan-300">
+                  <div className="mt-4 p-4 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-sm text-cyan-300" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                     {typeof window !== 'undefined' &&
                       (window.location.hostname === 'localhost' ||
                         window.location.hostname === '127.0.0.1')
-                      ? 'Development Mode: Race to Liberty unlocked! '
-                      : 'You have NyaltxPro! '}
+                      ? '🚀 Development Mode: Race to Liberty unlocked! '
+                      : '✅ You have NyaltxPro! '}
                     Ready to gain more visibility?{' '}
-                    <a href="#race" className="underline">
+                    <a href="#race" className="underline hover:text-cyan-200 transition-colors">
                       Upgrade to Race to Liberty
                     </a>
                     .
@@ -561,17 +567,17 @@ export default function PricingPage() {
               </div>
 
               {/* Visual or banner teaser */}
-              <div className="relative border border-white/10 rounded-2xl overflow-hidden">
+              <div className="relative border border-white/10 rounded-2xl overflow-hidden bg-gray-800/20 backdrop-blur-sm hover:border-indigo-500/30 transition-all duration-500">
                 <Image
                   src="/banner23.png"
                   alt="Race to Liberty"
                   fill
                   className="object-contain opacity-90"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-                <div className="absolute bottom-4 left-4 right-4">
-                  <div className="text-white text-xl font-semibold">Race to Liberty</div>
-                  <p className="text-gray-200 text-sm">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                <div className="absolute bottom-6 left-6 right-6">
+                  <div className="text-white text-2xl font-bold mb-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>Race to Liberty</div>
+                  <p className="text-gray-200 text-base leading-relaxed" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                     After NyaltxPro, boost your exposure with our Statue of Liberty–themed campaign.
                   </p>
                 </div>
