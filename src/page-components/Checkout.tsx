@@ -72,6 +72,7 @@ const Checkout = () => {
     const [network, setNetwork] = useState('ethereum');
     const [token, setToken] = useState('USDC');
     const [email, setEmail] = useState('');
+    const [emailError, setEmailError] = useState('');
     const [promo, setPromo] = useState('');
     const [agree, setAgree] = useState(true);
     const [processing, setProcessing] = useState(false);
@@ -88,6 +89,24 @@ const Checkout = () => {
         discord: '',
         github: '',
     });
+
+    // Email validation function
+    const validateEmail = (email: string): boolean => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    };
+
+    // Check email validity and set error
+    const handleEmailChange = (value: string) => {
+        setEmail(value);
+        if (!value.trim()) {
+            setEmailError('Email is required');
+        } else if (!validateEmail(value)) {
+            setEmailError('Please enter a valid email address');
+        } else {
+            setEmailError('');
+        }
+    };
 
     // Load user tokens on mount
     useEffect(() => {
@@ -170,6 +189,16 @@ const Checkout = () => {
     };
 
     const handlePay = async () => {
+        // Validate email first
+        if (!email.trim()) {
+            setEmailError('Email is required');
+            return alert('Please enter your email address');
+        }
+        if (!validateEmail(email)) {
+            setEmailError('Please enter a valid email address');
+            return alert('Please enter a valid email address');
+        }
+
         if (!agree) return alert('Please accept Terms to continue.');
         if (!isConnected) return alert('Please connect your wallet to continue.');
 
@@ -213,14 +242,21 @@ const Checkout = () => {
     return (
         <div className="p-6 max-w-6xl mx-auto">
             <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold text-white">Checkout</h1>
+                <div>
+                    <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                        Checkout
+                    </h1>
+                    <p className="text-gray-400 text-sm mt-1" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                        Complete your purchase with crypto payments
+                    </p>
+                </div>
                 <ConnectWalletButton />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Left: Payment form */}
                 <div className="lg:col-span-2">
-                    <div className="bg-[#0f1923] rounded-xl p-6 border border-gray-800">
+                    <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl p-6 shadow-xl">
                         {/* Customer */}
                         <div className="mb-6">
                             <div className="flex items-center mb-2">
@@ -231,14 +267,26 @@ const Checkout = () => {
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm text-gray-300 mb-1">Email</label>
+                                    <label className="block text-sm text-gray-300 mb-1" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                        Email Address <span className="text-red-400">*</span>
+                                    </label>
                                     <input
                                         type="email"
                                         value={email}
-                                        onChange={e => setEmail(e.target.value)}
+                                        onChange={e => handleEmailChange(e.target.value)}
                                         placeholder="you@example.com"
-                                        className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
+                                        required
+                                        className={`w-full px-3 py-2 bg-[#1a2932] border rounded-md text-white focus:outline-none focus:ring-1 ${
+                                            emailError 
+                                                ? 'border-red-500 focus:ring-red-500' 
+                                                : 'border-gray-700 focus:ring-[#00b8d8]'
+                                        }`}
                                     />
+                                    {emailError && (
+                                        <p className="text-xs text-red-400 mt-1" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                            {emailError}
+                                        </p>
+                                    )}
                                 </div>
                                 <div>
                                     <label className="block text-sm text-gray-300 mb-1">Promo Code</label>
@@ -467,8 +515,8 @@ const Checkout = () => {
 
                 {/* Right: Summary */}
                 <div className="lg:col-span-1">
-                    <div className="bg-[#0f1923] rounded-xl p-6 border border-gray-800">
-                        <h3 className="text-lg font-semibold mb-4">Order Summary</h3>
+                    <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl p-6 shadow-xl">
+                        <h3 className="text-lg font-semibold mb-4" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>Order Summary</h3>
                         <div className="space-y-3 mb-4">
                             {products.map(p => (
                                 <div key={p.id} className="flex items-center justify-between">

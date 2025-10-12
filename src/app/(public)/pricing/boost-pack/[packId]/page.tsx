@@ -700,8 +700,8 @@ export default function BoostPackCheckout() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Token Selection */}
             <div className="lg:col-span-2 space-y-6">
-              <div className="bg-gradient-to-b from-white/5 to-white/[0.03] backdrop-blur-md border border-white/10 rounded-xl p-6">
-                <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+              <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl p-6 shadow-xl">
+                <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                   <FaCoins className="text-cyan-400" />
                   Select Tokens to Boost
                 </h2>
@@ -868,7 +868,7 @@ export default function BoostPackCheckout() {
             {/* Order Summary */}
             <div className="space-y-6">
               {/* Boost Pack Info */}
-              <div className="bg-gradient-to-b from-white/5 to-white/[0.03] backdrop-blur-md border border-white/10 rounded-xl p-6">
+              <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl p-6 shadow-xl">
                 <div
                   className={`text-center p-6 rounded-lg bg-gradient-to-r ${boostPack.color} mb-4`}
                 >
@@ -1014,8 +1014,8 @@ export default function BoostPackCheckout() {
               </div>
 
               {/* Promo Code Section */}
-              <div className="bg-gradient-to-b from-white/5 to-white/[0.03] backdrop-blur-md border border-white/10 rounded-xl p-6">
-                <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+              <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl p-6 shadow-xl">
+                <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                   <FaTag className="text-yellow-400" />
                   Promo Code
                 </h3>

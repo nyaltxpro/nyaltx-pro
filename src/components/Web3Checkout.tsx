@@ -792,11 +792,11 @@ export default function Web3Checkout({
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       {/* Left: Payment form */}
       <div className="lg:col-span-2">
-        <div className="bg-[#0f1923] rounded-xl p-6 border border-gray-800">
+        <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl p-6 shadow-xl">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-xl font-semibold">Payment</h2>
+              <h2 className="text-xl font-semibold" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>Payment</h2>
               {selectedTier && (
                 <p className="text-gray-400 text-sm mt-1">
                   Selected plan: <span className="text-white font-medium">{selectedTier}</span>
@@ -839,8 +839,8 @@ export default function Web3Checkout({
           <div className="mb-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm text-gray-300 mb-1">
-                  Email <span className="text-red-400">*</span>
+                <label className="block text-sm text-gray-300 mb-1" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                  Email Address <span className="text-red-400">*</span>
                 </label>
                 <input
                   type="email"
@@ -855,7 +855,7 @@ export default function Web3Checkout({
                   }`}
                 />
                 {emailError && (
-                  <p className="mt-1 text-sm text-red-400">
+                  <p className="mt-1 text-sm text-red-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                     {emailError}
                   </p>
                 )}
@@ -1077,8 +1077,8 @@ export default function Web3Checkout({
 
       {/* Right: Summary */}
       <div className="lg:col-span-1">
-        <div className="bg-[#0f1923] rounded-xl p-6 border border-gray-800">
-          <h3 className="text-lg font-semibold mb-4">Order Summary</h3>
+        <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl p-6 shadow-xl">
+          <h3 className="text-lg font-semibold mb-4" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>Order Summary</h3>
           <div className="space-y-3 mb-4">
             {products.map(p => (
               <div key={p.id} className="flex items-center justify-between">

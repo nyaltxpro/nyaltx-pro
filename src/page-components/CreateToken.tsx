@@ -21,6 +21,8 @@ export default function CreateTokenPage() {
     const [website, setWebsite] = useState('');
     const [twitter, setTwitter] = useState('');
     const [telegram, setTelegram] = useState('');
+    const [email, setEmail] = useState('');
+    const [emailError, setEmailError] = useState('');
     const [devBuyAmount, setDevBuyAmount] = useState('1');
     const [slippage, setSlippage] = useState('10');
     const [priorityFee, setPriorityFee] = useState('0.0005');
@@ -64,6 +66,24 @@ export default function CreateTokenPage() {
         },
     ]);
 
+    // Email validation function
+    const validateEmail = (email: string): boolean => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    };
+
+    // Check email validity and set error
+    const handleEmailChange = (value: string) => {
+        setEmail(value);
+        if (!value.trim()) {
+            setEmailError('Email is required');
+        } else if (!validateEmail(value)) {
+            setEmailError('Please enter a valid email address');
+        } else {
+            setEmailError('');
+        }
+    };
+
     const toggleFAQ = (index: number) => {
         const updatedFaqs = [...faqs];
         updatedFaqs[index].isOpen = !updatedFaqs[index].isOpen;
@@ -95,6 +115,16 @@ export default function CreateTokenPage() {
         setSuccess('');
 
         try {
+            // Validate email first
+            if (!email.trim()) {
+                setEmailError('Email is required');
+                throw new Error('Please enter your email address');
+            }
+            if (!validateEmail(email)) {
+                setEmailError('Please enter a valid email address');
+                throw new Error('Please enter a valid email address');
+            }
+
             if (!tokenName || !tokenSymbol || !description) {
                 throw new Error('Please fill in all required fields');
             }
@@ -108,6 +138,7 @@ export default function CreateTokenPage() {
             formData.append('name', tokenName);
             formData.append('symbol', tokenSymbol);
             formData.append('description', description);
+            formData.append('email', email);
             formData.append('website', website);
             formData.append('twitter', twitter);
             formData.append('telegram', telegram);
@@ -138,6 +169,8 @@ export default function CreateTokenPage() {
             setTokenName('');
             setTokenSymbol('');
             setDescription('');
+            setEmail('');
+            setEmailError('');
             setWebsite('');
             setTwitter('');
             setTelegram('');
@@ -156,7 +189,14 @@ export default function CreateTokenPage() {
     return (
         <div className="p-6 max-w-7xl mx-auto">
             <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold text-[#00b8d8]">Create Token</h1>
+                <div>
+                    <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                        Create Token
+                    </h1>
+                    <p className="text-gray-400 text-sm mt-1" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                        Launch your token on Pump.fun, Bonk.fun, or Moonshot platforms
+                    </p>
+                </div>
                 <div className="flex items-center space-x-4">
                     {/* <SolanaWalletButton />
                     <ConnectWalletButton /> */}
@@ -166,7 +206,7 @@ export default function CreateTokenPage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Left Column - Form */}
                 <div className="lg:col-span-2">
-                    <div className="bg-[#0f1923] rounded-lg shadow-lg overflow-hidden">
+                    <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl shadow-xl overflow-hidden">
                         {/* Tabs */}
                         <div className="flex border-b border-gray-800">
                             <button
@@ -265,6 +305,32 @@ export default function CreateTokenPage() {
                                         rows={3}
                                     />
                                     <p className="text-xs text-gray-500 mt-1">Brief description of your token</p>
+                                </div>
+
+                                <div className="mb-4">
+                                    <label className="block text-sm font-medium text-gray-300 mb-1">
+                                        Email Address <span className="text-red-400">*</span>
+                                    </label>
+                                    <input
+                                        type="email"
+                                        value={email}
+                                        onChange={e => handleEmailChange(e.target.value)}
+                                        placeholder="your@email.com"
+                                        required
+                                        className={`w-full px-3 py-2 bg-[#1a2932] border rounded-md text-white focus:outline-none focus:ring-1 ${
+                                            emailError 
+                                                ? 'border-red-500 focus:ring-red-500' 
+                                                : 'border-gray-700 focus:ring-[#00b8d8]'
+                                        }`}
+                                    />
+                                    {emailError && (
+                                        <p className="text-xs text-red-400 mt-1">
+                                            {emailError}
+                                        </p>
+                                    )}
+                                    {!emailError && (
+                                        <p className="text-xs text-gray-500 mt-1">Required for token creation notifications</p>
+                                    )}
                                 </div>
 
                                 <div className="mb-4">
@@ -435,10 +501,12 @@ export default function CreateTokenPage() {
                     )}
 
                     {/* FAQ Section */}
-                    <div className="bg-[#0f1923] rounded-lg shadow-lg p-6">
-                        <h2 className="text-xl font-semibold text-white mb-4">🚀 Pump.fun Token Creator</h2>
+                    <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl shadow-xl p-6">
+                        <h2 className="text-xl font-semibold text-white mb-4" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                            🚀 Pump.fun Token Creator
+                        </h2>
 
-                        <p className="text-gray-300 mb-4">
+                        <p className="text-gray-300 mb-4" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                             Create meme tokens instantly on Solana with automatic liquidity and trading. No coding
                             required - just upload your image and launch!
                         </p>

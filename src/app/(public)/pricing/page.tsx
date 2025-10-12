@@ -416,10 +416,10 @@ export default function PricingPage() {
           {/* Header row */}
           <div className="flex items-start justify-between gap-4 mb-6">
             <div>
-              <h1 className="text-7xl md:text-7xl font-extrabold tracking-tight bg-clip-text my-5 p-2 text-transparent bg-gradient-to-r from-cyan-400 to-indigo-400">
+              <h1 className="text-7xl md:text-7xl font-extrabold tracking-tight bg-clip-text my-5 p-2 text-transparent bg-gradient-to-r from-cyan-400 to-indigo-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                 Pricing
               </h1>
-              <p className="text-gray-300 mt-2 max-w-2xl">
+              <p className="text-gray-300 mt-2 max-w-2xl" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                 Start with <strong>NyaltxPro</strong> to unlock your project profile and media. Then
                 upgrade to the <strong>Race to Liberty</strong> campaign for broader visibility.
               </p>
@@ -436,12 +436,12 @@ export default function PricingPage() {
 
           {/* NyaltxPro primary offer */}
           <section aria-labelledby="nyaltxpro" className="mb-10">
-            <h2 id="nyaltxpro" className="text-2xl font-bold text-white mb-4">
+            <h2 id="nyaltxpro" className="text-2xl font-bold text-white mb-4" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
               NyaltxPro
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div
-                className={`group relative border border-white/10 rounded-2xl p-5 bg-gradient-to-b from-white/5 to-white/[0.03] backdrop-blur-md flex flex-col min-h-[360px] transition-all duration-500 ease-out hover:-translate-y-1 hover:shadow-[0_0_40px_-10px_rgba(6,182,212,0.4)]`}
+                className={`group relative bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl p-6 shadow-xl flex flex-col min-h-[360px] transition-all duration-500 ease-out hover:-translate-y-1 hover:shadow-[0_0_40px_-10px_rgba(6,182,212,0.4)]`}
               >
                 <span className="absolute -top-2 right-4 text-[10px] uppercase tracking-wider px-2 py-1 rounded-full bg-cyan-600 text-black font-bold shadow shadow-cyan-500/30">
                   Start Here

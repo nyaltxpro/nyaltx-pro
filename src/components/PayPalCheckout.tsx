@@ -237,14 +237,26 @@ export default function PayPalCheckout({
 
   if (!isPayPalConfigured) {
     return (
-      <div className="w-full p-4 bg-yellow-900/30 border border-yellow-500/50 rounded-lg">
-        <div className="text-yellow-400 font-medium mb-2">PayPal Not Configured</div>
-        <div className="text-sm text-gray-300 mb-3">
+      <div className="w-full p-6 bg-yellow-500/10 backdrop-blur-lg border border-yellow-500/20 rounded-xl shadow-xl">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-12 h-12 bg-yellow-500/20 rounded-lg flex items-center justify-center border border-yellow-500/30">
+            <span className="text-2xl">⚠️</span>
+          </div>
+          <div>
+            <div className="text-yellow-400 font-semibold" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+              PayPal Not Configured
+            </div>
+            <div className="text-sm text-gray-300" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+              Payment service unavailable
+            </div>
+          </div>
+        </div>
+        <div className="text-sm text-gray-300 mb-3" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
           PayPal payments are not available. Please configure your PayPal Client ID in environment
           variables.
         </div>
-        <div className="text-xs text-gray-400">
-          Add <code className="bg-gray-800 px-1 rounded">NEXT_PUBLIC_PAYPAL_CLIENT_ID</code> to your
+        <div className="text-xs text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+          Add <code className="bg-gray-700/30 px-2 py-1 rounded border border-gray-600/30">NEXT_PUBLIC_PAYPAL_CLIENT_ID</code> to your
           .env.local file
         </div>
       </div>
@@ -259,7 +271,21 @@ export default function PayPalCheckout({
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl p-4 shadow-xl">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center border border-blue-500/30">
+          <span className="text-xl">💳</span>
+        </div>
+        <div>
+          <div className="text-white font-semibold" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+            PayPal Payment
+          </div>
+          <div className="text-sm text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+            Secure payment with PayPal
+          </div>
+        </div>
+      </div>
+      
       <PayPalScriptProvider options={paypalScriptOptions}>
         <PayPalButtons
           style={{
@@ -348,7 +374,12 @@ export default function PayPalCheckout({
         />
 
         {processing && (
-          <div className="mt-2 text-center text-sm text-gray-400">Processing payment...</div>
+          <div className="mt-4 flex items-center justify-center gap-3 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+            <div className="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+            <span className="text-sm text-blue-300" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+              Processing payment...
+            </span>
+          </div>
         )}
       </PayPalScriptProvider>
     </div>

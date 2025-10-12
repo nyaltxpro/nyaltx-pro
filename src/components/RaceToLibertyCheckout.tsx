@@ -237,6 +237,127 @@ export default function RaceToLibertyCheckout({
   const [promoError, setPromoError] = useState<string | undefined>(undefined);
   const [promoApplied, setPromoApplied] = useState(false);
 
+  // Get tier info from the tier parameter
+  const tierInfo = TIER_MULTIPLIERS[tier as keyof typeof TIER_MULTIPLIERS];
+
+  // NYAX Payment Handler
+  const handlePayNYAX = async () => {
+    // Validate email first
+    if (!email.trim()) {
+      setEmailError('Email is required');
+      setError('Please enter your email address');
+      return;
+    }
+    if (!validateEmail(email)) {
+      setEmailError('Please enter a valid email address');
+      setError('Please enter a valid email address');
+      return;
+    }
+
+    if (!selectedCoin) {
+      setError('Please select a token first');
+      return;
+    }
+    if (!NYAX_TOKEN) {
+      const errorMsg = 'NYAX token address not configured';
+      setError(errorMsg);
+      toast.error(errorMsg);
+      return;
+    }
+    if (!isConnected) {
+      const errorMsg = 'Please connect your wallet first';
+      setError(errorMsg);
+      toast.error(errorMsg);
+      return;
+    }
+
+    // Switch to correct chain if needed
+    if (chain?.id !== PAYMENT_CHAIN_ID) {
+      try {
+        await switchChainAsync({ chainId: PAYMENT_CHAIN_ID });
+      } catch (e: any) {
+        const errorMsg = e?.shortMessage || e?.message || 'Failed to switch network';
+        setError(errorMsg);
+        toast.error(errorMsg);
+        return;
+      }
+    }
+
+    // Calculate final amount with promo discount
+    let finalAmount = amount;
+    if (promoApplied && promoDiscount > 0) {
+      finalAmount = amount * (1 - promoDiscount);
+    }
+
+    // 20% discount for NYAX (applied after promo discount)
+    const discountedUSD = finalAmount * 0.8;
+
+    setError(undefined);
+    setBusy('nyax');
+    const nyaxToast = toast.loading('Processing NYAX payment...');
+
+    try {
+      const value = parseUnits(discountedUSD.toFixed(6), 18);
+      const hash = await writeContractAsync({
+        abi: erc20Abi,
+        address: NYAX_TOKEN,
+        functionName: 'transfer',
+        args: [RECEIVER, value],
+      });
+      console.log('NYAX payment tx:', hash);
+
+      // Store the NYAX payment order with comprehensive metadata
+      const selectedCoinData = availableCoins.find(coin => coin.id === selectedCoin);
+      const basePoints = selectedCoinData?.basePoints || 100;
+      const tierMultiplier = tierInfo.multiplier;
+      const boostMultiplier = selectedCoinData?.boostMultiplier || 1;
+      const totalPoints = Math.round(basePoints * tierMultiplier * boostMultiplier);
+
+      await storePaymentOrder({
+        paymentMethod: 'nyax',
+        txHash: hash,
+        amount: discountedUSD.toString(),
+        currency: 'NYAX',
+        tier: tier,
+        tierName: tierInfo.name,
+        tierMultiplier: tierMultiplier,
+        originalPrice: amount,
+        finalPrice: discountedUSD,
+        promoCode: promoApplied ? promoCode.toUpperCase() : undefined,
+        promoDiscount: promoApplied ? promoDiscount * 100 : undefined,
+        walletAddress: address,
+        email: email || undefined,
+        selectedToken: selectedCoin ? {
+          tokenId: selectedCoin,
+          tokenName: selectedCoinData?.name,
+          tokenSymbol: selectedCoinData?.symbol,
+          basePoints: basePoints,
+          boostMultiplier: boostMultiplier,
+          finalPoints: totalPoints,
+          contractAddress: selectedCoinData?.contractAddress,
+          chain: selectedCoinData?.chain
+        } : undefined,
+        totalPoints: totalPoints
+      });
+
+      toast.dismiss(nyaxToast);
+      toast.success('🎉 NYAX payment successful! Redirecting...');
+
+      // Redirect to success page
+      setTimeout(() => {
+        router.push(`/pricing/race-to-liberty/success?tier=${tier}&token=${selectedCoin}&txHash=${hash}&method=nyax&points=${totalPoints}${promoApplied ? `&promo=${promoCode}` : ''}`);
+      }, 2000);
+
+    } catch (e: any) {
+      toast.dismiss(nyaxToast);
+      const errorMsg = e?.shortMessage || e?.message || 'NYAX payment failed';
+      setError(errorMsg);
+      toast.error(errorMsg);
+    } finally {
+      setBusy(undefined);
+    }
+  };
+
   // Email validation function
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -404,8 +525,6 @@ export default function RaceToLibertyCheckout({
       toast.dismiss(paymentToast);
       const errorMsg = e?.shortMessage || e?.message || 'ETH payment failed';
       setError(errorMsg);
-      toast.error(errorMsg);
-    } finally {
       toast.error(errorMsg);
       return;
     }
