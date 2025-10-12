@@ -1,6 +1,7 @@
 'use client';
 
 import PublicHeader from '@/components/PublicHeader';
+import { getNYAXPriceUSD } from '@/utils/nyaxPriceApi';
 import { useAppKit } from '@reown/appkit/react';
 import { TokenETH } from '@web3icons/react';
 import Image from 'next/image';
@@ -8,7 +9,6 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { erc20Abi, parseEther, parseUnits } from 'viem';
 import { useAccount, useSendTransaction, useSwitchChain, useWriteContract } from 'wagmi';
-import { getNYAXPriceUSD } from '@/utils/nyaxPriceApi';
 
 // Pricing tiers in USD (Race to Liberty tiers)
 const TIERS = [
@@ -173,7 +173,7 @@ export default function PricingPage() {
     fetchETHPriceUSD()
       .then(setEthPrice)
       .catch(() => setEthPrice(null));
-    
+
     // Fetch NYAX price
     getNYAXPriceUSD()
       .then(setNyaxPrice)
@@ -200,10 +200,10 @@ export default function PricingPage() {
     (usd: number) => {
       // Apply 20% discount first
       const discountedUSD = usd * 0.8;
-      
+
       // Use real NYAX price if available, otherwise fallback to $1 assumption
       const nyaxPriceUSD = nyaxPrice && nyaxPrice > 0 ? nyaxPrice : 1.0;
-      
+
       return discountedUSD / nyaxPriceUSD;
     },
     [nyaxPrice]

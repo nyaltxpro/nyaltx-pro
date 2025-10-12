@@ -96,15 +96,15 @@ const AdminUsersComponent = () => {
     const sources = source.split(', ');
     return sources.map((s, index) => {
       const colors = {
-        orders: 'bg-blue-900 text-blue-300',
-        onchain_orders: 'bg-purple-900 text-purple-300',
-        favorites: 'bg-yellow-900 text-yellow-300',
-        token_registrations: 'bg-green-900 text-green-300',
-        newsletter: 'bg-cyan-900 text-cyan-300'
+        orders: 'bg-blue-500/10 text-blue-300 border border-blue-500/20',
+        onchain_orders: 'bg-purple-500/10 text-purple-300 border border-purple-500/20',
+        favorites: 'bg-yellow-500/10 text-yellow-300 border border-yellow-500/20',
+        token_registrations: 'bg-green-500/10 text-green-300 border border-green-500/20',
+        newsletter: 'bg-cyan-500/10 text-cyan-300 border border-cyan-500/20'
       };
-      const color = colors[s as keyof typeof colors] || 'bg-gray-900 text-gray-300';
+      const color = colors[s as keyof typeof colors] || 'bg-gray-500/10 text-gray-300 border border-gray-500/20';
       return (
-        <span key={index} className={`px-2 py-1 rounded text-xs ${color} mr-1`}>
+        <span key={index} className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${color} mr-1`} style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
           {s.replace('_', ' ')}
         </span>
       );
@@ -227,106 +227,161 @@ const AdminUsersComponent = () => {
       </div>
 
       {/* Users Table */}
-      <div className="bg-gray-800 rounded-xl border border-gray-700">
-        {loading ? (
-          <div className="p-8 text-center text-gray-400">Loading users...</div>
-        ) : error ? (
-          <div className="p-8 text-center text-red-400">Error: {error}</div>
-        ) : filteredUsers.length === 0 ? (
-          <div className="p-8 text-center text-gray-400">No users found</div>
-        ) : (
+      {loading ? (
+        <div className="text-center py-12">
+          <div className="w-16 h-16 bg-gray-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
+            <FaUser className="w-8 h-8 text-gray-400 animate-pulse" />
+          </div>
+          <p className="text-gray-400 font-medium" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+            Loading users...
+          </p>
+        </div>
+      ) : error ? (
+        <div className="text-center py-12">
+          <div className="w-16 h-16 bg-gray-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
+            <FaSearch className="w-8 h-8 text-red-400" />
+          </div>
+          <p className="text-red-400 font-medium" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+            Error: {error}
+          </p>
+        </div>
+      ) : filteredUsers.length === 0 ? (
+        <div className="text-center py-12">
+          <div className="w-16 h-16 bg-gray-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
+            <FaSearch className="w-8 h-8 text-gray-400" />
+          </div>
+          <p className="text-gray-400 font-medium" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+            No users found
+          </p>
+        </div>
+      ) : (
+        <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 overflow-hidden shadow-xl">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-700 text-gray-300">
+            <table className="w-full overflow-hidden">
+              <thead className="bg-gray-700/30 border-b border-gray-600/20">
                 <tr>
-                  <th className="px-4 py-3 text-left">User</th>
-                  <th className="px-4 py-3 text-left">Contact</th>
-                  <th className="px-4 py-3 text-left">Activity</th>
-                  <th className="px-4 py-3 text-left">Spending</th>
-                  <th className="px-4 py-3 text-left">Engagement</th>
-                  <th className="px-4 py-3 text-left">Source</th>
-                  <th className="px-4 py-3 text-left">Registered</th>
-                  <th className="px-4 py-3 text-left">Actions</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                    User
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                    Contact
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                    Activity
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                    Spending
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                    Engagement
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                    Source
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                    Registered
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                    Actions
+                  </th>
                 </tr>
               </thead>
-              <tbody className="text-gray-300">
+              <tbody className="divide-y divide-gray-700/20">
                 {filteredUsers.map((user) => (
-                  <tr key={user.id} className="border-b border-gray-700 hover:bg-gray-750">
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <FaUser className="text-gray-400" />
-                        <div>
-                          <div className="text-sm font-medium">
+                  <tr key={user.id} className="hover:bg-gray-700/20 transition-colors duration-200">
+                    <td className="px-4 py-3 text-sm border-r border-gray-700/20">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-gray-600/30 rounded-full flex items-center justify-center border border-gray-600/30">
+                          <FaUser className="w-4 h-4 text-gray-400" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="font-medium text-white text-sm" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                             {user.name || user.email || formatWalletAddress(user.walletAddress || '')}
                           </div>
-                          <div className="text-xs text-gray-400">
+                          <div className="text-xs text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                             ID: {user.id.slice(-8)}...
                           </div>
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3">
-                      <div className="space-y-1">
+                    <td className="px-4 py-3 text-sm border-r border-gray-700/20">
+                      <div className="space-y-2">
                         {user.email && (
-                          <div className="flex items-center gap-1 text-xs">
-                            <FaEnvelope className="text-green-400" />
-                            <span>{user.email}</span>
+                          <div className="flex items-center gap-2 text-xs">
+                            <FaEnvelope className="w-3 h-3 text-green-400" />
+                            <span className="text-gray-300 truncate max-w-[200px]" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                              {user.email}
+                            </span>
                           </div>
                         )}
                         {user.walletAddress && (
-                          <div className="flex items-center gap-1 text-xs">
-                            <FaWallet className="text-purple-400" />
-                            <span className="font-mono">{formatWalletAddress(user.walletAddress)}</span>
+                          <div className="flex items-center gap-2 text-xs">
+                            <FaWallet className="w-3 h-3 text-purple-400" />
+                            <code className="text-gray-300 bg-gray-700/30 px-2 py-1 rounded border border-gray-600/30">
+                              {formatWalletAddress(user.walletAddress)}
+                            </code>
                           </div>
                         )}
                       </div>
                     </td>
-                    <td className="px-4 py-3">
-                      <div className="text-sm">
-                        <div className="text-cyan-400 font-medium">{user.totalOrders} orders</div>
+                    <td className="px-4 py-3 text-sm border-r border-gray-700/20">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-cyan-500/10 text-cyan-300 border border-cyan-500/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                            {user.totalOrders} orders
+                          </span>
+                        </div>
                         {user.lastActive && (
-                          <div className="text-xs text-gray-400">
+                          <div className="text-xs text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                             Last: {formatDate(user.lastActive)}
                           </div>
                         )}
                       </div>
                     </td>
-                    <td className="px-4 py-3">
-                      <div className="text-sm font-medium text-green-400">
+                    <td className="px-4 py-3 text-sm border-r border-gray-700/20">
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-500/10 text-green-300 border border-green-500/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                         {formatCurrency(user.totalSpent)}
-                      </div>
+                      </span>
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3 text-sm border-r border-gray-700/20">
                       <div className="space-y-1">
                         {user.favoriteTokens > 0 && (
-                          <div className="flex items-center gap-1 text-xs">
-                            <FaStar className="text-yellow-400" />
-                            <span>{user.favoriteTokens} favorites</span>
+                          <div className="flex items-center gap-2 text-xs">
+                            <FaStar className="w-3 h-3 text-yellow-400" />
+                            <span className="text-gray-300" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                              {user.favoriteTokens} favorites
+                            </span>
                           </div>
                         )}
                         {user.registeredTokens > 0 && (
-                          <div className="flex items-center gap-1 text-xs">
-                            <FaCoins className="text-green-400" />
-                            <span>{user.registeredTokens} tokens</span>
+                          <div className="flex items-center gap-2 text-xs">
+                            <FaCoins className="w-3 h-3 text-green-400" />
+                            <span className="text-gray-300" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                              {user.registeredTokens} tokens
+                            </span>
                           </div>
                         )}
                       </div>
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3 text-sm border-r border-gray-700/20">
                       <div className="flex flex-wrap gap-1">
                         {getSourceBadge(user.source)}
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-xs">
-                      {formatDate(user.registeredAt)}
+                    <td className="px-4 py-3 text-sm border-r border-gray-700/20">
+                      <span className="text-gray-300 text-xs" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                        {formatDate(user.registeredAt)}
+                      </span>
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3 text-sm">
                       <button
                         onClick={() => openUserModal(user)}
-                        className="text-cyan-400 hover:text-cyan-300 p-1"
+                        className="px-3 py-1 rounded-lg text-xs font-medium transition-all duration-200 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/30"
                         title="View Details"
+                        style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                       >
-                        <FaEye />
+                        <FaEye className="w-3 h-3 inline mr-1" />
+                        View
                       </button>
                     </td>
                   </tr>
@@ -334,8 +389,8 @@ const AdminUsersComponent = () => {
               </tbody>
             </table>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* User Details Modal */}
       {showModal && selectedUser && (

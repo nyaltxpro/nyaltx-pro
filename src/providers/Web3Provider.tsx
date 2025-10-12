@@ -1,5 +1,5 @@
 'use client';
-import { SolanaAdapter } from '@reown/appkit-adapter-solana';
+// import { SolanaAdapter } from '@reown/appkit-adapter-solana';
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';
 import type { AppKitNetwork } from "@reown/appkit/networks";
 import { arbitrum, mainnet, solana, solanaDevnet, solanaTestnet } from '@reown/appkit/networks';
@@ -69,10 +69,10 @@ const metadata = {
 //   },
 // });
 
-const solanaWeb3JsAdapter = new SolanaAdapter()
+// const solanaWeb3JsAdapter = new SolanaAdapter()
 
 const modal = createAppKit({
-  adapters: [wagmiAdapter, solanaWeb3JsAdapter],
+  adapters: [wagmiAdapter],
   networks,
   metadata,
   projectId,

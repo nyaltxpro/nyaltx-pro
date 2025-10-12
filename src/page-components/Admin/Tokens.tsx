@@ -1,8 +1,9 @@
 'use client';
 
+import React, { useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import React, { useEffect, useMemo, useState } from 'react';
+import { FaCoins, FaSearch, FaCheck, FaTimes, FaTrash, FaChevronLeft, FaChevronRight, FaArrowLeft, FaCrown, FaPause, FaPlay, FaEye, FaEyeSlash, FaSort, FaSortUp, FaSortDown } from 'react-icons/fa';
 
 const AdminTokensClient = dynamic(() => Promise.resolve(AdminTokensComponent), {
     ssr: false,
@@ -374,199 +375,254 @@ function AdminTokensComponent() {
             {error && <div className="text-sm text-red-400">{error}</div>}
 
             {!tokens ? (
-                <div className="text-gray-400">Loading…</div>
+                <div className="text-center py-12">
+                    <div className="w-16 h-16 bg-gray-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg className="w-8 h-8 text-gray-400 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                        </svg>
+                    </div>
+                    <p className="text-gray-400 font-medium" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                        Loading tokens...
+                    </p>
+                </div>
             ) : viewRows.length === 0 ? (
-                <div className="text-gray-400">No records found.</div>
+                <div className="text-center py-12">
+                    <div className="w-16 h-16 bg-gray-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg className="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+                        </svg>
+                    </div>
+                    <p className="text-gray-400 font-medium" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                        No tokens found
+                    </p>
+                </div>
             ) : (
-                <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
-                    <table className="w-full text-sm text-left rtl:text-right text-gray-400">
-                        <thead className="text-xs  uppercase bg-gray-700 text-gray-400">
-                            <tr>
-                                <th
-                                    scope="col"
-                                    className={`px-6 py-3 select-none cursor-pointer ${sortKey === 'createdAt' ? 'text-cyan-300' : ''}`}
-                                    onClick={() => toggleSort('createdAt')}
-                                >
-                                    <span className="inline-flex items-center gap-1">
-                                        Created
-                                        <span className="text-xs opacity-70">{sortKey === 'createdAt' ? (sortDir === 'asc' ? '▲' : '▼') : ''}</span>
-                                    </span>
-                                </th>
-                                <th
-                                    scope="col"
-                                    className={`px-6 py-3 select-none cursor-pointer ${sortKey === 'tokenName' ? 'text-cyan-300' : ''}`}
-                                    onClick={() => toggleSort('tokenName')}
-                                >
-                                    <span className="inline-flex items-center gap-1">
-                                        Token
-                                        <span className="text-xs opacity-70">{sortKey === 'tokenName' ? (sortDir === 'asc' ? '▲' : '▼') : ''}</span>
-                                    </span>
-                                </th>
-                                <th
-                                    scope="col"
-                                    className={`px-6 py-3 select-none cursor-pointer ${sortKey === 'blockchain' ? 'text-cyan-300' : ''}`}
-                                    onClick={() => toggleSort('blockchain')}
-                                >
-                                    <span className="inline-flex items-center gap-1">
-                                        Chain
-                                        <span className="text-xs opacity-70">{sortKey === 'blockchain' ? (sortDir === 'asc' ? '▲' : '▼') : ''}</span>
-                                    </span>
-                                </th>
-                                <th scope="col" className="px-6 py-3">
-                                    Contract
-                                </th>
-                                <th scope="col" className="px-6 py-3">
-                                    Status
-                                </th>
-                                <th scope="col" className="px-6 py-3">
-                                    Race
-                                </th>
-                                <th scope="col" className="px-6 py-3">
-                                    Paused
-                                </th>
-                                <th scope="col" className="px-6 py-3">
-                                    Socials
-                                </th>
-                                <th scope="col" className="px-6 py-3">
-                                    <span className="sr-only">Actions</span>
-                                </th>
-                            </tr>
+                <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 overflow-hidden shadow-xl">
+                    <div className="overflow-x-auto">
+                        <table className="w-full overflow-hidden">
+                            <thead className="bg-gray-700/30 border-b border-gray-600/20">
+                                <tr>
+                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                        <button
+                                            onClick={() => toggleSort('createdAt')}
+                                            className="flex items-center gap-1 hover:text-gray-300 transition-colors"
+                                        >
+                                            Created
+                                            {sortKey === 'createdAt' && sortDir === 'asc' && <FaSortUp className="w-3 h-3" />}
+                                            {sortKey === 'createdAt' && sortDir === 'desc' && <FaSortDown className="w-3 h-3" />}
+                                            {sortKey !== 'createdAt' && <FaSort className="w-3 h-3 opacity-40" />}
+                                        </button>
+                                    </th>
+                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                        <button
+                                            onClick={() => toggleSort('tokenName')}
+                                            className="flex items-center gap-1 hover:text-gray-300 transition-colors"
+                                        >
+                                            Token
+                                            {sortKey === 'tokenName' && sortDir === 'asc' && <FaSortUp className="w-3 h-3" />}
+                                            {sortKey === 'tokenName' && sortDir === 'desc' && <FaSortDown className="w-3 h-3" />}
+                                            {sortKey !== 'tokenName' && <FaSort className="w-3 h-3 opacity-40" />}
+                                        </button>
+                                    </th>
+                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                        <button
+                                            onClick={() => toggleSort('blockchain')}
+                                            className="flex items-center gap-1 hover:text-gray-300 transition-colors"
+                                        >
+                                            Chain
+                                            {sortKey === 'blockchain' && sortDir === 'asc' && <FaSortUp className="w-3 h-3" />}
+                                            {sortKey === 'blockchain' && sortDir === 'desc' && <FaSortDown className="w-3 h-3" />}
+                                            {sortKey !== 'blockchain' && <FaSort className="w-3 h-3 opacity-40" />}
+                                        </button>
+                                    </th>
+                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                        Contract
+                                    </th>
+                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                        Status
+                                    </th>
+                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                        Race
+                                    </th>
+                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                        Paused
+                                    </th>
+                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                        Socials
+                                    </th>
+                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                        Actions
+                                    </th>
+                                </tr>
                         </thead>
-                        <tbody>
-                            {viewRows.map(t => (
-                                <tr
-                                    key={t.id}
-                                    className=" border-b bg-gray-800 border-gray-700  hover:bg-gray-600"
-                                >
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        {new Date(t.createdAt).toLocaleString()}
-                                    </td>
-                                    <th
-                                        scope="row"
-                                        className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                            <tbody className="divide-y divide-gray-700/20">
+                                {viewRows.map((t: any) => (
+                                    <tr
+                                        key={t.id}
+                                        className="hover:bg-gray-700/20 transition-colors duration-200"
                                     >
-                                        <div className="flex items-center gap-2">
-                                            {t.imageUri && (
-                                                <img src={t.imageUri.replace('gateway.pinata.cloud', 'ipfs.io')} alt="logo" className="w-6 h-6 rounded" />
-                                            )}
-                                            <div className="min-w-0">
-                                                <div className="font-medium text-gray-400">
-                                                    {t.tokenName} <span className="text-gray-400">({t.tokenSymbol})</span>
-                                                </div>
-                                                <div className="text-xs text-gray-400 truncate max-w-[320px]">
-                                                    {t.website || t.twitter || t.github || '—'}
+                                        <td className="px-4 py-3 text-sm text-gray-300 border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                            {new Date(t.createdAt).toLocaleDateString()}
+                                        </td>
+                                        <td className="px-4 py-3 border-r border-gray-700/20">
+                                            <div className="flex items-center gap-3">
+                                                {t.imageUri && (
+                                                    <img 
+                                                        src={t.imageUri.replace('gateway.pinata.cloud', 'ipfs.io')} 
+                                                        alt="Token logo" 
+                                                        className="w-8 h-8 rounded-full object-cover border border-gray-600/30"
+                                                    />
+                                                )}
+                                                <div className="min-w-0 flex-1">
+                                                    <div className="font-medium text-white text-sm" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                                        {t.tokenName}
+                                                    </div>
+                                                    <div className="text-xs text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                                        {t.tokenSymbol}
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </th>
-                                    <td className="px-6 py-4">{t.blockchain}</td>
-                                    <td className="px-6 py-4">
-                                        <code className="text-xs">{t.contractAddress}</code>
-                                    </td>
-                                    <td className="px-6 py-4 capitalize">{t.status}</td>
-                                    <td className="px-6 py-4">
-                                        {t.status === 'approved' ? (
-                                            <div className="flex flex-col gap-1">
-                                                <div
-                                                    className={`text-xs px-2 py-1 rounded ${t.inRace ? 'bg-yellow-900/50 text-yellow-300' : 'bg-gray-800 text-gray-400'}`}
-                                                >
-                                                    {t.inRace ? '🏁 In Race' : 'Not in Race'}
+                                        </td>
+                                        <td className="px-4 py-3 text-sm text-gray-300 border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-500/10 text-blue-300 border border-blue-500/20">
+                                                {t.blockchain}
+                                            </span>
+                                        </td>
+                                        <td className="px-4 py-3 text-sm text-gray-300 border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                            <code className="text-xs bg-gray-700/30 px-2 py-1 rounded border border-gray-600/30">
+                                                {t.contractAddress.slice(0, 6)}...{t.contractAddress.slice(-4)}
+                                            </code>
+                                        </td>
+                                        <td className="px-4 py-3 text-sm border-r border-gray-700/20">
+                                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                                t.status === 'approved' 
+                                                    ? 'bg-green-500/10 text-green-300 border border-green-500/20'
+                                                    : t.status === 'rejected'
+                                                    ? 'bg-red-500/10 text-red-300 border border-red-500/20'
+                                                    : 'bg-yellow-500/10 text-yellow-300 border border-yellow-500/20'
+                                            }`} style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                                {t.status}
+                                            </span>
+                                        </td>
+                                        <td className="px-4 py-3 text-sm border-r border-gray-700/20">
+                                            {t.status === 'approved' ? (
+                                                <div className="flex flex-col gap-2">
+                                                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                                        t.inRace 
+                                                            ? 'bg-yellow-500/10 text-yellow-300 border border-yellow-500/20'
+                                                            : 'bg-gray-500/10 text-gray-400 border border-gray-500/20'
+                                                    }`} style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                                        {t.inRace ? '🏁 In Race' : 'Not in Race'}
+                                                    </span>
+                                                    <button
+                                                        disabled={busyId === t.id}
+                                                        onClick={() => toggleRaceStatus(t.id, !t.inRace)}
+                                                        className={`text-xs px-3 py-1 rounded-lg transition-all duration-200 font-medium ${
+                                                            t.inRace
+                                                                ? 'bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30'
+                                                                : 'bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-300 border border-yellow-500/30'
+                                                        }`}
+                                                        style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                                                    >
+                                                        {t.inRace ? 'Remove' : 'Add to Race'}
+                                                    </button>
                                                 </div>
+                                            ) : (
+                                                <span className="text-xs text-gray-500" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                                    Approve first
+                                                </span>
+                                            )}
+                                        </td>
+                                        <td className="px-4 py-3 text-sm border-r border-gray-700/20">
+                                            <label className="inline-flex items-center gap-2 cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2"
+                                                    checked={Boolean(t.paused)}
+                                                    disabled={busyId === t.id}
+                                                    onChange={e => patchToken(t.id, { paused: e.target.checked })}
+                                                />
+                                                <span className={`text-xs font-medium ${t.paused ? 'text-red-300' : 'text-green-300'}`} style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                                    {t.paused ? 'Paused' : 'Active'}
+                                                </span>
+                                            </label>
+                                        </td>
+                                        <td className="px-4 py-3 text-sm border-r border-gray-700/20">
+                                            <div className="flex flex-col gap-2">
+                                                <SocialSwitch
+                                                    label="Website"
+                                                    checked={t.showWebsite ?? true}
+                                                    disabled={busyId === t.id}
+                                                    onChange={(val: boolean) => patchToken(t.id, { socials: { website: val } })}
+                                                />
+                                                <SocialSwitch
+                                                    label="Twitter"
+                                                    checked={t.showTwitter ?? true}
+                                                    disabled={busyId === t.id}
+                                                    onChange={(val: boolean) => patchToken(t.id, { socials: { twitter: val } })}
+                                                />
+                                                <SocialSwitch
+                                                    label="Telegram"
+                                                    checked={t.showTelegram ?? true}
+                                                    disabled={busyId === t.id}
+                                                    onChange={(val: boolean) => patchToken(t.id, { socials: { telegram: val } })}
+                                                />
+                                                <SocialSwitch
+                                                    label="Discord"
+                                                    checked={t.showDiscord ?? true}
+                                                    disabled={busyId === t.id}
+                                                    onChange={(val: boolean) => patchToken(t.id, { socials: { discord: val } })}
+                                                />
+                                                <SocialSwitch
+                                                    label="Github"
+                                                    checked={t.showGithub ?? true}
+                                                    disabled={busyId === t.id}
+                                                    onChange={(val: boolean) => patchToken(t.id, { socials: { github: val } })}
+                                                />
+                                            </div>
+                                        </td>
+                                        <td className="px-4 py-3 text-sm">
+                                            <div className="flex gap-2 justify-end">
+                                                <button
+                                                    disabled={busyId === t.id || t.status === 'approved'}
+                                                    onClick={() => updateStatus(t.id, 'approved')}
+                                                    className={`px-3 py-1 rounded-lg text-xs font-medium transition-all duration-200 ${
+                                                        t.status === 'approved' 
+                                                            ? 'bg-green-500/20 text-green-300 border border-green-500/30 cursor-not-allowed' 
+                                                            : 'bg-green-500/20 hover:bg-green-500/30 text-green-300 border border-green-500/30'
+                                                    }`}
+                                                    style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                                                >
+                                                    <FaCheck className="w-3 h-3 inline mr-1" />
+                                                    {t.status === 'approved' ? 'Approved' : 'Approve'}
+                                                </button>
                                                 <button
                                                     disabled={busyId === t.id}
-                                                    onClick={() => toggleRaceStatus(t.id, !t.inRace)}
-                                                    className={`text-xs px-2 py-1 rounded transition-colors ${t.inRace
-                                                        ? 'bg-red-600 hover:bg-red-500 text-white'
-                                                        : 'bg-yellow-600 hover:bg-yellow-500 text-black font-medium'
-                                                        }`}
+                                                    onClick={() => updateStatus(t.id, 'rejected')}
+                                                    className="px-3 py-1 rounded-lg text-xs font-medium transition-all duration-200 bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30"
+                                                    style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                                                 >
-                                                    {t.inRace ? 'Remove' : 'Add to Race'}
+                                                    <FaTimes className="w-3 h-3 inline mr-1" />
+                                                    Reject
+                                                </button>
+                                                <button
+                                                    disabled={busyId === t.id}
+                                                    onClick={() => remove(t.id)}
+                                                    className="px-3 py-1 rounded-lg text-xs font-medium transition-all duration-200 bg-gray-500/20 hover:bg-gray-500/30 text-gray-300 border border-gray-500/30"
+                                                    style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                                                >
+                                                    <FaTrash className="w-3 h-3 inline mr-1" />
+                                                    Delete
                                                 </button>
                                             </div>
-                                        ) : (
-                                            <span className="text-xs text-gray-500">Approve first</span>
-                                        )}
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <label className="inline-flex items-center gap-2 cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                className="accent-cyan-600"
-                                                checked={Boolean(t.paused)}
-                                                disabled={busyId === t.id}
-                                                onChange={e => patchToken(t.id, { paused: e.target.checked })}
-                                            />
-                                            <span className="text-xs text-gray-400">
-                                                {t.paused ? 'Paused' : 'Active'}
-                                            </span>
-                                        </label>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex flex-col gap-1">
-                                            <SocialSwitch
-                                                label="Website"
-                                                checked={t.showWebsite ?? true}
-                                                disabled={busyId === t.id}
-                                                onChange={val => patchToken(t.id, { socials: { website: val } })}
-                                            />
-                                            <SocialSwitch
-                                                label="Twitter"
-                                                checked={t.showTwitter ?? true}
-                                                disabled={busyId === t.id}
-                                                onChange={val => patchToken(t.id, { socials: { twitter: val } })}
-                                            />
-                                            <SocialSwitch
-                                                label="Telegram"
-                                                checked={t.showTelegram ?? true}
-                                                disabled={busyId === t.id}
-                                                onChange={val => patchToken(t.id, { socials: { telegram: val } })}
-                                            />
-                                            <SocialSwitch
-                                                label="Discord"
-                                                checked={t.showDiscord ?? true}
-                                                disabled={busyId === t.id}
-                                                onChange={val => patchToken(t.id, { socials: { discord: val } })}
-                                            />
-                                            <SocialSwitch
-                                                label="Github"
-                                                checked={t.showGithub ?? true}
-                                                disabled={busyId === t.id}
-                                                onChange={val => patchToken(t.id, { socials: { github: val } })}
-                                            />
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 text-right">
-                                        <div className="flex gap-2">
-                                            <button
-                                                disabled={busyId === t.id || t.status === 'approved'}
-                                                onClick={() => updateStatus(t.id, 'approved')}
-                                                className={`rounded px-3 py-1 text-xs ${t.status === 'approved' ? 'bg-emerald-700/50 text-emerald-300 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-500'}`}
-                                            >
-                                                {t.status === 'approved' ? 'Approved' : 'Approve'}
-                                            </button>
-                                            <button
-                                                disabled={busyId === t.id}
-                                                onClick={() => updateStatus(t.id, 'rejected')}
-                                                className="rounded bg-rose-600 hover:bg-rose-500 px-3 py-1 text-xs"
-                                            >
-                                                Reject
-                                            </button>
-                                            <button
-                                                disabled={busyId === t.id}
-                                                onClick={() => remove(t.id)}
-                                                className="rounded border border-gray-700 px-3 py-1 text-xs"
-                                            >
-                                                Delete
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             )}
-
             {/* Footer pagination */}
             <div className="flex items-center justify-between text-sm text-gray-300">
                 <div>
