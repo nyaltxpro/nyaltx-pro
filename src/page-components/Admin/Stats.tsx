@@ -1,10 +1,10 @@
 'use client';
 
+import AnalyticsDashboard from '@/components/admin/AnalyticsDashboard';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { FaChartBar, FaUsers, FaEye, FaWallet, FaServer, FaShoppingCart, FaBullhorn, FaGlobe } from 'react-icons/fa';
-import AnalyticsDashboard from '@/components/admin/AnalyticsDashboard';
+import { FaBullhorn, FaChartBar, FaEye, FaGlobe, FaServer, FaShoppingCart, FaUsers, FaWallet } from 'react-icons/fa';
 
 const AdminStatsClient = dynamic(() => Promise.resolve(AdminStatsComponent), {
     ssr: true,
@@ -184,7 +184,7 @@ function AdminStatsComponent() {
                                         {stats.profiles.active} active
                                     </div>
                                 </div>
-                                
+
                                 <div className="text-center bg-gray-700/30 border border-gray-600/30 rounded-lg p-6 hover:bg-gray-700/40 transition-all duration-200">
                                     <div className="w-12 h-12 bg-orange-500/20 rounded-lg flex items-center justify-center border border-orange-500/30 mx-auto mb-4">
                                         <FaShoppingCart className="w-6 h-6 text-orange-400" />
@@ -196,7 +196,7 @@ function AdminStatsComponent() {
                                         On-chain Orders
                                     </div>
                                 </div>
-                                
+
                                 <div className="text-center bg-gray-700/30 border border-gray-600/30 rounded-lg p-6 hover:bg-gray-700/40 transition-all duration-200">
                                     <div className="w-12 h-12 bg-pink-500/20 rounded-lg flex items-center justify-center border border-pink-500/30 mx-auto mb-4">
                                         <FaBullhorn className="w-6 h-6 text-pink-400" />
