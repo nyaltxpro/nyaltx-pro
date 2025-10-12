@@ -272,3 +272,30 @@ body > div > div[class*="wallet-adapter"] {
 .search-modal-container .popup {
   z-index: 100000004 !important;
 }
+
+/* Sidebar and Footer z-index hierarchy fix */
+/* Ensure sidebar appears above footer and other content */
+.sidebar-container {
+  z-index: 1000000 !important;
+}
+
+/* Footer should stay below sidebar */
+footer {
+  z-index: 1 !important;
+  position: relative !important;
+}
+
+/* Ensure footer doesn't interfere with expanded sidebar */
+footer.footer-with-sidebar {
+  z-index: 1 !important;
+}
+
+/* Mobile sidebar backdrop */
+.sidebar-mobile-backdrop {
+  z-index: 999999 !important;
+}
+
+/* Desktop sidebar */
+.sidebar-desktop {
+  z-index: 1000000 !important;
+}
