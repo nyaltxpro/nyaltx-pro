@@ -84,7 +84,7 @@ div[class*="sidebar"],
 .nav-menu,
 .menu-container,
 aside {
-  z-index: 1000000 !important;
+  z-index: 999999 !important;
 }
 
 /* Portal dropdown should be above everything */
@@ -93,13 +93,94 @@ aside {
   position: fixed !important;
 }
 
-/* Force common dashboard elements to lower z-index */
-.dashboard-content,
-.main-content,
-.page-wrapper,
-.layout-container,
-.content-wrapper {
+/* Force dashboard layout elements to lower z-index */
+main {
   z-index: 1 !important;
+}
+
+/* Target the specific dashboard layout structure */
+.md\:ml-16 {
+  z-index: 1 !important;
+}
+
+/* Target flex containers that might compete with sidebar */
+.flex.flex-col.min-h-screen {
+  z-index: 1 !important;
+}
+
+.flex-grow {
+  z-index: 1 !important;
+}
+
+/* Force any div with transition classes to low z-index */
+.transition-all {
+  z-index: 1 !important;
+}
+
+/* Target any potentially competing layout elements */
+div[class*="ml-"]:not([class*="sidebar"]) {
+  z-index: 1 !important;
+}
+
+/* Ensure all main content areas stay behind sidebar */
+body > div > div.md\:ml-16,
+body > div > div > main,
+[class*="duration-300"] {
+  z-index: 1 !important;
+}
+
+/* Target specific layout patterns from the dashboard */
+.relative.transition-all.duration-300.flex.flex-col.min-h-screen {
+  z-index: 1 !important;
+}
+
+/* Target any element with z-10 class that might compete */
+.z-10 {
+  z-index: 1 !important;
+}
+
+/* Force all content containers to stay behind */
+div[class*="flex"][class*="col"]:not([class*="sidebar"]) {
+  z-index: 1 !important;
+}
+
+/* Specific targeting for dashboard pages */
+[class*="dashboard"] main,
+[class*="dashboard"] > div:not([class*="sidebar"]) {
+  z-index: 1 !important;
+}
+
+/* More targeted approach - reset only competing elements */
+main,
+.main,
+div[class*="ml-"]:not([class*="sidebar"]),
+.transition-all:not([class*="sidebar"]):not([class*="modal"]):not([class*="wallet"]),
+.flex-grow:not([class*="sidebar"]):not([class*="modal"]):not([class*="wallet"]) {
+  z-index: 1 !important;
+}
+
+/* Sidebar gets high z-index */
+.fixed.left-0.top-0.h-full,
+[class*="sidebar"],
+motion-div[class*="fixed"][class*="left-0"] {
+  z-index: 999999 !important;
+}
+
+/* Wallet modal gets HIGHEST priority - must be above sidebar */
+.wallet-dropdown-portal,
+[style*="position: fixed"][style*="top: 50%"],
+div[class*="fixed"][class*="top-1/2"][class*="left-1/2"] {
+  z-index: 99999999 !important;
+}
+
+/* Wallet modal backdrop */
+.fixed.inset-0[style*="z-index: 9999998"] {
+  z-index: 99999998 !important;
+}
+
+/* Mobile menu backdrop */
+.fixed.inset-0[class*="bg-black"] {
+  z-index: 99999997 !important;
 }
 
 /* Ensure wallet modals are above everything */
