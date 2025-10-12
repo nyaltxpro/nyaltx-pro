@@ -1,7 +1,7 @@
 // perhaps in a client-only module
 import { arbitrum, mainnet, solana, solanaDevnet, solanaTestnet } from '@reown/appkit/networks';
 import { createAppKit } from '@reown/appkit/react';
-import { projectId, , wagmiAdapter } from '../lib/web3modal';
+import { projectId, wagmiAdapter } from '../lib/web3modal';
 
 
 
