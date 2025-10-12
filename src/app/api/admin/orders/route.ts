@@ -80,26 +80,43 @@ export async function GET(req: NextRequest) {
       .toArray();
 
     // Convert onchain orders to standard Order format
-    const convertedOnchainOrders: Order[] = onchainOrders.map((order: any) => ({
-      id: order.id || `onchain_${order._id}`,
-      type: 'race_to_liberty' as const,
-      status: 'completed' as const,
-      paymentMethod: order.method?.toLowerCase() === 'eth' ? 'eth' : 'nyax',
-      amount: order.amount || '0',
-      currency: order.method === 'ETH' ? 'ETH' : 'NYAX',
-      txHash: order.txHash,
-      chainId: order.chainId,
-      walletAddress: order.wallet,
-      productName: `Race to Liberty - ${order.tierId || 'Unknown Tier'}`,
-      tier: order.tierId,
-      createdAt: order.createdAt || new Date().toISOString(),
-      updatedAt: order.createdAt || new Date().toISOString(),
-      completedAt: order.createdAt || new Date().toISOString(),
-      metadata: {
-        source: 'onchain_orders',
-        originalData: order
+    const convertedOnchainOrders: Order[] = onchainOrders.map((order: any) => {
+      // Extract token information from the order or derive from tier
+      let tokenSymbol = order.tokenSymbol;
+      let tokenName = order.tokenName;
+      
+      // If no token info, derive from tier or method
+      if (!tokenSymbol && order.tierId) {
+        tokenSymbol = order.tierId.toUpperCase();
+        tokenName = `Race to Liberty - ${order.tierId.charAt(0).toUpperCase() + order.tierId.slice(1)}`;
+      } else if (!tokenSymbol && order.method) {
+        tokenSymbol = order.method.toUpperCase();
+        tokenName = order.method === 'ETH' ? 'Ethereum' : 'NYAX Token';
       }
-    }));
+      
+      return {
+        id: order.id || `onchain_${order._id}`,
+        type: 'race_to_liberty' as const,
+        status: 'completed' as const,
+        paymentMethod: order.method?.toLowerCase() === 'eth' ? 'eth' : 'nyax',
+        amount: order.amount || '0',
+        currency: order.method === 'ETH' ? 'ETH' : 'NYAX',
+        txHash: order.txHash,
+        chainId: order.chainId,
+        walletAddress: order.wallet,
+        productName: `Race to Liberty - ${order.tierId || 'Unknown Tier'}`,
+        tier: order.tierId,
+        tokenSymbol: tokenSymbol,
+        tokenName: tokenName,
+        createdAt: order.createdAt || new Date().toISOString(),
+        updatedAt: order.createdAt || new Date().toISOString(),
+        completedAt: order.createdAt || new Date().toISOString(),
+        metadata: {
+          source: 'onchain_orders',
+          originalData: order
+        }
+      };
+    });
 
     // Get boost points data
     const boostPointsCollection = await getCollection('boost_points');
@@ -109,28 +126,44 @@ export async function GET(req: NextRequest) {
       .toArray();
 
     // Convert boost points to orders
-    const convertedBoostOrders: Order[] = boostPoints.map((boost: any) => ({
-      id: `boost_${boost._id}`,
-      type: 'boost_pack' as const,
-      status: 'completed' as const,
-      paymentMethod: boost.paymentMethod || 'unknown',
-      amount: boost.amount?.toString() || '0',
-      currency: boost.currency || 'USD',
-      txHash: boost.txHash,
-      walletAddress: boost.walletAddress,
-      productName: `Boost Pack - ${boost.packType || 'Unknown'}`,
-      tier: boost.packType,
-      tokenSymbol: boost.tokenSymbol,
-      createdAt: boost.createdAt || new Date().toISOString(),
-      updatedAt: boost.createdAt || new Date().toISOString(),
-      completedAt: boost.createdAt || new Date().toISOString(),
-      metadata: {
-        source: 'boost_points',
-        points: boost.points,
-        decayHours: boost.decayHours,
-        originalData: boost
+    const convertedBoostOrders: Order[] = boostPoints.map((boost: any) => {
+      // Extract token information from boost points
+      let tokenSymbol = boost.tokenSymbol;
+      let tokenName = boost.tokenName;
+      
+      // If no token info, derive from pack type or payment method
+      if (!tokenSymbol && boost.packType) {
+        tokenSymbol = boost.packType.toUpperCase();
+        tokenName = `Boost Pack - ${boost.packType.charAt(0).toUpperCase() + boost.packType.slice(1)}`;
+      } else if (!tokenSymbol && boost.paymentMethod) {
+        tokenSymbol = boost.paymentMethod.toUpperCase();
+        tokenName = boost.paymentMethod === 'eth' ? 'Ethereum' : boost.paymentMethod === 'nyax' ? 'NYAX Token' : boost.paymentMethod.toUpperCase();
       }
-    }));
+      
+      return {
+        id: `boost_${boost._id}`,
+        type: 'boost_pack' as const,
+        status: 'completed' as const,
+        paymentMethod: boost.paymentMethod || 'unknown',
+        amount: boost.amount?.toString() || '0',
+        currency: boost.currency || 'USD',
+        txHash: boost.txHash,
+        walletAddress: boost.walletAddress,
+        productName: `Boost Pack - ${boost.packType || 'Unknown'}`,
+        tier: boost.packType,
+        tokenSymbol: tokenSymbol,
+        tokenName: tokenName,
+        createdAt: boost.createdAt || new Date().toISOString(),
+        updatedAt: boost.createdAt || new Date().toISOString(),
+        completedAt: boost.createdAt || new Date().toISOString(),
+        metadata: {
+          source: 'boost_points',
+          points: boost.points,
+          decayHours: boost.decayHours,
+          originalData: boost
+        }
+      };
+    });
 
     // Get token registrations data
     const tokenRegistrationsCollection = await getCollection('token_registrations');
@@ -174,8 +207,65 @@ export async function GET(req: NextRequest) {
       }
     }));
 
+    // Get subscription orders data
+    const subscriptionOrdersCollection = await getCollection('subscription_orders');
+    const subscriptionOrders = await subscriptionOrdersCollection
+      .find({})
+      .sort({ createdAt: -1 })
+      .toArray();
+
+    // Convert subscription orders to orders
+    const convertedSubscriptionOrders: Order[] = subscriptionOrders.map((sub: any) => {
+      // Extract token information from tier or metadata
+      let tokenSymbol = sub.tokenSymbol;
+      let tokenName = sub.tokenName;
+      
+      // If no token info in subscription, try to derive from tier or plan
+      if (!tokenSymbol && sub.tier && ['paddle', 'motor', 'helicopter', 'kayak'].includes(sub.tier.toLowerCase())) {
+        // This is a Race to Liberty subscription
+        tokenSymbol = sub.tier.toUpperCase();
+        tokenName = `Race to Liberty - ${sub.tier.charAt(0).toUpperCase() + sub.tier.slice(1)}`;
+      } else if (!tokenSymbol && sub.plan === 'pro') {
+        // This is a NYALTX Pro subscription
+        tokenSymbol = 'NYALTXPRO';
+        tokenName = 'NYALTX Pro Subscription';
+      } else if (!tokenSymbol) {
+        // Generic fallback
+        tokenSymbol = (sub.plan || sub.tier || 'UNKNOWN').toUpperCase();
+        tokenName = `Subscription - ${sub.plan || sub.tier || 'Unknown'}`;
+      }
+      
+      return {
+        id: `subscription_${sub._id || sub.id}`,
+        type: 'pro_subscription' as const,
+        status: sub.status === 'active' ? 'completed' : sub.status === 'inactive' ? 'failed' : 'pending',
+        paymentMethod: sub.paymentMethod || 'stripe',
+        amount: sub.amount || '0',
+        currency: sub.currency || 'USD',
+        walletAddress: sub.userId,
+        email: sub.email,
+        productName: `Pro Subscription - ${sub.plan || 'Pro'}`,
+        tokenSymbol: tokenSymbol,
+        tokenName: tokenName,
+        tier: sub.tier,
+        promoCode: sub.promoCode,
+        createdAt: sub.createdAt || new Date().toISOString(),
+        updatedAt: sub.updatedAt || sub.createdAt || new Date().toISOString(),
+        completedAt: sub.status === 'active' ? sub.createdAt : undefined,
+        metadata: {
+          source: 'subscription_orders',
+          plan: sub.plan,
+          expiresAt: sub.expiresAt,
+          refundStatus: sub.refundStatus,
+          refundAmount: sub.refundAmount,
+          refundDate: sub.refundDate,
+          originalData: sub
+        }
+      };
+    });
+
     // Combine all orders
-    let allOrders = [...mainOrders, ...convertedOnchainOrders, ...convertedBoostOrders, ...convertedTokenOrders];
+    let allOrders = [...mainOrders, ...convertedOnchainOrders, ...convertedBoostOrders, ...convertedTokenOrders, ...convertedSubscriptionOrders];
 
     // Apply filters to combined data
     if (type) {
@@ -206,6 +296,7 @@ export async function GET(req: NextRequest) {
         onchainOrders: convertedOnchainOrders.length,
         boostOrders: convertedBoostOrders.length,
         tokenOrders: convertedTokenOrders.length,
+        subscriptionOrders: convertedSubscriptionOrders.length,
         total: allOrders.length
       }
     });

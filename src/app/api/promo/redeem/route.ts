@@ -3,7 +3,7 @@ import { getCollection } from '@/lib/mongodb';
 
 export async function POST(req: Request) {
   try {
-    const { promoCode, tier, email, walletAddress } = await req.json();
+    const { promoCode, tier, email, walletAddress, tokenSymbol, tokenName } = await req.json();
 
     if (!promoCode || !tier) {
       return NextResponse.json(
@@ -125,6 +125,8 @@ export async function POST(req: Request) {
       currency: 'USD',
       promoCode: promoCode.toUpperCase(),
       tier: tier.toLowerCase(),
+      tokenSymbol: tokenSymbol || undefined,
+      tokenName: tokenName || undefined,
       createdAt: new Date().toISOString(),
       expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(), // 1 year from now
     };

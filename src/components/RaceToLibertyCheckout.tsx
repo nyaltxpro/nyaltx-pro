@@ -50,6 +50,9 @@ const storePaymentOrder = async (params: {
       status: 'completed',
       email: params.email,
       contractAddress: params.selectedToken?.contractAddress,
+      tokenSymbol: params.selectedToken?.tokenSymbol,
+      tokenName: params.selectedToken?.tokenName,
+      tier: params.tier,
       metadata: {
         paymentSource: 'race_to_liberty_checkout',
         tier: params.tier,
@@ -813,6 +816,9 @@ export default function RaceToLibertyCheckout({
           status: 'completed',
           email: email || undefined,
           contractAddress: selectedCoinData?.contractAddress,
+          tokenSymbol: selectedCoinData?.symbol,
+          tokenName: selectedCoinData?.name,
+          tier: tier,
           metadata: {
             paymentSource: 'race_to_liberty_checkout',
             tier: tier,

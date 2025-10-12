@@ -272,6 +272,8 @@ export default function Web3Checkout({
           tier: selectedTier || 'nyaltxpro',
           email: email.trim() || undefined,
           walletAddress: address,
+          tokenSymbol: selectedTier?.toUpperCase() || undefined,
+          tokenName: selectedTier === 'nyaltxpro' ? 'NYALTX Pro' : (selectedTier ? selectedTier.charAt(0).toUpperCase() + selectedTier.slice(1) : undefined),
         }),
       });
 
