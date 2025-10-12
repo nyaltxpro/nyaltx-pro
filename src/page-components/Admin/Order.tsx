@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
+import { FaShoppingCart, FaEthereum, FaCoins, FaWallet, FaExternalLinkAlt, FaMoneyBillWave, FaCheck, FaTimes, FaClock, FaExclamationTriangle } from 'react-icons/fa';
 
 
 
@@ -180,10 +181,17 @@ const AdminOrdersComponent = () => {
     };
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-6">
             <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-semibold">Orders</h2>
-                <Link href="/admin" className="text-sm underline text-gray-300">
+                <div>
+                    <h2 className="text-2xl font-semibold text-white" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                        Order Management
+                    </h2>
+                    <p className="text-gray-400 text-sm mt-1" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                        Manage on-chain payments and subscriptions
+                    </p>
+                </div>
+                <Link href="/admin" className="text-sm text-gray-300 hover:text-white transition-colors" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                     Back to Dashboard
                 </Link>
             </div>
@@ -249,72 +257,125 @@ const AdminOrdersComponent = () => {
                 </form>
 
                 {!onchainOrders ? (
-                    <div className="text-gray-400">Loading…</div>
+                    <div className="text-center py-12">
+                        <div className="w-16 h-16 bg-gray-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <FaShoppingCart className="w-8 h-8 text-gray-400 animate-pulse" />
+                        </div>
+                        <p className="text-gray-400 font-medium" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                            Loading orders...
+                        </p>
+                    </div>
                 ) : onchainOrders.length === 0 ? (
-                    <div className="text-gray-400">No on-chain orders recorded.</div>
+                    <div className="text-center py-12">
+                        <div className="w-16 h-16 bg-gray-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <FaShoppingCart className="w-8 h-8 text-gray-400" />
+                        </div>
+                        <p className="text-gray-400 font-medium mb-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                            No on-chain orders found
+                        </p>
+                        <p className="text-gray-500 text-sm" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                            On-chain orders will appear here
+                        </p>
+                    </div>
                 ) : (
-                    <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
-                        <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                            <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                                <tr>
-                                    <th scope="col" className="px-6 py-3">
-                                        ID
-                                    </th>
-                                    <th scope="col" className="px-6 py-3">
-                                        Method
-                                    </th>
-                                    <th scope="col" className="px-6 py-3">
-                                        Tier
-                                    </th>
-                                    <th scope="col" className="px-6 py-3">
-                                        Wallet
-                                    </th>
-                                    <th scope="col" className="px-6 py-3">
-                                        Tx Hash
-                                    </th>
-                                    <th scope="col" className="px-6 py-3">
-                                        Amount
-                                    </th>
-                                    <th scope="col" className="px-6 py-3">
-                                        Chain
-                                    </th>
-                                    <th scope="col" className="px-6 py-3">
-                                        Created
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {onchainOrders.map(o => (
-                                    <tr
-                                        key={o.id}
-                                        className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600"
-                                    >
-                                        <th
-                                            scope="row"
-                                            className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-                                        >
-                                            {o.id}
+                    <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 overflow-hidden shadow-xl">
+                        <div className="overflow-x-auto">
+                            <table className="w-full overflow-hidden">
+                                <thead className="bg-gray-700/30 border-b border-gray-600/20">
+                                    <tr>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                            Order ID
                                         </th>
-                                        <td className="px-6 py-4">{o.method}</td>
-                                        <td className="px-6 py-4">{o.tierId}</td>
-                                        <td className="px-6 py-4">{o.wallet}</td>
-                                        <td className="px-6 py-4">
-                                            <a
-                                                className="font-medium text-blue-600 dark:text-blue-500 hover:underline"
-                                                href={`https://etherscan.io/tx/${o.txHash}`}
-                                                target="_blank"
-                                                rel="noreferrer"
-                                            >
-                                                {o.txHash.slice(0, 10)}…
-                                            </a>
-                                        </td>
-                                        <td className="px-6 py-4">{o.amount}</td>
-                                        <td className="px-6 py-4">{o.chainId}</td>
-                                        <td className="px-6 py-4">{new Date(o.createdAt).toLocaleString()}</td>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                            Payment Method
+                                        </th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                            Tier
+                                        </th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                            Wallet
+                                        </th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                            Transaction
+                                        </th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                            Amount
+                                        </th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                            Chain
+                                        </th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                            Created
+                                        </th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody className="divide-y divide-gray-700/20">
+                                    {onchainOrders.map(o => (
+                                        <tr key={o.id} className="hover:bg-gray-700/20 transition-colors duration-200">
+                                            <td className="px-4 py-3 text-sm border-r border-gray-700/20">
+                                                <div className="font-medium text-white text-sm" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                                    {o.id.slice(0, 8)}...
+                                                </div>
+                                            </td>
+                                            <td className="px-4 py-3 text-sm border-r border-gray-700/20">
+                                                <div className="flex items-center gap-2">
+                                                    {o.method === 'ETH' ? (
+                                                        <FaEthereum className="w-4 h-4 text-blue-400" />
+                                                    ) : (
+                                                        <FaCoins className="w-4 h-4 text-yellow-400" />
+                                                    )}
+                                                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-500/10 text-blue-300 border border-blue-500/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                                        {o.method}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td className="px-4 py-3 text-sm border-r border-gray-700/20">
+                                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-500/10 text-purple-300 border border-purple-500/20 capitalize" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                                    {o.tierId}
+                                                </span>
+                                            </td>
+                                            <td className="px-4 py-3 text-sm border-r border-gray-700/20">
+                                                <div className="flex items-center gap-2">
+                                                    <FaWallet className="w-3 h-3 text-gray-400" />
+                                                    <code className="text-gray-300 bg-gray-700/30 px-2 py-1 rounded border border-gray-600/30">
+                                                        {o.wallet.slice(0, 6)}...{o.wallet.slice(-4)}
+                                                    </code>
+                                                </div>
+                                            </td>
+                                            <td className="px-4 py-3 text-sm border-r border-gray-700/20">
+                                                <a
+                                                    className="flex items-center gap-2 text-cyan-400 hover:text-cyan-300 transition-colors duration-200"
+                                                    href={`https://etherscan.io/tx/${o.txHash}`}
+                                                    target="_blank"
+                                                    rel="noreferrer"
+                                                    style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                                                >
+                                                    <code className="bg-gray-700/30 px-2 py-1 rounded border border-gray-600/30">
+                                                        {o.txHash.slice(0, 8)}...
+                                                    </code>
+                                                    <FaExternalLinkAlt className="w-3 h-3" />
+                                                </a>
+                                            </td>
+                                            <td className="px-4 py-3 text-sm border-r border-gray-700/20">
+                                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-500/10 text-green-300 border border-green-500/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                                    {o.amount} {o.method}
+                                                </span>
+                                            </td>
+                                            <td className="px-4 py-3 text-sm border-r border-gray-700/20">
+                                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-500/10 text-orange-300 border border-orange-500/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                                    Chain {o.chainId}
+                                                </span>
+                                            </td>
+                                            <td className="px-4 py-3 text-sm">
+                                                <span className="text-gray-300 text-xs" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                                    {new Date(o.createdAt).toLocaleDateString()}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 )}
             </section>

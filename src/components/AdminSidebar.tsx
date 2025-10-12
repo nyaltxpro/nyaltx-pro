@@ -39,13 +39,14 @@ const SidebarItem = ({ icon, text, href, isActive, isExpanded }: SidebarItemProp
     >
       <Link
         href={href}
-        className={`flex items-center py-3 px-3 mb-1 rounded-md transition-all duration-200 ${isActive
-          ? 'bg-[#1a2932] text-[#00b8d8]'
-          : 'text-gray-400 hover:bg-[#1a2932] hover:text-white'
+        className={`group flex items-center py-3 px-3 mb-2 rounded-lg transition-all duration-200 ${isActive
+          ? 'bg-gradient-to-r from-[#00b8d8]/20 to-[#00b8d8]/10 text-[#00b8d8] border border-[#00b8d8]/30 shadow-lg backdrop-blur-sm'
+          : 'text-gray-300 hover:bg-gray-700/30 hover:text-white hover:border hover:border-gray-600/30 hover:shadow-md hover:backdrop-blur-sm'
           }`}
+        style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
       >
         <motion.div
-          className="text-xl"
+          className={`text-xl ${isActive ? 'text-[#00b8d8]' : 'text-gray-400 group-hover:text-white'} transition-colors duration-200`}
           animate={{ rotate: isActive ? 360 : 0 }}
           transition={{ duration: 0.3 }}
         >
@@ -54,7 +55,7 @@ const SidebarItem = ({ icon, text, href, isActive, isExpanded }: SidebarItemProp
         <AnimatePresence>
           {isExpanded && (
             <motion.span
-              className="ml-3 whitespace-nowrap"
+              className={`ml-3 whitespace-nowrap font-medium ${isActive ? 'text-[#00b8d8]' : 'text-gray-300 group-hover:text-white'} transition-colors duration-200`}
               initial={{ opacity: 0, width: 0 }}
               animate={{ opacity: 1, width: 'auto' }}
               exit={{ opacity: 0, width: 0 }}
@@ -117,10 +118,11 @@ const LogoutButton = ({ isExpanded }: { isExpanded: boolean }) => {
       <form onSubmit={handleLogout} className="w-full">
         <button
           type="submit"
-          className="flex items-center py-3 px-3 mb-1 rounded-md transition-all duration-200 text-red-400 hover:bg-red-900/20 hover:text-red-300 w-full"
+          className="group flex items-center py-3 px-3 mb-2 rounded-lg transition-all duration-200 text-red-400 hover:bg-red-500/20 hover:text-red-300 hover:border hover:border-red-500/30 hover:shadow-md hover:backdrop-blur-sm w-full"
+          style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
         >
           <motion.div
-            className="text-xl"
+            className="text-xl text-red-400 group-hover:text-red-300 transition-colors duration-200"
             whileHover={{ rotate: 15 }}
             transition={{ duration: 0.3 }}
           >
@@ -129,7 +131,7 @@ const LogoutButton = ({ isExpanded }: { isExpanded: boolean }) => {
           <AnimatePresence>
             {isExpanded && (
               <motion.span
-                className="ml-3 whitespace-nowrap"
+                className="ml-3 whitespace-nowrap font-medium text-red-400 group-hover:text-red-300 transition-colors duration-200"
                 initial={{ opacity: 0, width: 0 }}
                 animate={{ opacity: 1, width: 'auto' }}
                 exit={{ opacity: 0, width: 0 }}
@@ -185,7 +187,7 @@ export default function AdminSidebar({ isMobileMenuOpen, toggleMobileMenu }: Adm
         <div className="fixed inset-0 bg-black bg-opacity-50 z-40" onClick={toggleMobileMenu} />
       )}
       <motion.div
-        className={`fixed left-0 top-0 h-full bg-[#0f1923] z-50 ${!isDesktop && (isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full')
+        className={`fixed left-0 top-0 h-full bg-gradient-to-b from-[#0f1923] via-[#1a2932] to-[#0f1923] backdrop-blur-xl border-r border-gray-700/20 shadow-2xl z-50 ${!isDesktop && (isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full')
           }`}
         initial={false}
         animate={{
@@ -201,38 +203,48 @@ export default function AdminSidebar({ isMobileMenuOpen, toggleMobileMenu }: Adm
         onMouseEnter={() => isDesktop && setIsExpanded(true)}
         onMouseLeave={() => isDesktop && setIsExpanded(false)}
       >
-        <div className="flex items-center h-16 border-b border-gray-800 px-4">
+        <div className="flex items-center h-16 border-b border-gray-700/30 px-4 bg-gray-800/20 backdrop-blur-sm">
           <div className="flex items-center">
-            <motion.div animate={{ rotate: isExpanded ? 360 : 0 }} transition={{ duration: 0.5 }}>
-              <Image src="/logo.png" alt="Logo" width={30} height={30} />
+            <motion.div 
+              animate={{ rotate: isExpanded ? 360 : 0 }} 
+              transition={{ duration: 0.5 }}
+              className="w-8 h-8 bg-gradient-to-br from-[#00b8d8] to-[#0099b8] rounded-lg flex items-center justify-center shadow-lg"
+            >
+              <Image src="/logo.png" alt="Logo" width={20} height={20} className="brightness-0 invert" />
             </motion.div>
             <AnimatePresence>
               {sidebarExpanded && (
-                <motion.span
-                  className="ml-2 font-bold text-white whitespace-nowrap"
+                <motion.div
+                  className="ml-3 flex flex-col"
                   initial={{ opacity: 0, width: 0 }}
                   animate={{ opacity: 1, width: 'auto' }}
                   exit={{ opacity: 0, width: 0 }}
                   transition={{ duration: 0.2, ease: 'easeInOut' }}
                 >
-                  NYAX Admin
-                </motion.span>
+                  <span className="font-bold text-white whitespace-nowrap" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                    NYALTX
+                  </span>
+                  <span className="text-xs text-gray-400 whitespace-nowrap" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                    Admin Panel
+                  </span>
+                </motion.div>
               )}
             </AnimatePresence>
           </div>
         </div>
 
-        <div className="p-2">
+        <div className="p-3">
           {/* Main Navigation */}
-          <div className="mb-4">
+          <div className="mb-6">
             <AnimatePresence>
               {sidebarExpanded && (
                 <motion.div
-                  className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide"
+                  className="px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider border-b border-gray-700/20 mb-3"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.2 }}
+                  style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                 >
                   Overview
                 </motion.div>
@@ -254,15 +266,16 @@ export default function AdminSidebar({ isMobileMenuOpen, toggleMobileMenu }: Adm
           </div>
 
           {/* Operations Section */}
-          <div className="mb-4">
+          <div className="mb-6">
             <AnimatePresence>
               {sidebarExpanded && (
                 <motion.div
-                  className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide"
+                  className="px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider border-b border-gray-700/20 mb-3"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.2 }}
+                  style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                 >
                   Operations
                 </motion.div>
