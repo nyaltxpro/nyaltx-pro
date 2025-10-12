@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { FaUsers, FaCoins, FaListUl, FaCrown, FaCheck, FaTimes, FaTrash, FaChevronLeft, FaChevronRight, FaEye, FaCog, FaChartBar, FaImage } from 'react-icons/fa';
+import { FaChartBar, FaCheck, FaChevronLeft, FaChevronRight, FaCog, FaCoins, FaCrown, FaEye, FaImage, FaListUl, FaTimes, FaTrash, FaUsers } from 'react-icons/fa';
 
 export default function AdminDashboardComponent() {
   const [membershipsCount, setMembershipsCount] = useState<number | null>(null);
@@ -120,7 +120,7 @@ export default function AdminDashboardComponent() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 p-6">
+    <div className="min-h-screen  p-6">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Enhanced Header */}
         <div className="text-center mb-12">
@@ -215,8 +215,8 @@ export default function AdminDashboardComponent() {
               </div>
               Pending Token Approvals
             </h3>
-            <a 
-              href="/admin/tokens" 
+            <a
+              href="/admin/tokens"
               className="flex items-center gap-2 px-4 py-2 bg-gray-800/50 hover:bg-gray-700/50 rounded-xl text-gray-300 hover:text-white transition-all duration-200 backdrop-blur-sm"
               style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
             >
@@ -224,7 +224,7 @@ export default function AdminDashboardComponent() {
               View All
             </a>
           </div>
-          
+
           {pendingError && (
             <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-2xl backdrop-blur-sm mb-6">
               <div className="flex items-center gap-3">
@@ -235,7 +235,7 @@ export default function AdminDashboardComponent() {
               </div>
             </div>
           )}
-          
+
           {!pendingTokens ? (
             <div className="text-center py-12">
               <div className="w-16 h-16 bg-gray-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -348,11 +348,11 @@ export default function AdminDashboardComponent() {
                   </tbody>
                 </table>
               </div>
-              
+
               {/* Enhanced Pagination */}
               <div className="flex items-center justify-between mt-6 p-4 bg-gray-900/30 rounded-2xl border border-gray-700/30 backdrop-blur-sm">
                 <div className="text-sm text-gray-300" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                  Page <span className="font-semibold text-white">{page}</span> of <span className="font-semibold text-white">{Math.max(1, Math.ceil(total / limit))}</span> • 
+                  Page <span className="font-semibold text-white">{page}</span> of <span className="font-semibold text-white">{Math.max(1, Math.ceil(total / limit))}</span> •
                   Total <span className="font-semibold text-white">{total}</span> tokens
                 </div>
                 <div className="flex items-center gap-3">
@@ -377,8 +377,8 @@ export default function AdminDashboardComponent() {
                 </div>
               </div>
             </div>
-        )}
-      </div>
+          )}
+        </div>
 
         {/* Enhanced Quick Actions Section */}
         <div className="bg-black/40 backdrop-blur-xl border border-gray-800/60 rounded-3xl shadow-2xl p-8">
@@ -405,7 +405,7 @@ export default function AdminDashboardComponent() {
                 View and manage all token registrations
               </p>
             </a>
-            
+
             <a
               href="/admin/points"
               className="group block p-6 bg-gray-900/30 hover:bg-gray-800/40 rounded-2xl border border-gray-700/30 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/10 backdrop-blur-sm"
@@ -422,7 +422,7 @@ export default function AdminDashboardComponent() {
                 Manage points for token race ranking
               </p>
             </a>
-            
+
             <a
               href="/admin/orders"
               className="group block p-6 bg-gray-900/30 hover:bg-gray-800/40 rounded-2xl border border-gray-700/30 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/10 backdrop-blur-sm"
@@ -439,7 +439,7 @@ export default function AdminDashboardComponent() {
                 View and manage user orders
               </p>
             </a>
-            
+
             <a
               href="/admin/banners"
               className="group block p-6 bg-gray-900/30 hover:bg-gray-800/40 rounded-2xl border border-gray-700/30 transition-all duration-300 hover:shadow-lg hover:shadow-orange-500/10 backdrop-blur-sm"
