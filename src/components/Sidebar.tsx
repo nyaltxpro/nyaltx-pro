@@ -125,10 +125,10 @@ export default function Sidebar({ isMobileMenuOpen, toggleMobileMenu }: SidebarP
   return (
     <>
       {!isDesktop && isMobileMenuOpen && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-10000000" onClick={toggleMobileMenu} />
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[99999999]" onClick={toggleMobileMenu} />
       )}
       <motion.div
-        className={`fixed left-0 top-0 h-full bg-black/95 backdrop-blur-xl border-r border-gray-800/50 z-[1000000] ${!isDesktop && (isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full')
+        className={`fixed left-0 top-0 h-full bg-black/95 backdrop-blur-xl border-r border-gray-800/50 z-[99999998] ${!isDesktop && (isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full')
           }`}
         style={{
           background: 'linear-gradient(180deg, rgba(0, 0, 0, 0.95) 0%, rgba(10, 10, 10, 0.95) 50%, rgba(0, 0, 0, 0.95) 100%)',
