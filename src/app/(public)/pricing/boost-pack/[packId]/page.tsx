@@ -532,6 +532,7 @@ export default function BoostPackCheckout() {
         // Redirect to success page with promo flag
         router.push(
           `/pricing/boost-pack/success?pack=${packId}&tokens=${selectedTokens.join(',')}&promo=${promoCode.toUpperCase()}&free=true`
+        );
         return;
       }
 
@@ -564,7 +565,42 @@ export default function BoostPackCheckout() {
 
         case 'paypal':
           // Handle PayPal payment via Stripe
-          const selectedTokenData = userTokens.filter(token => selectedTokens.includes(token.id));
+          const selectedTokenDataForPaypal = userTokens.filter(token => selectedTokens.includes(token.id));
+          
+          const paypalResponse = await fetch('/api/create-payment-intent', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              amount: Math.round(pricing.finalPrice * 100), // Convert to cents
+              currency: 'usd',
+              paymentMethodTypes: ['card'],
+              metadata: {
+                type: 'boost_pack',
+                packId: packId,
+                packName: boostPack.name,
+                selectedTokens: selectedTokens.join(','),
+                walletAddress: address,
+                email: email || undefined,
+                promoCode: appliedPromo ? promoCode.toUpperCase() : undefined,
+              },
+            }),
+          });
+
+          if (!paypalResponse.ok) {
+            throw new Error('Failed to create PayPal payment');
+          }
+
+          const { clientSecret } = await paypalResponse.json();
+          
+          // Redirect to Stripe checkout
+          router.push(`/pricing/checkout?client_secret=${clientSecret}&type=boost_pack&pack=${packId}&tokens=${selectedTokens.join(',')}`);
+          return;
+      }
+
+      // Apply boost to selected user-registered tokens
+      const selectedTokenData = userTokens.filter(token => selectedTokens.includes(token.id));
       const pointsUpdatePromises = selectedTokenData.map(async token => {
         const baseBoost = boostPack.points;
         const categoryMultiplier = token.multiplier || 1.0;
@@ -1128,9 +1164,9 @@ export default function BoostPackCheckout() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center text-white text-xs font-bold">
-                          PP
+                          💳
                         </div>
-                        <span className="text-white">PayPal</span>
+                        <span className="text-white">PayPal / Card</span>
                       </div>
                       <span className="text-gray-300">${pricing.finalPrice.toFixed(2)}</span>
                     </div>
@@ -1239,7 +1275,12 @@ export default function BoostPackCheckout() {
                     ) : (
                       <>
                         <FaRocket />
-                        {pricing.finalPrice === 0 ? 'Claim Free Boost Pack' : 'Purchase Boost Pack'}
+                        {pricing.finalPrice === 0 
+                          ? 'Claim Free Boost Pack' 
+                          : paymentMethod === 'paypal' 
+                            ? 'Continue to PayPal Checkout'
+                            : 'Purchase Boost Pack'
+                        }
                       </>
                     )}
                   </>
