@@ -150,22 +150,43 @@ export default function SimpleUnifiedWalletButton({
                         openEvmModal({ view: 'Account' });
                         setShowDropdown(false);
                       }}
-                      className="w-full mb-3 px-4 py-3 rounded-lg bg-gradient-to-r from-[#627eea]/20 to-[#8b5cf6]/20 hover:from-[#627eea]/30 hover:to-[#8b5cf6]/30 transition-colors duration-200 text-left border border-[#627eea]/30"
+                      className="w-full mb-3 px-4 py-3 rounded-lg bg-gradient-to-r from-[#627eea]/20 to-[#8b5cf6]/20 hover:from-[#627eea]/30 hover:to-[#8b5cf6]/30 transition-colors duration-200 text-left border border-[#627eea]/30 flex items-center gap-3"
                     >
-                      <div className="text-white font-medium">Manage EVM Account</div>
-                      <div className="text-xs text-gray-400">View balance, transactions, settings</div>
+                      <div className="w-8 h-8 bg-gradient-to-r from-[#627eea] to-[#8b5cf6] rounded-lg flex items-center justify-center">
+                        <Image 
+                          src="/ethereum.svg" 
+                          alt="Ethereum" 
+                          width={16} 
+                          height={16} 
+                          className="w-4 h-4"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <div className="text-white font-medium">Manage EVM Account</div>
+                        <div className="text-xs text-gray-400">View balance, transactions, settings</div>
+                      </div>
                     </button>
                   )}
 
                   {walletType === 'solana' && (
-                    <div className="w-full rounded-lg bg-gradient-to-r from-[#9945ff]/20 to-[#14f195]/20 border border-[#9945ff]/30 overflow-hidden">
+                    <div className="w-full rounded-lg bg-gradient-to-r from-[#9945ff]/20 to-[#14f195]/20 border border-[#9945ff]/30 overflow-hidden relative">
+                      {/* Solana Icon */}
+                      <div className="absolute left-3 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-gradient-to-r from-[#9945ff] to-[#14f195] rounded-lg flex items-center justify-center z-10">
+                        <Image 
+                          src="/solana.svg" 
+                          alt="Solana" 
+                          width={16} 
+                          height={16} 
+                          className="w-4 h-4"
+                        />
+                      </div>
                       <WalletMultiButton 
                         style={{
                           background: 'transparent',
                           border: 'none',
                           width: '100%',
                           justifyContent: 'flex-start',
-                          padding: '12px 16px',
+                          padding: '12px 16px 12px 48px', // Add left padding for icon
                           fontSize: '14px',
                           fontWeight: '500',
                           borderRadius: '8px'
@@ -214,14 +235,24 @@ export default function SimpleUnifiedWalletButton({
                   {/* Solana Wallet Option */}
                   <div>
                     <div className="text-xs text-gray-400 mb-2">Solana Wallets</div>
-                    <div className="w-full rounded-lg bg-gradient-to-r from-[#9945ff]/20 to-[#14f195]/20 border border-[#9945ff]/30 overflow-hidden">
+                    <div className="w-full rounded-lg bg-gradient-to-r from-[#9945ff]/20 to-[#14f195]/20 border border-[#9945ff]/30 overflow-hidden relative">
+                      {/* Solana Icon */}
+                      <div className="absolute left-3 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-gradient-to-r from-[#9945ff] to-[#14f195] rounded-lg flex items-center justify-center z-10">
+                        <Image 
+                          src="/solana.svg" 
+                          alt="Solana" 
+                          width={16} 
+                          height={16} 
+                          className="w-4 h-4"
+                        />
+                      </div>
                       <WalletMultiButton 
                         style={{
                           background: 'transparent',
                           border: 'none',
                           width: '100%',
                           justifyContent: 'flex-start',
-                          padding: '12px 16px',
+                          padding: '12px 16px 12px 48px', // Add left padding for icon
                           fontSize: '14px',
                           fontWeight: '500',
                           borderRadius: '8px'
