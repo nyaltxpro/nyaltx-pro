@@ -192,3 +192,49 @@ div[class*="fixed"][class*="top-1/2"][class*="left-1/2"] {
 .wallet-adapter-modal-wrapper .wallet-adapter-modal {
   z-index: 100001 !important;
 }
+
+/* Additional Solana wallet modal fixes */
+.wallet-adapter-modal-wrapper {
+  z-index: 100000000 !important;
+}
+
+.wallet-adapter-modal-overlay {
+  z-index: 100000000 !important;
+}
+
+.wallet-adapter-modal {
+  z-index: 100000001 !important;
+}
+
+.wallet-adapter-modal-container {
+  z-index: 100000000 !important;
+}
+
+/* Target any Solana wallet modal elements */
+[class*="wallet-adapter"] {
+  z-index: 100000000 !important;
+}
+
+/* Ensure Solana modal backdrop is visible */
+.wallet-adapter-modal-overlay,
+.wallet-adapter-modal-wrapper > div:first-child {
+  z-index: 100000000 !important;
+  position: fixed !important;
+}
+
+/* Nuclear option for Solana wallet modals */
+div[class*="wallet-adapter-modal"],
+div[role="dialog"][class*="wallet"],
+[data-testid*="wallet"],
+.wallet-adapter-modal-list,
+.wallet-adapter-modal-list-more,
+.wallet-adapter-modal-middle,
+.wallet-adapter-modal-title {
+  z-index: 100000001 !important;
+}
+
+/* Ensure any portal-rendered Solana elements are visible */
+body > div[class*="wallet"],
+body > div > div[class*="wallet-adapter"] {
+  z-index: 100000001 !important;
+}
