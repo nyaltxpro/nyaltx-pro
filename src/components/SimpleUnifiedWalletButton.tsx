@@ -29,25 +29,20 @@ export default function SimpleUnifiedWalletButton({
   } = useUnifiedWallet();
 
   const { open: openEvmModal } = useAppKit();
-  const [showDropdown, setShowDropdown] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [isModalOpening, setIsModalOpening] = useState(false);
-  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 });
-  const buttonRef = useRef<HTMLButtonElement>(null);
 
   const handleConnectEvm = async () => {
     console.log('Opening EVM modal...');
     setIsModalOpening(true);
-    setShowDropdown(false);
-
+    setShowModal(false);
+    
     try {
       await openEvmModal();
     } catch (error) {
       console.log('Modal was closed or cancelled');
     } finally {
-      // Reset modal opening state after a short delay
-      setTimeout(() => {
-        setIsModalOpening(false);
-      }, 1000);
+      setIsModalOpening(false);
     }
   };
 
@@ -55,21 +50,8 @@ export default function SimpleUnifiedWalletButton({
     if (walletType === 'evm') {
       openEvmModal({ view: 'Account' });
     } else if (walletType === 'solana') {
-      // For Solana, show dropdown with disconnect option
-      setShowDropdown(!showDropdown);
-    }
-  };
-
-  const calculateDropdownPosition = () => {
-    if (buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect();
-      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-      const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
-      
-      setDropdownPosition({
-        top: rect.bottom + scrollTop + 8, // 8px margin
-        right: window.innerWidth - rect.right - scrollLeft
-      });
+      // For Solana, show modal with disconnect option
+      setShowModal(true);
     }
   };
 
@@ -77,8 +59,7 @@ export default function SimpleUnifiedWalletButton({
     if (isConnected) {
       handleAccountClick();
     } else {
-      calculateDropdownPosition();
-      setShowDropdown(!showDropdown);
+      setShowModal(true);
     }
   };
 
@@ -115,35 +96,30 @@ export default function SimpleUnifiedWalletButton({
     <>
       <div className="relative wallet-dropdown-container">
         <button
-          ref={buttonRef}
           className={`py-2 px-4 rounded-xl bg-gradient-to-r from-[#00b8d8] to-[#3b82f6] text-white font-medium hover:from-[#00b8d8]/90 hover:to-[#3b82f6]/90 transition-all duration-200 text-sm tracking-wide flex items-center gap-2 shadow-lg shadow-[#00b8d8]/20 ${className}`}
           onClick={handleMainButtonClick}
           data-wallet-button
         >
           <PersonIcon className="w-4 h-4" />
           Connect Wallet
-          <ChevronDownIcon className={`w-4 h-4 transition-transform duration-200 ${showDropdown ? 'rotate-180' : ''}`} />
+          <ChevronDownIcon className="w-4 h-4" />
         </button>
       </div>
 
-      {/* Portal Dropdown Menu */}
-      {showDropdown && typeof window !== 'undefined' && createPortal(
+      {/* Modal */}
+      {showModal && typeof window !== 'undefined' && createPortal(
         <>
           {/* Backdrop */}
           <div 
-            className="fixed inset-0" 
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm" 
             style={{ zIndex: 9999998 }}
-            onClick={() => setShowDropdown(false)}
+            onClick={() => setShowModal(false)}
           />
           
-          {/* Dropdown Content */}
+          {/* Modal Content */}
           <div 
-            className="fixed w-80 bg-black/95 backdrop-blur-xl border border-gray-800/50 rounded-xl shadow-2xl overflow-hidden wallet-dropdown-portal"
-            style={{ 
-              zIndex: 9999999,
-              top: `${dropdownPosition.top}px`,
-              right: `${dropdownPosition.right}px`
-            }}
+            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 bg-black/95 backdrop-blur-xl border border-gray-800/50 rounded-xl shadow-2xl overflow-hidden"
+            style={{ zIndex: 9999999 }}
           >
             <div className="p-4">
               {isConnected ? (
@@ -172,7 +148,7 @@ export default function SimpleUnifiedWalletButton({
                     <button
                       onClick={() => {
                         openEvmModal({ view: 'Account' });
-                        setShowDropdown(false);
+                        setShowModal(false);
                       }}
                       className="w-full mb-3 px-4 py-3 rounded-lg bg-gradient-to-r from-[#627eea]/20 to-[#8b5cf6]/20 hover:from-[#627eea]/30 hover:to-[#8b5cf6]/30 transition-colors duration-200 text-left border border-[#627eea]/30 flex items-center gap-3"
                     >
