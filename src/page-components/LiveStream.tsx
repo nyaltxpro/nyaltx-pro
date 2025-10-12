@@ -235,24 +235,7 @@ export default function LiveStreamPage() {
                             </div>
 
                             <div className="flex items-center gap-4">
-                                {/* Platform Selector */}
-                                {/* <div className="flex items-center gap-2 bg-gray-800/50 backdrop-blur-sm rounded-xl p-1 border border-gray-700/50">
-                                    <button
-                                        onClick={() => setStreamingPlatform('streamio')}
-                                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${streamingPlatform === 'streamio'
-                                            ? 'bg-gradient-to-r from-[#00d4aa] to-[#3b82f6] text-white shadow-lg shadow-[#00d4aa]/20'
-                                            : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
-                                            }`}
-                                    >
-                                        <StarIcon className="w-4 h-4" />
-                                        Stream.io Pro
-                                    </button>
-                                </div> */}
 
-                                {/* <div className="flex items-center gap-2 px-4 py-2 bg-red-500/20 text-red-400 rounded-xl border border-red-500/30 backdrop-blur-sm">
-                                    <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                                    <span className="font-semibold">{liveStreams.length} LIVE</span>
-                                </div> */}
 
                                 <Tooltip.Root>
                                     <Tooltip.Trigger asChild>

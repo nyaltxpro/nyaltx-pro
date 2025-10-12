@@ -382,27 +382,36 @@ function AdminTokensComponent() {
                     <table className="w-full text-sm text-left rtl:text-right text-gray-400">
                         <thead className="text-xs  uppercase bg-gray-700 text-gray-400">
                             <tr>
-                                <Th
+                                <th
+                                    scope="col"
+                                    className={`px-6 py-3 select-none cursor-pointer ${sortKey === 'createdAt' ? 'text-cyan-300' : ''}`}
                                     onClick={() => toggleSort('createdAt')}
-                                    active={sortKey === 'createdAt'}
-                                    dir={sortDir}
                                 >
-                                    Created
-                                </Th>
-                                <Th
+                                    <span className="inline-flex items-center gap-1">
+                                        Created
+                                        <span className="text-xs opacity-70">{sortKey === 'createdAt' ? (sortDir === 'asc' ? '▲' : '▼') : ''}</span>
+                                    </span>
+                                </th>
+                                <th
+                                    scope="col"
+                                    className={`px-6 py-3 select-none cursor-pointer ${sortKey === 'tokenName' ? 'text-cyan-300' : ''}`}
                                     onClick={() => toggleSort('tokenName')}
-                                    active={sortKey === 'tokenName'}
-                                    dir={sortDir}
                                 >
-                                    Token
-                                </Th>
-                                <Th
+                                    <span className="inline-flex items-center gap-1">
+                                        Token
+                                        <span className="text-xs opacity-70">{sortKey === 'tokenName' ? (sortDir === 'asc' ? '▲' : '▼') : ''}</span>
+                                    </span>
+                                </th>
+                                <th
+                                    scope="col"
+                                    className={`px-6 py-3 select-none cursor-pointer ${sortKey === 'blockchain' ? 'text-cyan-300' : ''}`}
                                     onClick={() => toggleSort('blockchain')}
-                                    active={sortKey === 'blockchain'}
-                                    dir={sortDir}
                                 >
-                                    Chain
-                                </Th>
+                                    <span className="inline-flex items-center gap-1">
+                                        Chain
+                                        <span className="text-xs opacity-70">{sortKey === 'blockchain' ? (sortDir === 'asc' ? '▲' : '▼') : ''}</span>
+                                    </span>
+                                </th>
                                 <th scope="col" className="px-6 py-3">
                                     Contract
                                 </th>

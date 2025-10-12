@@ -894,7 +894,7 @@ function TradingViewWithParams({
             <div className="grid grid-cols-4 mt-8 lg:grid-cols-4 gap-4">
                 {/* Left Column - Stats and Order Panel */}
                 <div className="lg:col-span-1">
-                    <div className="bg-[#0f1923] rounded-xl overflow-hidden mb-4">
+                    <div className="bg-[#2222s27] rounded-xl overflow-hidden mb-4">
                         <iframe src={infoDexEmbedUrl} width="100%" height="600" style={{ border: 0 }} />
 
                     </div>
