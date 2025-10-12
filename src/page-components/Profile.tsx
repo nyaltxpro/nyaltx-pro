@@ -1,10 +1,11 @@
 'use client';
 
 import SocialLinksEditor from '@/components/SocialLinksEditor';
+import * as Avatar from '@radix-ui/react-avatar';
+import { PersonIcon, PlusIcon } from '@radix-ui/react-icons';
+import * as Tooltip from '@radix-ui/react-tooltip';
 import { useAppKit } from '@reown/appkit/react';
-import Image from 'next/image';
 import React, { useState } from 'react';
-import { FaWallet } from 'react-icons/fa';
 import { useAccount } from 'wagmi';
 export default function ProfilePage() {
     const { isConnected: isWagmiConnected, address } = useAccount();
@@ -135,256 +136,317 @@ export default function ProfilePage() {
     };
 
     return (
-        <main className="container mx-auto px-4 py-8 max-w-7xl">
-            {/* Profile Banner */}
-
-            {/* Profile Info */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-                <div>
-
-                </div>
-            </div>
-
-
-            {/* My Tokens Tab */}
-
-            {derivedConnected && <div>
-                <br />
-                {/* My Registered Token Submissions */}
-                <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm rounded-2xl border border-gray-700/50 overflow-hidden mt-6">
-                    <div className="p-6 border-b border-gray-700/50 flex items-center justify-between">
-                        <div>
-                            <h3 className="text-xl font-semibold text-white mb-1">My Registered Tokens</h3>
-                            <p className="text-sm text-gray-400">Tokens you've submitted for approval</p>
-                        </div>
-                        <a
-                            href="/dashboard/register-token"
-                            className="px-4 py-2 bg-[#00b8d8] text-white rounded-full text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-cyan-500/25"
-                        >
-                            Submit New Token
-                        </a>
-                    </div>
-                    <div className="p-6">
-                        {!myRegisteredTokens ? (
-                            <div className="flex items-center justify-center py-8">
-                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-400"></div>
-                                <span className="ml-3 text-gray-400">Loading tokens...</span>
-                            </div>
-                        ) : myRegisteredTokens.length === 0 ? (
-                            <div className="text-center py-12">
-                                <div className="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <span className="text-2xl">🪙</span>
+        <Tooltip.Provider>
+            <div className="min-h-screen  px-4 py-6 md:px-6 lg:px-8">
+                <div className="mx-auto">
+                    {/* Header Section */}
+                    <div className="relative mb-8">
+                        <div className="absolute inset-0 rounded-2xl blur-xl"></div>
+                        <div className="relative rounded-2xl p-6">
+                            <div className="flex items-center justify-between mb-4">
+                                <div>
+                                    <h1 className="text-3xl md:text-4xl font-bold bg-white bg-clip-text text-transparent" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                        My Profile
+                                    </h1>
+                                    <div className="flex items-center gap-2 mt-1">
+                                        <div className={`w-2 h-2 ${derivedConnected ? 'bg-green-400 animate-pulse' : 'bg-red-400'} rounded-full`}></div>
+                                        <p className="text-gray-400 text-sm" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                            {derivedConnected ? 'Wallet connected • Manage your tokens and social links' : 'Wallet not connected • Connect to access profile features'}
+                                        </p>
+                                    </div>
                                 </div>
-                                <h4 className="text-lg font-medium text-white mb-2">No tokens registered yet</h4>
-                                <p className="text-gray-400 mb-6">
-                                    Submit your first token to get started with the NYALTX ecosystem
-                                </p>
+                                {derivedConnected && (
+                                    <div className="flex items-center gap-4">
+                                        <div className="text-sm text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                            {formatWalletAddress(userAddress)}
+                                        </div>
+                                        <Tooltip.Root>
+                                            <Tooltip.Trigger asChild>
+                                                <button
+                                                    onClick={handleDisconnectWallet}
+                                                    className="shadow-2xl px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-white font-medium transition-all flex items-center gap-2 text-xs"
+                                                    style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                                                >
+                                                    <PersonIcon className="w-4 h-4" />
+                                                    Account
+                                                </button>
+                                            </Tooltip.Trigger>
+                                            <Tooltip.Portal>
+                                                <Tooltip.Content className="bg-black/90 text-white px-3 py-2 rounded-lg text-sm">
+                                                    Manage wallet connection
+                                                    <Tooltip.Arrow className="fill-black/90" />
+                                                </Tooltip.Content>
+                                            </Tooltip.Portal>
+                                        </Tooltip.Root>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Stats Bar */}
+                            {derivedConnected && (
+                                <div className="flex items-center gap-6 text-sm">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-3 h-3 bg-[#00c3ff] rounded-full"></div>
+                                        <span className="text-gray-300" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>Token management</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-3 h-3 bg-[#7c3aed] rounded-full"></div>
+                                        <span className="text-gray-300" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>Social links</span>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+
+                    {/* My Tokens Tab */}
+
+                    {derivedConnected && <div>
+                        <br />
+                        {/* My Registered Token Submissions */}
+                        <div className="bg-black/60 backdrop-blur-sm border border-gray-800/50 rounded-2xl overflow-hidden">
+                            <div className="p-6 border-b border-gray-700/50 flex items-center justify-between">
+                                <div>
+                                    <h3 className="text-xl font-semibold text-white mb-1" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>My Registered Tokens</h3>
+                                    <p className="text-sm text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>Tokens you've submitted for approval</p>
+                                </div>
+                                <Tooltip.Root>
+                                    <Tooltip.Trigger asChild>
+                                        <a
+                                            href="/dashboard/register-token"
+                                            className="px-4 py-2 bg-gradient-to-r from-[#00c3ff] to-[#7c3aed] text-white rounded-lg text-sm font-medium transition-all duration-200 hover:shadow-lg hover:shadow-[#00c3ff]/25 flex items-center gap-2"
+                                            style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                                        >
+                                            <PlusIcon className="w-4 h-4" />
+                                            Submit New Token
+                                        </a>
+                                    </Tooltip.Trigger>
+                                    <Tooltip.Portal>
+                                        <Tooltip.Content className="bg-black/90 text-white px-3 py-2 rounded-lg text-sm">
+                                            Register a new token
+                                            <Tooltip.Arrow className="fill-black/90" />
+                                        </Tooltip.Content>
+                                    </Tooltip.Portal>
+                                </Tooltip.Root>
+                            </div>
+                            <div className="p-6">
+                                {!myRegisteredTokens ? (
+                                    <div className="flex items-center justify-center py-12">
+                                        <div className="w-16 h-16 border-4 border-[#00c3ff]/30 border-t-[#00c3ff] rounded-full animate-spin"></div>
+                                        <span className="ml-4 text-gray-300 text-lg" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>Loading tokens...</span>
+                                    </div>
+                                ) : myRegisteredTokens.length === 0 ? (
+                                    <div className="text-center py-16">
+                                        <div className="w-20 h-20 bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                                            <span className="text-3xl">🪙</span>
+                                        </div>
+                                        <h4 className="text-2xl font-semibold text-white mb-4" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>No tokens registered yet</h4>
+                                        <p className="text-gray-300 text-lg mb-8" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                            Submit your first token to get started with the NYALTX ecosystem
+                                        </p>
+                                        <a
+                                            href="/dashboard/register-token"
+                                            className="inline-flex items-center gap-2 bg-gradient-to-r from-[#00c3ff] to-[#7c3aed] text-white px-8 py-3 rounded-xl font-medium transition-all duration-300 hover:shadow-lg hover:shadow-[#00c3ff]/25 hover:scale-105"
+                                            style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                                        >
+                                            <PlusIcon className="w-4 h-4" />
+                                            Register Your First Token
+                                        </a>
+                                    </div>
+                                ) : (
+                                    <div className="grid gap-4">
+                                        {myRegisteredTokens.map(token => (
+                                            <div key={token.id} className="group relative">
+                                                {/* Glow effect */}
+                                                <div className="absolute -inset-0.5 bg-gradient-to-r from-[#00c3ff]/20 via-[#7c3aed]/20 to-[#f59e0b]/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
+
+                                                <div className="relative bg-black/60 backdrop-blur-sm border border-gray-800/50 rounded-2xl p-6 hover:border-gray-700/50 transition-all duration-300 group-hover:transform group-hover:scale-[1.02]">
+                                                    <div className="flex items-center gap-4">
+                                                        <Avatar.Root className="w-14 h-14">
+                                                            <Avatar.Image
+                                                                src={token.imageUri}
+                                                                alt={token.tokenSymbol}
+                                                                className="w-full h-full object-cover rounded-full"
+                                                            />
+                                                            <Avatar.Fallback className="w-full h-full bg-gradient-to-br from-orange-500 to-pink-600 flex items-center justify-center text-white font-bold text-lg rounded-full">
+                                                                {token.tokenSymbol?.slice(0, 2) || token.tokenName?.slice(0, 2) || '??'}
+                                                            </Avatar.Fallback>
+                                                        </Avatar.Root>
+
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="flex items-center gap-3 mb-2">
+                                                                <h4 className="text-xl font-bold text-white truncate" style={{ fontFamily: 'Space Grotesk, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>{token.tokenName}</h4>
+                                                                <span className="px-2 py-1 bg-gray-800/50 rounded-md text-xs font-mono text-gray-300" style={{ fontFamily: 'SF Mono, Monaco, Inconsolata, Roboto Mono, monospace' }}>
+                                                                    {token.tokenSymbol}
+                                                                </span>
+                                                                <span
+                                                                    className={`px-3 py-1 rounded-full text-xs font-medium ${token.status === 'approved'
+                                                                        ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                                                                        : token.status === 'pending'
+                                                                            ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
+                                                                            : 'bg-red-500/20 text-red-400 border border-red-500/30'
+                                                                        }`}
+                                                                    style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                                                                >
+                                                                    {token.status}
+                                                                </span>
+                                                            </div>
+                                                            <div className="flex items-center gap-4 text-sm text-gray-400">
+                                                                <span className="flex items-center gap-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                                                    <span className="w-2 h-2 bg-blue-400 rounded-full"></span>
+                                                                    {token.blockchain}
+                                                                </span>
+                                                                <code className="text-xs bg-gray-700/50 px-2 py-1 rounded font-mono" style={{ fontFamily: 'SF Mono, Monaco, Inconsolata, Roboto Mono, monospace' }}>
+                                                                    {token.contractAddress?.slice(0, 6)}...
+                                                                    {token.contractAddress?.slice(-4)}
+                                                                </code>
+                                                                <span style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>{new Date(token.createdAt).toLocaleDateString()}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                                {myRegError && (
+                                    <div className="mt-4 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+                                        <p className="text-red-400 text-sm">{myRegError}</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    }
+
+                    {/* Social Links Management Tab */}
+                    <br />
+
+                    {derivedConnected && <div>
+                        <div className="mb-8">
+                            <h2 className="text-2xl font-bold text-white mb-4">Manage Token Social Links</h2>
+                            <p className="text-gray-400 mb-6">
+                                Update social media links and promotional content for your registered and created
+                                tokens. These links help users discover more about your projects.
+                            </p>
+                        </div>
+
+                        {/* Registered Tokens Section */}
+                        <div className="mb-8">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-xl font-semibold text-white">Registered Tokens</h3>
                                 <a
                                     href="/dashboard/register-token"
-                                    className="inline-flex items-center px-4 py-2 bg-[#00b8d8] hover:bg-[#00a6c4] text-white rounded-full font-medium transition-all duration-200"
+                                    className="text-sm text-blue-400 hover:text-blue-300 underline"
                                 >
-                                    Register Your First Token
+                                    Register New Token
                                 </a>
                             </div>
-                        ) : (
-                            <div className="grid gap-4">
-                                {myRegisteredTokens.map(token => (
-                                    <div
-                                        key={token.id}
-                                        className="bg-gray-800/50 rounded-xl p-4 border border-gray-700/50 hover:border-gray-600/50 transition-all duration-200"
-                                    >
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-700 flex items-center justify-center flex-shrink-0">
-                                                {token.imageUri ? (
-                                                    <Image
-                                                        src={token.imageUri}
-                                                        alt={token.tokenSymbol}
-                                                        width={48}
-                                                        height={48}
-                                                        className="w-full h-full object-cover"
-                                                        onError={e => {
-                                                            const target = e.currentTarget;
-                                                            target.style.display = 'none';
-                                                            const fallback = target.nextElementSibling as HTMLElement;
-                                                            if (fallback) fallback.style.display = 'flex';
-                                                        }}
-                                                    />
-                                                ) : null}
-                                                <div
-                                                    className={`w-full h-full ${token.imageUri ? 'hidden' : 'flex'} items-center justify-center text-gray-400 font-semibold`}
-                                                >
-                                                    {token.tokenSymbol?.charAt(0) || '?'}
-                                                </div>
-                                            </div>
 
-                                            <div className="flex-1 min-w-0">
-                                                <div className="flex items-center gap-3 mb-1">
-                                                    <h4 className="font-semibold text-white truncate">{token.tokenName}</h4>
-                                                    <span className="px-2 py-1 bg-gray-700 rounded-md text-xs font-mono text-gray-300">
-                                                        {token.tokenSymbol}
-                                                    </span>
-                                                    <span
-                                                        className={`px-2 py-1 rounded-full text-xs font-medium ${token.status === 'approved'
-                                                            ? 'bg-green-500/20 text-green-400 border border-green-500/30'
-                                                            : token.status === 'pending'
-                                                                ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
-                                                                : 'bg-red-500/20 text-red-400 border border-red-500/30'
-                                                            }`}
-                                                    >
-                                                        {token.status}
-                                                    </span>
-                                                </div>
-                                                <div className="flex items-center gap-4 text-sm text-gray-400">
-                                                    <span className="flex items-center gap-1">
-                                                        <span className="w-2 h-2 bg-blue-400 rounded-full"></span>
-                                                        {token.blockchain}
-                                                    </span>
-                                                    <code className="text-xs bg-gray-700/50 px-2 py-1 rounded">
-                                                        {token.contractAddress?.slice(0, 6)}...
-                                                        {token.contractAddress?.slice(-4)}
-                                                    </code>
-                                                    <span>{new Date(token.createdAt).toLocaleDateString()}</span>
-                                                </div>
-                                            </div>
-                                        </div>
+                            {!myRegisteredTokens ? (
+                                <div className="bg-gray-800 rounded-lg p-4">
+                                    <div className="text-gray-400 text-sm">Loading registered tokens...</div>
+                                </div>
+                            ) : myRegisteredTokens.length === 0 ? (
+                                <div className="bg-gray-800 rounded-lg p-6 text-center">
+                                    <div className="text-gray-400 mb-2">No registered tokens found</div>
+                                    <div className="text-sm text-gray-500">
+                                        Register your first token to manage its social links here.
                                     </div>
-                                ))}
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    {myRegisteredTokens.map(token => (
+                                        <SocialLinksEditor
+                                            key={token.id}
+                                            token={token}
+                                            tokenType="registered"
+                                            userAddress={userAddress}
+                                            onUpdate={handleTokenUpdate}
+                                        />
+                                    ))}
+                                </div>
+                            )}
+
+                            {myRegError && (
+                                <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-4 mt-4">
+                                    <div className="text-red-400 text-sm">{myRegError}</div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Created Tokens Section */}
+                        <div className="mb-8">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-xl font-semibold text-white">Created Tokens</h3>
+                                <a
+                                    href="/dashboard/create-token"
+                                    className="text-sm text-blue-400 hover:text-blue-300 underline"
+                                >
+                                    Create New Token
+                                </a>
                             </div>
-                        )}
-                        {myRegError && (
-                            <div className="mt-4 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
-                                <p className="text-red-400 text-sm">{myRegError}</p>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </div>
 
-            }
+                            {!myCreatedTokens ? (
+                                <div className="bg-gray-800 rounded-lg p-4">
+                                    <div className="text-gray-400 text-sm">Loading created tokens...</div>
+                                </div>
+                            ) : myCreatedTokens.length === 0 ? (
+                                <div className="bg-gray-800 rounded-lg p-6 text-center">
+                                    <div className="text-gray-400 mb-2">No created tokens found</div>
+                                    <div className="text-sm text-gray-500">
+                                        Create your first token using our pump.fun integration to manage its social links
+                                        here.
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    {myCreatedTokens.map(token => (
+                                        <SocialLinksEditor
+                                            key={token.id}
+                                            token={token}
+                                            tokenType="created"
+                                            userAddress={userAddress}
+                                            onUpdate={handleTokenUpdate}
+                                        />
+                                    ))}
+                                </div>
+                            )}
 
-            {/* Social Links Management Tab */}
-            <br />
-
-            {derivedConnected && <div>
-                <div className="mb-8">
-                    <h2 className="text-2xl font-bold text-white mb-4">Manage Token Social Links</h2>
-                    <p className="text-gray-400 mb-6">
-                        Update social media links and promotional content for your registered and created
-                        tokens. These links help users discover more about your projects.
-                    </p>
-                </div>
-
-                {/* Registered Tokens Section */}
-                <div className="mb-8">
-                    <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-xl font-semibold text-white">Registered Tokens</h3>
-                        <a
-                            href="/dashboard/register-token"
-                            className="text-sm text-blue-400 hover:text-blue-300 underline"
-                        >
-                            Register New Token
-                        </a>
-                    </div>
-
-                    {!myRegisteredTokens ? (
-                        <div className="bg-gray-800 rounded-lg p-4">
-                            <div className="text-gray-400 text-sm">Loading registered tokens...</div>
+                            {myCreatedError && (
+                                <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-4 mt-4">
+                                    <div className="text-red-400 text-sm">{myCreatedError}</div>
+                                </div>
+                            )}
                         </div>
-                    ) : myRegisteredTokens.length === 0 ? (
-                        <div className="bg-gray-800 rounded-lg p-6 text-center">
-                            <div className="text-gray-400 mb-2">No registered tokens found</div>
-                            <div className="text-sm text-gray-500">
-                                Register your first token to manage its social links here.
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="space-y-4">
-                            {myRegisteredTokens.map(token => (
-                                <SocialLinksEditor
-                                    key={token.id}
-                                    token={token}
-                                    tokenType="registered"
-                                    userAddress={userAddress}
-                                    onUpdate={handleTokenUpdate}
-                                />
-                            ))}
-                        </div>
-                    )}
-
-                    {myRegError && (
-                        <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-4 mt-4">
-                            <div className="text-red-400 text-sm">{myRegError}</div>
-                        </div>
-                    )}
-                </div>
-
-                {/* Created Tokens Section */}
-                <div className="mb-8">
-                    <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-xl font-semibold text-white">Created Tokens</h3>
-                        <a
-                            href="/dashboard/create-token"
-                            className="text-sm text-blue-400 hover:text-blue-300 underline"
-                        >
-                            Create New Token
-                        </a>
                     </div>
 
-                    {!myCreatedTokens ? (
-                        <div className="bg-gray-800 rounded-lg p-4">
-                            <div className="text-gray-400 text-sm">Loading created tokens...</div>
-                        </div>
-                    ) : myCreatedTokens.length === 0 ? (
-                        <div className="bg-gray-800 rounded-lg p-6 text-center">
-                            <div className="text-gray-400 mb-2">No created tokens found</div>
-                            <div className="text-sm text-gray-500">
-                                Create your first token using our pump.fun integration to manage its social links
-                                here.
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="space-y-4">
-                            {myCreatedTokens.map(token => (
-                                <SocialLinksEditor
-                                    key={token.id}
-                                    token={token}
-                                    tokenType="created"
-                                    userAddress={userAddress}
-                                    onUpdate={handleTokenUpdate}
-                                />
-                            ))}
-                        </div>
-                    )}
+                    }
 
-                    {myCreatedError && (
-                        <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-4 mt-4">
-                            <div className="text-red-400 text-sm">{myCreatedError}</div>
+                    {/* Profile Boost Tab */}
+                    {/* Not Connected State */}
+                    {!derivedConnected && (
+                        <div className="backdrop-blur-lg rounded-xl p-12 text-center border border-white/20">
+                            <div className="w-20 h-20 bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                                <PersonIcon className="w-10 h-10 text-gray-500" />
+                            </div>
+                            <h2 className="text-2xl font-semibold text-white mb-4" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>Connect Your Wallet</h2>
+                            <p className="text-gray-300 text-lg mb-8" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                Connect your wallet to view your tokens and manage social links
+                            </p>
+                            <button
+                                onClick={handleConnectWallet}
+                                className="inline-flex items-center gap-2 bg-gradient-to-r from-[#00c3ff] to-[#7c3aed] text-white px-8 py-3 rounded-xl font-medium transition-all duration-300 hover:shadow-lg hover:shadow-[#00c3ff]/25 hover:scale-105"
+                                style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                            >
+                                <PersonIcon className="w-4 h-4" />
+                                Connect Wallet
+                            </button>
                         </div>
                     )}
                 </div>
             </div>
-
-            }
-
-            {/* Profile Boost Tab */}
-            {/* Not Connected State */}
-            {!derivedConnected && (
-                <div className="flex flex-col items-center justify-center py-16 text-center">
-                    <div className="bg-gray-800 p-6 rounded-xl max-w-md">
-                        <FaWallet className="text-5xl text-[#00b8d8] mx-auto mb-4" />
-                        <h2 className="text-xl font-semibold text-white mb-2">Connect Your Wallet</h2>
-                        <p className="text-gray-400 mb-6">
-                            Connect your wallet to view your tokens and manage social links
-                        </p>
-                        <button
-                            onClick={handleConnectWallet}
-                            className="w-full bg-[#00b8d8]  text-white px-4 py-3 rounded-full transition-colors"
-                        >
-                            Connect Wallet
-                        </button>
-                    </div>
-                </div>
-            )}
-        </main>
+        </Tooltip.Provider>
     );
 }

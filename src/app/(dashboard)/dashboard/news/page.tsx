@@ -1,6 +1,5 @@
-import React from 'react';
-import Link from 'next/link';
 import { getNews } from '@/lib/rss';
+import Link from 'next/link';
 
 export const revalidate = 600; // Revalidate every 10 minutes
 
@@ -25,14 +24,14 @@ export default async function NewsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0a0e1a] via-[#0f1419] to-[#1a1f2e] px-4 py-6 md:px-6 lg:px-8">
+    <div className="min-h-screen  px-4 py-6 md:px-6 lg:px-8">
       {/* Header Section */}
       <div className="relative mb-8">
         <div className="absolute inset-0  rounded-2xl blur-xl"></div>
         <div className="relative   rounded-2xl p-6">
           <div className="flex items-center gap-4 mb-4">
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-white via-[#00c3ff] to-[#7c3aed] bg-clip-text text-transparent">
+              <h1 className="text-3xl md:text-4xl font-bold bg-white bg-clip-text text-transparent">
                 DeFi News Hub
               </h1>
               <div className="flex items-center gap-2 mt-1">
@@ -45,16 +44,7 @@ export default async function NewsPage() {
           </div>
 
           {/* Stats Bar */}
-          <div className="flex items-center gap-6 text-sm">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-[#00c3ff] rounded-full"></div>
-              <span className="text-gray-300">Updated every 10 minutes</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-[#7c3aed] rounded-full"></div>
-              <span className="text-gray-300">{items.length} articles</span>
-            </div>
-          </div>
+
         </div>
       </div>
 
@@ -83,7 +73,7 @@ export default async function NewsPage() {
           {items.map((item, index) => (
             <div key={item.id} className="group relative">
               {/* Glow effect */}
-              <div className="absolute -inset-0.5 bg-gradient-to-r from-[#00c3ff]/20 via-[#7c3aed]/20 to-[#f59e0b]/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
+              {/* <div className="absolute -inset-0.5 bg-gradient-to-r from-[#00c3ff]/20 via-[#7c3aed]/20 to-[#f59e0b]/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-500"></div> */}
 
               <div className="relative bg-black/60 backdrop-blur-sm border border-gray-800/50 rounded-2xl overflow-hidden hover:border-gray-700/50 transition-all duration-300 group-hover:transform group-hover:scale-[1.02]">
                 {item.image ? (

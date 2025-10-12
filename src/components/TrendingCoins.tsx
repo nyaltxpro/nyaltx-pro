@@ -113,7 +113,7 @@ export default function TrendingCoins() {
     <div className="w-full">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">Trending Search List</h2>
-        <div className="flex items-center gap-2">
+        {/* <div className="flex items-center gap-2">
           {hasCachedData && (
             <span className="text-xs text-green-400 bg-green-900/20 px-2 py-1 rounded">
               📱 Cached
@@ -127,7 +127,7 @@ export default function TrendingCoins() {
           >
             {loading ? '🔄' : '↻'} Refresh
           </button>
-        </div>
+        </div> */}
       </div>
 
       {loading && !hasCachedData ? (
@@ -149,7 +149,7 @@ export default function TrendingCoins() {
         </div>
       ) : (
         <div className="space-y-3">
-          {trendingCoins.map(coin => (
+          {trendingCoins.slice(0, 5).map(coin => (
             <div
               key={coin.id}
               className="rounded-lg p-2 flex flex-col sm:flex-row sm:justify-between sm:items-center cursor-pointer hover:bg-gray-800/40"

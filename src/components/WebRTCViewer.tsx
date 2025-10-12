@@ -1,18 +1,19 @@
 'use client';
 
+import { ChatMessage, streamingService } from '@/services/StreamingService';
+import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
-import { useAccount } from 'wagmi';
-import { streamingService, ChatMessage } from '@/services/StreamingService';
-import SimplePeer from 'simple-peer';
+import toast from 'react-hot-toast';
 import {
   FaComments,
-  FaPaperPlane,
-  FaUsers,
-  FaSignal,
   FaExclamationTriangle,
+  FaPaperPlane,
   FaPlay,
+  FaSignal,
+  FaUsers,
 } from 'react-icons/fa';
-import toast from 'react-hot-toast';
+import SimplePeer from 'simple-peer';
+import { useAccount } from 'wagmi';
 
 interface WebRTCViewerProps {
   broadcasterId: string;
@@ -325,7 +326,7 @@ export default function WebRTCViewer({
   if (!isConnected) {
     return (
       <div className="bg-[#0f1923] rounded-xl border border-gray-800 p-8 text-center">
-        <FaExclamationTriangle className="w-16 h-16 text-yellow-400 mx-auto mb-4" />
+        <Image src='./live.png' alt="live" width={100} height={100} />
         <h3 className="text-xl font-semibold text-white mb-2">Wallet Required</h3>
         <p className="text-gray-400">Please connect your wallet to view live streams</p>
       </div>

@@ -7,6 +7,7 @@ import {
 } from '@/api/coingecko/api';
 import Faq from '@/components/Faq';
 import SwapPage from '@/components/SwapCard';
+import TokenAvatar from '@/components/TokenAvatar';
 import tokens from '@/data/tokens.json';
 import {
     fetchContractAddresses,
@@ -14,12 +15,10 @@ import {
     updateUrlWithContractAddress,
 } from '@/utils/contractAddressUtils';
 import { getCryptoIconUrl, getCryptoIconUrlWithFallback } from '@/utils/cryptoIcons';
-import TokenAvatar from '@/components/TokenAvatar';
 import { getCryptoName } from '@/utils/cryptoNames';
 import { geckoTerminalAPI } from '@/utils/geckoTerminalApi';
 import { fetchMoralisTokenData, fetchMoralisTokenPrice, isMoralisSupportedChain } from '@/utils/moralisApi';
 import { fetchNYAXPrice, isNYAXToken } from '@/utils/nyaxPriceApi';
-import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
 import React, { Suspense, useEffect, useState } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
@@ -888,7 +887,7 @@ function TradingViewWithParams({
     }, []);
 
     return (
-        <div className="p-4 text-white min-h-screen">
+        <div className="p-4 text-white min-h-screen" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
             {/* Token Header */}
             {/* <Header /> */}
             {/* Main Content Grid */}
@@ -934,7 +933,7 @@ function TradingViewWithParams({
                 {/* Right Column - Chart and Trades */}
                 <div className="col-span-2 lg:col-span-2">
                     {/* Chart */}
-                    <div className="bg-[#0f1923] rounded-xl p-4 mb-4">
+                    <div className="bg-[#222227] rounded-xl p-4 mb-4">
                         <div className="flex justify-between items-center mb-4">
                             {/* Token Header Bar */}
                             <div className="flex items-center gap-3">
@@ -1261,7 +1260,7 @@ function TradingViewWithParams({
                     </div>
 
                     {/* Trades/Info Tabs */}
-                    <div className="bg-[#0f1923] rounded-xl overflow-hidden">
+                    <div className="bg-[#111116] rounded-xl overflow-hidden">
                         <div className="flex border-b border-gray-800">
                             <button
                                 className={`px-6 py-3 text-sm font-medium ${activeTab === 'trades'
@@ -1459,7 +1458,7 @@ function TradingViewWithParams({
                 </div>
 
                 <div className=" col-span-1 lg:col-span-1">
-                    <div className="bg-[#0f1923] rounded-xl p-4 mb-4">
+                    <div className="bg-[#222227] rounded-xl p-4 mb-4">
                         <div className="flex justify-between items-center mb-4">
                             <div className="flex items-center">
                                 <h2 className="text-lg font-semibold">FAVORITES</h2>

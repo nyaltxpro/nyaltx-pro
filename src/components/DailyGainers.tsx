@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import tokens from '@/data/tokens.json';
 import { fetchCoinPlatforms } from '@/api/coingecko/api';
+import tokens from '@/data/tokens.json';
 import { useMarketMovers } from '@/hooks/useMarketMovers';
 import { CachedMarketMoverCoin } from '@/store/slices/searchCacheSlice';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 export default function DailyGainers() {
   const [activeTab, setActiveTab] = useState<'gainers' | 'losers'>('gainers');
@@ -23,7 +23,7 @@ export default function DailyGainers() {
 
   const formatPrice = (price: number | null | undefined) => {
     if (!price || price === 0) return '$0.00';
-    
+
     if (price < 0.01) return `$${price.toFixed(6)}`;
     if (price < 1) return `$${price.toFixed(4)}`;
     if (price < 10) return `$${price.toFixed(2)}`;
@@ -32,7 +32,7 @@ export default function DailyGainers() {
 
   const formatVolume = (volume: number | null | undefined) => {
     if (!volume || volume === 0) return '$0.00';
-    
+
     if (volume >= 1000000) {
       return `$${(volume / 1000000).toFixed(2)}M`;
     } else if (volume >= 1000) {
@@ -115,7 +115,7 @@ export default function DailyGainers() {
       <div className="section-header flex justify-between items-center mb-4">
         <div>
           <h2 className="text-xl font-semibold">Market Movers</h2>
-          <div className="flex items-center gap-2 mt-1">
+          {/* <div className="flex items-center gap-2 mt-1">
             {hasCachedData && !isLoadingCoinData && (
               <span className="text-xs text-green-400 bg-green-900/20 px-2 py-1 rounded">
                 📈 {activeTab} Cached
@@ -131,9 +131,9 @@ export default function DailyGainers() {
                 ✅ {displayData.length} {activeTab} Loaded
               </span>
             )}
-          </div>
+          </div> */}
         </div>
-        
+
         <div className="flex items-center gap-2">
           <div className="flex space-x-2">
             <button
@@ -149,15 +149,15 @@ export default function DailyGainers() {
               Losers
             </button>
           </div>
-          
-          <button
+
+          {/* <button
             onClick={refreshMarketMovers}
             disabled={isLoadingCoinData}
             className="flex items-center gap-1 px-2 py-1 bg-cyan-600 hover:bg-cyan-700 disabled:bg-gray-600 rounded-full transition-colors text-xs"
             title={`Refresh ${activeTab} data`}
           >
             <span className={isLoadingCoinData ? 'animate-spin' : ''}>🔄</span>
-          </button>
+          </button> */}
         </div>
       </div>
 

@@ -1,27 +1,25 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import React, { useEffect, useState } from 'react';
 import {
-  FaExchangeAlt,
   FaChevronDown,
   FaCog,
-  FaSync,
-  FaSearch,
-  FaTimes,
-  FaInfoCircle,
+  FaExchangeAlt,
   FaFire,
+  FaInfoCircle,
+  FaSearch,
+  FaSync,
+  FaTimes,
 } from 'react-icons/fa';
-import { useRouter } from 'next/navigation';
 
-import { getCryptoIconUrl } from '@/utils/cryptoIcons';
-import Header from '@/components/Header';
+import { getTrendingCoins } from '@/api/coingecko/client';
 import ExchangeSelector from '@/components/ExchangeSelector';
 import NetworkSelector from '@/components/NetworkSelector';
 import { dexManager } from '@/lib/dex/dexManager';
-import { DexInterface, PriceQuote, Token, CHAIN_IDS, DEX_PROTOCOL } from '@/lib/dex/types';
-import { getTrendingCoins } from '@/api/coingecko/client';
-import { getTokenId } from '@/api/coingecko/api';
+import { CHAIN_IDS, DEX_PROTOCOL, DexInterface, PriceQuote, Token } from '@/lib/dex/types';
+import { getCryptoIconUrl } from '@/utils/cryptoIcons';
 
 // Network definitions for UI display
 const networks = [
@@ -334,18 +332,18 @@ export default function SwapPage({ inTradeView = false, baseToken, quoteToken }:
         {/* Swap Card */}
         <div className={`${inTradeView ? 'h-full' : 'max-w-md mx-auto'}`}>
           <div
-            className={`bg-[#0f1923] rounded-xl shadow-lg py-3 px-2 ${inTradeView ? 'h-full' : ''}`}
+            className={`bg-[#222227] rounded-xl shadow-lg py-3 px-2 ${inTradeView ? 'h-full' : ''}`}
           >
             <div className="flex justify-between px-2 items-center mb-4">
               <h3 className="text-lg font-medium">Swap</h3>
               <div className="flex space-x-2">
                 <button
                   onClick={toggleSettings}
-                  className="p-2 rounded-full hover:bg-gray-800 transition-colors"
+                  className="p-2 rounded-full hover:bg-[#111116] transition-colors"
                 >
                   <FaCog className="text-gray-400" />
                 </button>
-                <button className="p-2 rounded-full hover:bg-gray-800 transition-colors">
+                <button className="p-2 rounded-full hover:bg-[#111116] transition-colors">
                   <FaSync className="text-gray-400" />
                 </button>
               </div>
@@ -353,7 +351,7 @@ export default function SwapPage({ inTradeView = false, baseToken, quoteToken }:
 
             {/* Settings Panel */}
             {showSettings && (
-              <div className="mb-4 p-4 bg-gray-800 rounded-lg">
+              <div className="mb-4 p-4 bg-[#111116] rounded-lg">
                 <h3 className="text-sm font-medium mb-2">Transaction Settings</h3>
                 <div className="mb-3">
                   <label className="flex justify-between text-sm mb-1">
@@ -395,7 +393,7 @@ export default function SwapPage({ inTradeView = false, baseToken, quoteToken }:
                 <span>From</span>
                 <span>Balance: 0.0</span>
               </div>
-              <div className="bg-gray-800 rounded-lg p-4">
+              <div className="bg-[#111116] rounded-lg p-4">
                 <div className="flex justify-between">
                   <input
                     type="text"
@@ -432,7 +430,7 @@ export default function SwapPage({ inTradeView = false, baseToken, quoteToken }:
             <div className="flex justify-center -my-3 z-10 relative">
               <button
                 onClick={swapTokens}
-                className="bg-gray-800 hover:bg-gray-700 rounded-full p-2 border border-gray-700"
+                className="bg-[#111116] hover:bg-gray-700 rounded-full p-2 border border-gray-700"
               >
                 <FaExchangeAlt className="text-blue-400" />
               </button>
@@ -444,7 +442,7 @@ export default function SwapPage({ inTradeView = false, baseToken, quoteToken }:
                 <span>To</span>
                 <span>Balance: 0.0</span>
               </div>
-              <div className="bg-gray-800 rounded-lg p-4">
+              <div className="bg-[#111116] rounded-lg p-4">
                 <div className="flex justify-between">
                   <input
                     type="text"
@@ -474,7 +472,7 @@ export default function SwapPage({ inTradeView = false, baseToken, quoteToken }:
 
             {/* Price Info */}
             {fromAmount && toAmount && (
-              <div className="bg-gray-800 rounded-lg p-3 mb-4 text-sm">
+              <div className="bg-[#111116] rounded-lg p-3 mb-4 text-sm">
                 <div className="flex justify-between items-center">
                   <span className="text-gray-400">Price</span>
                   <span>
@@ -501,7 +499,7 @@ export default function SwapPage({ inTradeView = false, baseToken, quoteToken }:
             )}
 
             {/* Connect Wallet Button */}
-            <button className="w-full bg-[#00b8d8] text-white font-medium py-3 px-4 rounded-lg transition-colors">
+            <button className="w-full bg-[#fffff1]/40 text-white font-medium py-3 px-4 rounded-lg transition-colors">
               Connect wallet
             </button>
 
@@ -525,7 +523,7 @@ export default function SwapPage({ inTradeView = false, baseToken, quoteToken }:
                       <div
                         key={coin.item.id}
                         onClick={() => handleTrendingCoinClick(coin)}
-                        className="flex-shrink-0 bg-gray-800 hover:bg-gray-700 rounded-lg p-2 cursor-pointer transition-colors"
+                        className="flex-shrink-0 bg-[#111116] hover:bg-gray-700 rounded-lg p-2 cursor-pointer transition-colors"
                       >
                         <div className="flex items-center space-x-2">
                           <div className="relative">
@@ -578,7 +576,7 @@ export default function SwapPage({ inTradeView = false, baseToken, quoteToken }:
 
             {/* Available Quotes */}
             {quotes.length > 0 && (
-              <div className="mt-4 mb-4 bg-gray-800 rounded-lg p-3">
+              <div className="mt-4 mb-4 bg-[#111116] rounded-lg p-3">
                 <div className="text-sm font-medium mb-2">Available Routes</div>
                 {quotes.map((quote, index) => {
                   const exchange = availableExchanges.find(ex => ex.config.name === quote.protocol);
@@ -684,7 +682,7 @@ export default function SwapPage({ inTradeView = false, baseToken, quoteToken }:
                   placeholder="Search token name or symbol"
                   value={searchTerm}
                   onChange={e => setSearchTerm(e.target.value)}
-                  className="w-full bg-gray-800 text-white px-4 py-3 pl-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full bg-[#111116] text-white px-4 py-3 pl-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <FaSearch className="absolute left-3 top-3.5 text-gray-400" />
               </div>
@@ -700,7 +698,7 @@ export default function SwapPage({ inTradeView = false, baseToken, quoteToken }:
                 .map(token => (
                   <div
                     key={token.symbol}
-                    className="flex items-center p-3 hover:bg-gray-800 cursor-pointer border-b border-gray-800"
+                    className="flex items-center p-3 hover:bg-[#111116] cursor-pointer border-b border-gray-800"
                     onClick={() => {
                       if (selectingToken === 'from') {
                         setFromToken(token);

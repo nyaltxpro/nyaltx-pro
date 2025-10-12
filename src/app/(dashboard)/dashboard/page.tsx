@@ -14,6 +14,8 @@ import BlockchainNetworksGrid from '@/components/BlockchainNetworksGrid';
 import DailyGainers from '@/components/DailyGainers';
 import TokenCreator from '@/components/TokenCreator';
 import RecentSocials from '@/components/RecentSocials';
+import * as Tooltip from '@radix-ui/react-tooltip';
+import { StarIcon, RocketIcon, ActivityLogIcon, UpdateIcon, BarChartIcon } from '@radix-ui/react-icons';
 import { Blockchain, Token } from '@/lib/types/blockchain';
 import {
   supportedBlockchains,
@@ -364,8 +366,9 @@ export default function Home() {
   }, []);
 
   return (
-    <div className={`flex flex-col min-h-screen ${!darkMode ? 'light' : ''}`}>
-      {/* <Header /> */}
+    <Tooltip.Provider>
+      <div className={`flex flex-col min-h-screen ${!darkMode ? 'light' : ''}`} style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+        {/* <Header /> */}
 
       {isPageLoading ? (
         // Skeleton Loading State
@@ -493,13 +496,25 @@ export default function Home() {
           {/* Token Race Section */}
           <div className="token-race mx-4 mt-4">
             <div className="token-race-header flex-col md:flex-row">
-              <div className="flex items-center gap-2 mb-2 md:mb-0">
-                <span className="text-xl font-bold">TOKEN RACE</span>
+              <div className="flex items-center gap-3 mb-2 md:mb-0">
+                <StarIcon className="w-6 h-6 text-yellow-400" />
+                <span className="text-xl font-bold" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>TOKEN RACE</span>
               </div>
               <div className="flex space-x-2 items-center">
-                <button className="py-1 px-3 bg-gray-700 text-white font-bold rounded-md">
-                  RANKING
-                </button>
+                <Tooltip.Root>
+                  <Tooltip.Trigger asChild>
+                    <button className="py-2 px-4 bg-gradient-to-r from-[#00d4aa] to-[#00b894] text-white font-bold rounded-lg flex items-center gap-2 hover:shadow-lg transition-all duration-300" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                      <BarChartIcon className="w-4 h-4" />
+                      RANKING
+                    </button>
+                  </Tooltip.Trigger>
+                  <Tooltip.Portal>
+                    <Tooltip.Content className="bg-black/90 text-white px-3 py-2 rounded-lg text-sm">
+                      View token rankings
+                      <Tooltip.Arrow className="fill-black/90" />
+                    </Tooltip.Content>
+                  </Tooltip.Portal>
+                </Tooltip.Root>
               </div>
             </div>
 
@@ -527,27 +542,29 @@ export default function Home() {
                     >
                       <div
                         onClick={() => handleClick(token)}
-                        className="relative flex flex-row justify-between items-center mt-3 p-3 bg-gradient-to-br from-gray-800 to-gray-700 rounded-lg shadow-lg border border-gray-600 h-32 transform hover:scale-105 transition-transform duration-300 cursor-pointer hover:border-[#00c3ff]"
+                        className="relative flex flex-row justify-between items-center mt-3 p-4 bg-gradient-to-br from-black/80 to-gray-900/80 backdrop-blur-sm rounded-xl shadow-lg border border-gray-700/50 h-32 transform hover:scale-105 transition-all duration-300 cursor-pointer hover:border-[#00d4aa] hover:shadow-[#00d4aa]/25"
+                        style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                       >
                         {/* Position tag on top right based on points ranking */}
                         <div
-                          className={`absolute -top-1 -right-1 px-2 py-1 rounded-full text-xs font-bold ${
+                          className={`absolute -top-2 -right-2 px-3 py-1 rounded-full text-xs font-bold shadow-lg ${
                             index % filteredTokenRaceData.length === 0
-                              ? 'bg-yellow-500 text-black'
+                              ? 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-black'
                               : index % filteredTokenRaceData.length === 1
-                                ? 'bg-gray-400 text-black'
+                                ? 'bg-gradient-to-r from-gray-300 to-gray-400 text-black'
                                 : index % filteredTokenRaceData.length === 2
-                                  ? 'bg-orange-500 text-black'
-                                  : 'bg-blue-500 text-white'
+                                  ? 'bg-gradient-to-r from-orange-400 to-orange-500 text-black'
+                                  : 'bg-gradient-to-r from-blue-400 to-blue-500 text-white'
                           }`}
+                          style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                         >
                           {index % filteredTokenRaceData.length === 0
-                            ? '1st'
+                            ? '🥇 1st'
                             : index % filteredTokenRaceData.length === 1
-                              ? '2nd'
+                              ? '🥈 2nd'
                               : index % filteredTokenRaceData.length === 2
-                                ? '3rd'
-                                : `${(index % filteredTokenRaceData.length) + 1}th`}
+                                ? '🥉 3rd'
+                                : `#${(index % filteredTokenRaceData.length) + 1}`}
                         </div>
 
                         <div className="flex items-center gap-2 mb-1">
@@ -564,8 +581,10 @@ export default function Home() {
                             </div>
                           )}
                           <div className="token-symbol flex flex-col text-sm font-bold text-white truncate">
-                            {token.symbol || token.name || 'Unknown'}
-                            <span className="text-green-400">
+                            <span style={{ fontFamily: 'Space Grotesk, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                              {token.symbol || token.name || 'Unknown'}
+                            </span>
+                            <span className="text-[#00d4aa] font-medium" style={{ fontFamily: 'SF Mono, Monaco, Inconsolata, Roboto Mono, monospace' }}>
                               $
                               {token.price ||
                                 (token.current_price ? token.current_price.toFixed(4) : 'N/A')}
@@ -576,12 +595,15 @@ export default function Home() {
                         <div className="flex flex-col items-center">
                           {/* Points display */}
                           <div className="text-center mb-1">
-                            <div className="text-lg font-bold text-[#00c3ff]">
+                            <div className="text-lg font-bold text-[#00d4aa] flex items-center gap-1" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                              <RocketIcon className="w-4 h-4" />
                               {token.points || 0} pts
                             </div>
                           </div>
 
-                          <div className="token-price text-xs font-semibold text-center"></div>
+                          <div className="token-price text-xs font-semibold text-center text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                            Racing
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -604,19 +626,31 @@ export default function Home() {
           </div>
 
           {/* Main Content Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-4" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
             {/* Daily Gainers Section */}
-            <div className="max-h-[400px] overflow-auto section-card">
+            <div className="max-h-[400px] overflow-auto bg-black/60 backdrop-blur-sm border border-gray-800/50 rounded-2xl p-6 hover:border-gray-700/50 transition-all duration-300">
+              <div className="flex items-center gap-3 mb-4">
+                <ActivityLogIcon className="w-5 h-5 text-green-400" />
+                <h3 className="text-lg font-semibold text-white">Daily Gainers</h3>
+              </div>
               <DailyGainers />
             </div>
 
-            {/* Token Creator Section */}
-            <div className="max-h-[400px] overflow-auto section-card">
+            {/* Recently Added Coins Section */}
+            <div className="max-h-[400px] overflow-auto bg-black/60 backdrop-blur-sm border border-gray-800/50 rounded-2xl p-6 hover:border-gray-700/50 transition-all duration-300">
+              <div className="flex items-center gap-3 mb-4">
+                <RocketIcon className="w-5 h-5 text-blue-400" />
+                <h3 className="text-lg font-semibold text-white">Latest Tokens</h3>
+              </div>
               <RecentlyAddedCoins />
             </div>
 
-            {/* Recently Updated Socials */}
-            <div className="max-h-[400px] overflow-auto section-card">
+            {/* Trending Coins Section */}
+            <div className="max-h-[400px] overflow-auto bg-black/60 backdrop-blur-sm border border-gray-800/50 rounded-2xl p-6 hover:border-gray-700/50 transition-all duration-300">
+              <div className="flex items-center gap-3 mb-4">
+                <StarIcon className="w-5 h-5 text-yellow-400" />
+                <h3 className="text-lg font-semibold text-white">Trending</h3>
+              </div>
               <TrendingCoins />
             </div>
           </div>
@@ -645,6 +679,7 @@ export default function Home() {
           </div>
         </>
       )}
-    </div>
+      </div>
+    </Tooltip.Provider>
   );
 }

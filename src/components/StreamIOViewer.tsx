@@ -1,21 +1,20 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useAccount } from 'wagmi';
+import { ChatMessage, streamIOService, StreamUser } from '@/services/StreamIOService';
 import {
-  StreamVideo,
-  StreamVideoClient,
   Call,
-  StreamCall,
   SpeakerLayout,
-  CallParticipantsList,
-  useCallStateHooks,
+  StreamCall,
+  StreamVideo,
+  StreamVideoClient
 } from '@stream-io/video-react-sdk';
-import { streamIOService, StreamUser, LiveStream, ChatMessage } from '@/services/StreamIOService';
-import { Channel } from 'stream-chat';
-import EnhancedStreamChat from './EnhancedStreamChat';
-import { FaUsers, FaExclamationTriangle, FaPlay, FaComments, FaPaperPlane } from 'react-icons/fa';
+import Image from 'next/image';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+import { FaExclamationTriangle, FaPlay, FaUsers } from 'react-icons/fa';
+import { Channel } from 'stream-chat';
+import { useAccount } from 'wagmi';
+import EnhancedStreamChat from './EnhancedStreamChat';
 
 interface StreamIOViewerProps {
   streamId: string;
@@ -153,7 +152,7 @@ export default function StreamIOViewer({
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <FaExclamationTriangle className="w-16 h-16 text-yellow-400 mx-auto mb-4" />
+          <Image src='./live.png' alt="live" width={100} height={100} />
           <p className="text-gray-400 text-lg">Please connect your wallet to view the stream</p>
         </div>
       </div>

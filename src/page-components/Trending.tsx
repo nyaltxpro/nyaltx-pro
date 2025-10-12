@@ -6,6 +6,8 @@ import { useTrendingCoins } from '@/hooks/useTrendingCoins';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
+import * as Tooltip from '@radix-ui/react-tooltip';
+import { ArrowRight, ChevronDown, Filter, Loader, RefreshCw, Search, SortAsc, SortDesc, Star, TrendingUp } from 'lucide-react';
 import {
     FaCaretDown,
     FaCaretUp,
@@ -383,112 +385,189 @@ export default function TrendingPage() {
     };
 
     return (
-        <div className="min-h-screen  text-white">
-            {/* Banner */}
-            {/* <Header /> */}
-
-            {/* Header with search and wallet */}
-            <div className="container mx-auto px-4 py-4">
-                <div className="flex justify-between items-center mb-6">
-                    <div>
-                        <h1 className="text-2xl font-bold">Top 20 Cryptocurrencies</h1>
-                        <div className="flex items-center gap-2 mt-1">
-                            {hasCachedData && !trendingLoading && (
-                                <span className="text-xs text-green-400 bg-green-900/20 px-2 py-1 rounded">
-                                    📱 Trending Cached
-                                </span>
-                            )}
-                            {(trendingLoading || marketDataLoading) && (
-                                <span className="text-xs text-blue-400 bg-blue-900/20 px-2 py-1 rounded animate-pulse">
-                                    🔄 Loading Market Data...
-                                </span>
-                            )}
-                            {tokens.length > 0 && !trendingLoading && !marketDataLoading && (
-                                <span className="text-xs text-green-400 bg-green-900/20 px-2 py-1 rounded">
-                                    ✅ {tokens.length} Tokens Loaded
-                                </span>
-                            )}
+        <Tooltip.Provider>
+            <div className="min-h-screen p-6">
+                <div className=" mx-auto">
+                    {/* Header */}
+                    <div className="mb-8">
+                        <div className="flex items-center justify-between mb-6">
+                            <div>
+                                <h1 className="text-4xl font-bold text-white mb-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>Trending Cryptocurrencies</h1>
+                                <p className="text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>Top performing cryptocurrencies with real-time market data</p>
+                            </div>
+                            <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-2">
+                                    {hasCachedData && !trendingLoading && (
+                                        <span className="text-xs text-green-400 bg-green-900/20 px-2 py-1 rounded" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                            📱 Trending Cached
+                                        </span>
+                                    )}
+                                    {(trendingLoading || marketDataLoading) && (
+                                        <span className="text-xs text-blue-400 bg-blue-900/20 px-2 py-1 rounded animate-pulse" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                            🔄 Loading Market Data...
+                                        </span>
+                                    )}
+                                    {tokens.length > 0 && !trendingLoading && !marketDataLoading && (
+                                        <span className="text-xs text-green-400 bg-green-900/20 px-2 py-1 rounded" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                            ✅ {tokens.length} Tokens Loaded
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <div className="flex items-center space-x-4">
-                        <button
-                            onClick={refreshTrendingCoins}
-                            disabled={trendingLoading}
-                            className="flex items-center gap-2 px-3 py-2 bg-cyan-600 disabled:bg-gray-600 rounded-full transition-colors text-sm"
-                            title="Refresh trending data from Redux cache"
-                        >
-                            <FaSync className={trendingLoading ? 'animate-spin' : ''} />
-                            Refresh Trending
-                        </button>
-                        <button
-                            onClick={loadMarketData}
-                            disabled={marketDataLoading}
-                            className="flex items-center gap-2 px-3 py-2 bg-cyan-600 hover:bg-cyan-700 disabled:bg-gray-600 rounded-full transition-colors text-sm"
-                            title="Refresh market data"
-                        >
-                            <FaSync className={marketDataLoading ? 'animate-spin' : ''} />
-                            Refresh Market
-                        </button>
-                    </div>
-                </div>
+                    {/* Search and Filters */}
+                    <div className="backdrop-blur-lg rounded-md mb-6">
+                        <div className="flex gap-3 mb-6">
+                            <div className="flex-1 relative">
+                                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                                <input
+                                    type="text"
+                                    value={searchTerm}
+                                    onChange={handleSearch}
+                                    placeholder="Search for cryptocurrencies (e.g., BTC, ETH, or token name)"
+                                    className="w-full pl-12 pr-4 py-3 bg-gray-800/40 border border-gray-700/30 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm transition-all"
+                                    style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                                />
+                            </div>
+                            <button
+                                onClick={loadMarketData}
+                                disabled={marketDataLoading}
+                                className="shadow-2xl px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2 text-xs"
+                                style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                            >
+                                {marketDataLoading ? (
+                                    <>
+                                        <Loader className="animate-spin" size={16} />
+                                        Loading...
+                                    </>
+                                ) : (
+                                    <>
+                                        <RefreshCw size={16} />
+                                        Refresh
+                                    </>
+                                )}
+                            </button>
+                            <Tooltip.Root>
+                                <Tooltip.Trigger asChild>
+                                    <button
+                                        onClick={refreshTrendingCoins}
+                                        disabled={trendingLoading}
+                                        className="flex items-center text-xs gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors border border-white/20 text-white"
+                                        style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                                    >
+                                        <TrendingUp size={16} />
+                                        Trending
+                                    </button>
+                                </Tooltip.Trigger>
+                                <Tooltip.Portal>
+                                    <Tooltip.Content className="bg-black/90 text-white px-3 py-2 rounded-lg text-sm" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                        Refresh trending data
+                                        <Tooltip.Arrow className="fill-black/90" />
+                                    </Tooltip.Content>
+                                </Tooltip.Portal>
+                            </Tooltip.Root>
+                        </div>
 
-                {/* Filters */}
-                <div className="flex flex-wrap gap-4 mb-6">
-                    <div className="flex space-x-2">
-                        <button
-                            className={`px-4 py-2 rounded-full ${activeFilter === 'all' ? 'bg-cyan-500' : 'bg-gray-800'}`}
-                            onClick={() => setActiveFilter('all')}
-                        >
-                            All
-                        </button>
-                        <button
-                            className={`px-4 py-2 rounded-full ${activeFilter === 'gainers' ? 'bg-cyan-500' : 'bg-gray-800'}`}
-                            onClick={() => setActiveFilter('gainers')}
-                        >
-                            Gainers
-                        </button>
-                        <button
-                            className={`px-4 py-2 rounded-full ${activeFilter === 'losers' ? 'bg-cyan-500' : 'bg-gray-800'}`}
-                            onClick={() => setActiveFilter('losers')}
-                        >
-                            Losers
-                        </button>
-                        <button
-                            className={`px-4 py-2 rounded-full ${activeFilter === 'favorites' ? 'bg-cyan-500' : 'bg-gray-800'}`}
-                            onClick={() => setActiveFilter('favorites')}
-                        >
-                            Favorites
-                        </button>
-                    </div>
+                        {/* Filter Tabs */}
+                        <div className="flex flex-wrap gap-3 mb-4">
+                            <div className="flex gap-2">
+                                <button
+                                    className={`px-4 py-2 rounded-lg text-xs font-medium transition-all ${
+                                        activeFilter === 'all'
+                                            ? 'bg-blue-600 text-white shadow-lg'
+                                            : 'bg-white/10 text-gray-300 hover:bg-white/20'
+                                    }`}
+                                    onClick={() => setActiveFilter('all')}
+                                    style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                                >
+                                    All Tokens
+                                </button>
+                                <button
+                                    className={`px-4 py-2 rounded-lg text-xs font-medium transition-all ${
+                                        activeFilter === 'gainers'
+                                            ? 'bg-green-600 text-white shadow-lg'
+                                            : 'bg-white/10 text-gray-300 hover:bg-white/20'
+                                    }`}
+                                    onClick={() => setActiveFilter('gainers')}
+                                    style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                                >
+                                    Gainers
+                                </button>
+                                <button
+                                    className={`px-4 py-2 rounded-lg text-xs font-medium transition-all ${
+                                        activeFilter === 'losers'
+                                            ? 'bg-red-600 text-white shadow-lg'
+                                            : 'bg-white/10 text-gray-300 hover:bg-white/20'
+                                    }`}
+                                    onClick={() => setActiveFilter('losers')}
+                                    style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                                >
+                                    Losers
+                                </button>
+                                <button
+                                    className={`px-4 py-2 rounded-lg text-xs font-medium transition-all ${
+                                        activeFilter === 'favorites'
+                                            ? 'bg-yellow-600 text-white shadow-lg'
+                                            : 'bg-white/10 text-gray-300 hover:bg-white/20'
+                                    }`}
+                                    onClick={() => setActiveFilter('favorites')}
+                                    style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                                >
+                                    <Star size={14} className="mr-1" />
+                                    Favorites
+                                </button>
+                            </div>
 
-                    <div className="flex space-x-2 ml-auto">
-                        <button
-                            className={`px-4 py-2 rounded-lg ${timeframe === '1h' ? 'bg-cyan-500' : 'bg-gray-800'}`}
-                            onClick={() => setTimeframe('1h')}
-                        >
-                            1H
-                        </button>
-                        <button
-                            className={`px-4 py-2 rounded-lg ${timeframe === '24h' ? 'bg-cyan-500' : 'bg-gray-800'}`}
-                            onClick={() => setTimeframe('24h')}
-                        >
-                            24H
-                        </button>
-                        <button
-                            className={`px-4 py-2 rounded-lg ${timeframe === '7d' ? 'bg-cyan-500' : 'bg-gray-800'}`}
-                            onClick={() => setTimeframe('7d')}
-                        >
-                            7D
-                        </button>
-                        <button
-                            className={`px-4 py-2 rounded-lg ${timeframe === '30d' ? 'bg-cyan-500' : 'bg-gray-800'}`}
-                            onClick={() => setTimeframe('30d')}
-                        >
-                            30D
-                        </button>
+                            <div className="flex gap-2 ml-auto">
+                                <button
+                                    className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                                        timeframe === '1h'
+                                            ? 'bg-cyan-600 text-white shadow-lg'
+                                            : 'bg-white/10 text-gray-300 hover:bg-white/20'
+                                    }`}
+                                    onClick={() => setTimeframe('1h')}
+                                    style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                                >
+                                    1H
+                                </button>
+                                <button
+                                    className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                                        timeframe === '24h'
+                                            ? 'bg-cyan-600 text-white shadow-lg'
+                                            : 'bg-white/10 text-gray-300 hover:bg-white/20'
+                                    }`}
+                                    onClick={() => setTimeframe('24h')}
+                                    style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                                >
+                                    24H
+                                </button>
+                                <button
+                                    className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                                        timeframe === '7d'
+                                            ? 'bg-cyan-600 text-white shadow-lg'
+                                            : 'bg-white/10 text-gray-300 hover:bg-white/20'
+                                    }`}
+                                    onClick={() => setTimeframe('7d')}
+                                    style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                                >
+                                    7D
+                                </button>
+                                <button
+                                    className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                                        timeframe === '30d'
+                                            ? 'bg-cyan-600 text-white shadow-lg'
+                                            : 'bg-white/10 text-gray-300 hover:bg-white/20'
+                                    }`}
+                                    onClick={() => setTimeframe('30d')}
+                                    style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                                >
+                                    30D
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                </div>
 
                 {/* Enhanced Skeleton Loading State */}
                 {(trendingLoading || marketDataLoading || tokens.length === 0) && (
@@ -582,217 +661,204 @@ export default function TrendingPage() {
                     </div>
                 )}
 
-                {/* Error State */}
-                {(trendingError || marketDataError) && (
-                    <div className="bg-red-900/20 border border-red-500 rounded-lg p-4 mb-6">
-                        <div className="text-red-400">
-                            {trendingError || marketDataError}
+                    {(trendingError || marketDataError) && (
+                        <div className="my-4 p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-red-200">
+                            <strong>Error:</strong> {trendingError || marketDataError}
                             {hasCachedData && (
-                                <div className="text-yellow-400 text-sm mt-1">
+                                <div className="text-yellow-400 text-sm mt-1" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                                     📱 Using cached data while resolving issues
                                 </div>
                             )}
-                        </div>
-                        <div className="flex gap-2 mt-2">
-                            <button
-                                onClick={loadMarketData}
-                                className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-sm transition-colors"
-                            >
-                                Retry Market Data
-                            </button>
-                            <button
-                                onClick={refreshTrendingCoins}
-                                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm transition-colors"
-                            >
-                                Refresh Trending
-                            </button>
-                        </div>
-                    </div>
-                )}
-
-                {/* Trending Stats Cards */}
-                {globalData && (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                        <div className="bg-[var(--card-bg)] p-4 rounded-lg border border-[var(--border-color)]">
-                            <h3 className="text-gray-400 text-sm mb-1">Total Market Cap</h3>
-                            <div className="text-xl font-bold">{globalData.totalMarketCap}</div>
-                            <div
-                                className={`text-sm ${globalData.marketCapChange24h >= 0 ? 'text-green-500' : 'text-red-500'}`}
-                            >
-                                {coinGeckoService.formatPercentageChange(globalData.marketCapChange24h)} (24h)
-                            </div>
-                        </div>
-
-                        <div className="bg-[var(--card-bg)] p-4 rounded-lg border border-[var(--border-color)]">
-                            <h3 className="text-gray-400 text-sm mb-1">24h Trading Volume</h3>
-                            <div className="text-xl font-bold">{globalData.totalVolume}</div>
-                            <div className="text-gray-400 text-sm">Global volume</div>
-                        </div>
-
-                        <div className="bg-[var(--card-bg)] p-4 rounded-lg border border-[var(--border-color)]">
-                            <h3 className="text-gray-400 text-sm mb-1">BTC Dominance</h3>
-                            <div className="text-xl font-bold">{globalData.btcDominance}</div>
-                            <div className="text-gray-400 text-sm">Market share</div>
-                        </div>
-                    </div>
-                )}
-
-                {/* Tokens Table */}
-                {!trendingLoading && !marketDataLoading && tokens.length > 0 && (
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full bg-[var(--card-bg)] rounded-lg overflow-hidden border border-[var(--border-color)]">
-                            <thead className="bg-[var(--header-bg)]">
-                                <tr>
-                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider w-16">
-                                        <button
-                                            className="flex items-center focus:outline-none"
-                                            onClick={() => requestSort('rank')}
-                                        >
-                                            Rank {getSortDirectionIndicator('rank')}
-                                        </button>
-                                    </th>
-                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                                        <button
-                                            className="flex items-center focus:outline-none"
-                                            onClick={() => requestSort('name')}
-                                        >
-                                            Name {getSortDirectionIndicator('name')}
-                                        </button>
-                                    </th>
-                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                                        <button
-                                            className="flex items-center focus:outline-none"
-                                            onClick={() => requestSort('price')}
-                                        >
-                                            Price {getSortDirectionIndicator('price')}
-                                        </button>
-                                    </th>
-                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                                        <button
-                                            className="flex items-center focus:outline-none"
-                                            onClick={() => requestSort('change24h')}
-                                        >
-                                            24h Change {getSortDirectionIndicator('change24h')}
-                                        </button>
-                                    </th>
-                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                                        <span>Chart (7d)</span>
-                                    </th>
-                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                                        <button
-                                            className="flex items-center focus:outline-none"
-                                            onClick={() => requestSort('marketCap')}
-                                        >
-                                            Market Cap {getSortDirectionIndicator('marketCap')}
-                                        </button>
-                                    </th>
-                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                                        <button
-                                            className="flex items-center focus:outline-none"
-                                            onClick={() => requestSort('volume24h')}
-                                        >
-                                            Volume (24h) {getSortDirectionIndicator('volume24h')}
-                                        </button>
-                                    </th>
-                                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-300 uppercase tracking-wider">
-                                        Actions
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-700">
-                                {filteredTokens.map(token => (
-                                    <tr
-                                        key={token.id}
-                                        className="hover:bg-gray-700 cursor-pointer transition-colors"
-                                        onClick={() => navigateToTrade(token.symbol)}
-                                    >
-                                        <td className="px-4 py-4 whitespace-nowrap">
-                                            <div className="text-sm font-medium">#{token.rank}</div>
-                                        </td>
-                                        <td className="px-4 py-4 whitespace-nowrap">
-                                            <div className="flex items-center">
-                                                <div className="flex-shrink-0 h-8 w-8 relative">
-                                                    <Image src={token.logo} alt={token.name} width={32} height={32} />
-                                                </div>
-                                                <div className="ml-4">
-                                                    <div className="text-sm font-medium">{token.name}</div>
-                                                    <div className="text-sm text-gray-400">{token.symbol}</div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-4 py-4 whitespace-nowrap">
-                                            <div className="text-sm font-medium">{token.priceUsd}</div>
-                                        </td>
-                                        <td
-                                            className={`px-4 py-4 whitespace-nowrap ${token.change24h >= 0 ? 'text-green-500' : 'text-red-500'}`}
-                                        >
-                                            <div className="text-sm font-medium">{token.change24hFormatted}</div>
-                                        </td>
-                                        <td className="px-4 py-4">
-                                            <SparklineChart data={token.sparkline} change={token.change24h} />
-                                        </td>
-                                        <td className="px-4 py-4 whitespace-nowrap">
-                                            <div className="text-sm">{token.marketCapFormatted}</div>
-                                        </td>
-                                        <td className="px-4 py-4 whitespace-nowrap">
-                                            <div className="text-sm">{token.volume24hFormatted}</div>
-                                        </td>
-                                        <td className="px-4 py-4 text-center">
-                                            <div className="flex items-center justify-center space-x-3">
-                                                <button
-                                                    onClick={e => toggleFavorite(token.id, e)}
-                                                    className="text-yellow-500 focus:outline-none"
-                                                >
-                                                    {token.favorite ? <FaStar /> : <FaRegStar />}
-                                                </button>
-                                                <button
-                                                    className="text-blue-500 focus:outline-none"
-                                                    onClick={e => {
-                                                        e.stopPropagation();
-                                                        navigateToTrade(token.symbol);
-                                                    }}
-                                                >
-                                                    <FaExternalLinkAlt />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
-
-                {/* Empty State */}
-                {!trendingLoading && !marketDataLoading && tokens.length === 0 && !trendingError && !marketDataError && (
-                    <div className="text-center py-12">
-                        <div className="bg-gray-800/50 rounded-lg p-8 max-w-md mx-auto">
-                            <div className="text-4xl mb-4">📊</div>
-                            <h3 className="text-xl font-semibold mb-2">No Data Available</h3>
-                            <p className="text-gray-400 mb-4">
-                                Unable to load cryptocurrency data at the moment.
-                            </p>
-                            <div className="flex gap-2 justify-center">
+                            <div className="flex gap-2 mt-2">
                                 <button
                                     onClick={loadMarketData}
-                                    className="px-4 py-2 bg-cyan-600 hover:bg-cyan-700 rounded-lg text-sm transition-colors"
+                                    className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-sm transition-colors"
+                                    style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                                 >
                                     Retry Market Data
                                 </button>
                                 <button
                                     onClick={refreshTrendingCoins}
                                     className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm transition-colors"
+                                    style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                                 >
                                     Refresh Trending
                                 </button>
                             </div>
                         </div>
-                    </div>
-                )}
+                    )}
+
+                    {/* Market Stats Cards */}
+                    {globalData && (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                            <div className="bg-gray-800/40 backdrop-blur-lg p-4 rounded-lg border border-gray-700/30">
+                                <h3 className="text-gray-400 text-sm mb-1" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>Total Market Cap</h3>
+                                <div className="text-xl font-bold text-white" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>{globalData.totalMarketCap}</div>
+                                <div
+                                    className={`text-sm ${globalData.marketCapChange24h >= 0 ? 'text-green-500' : 'text-red-500'}`}
+                                    style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                                >
+                                    {coinGeckoService.formatPercentageChange(globalData.marketCapChange24h)} (24h)
+                                </div>
+                            </div>
+
+                            <div className="bg-gray-800/40 backdrop-blur-lg p-4 rounded-lg border border-gray-700/30">
+                                <h3 className="text-gray-400 text-sm mb-1" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>24h Trading Volume</h3>
+                                <div className="text-xl font-bold text-white" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>{globalData.totalVolume}</div>
+                                <div className="text-gray-400 text-sm" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>Global volume</div>
+                            </div>
+
+                            <div className="bg-gray-800/40 backdrop-blur-lg p-4 rounded-lg border border-gray-700/30">
+                                <h3 className="text-gray-400 text-sm mb-1" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>BTC Dominance</h3>
+                                <div className="text-xl font-bold text-white" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>{globalData.btcDominance}</div>
+                                <div className="text-gray-400 text-sm" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>Market share</div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Tokens Table */}
+                    {!trendingLoading && !marketDataLoading && tokens.length > 0 && (
+                        <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 overflow-hidden shadow-xl">
+                            <div className="overflow-x-auto">
+                                <table className="w-full overflow-hidden">
+                                    <thead className="bg-gray-700/30 border-b border-gray-600/20">
+                                        <tr>
+                                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                                Rank
+                                            </th>
+                                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                                Token
+                                            </th>
+                                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                                Price
+                                            </th>
+                                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                                24h Change
+                                            </th>
+                                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                                Chart (7d)
+                                            </th>
+                                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                                Market Cap
+                                            </th>
+                                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                                Volume (24h)
+                                            </th>
+                                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                                Actions
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="bg-gray-800/20">
+                                        {filteredTokens.map((token, index) => (
+                                            <tr key={token.id} className="hover:bg-gray-700/20 transition-all duration-150 border-b border-gray-700/15 last:border-b-0">
+                                                <td className="px-4 py-3 border-r border-gray-700/20">
+                                                    <div className="text-white font-medium text-sm" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>#{token.rank}</div>
+                                                </td>
+                                                <td className="px-4 py-3 border-r border-gray-700/20">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="w-8 h-8 rounded-full overflow-hidden">
+                                                                <Image src={token.logo} alt={token.name} width={32} height={32} className="w-full h-full object-cover" />
+                                                            </div>
+                                                        </div>
+                                                        <div>
+                                                            <div className="text-white font-medium text-sm" style={{ fontFamily: 'Space Grotesk, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>{token.name || 'Unknown'}</div>
+                                                            <div className="text-gray-400 text-xs" style={{ fontFamily: 'Space Grotesk, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>{token.symbol || 'N/A'}</div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="px-4 py-3 border-r border-gray-700/20">
+                                                    <div className="text-gray-300 font-mono text-sm" style={{ fontFamily: 'SF Mono, Monaco, Inconsolata, Roboto Mono, monospace' }}>
+                                                        {token.priceUsd}
+                                                    </div>
+                                                </td>
+                                                <td className="px-4 py-3 border-r border-gray-700/20">
+                                                    <div className={`text-sm font-medium ${token.change24h >= 0 ? 'text-green-400' : 'text-red-400'}`} style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                                        {token.change24hFormatted}
+                                                    </div>
+                                                </td>
+                                                <td className="px-4 py-3 border-r border-gray-700/20">
+                                                    <SparklineChart data={token.sparkline} change={token.change24h} />
+                                                </td>
+                                                <td className="px-4 py-3 border-r border-gray-700/20">
+                                                    <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                                        {token.marketCapFormatted}
+                                                    </div>
+                                                </td>
+                                                <td className="px-4 py-3 border-r border-gray-700/20">
+                                                    <div className="text-gray-300 text-sm" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                                        {token.volume24hFormatted}
+                                                    </div>
+                                                </td>
+                                                <td className="px-4 py-3">
+                                                    <div className="flex items-center gap-2">
+                                                        <button
+                                                            onClick={() => navigateToTrade(token.symbol)}
+                                                            className="px-3 py-1.5 bg-green-600/90 hover:bg-green-600 text-white text-xs font-medium rounded-md transition-all duration-200 hover:shadow-md"
+                                                            style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                                                        >
+                                                            Trade
+                                                        </button>
+                                                        <Tooltip.Root>
+                                                            <Tooltip.Trigger asChild>
+                                                                <button
+                                                                    onClick={e => toggleFavorite(token.id, e)}
+                                                                    className="p-2 text-gray-400 hover:text-white hover:bg-gray-700/50 rounded-md transition-all duration-200"
+                                                                >
+                                                                    {token.favorite ? <Star size={14} fill="currentColor" className="text-yellow-400" /> : <Star size={14} className="text-gray-300" />}
+                                                                </button>
+                                                            </Tooltip.Trigger>
+                                                            <Tooltip.Portal>
+                                                                <Tooltip.Content className="bg-black/90 text-white px-3 py-2 rounded-lg text-sm">
+                                                                    {token.favorite ? 'Remove from favorites' : 'Add to favorites'}
+                                                                    <Tooltip.Arrow className="fill-black/90" />
+                                                                </Tooltip.Content>
+                                                            </Tooltip.Portal>
+                                                        </Tooltip.Root>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Welcome State - Show when no data available */}
+                    {!trendingLoading && !marketDataLoading && tokens.length === 0 && !trendingError && !marketDataError && (
+                        <div className="backdrop-blur-lg rounded-xl p-12 text-center border border-white/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                            <div className="mb-6">
+                                <TrendingUp size={64} className="text-blue-400 mx-auto mb-4" />
+                            </div>
+                            <h3 className="text-2xl font-semibold text-white mb-2">Discover Trending Cryptocurrencies</h3>
+                            <p className="text-gray-300 text-lg mb-6">Real-time market data and trending analysis</p>
+                            <div className="flex gap-3 justify-center">
+                                <button
+                                    onClick={loadMarketData}
+                                    className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                                    style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                                >
+                                    <RefreshCw size={16} />
+                                    Load Market Data
+                                </button>
+                                <button
+                                    onClick={refreshTrendingCoins}
+                                    className="px-6 py-3 bg-cyan-600 hover:bg-cyan-700 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                                    style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                                >
+                                    <TrendingUp size={16} />
+                                    Get Trending
+                                </button>
+                            </div>
+                        </div>
+                    )}
 
                 {/* Hot Trends Section */}
 
+                </div>
             </div>
-        </div>
+        </Tooltip.Provider>
     );
 }

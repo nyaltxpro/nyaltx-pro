@@ -1,17 +1,15 @@
 'use client';
 
-import React from 'react';
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import tokens from '@/data/tokens.json';
 import { fetchCoinPlatforms } from '@/api/coingecko/api';
+import TokenAvatar from '@/components/TokenAvatar';
+import tokens from '@/data/tokens.json';
 import { useRecentlyAddedCoins } from '@/hooks/useRecentlyAddedCoins';
 import { CachedRecentlyAddedCoin } from '@/store/slices/searchCacheSlice';
-import TokenAvatar from '@/components/TokenAvatar';
+import { useRouter } from 'next/navigation';
 
 export default function RecentlyAddedCoins() {
   const router = useRouter();
-  
+
   // Wrap hook usage in try-catch for error boundary
   let hookResult;
   try {
@@ -22,24 +20,24 @@ export default function RecentlyAddedCoins() {
       recentlyAddedCoins: [],
       loading: false,
       error: 'Failed to initialize recently added coins',
-      refreshRecentlyAddedCoins: async () => {},
+      refreshRecentlyAddedCoins: async () => { },
       hasCachedData: false
     };
   }
-  
-  const { 
-    recentlyAddedCoins: coins, 
-    loading, 
-    error, 
+
+  const {
+    recentlyAddedCoins: coins,
+    loading,
+    error,
     refreshRecentlyAddedCoins,
-    hasCachedData 
+    hasCachedData
   } = hookResult;
 
 
   // Format price with appropriate decimal places
   const formatPrice = (price: number | null | undefined) => {
     if (!price || price === 0) return '$0.00';
-    
+
     if (price < 0.01) return `$${price.toFixed(6)}`;
     if (price < 1) return `$${price.toFixed(4)}`;
     if (price < 10) return `$${price.toFixed(2)}`;
@@ -49,7 +47,7 @@ export default function RecentlyAddedCoins() {
   // Format market cap and volume
   const formatNumber = (num: number | null | undefined) => {
     if (!num || num === 0) return '$0.00';
-    
+
     if (num >= 1000000000) {
       return `$${(num / 1000000000).toFixed(2)}B`;
     } else if (num >= 1000000) {
@@ -134,7 +132,7 @@ export default function RecentlyAddedCoins() {
       <div className="flex justify-between items-center mb-4">
         <div>
           <h2 className="text-xl font-semibold">🔥 Latest Token Profiles</h2>
-          <div className="flex items-center gap-2 mt-1">
+          {/* <div className="flex items-center gap-2 mt-1">
             {hasCachedData && !loading && (
               <span className="text-xs text-green-400 bg-green-900/20 px-2 py-1 rounded">
                 📱 DexScreener Cached
@@ -150,10 +148,10 @@ export default function RecentlyAddedCoins() {
                 ✅ {coins.length} Coins Loaded
               </span>
             )}
-          </div>
+          </div> */}
         </div>
-        
-        <button
+
+        {/* <button
           onClick={refreshRecentlyAddedCoins}
           disabled={loading}
           className="flex items-center gap-2 px-3 py-2 bg-cyan-600 hover:bg-cyan-700 disabled:bg-gray-600 rounded-full transition-colors text-sm"
@@ -161,7 +159,7 @@ export default function RecentlyAddedCoins() {
         >
           <span className={loading ? 'animate-spin' : ''}>🔄</span>
           Refresh
-        </button>
+        </button> */}
       </div>
 
       {loading ? (
@@ -204,7 +202,7 @@ export default function RecentlyAddedCoins() {
         </div>
       ) : (
         <div className="space-y-4">
-          {coins.map(coin => (
+          {coins.slice(0, 5).map(coin => (
             <div
               key={coin.id}
               className="rounded-lg p-2 flex flex-col sm:flex-row sm:justify-between sm:items-center cursor-pointer hover:bg-gray-800/40"

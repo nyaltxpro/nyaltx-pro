@@ -1,15 +1,16 @@
 'use client';
 
+import {
+    CalendarIcon,
+    ChevronRightIcon,
+    ClockIcon,
+    Cross2Icon,
+    ExternalLinkIcon,
+    EyeOpenIcon,
+    TokensIcon
+} from '@radix-ui/react-icons';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
-import {
-    FaCalendarAlt,
-    FaClock,
-    FaCoins,
-    FaExpand,
-    FaExternalLinkAlt,
-    FaTimes
-} from 'react-icons/fa';
 
 interface Event {
     id: number;
@@ -154,15 +155,32 @@ export default function EventsPage() {
     }
 
     return (
-        <div className="p-6">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h1 className="text-3xl font-bold text-white mb-2">Crypto Events</h1>
-                    <p className="text-gray-400">
-                        Stay updated with the latest cryptocurrency events and announcements
-                    </p>
+        <div className="min-h-screen  px-4 py-6 md:px-6 lg:px-8">
+            {/* Header Section */}
+            <div className="relative mb-8">
+                <div className="absolute inset-0 rounded-2xl blur-xl"></div>
+                <div className="relative rounded-2xl p-6">
+                    <div className="flex items-center gap-4 mb-4">
+                        <div>
+                            <h1 className="text-3xl md:text-4xl font-bold bg-white bg-clip-text text-transparent" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                Crypto Events Hub
+                            </h1>
+                            <div className="flex items-center gap-2 mt-1">
+                                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                                <p className="text-gray-400 text-sm" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                    Live updates • Latest cryptocurrency events and announcements
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+
                 </div>
+            </div>
+
+            {/* Filter buttons */}
+            <div className="flex items-center justify-between mb-6">
+                <div></div>
 
                 {/* Filter buttons */}
                 <div className="flex gap-2">
@@ -196,177 +214,182 @@ export default function EventsPage() {
                 </div>
             </div>
 
-            {/* Events Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                {filteredEvents.map(event => (
-                    <div
-                        key={event.id}
-                        className="group bg-gradient-to-b from-white/5 to-white/[0.03] backdrop-blur-md border border-white/10 rounded-xl overflow-hidden hover:border-cyan-500/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-cyan-500/10"
-                    >
-                        {/* Event Image */}
-                        {event.proof && (
-                            <div
-                                className="relative h-48 overflow-hidden cursor-pointer group/image"
-                                onClick={() =>
-                                    setSelectedImage({ src: getProxiedImageUrl(event.proof), title: event.title.en })
-                                }
-                            >
-                                <Image
-                                    src={getProxiedImageUrl(event.proof)}
-                                    alt={event.title.en}
-                                    fill
-                                    className="object-cover transition-transform duration-300 group-hover:scale-105"
-                                    onError={e => {
-                                        (e.target as HTMLImageElement).style.display = 'none';
-                                    }}
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+            {filteredEvents.length === 0 ? (
+                <div className="text-center py-16">
+                    <div className="w-20 h-20 bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <CalendarIcon className="w-8 h-8 text-gray-500" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-gray-300 mb-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>No Events Available</h3>
+                    <p className="text-gray-500" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>Please try again later. Our feeds are being updated.</p>
+                </div>
+            ) : (
+                <div className="grid gap-6 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
+                    {filteredEvents.map((event, index) => (
+                        <div key={event.id} className="group relative">
+                            {/* Glow effect */}
+                            <div className="absolute -inset-0.5 bg-gradient-to-r from-[#00c3ff]/20 via-[#7c3aed]/20 to-[#f59e0b]/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
 
-                                {/* View Image Overlay */}
-                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/image:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                                    <div className="bg-white/20 backdrop-blur-sm rounded-full p-3 border border-white/30">
-                                        <FaExpand className="w-5 h-5 text-white" />
-                                    </div>
-                                </div>
+                            <div className="relative bg-black/60 backdrop-blur-sm border border-gray-800/50 rounded-2xl overflow-hidden hover:border-gray-700/50 transition-all duration-300 group-hover:transform group-hover:scale-[1.02]">
+                                {/* Event Image */}
+                                {event.proof && (
+                                    <div
+                                        className="relative h-48 overflow-hidden cursor-pointer group/image"
+                                        onClick={() =>
+                                            setSelectedImage({ src: getProxiedImageUrl(event.proof), title: event.title.en })
+                                        }
+                                    >
+                                        <Image
+                                            src={getProxiedImageUrl(event.proof)}
+                                            alt={event.title.en}
+                                            fill
+                                            className="object-cover transition-transform duration-300 group-hover:scale-105"
+                                            onError={e => {
+                                                (e.target as HTMLImageElement).style.display = 'none';
+                                            }}
+                                        />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
-                                {/* Event Type Badge */}
-                                {event.categories && event.categories.length > 0 && (
-                                    <div className="absolute top-3 left-3">
-                                        <span className="bg-black/70 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-medium border border-white/20">
-                                            {event.categories[0].name}
-                                        </span>
-                                    </div>
-                                )}
-
-                                {/* Important Badge */}
-                                {event.important && (
-                                    <div className="absolute top-3 right-3">
-                                        <div className="bg-yellow-500/90 backdrop-blur-sm text-black px-3 py-1 rounded-full text-xs font-bold">
-                                            ⭐ Important
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-
-                        <div className="p-6">
-                            {/* Event Header */}
-                            <div className="mb-4">
-                                <h3 className="text-lg font-bold text-white mb-3 line-clamp-2 group-hover:text-cyan-400 transition-colors">
-                                    {event.title.en}
-                                </h3>
-
-                                {/* Date Display */}
-                                <div className="flex items-center gap-2 text-sm text-gray-400 mb-3">
-                                    <FaCalendarAlt className="w-4 h-4 text-cyan-400" />
-                                    <span className="font-medium">
-                                        {event.displayed_date || formatDate(event.date_event)}
-                                    </span>
-                                </div>
-
-                                {/* Can Occur Before Indicator */}
-                                {event.can_occur_before && (
-                                    <div className="flex items-center gap-2 text-xs text-amber-400 mb-3">
-                                        <FaClock className="w-3 h-3" />
-                                        <span>Can occur before scheduled date</span>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Description */}
-                            {event.description?.en && (
-                                <p className="text-gray-300 text-sm mb-4 line-clamp-3">{event.description.en}</p>
-                            )}
-
-                            {/* Coins Section */}
-                            {event.coins && event.coins.length > 0 && (
-                                <div className="mb-4">
-                                    <div className="flex items-center gap-2 mb-3">
-                                        <FaCoins className="w-4 h-4 text-cyan-400" />
-                                        <span className="text-sm font-semibold text-gray-300">Related Coins</span>
-                                    </div>
-                                    <div className="space-y-2">
-                                        {event.coins.slice(0, 2).map(coin => (
-                                            <div
-                                                key={coin.id}
-                                                className="flex items-center justify-between bg-gray-800/50 rounded-lg p-3 border border-gray-700/50"
-                                            >
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-8 h-8 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
-                                                        {coin.symbol.charAt(0)}
-                                                    </div>
-                                                    <div>
-                                                        <div className="text-white font-medium text-sm">{coin.symbol}</div>
-                                                        <div className="text-gray-400 text-xs">{coin.name}</div>
-                                                    </div>
-                                                </div>
-                                                {coin.rank && (
-                                                    <div className="text-xs text-gray-500 bg-gray-700 px-2 py-1 rounded">
-                                                        #{coin.rank}
-                                                    </div>
-                                                )}
+                                        {/* View Image Overlay */}
+                                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/image:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                            <div className="bg-white/20 backdrop-blur-sm rounded-full p-3 border border-white/30">
+                                                <EyeOpenIcon className="w-5 h-5 text-white" />
                                             </div>
-                                        ))}
-                                        {event.coins.length > 2 && (
-                                            <div className="text-center text-gray-400 text-xs py-2">
-                                                +{event.coins.length - 2} more coins
+                                        </div>
+
+                                        {/* Event Type Badge */}
+                                        {event.categories && event.categories.length > 0 && (
+                                            <div className="absolute top-3 left-3">
+                                                <span className="bg-black/70 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-medium border border-white/20">
+                                                    {event.categories[0].name}
+                                                </span>
+                                            </div>
+                                        )}
+
+                                        {/* Important Badge */}
+                                        {event.important && (
+                                            <div className="absolute top-3 right-3">
+                                                <div className="bg-yellow-500/90 backdrop-blur-sm text-black px-3 py-1 rounded-full text-xs font-bold">
+                                                    ⭐ Important
+                                                </div>
                                             </div>
                                         )}
                                     </div>
-                                </div>
-                            )}
+                                )}
 
-                            {/* Additional Categories */}
-                            {event.categories && event.categories.length > 1 && (
-                                <div className="mb-4">
-                                    <div className="flex flex-wrap gap-2">
-                                        {event.categories.slice(1, 3).map(category => (
-                                            <span
-                                                key={category.id}
-                                                className="bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full text-xs font-medium border border-indigo-500/30"
-                                            >
-                                                {category.name}
+                                <div className="p-6">
+                                    <div className="flex items-center justify-between mb-3">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-2 h-2 bg-[#00c3ff] rounded-full"></div>
+                                            <span className="text-xs uppercase tracking-wider text-[#00c3ff] font-bold" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                                {event.categories && event.categories.length > 0 ? event.categories[0].name : 'EVENT'}
                                             </span>
-                                        ))}
+                                        </div>
+                                        <span className="text-xs text-gray-500 bg-gray-800/50 px-2 py-1 rounded-full" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                            {event.displayed_date || formatDate(event.date_event)}
+                                        </span>
+                                    </div>
+
+                                    <h3 className="text-lg font-bold text-white hover:text-transparent hover:bg-gradient-to-r hover:from-[#00c3ff] hover:to-[#7c3aed] hover:bg-clip-text transition-all duration-300 mb-3 line-clamp-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                        {event.title.en}
+                                    </h3>
+
+                                    {event.description?.en && (
+                                        <p className="text-sm text-gray-400 line-clamp-3 leading-relaxed mb-4" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                            {event.description.en}
+                                        </p>
+                                    )}
+
+                                    {/* Can Occur Before Indicator */}
+                                    {event.can_occur_before && (
+                                        <div className="flex items-center gap-2 text-xs text-amber-400 mb-3">
+                                            <ClockIcon className="w-3 h-3" />
+                                            <span style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>Can occur before scheduled date</span>
+                                        </div>
+                                    )}
+
+                                    {/* Coins Section */}
+                                    {event.coins && event.coins.length > 0 && (
+                                        <div className="mb-4">
+                                            <div className="flex items-center gap-2 mb-3">
+                                                <TokensIcon className="w-4 h-4 text-cyan-400" />
+                                                <span className="text-sm font-semibold text-gray-300" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>Related Coins</span>
+                                            </div>
+                                            <div className="space-y-2">
+                                                {event.coins.slice(0, 2).map(coin => (
+                                                    <div
+                                                        key={coin.id}
+                                                        className="flex items-center justify-between bg-gray-800/50 rounded-lg p-3 border border-gray-700/50"
+                                                    >
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-8 h-8 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                                                                {coin.symbol.charAt(0)}
+                                                            </div>
+                                                            <div>
+                                                                <div className="text-white font-medium text-sm">{coin.symbol}</div>
+                                                                <div className="text-gray-400 text-xs">{coin.name}</div>
+                                                            </div>
+                                                        </div>
+                                                        {coin.rank && (
+                                                            <div className="text-xs text-gray-500 bg-gray-700 px-2 py-1 rounded">
+                                                                #{coin.rank}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                ))}
+                                                {event.coins.length > 2 && (
+                                                    <div className="text-center text-gray-400 text-xs py-2">
+                                                        +{event.coins.length - 2} more coins
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Additional Categories */}
+                                    {event.categories && event.categories.length > 1 && (
+                                        <div className="mb-4">
+                                            <div className="flex flex-wrap gap-2">
+                                                {event.categories.slice(1, 3).map(category => (
+                                                    <span
+                                                        key={category.id}
+                                                        className="bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full text-xs font-medium border border-indigo-500/30"
+                                                    >
+                                                        {category.name}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Read more indicator */}
+                                    <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-800/50">
+                                        <div className="flex items-center gap-2 text-xs text-gray-500">
+                                            {event.source ? (
+                                                <a
+                                                    href={event.source}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="flex items-center gap-1 text-xs text-cyan-400 hover:text-cyan-300 transition-colors"
+                                                    style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                                                >
+                                                    <ExternalLinkIcon className="w-4 h-4" />
+                                                    View Source
+                                                </a>
+                                            ) : (
+                                                <span style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                                    Event #{event.id}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <ChevronRightIcon className="w-4 h-4 text-[#00c3ff] transform group-hover:translate-x-1 transition-transform duration-300" />
                                     </div>
                                 </div>
-                            )}
-
-                            {/* Footer */}
-                            <div className="flex items-center justify-between pt-4 border-t border-white/10">
-                                <div className="flex items-center gap-2">
-                                    {event.source && (
-                                        <a
-                                            href={event.source}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="flex items-center gap-1 text-xs text-cyan-400 hover:text-cyan-300 transition-colors"
-                                        >
-                                            <FaExternalLinkAlt className="w-3 h-3" />
-                                            <span>View Source</span>
-                                        </a>
-                                    )}
-                                </div>
-
-                                <div className="text-xs text-gray-500">ID: {event.id}</div>
                             </div>
                         </div>
-                    </div>
-                ))}
-            </div>
-
-            {/* Empty State */}
-            {filteredEvents.length === 0 && !loading && (
-                <div className="text-center py-12">
-                    <FaCalendarAlt className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold text-gray-400 mb-2">No Events Found</h3>
-                    <p className="text-gray-500">
-                        {filter === 'all'
-                            ? 'No events are currently available.'
-                            : `No ${filter} events found. Try changing the filter.`}
-                    </p>
+                    ))}
                 </div>
             )}
+
 
             {/* Pagination */}
             {totalPages > 1 && (
@@ -419,7 +442,7 @@ export default function EventsPage() {
                                 onClick={() => setSelectedImage(null)}
                                 className="text-white hover:text-gray-300 transition-colors p-2 hover:bg-white/10 rounded-full"
                             >
-                                <FaTimes className="w-5 h-5" />
+                                <Cross2Icon className="w-5 h-5" />
                             </button>
                         </div>
 

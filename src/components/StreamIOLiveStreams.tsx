@@ -1,10 +1,11 @@
 'use client';
 
+import { LiveStream, streamIOService, StreamUser } from '@/services/StreamIOService';
+import Image from 'next/image';
 import { useEffect, useState } from 'react';
-import { useAccount } from 'wagmi';
-import { streamIOService, LiveStream, StreamUser } from '@/services/StreamIOService';
-import { FaUsers, FaPlay, FaSync, FaExclamationTriangle } from 'react-icons/fa';
 import toast from 'react-hot-toast';
+import { FaExclamationTriangle, FaPlay, FaSync, FaUsers } from 'react-icons/fa';
+import { useAccount } from 'wagmi';
 
 interface StreamIOLiveStreamsProps {
   onStreamSelect: (streamId: string, streamTitle: string) => void;
@@ -128,8 +129,8 @@ export default function StreamIOLiveStreams({ onStreamSelect }: StreamIOLiveStre
   if (!isConnected || !address) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <FaExclamationTriangle className="w-16 h-16 text-yellow-400 mx-auto mb-4" />
+        <div className="text-center flex items-center justify-center flex-col">
+          <Image src='/live.png' alt="live" width={100} height={100} />
           <p className="text-gray-400 text-lg">Please connect your wallet to view live streams</p>
         </div>
       </div>
@@ -140,7 +141,7 @@ export default function StreamIOLiveStreams({ onStreamSelect }: StreamIOLiveStre
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <FaExclamationTriangle className="w-16 h-16 text-red-400 mx-auto mb-4" />
+          <Image src='./live.png' alt="live" width={100} height={100} />
           <p className="text-red-400 text-lg">{error}</p>
           <button
             onClick={() => window.location.reload()}

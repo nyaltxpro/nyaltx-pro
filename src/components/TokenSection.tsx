@@ -3,6 +3,9 @@ import { useRouter } from 'next/navigation';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useChainFilter } from '@/hooks/useChainFilter';
 import ChainFilterIndicator from './ChainFilterIndicator';
+import * as Tooltip from '@radix-ui/react-tooltip';
+import * as Avatar from '@radix-ui/react-avatar';
+import { RocketIcon, ExternalLinkIcon, InfoCircledIcon, UpdateIcon } from '@radix-ui/react-icons';
 
 function formatTime(ts: number | string | undefined) {
   if (!ts) return '';
@@ -185,41 +188,83 @@ const Row: React.FC<{ item: any; onInspect: (o: any) => void }> = ({ item, onIns
   };
 
   return (
-    <div className="grid grid-cols-6 gap-2 items-center border-b border-gray-700 py-2">
-      <div className="flex items-center gap-2 col-span-6 truncate" title={tokenData.name || ''}>
-        {isLoading ? (
-          <div className="rounded-xl w-15 h-15  bg-gray-700 animate-pulse"></div>
-        ) : tokenData.image ? (
-          <img
-            src={tokenData.image}
-            alt={tokenData.symbol || 'icon'}
-            className="rounded-xl w-15 h-15  object-cover"
-          />
-        ) : (
-          <div className="rounded-xl w-15 h-15  bg-gray-800 flex items-center justify-center text-xs">
-            {tokenData.symbol?.[0] || '?'}
-          </div>
-        )}
-        <span className="font-medium truncate">{tokenData.name || '—'}</span>
-        <div className="text-sm opacity-80">{tokenData.symbol || '—'}</div>
-        <button
-          onClick={() => handleClick(item)}
-          className="col-span-6 mt-2 text-xs px-2 py-1 rounded bg-cyan-400 hover:bg-gray-700 w-max"
-        >
-          Trade
-        </button>
-        <div className="text-xs text-right opacity-60">{formatTime(tokenData.ts)}</div>
-      </div>
+    <div className="group relative">
+      {/* Glow effect */}
+      <div className="absolute -inset-0.5 bg-gradient-to-r from-[#00d4aa]/20 via-[#3b82f6]/20 to-[#f59e0b]/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
+      
+      <div className="relative bg-black/60 backdrop-blur-sm border border-gray-800/50 rounded-xl p-4 hover:border-gray-700/50 transition-all duration-300 group-hover:transform group-hover:scale-[1.02]" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <Avatar.Root className="w-12 h-12">
+              {isLoading ? (
+                <div className="w-full h-full bg-gray-700/50 rounded-full animate-pulse"></div>
+              ) : tokenData.image ? (
+                <Avatar.Image
+                  src={tokenData.image}
+                  alt={tokenData.symbol || 'icon'}
+                  className="w-full h-full object-cover rounded-full"
+                />
+              ) : (
+                <Avatar.Fallback className="w-full h-full bg-gradient-to-br from-orange-500 to-pink-600 flex items-center justify-center text-white font-bold text-sm rounded-full">
+                  {tokenData.symbol?.[0] || '?'}
+                </Avatar.Fallback>
+              )}
+            </Avatar.Root>
 
-      {/* <div className="text-xs font-mono opacity-80" title={tokenData.mint || ""}>{truncate(tokenData.mint, 8)}</div>
-      <div className="text-xs font-mono opacity-60" title={tokenData.creator || ""}>{truncate(tokenData.creator, 6)}</div>
-      */}
-      <button
-        onClick={() => onInspect(item)}
-        className="col-span-1 mt-2 text-xs px-2 py-1 rounded bg-gray-800 hover:bg-gray-700 w-max"
-      >
-        Details
-      </button>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <h4 className="font-semibold text-white truncate" style={{ fontFamily: 'Space Grotesk, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                  {tokenData.name || '—'}
+                </h4>
+                <span className="px-2 py-1 bg-gray-800/50 rounded-md text-xs font-mono text-gray-300" style={{ fontFamily: 'SF Mono, Monaco, Inconsolata, Roboto Mono, monospace' }}>
+                  {tokenData.symbol || '—'}
+                </span>
+              </div>
+              <div className="text-xs text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                {formatTime(tokenData.ts)}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Tooltip.Root>
+              <Tooltip.Trigger asChild>
+                <button
+                  onClick={() => handleClick(tokenData)}
+                  className="px-3 py-2 bg-gradient-to-r from-[#00d4aa] to-[#00b894] text-white text-xs font-medium rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-[#00d4aa]/25 flex items-center gap-1"
+                  style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                >
+                  <ExternalLinkIcon className="w-3 h-3" />
+                  Trade
+                </button>
+              </Tooltip.Trigger>
+              <Tooltip.Portal>
+                <Tooltip.Content className="bg-black/90 text-white px-3 py-2 rounded-lg text-sm">
+                  View token details
+                  <Tooltip.Arrow className="fill-black/90" />
+                </Tooltip.Content>
+              </Tooltip.Portal>
+            </Tooltip.Root>
+
+            <Tooltip.Root>
+              <Tooltip.Trigger asChild>
+                <button
+                  onClick={() => onInspect(item)}
+                  className="p-2 bg-gray-800/50 hover:bg-gray-700/50 text-gray-400 hover:text-white rounded-lg transition-all duration-200"
+                >
+                  <InfoCircledIcon className="w-4 h-4" />
+                </button>
+              </Tooltip.Trigger>
+              <Tooltip.Portal>
+                <Tooltip.Content className="bg-black/90 text-white px-3 py-2 rounded-lg text-sm">
+                  View raw data
+                  <Tooltip.Arrow className="fill-black/90" />
+                </Tooltip.Content>
+              </Tooltip.Portal>
+            </Tooltip.Root>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
@@ -508,29 +553,41 @@ export default function PumpPortalSimpleUI() {
   };
 
   return (
-    <div className=" text-gray-100">
-      <div className=" mx-auto px-2 py-6">
-        <header className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-          <div>
-            {/* <p className={`text-xs mt-1 ${connected ? "text-green-400" : "text-red-400"}`}>
-              WebSocket: {connected ? "connected" : "disconnected"} · {messagesPerSec} msg/s
-            </p> */}
-            <h1 className="font-semibold text-2xl">Newest Memes</h1>
+    <Tooltip.Provider>
+      <div className="text-gray-100" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+        <div className="mx-auto px-2 py-6">
+          <header className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <RocketIcon className="w-6 h-6 text-[#00d4aa]" />
+              <h1 className="font-bold text-2xl text-white" style={{ fontFamily: 'Space Grotesk, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                Newest Memes
+              </h1>
+              {connected && (
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                  <span className="text-xs text-green-400">Live</span>
+                </div>
+              )}
+            </div>
+          </header>
+
+          {/* Chain Filter Indicator */}
+          <div className="mb-6">
+            <ChainFilterIndicator />
           </div>
-        </header>
 
-        {/* Chain Filter Indicator */}
-        <div className="mt-4">
-          <ChainFilterIndicator />
-        </div>
-
-        <main className="grid md:grid-cols-2 gap-6 mt-6">
-          <section className="bg-gray-950 rounded-2xl p-4 border border-gray-800">
-            <h2 className="text-lg font-semibold mb-3">
-              New
-              <span className="text-xs ml-2 text-gray-400">{filteredNewTokens.length} tokens</span>
-            </h2>
-            <div className="space-y-3 max-h-[70vh] overflow-auto pr-1">
+          <main className="grid md:grid-cols-2 gap-6">
+            <section className="bg-black/60 backdrop-blur-sm border border-gray-800/50 rounded-2xl p-6 hover:border-gray-700/50 transition-all duration-300">
+              <div className="flex items-center gap-3 mb-4">
+                <RocketIcon className="w-5 h-5 text-blue-400" />
+                <h2 className="text-lg font-semibold text-white">
+                  New Tokens
+                </h2>
+                <span className="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded-full font-medium">
+                  {filteredNewTokens.length}
+                </span>
+              </div>
+              <div className="space-y-3 max-h-[70vh] overflow-auto pr-1">
               {filtered(filteredNewTokens).map((it, idx) => {
                 // Use mint as key to prevent duplicate rendering
                 const tokenFields = pickTokenFields(it.event?.token || it.event || it);
@@ -568,22 +625,35 @@ export default function PumpPortalSimpleUI() {
             </div>
           </section> */}
 
-          <section className="bg-gray-950 rounded-2xl p-4 border border-gray-800">
-            <h2 className="text-lg font-semibold mb-3">
-              Launched
-              <span className="text-xs ml-2 text-gray-400">
-                {filteredLaunchedList.length} tokens
-              </span>
-              <button
-                onClick={() =>
-                  console.log('Launched tokens:', launched, 'List:', filteredLaunchedList)
-                }
-                className="text-xs ml-2 px-2 py-0.5 rounded bg-gray-800 hover:bg-gray-700"
-                title="Log launched tokens to console"
-              >
-                Debug
-              </button>
-            </h2>
+            <section className="bg-black/60 backdrop-blur-sm border border-gray-800/50 rounded-2xl p-6 hover:border-gray-700/50 transition-all duration-300">
+              <div className="flex items-center gap-3 mb-4">
+                <UpdateIcon className="w-5 h-5 text-green-400" />
+                <h2 className="text-lg font-semibold text-white">
+                  Launched Tokens
+                </h2>
+                <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded-full font-medium">
+                  {filteredLaunchedList.length}
+                </span>
+                <Tooltip.Root>
+                  <Tooltip.Trigger asChild>
+                    <button
+                      onClick={() =>
+                        console.log('Launched tokens:', launched, 'List:', filteredLaunchedList)
+                      }
+                      className="p-1 bg-gray-800/50 hover:bg-gray-700/50 text-gray-400 hover:text-white rounded transition-all duration-200"
+                      title="Log launched tokens to console"
+                    >
+                      <InfoCircledIcon className="w-3 h-3" />
+                    </button>
+                  </Tooltip.Trigger>
+                  <Tooltip.Portal>
+                    <Tooltip.Content className="bg-black/90 text-white px-3 py-2 rounded-lg text-sm">
+                      Debug console log
+                      <Tooltip.Arrow className="fill-black/90" />
+                    </Tooltip.Content>
+                  </Tooltip.Portal>
+                </Tooltip.Root>
+              </div>
             <div className="space-y-3 max-h-[70vh] overflow-auto pr-1">
               {filteredLaunchedList.length > 0 ? (
                 filtered(filteredLaunchedList).map((it: any, index: number) => {
@@ -593,13 +663,17 @@ export default function PumpPortalSimpleUI() {
                   return <Row key={key} item={it} onInspect={setInspect} />;
                 })
               ) : (
-                <div>
-                  <p className="text-sm opacity-60 mb-2">
-                    Listening for migrations... Click "Test Launch" to add a test token.
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <UpdateIcon className="w-8 h-8 text-gray-500" />
+                  </div>
+                  <p className="text-sm text-gray-400 mb-4" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                    Listening for migrations...
                   </p>
                   <button
                     onClick={simulateLaunchedToken}
-                    className="text-xs px-3 py-1 rounded-xl bg-green-800 border border-green-700 hover:bg-green-700"
+                    className="px-4 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white text-xs font-medium rounded-lg hover:shadow-lg hover:shadow-green-600/25 transition-all duration-200"
+                    style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                   >
                     Add Test Token
                   </button>
@@ -609,29 +683,29 @@ export default function PumpPortalSimpleUI() {
           </section>
         </main>
 
-        {inspect && (
-          <div className="fixed inset-0  backdrop-blur-sm flex items-end md:items-center justify-center p-4 z-50">
-            <div className="bg-gray-950 border border-gray-800 rounded-2xl w-full max-w-3xl p-4">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-semibold">Raw event JSON</h3>
-                <button
-                  onClick={() => setInspect(null)}
-                  className="px-3 py-1.5 rounded-xl bg-gray-800 hover:bg-gray-700"
-                >
-                  Close
-                </button>
+          {inspect && (
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end md:items-center justify-center p-4 z-50">
+              <div className="bg-black/90 backdrop-blur-lg border border-gray-800/50 rounded-2xl w-full max-w-3xl p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-semibold text-white" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                    Raw Event JSON
+                  </h3>
+                  <button
+                    onClick={() => setInspect(null)}
+                    className="px-4 py-2 bg-gray-800/50 hover:bg-gray-700/50 text-white rounded-lg transition-all duration-200"
+                    style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                  >
+                    Close
+                  </button>
+                </div>
+                <pre className="text-xs overflow-auto max-h-[70vh] whitespace-pre-wrap break-words bg-gray-900/50 p-4 rounded-lg text-gray-300" style={{ fontFamily: 'SF Mono, Monaco, Inconsolata, Roboto Mono, monospace' }}>
+                  {JSON.stringify(inspect, null, 2)}
+                </pre>
               </div>
-              <pre className="text-xs overflow-auto max-h-[70vh] whitespace-pre-wrap break-words">
-                {JSON.stringify(inspect, null, 2)}
-              </pre>
             </div>
-          </div>
-        )}
-
-        {/* <footer className="text-xs opacity-60 mt-8">
-          Data via PumpPortal websocket. To stream PumpSwap data, connect with an API key as a query parameter. This demo only listens and does not trade.
-        </footer> */}
+          )}
+        </div>
       </div>
-    </div>
+    </Tooltip.Provider>
   );
 }

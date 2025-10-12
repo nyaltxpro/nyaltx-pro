@@ -1,9 +1,11 @@
 import Footer from '@/components/Footer';
+import "@radix-ui/themes/styles.css";
 import type { Metadata } from 'next';
 import { Inter, Poppins, Roboto } from "next/font/google";
 import { Toaster } from 'react-hot-toast';
 import "./globals.css";
 import Providers from './providers';
+
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://nyaltx.com';
 export const metadata: Metadata = {
@@ -104,8 +106,11 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
         <Providers>
-          <div className=" transition-all duration-300 flex flex-col min-h-screen">
-            <main className="flex-grow">
+          {/* DexScreener-inspired background pattern */}
+          <div className="dex-bg-pattern"></div>
+          
+          <div className="relative transition-all duration-300 flex flex-col min-h-screen">
+            <main className="flex-grow relative z-10">
               {children}
             </main>
             <Footer />
@@ -115,22 +120,36 @@ export default function RootLayout({
             toastOptions={{
               duration: 4000,
               style: {
-                background: '#1f2937',
-                color: '#f9fafb',
-                border: '1px solid #374151',
+                background: 'rgba(0, 0, 0, 0.95)',
+                color: '#ffffff',
+                border: '1px solid rgba(59, 130, 246, 0.2)',
+                borderRadius: '12px',
+                backdropFilter: 'blur(16px)',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+                fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
               },
               success: {
                 style: {
-                  background: '#065f46',
-                  color: '#d1fae5',
-                  border: '1px solid #10b981',
+                  background: 'rgba(16, 185, 129, 0.1)',
+                  color: '#10b981',
+                  border: '1px solid rgba(16, 185, 129, 0.3)',
+                  backdropFilter: 'blur(16px)',
+                },
+                iconTheme: {
+                  primary: '#10b981',
+                  secondary: '#ffffff',
                 },
               },
               error: {
                 style: {
-                  background: '#7f1d1d',
-                  color: '#fecaca',
-                  border: '1px solid #ef4444',
+                  background: 'rgba(239, 68, 68, 0.1)',
+                  color: '#ef4444',
+                  border: '1px solid rgba(239, 68, 68, 0.3)',
+                  backdropFilter: 'blur(16px)',
+                },
+                iconTheme: {
+                  primary: '#ef4444',
+                  secondary: '#ffffff',
                 },
               },
             }}

@@ -45,7 +45,9 @@ const nextConfig: NextConfig = {
       "imgur.com",
       "i.imgur.com",
       "www.nyaltx.com",
-      "api.geckoterminal.com"
+      "api.geckoterminal.com",
+      "images.pump.fun",
+      "logo.moralis.io"
     ],
     remotePatterns: [
       {
@@ -116,6 +118,16 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "api.geckoterminal.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "images.pump.fun",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "logo.moralis.io",
         pathname: "/**",
       },
     ],

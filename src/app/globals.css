@@ -1,25 +1,38 @@
 
 @import 'tailwindcss';
+@import '../styles/dexscreener-theme.css';
 
 :root {
-  --background: #0b1217;
+  /* DexScreener-inspired color palette - Dark Black Theme */
+  --background: #101010;
+  --background-secondary: #0a0a0a;
+  --background-tertiary: #111111;
   --foreground: #ffffff;
-  --primary: #00b8d8;
-  --secondary: #818ea3;
-  --success: #17c671;
-  --danger: #ea3943;
-  --warning: #ffb400;
-  --border-color: #1e2c34;
-  --card-bg: #142028;
-  --sidebar-bg: #0b1217;
-  --header-bg: #142028;
-  --nitro-color: #00ffb3;
-  --rank-1st: #ffd700;
-  --rank-2nd: #00c3ff;
-  --rank-3rd: #ff00ff;
-  --rank-4th: #00ffff;
-  --rank-5th: #00ff00;
-  --rank-6th: #ff6600;
+  --foreground-secondary: #a0a9b8;
+  --foreground-muted: #6b7280;
+  
+  /* Primary colors */
+  --primary: #00d4aa;
+  --primary-hover: #00b894;
+  --secondary: #1e293b;
+  --accent: #3b82f6;
+  
+  /* Status colors */
+  --success: #10b981;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  
+  /* Border and surface colors */
+  --border-color: #1a1a1a;
+  --border-subtle: #2a2a2a;
+  --card-bg: #0a0a0a;
+  --card-hover: #111111;
+  --sidebar-bg: #000000;
+  --header-bg: #0a0a0a;
+  
+
+ 
+ 
 }
 
 /* CSS Variables */
@@ -30,20 +43,41 @@
   --font-roboto: var(--font-roboto);
 }
 
-.light {
-  --background: #ffffff;
-  --foreground: #142028;
-  --card-bg: #ffffff;
-  --sidebar-bg: #f8f9fa;
-  --header-bg: #ffffff;
-  --border-color: #dee2e6;
-}
+
 
 body {
-  background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans), 'Poppins', 'Roboto', sans-serif;
+  /* Linear gradient background options - uncomment one to test */
+  
+  /* Option 1: Subtle dark gradient */
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0f0f0f 100%);
+  
+  /* Option 2: NYALTX brand gradient */
+  /* background: linear-gradient(135deg, #000000 0%, #001a1a 25%, #000d1a 50%, #001a0d 75%, #000000 100%); */
+  
+  /* Option 3: Deep space gradient */
+  /* background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 30%, #16213e 70%, #0f0f0f 100%); */
+  
+  /* Option 4: Crypto-themed gradient */
+  /* background: linear-gradient(135deg, #000000 0%, #0d1421 25%, #1a0d21 50%, #21140d 75%, #000000 100%); */
+  
+  /* Option 5: Minimal gradient */
+  /* background: linear-gradient(180deg, #0a0a0a 0%, #151515 50%, #0a0a0a 100%); */
+  
+  /* Option 6: Trading platform gradient */
+  /* background: linear-gradient(135deg, #0f0f0f 0%, #1e1e1e 25%, #0f1419 50%, #1e1e1e 75%, #0f0f0f 100%); */
+  
+  font-family: Arial, Helvetica, sans-serif;
   font-size: 14px;
+  position: relative;
+  overflow-x: hidden;
+}
+
+
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(1deg); }
 }
 
 .font-roboto {
@@ -51,9 +85,9 @@ body {
 }
 
 .token-race {
-  background: linear-gradient(90deg, rgba(20, 32, 40, 0.8) 0%, rgba(20, 32, 40, 0.9) 100%);
+  /* background: linear-gradient(90deg, rgba(20, 32, 40, 0.8) 0%, rgba(20, 32, 40, 0.9) 100%); */
   border-radius: 8px;
-  padding: 12px;
+  /* padding: 12px; */
   margin-bottom: 16px;
 }
 
@@ -62,6 +96,7 @@ body {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 12px;
+  padding: 12px;
 }
 
 .token-race-title {
@@ -307,11 +342,86 @@ body {
   border: 0.1875rem solid var(--background);
 }
 
+/* DexScreener-inspired card styles */
 .card {
-  background-color: var(--card-bg);
-  border-radius: 0.5rem;
-  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  background: linear-gradient(135deg, var(--card-bg) 0%, var(--background-secondary) 100%);
+  border-radius: 12px;
   border: 1px solid var(--border-color);
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(8px);
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  background: linear-gradient(135deg, var(--card-hover) 0%, var(--background-tertiary) 100%);
+  border-color: var(--border-subtle);
+  box-shadow: 
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+/* DexScreener-style glassmorphism */
+.glass-card {
+  background: rgba(15, 20, 25, 0.8);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Modern button styles */
+.btn-dex {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+  padding: 12px 24px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 14px rgba(0, 212, 170, 0.3);
+}
+
+.btn-dex:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 212, 170, 0.4);
+}
+
+/* Table styles inspired by DexScreener */
+.dex-table {
+  background: var(--card-bg);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+}
+
+.dex-table thead {
+  background: linear-gradient(135deg, var(--background-secondary) 0%, var(--background-tertiary) 100%);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.dex-table th {
+  padding: 16px;
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--foreground-secondary);
+}
+
+.dex-table td {
+  padding: 16px;
+  border-bottom: 1px solid rgba(30, 41, 59, 0.5);
+}
+
+.dex-table tr:hover {
+  background: rgba(59, 130, 246, 0.05);
 }
 
 .sidebar {

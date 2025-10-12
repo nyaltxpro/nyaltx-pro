@@ -1,29 +1,29 @@
 'use client';
 
+import {
+  BarChartIcon,
+  CalendarIcon,
+  GearIcon,
+  HomeIcon,
+  ImageIcon,
+  ListBulletIcon,
+  LockClosedIcon,
+  MagnifyingGlassIcon,
+  PersonIcon,
+  PlayIcon,
+  PlusIcon,
+  ReaderIcon,
+  RocketIcon,
+  StarIcon,
+  TargetIcon,
+  TokensIcon,
+  UpdateIcon
+} from '@radix-ui/react-icons';
 import { AnimatePresence, motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import {
-  FaCalendarAlt,
-  FaChartLine,
-  FaCog,
-  FaCoins,
-  FaGamepad,
-  FaHome,
-  FaImage,
-  FaListOl,
-  FaNewspaper,
-  FaPlay,
-  FaPlus,
-  FaRocket,
-  FaSearch,
-  FaStar,
-  FaSyncAlt,
-  FaUser,
-  FaWallet
-} from 'react-icons/fa';
 
 interface SidebarProps {
   isMobileMenuOpen: boolean;
@@ -47,13 +47,13 @@ const SidebarItem = ({ icon, text, href, isActive, isExpanded }: SidebarItemProp
     >
       <Link
         href={href}
-        className={`flex items-center py-3 px-3 mb-1 rounded-md transition-all duration-200 ${isActive
-            ? 'bg-[#1a2932] text-[#00b8d8]'
-            : 'text-gray-400 hover:bg-[#1a2932] hover:text-white'
+        className={`group flex items-center py-3 px-3 mb-1 rounded-xl transition-all duration-300 ${isActive
+          ? 'bg-gradient-to-r from-[#00d4aa]/20 to-[#3b82f6]/20 text-[#00d4aa] border border-[#00d4aa]/30 shadow-lg shadow-[#00d4aa]/10'
+          : 'text-gray-300 hover:bg-white/5 hover:text-white hover:border hover:border-white/10'
           }`}
       >
         <motion.div
-          className="text-xl"
+          className={`text-2xl transition-colors duration-300 ${isActive ? 'text-[#00d4aa]' : 'text-gray-400 group-hover:text-white'}`}
           animate={{ rotate: isActive ? 360 : 0 }}
           transition={{ duration: 0.3 }}
         >
@@ -62,14 +62,12 @@ const SidebarItem = ({ icon, text, href, isActive, isExpanded }: SidebarItemProp
         <AnimatePresence>
           {isExpanded && (
             <motion.span
-              className="ml-3 whitespace-nowrap"
+              className="ml-3 whitespace-nowrap  font-extralight"
               initial={{ opacity: 0, width: 0 }}
               animate={{ opacity: 1, width: 'auto' }}
               exit={{ opacity: 0, width: 0 }}
-              transition={{
-                duration: 0.2,
-                ease: 'easeInOut',
-              }}
+              transition={{ duration: 0.2, ease: 'easeInOut' }}
+              style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
             >
               {text}
             </motion.span>
@@ -96,35 +94,30 @@ export default function Sidebar({ isMobileMenuOpen, toggleMobileMenu }: SidebarP
   }, []);
 
   const navItems = [
-    { icon: <FaHome />, text: 'Home', href: '/dashboard' },
-    { icon: <FaUser />, text: 'Profile', href: '/dashboard/profile' },
+    { icon: <HomeIcon />, text: 'Home', href: '/dashboard' },
+    { icon: <PersonIcon />, text: 'Profile', href: '/dashboard/profile' },
     {
-      icon: <FaChartLine />,
+      icon: <BarChartIcon />,
       text: 'NYAX',
       href: '/dashboard/trade?base=NYAX&chain=ethereum&address=0x5eed5621b92be4473f99bacac77acfa27deb57d9',
     },
-    // { icon: <FaExchangeAlt />, text: 'Pairs', href: '/pairs' },
-    { icon: <FaStar />, text: 'Favorites', href: '/dashboard/favorites' },
-    // { icon: <FaVideo />, text: 'Live Streams', href: '/dashboard/live-streams' },
-    { icon: <FaPlay />, text: 'Live Stream', href: '/dashboard/live-stream' },
-    // { icon: <FaGift />, text: 'Airdrops', href: '/dashboard/airdrops' },
-    { icon: <FaRocket />, text: 'Trending', href: '/dashboard/trending' },
-    { icon: <FaNewspaper />, text: 'News', href: '/dashboard/news' },
-    { icon: <FaCalendarAlt />, text: 'Events', href: '/dashboard/events' },
-    { icon: <FaSearch />, text: 'Solana Tokens', href: '/dashboard/tokens' },
-    { icon: <FaGamepad />, text: 'Gamification', href: '/dashboard/gamification' },
-    { icon: <FaListOl />, text: 'Leaderboard', href: '/dashboard/leaderboard' },
-    // { icon: <FaTrophy />, text: 'Race to Liberty', href: '/dashboard/race-to-liberty' },
-    { icon: <FaCoins />, text: 'Create Token', href: '/dashboard/create-token' },
-    { icon: <FaPlus />, text: 'Register Token', href: '/pricing' },
-    // { icon: <FaShoppingCart />, text: 'Checkout', href: '/dashboard/checkout' },
-    { icon: <FaWallet />, text: 'Connect', href: '/dashboard/connect' },
-    { icon: <FaSyncAlt />, text: 'Swap', href: '/dashboard/swap' },
+    { icon: <StarIcon />, text: 'Favorites', href: '/dashboard/favorites' },
+    { icon: <PlayIcon />, text: 'Live Stream', href: '/dashboard/live-stream' },
+    { icon: <RocketIcon />, text: 'Trending', href: '/dashboard/trending' },
+    { icon: <ReaderIcon />, text: 'News', href: '/dashboard/news' },
+    { icon: <CalendarIcon />, text: 'Events', href: '/dashboard/events' },
+    { icon: <MagnifyingGlassIcon />, text: 'Solana Tokens', href: '/dashboard/tokens' },
+    { icon: <TargetIcon />, text: 'Gamification', href: '/dashboard/gamification' },
+    { icon: <ListBulletIcon />, text: 'Leaderboard', href: '/dashboard/leaderboard' },
+    { icon: <TokensIcon />, text: 'Create Token', href: '/dashboard/create-token' },
+    { icon: <PlusIcon />, text: 'Register Token', href: '/pricing' },
+    { icon: <LockClosedIcon />, text: 'Connect', href: '/dashboard/connect' },
+    { icon: <UpdateIcon />, text: 'Swap', href: '/dashboard/swap' },
   ];
 
   const extraItems = [
-    { icon: <FaImage />, text: 'NFTs', href: '/dashboard/nfts' },
-    { icon: <FaCog />, text: 'Settings', href: '/dashboard/settings' },
+    { icon: <ImageIcon />, text: 'NFTs', href: '/dashboard/nfts' },
+    { icon: <GearIcon />, text: 'Settings', href: '/dashboard/settings' },
   ];
 
   const sidebarExpanded = isDesktop ? isExpanded : isMobileMenuOpen;
@@ -132,11 +125,16 @@ export default function Sidebar({ isMobileMenuOpen, toggleMobileMenu }: SidebarP
   return (
     <>
       {!isDesktop && isMobileMenuOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-40" onClick={toggleMobileMenu} />
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-40" onClick={toggleMobileMenu} />
       )}
       <motion.div
-        className={`fixed left-0 top-0 h-full bg-[#0f1923] z-50 ${!isDesktop && (isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full')
+        className={`fixed left-0 top-0 h-full bg-black/95 backdrop-blur-xl border-r border-gray-800/50 z-50 ${!isDesktop && (isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full')
           }`}
+        style={{
+          background: 'linear-gradient(180deg, rgba(0, 0, 0, 0.95) 0%, rgba(10, 10, 10, 0.95) 50%, rgba(0, 0, 0, 0.95) 100%)',
+          backdropFilter: 'blur(20px)',
+          borderRight: '1px solid rgba(255, 255, 255, 0.1)'
+        }}
         initial={false}
         animate={{
           width: isDesktop ? (isExpanded ? 224 : 64) : 224, // 56 = 14rem, 16 = 4rem in pixels
@@ -151,19 +149,25 @@ export default function Sidebar({ isMobileMenuOpen, toggleMobileMenu }: SidebarP
         onMouseEnter={() => isDesktop && setIsExpanded(true)}
         onMouseLeave={() => isDesktop && setIsExpanded(false)}
       >
-        <div className="flex items-center h-16 border-b border-gray-800 px-4">
+        <div className="flex items-center h-16 border-b border-gray-800/30 px-4 bg-gradient-to-r from-transparent via-gray-900/20 to-transparent">
           <div className="flex items-center">
-            <motion.div animate={{ rotate: isExpanded ? 360 : 0 }} transition={{ duration: 0.5 }}>
-              <Image src="/logo.png" alt="Logo" width={30} height={30} />
+            <motion.div 
+              animate={{ rotate: isExpanded ? 360 : 0 }} 
+              transition={{ duration: 0.5 }}
+              className="relative"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-[#00d4aa] to-[#3b82f6] rounded-full blur-sm opacity-50"></div>
+              <Image src="/logo.png" alt="Logo" width={30} height={30} className="relative z-10" />
             </motion.div>
             <AnimatePresence>
               {sidebarExpanded && (
                 <motion.span
-                  className="ml-2 font-bold text-white whitespace-nowrap"
+                  className="ml-3 whitespace-nowrap font-bold bg-gradient-to-r from-white via-[#00d4aa] to-[#3b82f6] bg-clip-text text-transparent"
                   initial={{ opacity: 0, width: 0 }}
                   animate={{ opacity: 1, width: 'auto' }}
                   exit={{ opacity: 0, width: 0 }}
                   transition={{ duration: 0.2, ease: 'easeInOut' }}
+                  style={{ fontFamily: 'Space Grotesk, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                 >
                   NYALTX
                 </motion.span>

@@ -2,7 +2,10 @@
 
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
-import { FaAward, FaCoins, FaExternalLinkAlt, FaMedal, FaSyncAlt, FaTrophy } from 'react-icons/fa';
+import * as Avatar from '@radix-ui/react-avatar';
+import * as Tooltip from '@radix-ui/react-tooltip';
+import { ExternalLinkIcon, UpdateIcon, StarIcon } from '@radix-ui/react-icons';
+import { FaAward, FaMedal, FaTrophy } from 'react-icons/fa';
 
 interface LeaderboardToken {
     id: string;
@@ -165,168 +168,180 @@ export default function LeaderboardPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-[#0f1923] to-[#1a2332] p-6">
-            <div className="max-w-7xl mx-auto">
-                {/* Header */}
-                <div className="flex items-center justify-between mb-8">
-                    <div className="flex items-center space-x-4">
-                        <FaTrophy className="text-yellow-500 text-3xl" />
-                        <div>
-                            <h1 className="text-3xl font-bold text-white">Token Leaderboard</h1>
-                            <p className="text-gray-400">Ranking of all tokens by points</p>
+        <Tooltip.Provider>
+            <div className="min-h-screen p-6">
+                <div className=" mx-auto">
+                    {/* Header */}
+                    <div className="mb-8">
+                        <div className="flex items-center justify-between mb-6">
+                            <div>
+                                <h1 className="text-4xl font-bold text-white mb-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>Token Leaderboard</h1>
+                                <p className="text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>Ranking of all registered tokens by points and performance</p>
+                            </div>
+                            <div className="flex items-center gap-4">
+                                <button
+                                    onClick={handleRefresh}
+                                    disabled={refreshing}
+                                    className="shadow-2xl px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2 text-xs"
+                                    style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                                >
+                                    {refreshing ? (
+                                        <>
+                                            <UpdateIcon className="animate-spin w-4 h-4" />
+                                            Refreshing...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <UpdateIcon className="w-4 h-4" />
+                                            Refresh
+                                        </>
+                                    )}
+                                </button>
+                            </div>
                         </div>
                     </div>
-                    <button
-                        onClick={handleRefresh}
-                        disabled={refreshing}
-                        className="flex items-center space-x-2 bg-[#00b8d8] hover:bg-[#0095b3] disabled:opacity-50 text-white px-4 py-2 rounded-lg transition-colors"
-                    >
-                        <FaSyncAlt className={`${refreshing ? 'animate-spin' : ''}`} />
-                        <span>Refresh</span>
-                    </button>
-                </div>
 
-                {/* Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <div className="bg-gray-800/50 rounded-lg p-6 border border-gray-700">
-                        <div className="flex items-center space-x-3">
-                            <FaCoins className="text-[#00b8d8] text-2xl" />
-                            <div>
-                                <p className="text-gray-400 text-sm">Total Tokens</p>
-                                <p className="text-white text-2xl font-bold">{tokens.length}</p>
+                    {/* Stats Cards */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div className="bg-gray-800/40 backdrop-blur-lg p-4 rounded-lg border border-gray-700/30">
+                            <h3 className="text-gray-400 text-sm mb-1" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>Total Tokens</h3>
+                            <div className="text-xl font-bold text-white" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>{tokens.length}</div>
+                            <div className="text-gray-400 text-sm" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>Competing tokens</div>
+                        </div>
+                        <div className="bg-gray-800/40 backdrop-blur-lg p-4 rounded-lg border border-gray-700/30">
+                            <h3 className="text-gray-400 text-sm mb-1" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>Top Score</h3>
+                            <div className="text-xl font-bold text-white" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                {tokens.length > 0 ? formatPoints(tokens[0].points) : '0'}
                             </div>
+                            <div className="text-gray-400 text-sm" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>Highest points</div>
+                        </div>
+                        <div className="bg-gray-800/40 backdrop-blur-lg p-4 rounded-lg border border-gray-700/30">
+                            <h3 className="text-gray-400 text-sm mb-1" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>Competition Status</h3>
+                            <div className="text-xl font-bold text-white" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>Live</div>
+                            <div className="text-gray-400 text-sm" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>Active leaderboard</div>
                         </div>
                     </div>
-                    <div className="bg-gray-800/50 rounded-lg p-6 border border-gray-700">
-                        <div className="flex items-center space-x-3">
-                            <FaTrophy className="text-yellow-500 text-2xl" />
-                            <div>
-                                <p className="text-gray-400 text-sm">Top Score</p>
-                                <p className="text-white text-2xl font-bold">
-                                    {tokens.length > 0 ? formatPoints(tokens[0].points) : '0'}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="bg-gray-800/50 rounded-lg p-6 border border-gray-700">
-                        <div className="flex items-center space-x-3">
-                            <FaAward className="text-purple-500 text-2xl" />
-                            <div>
-                                <p className="text-gray-400 text-sm">Active Competition</p>
-                                <p className="text-white text-2xl font-bold">Live</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
-                {/* Leaderboard Table */}
-                <div className="bg-gray-800/50 rounded-lg border border-gray-700 overflow-hidden">
-                    <div className="overflow-x-auto">
-                        <table className="w-full">
-                            <thead className="bg-gray-900/50">
-                                <tr>
-                                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                                        Rank
-                                    </th>
-                                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                                        Token
-                                    </th>
-                                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                                        Chain
-                                    </th>
-                                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                                        Points
-                                    </th>
-                                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                                        Owner
-                                    </th>
-                                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                                        Actions
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-700">
-                                {tokens.map((token, index) => (
-                                    <tr
-                                        key={token.id}
-                                        className={`hover:bg-gray-700/30 transition-colors ${index < 3 ? 'bg-gradient-to-r from-gray-800/30 to-transparent' : ''
-                                            }`}
-                                    >
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="flex items-center space-x-3">
-                                                {getRankIcon(token.rank)}
-                                                {token.rank <= 3 && (
-                                                    <div
-                                                        className={`px-2 py-1 rounded-full text-xs font-bold text-white ${getRankBadgeColor(token.rank)}`}
-                                                    >
-                                                        TOP {token.rank}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="flex items-center space-x-3">
-                                                <div className="relative w-10 h-10">
-                                                    <Image
-                                                        src={token.imageUri || '/generic.svg'}
-                                                        alt={token.tokenName}
-                                                        width={40}
-                                                        height={40}
-                                                        className="rounded-full"
-                                                        onError={e => {
-                                                            const target = e.target as HTMLImageElement;
-                                                            target.src = '/generic.svg';
-                                                        }}
-                                                    />
-                                                </div>
-                                                <div>
-                                                    <p className="text-white font-medium">{token.tokenName}</p>
-                                                    <p className="text-gray-400 text-sm">{token.tokenSymbol}</p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <span
-                                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white ${getBlockchainColor(token.blockchain)}`}
-                                            >
-                                                {token.blockchain.toUpperCase()}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="flex items-center space-x-2">
-                                                <FaCoins className="text-[#00b8d8] text-sm" />
-                                                <span className="text-white font-bold text-lg">
-                                                    {formatPoints(token.points)}
-                                                </span>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className="text-gray-400 font-mono text-sm">
-                                                {formatAddress(token.submittedByAddress)}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <button className="text-[#00b8d8] hover:text-[#0095b3] transition-colors">
-                                                <FaExternalLinkAlt className="text-sm" />
-                                            </button>
-                                        </td>
+                    {/* Leaderboard Table */}
+                    <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 overflow-hidden shadow-xl">
+                        <div className="overflow-x-auto">
+                            <table className="w-full overflow-hidden">
+                                <thead className="bg-gray-700/30 border-b border-gray-600/20">
+                                    <tr>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                            Rank
+                                        </th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                            Token
+                                        </th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                            Chain
+                                        </th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                            Points
+                                        </th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                            Owner
+                                        </th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                            Actions
+                                        </th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody className="bg-gray-800/20">
+                                    {tokens.map((token, index) => (
+                                        <tr key={token.id} className="hover:bg-gray-700/20 transition-all duration-150 border-b border-gray-700/15 last:border-b-0">
+                                            <td className="px-4 py-3 border-r border-gray-700/20">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="flex items-center gap-2">
+                                                        {token.rank <= 3 ? (
+                                                            <div className="flex items-center gap-2">
+                                                                {getRankIcon(token.rank)}
+                                                                <div className={`px-2 py-1 rounded-full text-xs font-bold text-white ${getRankBadgeColor(token.rank)}`}>
+                                                                    TOP {token.rank}
+                                                                </div>
+                                                            </div>
+                                                        ) : (
+                                                            <div className="text-white font-medium text-sm" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>#{token.rank}</div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-4 py-3 border-r border-gray-700/20">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="flex items-center gap-2">
+                                                        <Avatar.Root className="w-8 h-8">
+                                                            <Avatar.Image
+                                                                src={token.imageUri}
+                                                                alt={token.tokenName}
+                                                                className="w-full h-full object-cover rounded-full"
+                                                            />
+                                                            <Avatar.Fallback className="w-full h-full bg-gradient-to-br from-orange-500 to-pink-600 flex items-center justify-center text-white font-bold text-xs rounded-full">
+                                                                {token.tokenSymbol?.slice(0, 2) || token.tokenName?.slice(0, 2) || '??'}
+                                                            </Avatar.Fallback>
+                                                        </Avatar.Root>
+                                                    </div>
+                                                    <div>
+                                                        <div className="text-white font-medium text-sm" style={{ fontFamily: 'Space Grotesk, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>{token.tokenName || 'Unknown'}</div>
+                                                        <div className="text-gray-400 text-xs" style={{ fontFamily: 'Space Grotesk, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>{token.tokenSymbol || 'N/A'}</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-4 py-3 border-r border-gray-700/20">
+                                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white ${getBlockchainColor(token.blockchain)}`} style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                                    {token.blockchain.toUpperCase()}
+                                                </span>
+                                            </td>
+                                            <td className="px-4 py-3 border-r border-gray-700/20">
+                                                <div className="text-gray-300 font-mono text-sm" style={{ fontFamily: 'SF Mono, Monaco, Inconsolata, Roboto Mono, monospace' }}>
+                                                    {formatPoints(token.points)} pts
+                                                </div>
+                                            </td>
+                                            <td className="px-4 py-3 border-r border-gray-700/20">
+                                                <div className="text-gray-300 text-sm font-mono" style={{ fontFamily: 'SF Mono, Monaco, Inconsolata, Roboto Mono, monospace' }}>
+                                                    {formatAddress(token.submittedByAddress)}
+                                                </div>
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                <div className="flex items-center gap-2">
+                                                    <Tooltip.Root>
+                                                        <Tooltip.Trigger asChild>
+                                                            <a
+                                                                href={`https://${token.blockchain === 'ethereum' ? 'etherscan.io' : token.blockchain === 'bsc' ? 'bscscan.com' : token.blockchain === 'polygon' ? 'polygonscan.com' : token.blockchain === 'arbitrum' ? 'arbiscan.io' : token.blockchain === 'optimism' ? 'optimistic.etherscan.io' : 'solscan.io'}/token/${token.contractAddress}`}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="p-2 text-gray-400 hover:text-white hover:bg-gray-700/50 rounded-md transition-all duration-200"
+                                                            >
+                                                                <ExternalLinkIcon className="w-4 h-4 text-gray-300" />
+                                                            </a>
+                                                        </Tooltip.Trigger>
+                                                        <Tooltip.Portal>
+                                                            <Tooltip.Content className="bg-black/90 text-white px-3 py-2 rounded-lg text-sm">
+                                                                View on Explorer
+                                                                <Tooltip.Arrow className="fill-black/90" />
+                                                            </Tooltip.Content>
+                                                        </Tooltip.Portal>
+                                                    </Tooltip.Root>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                </div>
 
-                {tokens.length === 0 && (
-                    <div className="text-center py-12">
-                        <FaTrophy className="text-gray-600 text-6xl mx-auto mb-4" />
-                        <p className="text-gray-400 text-lg">No tokens found in the leaderboard</p>
-                        <p className="text-gray-500 text-sm">
-                            Tokens will appear here once they receive points
-                        </p>
-                    </div>
-                )}
+                    {tokens.length === 0 && (
+                        <div className="backdrop-blur-lg rounded-xl p-12 text-center border border-white/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                            <div className="mb-6">
+                                <FaTrophy className="text-blue-400 mx-auto mb-4 text-6xl" />
+                            </div>
+                            <h3 className="text-2xl font-semibold text-white mb-2">No Tokens in Competition</h3>
+                            <p className="text-gray-300 text-lg mb-6">Tokens will appear here once they receive points from Race to Liberty</p>
+                        </div>
+                    )}
+                </div>
             </div>
-        </div>
+        </Tooltip.Provider>
     );
 }
