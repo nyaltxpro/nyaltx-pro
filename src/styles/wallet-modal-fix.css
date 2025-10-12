@@ -1,23 +1,23 @@
 /* Fix for wallet modal z-index issues */
 .wallet-adapter-modal-wrapper {
-  z-index: 100000 !important;
+  z-index: 10000000 !important;
 }
 
 .wallet-adapter-modal-overlay {
-  z-index: 100000 !important;
+  z-index: 10000000 !important;
 }
 
 .wallet-adapter-modal {
-  z-index: 100001 !important;
+  z-index: 10000001 !important;
 }
 
 /* Reown AppKit modal z-index fix */
 w3m-modal {
-  z-index: 100000 !important;
+  z-index: 10000000 !important;
 }
 
 wcm-modal {
-  z-index: 100000 !important;
+  z-index: 10000000 !important;
 }
 
 /* General modal backdrop fix */
@@ -70,9 +70,36 @@ nav:not(.wallet-dropdown-container) {
 
 /* Ensure dropdown appears above everything */
 .wallet-dropdown-container > div[style*="position: absolute"] {
-  z-index: 999999 !important;
+  z-index: 9999999 !important;
   position: fixed !important;
   transform: none !important;
+}
+
+/* Specific fixes for dashboard sidebar and navigation */
+.sidebar,
+.dashboard-sidebar,
+nav[class*="sidebar"],
+div[class*="sidebar"],
+.navigation,
+.nav-menu,
+.menu-container,
+aside {
+  z-index: 1000 !important;
+}
+
+/* Portal dropdown should be above everything */
+.wallet-dropdown-portal {
+  z-index: 9999999 !important;
+  position: fixed !important;
+}
+
+/* Force common dashboard elements to lower z-index */
+.dashboard-content,
+.main-content,
+.page-wrapper,
+.layout-container,
+.content-wrapper {
+  z-index: 1 !important;
 }
 
 /* Ensure wallet modals are above everything */

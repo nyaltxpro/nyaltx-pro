@@ -132,15 +132,15 @@ export default function SimpleUnifiedWalletButton({
           {/* Backdrop */}
           <div 
             className="fixed inset-0" 
-            style={{ zIndex: 999998 }}
+            style={{ zIndex: 9999998 }}
             onClick={() => setShowDropdown(false)}
           />
           
           {/* Dropdown Content */}
           <div 
-            className="fixed w-80 bg-black/95 backdrop-blur-xl border border-gray-800/50 rounded-xl shadow-2xl overflow-hidden"
+            className="fixed w-80 bg-black/95 backdrop-blur-xl border border-gray-800/50 rounded-xl shadow-2xl overflow-hidden wallet-dropdown-portal"
             style={{ 
-              zIndex: 999999,
+              zIndex: 9999999,
               top: `${dropdownPosition.top}px`,
               right: `${dropdownPosition.right}px`
             }}
