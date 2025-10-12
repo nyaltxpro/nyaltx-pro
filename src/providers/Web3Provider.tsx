@@ -24,7 +24,10 @@ export const wagmiAdapter = new WagmiAdapter({
 })
 
 // 2. Create Solana adapter
-export const solanaWeb3JsAdapter = new SolanaAdapter()
+const solanaWeb3JsAdapter = new SolanaAdapter({
+  registerWalletStandard: true,
+  wallets: [/* only show these specific wallets */]
+})
 
 
 // Set up metadata
