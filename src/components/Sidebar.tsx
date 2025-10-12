@@ -125,10 +125,10 @@ export default function Sidebar({ isMobileMenuOpen, toggleMobileMenu }: SidebarP
   return (
     <>
       {!isDesktop && isMobileMenuOpen && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-40" onClick={toggleMobileMenu} />
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-10000000" onClick={toggleMobileMenu} />
       )}
       <motion.div
-        className={`fixed left-0 top-0 h-full bg-black/95 backdrop-blur-xl border-r border-gray-800/50 z-50 ${!isDesktop && (isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full')
+        className={`fixed left-0 top-0 h-full bg-black/95 backdrop-blur-xl border-r border-gray-800/50 z-[1000000] ${!isDesktop && (isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full')
           }`}
         style={{
           background: 'linear-gradient(180deg, rgba(0, 0, 0, 0.95) 0%, rgba(10, 10, 10, 0.95) 50%, rgba(0, 0, 0, 0.95) 100%)',
@@ -151,8 +151,8 @@ export default function Sidebar({ isMobileMenuOpen, toggleMobileMenu }: SidebarP
       >
         <div className="flex items-center h-16 border-b border-gray-800/30 px-4 bg-gradient-to-r from-transparent via-gray-900/20 to-transparent">
           <div className="flex items-center">
-            <motion.div 
-              animate={{ rotate: isExpanded ? 360 : 0 }} 
+            <motion.div
+              animate={{ rotate: isExpanded ? 360 : 0 }}
               transition={{ duration: 0.5 }}
               className="relative"
             >
