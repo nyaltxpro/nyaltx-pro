@@ -1,3 +1,4 @@
+import { SolanaAdapter } from '@reown/appkit-adapter-solana';
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';
 import { arbitrum, base, mainnet, polygon, scroll } from '@reown/appkit/networks';
 import { cookieStorage, createStorage, http } from '@wagmi/core';
@@ -10,6 +11,11 @@ if (!projectId) {
 }
 
 export const networks = [mainnet, arbitrum, polygon, base, scroll]; // Removed sepolia, mainnet is default
+
+export const solanaWeb3JsAdapter = new SolanaAdapter({
+  registerWalletStandard: true,
+  wallets: [/* only show these specific wallets */]
+})
 
 //Set up the Wagmi Adapter (Config)
 export const wagmiAdapter = new WagmiAdapter({
