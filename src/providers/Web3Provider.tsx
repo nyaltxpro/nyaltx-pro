@@ -1,11 +1,10 @@
 'use client';
-import { mainnet, solana, solanaDevnet, solanaTestnet } from '@reown/appkit/networks';
+import { mainnet, arbitrum, base, polygon, scroll } from '@reown/appkit/networks';
 import { createAppKit } from '@reown/appkit/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { type ReactNode } from 'react';
 import { cookieToInitialState, WagmiProvider, type Config } from 'wagmi';
-import { projectId, wagmiAdapter, solanaWeb3JsAdapter } from '../lib/web3modal';
-import { SolanaWalletProvider } from './SolanaWalletProvider';
+import { projectId, wagmiAdapter, SolanaWalletContext } from '../lib/web3modal';
 
 
 const queryClient = new QueryClient();
@@ -13,11 +12,11 @@ if (!projectId) {
   throw new Error('Project ID is not defined');
 }
 
-// Create the modal with both EVM and Solana adapters
+// Create the modal with EVM adapter only
 const modal = createAppKit({
-  adapters: [wagmiAdapter, solanaWeb3JsAdapter],
+  adapters: [wagmiAdapter],
   projectId,
-  networks: [mainnet, solana, solanaTestnet, solanaDevnet],
+  networks: [mainnet, arbitrum, base, polygon, scroll],
   defaultNetwork: mainnet,
   metadata: {
     name: 'NYALTX',
@@ -60,9 +59,9 @@ function ContextProvider({ children, cookies }: { children: ReactNode; cookies: 
       reconnectOnMount={false}
     >
       <QueryClientProvider client={queryClient}>
-        <SolanaWalletProvider>
+        <SolanaWalletContext>
           {children}
-        </SolanaWalletProvider>
+        </SolanaWalletContext>
       </QueryClientProvider>
     </WagmiProvider>
   );
