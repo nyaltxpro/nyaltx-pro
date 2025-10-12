@@ -238,3 +238,37 @@ body > div[class*="wallet"],
 body > div > div[class*="wallet-adapter"] {
   z-index: 100000001 !important;
 }
+
+/* Search modal z-index fix - ensure it appears above everything */
+.search-modal-backdrop {
+  z-index: 100000002 !important;
+}
+
+.search-modal-container {
+  z-index: 100000003 !important;
+}
+
+/* Ensure search modal appears above all other modals and overlays */
+[data-search-modal="true"] {
+  z-index: 100000002 !important;
+}
+
+/* Force search modal components above everything */
+.search-modal-backdrop * {
+  z-index: inherit !important;
+}
+
+/* Ensure search input and results are properly layered */
+.search-modal-container input,
+.search-modal-container div,
+.search-modal-container button {
+  position: relative;
+  z-index: 1;
+}
+
+/* Fix any dropdown or overlay issues within search modal */
+.search-modal-container .dropdown,
+.search-modal-container .overlay,
+.search-modal-container .popup {
+  z-index: 100000004 !important;
+}

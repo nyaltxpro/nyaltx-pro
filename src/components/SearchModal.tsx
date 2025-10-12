@@ -842,7 +842,9 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="fixed inset-0 bg-[#152028] bg-opacity-70 z-50 flex items-start justify-center pt-16"
+          className="fixed inset-0 bg-[#152028] bg-opacity-70 flex items-start justify-center pt-16 search-modal-backdrop"
+          data-search-modal="true"
+          style={{ zIndex: 100000002 }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -855,7 +857,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
         >
           <motion.div
             ref={modalRef}
-            className="w-full max-w-5xl rounded-lg p-3 overflow-hidden"
+            className="w-full max-w-5xl rounded-lg p-3 overflow-hidden search-modal-container"
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
