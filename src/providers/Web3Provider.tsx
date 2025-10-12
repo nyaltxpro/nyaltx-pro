@@ -4,7 +4,7 @@ import { createAppKit } from '@reown/appkit/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { type ReactNode } from 'react';
 import { cookieToInitialState, WagmiProvider, type Config } from 'wagmi';
-import { projectId, solanaWeb3JsAdapter, wagmiAdapter } from '../lib/web3modal';
+import { projectId, wagmiAdapter } from '../lib/web3modal';
 
 
 const queryClient = new QueryClient();
@@ -23,7 +23,7 @@ const metadata = {
 
 // Create the modal
 const modal = createAppKit({
-  adapters: [wagmiAdapter, solanaWeb3JsAdapter],
+  adapters: [wagmiAdapter],
   projectId,
   networks: [mainnet, solana, solanaTestnet, solanaDevnet],
   defaultNetwork: mainnet,
