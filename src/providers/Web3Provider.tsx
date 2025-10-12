@@ -24,7 +24,7 @@ export const wagmiAdapter = new WagmiAdapter({
 })
 
 // 2. Create Solana adapter
-const solanaWeb3JsAdapter = new SolanaAdapter()
+export const solanaWeb3JsAdapter = new SolanaAdapter()
 
 
 // Set up metadata
