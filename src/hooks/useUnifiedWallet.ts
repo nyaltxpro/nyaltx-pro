@@ -50,9 +50,9 @@ export function useUnifiedWallet(): UnifiedWalletState {
     connecting: isSolanaConnecting 
   } = useWallet();
 
+  const solanaAddress = solanaPublicKey?.toString() || null;
+
   return useMemo(() => {
-    const solanaAddress = solanaPublicKey?.toString() || null;
-    
     // Determine primary wallet (prefer EVM if both connected)
     const primaryWalletType: 'evm' | 'solana' | null = 
       isEvmConnected ? 'evm' : 
