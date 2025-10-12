@@ -51,7 +51,8 @@ const AllChainsDropdown: React.FC<AllChainsDropdownProps> = ({ onSelectChain, cl
         </DropdownMenu.Trigger>
         <DropdownMenu.Portal>
           <DropdownMenu.Content
-            className="bg-gray-900 border border-gray-700 rounded-lg shadow-xl p-2 w-64 max-h-96 overflow-y-auto z-50"
+            className="bg-gray-900 border border-gray-700 rounded-lg shadow-xl p-2 w-64 max-h-96 overflow-y-auto blockchain-dropdown-content"
+            style={{ zIndex: 999999 }}
             sideOffset={5}
             align="center"
           >

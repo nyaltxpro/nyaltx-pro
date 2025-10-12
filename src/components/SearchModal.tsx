@@ -844,7 +844,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
         <motion.div
           className="fixed inset-0 bg-[#152028] bg-opacity-70 flex items-start justify-center pt-16 search-modal-backdrop"
           data-search-modal="true"
-          style={{ zIndex: 100000002 }}
+          style={{ zIndex: 100000005, position: 'fixed' }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -858,6 +858,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
           <motion.div
             ref={modalRef}
             className="w-full max-w-5xl rounded-lg p-3 overflow-hidden search-modal-container"
+            style={{ zIndex: 100000006, position: 'relative', transformOrigin: 'center center' }}
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
@@ -867,7 +868,6 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
               damping: 25,
               duration: 0.25,
             }}
-            style={{ transformOrigin: 'center center' }}
           >
             {/* Search input */}
             <div className="p-2 border rounded-full border-gray-500">
