@@ -1,10 +1,10 @@
 import Footer from '@/components/Footer';
+import '@solana/wallet-adapter-react-ui/styles.css';
 import type { Metadata } from 'next';
 import { Inter, Poppins, Roboto } from "next/font/google";
 import { Toaster } from 'react-hot-toast';
 import "./globals.css";
 import Providers from './providers';
-
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://nyaltx.com';
 export const metadata: Metadata = {

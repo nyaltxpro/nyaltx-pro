@@ -5,7 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
 import Banner from './Banner';
 import BlockchainDropdown from './BlockchainDropdown';
-import ConnectWalletButton from './ConnectWalletButton';
+import UnifiedWalletButton from './UnifiedWalletButton';
 import LivePriceTicker from './LivePriceTicker';
 import SearchModal from './SearchModal';
 import './animations.css';
@@ -157,7 +157,7 @@ const Header = () => {
               </Tooltip.Root>
 
               <div className="ml-2">
-                <ConnectWalletButton />
+                <UnifiedWalletButton />
               </div>
             </div>
           </div>

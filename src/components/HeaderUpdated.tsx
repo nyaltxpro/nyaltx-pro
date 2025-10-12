@@ -3,7 +3,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import Banner from './Banner';
-import ConnectWalletButton from './ConnectWalletButton';
+import UnifiedWalletButton from './UnifiedWalletButton';
 import BlockchainDropdown from './BlockchainDropdown';
 import './animations.css';
 import { SlStar } from 'react-icons/sl';
@@ -280,7 +280,7 @@ const Header = ({ toggleMobileMenu }: HeaderProps) => {
 
             {/* Connect Wallet Button */}
             <div className="ml-2">
-              <ConnectWalletButton />
+              <UnifiedWalletButton />
             </div>
           </div>
         </div>
