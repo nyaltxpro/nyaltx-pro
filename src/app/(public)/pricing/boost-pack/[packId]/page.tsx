@@ -206,15 +206,16 @@ export default function BoostPackCheckout() {
   const packId = params?.packId as string;
   const boostPack = BOOST_PACKS[packId as keyof typeof BOOST_PACKS];
 
-  const [selectedTokens, setSelectedTokens] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedTokens, setSelectedTokens] = useState<string[]>([]);
   const [paymentMethod, setPaymentMethod] = useState<'eth' | 'sol' | 'nyax'>('eth');
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [ethPrice, setEthPrice] = useState<number>(3000);
+  const [ethPrice, setEthPrice] = useState(3000);
   const [promoCode, setPromoCode] = useState('');
   const [appliedPromo, setAppliedPromo] = useState<any>(null);
   const [promoError, setPromoError] = useState<string | null>(null);
+  const [email, setEmail] = useState('');
 
   // Load user tokens from database using Redux
   const refreshUserTokens = async () => {
@@ -428,9 +429,49 @@ export default function BoostPackCheckout() {
         dispatch(saveTokenBoostsToStorage());
         await refreshUserTokens();
 
+        // Create boost_points records via gamification API
+        try {
+          for (const token of selectedTokenData) {
+            const finalBoost = Math.floor(boostPack.points * (token.multiplier || 1.0));
+            
+            const boostResponse = await fetch('/api/gamification/boost', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                walletAddress: address,
+                tokenId: token.id,
+                tokenSymbol: token.symbol || token.tokenSymbol,
+                tokenName: token.name || token.tokenName,
+                points: finalBoost,
+                packType: packId,
+                paymentMethod: 'free_promo',
+                amount: '0.00',
+                currency: 'FREE',
+                decayHours: 24, // Standard decay time
+                metadata: {
+                  source: 'boost_pack_checkout',
+                  promoCode: promoCode.toUpperCase(),
+                  isFreePromo: true
+                }
+              }),
+            });
+
+            if (boostResponse.ok) {
+              console.log(`✅ Created boost_points record for ${token.symbol || token.tokenSymbol}`);
+            } else {
+              console.error(`❌ Failed to create boost_points record for ${token.symbol || token.tokenSymbol}`);
+            }
+          }
+        } catch (boostError) {
+          console.error('❌ Error creating boost_points records:', boostError);
+        }
+
         // Save free promo order to admin/orders system
         try {
           const selectedTokenData = userTokens.filter(token => selectedTokens.includes(token.id));
+          const primaryToken = selectedTokenData[0];
           const orderData = {
             type: 'boost_pack',
             paymentMethod: 'free_promo',
@@ -439,7 +480,11 @@ export default function BoostPackCheckout() {
             txHash: null,
             productName: `${boostPack.name} - Free Promo (${promoCode.toUpperCase()})`,
             status: 'completed',
-            contractAddress: selectedTokenData.length > 0 ? selectedTokenData[0].address : undefined,
+            email: email || undefined,
+            contractAddress: primaryToken?.address,
+            tokenSymbol: primaryToken?.symbol || primaryToken?.tokenSymbol,
+            tokenName: primaryToken?.name || primaryToken?.tokenName,
+            tier: packId,
             metadata: {
               paymentSource: 'boost_pack_checkout',
               boostPackType: packId,
@@ -566,6 +611,46 @@ export default function BoostPackCheckout() {
       // Refresh token list to show updated boost values
       await refreshUserTokens();
 
+      // Create boost_points records via gamification API
+      try {
+        for (const token of selectedTokenData) {
+          const finalBoost = Math.floor(boostPack.points * (token.multiplier || 1.0));
+          
+          const boostResponse = await fetch('/api/gamification/boost', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              walletAddress: address,
+              tokenId: token.id,
+              tokenSymbol: token.symbol || token.tokenSymbol,
+              tokenName: token.name || token.tokenName,
+              points: finalBoost,
+              packType: packId,
+              paymentMethod: paymentMethod,
+              amount: pricing.finalPrice.toString(),
+              currency: paymentMethod.toUpperCase(),
+              txHash: txHash,
+              decayHours: 24, // Standard decay time
+              metadata: {
+                source: 'boost_pack_checkout',
+                promoCode: appliedPromo ? promoCode.toUpperCase() : null,
+                promoDiscount: appliedPromo ? appliedPromo.discount : 0
+              }
+            }),
+          });
+
+          if (boostResponse.ok) {
+            console.log(`✅ Created boost_points record for ${token.symbol || token.tokenSymbol}`);
+          } else {
+            console.error(`❌ Failed to create boost_points record for ${token.symbol || token.tokenSymbol}`);
+          }
+        }
+      } catch (boostError) {
+        console.error('❌ Error creating boost_points records:', boostError);
+      }
+
       // Log the transaction for debugging
       console.log('Boost applied to tokens:', {
         packName: boostPack.name,
@@ -586,6 +671,7 @@ export default function BoostPackCheckout() {
       // Save paid order to admin/orders system
       try {
         const selectedTokenData = userTokens.filter(token => selectedTokens.includes(token.id));
+        const primaryToken = selectedTokenData[0];
         const orderData = {
           type: 'boost_pack',
           paymentMethod: paymentMethod,
@@ -594,7 +680,11 @@ export default function BoostPackCheckout() {
           txHash: txHash,
           productName: `${boostPack.name} - ${selectedTokenData.length} Token${selectedTokenData.length > 1 ? 's' : ''}`,
           status: 'completed',
-          contractAddress: selectedTokenData.length > 0 ? selectedTokenData[0].address : undefined,
+          email: email || undefined,
+          contractAddress: primaryToken?.address,
+          tokenSymbol: primaryToken?.symbol || primaryToken?.tokenSymbol,
+          tokenName: primaryToken?.name || primaryToken?.tokenName,
+          tier: packId,
           metadata: {
             paymentSource: 'boost_pack_checkout',
             boostPackType: packId,
@@ -946,6 +1036,26 @@ export default function BoostPackCheckout() {
                         pts
                       </span>
                     </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Email Input */}
+              <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl p-6 shadow-xl">
+                <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                  <FaTag className="text-cyan-400" />
+                  Contact Information
+                </h3>
+                <div className="space-y-3">
+                  <input
+                    type="email"
+                    placeholder="Enter your email address (optional)"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:border-cyan-500 focus:outline-none"
+                  />
+                  <div className="text-xs text-gray-500">
+                    Email is optional but recommended for order confirmations and updates
                   </div>
                 </div>
               </div>
