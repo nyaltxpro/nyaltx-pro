@@ -56,6 +56,15 @@ function AdminCorporateNewsComponent() {
     const [isUploadingToIPFS, setIsUploadingToIPFS] = useState(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
+    // Helper function to convert Pinata gateway URLs to ipfs.io
+    const convertToWorkingIPFSUrl = (url: string): string => {
+        if (url.includes('gateway.pinata.cloud/ipfs/')) {
+            const hash = url.split('gateway.pinata.cloud/ipfs/')[1];
+            return `https://ipfs.io/ipfs/${hash}`;
+        }
+        return url;
+    };
+
     useEffect(() => {
         loadNews();
     }, []);
@@ -240,7 +249,7 @@ function AdminCorporateNewsComponent() {
             }
 
             const data = await response.json();
-            const ipfsUrl = `https://gateway.pinata.cloud/ipfs/${data.hash}`;
+            const ipfsUrl = `https://ipfs.io/ipfs/${data.hash}`;
             
             // Update the featured image field with IPFS URL
             setNewsForm(prev => ({ ...prev, featuredImage: ipfsUrl }));
@@ -445,13 +454,29 @@ function AdminCorporateNewsComponent() {
                             {/* Manual URL Input */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-300 mb-2">Or enter image URL manually</label>
-                                <input
-                                    type="url"
-                                    value={newsForm.featuredImage}
-                                    onChange={(e) => setNewsForm(prev => ({ ...prev, featuredImage: e.target.value }))}
-                                    className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500/50"
-                                    placeholder="https://example.com/image.jpg or IPFS URL"
-                                />
+                                <div className="flex gap-2">
+                                    <input
+                                        type="url"
+                                        value={newsForm.featuredImage}
+                                        onChange={(e) => setNewsForm(prev => ({ ...prev, featuredImage: e.target.value }))}
+                                        className="flex-1 px-3 py-2 bg-gray-700/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500/50"
+                                        placeholder="https://example.com/image.jpg or IPFS URL"
+                                    />
+                                    {newsForm.featuredImage.includes('gateway.pinata.cloud') && (
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                const fixedUrl = convertToWorkingIPFSUrl(newsForm.featuredImage);
+                                                setNewsForm(prev => ({ ...prev, featuredImage: fixedUrl }));
+                                                setSuccess('URL converted to working IPFS gateway!');
+                                            }}
+                                            className="px-3 py-2 bg-yellow-600/20 hover:bg-yellow-600/30 text-yellow-300 rounded-lg border border-yellow-600/30 transition-all duration-200 text-sm font-medium whitespace-nowrap"
+                                            title="Convert Pinata gateway URL to working IPFS.io gateway"
+                                        >
+                                            Fix URL
+                                        </button>
+                                    )}
+                                </div>
                             </div>
                             
                             {/* Image Preview */}

@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       hash: pinataData.IpfsHash,
-      url: `https://gateway.pinata.cloud/ipfs/${pinataData.IpfsHash}`,
+      url: `https://ipfs.io/ipfs/${pinataData.IpfsHash}`,
       size: file.size,
       name: file.name,
       type: file.type
