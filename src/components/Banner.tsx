@@ -1,7 +1,6 @@
 'use client';
 
 import Image from 'next/image';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -84,7 +83,7 @@ export default function Banner() {
     const href = getCurrentHyperlink();
     console.log('Banner clicked! Navigating to:', href);
     console.log('Current banner metadata:', getCurrentBannerMetadata());
-    
+
     if (href) {
       // Use router.push for navigation
       router.push(href);
@@ -129,7 +128,9 @@ export default function Banner() {
   };
 
   return (
-    <div className="relative w-full max-w-5xl mx-auto py-4 px-4 select-none">
+    <div className="relative w-full max-w-5xl mx-auto py-4 px-4 select-none"
+      onClick={handleBannerClick}
+    >
       {/* Enhanced Banner Container */}
       <div className="relative group">
         {/* Animated background glow */}

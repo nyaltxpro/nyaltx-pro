@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import PublicHeader from '@/components/PublicHeader';
 import NewsArticle from '../../../../components/NewsArticle';
+import { getDb } from '@/lib/mongodb';
 
 interface NewsData {
   _id: string;
@@ -18,17 +19,50 @@ interface NewsData {
 
 async function getNewsArticle(slug: string): Promise<NewsData | null> {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-    const response = await fetch(`${baseUrl}/api/news/${slug}`, {
-      next: { revalidate: 300 } // Revalidate every 5 minutes
+    console.log('Fetching article with slug:', slug);
+    
+    const db = await getDb();
+    const collection = db.collection('corporate_news');
+    
+    // Check all articles with this slug for debugging
+    const allMatchingArticles = await collection.find({ slug }).toArray();
+    console.log('All articles with slug:', slug, allMatchingArticles.map(a => ({ 
+      title: a.title, 
+      status: a.status, 
+      publishedAt: a.publishedAt,
+      slug: a.slug 
+    })));
+    
+    // Find the published article
+    const newsArticle = await collection.findOne({ 
+      slug, 
+      status: 'published' 
     });
     
-    if (!response.ok) {
+    console.log('Published article found:', newsArticle ? 'YES' : 'NO');
+    
+    if (!newsArticle) {
       return null;
     }
     
-    const data = await response.json();
-    return data.news;
+    // Increment view count
+    await collection.updateOne(
+      { _id: newsArticle._id },
+      { $inc: { views: 1 } }
+    );
+    
+    return {
+      _id: newsArticle._id.toString(),
+      title: newsArticle.title,
+      content: newsArticle.content,
+      excerpt: newsArticle.excerpt,
+      featuredImage: newsArticle.featuredImage,
+      publishedAt: newsArticle.publishedAt,
+      author: newsArticle.author,
+      slug: newsArticle.slug,
+      tags: newsArticle.tags || [],
+      views: newsArticle.views || 0
+    };
   } catch (error) {
     console.error('Error fetching news article:', error);
     return null;
