@@ -11,15 +11,28 @@ export async function GET(
     
     const { slug } = params;
     
+    console.log('Individual article API called with slug:', slug);
+    
     if (!slug) {
       return NextResponse.json({ error: 'Slug is required' }, { status: 400 });
     }
+    
+    // Check all articles with this slug (regardless of status) for debugging
+    const allMatchingArticles = await collection.find({ slug }).toArray();
+    console.log('All articles with slug:', slug, allMatchingArticles.map(a => ({ 
+      title: a.title, 
+      status: a.status, 
+      publishedAt: a.publishedAt,
+      slug: a.slug 
+    })));
     
     // Find the news article by slug and ensure it's published
     const newsArticle = await collection.findOne({ 
       slug, 
       status: 'published' 
     });
+    
+    console.log('Published article found:', newsArticle ? 'YES' : 'NO');
     
     if (!newsArticle) {
       return NextResponse.json({ error: 'News article not found' }, { status: 404 });

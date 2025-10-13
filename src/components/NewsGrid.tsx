@@ -51,13 +51,26 @@ function NewsGrid() {
         params.append('tag', selectedTag);
       }
 
-      const response = await fetch(`/api/news?${params.toString()}`);
-      if (!response.ok) throw new Error('Failed to load news');
+      const url = `/api/news?${params.toString()}`;
+      console.log('Fetching news from:', url);
+      
+      const response = await fetch(url);
+      console.log('News API response status:', response.status);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('News API error:', errorText);
+        throw new Error(`Failed to load news: ${response.status}`);
+      }
       
       const data: NewsResponse = await response.json();
+      console.log('News API response data:', data);
+      console.log('Number of articles found:', data.news?.length || 0);
+      
       setNews(data.news);
       setPagination(data.pagination);
     } catch (err: any) {
+      console.error('Error loading news:', err);
       setError(err.message);
     } finally {
       setLoading(false);

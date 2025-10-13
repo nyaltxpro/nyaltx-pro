@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/mongodb';
+import { ObjectId } from 'mongodb';
 
 export async function GET(request: NextRequest) {
   try {
@@ -136,6 +137,8 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'News ID is required' }, { status: 400 });
     }
     
+    console.log('Updating news article with ID:', id);
+    
     const updateData: any = {
       updatedAt: new Date()
     };
@@ -157,7 +160,7 @@ export async function PUT(request: NextRequest) {
     if (slug) updateData.slug = slug;
     
     const result = await collection.updateOne(
-      { _id: id },
+      { _id: new ObjectId(id) },
       { $set: updateData }
     );
     
@@ -186,7 +189,9 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'News ID is required' }, { status: 400 });
     }
     
-    const result = await collection.deleteOne({ _id: id });
+    console.log('Deleting news article with ID:', id);
+    
+    const result = await collection.deleteOne({ _id: new ObjectId(id) });
     
     if (result.deletedCount === 0) {
       return NextResponse.json({ error: 'News article not found' }, { status: 404 });

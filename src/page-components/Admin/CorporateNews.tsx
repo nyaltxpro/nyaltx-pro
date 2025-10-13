@@ -108,14 +108,18 @@ function AdminCorporateNewsComponent() {
                 publishedAt: newsForm.status === 'published' ? new Date().toISOString() : null
             };
 
+            console.log('Saving news article:', { editingNews: !!editingNews, newsData });
+
             let response;
             if (editingNews) {
+                console.log('Updating article with ID:', editingNews._id);
                 response = await fetch('/api/admin/news', {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ id: editingNews._id, ...newsData })
                 });
             } else {
+                console.log('Creating new article');
                 response = await fetch('/api/admin/news', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -141,6 +145,7 @@ function AdminCorporateNewsComponent() {
         if (!confirm('Are you sure you want to delete this news article?')) return;
 
         try {
+            console.log('Deleting article with ID:', id);
             const response = await fetch('/api/admin/news', {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
