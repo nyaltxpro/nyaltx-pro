@@ -17,15 +17,20 @@ interface PhantomWalletButtonProps {
 const SOLANA_RECEIVER = process.env.NEXT_PUBLIC_SOLANA_RECEIVER_ADDRESS || 
   'YourSolanaWalletAddressHere';
 
+// Phantom wallet interface
+interface PhantomProvider {
+  isPhantom?: boolean;
+  connect: () => Promise<{ publicKey: { toString: () => string } }>;
+  disconnect: () => Promise<void>;
+  signAndSendTransaction: (transaction: any) => Promise<{ signature: string }>;
+  publicKey?: { toString: () => string };
+  isConnected?: boolean;
+}
+
 declare global {
   interface Window {
-    solana?: {
-      isPhantom?: boolean;
-      connect: () => Promise<{ publicKey: { toString: () => string } }>;
-      disconnect: () => Promise<void>;
-      signAndSendTransaction: (transaction: any) => Promise<{ signature: string }>;
-      publicKey?: { toString: () => string };
-      isConnected?: boolean;
+    phantom?: {
+      solana?: PhantomProvider;
     };
   }
 }
@@ -46,13 +51,14 @@ export const PhantomWalletButton: React.FC<PhantomWalletButtonProps> = ({
   // Check if Phantom wallet is available
   useEffect(() => {
     const checkPhantom = () => {
-      if (typeof window !== 'undefined' && window.solana?.isPhantom) {
+      const phantom = window.phantom?.solana || (window as any).solana;
+      if (typeof window !== 'undefined' && phantom?.isPhantom) {
         setIsPhantomAvailable(true);
         
         // Check if already connected
-        if (window.solana?.isConnected && window.solana?.publicKey) {
+        if (phantom?.isConnected && phantom?.publicKey) {
           setIsConnected(true);
-          setWalletAddress(window.solana.publicKey.toString());
+          setWalletAddress(phantom.publicKey.toString());
         }
       }
     };
@@ -95,7 +101,8 @@ export const PhantomWalletButton: React.FC<PhantomWalletButtonProps> = ({
 
   // Connect to Phantom wallet
   const connectWallet = useCallback(async () => {
-    if (!window.solana?.isPhantom) {
+    const phantom = window.phantom?.solana || (window as any).solana;
+    if (!phantom?.isPhantom) {
       const errorMsg = 'Phantom wallet not found. Please install Phantom wallet extension.';
       onError(errorMsg);
       toast.error(errorMsg);
@@ -105,7 +112,7 @@ export const PhantomWalletButton: React.FC<PhantomWalletButtonProps> = ({
     const connectingToast = toast.loading('Connecting to Phantom wallet...');
     
     try {
-      const response = await window.solana.connect();
+      const response = await phantom.connect();
       const address = response.publicKey.toString();
       setIsConnected(true);
       setWalletAddress(address);
@@ -124,9 +131,10 @@ export const PhantomWalletButton: React.FC<PhantomWalletButtonProps> = ({
 
   // Disconnect wallet
   const disconnectWallet = useCallback(async () => {
-    if (window.solana) {
+    const phantom = window.phantom?.solana || (window as any).solana;
+    if (phantom) {
       try {
-        await window.solana.disconnect();
+        await phantom.disconnect();
         setIsConnected(false);
         setWalletAddress('');
         console.log('🔌 Disconnected from Phantom wallet');
@@ -146,7 +154,8 @@ export const PhantomWalletButton: React.FC<PhantomWalletButtonProps> = ({
 
   // Handle Solana payment using Phantom wallet
   const handleSolanaPayment = useCallback(async () => {
-    if (!isConnected || !window.solana) {
+    const phantom = window.phantom?.solana || (window as any).solana;
+    if (!isConnected || !phantom) {
       const errorMsg = 'Please connect your Phantom wallet first';
       onError(errorMsg);
       toast.error(errorMsg);

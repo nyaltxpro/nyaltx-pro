@@ -2,6 +2,9 @@
 
 import catalog from '@/data/tokens.json';
 import { LocalCoin, LocalSearchResult, useLocalCoinsSearch } from '@/hooks/useLocalCoinsSearch';
+import { useCoinGeckoSearch } from '@/hooks/useCoinGeckoSearch';
+import { useAppSelector } from '@/store';
+import { selectCoinGeckoSearchResults, selectTrendingCoins } from '@/store/slices/searchCacheSlice';
 import {
   ContractAddressResult,
   fetchContractAddresses,
@@ -23,6 +26,7 @@ import { commonCryptoSymbols, getCryptoIconUrl } from '../utils/cryptoIcons';
 import { getCryptoName } from '../utils/cryptoNames';
 import TokenAvatar from './TokenAvatar';
 
+interface SearchModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
@@ -32,7 +36,59 @@ interface NyaxToken {
   logoId: string;
   name: string | null;
   symbol: string | null;
-{{ ... }}
+  contractAddress: string | null;
+  network: string | null;
+  logo: string | null;
+}
+
+interface UnifiedToken {
+  id?: string;
+  symbol: string;
+  name: string;
+  chain: string;
+  address: string;
+  logo?: string;
+  source: string;
+  price?: number;
+  market_cap?: number;
+}
+
+interface CoinGeckoCoin {
+  id: string;
+  symbol: string;
+  name: string;
+  image?: string;
+  contractAddresses?: { [key: string]: string };
+  primaryChain?: string;
+  primaryAddress?: string;
+}
+
+const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
+  const router = useRouter();
+  const modalRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const unifiedSearchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  // State management
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [localSearchResults, setLocalSearchResults] = useState<LocalSearchResult[]>([]);
+  const [unifiedTokens, setUnifiedTokens] = useState<UnifiedToken[]>([]);
+  const [unifiedTokensLoading, setUnifiedTokensLoading] = useState(false);
+
+  // Get cached CoinGecko results from Redux
+  const cachedCoinGeckoResults = useAppSelector(selectCoinGeckoSearchResults(searchTerm));
+  const cachedTrendingCoins = useAppSelector(selectTrendingCoins);
+
+  // Load NYAX tokens data
+  const nyaxTokens: NyaxToken[] = nyaxTokensData.tokens || [];
+
+  // PumpFun tokens hook
+  const { tokens: pumpFunTokens } = usePumpFunTokensMoralis();
+
+  // Local coins search hook
   const {
     searchCoins,
     getTrendingCoins: localTrendingCoins,
@@ -46,9 +102,9 @@ interface NyaxToken {
     getTrendingCoinsWithCache,
     getCacheKey,
     cancelSearch,
+    isSearching: isSearchingCoinGecko,
   } = useCoinGeckoSearch();
 
-{{ ... }}
   // Map NYAX network labels to our chain slugs
   const mapNetworkToChain = (network: string | null | undefined): string | undefined => {
     if (!network) return undefined;
@@ -450,8 +506,8 @@ interface NyaxToken {
   const handleCoinGeckoClick = async (coin: CoinGeckoCoin) => {
     let contractResult: ContractAddressResult = {
       contractAddresses: coin.contractAddresses || {},
-      primaryChain: coin.primaryChain,
-      primaryAddress: coin.primaryAddress,
+      primaryChain: coin.primaryChain || null,
+      primaryAddress: coin.primaryAddress || null,
     };
 
     // If no contract address available, try fallback fetch
@@ -977,8 +1033,8 @@ interface NyaxToken {
                                 {token.price && (
                                   <span>${parseFloat(token.price.toString()).toFixed(6)}</span>
                                 )}
-                                {token.marketCap && (
-                                  <span>MC: ${(token.marketCap / 1e6).toFixed(2)}M</span>
+                                {token.market_cap && (
+                                  <span>MC: ${(token.market_cap / 1e6).toFixed(2)}M</span>
                                 )}
                                 {token.address && token.address !== 'N/A' && (
                                   <span className="font-mono truncate max-w-[100px]" title={token.address}>
