@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 
 interface BannerFile {
@@ -20,6 +21,7 @@ interface BannerMetadata {
 }
 
 export default function Banner() {
+  const router = useRouter();
   const [uploadedBanners, setUploadedBanners] = useState<BannerFile[]>([]);
   const [bannerMetadata, setBannerMetadata] = useState<BannerMetadata[]>([]);
   const [loading, setLoading] = useState(true);
@@ -76,6 +78,19 @@ export default function Banner() {
   const prev = () => setIndex(i => (i - 1 + images.length) % images.length);
   const next = () => setIndex(i => (i + 1) % images.length);
 
+  // Handle banner click
+  const handleBannerClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const href = getCurrentHyperlink();
+    console.log('Banner clicked! Navigating to:', href);
+    console.log('Current banner metadata:', getCurrentBannerMetadata());
+    
+    if (href) {
+      // Use router.push for navigation
+      router.push(href);
+    }
+  };
+
   // Get current banner metadata
   const getCurrentBannerMetadata = () => {
     if (uploadedBanners.length > 0 && uploadedBanners[index]) {
@@ -88,11 +103,14 @@ export default function Banner() {
   // Get hyperlink for current banner
   const getCurrentHyperlink = () => {
     const metadata = getCurrentBannerMetadata();
-    if (metadata?.hyperlink) {
+    if (metadata?.hyperlink && metadata.hyperlink.trim() !== '') {
+      console.log('Using metadata hyperlink:', metadata.hyperlink);
       return metadata.hyperlink;
     }
     // Fallback to existing logic
-    return index === 1 ? '/pricing' : '/';
+    const fallbackLink = index === 1 ? '/pricing' : '/';
+    console.log('Using fallback hyperlink:', fallbackLink, 'metadata:', metadata);
+    return fallbackLink;
   };
 
   // Get title and description for current banner
@@ -122,10 +140,17 @@ export default function Banner() {
           <div className="absolute inset-0 bg-gradient-to-r from-[#00d4aa]/5 via-transparent to-[#3b82f6]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10"></div>
 
           {/* Banner Link */}
-          <Link
-            href={getCurrentHyperlink()}
+          <div
+            className="block relative overflow-hidden cursor-pointer"
+            onClick={handleBannerClick}
+            role="button"
+            tabIndex={0}
             aria-label={getCurrentBannerInfo().title}
-            className="block relative overflow-hidden"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                handleBannerClick(e as any);
+              }
+            }}
           >
             <Image
               key={images[index]}
@@ -148,7 +173,7 @@ export default function Banner() {
 
             {/* Gradient overlay for better text readability */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-black/10"></div>
-          </Link>
+          </div>
 
 
           {/* Loading indicator */}

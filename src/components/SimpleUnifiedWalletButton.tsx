@@ -2,10 +2,13 @@
 
 import { useAppKit } from '@reown/appkit/react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
-import { ChevronDownIcon, PersonIcon } from '@radix-ui/react-icons';
+import { useWallet } from '@solana/wallet-adapter-react';
+import { useDisconnect } from 'wagmi';
+import { ChevronDownIcon, PersonIcon, ExitIcon } from '@radix-ui/react-icons';
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
+import toast from 'react-hot-toast';
 import { useUnifiedWallet } from '@/hooks/useUnifiedWallet';
 
 interface SimpleUnifiedWalletButtonProps {
@@ -29,6 +32,8 @@ export default function SimpleUnifiedWalletButton({
   } = useUnifiedWallet();
 
   const { open: openEvmModal } = useAppKit();
+  const { disconnect: disconnectSolana } = useWallet();
+  const { disconnect: disconnectEvm } = useDisconnect();
   const [showModal, setShowModal] = useState(false);
   const [isModalOpening, setIsModalOpening] = useState(false);
 
@@ -43,6 +48,22 @@ export default function SimpleUnifiedWalletButton({
       console.log('Modal was closed or cancelled');
     } finally {
       setIsModalOpening(false);
+    }
+  };
+
+  const handleDisconnect = async () => {
+    try {
+      if (walletType === 'evm') {
+        await disconnectEvm();
+        toast.success('🔌 EVM wallet disconnected');
+      } else if (walletType === 'solana') {
+        await disconnectSolana();
+        toast.success('🔌 Solana wallet disconnected');
+      }
+      setShowModal(false);
+    } catch (error) {
+      console.error('Error disconnecting wallet:', error);
+      toast.error('Failed to disconnect wallet');
     }
   };
 
@@ -169,7 +190,7 @@ export default function SimpleUnifiedWalletButton({
                   )}
 
                   {walletType === 'solana' && (
-                    <div className="w-full rounded-lg bg-gradient-to-r from-[#9945ff]/20 to-[#14f195]/20 border border-[#9945ff]/30 overflow-hidden relative">
+                    <div className="w-full mb-3 rounded-lg bg-gradient-to-r from-[#9945ff]/20 to-[#14f195]/20 border border-[#9945ff]/30 overflow-hidden relative">
                       {/* Solana Icon */}
                       <div className="absolute left-3 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-gradient-to-r from-[#9945ff] to-[#14f195] rounded-lg flex items-center justify-center z-10">
                         <Image
@@ -194,6 +215,24 @@ export default function SimpleUnifiedWalletButton({
                       />
                     </div>
                   )}
+
+                  {/* Disconnect Button */}
+                  <button
+                    onClick={handleDisconnect}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-gradient-to-r from-red-500/20 to-red-600/20 hover:from-red-500/30 hover:to-red-600/30 transition-colors duration-200 text-left group border border-red-500/30"
+                  >
+                    <div className="w-8 h-8 bg-gradient-to-r from-red-500 to-red-600 rounded-lg flex items-center justify-center">
+                      <ExitIcon className="w-4 h-4 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="text-white font-medium group-hover:text-red-400 transition-colors">
+                        Disconnect Wallet
+                      </div>
+                      <div className="text-xs text-gray-400">
+                        Disconnect from {chainName}
+                      </div>
+                    </div>
+                  </button>
                 </>
               ) : (
                 // Not connected state - show connection options
