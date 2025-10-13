@@ -78,7 +78,8 @@ export default function SimpleUnifiedWalletButton({
 
   const handleMainButtonClick = () => {
     if (isConnected) {
-      handleAccountClick();
+      // Directly disconnect when connected
+      handleDisconnect();
     } else {
       setShowModal(true);
     }
@@ -100,12 +101,13 @@ export default function SimpleUnifiedWalletButton({
     return (
       <div className="relative">
         <button
-          className={`py-2 px-4 rounded-xl bg-gradient-to-r from-[#00b8d8] to-[#3b82f6] text-white font-medium hover:from-[#00b8d8]/90 hover:to-[#3b82f6]/90 transition-all duration-200 text-sm tracking-wide flex items-center gap-2 shadow-lg shadow-[#00b8d8]/20 ${className}`}
+          className={`py-2 px-4 rounded-xl bg-gradient-to-r from-red-500 to-red-600 text-white font-medium hover:from-red-500/90 hover:to-red-600/90 transition-all duration-200 text-sm tracking-wide flex items-center gap-2 shadow-lg shadow-red-500/20 ${className}`}
           onClick={handleMainButtonClick}
+          title={`Disconnect from ${chainName}`}
         >
-          <PersonIcon className="w-4 h-4" />
+          <ExitIcon className="w-4 h-4" />
           <div className="flex flex-col items-start">
-            <span className="text-xs opacity-75">{chainName}</span>
+            <span className="text-xs opacity-75">Disconnect</span>
             <span>{formatAddress(address || '')}</span>
           </div>
         </button>
