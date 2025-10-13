@@ -406,11 +406,11 @@ export default function PricingPage() {
       <PublicHeader />
       <div className="relative">
         {/* Web3 aurora background */}
-        <div className="pointer-events-none absolute inset-0 -z-10">
+        {/* <div className="pointer-events-none absolute inset-0 -z-10">
           <div className="absolute -top-24 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-cyan-500/20 blur-3xl" />
           <div className="absolute top-40 right-10 h-72 w-72 rounded-full bg-indigo-500/10 blur-3xl" />
           <div className="absolute bottom-0 left-10 h-64 w-64 rounded-full bg-fuchsia-500/10 blur-3xl" />
-        </div>
+        </div> */}
 
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-10">
           {/* Header row */}
@@ -460,10 +460,10 @@ export default function PricingPage() {
                   <li className="flex items-center gap-3">
                     <span className="w-2 h-2 bg-cyan-400 rounded-full flex-shrink-0"></span>
                     <span>Embedded project video
-                    <span className="text-gray-400 text-xs">
-                      {' '}
-                      — default video provided if none purchased
-                    </span></span>
+                      <span className="text-gray-400 text-xs">
+                        {' '}
+                        — default video provided if none purchased
+                      </span></span>
                   </li>
                   <li className="flex items-center gap-3 text-cyan-400 font-medium"><span className="w-2 h-2 bg-cyan-400 rounded-full flex-shrink-0"></span>Valid for 1 year</li>
                 </ul>
@@ -529,13 +529,13 @@ export default function PricingPage() {
                       onClick={() => router.push(`/dashboard/register-token?redirect=pricing/checkout/nyaltxpro1&method=paypal`)}
                       className="w-full py-3 rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold hover:from-green-700 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105 shadow-lg" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                     >
-                    <span className="inline-flex items-center gap-2">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a9.124 9.124 0 0 1-.077.437c-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287z" />
-                      </svg>
-                      Register Token & Pay $1 with PayPal
-                    </span>
-                  </button>
+                      <span className="inline-flex items-center gap-2">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a9.124 9.124 0 0 1-.077.437c-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287z" />
+                        </svg>
+                        Register Token & Pay $1 with PayPal
+                      </span>
+                    </button>
                     <button
                       onClick={() => router.push(`/dashboard/register-token?redirect=pricing/checkout/nyaltxpro1&method=eth`)}
                       className="w-full py-3 rounded-xl border border-gray-600/50 bg-gray-800/30 text-white font-semibold hover:bg-indigo-600/20 hover:border-indigo-500/50 transition-all duration-300" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}

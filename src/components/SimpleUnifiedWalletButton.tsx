@@ -1,15 +1,15 @@
 'use client';
 
-import { useAppKit } from '@reown/appkit/react';
-import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
-import { useWallet } from '@solana/wallet-adapter-react';
-import { useDisconnect } from 'wagmi';
-import { ChevronDownIcon, PersonIcon, ExitIcon } from '@radix-ui/react-icons';
-import { useState, useEffect, useRef } from 'react';
-import { createPortal } from 'react-dom';
-import Image from 'next/image';
-import toast from 'react-hot-toast';
 import { useUnifiedWallet } from '@/hooks/useUnifiedWallet';
+import { ChevronDownIcon, ExitIcon, PersonIcon } from '@radix-ui/react-icons';
+import { useAppKit } from '@reown/appkit/react';
+import { useWallet } from '@solana/wallet-adapter-react';
+import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+import Image from 'next/image';
+import { useState } from 'react';
+import { createPortal } from 'react-dom';
+import toast from 'react-hot-toast';
+import { useDisconnect } from 'wagmi';
 
 interface SimpleUnifiedWalletButtonProps {
   className?: string;
@@ -41,7 +41,7 @@ export default function SimpleUnifiedWalletButton({
     console.log('Opening EVM modal...');
     setIsModalOpening(true);
     setShowModal(false);
-    
+
     try {
       await openEvmModal();
     } catch (error) {
@@ -133,14 +133,14 @@ export default function SimpleUnifiedWalletButton({
       {showModal && typeof window !== 'undefined' && createPortal(
         <>
           {/* Backdrop */}
-          <div 
-            className="fixed inset-0 bg-black/70 backdrop-blur-sm" 
+          <div
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm"
             style={{ zIndex: 9999998 }}
             onClick={() => setShowModal(false)}
           />
-          
+
           {/* Modal Content */}
-          <div 
+          <div
             className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 bg-black/95 backdrop-blur-xl border border-gray-800/50 rounded-xl shadow-2xl overflow-hidden"
             style={{ zIndex: 9999999 }}
           >
@@ -192,7 +192,10 @@ export default function SimpleUnifiedWalletButton({
                   )}
 
                   {walletType === 'solana' && (
-                    <div className="w-full mb-3 rounded-lg bg-gradient-to-r from-[#9945ff]/20 to-[#14f195]/20 border border-[#9945ff]/30 overflow-hidden relative">
+                    <div className="w-full mb-3 rounded-lg bg-gradient-to-r from-[#9945ff]/20 to-[#14f195]/20 border border-[#9945ff]/30 overflow-hidden relative" onClick={() => {
+
+                      setShowModal(false);
+                    }} >
                       {/* Solana Icon */}
                       <div className="absolute left-3 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-gradient-to-r from-[#9945ff] to-[#14f195] rounded-lg flex items-center justify-center z-10">
                         <Image
