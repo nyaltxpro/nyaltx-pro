@@ -90,10 +90,8 @@ export default function PublicHeader() {
                 <div className="py-1">
                   <DropdownLink href="/about-us" label="About Us" />
                   <DropdownLink href="/contact" label="Contact" />
-                  <DropdownLink href="/team" label="Team" />
-                  <DropdownLink href="/careers" label="Careers" />
-                  <DropdownLink href="/blog" label="Blog" />
-                  <DropdownLink href="/help" label="Help & Support" />
+                  <DropdownLink href="/contact" label="Help & Support" />
+                  <DropdownLink href="/news" label="Our News" />
                 </div>
               </div>
             )}

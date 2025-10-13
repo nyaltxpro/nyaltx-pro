@@ -150,19 +150,19 @@ export default function Sidebar({ isMobileMenuOpen, toggleMobileMenu }: SidebarP
         onMouseLeave={() => isDesktop && setIsExpanded(false)}
       >
         <div className="flex items-center h-16 border-b border-gray-800/30 px-4 bg-gradient-to-r from-transparent via-gray-900/20 to-transparent">
-          <div className="flex items-center">
+          <Link href="/" className="flex items-center group cursor-pointer">
             <motion.div
               animate={{ rotate: isExpanded ? 360 : 0 }}
               transition={{ duration: 0.5 }}
-              className="relative"
+              className="relative group-hover:scale-110 transition-transform duration-300"
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-[#00d4aa] to-[#3b82f6] rounded-full blur-sm opacity-50"></div>
-              <Image src="/logo.png" alt="Logo" width={30} height={30} className="relative z-10" />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#00d4aa] to-[#3b82f6] rounded-full blur-sm opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
+              <Image src="/logo.png" alt="NYALTX Logo - Go to Home" width={30} height={30} className="relative z-10" />
             </motion.div>
             <AnimatePresence>
               {sidebarExpanded && (
                 <motion.span
-                  className="ml-3 whitespace-nowrap font-bold bg-gradient-to-r from-white via-[#00d4aa] to-[#3b82f6] bg-clip-text text-transparent"
+                  className="ml-3 whitespace-nowrap font-bold bg-gradient-to-r from-white via-[#00d4aa] to-[#3b82f6] bg-clip-text text-transparent group-hover:from-[#00d4aa] group-hover:via-white group-hover:to-[#3b82f6] transition-all duration-300"
                   initial={{ opacity: 0, width: 0 }}
                   animate={{ opacity: 1, width: 'auto' }}
                   exit={{ opacity: 0, width: 0 }}
@@ -173,7 +173,7 @@ export default function Sidebar({ isMobileMenuOpen, toggleMobileMenu }: SidebarP
                 </motion.span>
               )}
             </AnimatePresence>
-          </div>
+          </Link>
         </div>
 
         <div className="p-2">

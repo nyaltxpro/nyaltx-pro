@@ -1,15 +1,7 @@
 'use client';
 
 import catalog from '@/data/tokens.json';
-import { useCoinGeckoSearch } from '@/hooks/useCoinGeckoSearch';
 import { LocalCoin, LocalSearchResult, useLocalCoinsSearch } from '@/hooks/useLocalCoinsSearch';
-import { useAppSelector } from '@/store';
-import {
-  selectCoinGeckoSearchResults,
-  selectSearchLoading,
-  selectTrendingCoins,
-  selectTrendingLoading,
-} from '@/store/slices/searchCacheSlice';
 import {
   ContractAddressResult,
   fetchContractAddresses,
@@ -31,125 +23,32 @@ import { commonCryptoSymbols, getCryptoIconUrl } from '../utils/cryptoIcons';
 import { getCryptoName } from '../utils/cryptoNames';
 import TokenAvatar from './TokenAvatar';
 
-interface SearchModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-interface TrendingCoin {
-  id: string;
-  name: string;
-  symbol: string;
-  market_cap_rank: number;
-  thumb: string;
-  large: string;
-  score: number;
-  price_btc: number;
-  contractAddresses?: { [key: string]: string };
-  primaryChain?: string | null;
-  primaryAddress?: string | null;
-}
-
-interface CoinGeckoCoin {
-  id: string;
-  name: string;
-  symbol: string;
-  market_cap_rank: number;
-  thumb: string;
-  large: string;
-  api_symbol: string;
-  contractAddresses: { [key: string]: string };
-  primaryChain: string | null;
-  primaryAddress: string | null;
-}
 
 interface NyaxToken {
   logoId: string;
   name: string | null;
   symbol: string | null;
-  contractAddress: string | null;
-  network: string;
-  logo: string;
-  aboutUs: string | null;
-  url: string;
-  description?: string | null;
-  totalSupply?: string | null;
-  circulatingSupply?: string | null;
-  marketCap?: string | null;
-  price?: string | null;
-  website?: string | null;
-  telegram?: string | null;
-  twitter?: string | null;
-  discord?: string | null;
-  whitepaper?: string | null;
-  email?: string | null;
-  etherscan?: string | null;
-  video?: string | null;
-  additionalInfo?: any;
-}
-
-interface UnifiedToken {
-  id: string;
-  address: string;
-  name: string;
-  symbol: string;
-  logo?: string;
-  chain: string;
-  price?: number;
-  marketCap?: number;
-  liquidity?: number;
-  createdAt?: string;
-  source: 'local' | 'solana';
-  status?: string;
-  // Additional fields
-  volume?: number;
-  volume24h?: number;
-  holders?: number;
-  transactions?: number;
-  socials?: {
-    twitter?: string;
-    website?: string;
-    telegram?: string;
-  };
-}
-
-const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
-  const router = useRouter();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
-  const [localSearchResults, setLocalSearchResults] = useState<LocalSearchResult[]>([]);
-  const [unifiedTokens, setUnifiedTokens] = useState<UnifiedToken[]>([]);
-  const [unifiedTokensLoading, setUnifiedTokensLoading] = useState(false);
-  const modalRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const unifiedSearchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const { tokens: pumpFunTokens, loading: pumpFunLoading, connected: pumpFunConnected } = usePumpFunTokensMoralis({
-    limit: 50,
-    autoRefresh: true,
-    refreshInterval: 60000 // 1 minute
-  });
-  const [nyaxTokens] = useState<NyaxToken[]>(nyaxTokensData.tokens || []);
-
-  // Local coins search hook
+{{ ... }}
   const {
     searchCoins,
     getTrendingCoins: localTrendingCoins,
     isLoading: isLocalSearchLoading,
   } = useLocalCoinsSearch();
 
-  // Redux selectors for cached data
-  const cachedTrendingCoins = useAppSelector(selectTrendingCoins);
-  const cachedCoinGeckoResults = useAppSelector(state =>
-    selectCoinGeckoSearchResults(searchTerm)(state)
-  );
-  const isSearchingCoinGecko = useAppSelector(selectSearchLoading);
-  const isTrendingLoading = useAppSelector(selectTrendingLoading);
 
   // CoinGecko search hook
-  const { searchCoinGecko, getTrendingCoinsWithCache, getCacheKey, cancelSearch } =
-    useCoinGeckoSearch();
+  const {
+    searchCoinGecko,
+    getTrendingCoinsWithCache,
+    getCacheKey,
+    cancelSearch,
+  } = useCoinGeckoSearch();
 
+{{ ... }}
   // Map NYAX network labels to our chain slugs
   const mapNetworkToChain = (network: string | null | undefined): string | undefined => {
     if (!network) return undefined;

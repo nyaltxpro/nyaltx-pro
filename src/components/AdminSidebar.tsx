@@ -12,6 +12,7 @@ import {
   FaGift,
   FaHome,
   FaImage,
+  FaNewspaper,
   FaShoppingCart,
   FaSignOutAlt,
   FaUserFriends
@@ -174,6 +175,7 @@ export default function AdminSidebar({ isMobileMenuOpen, toggleMobileMenu }: Adm
     { icon: <FaChartPie />, text: 'Analytics', href: '/admin/statistics' },
     // { icon: <FaChartLine />, text: 'Stats', href: '/admin/stats' },
     { icon: <FaGift />, text: 'Token Points', href: '/admin/points' },
+    { icon: <FaNewspaper />, text: 'Corporate News', href: '/admin/news' },
     { icon: <FaImage />, text: 'Banners', href: '/admin/banners' },
     // { icon: <FaRocket />, text: 'Campaigns', href: '/admin/campaigns' },
     { icon: <FaFootballBall />, text: 'Footer Settings', href: '/admin/footer-settings' },

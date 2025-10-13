@@ -27,12 +27,26 @@ interface BannerFile {
     url: string;
 }
 
+interface BannerMetadata {
+    bannerName: string;
+    hyperlink: string;
+    title: string;
+    description: string;
+}
+
 function AdminBannersComponent() {
     const [banners, setBanners] = useState<BannerFile[]>([]);
+    const [bannerMetadata, setBannerMetadata] = useState<BannerMetadata[]>([]);
     const [loading, setLoading] = useState(true);
     const [uploading, setUploading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
+    const [editingMetadata, setEditingMetadata] = useState<string | null>(null);
+    const [metadataForm, setMetadataForm] = useState({
+        hyperlink: '',
+        title: '',
+        description: ''
+    });
 
     useEffect(() => {
         loadBanners();
@@ -41,10 +55,19 @@ function AdminBannersComponent() {
     const loadBanners = async () => {
         try {
             setLoading(true);
-            const response = await fetch('/api/admin/banners');
-            if (!response.ok) throw new Error('Failed to load banners');
-            const data = await response.json();
-            setBanners(data.banners || []);
+            
+            // Load banners
+            const bannersResponse = await fetch('/api/admin/banners');
+            if (!bannersResponse.ok) throw new Error('Failed to load banners');
+            const bannersData = await bannersResponse.json();
+            setBanners(bannersData.banners || []);
+
+            // Load banner metadata
+            const metadataResponse = await fetch('/api/admin/banners/metadata');
+            if (metadataResponse.ok) {
+                const metadataData = await metadataResponse.json();
+                setBannerMetadata(metadataData.bannerMetadata || []);
+            }
         } catch (err: any) {
             setError(err.message);
         } finally {
@@ -138,6 +161,47 @@ function AdminBannersComponent() {
         const sizes = ['Bytes', 'KB', 'MB', 'GB'];
         const i = Math.floor(Math.log(bytes) / Math.log(k));
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    };
+
+    const handleEditMetadata = (bannerName: string) => {
+        const existingMetadata = bannerMetadata.find(meta => meta.bannerName === bannerName);
+        setMetadataForm({
+            hyperlink: existingMetadata?.hyperlink || '',
+            title: existingMetadata?.title || '',
+            description: existingMetadata?.description || ''
+        });
+        setEditingMetadata(bannerName);
+    };
+
+    const handleSaveMetadata = async () => {
+        if (!editingMetadata) return;
+
+        try {
+            const response = await fetch('/api/admin/banners/metadata', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    bannerName: editingMetadata,
+                    ...metadataForm
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to save metadata');
+            }
+
+            setSuccess('Banner metadata saved successfully!');
+            setEditingMetadata(null);
+            loadBanners(); // Reload to get updated metadata
+        } catch (err: any) {
+            setError(err.message);
+        }
+    };
+
+    const handleCancelEdit = () => {
+        setEditingMetadata(null);
+        setMetadataForm({ hyperlink: '', title: '', description: '' });
     };
 
     return (
@@ -321,8 +385,25 @@ function AdminBannersComponent() {
                                             </div>
                                         </div>
 
+                                        {/* Banner Metadata */}
+                                        {(() => {
+                                            const metadata = bannerMetadata.find(meta => meta.bannerName === banner.name);
+                                            return metadata ? (
+                                                <div className="mb-3 p-2 bg-gray-800/30 rounded-lg border border-gray-600/20">
+                                                    <div className="text-xs text-gray-400 mb-1">Hyperlink:</div>
+                                                    <div className="text-xs text-blue-300 truncate">{metadata.hyperlink || 'Not set'}</div>
+                                                    {metadata.title && (
+                                                        <>
+                                                            <div className="text-xs text-gray-400 mt-1 mb-1">Title:</div>
+                                                            <div className="text-xs text-white truncate">{metadata.title}</div>
+                                                        </>
+                                                    )}
+                                                </div>
+                                            ) : null;
+                                        })()}
+
                                         {/* Actions */}
-                                        <div className="flex gap-2">
+                                        <div className="flex gap-2 mb-2">
                                             <button
                                                 onClick={() => window.open(banner.url, '_blank')}
                                                 className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-xs font-medium bg-gray-500/20 hover:bg-gray-500/30 text-gray-300 border border-gray-500/30 rounded-lg transition-all duration-200"
@@ -341,6 +422,17 @@ function AdminBannersComponent() {
                                                 <FaCopy className="w-3 h-3" />
                                                 Copy
                                             </button>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={() => handleEditMetadata(banner.name)}
+                                                className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-xs font-medium bg-green-500/20 hover:bg-green-500/30 text-green-300 border border-green-500/30 rounded-lg transition-all duration-200"
+                                                title="Edit hyperlink & metadata"
+                                                style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                                            >
+                                                <FaUpload className="w-3 h-3" />
+                                                Edit
+                                            </button>
                                             <button
                                                 onClick={() => handleDelete(banner.name)}
                                                 className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-xs font-medium bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30 rounded-lg transition-all duration-200"
@@ -358,6 +450,81 @@ function AdminBannersComponent() {
                     )}
                 </div>
             </div>
+
+            {/* Metadata Edit Modal */}
+            {editingMetadata && (
+                <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="bg-gray-800/95 backdrop-blur-xl border border-gray-700/50 rounded-2xl p-6 w-full max-w-md shadow-2xl">
+                        <h3 className="text-xl font-semibold text-white mb-4" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                            Edit Banner Metadata
+                        </h3>
+                        <p className="text-gray-400 text-sm mb-4" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                            Configure hyperlink and display information for: <span className="text-white font-medium">{editingMetadata}</span>
+                        </p>
+
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                    Hyperlink URL
+                                </label>
+                                <input
+                                    type="url"
+                                    value={metadataForm.hyperlink}
+                                    onChange={(e) => setMetadataForm(prev => ({ ...prev, hyperlink: e.target.value }))}
+                                    placeholder="https://example.com or /pricing"
+                                    className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-[#00d4aa]/50 focus:ring-1 focus:ring-[#00d4aa]/20 transition-all duration-200"
+                                    style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                    Display Title
+                                </label>
+                                <input
+                                    type="text"
+                                    value={metadataForm.title}
+                                    onChange={(e) => setMetadataForm(prev => ({ ...prev, title: e.target.value }))}
+                                    placeholder="Welcome to NYALTX"
+                                    className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-[#00d4aa]/50 focus:ring-1 focus:ring-[#00d4aa]/20 transition-all duration-200"
+                                    style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                    Description
+                                </label>
+                                <input
+                                    type="text"
+                                    value={metadataForm.description}
+                                    onChange={(e) => setMetadataForm(prev => ({ ...prev, description: e.target.value }))}
+                                    placeholder="Your crypto trading platform"
+                                    className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-[#00d4aa]/50 focus:ring-1 focus:ring-[#00d4aa]/20 transition-all duration-200"
+                                    style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex gap-3 mt-6">
+                            <button
+                                onClick={handleCancelEdit}
+                                className="flex-1 px-4 py-2 bg-gray-600/50 hover:bg-gray-600/70 text-gray-300 rounded-lg transition-all duration-200 font-medium"
+                                style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleSaveMetadata}
+                                className="flex-1 px-4 py-2 bg-gradient-to-r from-[#00d4aa] to-[#3b82f6] hover:from-[#00d4aa]/80 hover:to-[#3b82f6]/80 text-white rounded-lg transition-all duration-200 font-medium"
+                                style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                            >
+                                Save Metadata
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Usage Examples */}
         </div>

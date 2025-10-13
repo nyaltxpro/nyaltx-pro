@@ -12,8 +12,16 @@ interface BannerFile {
   url: string;
 }
 
+interface BannerMetadata {
+  bannerName: string;
+  hyperlink: string;
+  title: string;
+  description: string;
+}
+
 export default function Banner() {
   const [uploadedBanners, setUploadedBanners] = useState<BannerFile[]>([]);
+  const [bannerMetadata, setBannerMetadata] = useState<BannerMetadata[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fallbackImages = useMemo(() => ['/banner.jpg', '/banner3.jpg'], []);
@@ -28,23 +36,31 @@ export default function Banner() {
 
   const [index, setIndex] = useState(0);
 
-  // Load banners from admin panel
+  // Load banners and metadata from admin panel
   useEffect(() => {
-    const loadBanners = async () => {
+    const loadBannersAndMetadata = async () => {
       try {
-        const response = await fetch('/api/admin/banners');
-        if (response.ok) {
-          const data = await response.json();
-          setUploadedBanners(data.banners || []);
+        // Load banners
+        const bannersResponse = await fetch('/api/admin/banners');
+        if (bannersResponse.ok) {
+          const bannersData = await bannersResponse.json();
+          setUploadedBanners(bannersData.banners || []);
+        }
+
+        // Load banner metadata
+        const metadataResponse = await fetch('/api/admin/banners/metadata');
+        if (metadataResponse.ok) {
+          const metadataData = await metadataResponse.json();
+          setBannerMetadata(metadataData.bannerMetadata || []);
         }
       } catch (error) {
-        console.error('Failed to load banners:', error);
+        console.error('Failed to load banners or metadata:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    loadBanners();
+    loadBannersAndMetadata();
   }, []);
 
   useEffect(() => {
@@ -60,6 +76,40 @@ export default function Banner() {
   const prev = () => setIndex(i => (i - 1 + images.length) % images.length);
   const next = () => setIndex(i => (i + 1) % images.length);
 
+  // Get current banner metadata
+  const getCurrentBannerMetadata = () => {
+    if (uploadedBanners.length > 0 && uploadedBanners[index]) {
+      const currentBanner = uploadedBanners[index];
+      return bannerMetadata.find(meta => meta.bannerName === currentBanner.name);
+    }
+    return null;
+  };
+
+  // Get hyperlink for current banner
+  const getCurrentHyperlink = () => {
+    const metadata = getCurrentBannerMetadata();
+    if (metadata?.hyperlink) {
+      return metadata.hyperlink;
+    }
+    // Fallback to existing logic
+    return index === 1 ? '/pricing' : '/';
+  };
+
+  // Get title and description for current banner
+  const getCurrentBannerInfo = () => {
+    const metadata = getCurrentBannerMetadata();
+    if (metadata) {
+      return {
+        title: metadata.title || (index === 1 ? 'Explore Pricing Plans' : 'Welcome to NYALTX'),
+        description: metadata.description || (index === 1 ? 'Discover our premium features' : 'Your crypto trading platform')
+      };
+    }
+    return {
+      title: index === 1 ? 'Explore Pricing Plans' : 'Welcome to NYALTX',
+      description: index === 1 ? 'Discover our premium features' : 'Your crypto trading platform'
+    };
+  };
+
   return (
     <div className="relative w-full max-w-5xl mx-auto py-4 px-4 select-none">
       {/* Enhanced Banner Container */}
@@ -73,8 +123,8 @@ export default function Banner() {
 
           {/* Banner Link */}
           <Link
-            href={index === 1 ? '/pricing' : '/'}
-            aria-label={index === 1 ? 'Go to Pricing' : 'Go to Home'}
+            href={getCurrentHyperlink()}
+            aria-label={getCurrentBannerInfo().title}
             className="block relative overflow-hidden"
           >
             <Image
@@ -134,10 +184,10 @@ export default function Banner() {
         <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <div className="bg-black/60 backdrop-blur-sm rounded-lg px-3 py-2 border border-gray-700/50">
             <p className="text-white text-sm font-medium">
-              {index === 1 ? 'Explore Pricing Plans' : 'Welcome to NYALTX'}
+              {getCurrentBannerInfo().title}
             </p>
             <p className="text-gray-300 text-xs">
-              {index === 1 ? 'Discover our premium features' : 'Your crypto trading platform'}
+              {getCurrentBannerInfo().description}
             </p>
           </div>
 

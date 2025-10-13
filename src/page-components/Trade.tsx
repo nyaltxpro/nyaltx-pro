@@ -18,6 +18,9 @@ import { getCryptoIconUrl, getCryptoIconUrlWithFallback } from '@/utils/cryptoIc
 import { getCryptoName } from '@/utils/cryptoNames';
 import { geckoTerminalAPI } from '@/utils/geckoTerminalApi';
 import { fetchMoralisTokenData, fetchMoralisTokenPrice, isMoralisSupportedChain } from '@/utils/moralisApi';
+import MoralisTradingViewChart from '@/components/MoralisTradingViewChart';
+import TokenInfoWidget from '@/components/TokenInfoWidget';
+import useMoralisTokenMetadata from '@/hooks/useMoralisTokenMetadata';
 import { fetchNYAXPrice, isNYAXToken } from '@/utils/nyaxPriceApi';
 import { useSearchParams } from 'next/navigation';
 import React, { Suspense, useEffect, useState } from 'react';
@@ -193,6 +196,14 @@ function TradingViewWithParams({
     const [adminSocialLinksEnabled, setAdminSocialLinksEnabled] = useState<boolean>(false);
     const [isRegisteredToken, setIsRegisteredToken] = useState<boolean>(false);
     const [customVideoUrl, setCustomVideoUrl] = useState<string | null>(null);
+    const [showMoralisChart, setShowMoralisChart] = useState<boolean>(false);
+    const [chartType, setChartType] = useState<'dexscreener' | 'moralis'>('dexscreener');
+
+    // Use Moralis token metadata hook
+    const { metadata: moralisMetadata, loading: metadataLoading, error: metadataError } = useMoralisTokenMetadata(
+        addressParam || '',
+        chainParam === 'solana' ? 'mainnet' : chainParam || 'mainnet'
+    );
 
     // Fetch token social links and admin settings with contract address fallback
     useEffect(() => {
@@ -1247,15 +1258,62 @@ function TradingViewWithParams({
                             })()}
                         </div>
 
+                        {/* Chart Type Toggle */}
+                        <div className="flex items-center gap-2 mb-4">
+                            <span className="text-sm text-gray-400">Chart:</span>
+                            <button
+                                onClick={() => setChartType('dexscreener')}
+                                className={`px-3 py-1 text-xs rounded-full transition-colors ${
+                                    chartType === 'dexscreener'
+                                        ? 'bg-blue-500 text-white'
+                                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                                }`}
+                            >
+                                DexScreener
+                            </button>
+                            <button
+                                onClick={() => setChartType('moralis')}
+                                className={`px-3 py-1 text-xs rounded-full transition-colors ${
+                                    chartType === 'moralis'
+                                        ? 'bg-purple-500 text-white'
+                                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                                }`}
+                                disabled={!addressParam || chainParam !== 'solana'}
+                                title={!addressParam || chainParam !== 'solana' ? 'Moralis charts only available for Solana tokens with contract address' : ''}
+                            >
+                                Moralis TradingView
+                            </button>
+                        </div>
+
                         {/* Chart Container */}
                         <div className="w-full h-[500px] rounded-lg relative">
-                            {/* <AdvancedRealTimeChart {...chartProps} /> */}
-                            <iframe
-                                src={dexEmbedUrl}
-                                width="100%"
-                                height="500"
-                                style={{ border: 0, backgroundColor: 'transparent' }}
-                            />
+                            {chartType === 'moralis' && addressParam && chainParam === 'solana' ? (
+                                <MoralisTradingViewChart
+                                    tokenAddress={addressParam}
+                                    chainId="solana"
+                                    width="100%"
+                                    height="500px"
+                                    defaultInterval="1D"
+                                    theme="moralis"
+                                    backgroundColor="#071321"
+                                    gridColor="#0d2035"
+                                    textColor="#68738D"
+                                    candleUpColor="#4CE666"
+                                    candleDownColor="#E64C4C"
+                                    hideLeftToolbar={false}
+                                    hideTopToolbar={false}
+                                    hideBottomToolbar={false}
+                                    className="rounded-lg overflow-hidden"
+                                />
+                            ) : (
+                                <iframe
+                                    src={dexEmbedUrl}
+                                    width="100%"
+                                    height="500"
+                                    style={{ border: 0, backgroundColor: 'transparent' }}
+                                    className="rounded-lg"
+                                />
+                            )}
                         </div>
                     </div>
 
