@@ -24,6 +24,24 @@ interface NewsArticleProps {
 
 function NewsArticle({ article }: NewsArticleProps) {
   const [copied, setCopied] = useState(false);
+  const [imageError, setImageError] = useState(false);
+
+  // Helper function to convert Pinata gateway URLs to ipfs.io
+  const convertToWorkingIPFSUrl = (url: string): string => {
+    if (url && url.includes('gateway.pinata.cloud/ipfs/')) {
+      const hash = url.split('gateway.pinata.cloud/ipfs/')[1];
+      return `https://ipfs.io/ipfs/${hash}`;
+    }
+    return url;
+  };
+
+  // Convert featured image URL if it's a Pinata gateway URL
+  const workingImageUrl = article.featuredImage ? convertToWorkingIPFSUrl(article.featuredImage) : '';
+
+  // Debug logging
+  console.log('Article data:', article);
+  console.log('Original featured image URL:', article.featuredImage);
+  console.log('Working featured image URL:', workingImageUrl);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -153,22 +171,47 @@ function NewsArticle({ article }: NewsArticleProps) {
         </header>
 
         {/* Featured Image */}
-        {article.featuredImage && (
-          <div className="relative mb-8 rounded-2xl overflow-hidden w-full" style={{ minHeight: '300px', maxHeight: '60vh' }}>
-            <Image
-              src={article.featuredImage}
-              alt={article.title}
-              width={800}
-              height={400}
-              className="w-full h-full object-cover"
-              style={{ 
-                minWidth: '400px', 
-                minHeight: '300px',
-                maxHeight: '60vh',
-                objectFit: 'cover',
-                objectPosition: 'center'
-              }}
-            />
+        {workingImageUrl && (
+          <div className="featured-image-container relative mb-8 rounded-2xl overflow-hidden w-full" style={{ minHeight: '300px', maxHeight: '60vh' }}>
+            {!imageError ? (
+              <Image
+                src={workingImageUrl}
+                alt={article.title}
+                width={800}
+                height={400}
+                className="w-full h-full object-cover"
+                style={{ 
+                  minWidth: '400px', 
+                  minHeight: '300px',
+                  maxHeight: '60vh',
+                  objectFit: 'cover',
+                  objectPosition: 'center'
+                }}
+                unoptimized={workingImageUrl.includes('ipfs.io')}
+                onError={(e) => {
+                  console.error('Next.js Image failed to load:', workingImageUrl);
+                  setImageError(true);
+                }}
+              />
+            ) : (
+              <img
+                src={workingImageUrl}
+                alt={article.title}
+                className="w-full h-full object-cover"
+                style={{ 
+                  minWidth: '400px', 
+                  minHeight: '300px',
+                  maxHeight: '60vh',
+                  objectFit: 'cover',
+                  objectPosition: 'center'
+                }}
+                onError={(e) => {
+                  console.error('Fallback img also failed to load:', workingImageUrl);
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                }}
+              />
+            )}
           </div>
         )}
 
@@ -193,10 +236,26 @@ function NewsArticle({ article }: NewsArticleProps) {
             object-position: center !important;
             border-radius: 12px !important;
             margin: 24px 0 !important;
+            display: block !important;
+          }
+          
+          .featured-image-container img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            object-position: center !important;
+            min-width: 400px !important;
+            min-height: 300px !important;
+            max-height: 60vh !important;
           }
           
           @media (max-width: 640px) {
             .article-content :global(img) {
+              min-width: 100% !important;
+              min-height: 200px !important;
+            }
+            
+            .featured-image-container img {
               min-width: 100% !important;
               min-height: 200px !important;
             }

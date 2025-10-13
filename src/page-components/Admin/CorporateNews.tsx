@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
-import { FaPlus, FaEdit, FaTrash, FaEye, FaNewspaper, FaClock, FaUser, FaTags, FaUpload, FaSpinner } from 'react-icons/fa';
+import { FaClock, FaEdit, FaEye, FaNewspaper, FaPlus, FaSpinner, FaTags, FaTrash, FaUpload, FaUser } from 'react-icons/fa';
 
 const AdminCorporateNewsClient = dynamic(() => Promise.resolve(AdminCorporateNewsComponent), {
     ssr: false,
@@ -51,7 +51,7 @@ function AdminCorporateNewsComponent() {
         tags: '',
         author: 'NYALTX Team'
     });
-    
+
     // IPFS upload state
     const [isUploadingToIPFS, setIsUploadingToIPFS] = useState(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -114,7 +114,7 @@ function AdminCorporateNewsComponent() {
     const handleSaveNews = async () => {
         try {
             const tagsArray = newsForm.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
-            
+
             const newsData = {
                 ...newsForm,
                 tags: tagsArray,
@@ -187,20 +187,20 @@ function AdminCorporateNewsComponent() {
                 setError('Please select a valid image file (JPEG, PNG, GIF, or WebP)');
                 return;
             }
-            
+
             // Validate file size (max 10MB)
             if (file.size > 10 * 1024 * 1024) {
                 setError('File size must be less than 10MB');
                 return;
             }
-            
+
             // Validate image dimensions
             const img = new Image();
             const objectUrl = URL.createObjectURL(file);
-            
+
             img.onload = () => {
                 URL.revokeObjectURL(objectUrl);
-                
+
                 if (img.width < 400 || img.height < 300) {
                     setError(`Image dimensions must be at least 400x300 pixels. Current image is ${img.width}x${img.height} pixels.`);
                     // Clear the file input
@@ -208,11 +208,11 @@ function AdminCorporateNewsComponent() {
                     if (fileInput) fileInput.value = '';
                     return;
                 }
-                
+
                 setSelectedFile(file);
                 setError(null);
             };
-            
+
             img.onerror = () => {
                 URL.revokeObjectURL(objectUrl);
                 setError('Failed to load image. Please select a valid image file.');
@@ -220,7 +220,7 @@ function AdminCorporateNewsComponent() {
                 const fileInput = document.getElementById('ipfs-file-input') as HTMLInputElement;
                 if (fileInput) fileInput.value = '';
             };
-            
+
             img.src = objectUrl;
         }
     };
@@ -250,16 +250,16 @@ function AdminCorporateNewsComponent() {
 
             const data = await response.json();
             const ipfsUrl = `https://ipfs.io/ipfs/${data.hash}`;
-            
+
             // Update the featured image field with IPFS URL
             setNewsForm(prev => ({ ...prev, featuredImage: ipfsUrl }));
             setSuccess(`Image uploaded to IPFS successfully! Hash: ${data.hash}`);
             setSelectedFile(null);
-            
+
             // Clear the file input
             const fileInput = document.getElementById('ipfs-file-input') as HTMLInputElement;
             if (fileInput) fileInput.value = '';
-            
+
         } catch (err: any) {
             setError(err.message);
         } finally {
@@ -348,7 +348,7 @@ function AdminCorporateNewsComponent() {
                         <FaNewspaper className="w-5 h-5 text-blue-400" />
                         {editingNews ? 'Edit News Article' : 'Create New News Article'}
                     </h3>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-300 mb-2">Title *</label>
@@ -397,7 +397,7 @@ function AdminCorporateNewsComponent() {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                         <div className="md:col-span-2">
                             <label className="block text-sm font-medium text-gray-300 mb-2">Featured Image</label>
-                            
+
                             {/* IPFS Upload Section */}
                             <div className="mb-3 p-4 bg-gray-700/30 border border-gray-600/30 rounded-lg">
                                 <div className="flex items-center gap-3 mb-2">
@@ -407,7 +407,7 @@ function AdminCorporateNewsComponent() {
                                 <div className="mb-3 text-xs text-gray-400">
                                     Requirements: Min 400x300 pixels, Max 10MB, JPEG/PNG/GIF/WebP only
                                 </div>
-                                
+
                                 <div className="flex items-center gap-3">
                                     <input
                                         id="ipfs-file-input"
@@ -423,13 +423,13 @@ function AdminCorporateNewsComponent() {
                                         <FaUpload className="w-4 h-4" />
                                         Choose File
                                     </label>
-                                    
+
                                     {selectedFile && (
                                         <span className="text-sm text-gray-400 flex-1 truncate">
                                             {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
                                         </span>
                                     )}
-                                    
+
                                     <button
                                         type="button"
                                         onClick={uploadToIPFS}
@@ -450,7 +450,7 @@ function AdminCorporateNewsComponent() {
                                     </button>
                                 </div>
                             </div>
-                            
+
                             {/* Manual URL Input */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-300 mb-2">Or enter image URL manually</label>
@@ -478,7 +478,7 @@ function AdminCorporateNewsComponent() {
                                     )}
                                 </div>
                             </div>
-                            
+
                             {/* Image Preview */}
                             {newsForm.featuredImage && (
                                 <div className="mt-3">
@@ -572,17 +572,16 @@ function AdminCorporateNewsComponent() {
                                         <div className="flex-1">
                                             <div className="flex items-center gap-2 mb-2">
                                                 <h4 className="font-medium text-white text-lg">{article.title}</h4>
-                                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                                    article.status === 'published' 
+                                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${article.status === 'published'
                                                         ? 'bg-green-500/10 text-green-300 border border-green-500/20'
                                                         : 'bg-yellow-500/10 text-yellow-300 border border-yellow-500/20'
-                                                }`}>
+                                                    }`}>
                                                     {article.status}
                                                 </span>
                                             </div>
-                                            
+
                                             <p className="text-gray-400 text-sm mb-3 line-clamp-2">{article.excerpt}</p>
-                                            
+
                                             <div className="flex items-center gap-4 text-xs text-gray-500">
                                                 <div className="flex items-center gap-1">
                                                     <FaUser className="w-3 h-3" />
@@ -605,7 +604,7 @@ function AdminCorporateNewsComponent() {
                                                 )}
                                             </div>
                                         </div>
-                                        
+
                                         <div className="flex gap-2 ml-4">
                                             {article.status === 'published' && (
                                                 <button
