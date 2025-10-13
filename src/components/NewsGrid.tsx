@@ -35,6 +35,15 @@ function NewsGrid() {
   const [pagination, setPagination] = useState<NewsResponse['pagination'] | null>(null);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
 
+  // Helper function to convert Pinata gateway URLs to ipfs.io
+  const convertToWorkingIPFSUrl = (url: string): string => {
+    if (url && url.includes('gateway.pinata.cloud/ipfs/')) {
+      const hash = url.split('gateway.pinata.cloud/ipfs/')[1];
+      return `https://ipfs.io/ipfs/${hash}`;
+    }
+    return url;
+  };
+
   useEffect(() => {
     loadNews();
   }, [currentPage, selectedTag]);
@@ -191,10 +200,16 @@ function NewsGrid() {
             <div className="relative h-48 overflow-hidden bg-gray-800/50">
               {article.featuredImage ? (
                 <Image
-                  src={article.featuredImage}
+                  src={convertToWorkingIPFSUrl(article.featuredImage)}
                   alt={article.title}
                   fill
                   className="object-cover transition-transform duration-500 group-hover:scale-110"
+                  unoptimized={convertToWorkingIPFSUrl(article.featuredImage).includes('ipfs.io')}
+                  onError={(e) => {
+                    console.error('News card image failed to load:', convertToWorkingIPFSUrl(article.featuredImage));
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                  }}
                 />
               ) : (
                 <div className="w-full h-full bg-gradient-to-br from-cyan-500/20 to-indigo-500/20 flex items-center justify-center">
