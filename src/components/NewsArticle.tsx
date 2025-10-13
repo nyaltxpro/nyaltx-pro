@@ -154,13 +154,20 @@ function NewsArticle({ article }: NewsArticleProps) {
 
         {/* Featured Image */}
         {article.featuredImage && (
-          <div className="relative mb-8 rounded-2xl overflow-hidden">
+          <div className="relative mb-8 rounded-2xl overflow-hidden w-full" style={{ minHeight: '300px', maxHeight: '60vh' }}>
             <Image
               src={article.featuredImage}
               alt={article.title}
               width={800}
               height={400}
-              className="w-full h-auto object-cover"
+              className="w-full h-full object-cover"
+              style={{ 
+                minWidth: '400px', 
+                minHeight: '300px',
+                maxHeight: '60vh',
+                objectFit: 'cover',
+                objectPosition: 'center'
+              }}
             />
           </div>
         )}
@@ -168,12 +175,33 @@ function NewsArticle({ article }: NewsArticleProps) {
         {/* Article Content */}
         <article className="prose prose-lg prose-invert max-w-none">
           <div 
-            className="text-gray-300 leading-relaxed space-y-6"
+            className="text-gray-300 leading-relaxed space-y-6 article-content"
             dangerouslySetInnerHTML={{ 
               __html: article.content.replace(/\n/g, '<br />') 
             }}
           />
         </article>
+
+        {/* Custom styles for article images */}
+        <style jsx>{`
+          .article-content :global(img) {
+            min-width: 400px !important;
+            min-height: 300px !important;
+            width: 100% !important;
+            height: auto !important;
+            object-fit: cover !important;
+            object-position: center !important;
+            border-radius: 12px !important;
+            margin: 24px 0 !important;
+          }
+          
+          @media (max-width: 640px) {
+            .article-content :global(img) {
+              min-width: 100% !important;
+              min-height: 200px !important;
+            }
+          }
+        `}</style>
 
         {/* Article Footer */}
         <footer className="mt-12 pt-8 border-t border-gray-800">

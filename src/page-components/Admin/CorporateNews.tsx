@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
-import { FaPlus, FaEdit, FaTrash, FaEye, FaNewspaper, FaClock, FaUser, FaTags } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaTrash, FaEye, FaNewspaper, FaClock, FaUser, FaTags, FaUpload, FaSpinner } from 'react-icons/fa';
 
 const AdminCorporateNewsClient = dynamic(() => Promise.resolve(AdminCorporateNewsComponent), {
     ssr: false,
@@ -51,6 +51,10 @@ function AdminCorporateNewsComponent() {
         tags: '',
         author: 'NYALTX Team'
     });
+    
+    // IPFS upload state
+    const [isUploadingToIPFS, setIsUploadingToIPFS] = useState(false);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
     useEffect(() => {
         loadNews();
@@ -164,9 +168,101 @@ function AdminCorporateNewsComponent() {
         }
     };
 
+    // IPFS upload function
+    const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            // Validate file type
+            const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+            if (!validTypes.includes(file.type)) {
+                setError('Please select a valid image file (JPEG, PNG, GIF, or WebP)');
+                return;
+            }
+            
+            // Validate file size (max 10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                setError('File size must be less than 10MB');
+                return;
+            }
+            
+            // Validate image dimensions
+            const img = new Image();
+            const objectUrl = URL.createObjectURL(file);
+            
+            img.onload = () => {
+                URL.revokeObjectURL(objectUrl);
+                
+                if (img.width < 400 || img.height < 300) {
+                    setError(`Image dimensions must be at least 400x300 pixels. Current image is ${img.width}x${img.height} pixels.`);
+                    // Clear the file input
+                    const fileInput = document.getElementById('ipfs-file-input') as HTMLInputElement;
+                    if (fileInput) fileInput.value = '';
+                    return;
+                }
+                
+                setSelectedFile(file);
+                setError(null);
+            };
+            
+            img.onerror = () => {
+                URL.revokeObjectURL(objectUrl);
+                setError('Failed to load image. Please select a valid image file.');
+                // Clear the file input
+                const fileInput = document.getElementById('ipfs-file-input') as HTMLInputElement;
+                if (fileInput) fileInput.value = '';
+            };
+            
+            img.src = objectUrl;
+        }
+    };
+
+    const uploadToIPFS = async () => {
+        if (!selectedFile) {
+            setError('Please select a file first');
+            return;
+        }
+
+        setIsUploadingToIPFS(true);
+        setError(null);
+
+        try {
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+
+            const response = await fetch('/api/upload/ipfs', {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to upload to IPFS');
+            }
+
+            const data = await response.json();
+            const ipfsUrl = `https://gateway.pinata.cloud/ipfs/${data.hash}`;
+            
+            // Update the featured image field with IPFS URL
+            setNewsForm(prev => ({ ...prev, featuredImage: ipfsUrl }));
+            setSuccess(`Image uploaded to IPFS successfully! Hash: ${data.hash}`);
+            setSelectedFile(null);
+            
+            // Clear the file input
+            const fileInput = document.getElementById('ipfs-file-input') as HTMLInputElement;
+            if (fileInput) fileInput.value = '';
+            
+        } catch (err: any) {
+            setError(err.message);
+        } finally {
+            setIsUploadingToIPFS(false);
+        }
+    };
+
     const handleCancel = () => {
         setIsCreating(false);
         setEditingNews(null);
+        setSelectedFile(null);
+        setIsUploadingToIPFS(false);
         setNewsForm({
             title: '',
             content: '',
@@ -290,15 +386,91 @@ function AdminCorporateNewsComponent() {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">Featured Image URL</label>
-                            <input
-                                type="url"
-                                value={newsForm.featuredImage}
-                                onChange={(e) => setNewsForm(prev => ({ ...prev, featuredImage: e.target.value }))}
-                                className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500/50"
-                                placeholder="https://example.com/image.jpg"
-                            />
+                        <div className="md:col-span-2">
+                            <label className="block text-sm font-medium text-gray-300 mb-2">Featured Image</label>
+                            
+                            {/* IPFS Upload Section */}
+                            <div className="mb-3 p-4 bg-gray-700/30 border border-gray-600/30 rounded-lg">
+                                <div className="flex items-center gap-3 mb-2">
+                                    <span className="text-sm font-medium text-cyan-300">Upload to IPFS</span>
+                                    <div className="flex-1 h-px bg-gray-600/50"></div>
+                                </div>
+                                <div className="mb-3 text-xs text-gray-400">
+                                    Requirements: Min 400x300 pixels, Max 10MB, JPEG/PNG/GIF/WebP only
+                                </div>
+                                
+                                <div className="flex items-center gap-3">
+                                    <input
+                                        id="ipfs-file-input"
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleFileSelect}
+                                        className="hidden"
+                                    />
+                                    <label
+                                        htmlFor="ipfs-file-input"
+                                        className="flex items-center gap-2 px-3 py-2 bg-gray-600/50 hover:bg-gray-600/70 text-gray-300 rounded-lg cursor-pointer transition-all duration-200 text-sm"
+                                    >
+                                        <FaUpload className="w-4 h-4" />
+                                        Choose File
+                                    </label>
+                                    
+                                    {selectedFile && (
+                                        <span className="text-sm text-gray-400 flex-1 truncate">
+                                            {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
+                                        </span>
+                                    )}
+                                    
+                                    <button
+                                        type="button"
+                                        onClick={uploadToIPFS}
+                                        disabled={!selectedFile || isUploadingToIPFS}
+                                        className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed text-white rounded-lg transition-all duration-200 text-sm font-medium"
+                                    >
+                                        {isUploadingToIPFS ? (
+                                            <>
+                                                <FaSpinner className="w-4 h-4 animate-spin" />
+                                                Uploading...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <FaUpload className="w-4 h-4" />
+                                                Upload to IPFS
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            {/* Manual URL Input */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">Or enter image URL manually</label>
+                                <input
+                                    type="url"
+                                    value={newsForm.featuredImage}
+                                    onChange={(e) => setNewsForm(prev => ({ ...prev, featuredImage: e.target.value }))}
+                                    className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500/50"
+                                    placeholder="https://example.com/image.jpg or IPFS URL"
+                                />
+                            </div>
+                            
+                            {/* Image Preview */}
+                            {newsForm.featuredImage && (
+                                <div className="mt-3">
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">Preview</label>
+                                    <div className="relative w-full h-32 bg-gray-800/50 rounded-lg overflow-hidden">
+                                        <img
+                                            src={newsForm.featuredImage}
+                                            alt="Featured image preview"
+                                            className="w-full h-full object-cover"
+                                            onError={(e) => {
+                                                const target = e.target as HTMLImageElement;
+                                                target.style.display = 'none';
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                            )}
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-300 mb-2">Status</label>
