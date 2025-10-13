@@ -7,7 +7,6 @@ import {
   HomeIcon,
   ImageIcon,
   ListBulletIcon,
-  LockClosedIcon,
   MagnifyingGlassIcon,
   PersonIcon,
   PlayIcon,
@@ -16,8 +15,7 @@ import {
   RocketIcon,
   StarIcon,
   TargetIcon,
-  TokensIcon,
-  UpdateIcon
+  TokensIcon
 } from '@radix-ui/react-icons';
 import { AnimatePresence, motion } from 'framer-motion';
 import Image from 'next/image';
@@ -111,8 +109,8 @@ export default function Sidebar({ isMobileMenuOpen, toggleMobileMenu }: SidebarP
     { icon: <ListBulletIcon />, text: 'Leaderboard', href: '/dashboard/leaderboard' },
     { icon: <TokensIcon />, text: 'Create Token', href: '/dashboard/create-token' },
     { icon: <PlusIcon />, text: 'Register Token', href: '/pricing' },
-    { icon: <LockClosedIcon />, text: 'Connect', href: '/dashboard/connect' },
-    { icon: <UpdateIcon />, text: 'Swap', href: '/dashboard/swap' },
+    // { icon: <LockClosedIcon />, text: 'Connect', href: '/dashboard/connect' },
+    // { icon: <UpdateIcon />, text: 'Swap', href: '/dashboard/swap' },
   ];
 
   const extraItems = [
