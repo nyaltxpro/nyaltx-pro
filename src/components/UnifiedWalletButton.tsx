@@ -1,13 +1,13 @@
 'use client';
 
+import { useUnifiedWallet } from '@/hooks/useUnifiedWallet';
+import { ChevronDownIcon, ExitIcon, PersonIcon } from '@radix-ui/react-icons';
 import { useAppKit } from '@reown/appkit/react';
-import { useWalletModal } from '@solana/wallet-adapter-react-ui';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { useDisconnect } from 'wagmi';
-import { ChevronDownIcon, PersonIcon, ExitIcon } from '@radix-ui/react-icons';
+import { useWalletModal } from '@solana/wallet-adapter-react-ui';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { useUnifiedWallet } from '@/hooks/useUnifiedWallet';
+import { useDisconnect } from 'wagmi';
 
 interface UnifiedWalletButtonProps {
   className?: string;
@@ -18,23 +18,23 @@ export default function UnifiedWalletButton({
   className = '',
   onConnect,
 }: UnifiedWalletButtonProps) {
-  const { 
-    isConnected, 
-    isConnecting, 
-    address, 
-    walletType, 
+  const {
+    isConnected,
+    isConnecting,
+    address,
+    walletType,
     walletName,
     chainName,
     formatAddress,
     isEvmConnected,
-    isSolanaConnected 
+    isSolanaConnected
   } = useUnifiedWallet();
-  
+
   const { open: openEvmModal } = useAppKit();
   const { setVisible: setSolanaModalVisible } = useWalletModal();
   const { disconnect: disconnectEvm } = useDisconnect();
   const { disconnect: disconnectSolana } = useWallet();
-  
+
   const [showDropdown, setShowDropdown] = useState(false);
   const [displayAddress, setDisplayAddress] = useState<string>('');
 
@@ -135,18 +135,18 @@ export default function UnifiedWalletButton({
         {showDropdown && (
           <>
             {/* Backdrop */}
-            <div 
-              className="fixed inset-0 unified-wallet-backdrop" 
+            <div
+              className="fixed inset-0 unified-wallet-backdrop"
               onClick={() => setShowDropdown(false)}
             />
-            
+
             {/* Dropdown Content */}
             <div className="absolute top-full right-0 mt-2 w-64 bg-black/95 backdrop-blur-xl border border-gray-800/50 rounded-xl shadow-2xl overflow-hidden" style={{ zIndex: 10002 }}>
               <div className="p-2">
                 <div className="text-xs text-gray-400 px-3 py-2 font-medium">
                   Connected as {walletName}
                 </div>
-                
+
                 {/* Account Details Option */}
                 <button
                   onClick={handleAccountClick}
@@ -212,18 +212,18 @@ export default function UnifiedWalletButton({
       {showDropdown && (
         <>
           {/* Backdrop */}
-          <div 
-            className="fixed inset-0 unified-wallet-backdrop" 
+          <div
+            className="fixed inset-0 unified-wallet-backdrop"
             onClick={() => setShowDropdown(false)}
           />
-          
+
           {/* Dropdown Content */}
           <div className="absolute top-full right-0 mt-2 w-64 bg-black/95 backdrop-blur-xl border border-gray-800/50 rounded-xl shadow-2xl overflow-hidden" style={{ zIndex: 10002 }}>
             <div className="p-2">
               <div className="text-xs text-gray-400 px-3 py-2 font-medium">
                 Choose Wallet Type
               </div>
-              
+
               {/* EVM Wallet Option */}
               <button
                 onClick={handleConnectEvm}

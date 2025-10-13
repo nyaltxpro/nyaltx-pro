@@ -51,6 +51,18 @@ export default function SimpleUnifiedWalletButton({
     }
   };
 
+  const handleConnectSolana = async () => {
+    console.log('Opening Solana modal...');
+    setIsModalOpening(true);
+    setShowModal(false);
+
+    try {
+      setIsModalOpening(false);
+    } catch (error) {
+      console.log('Modal was closed or cancelled');
+    }
+  };
+
   const handleDisconnect = async () => {
     try {
       if (walletType === 'evm') {
@@ -193,7 +205,6 @@ export default function SimpleUnifiedWalletButton({
 
                   {walletType === 'solana' && (
                     <div className="w-full mb-3 rounded-lg bg-gradient-to-r from-[#9945ff]/20 to-[#14f195]/20 border border-[#9945ff]/30 overflow-hidden relative" onClick={() => {
-
                       setShowModal(false);
                     }} >
                       {/* Solana Icon */}
@@ -279,7 +290,7 @@ export default function SimpleUnifiedWalletButton({
                   {/* Solana Wallet Option */}
                   <div>
                     <div className="text-xs text-gray-400 mb-2">Solana Wallets</div>
-                    <div className="w-full rounded-lg bg-gradient-to-r from-[#9945ff]/20 to-[#14f195]/20 border border-[#9945ff]/30 overflow-hidden relative">
+                    <div className="w-full rounded-lg bg-gradient-to-r from-[#9945ff]/20 to-[#14f195]/20 border border-[#9945ff]/30 overflow-hidden relative" onClick={handleConnectSolana} >
                       {/* Solana Icon */}
                       <div className="absolute left-3 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-gradient-to-r from-[#9945ff] to-[#14f195] rounded-lg flex items-center justify-center z-10">
                         <Image
