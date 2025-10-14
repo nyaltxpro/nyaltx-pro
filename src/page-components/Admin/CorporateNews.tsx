@@ -201,8 +201,8 @@ function AdminCorporateNewsComponent() {
             img.onload = () => {
                 URL.revokeObjectURL(objectUrl);
 
-                if (img.width < 400 || img.height < 300) {
-                    setError(`Image dimensions must be at least 400x300 pixels. Current image is ${img.width}x${img.height} pixels.`);
+                if (img.width < 400 || img.height < 200) {
+                    setError(`Image dimensions must be at least 400x200 pixels. Current image is ${img.width}x${img.height} pixels.`);
                     // Clear the file input
                     const fileInput = document.getElementById('ipfs-file-input') as HTMLInputElement;
                     if (fileInput) fileInput.value = '';
@@ -573,8 +573,8 @@ function AdminCorporateNewsComponent() {
                                             <div className="flex items-center gap-2 mb-2">
                                                 <h4 className="font-medium text-white text-lg">{article.title}</h4>
                                                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${article.status === 'published'
-                                                        ? 'bg-green-500/10 text-green-300 border border-green-500/20'
-                                                        : 'bg-yellow-500/10 text-yellow-300 border border-yellow-500/20'
+                                                    ? 'bg-green-500/10 text-green-300 border border-green-500/20'
+                                                    : 'bg-yellow-500/10 text-yellow-300 border border-yellow-500/20'
                                                     }`}>
                                                     {article.status}
                                                 </span>
