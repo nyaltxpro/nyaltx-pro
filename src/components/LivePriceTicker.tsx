@@ -21,34 +21,45 @@ interface PumpFunToken {
   bondingCurveProgress: number;
 }
 
-// CoinGecko Market Mover Interface
-interface MarketMover {
-  id: string;
-  symbol: string;
-  name: string;
-  image: string;
-  current_price: number;
-  price_change_percentage_24h: number;
-  market_cap_rank: number;
-  market_cap: number;
+// DexScreener Token Profile Interface
+interface DexScreenerToken {
+  url: string;
+  chainId: string;
+  tokenAddress: string;
+  icon: string;
+  header?: string;
+  openGraph?: string;
+  description?: string;
+  links?: Array<{ type?: string; label?: string; url: string }>;
+  cto: boolean;
+  // Enhanced insights data
+  insights?: {
+    priceUsd?: string;
+    priceChange24h?: number;
+    volume24h?: number;
+    liquidity?: number;
+    txns24h?: number;
+    symbol?: string;
+    name?: string;
+  };
 }
 
 const LivePriceTicker: React.FC = () => {
   const router = useRouter();
   const [tokens, setTokens] = useState<PumpFunToken[]>([]);
-  const [marketMovers, setMarketMovers] = useState<MarketMover[]>([]);
+  const [dexScreenerTokens, setDexScreenerTokens] = useState<DexScreenerToken[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [marketMoversLoading, setMarketMoversLoading] = useState<boolean>(true);
+  const [dexScreenerLoading, setDexScreenerLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Fetch CoinGecko market movers (top gainers and losers)
-  const fetchMarketMovers = async () => {
+  // Fetch DexScreener latest token profiles
+  const fetchDexScreenerTokens = async () => {
     try {
-      setMarketMoversLoading(true);
+      setDexScreenerLoading(true);
       
-      const response = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h', {
+      const response = await fetch('https://api.dexscreener.com/token-profiles/latest/v1', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -56,42 +67,59 @@ const LivePriceTicker: React.FC = () => {
       });
 
       if (!response.ok) {
-        throw new Error(`CoinGecko API error: ${response.status}`);
+        throw new Error(`DexScreener API error: ${response.status}`);
       }
 
-      const data: MarketMover[] = await response.json();
+      const data: DexScreenerToken[] = await response.json();
       
-      if (Array.isArray(data)) {
-        // Filter out coins with null price change and sort by 24h change
-        const validMovers = data.filter(coin => 
-          coin.price_change_percentage_24h !== null && 
-          coin.price_change_percentage_24h !== undefined &&
-          coin.market_cap_rank <= 200 // Top 200 by market cap
+      if (Array.isArray(data) && data.length > 0) {
+        // Take top 20 latest token profiles
+        const latestTokens = data.slice(0, 20);
+        
+        // Fetch insights for each token (limit to first 10 to avoid rate limits)
+        const tokensWithInsights = await Promise.all(
+          latestTokens.slice(0, 10).map(async (token) => {
+            try {
+              const insightsResponse = await fetch(
+                `/api/dexscreener/token-insights?chain=${token.chainId}&address=${token.tokenAddress}`
+              );
+              
+              if (insightsResponse.ok) {
+                const insightsData = await insightsResponse.json();
+                const mainPair = insightsData.mainPair;
+                
+                if (mainPair) {
+                  return {
+                    ...token,
+                    insights: {
+                      priceUsd: mainPair.priceUsd,
+                      priceChange24h: mainPair.priceChange?.h24,
+                      volume24h: mainPair.volume?.h24,
+                      liquidity: mainPair.liquidity?.usd,
+                      txns24h: (mainPair.txns?.h24?.buys || 0) + (mainPair.txns?.h24?.sells || 0),
+                      symbol: mainPair.baseToken?.symbol,
+                      name: mainPair.baseToken?.name,
+                    },
+                  };
+                }
+              }
+            } catch (err) {
+              console.error(`Failed to fetch insights for ${token.tokenAddress}:`, err);
+            }
+            return token;
+          })
         );
-
-        // Get top 10 gainers and top 10 losers
-        const gainers = validMovers
-          .filter(coin => coin.price_change_percentage_24h > 0)
-          .sort((a, b) => b.price_change_percentage_24h - a.price_change_percentage_24h)
-          .slice(0, 10);
-
-        const losers = validMovers
-          .filter(coin => coin.price_change_percentage_24h < 0)
-          .sort((a, b) => a.price_change_percentage_24h - b.price_change_percentage_24h)
-          .slice(0, 10);
-
-        // Combine gainers and losers
-        const combinedMovers = [...gainers, ...losers];
-        setMarketMovers(combinedMovers);
-        console.log(`✅ Loaded ${combinedMovers.length} market movers (${gainers.length} gainers, ${losers.length} losers)`);
+        
+        setDexScreenerTokens(tokensWithInsights);
+        console.log(`✅ Loaded ${tokensWithInsights.length} DexScreener token profiles with insights`);
       } else {
-        throw new Error('Invalid CoinGecko API response structure');
+        throw new Error('Invalid DexScreener API response structure');
       }
     } catch (err) {
-      console.error('❌ Error fetching market movers:', err);
-      setMarketMovers([]);
+      console.error('❌ Error fetching DexScreener tokens:', err);
+      setDexScreenerTokens([]);
     } finally {
-      setMarketMoversLoading(false);
+      setDexScreenerLoading(false);
     }
   };
 
@@ -137,17 +165,17 @@ const LivePriceTicker: React.FC = () => {
   useEffect(() => {
     // Initial fetch
     fetchPumpFunTokens();
-    fetchMarketMovers();
+    fetchDexScreenerTokens();
 
     // Set up auto-refresh every 30 seconds for Pump.fun tokens
     const pumpFunInterval = setInterval(fetchPumpFunTokens, 30000);
     
-    // Set up auto-refresh every 2 minutes for market movers (less frequent to avoid rate limits)
-    const marketMoversInterval = setInterval(fetchMarketMovers, 120000);
+    // Set up auto-refresh every 60 seconds for DexScreener tokens
+    const dexScreenerInterval = setInterval(fetchDexScreenerTokens, 60000);
 
     return () => {
       clearInterval(pumpFunInterval);
-      clearInterval(marketMoversInterval);
+      clearInterval(dexScreenerInterval);
     };
   }, []);
 
@@ -245,14 +273,28 @@ const LivePriceTicker: React.FC = () => {
     return `$${price.toLocaleString()}`;
   };
 
-  // Navigate to trade page for market movers
-  const handleMarketMoverClick = (mover: MarketMover) => {
+  // Navigate to trade page for DexScreener tokens
+  const handleDexScreenerTokenClick = (token: DexScreenerToken) => {
     const params = new URLSearchParams();
-    params.set('base', mover.symbol.toUpperCase());
-    params.set('name', mover.name);
-    params.set('imageUri', mover.image);
-    params.set('source', 'coingecko');
-    params.set('coingecko_id', mover.id);
+    params.set('address', token.tokenAddress);
+    params.set('chain', token.chainId);
+    params.set('imageUri', token.icon);
+    params.set('source', 'dexscreener');
+    
+    // Use insights data if available
+    if (token.insights?.symbol) {
+      params.set('base', token.insights.symbol);
+    }
+    if (token.insights?.name) {
+      params.set('name', token.insights.name);
+    } else if (token.description) {
+      // Fallback to extracting from description
+      const descWords = token.description.split(' ');
+      if (descWords.length > 0) {
+        params.set('name', descWords.slice(0, 3).join(' '));
+      }
+    }
+    
     router.push(`/dashboard/trade?${params.toString()}`);
   };
 
@@ -317,34 +359,34 @@ const LivePriceTicker: React.FC = () => {
             msOverflowStyle: 'none',
           }}
         >
-          {/* Market Movers Section Header */}
+          {/* DexScreener Latest Tokens Section Header */}
           <div className="flex items-center gap-3 pl-6 flex-shrink-0">
-            <div className="w-7 h-7 bg-gradient-to-r from-green-500 to-red-500 rounded-lg flex items-center justify-center">
-              <TriangleUpIcon className="w-4 h-4 text-white" />
+            <div className="w-7 h-7 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-lg flex items-center justify-center">
+              <RocketIcon className="w-4 h-4 text-white" />
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-green-400 font-semibold text-sm" style={{ fontFamily: 'Space Grotesk, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                MARKET MOVERS
+              <span className="text-cyan-400 font-semibold text-sm" style={{ fontFamily: 'Space Grotesk, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                LATEST TOKENS
               </span>
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+              <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
             </div>
           </div>
 
-          {/* Market Movers */}
-          {marketMovers.length > 0 && [...marketMovers, ...marketMovers].map((mover, index) => (
-            <Tooltip.Root key={`mover-${mover.id}-${index}`}>
+          {/* DexScreener Tokens */}
+          {dexScreenerTokens.length > 0 && [...dexScreenerTokens, ...dexScreenerTokens].map((token, index) => (
+            <Tooltip.Root key={`dex-${token.tokenAddress}-${index}`}>
               <Tooltip.Trigger asChild>
                 <div
-                  className="group flex items-center gap-3 px-4 py-2 bg-gray-800/30 hover:bg-gray-700/40 rounded-xl cursor-pointer transition-all duration-300 hover:scale-105 border border-gray-700/30 hover:border-green-400/40 flex-shrink-0"
-                  onClick={() => handleMarketMoverClick(mover)}
+                  className="group flex items-center gap-3 px-4 py-2 bg-gray-800/30 hover:bg-gray-700/40 rounded-xl cursor-pointer transition-all duration-300 hover:scale-105 border border-gray-700/30 hover:border-cyan-400/40 flex-shrink-0"
+                  onClick={() => handleDexScreenerTokenClick(token)}
                 >
                   <div className="flex items-center gap-3">
                     {/* Token Logo */}
                     <div className="relative">
                       <div className="w-8 h-8 relative">
                         <Image
-                          src={mover.image}
-                          alt={mover.symbol}
+                          src={token.icon}
+                          alt={token.tokenAddress.slice(0, 6)}
                           width={32}
                           height={32}
                           className="rounded-full ring-2 ring-gray-600/50"
@@ -353,51 +395,85 @@ const LivePriceTicker: React.FC = () => {
                           }}
                         />
                       </div>
-                      {/* Gain/Loss indicator */}
-                      <div className={`absolute -bottom-1 -right-1 w-4 h-4 ${mover.price_change_percentage_24h >= 0 ? 'bg-green-500' : 'bg-red-500'} rounded-full flex items-center justify-center`}>
-                        {mover.price_change_percentage_24h >= 0 ? 
-                          <TriangleUpIcon className="w-2 h-2 text-white" /> : 
-                          <TriangleDownIcon className="w-2 h-2 text-white" />
-                        }
+                      {/* Chain badge */}
+                      <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full flex items-center justify-center">
+                        <span className="text-[8px] font-bold text-white">
+                          {token.chainId === 'solana' ? 'S' : token.chainId === 'bsc' ? 'B' : 'E'}
+                        </span>
                       </div>
                     </div>
 
                     <div className="flex flex-col min-w-0">
                       <div className="flex items-center gap-2">
                         <span className="font-bold text-white text-sm truncate" style={{ fontFamily: 'Space Grotesk, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                          {mover.symbol.toUpperCase()}
+                          {token.insights?.symbol || token.tokenAddress.slice(0, 6)}...{!token.insights?.symbol && token.tokenAddress.slice(-4)}
                         </span>
-                        <div className={`px-1.5 py-0.5 rounded text-xs font-semibold ${getPriceChangeColor(mover.price_change_percentage_24h)} bg-gray-800/50`}>
-                          {formatPriceChange(mover.price_change_percentage_24h)}
-                        </div>
+                        {token.insights?.priceChange24h !== undefined && (
+                          <div className={`px-1.5 py-0.5 rounded text-xs font-semibold ${
+                            token.insights.priceChange24h >= 0 ? 'text-green-400' : 'text-red-400'
+                          } bg-gray-800/50`}>
+                            {token.insights.priceChange24h >= 0 ? '+' : ''}{token.insights.priceChange24h.toFixed(2)}%
+                          </div>
+                        )}
                       </div>
-                      <div className="flex items-center gap-3">
-                        <span className="text-gray-300 text-xs font-mono" style={{ fontFamily: 'SF Mono, Monaco, monospace' }}>
-                          {formatMarketMoverPrice(mover.current_price)}
-                        </span>
-                        <span className="text-gray-400 text-xs" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                          #{mover.market_cap_rank}
-                        </span>
+                      <div className="flex items-center gap-2">
+                        {token.insights?.priceUsd ? (
+                          <span className="text-gray-300 text-xs font-mono" style={{ fontFamily: 'SF Mono, Monaco, monospace' }}>
+                            ${parseFloat(token.insights.priceUsd).toLocaleString(undefined, { maximumFractionDigits: 6 })}
+                          </span>
+                        ) : (
+                          <span className="text-gray-400 text-xs capitalize" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                            {token.chainId}
+                          </span>
+                        )}
+                        {token.insights?.volume24h && (
+                          <span className="text-gray-500 text-xs">
+                            • Vol ${(token.insights.volume24h / 1000).toFixed(1)}K
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
 
                   <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                    <ExternalLinkIcon className="w-3 h-3 text-green-400" />
+                    <ExternalLinkIcon className="w-3 h-3 text-cyan-400" />
                   </div>
                 </div>
               </Tooltip.Trigger>
               <Tooltip.Portal>
                 <Tooltip.Content className="bg-black/90 text-white px-3 py-2 rounded-lg text-sm max-w-xs">
                   <div className="space-y-1">
-                    <div className="font-semibold">{mover.name} ({mover.symbol.toUpperCase()})</div>
-                    <div className="text-xs text-gray-300">
-                      24h Change: <span className={getPriceChangeColor(mover.price_change_percentage_24h)}>
-                        {formatPriceChange(mover.price_change_percentage_24h)}
-                      </span>
+                    <div className="font-semibold">
+                      {token.insights?.name || 'Latest Token'} ({token.insights?.symbol || token.tokenAddress.slice(0, 6)})
                     </div>
-                    <div className="text-xs text-gray-300">
-                      Market Cap: {formatMarketCap(mover.market_cap)} • Rank #{mover.market_cap_rank}
+                    {token.description && (
+                      <div className="text-xs text-gray-300">
+                        {token.description.slice(0, 100)}{token.description.length > 100 ? '...' : ''}
+                      </div>
+                    )}
+                    {token.insights && (
+                      <div className="text-xs text-gray-300 space-y-0.5">
+                        {token.insights.priceUsd && (
+                          <div>Price: ${parseFloat(token.insights.priceUsd).toLocaleString(undefined, { maximumFractionDigits: 6 })}</div>
+                        )}
+                        {token.insights.priceChange24h !== undefined && (
+                          <div className={token.insights.priceChange24h >= 0 ? 'text-green-400' : 'text-red-400'}>
+                            24h: {token.insights.priceChange24h >= 0 ? '+' : ''}{token.insights.priceChange24h.toFixed(2)}%
+                          </div>
+                        )}
+                        {token.insights.volume24h && (
+                          <div>Volume: ${(token.insights.volume24h / 1000).toFixed(1)}K</div>
+                        )}
+                        {token.insights.liquidity && (
+                          <div>Liquidity: ${(token.insights.liquidity / 1000).toFixed(1)}K</div>
+                        )}
+                        {token.insights.txns24h && (
+                          <div>Txns 24h: {token.insights.txns24h.toLocaleString()}</div>
+                        )}
+                      </div>
+                    )}
+                    <div className="text-xs text-gray-400">
+                      {token.tokenAddress.slice(0, 10)}...{token.tokenAddress.slice(-10)}
                     </div>
                     <div className="text-xs text-gray-400">Click to view on Trade page</div>
                   </div>
