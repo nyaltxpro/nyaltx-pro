@@ -8,7 +8,6 @@ import { useEffect, useState } from 'react';
 import {
   FaChartPie,
   FaCoins,
-  FaFootballBall,
   FaGift,
   FaHome,
   FaImage,
@@ -180,7 +179,7 @@ export default function AdminSidebar({ isMobileMenuOpen, toggleMobileMenu }: Adm
     { icon: <FaNewspaper />, text: 'Corporate News', href: '/admin/news' },
     { icon: <FaImage />, text: 'Banners', href: '/admin/banners' },
     // { icon: <FaRocket />, text: 'Campaigns', href: '/admin/campaigns' },
-    { icon: <FaFootballBall />, text: 'Footer Settings', href: '/admin/footer-settings' },
+    // { icon: <FaFootballBall />, text: 'Footer Settings', href: '/admin/footer-settings' },
   ];
 
   const sidebarExpanded = isDesktop ? isExpanded : isMobileMenuOpen;
@@ -209,8 +208,8 @@ export default function AdminSidebar({ isMobileMenuOpen, toggleMobileMenu }: Adm
       >
         <div className="flex items-center h-16 border-b border-gray-700/30 px-4 bg-gray-800/20 backdrop-blur-sm">
           <div className="flex items-center">
-            <motion.div 
-              animate={{ rotate: isExpanded ? 360 : 0 }} 
+            <motion.div
+              animate={{ rotate: isExpanded ? 360 : 0 }}
               transition={{ duration: 0.5 }}
               className="w-8 h-8 bg-gradient-to-br from-[#00b8d8] to-[#0099b8] rounded-lg flex items-center justify-center shadow-lg"
             >
