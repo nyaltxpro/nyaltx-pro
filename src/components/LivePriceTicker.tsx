@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { getCryptoIconUrl, cryptoIconExists, commonCryptoSymbols } from '../utils/cryptoIcons';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { ActivityLogIcon, ExternalLinkIcon, RocketIcon, TriangleUpIcon, TriangleDownIcon } from '@radix-ui/react-icons';
@@ -33,6 +34,7 @@ interface MarketMover {
 }
 
 const LivePriceTicker: React.FC = () => {
+  const router = useRouter();
   const [tokens, setTokens] = useState<PumpFunToken[]>([]);
   const [marketMovers, setMarketMovers] = useState<MarketMover[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -243,6 +245,29 @@ const LivePriceTicker: React.FC = () => {
     return `$${price.toLocaleString()}`;
   };
 
+  // Navigate to trade page for market movers
+  const handleMarketMoverClick = (mover: MarketMover) => {
+    const params = new URLSearchParams();
+    params.set('base', mover.symbol.toUpperCase());
+    params.set('name', mover.name);
+    params.set('imageUri', mover.image);
+    params.set('source', 'coingecko');
+    params.set('coingecko_id', mover.id);
+    router.push(`/dashboard/trade?${params.toString()}`);
+  };
+
+  // Navigate to trade page for Pump.fun tokens
+  const handlePumpFunTokenClick = (token: PumpFunToken) => {
+    const params = new URLSearchParams();
+    params.set('base', token.symbol);
+    params.set('name', token.name);
+    params.set('chain', 'solana');
+    params.set('address', token.tokenAddress);
+    if (token.logo) params.set('imageUri', token.logo);
+    params.set('source', 'pumpfun');
+    router.push(`/dashboard/trade?${params.toString()}`);
+  };
+
   if (loading) {
     return (
       <div className="w-full bg-gradient-to-r from-black/95 via-gray-900/95 to-black/95 backdrop-blur-lg border-y border-gray-800/50 py-3 flex items-center justify-center" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
@@ -311,7 +336,7 @@ const LivePriceTicker: React.FC = () => {
               <Tooltip.Trigger asChild>
                 <div
                   className="group flex items-center gap-3 px-4 py-2 bg-gray-800/30 hover:bg-gray-700/40 rounded-xl cursor-pointer transition-all duration-300 hover:scale-105 border border-gray-700/30 hover:border-green-400/40 flex-shrink-0"
-                  onClick={() => window.open(`https://www.coingecko.com/en/coins/${mover.id}`, '_blank')}
+                  onClick={() => handleMarketMoverClick(mover)}
                 >
                   <div className="flex items-center gap-3">
                     {/* Token Logo */}
@@ -374,7 +399,7 @@ const LivePriceTicker: React.FC = () => {
                     <div className="text-xs text-gray-300">
                       Market Cap: {formatMarketCap(mover.market_cap)} • Rank #{mover.market_cap_rank}
                     </div>
-                    <div className="text-xs text-gray-400">Click to view on CoinGecko</div>
+                    <div className="text-xs text-gray-400">Click to view on Trade page</div>
                   </div>
                   <Tooltip.Arrow className="fill-black/90" />
                 </Tooltip.Content>
@@ -400,7 +425,7 @@ const LivePriceTicker: React.FC = () => {
               <Tooltip.Trigger asChild>
                 <div
                   className="group flex items-center gap-3 px-4 py-2 bg-gray-800/30 hover:bg-gray-700/40 rounded-xl cursor-pointer transition-all duration-300 hover:scale-105 border border-gray-700/30 hover:border-[#00d4aa]/40 flex-shrink-0"
-                  onClick={() => window.open(`https://pump.fun/${token.tokenAddress}`, '_blank')}
+                  onClick={() => handlePumpFunTokenClick(token)}
                 >
                   <div className="flex items-center gap-3">
                     {/* Token Logo */}
@@ -456,7 +481,7 @@ const LivePriceTicker: React.FC = () => {
                       Bonding: {formatBondingProgress(token.bondingCurveProgress)} • 
                       FDV: ${parseFloat(token.fullyDilutedValuation).toLocaleString()}
                     </div>
-                    <div className="text-xs text-gray-400">Click to view on Pump.fun</div>
+                    <div className="text-xs text-gray-400">Click to view on Trade page</div>
                   </div>
                   <Tooltip.Arrow className="fill-black/90" />
                 </Tooltip.Content>
