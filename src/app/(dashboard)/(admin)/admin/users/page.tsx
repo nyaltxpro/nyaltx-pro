@@ -1,8 +1,8 @@
-import { AdminUsersComponent } from '@/page-components/Admin'
+import { AdminUsers } from '@/page-components/Admin'
 
 const page = () => {
   return (
-    <AdminUsersComponent />
+    <AdminUsers />
   )
 }
 
