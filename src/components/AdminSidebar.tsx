@@ -13,6 +13,7 @@ import {
   FaHome,
   FaImage,
   FaNewspaper,
+  FaPlusCircle,
   FaShoppingCart,
   FaSignOutAlt,
   FaUserFriends
@@ -169,6 +170,7 @@ export default function AdminSidebar({ isMobileMenuOpen, toggleMobileMenu }: Adm
   const navItems = [
     { icon: <FaHome />, text: 'Dashboard', href: '/admin' },
     { icon: <FaCoins />, text: 'Tokens', href: '/admin/tokens' },
+    { icon: <FaPlusCircle />, text: 'Register Token', href: '/admin/tokens/register' },
     { icon: <FaShoppingCart />, text: 'Orders', href: '/admin/orders' },
     { icon: <FaUserFriends />, text: 'Users', href: '/admin/users' },
     // { icon: <FaUsers />, text: 'Profiles', href: '/admin/profiles' },
@@ -252,7 +254,7 @@ export default function AdminSidebar({ isMobileMenuOpen, toggleMobileMenu }: Adm
                 </motion.div>
               )}
             </AnimatePresence>
-            {navItems.slice(0, 6).map(item => (
+            {navItems.slice(0, 7).map(item => (
               <SidebarItem
                 key={item.href}
                 icon={item.icon}
@@ -283,7 +285,7 @@ export default function AdminSidebar({ isMobileMenuOpen, toggleMobileMenu }: Adm
                 </motion.div>
               )}
             </AnimatePresence>
-            {navItems.slice(6).map(item => (
+            {navItems.slice(7).map(item => (
               <SidebarItem
                 key={item.href}
                 icon={item.icon}

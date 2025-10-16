@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { FaCoins, FaSearch, FaCheck, FaTimes, FaTrash, FaChevronLeft, FaChevronRight, FaArrowLeft, FaCrown, FaPause, FaPlay, FaEye, FaEyeSlash, FaSort, FaSortUp, FaSortDown } from 'react-icons/fa';
+import { FaCoins, FaSearch, FaCheck, FaTimes, FaTrash, FaChevronLeft, FaChevronRight, FaArrowLeft, FaCrown, FaPause, FaPlay, FaEye, FaEyeSlash, FaSort, FaSortUp, FaSortDown, FaPlusCircle } from 'react-icons/fa';
 
 const AdminTokensClient = dynamic(() => Promise.resolve(AdminTokensComponent), {
     ssr: false,
@@ -259,9 +259,18 @@ function AdminTokensComponent() {
                     <h2 className="text-2xl font-semibold">Token Approvals</h2>
                     <p className="text-sm text-gray-400">Review and manage submitted token listings.</p>
                 </div>
-                <Link href="/admin" className="text-sm underline text-gray-300">
-                    Back to Dashboard
-                </Link>
+                <div className="flex items-center gap-3">
+                    <Link 
+                        href="/admin/tokens/register"
+                        className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#00b8d8] to-[#0099b8] hover:from-[#0099b8] hover:to-[#007a98] text-white rounded-lg transition-all font-medium text-sm"
+                    >
+                        <FaPlusCircle />
+                        Register Token
+                    </Link>
+                    <Link href="/admin" className="text-sm underline text-gray-300">
+                        Back to Dashboard
+                    </Link>
+                </div>
             </div>
 
             {/* Filters & Controls */}
