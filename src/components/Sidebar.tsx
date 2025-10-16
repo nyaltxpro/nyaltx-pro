@@ -98,6 +98,9 @@ export default function Sidebar({ isMobileMenuOpen, toggleMobileMenu }: SidebarP
       text: 'NYAX',
       href: '/dashboard/trade?base=NYAX&chain=ethereum&address=0x5eed5621b92be4473f99bacac77acfa27deb57d9',
     },
+    { icon: <TokensIcon />, text: 'Create Token', href: '/dashboard/create-token' },
+    { icon: <PlusIcon />, text: 'Register Token', href: '/pricing' },
+
     { icon: <StarIcon />, text: 'Favorites', href: '/dashboard/favorites' },
     { icon: <PlayIcon />, text: 'Live Stream', href: '/dashboard/live-stream' },
     { icon: <RocketIcon />, text: 'Trending', href: '/dashboard/trending' },
@@ -106,8 +109,6 @@ export default function Sidebar({ isMobileMenuOpen, toggleMobileMenu }: SidebarP
     // { icon: <MagnifyingGlassIcon />, text: 'Solana Tokens', href: '/dashboard/tokens' },
     { icon: <TargetIcon />, text: 'Gamification', href: '/dashboard/gamification' },
     { icon: <ListBulletIcon />, text: 'Leaderboard', href: '/dashboard/leaderboard' },
-    { icon: <TokensIcon />, text: 'Create Token', href: '/dashboard/create-token' },
-    { icon: <PlusIcon />, text: 'Register Token', href: '/pricing' },
     // { icon: <LockClosedIcon />, text: 'Connect', href: '/dashboard/connect' },
     // { icon: <UpdateIcon />, text: 'Swap', href: '/dashboard/swap' },
   ];
