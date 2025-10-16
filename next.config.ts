@@ -47,7 +47,9 @@ const nextConfig: NextConfig = {
       "www.nyaltx.com",
       "api.geckoterminal.com",
       "images.pump.fun",
-      "logo.moralis.io"
+      "logo.moralis.io",
+      "cdn.dexscreener.com",
+      "dd.dexscreener.com"
     ],
     remotePatterns: [
       {
@@ -128,6 +130,16 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "logo.moralis.io",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "cdn.dexscreener.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "dd.dexscreener.com",
         pathname: "/**",
       },
     ],

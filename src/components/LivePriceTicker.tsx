@@ -295,6 +295,20 @@ const LivePriceTicker: React.FC = () => {
       }
     }
     
+    // Pass price data
+    if (token.insights?.priceUsd) {
+      params.set('price', token.insights.priceUsd);
+    }
+    if (token.insights?.priceChange24h !== undefined) {
+      params.set('priceChange24h', token.insights.priceChange24h.toString());
+    }
+    if (token.insights?.volume24h) {
+      params.set('volume24h', token.insights.volume24h.toString());
+    }
+    if (token.insights?.liquidity) {
+      params.set('liquidity', token.insights.liquidity.toString());
+    }
+    
     router.push(`/dashboard/trade?${params.toString()}`);
   };
 
