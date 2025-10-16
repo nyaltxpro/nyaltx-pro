@@ -6,6 +6,7 @@ import {
     TokenPairData
 } from '@/api/coingecko/api';
 import Faq from '@/components/Faq';
+import InfoWidget from '@/components/InfoWidget';
 import MoralisTradingViewChart from '@/components/MoralisTradingViewChart';
 import SwapPage from '@/components/SwapCard';
 import TokenAvatar from '@/components/TokenAvatar';
@@ -926,6 +927,20 @@ function TradingViewWithParams({
         setInfoIframeError(false);
     }, [dexEmbedUrl, transactionDexEmbedUrl, infoDexEmbedUrl]);
 
+    // Add timeout for info iframe - if it doesn't load within 10 seconds, show InfoWidget
+    useEffect(() => {
+        if (infoDexEmbedUrl && !infoIframeLoaded && !infoIframeError) {
+            const timeout = setTimeout(() => {
+                if (!infoIframeLoaded) {
+                    console.log('Info iframe timeout - showing InfoWidget fallback');
+                    setInfoIframeError(true);
+                }
+            }, 10000); // 10 second timeout
+
+            return () => clearTimeout(timeout);
+        }
+    }, [infoDexEmbedUrl, infoIframeLoaded, infoIframeError]);
+
     // Get TradingView symbol
 
     // Scroll to top when component mounts
@@ -943,26 +958,8 @@ function TradingViewWithParams({
                 <div className="lg:col-span-1">
                     <div className="bg-[#2222s27] rounded-xl overflow-hidden mb-4" style={{ minHeight: '600px', position: 'relative' }}>
                         {!infoDexEmbedUrl || infoIframeError ? (
-                            <div className="w-full h-[600px] rounded-lg bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 flex flex-col items-center justify-center p-8">
-                                <FaInfoCircle className="text-gray-500 text-6xl mb-4" />
-                                <h3 className="text-xl font-semibold text-gray-300 mb-2">
-                                    {!infoDexEmbedUrl ? 'Info Not Available' : 'Failed to Load Info'}
-                                </h3>
-                                <p className="text-gray-400 text-center mb-4">
-                                    {!infoDexEmbedUrl 
-                                        ? 'Token information is not available yet.'
-                                        : 'Unable to load token information. Please try again.'}
-                                </p>
-                                <button
-                                    onClick={() => {
-                                        setInfoIframeError(false);
-                                        setInfoIframeLoaded(false);
-                                    }}
-                                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors flex items-center gap-2"
-                                >
-                                    <FaSyncAlt className="text-sm" />
-                                    Retry
-                                </button>
+                            <div className="w-full rounded-lg" style={{ maxHeight: '600px', overflow: 'auto' }}>
+                                <InfoWidget />
                             </div>
                         ) : (
                             <>
