@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { FaArrowLeft, FaCheck, FaCoins, FaTimes } from 'react-icons/fa';
+import { FaArrowLeft, FaCheck, FaCoins, FaTimes, FaUpload, FaSpinner } from 'react-icons/fa';
 
 interface TokenFormData {
   tokenName: string;
@@ -39,6 +39,9 @@ export default function AdminTokenRegister() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isUploadingToIPFS, setIsUploadingToIPFS] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
 
   const blockchains = [
     { value: 'ethereum', label: 'Ethereum' },
@@ -64,6 +67,70 @@ export default function AdminTokenRegister() {
       setFormData(prev => ({ ...prev, [name]: checked }));
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
+    }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+    if (!validTypes.includes(file.type)) {
+      showToast('error', 'Invalid file type. Please upload JPEG, PNG, GIF, SVG, or WebP images.');
+      return;
+    }
+
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      showToast('error', 'File size too large. Maximum size is 10MB.');
+      return;
+    }
+
+    setSelectedFile(file);
+  };
+
+  const uploadToIPFS = async () => {
+    if (!selectedFile) {
+      showToast('error', 'Please select a file first');
+      return;
+    }
+
+    setIsUploadingToIPFS(true);
+    setUploadProgress(0);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+
+      const response = await fetch('/api/upload/ipfs', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to upload to IPFS');
+      }
+
+      const data = await response.json();
+      const ipfsUrl = `https://ipfs.io/ipfs/${data.hash}`;
+
+      // Update the imageUri field with IPFS URL
+      setFormData(prev => ({ ...prev, imageUri: ipfsUrl }));
+      showToast('success', `Image uploaded to IPFS! Hash: ${data.hash}`);
+      setSelectedFile(null);
+      setUploadProgress(100);
+
+      // Clear the file input
+      const fileInput = document.getElementById('ipfs-file-input') as HTMLInputElement;
+      if (fileInput) fileInput.value = '';
+
+    } catch (err: any) {
+      showToast('error', err.message || 'Failed to upload to IPFS');
+    } finally {
+      setIsUploadingToIPFS(false);
+      setTimeout(() => setUploadProgress(0), 2000);
     }
   };
 
@@ -297,10 +364,77 @@ export default function AdminTokenRegister() {
             <h3 className="text-lg font-semibold text-white mb-4 border-b border-gray-700/50 pb-2">
               Media & Links
             </h3>
+
+            {/* IPFS Upload Section */}
+            <div className="mb-4 p-4 bg-gradient-to-r from-cyan-900/20 to-blue-900/20 border border-cyan-700/30 rounded-lg">
+              <div className="flex items-center gap-3 mb-3">
+                <FaUpload className="text-cyan-400" />
+                <span className="text-sm font-semibold text-cyan-300">Upload Image to IPFS</span>
+                <div className="flex-1 h-px bg-cyan-600/30"></div>
+              </div>
+              
+              <div className="mb-3 text-xs text-gray-400 bg-gray-800/50 p-2 rounded border border-gray-700/30">
+                <strong className="text-cyan-400">Requirements:</strong> Min 100x100px, Max 10MB • JPEG, PNG, GIF, SVG, or WebP
+              </div>
+
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center gap-3">
+                  <input
+                    id="ipfs-file-input"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileSelect}
+                    className="hidden"
+                  />
+                  <label
+                    htmlFor="ipfs-file-input"
+                    className="flex items-center gap-2 px-4 py-2 bg-gray-700/70 hover:bg-gray-700 text-gray-300 rounded-lg cursor-pointer transition-all duration-200 text-sm font-medium border border-gray-600"
+                  >
+                    <FaUpload className="w-4 h-4" />
+                    Choose File
+                  </label>
+
+                  {selectedFile && (
+                    <span className="text-sm text-gray-300 flex-1 truncate bg-gray-800/50 px-3 py-2 rounded border border-gray-700">
+                      {selectedFile.name} <span className="text-cyan-400">({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)</span>
+                    </span>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={uploadToIPFS}
+                    disabled={!selectedFile || isUploadingToIPFS}
+                    className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed text-white rounded-lg transition-all duration-200 text-sm font-semibold shadow-lg"
+                  >
+                    {isUploadingToIPFS ? (
+                      <>
+                        <FaSpinner className="w-4 h-4 animate-spin" />
+                        Uploading...
+                      </>
+                    ) : (
+                      <>
+                        <FaUpload className="w-4 h-4" />
+                        Upload to IPFS
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                {uploadProgress > 0 && uploadProgress < 100 && (
+                  <div className="w-full bg-gray-700 rounded-full h-2">
+                    <div 
+                      className="bg-gradient-to-r from-cyan-500 to-blue-500 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${uploadProgress}%` }}
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
+              <div className="md:col-span-2">
                 <label htmlFor="imageUri" className="block text-sm font-medium text-gray-300 mb-2">
-                  Image URI
+                  Image URI <span className="text-xs text-gray-500">(or enter manually)</span>
                 </label>
                 <input
                   type="text"
@@ -311,6 +445,11 @@ export default function AdminTokenRegister() {
                   className="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00b8d8] focus:border-transparent"
                   placeholder="https://... or ipfs://..."
                 />
+                {formData.imageUri && (
+                  <div className="mt-2 text-xs text-cyan-400">
+                    ✓ Image URL set: {formData.imageUri.substring(0, 50)}...
+                  </div>
+                )}
               </div>
 
               <div>
@@ -494,6 +633,7 @@ export default function AdminTokenRegister() {
           <li>• No payment or checkout required</li>
           <li>• Instant registration without approval queue</li>
           <li>• Option to auto-approve and add to Race to Liberty</li>
+          <li>• <span className="text-cyan-300 font-medium">IPFS image upload</span> for decentralized hosting</li>
           <li>• All social links and metadata can be configured</li>
           <li>• Email notifications still sent if provided</li>
         </ul>
