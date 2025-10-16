@@ -6,9 +6,11 @@ import {
     TokenPairData
 } from '@/api/coingecko/api';
 import Faq from '@/components/Faq';
+import MoralisTradingViewChart from '@/components/MoralisTradingViewChart';
 import SwapPage from '@/components/SwapCard';
 import TokenAvatar from '@/components/TokenAvatar';
 import tokens from '@/data/tokens.json';
+import useMoralisTokenMetadata from '@/hooks/useMoralisTokenMetadata';
 import {
     fetchContractAddresses,
     logContractAddressInfo,
@@ -18,9 +20,6 @@ import { getCryptoIconUrl, getCryptoIconUrlWithFallback } from '@/utils/cryptoIc
 import { getCryptoName } from '@/utils/cryptoNames';
 import { geckoTerminalAPI } from '@/utils/geckoTerminalApi';
 import { fetchMoralisTokenData, fetchMoralisTokenPrice, isMoralisSupportedChain } from '@/utils/moralisApi';
-import MoralisTradingViewChart from '@/components/MoralisTradingViewChart';
-import TokenInfoWidget from '@/components/TokenInfoWidget';
-import useMoralisTokenMetadata from '@/hooks/useMoralisTokenMetadata';
 import { fetchNYAXPrice, isNYAXToken } from '@/utils/nyaxPriceApi';
 import { useSearchParams } from 'next/navigation';
 import React, { Suspense, useEffect, useState } from 'react';
@@ -103,7 +102,7 @@ const normalizeDexScreenerChainId = (chain: string): string => {
         'bnb': 'bsc',
         'binance-smart-chain': 'bsc',
     };
-    
+
     const lowerChain = chain.toLowerCase();
     return chainMapping[lowerChain] || lowerChain;
 };
@@ -1282,21 +1281,19 @@ function TradingViewWithParams({
                             <span className="text-sm text-gray-400">Chart:</span>
                             <button
                                 onClick={() => setChartType('dexscreener')}
-                                className={`px-3 py-1 text-xs rounded-full transition-colors ${
-                                    chartType === 'dexscreener'
+                                className={`px-3 py-1 text-xs rounded-full transition-colors ${chartType === 'dexscreener'
                                         ? 'bg-blue-500 text-white'
                                         : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                                }`}
+                                    }`}
                             >
                                 DexScreener
                             </button>
                             <button
                                 onClick={() => setChartType('moralis')}
-                                className={`px-3 py-1 text-xs rounded-full transition-colors ${
-                                    chartType === 'moralis'
+                                className={`px-3 py-1 text-xs rounded-full transition-colors ${chartType === 'moralis'
                                         ? 'bg-purple-500 text-white'
                                         : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                                }`}
+                                    }`}
                                 disabled={!addressParam || chainParam !== 'solana'}
                                 title={!addressParam || chainParam !== 'solana' ? 'Moralis charts only available for Solana tokens with contract address' : ''}
                             >
