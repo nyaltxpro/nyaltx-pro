@@ -3,20 +3,6 @@ import { NextRequest, NextResponse } from 'next/server';
 export const runtime = 'edge';
 
 /**
- * Normalize chain IDs to DexScreener format
- */
-function normalizeChainId(chainId: string): string {
-  const chainMap: Record<string, string> = {
-    'binance': 'bsc',
-    'binance-smart-chain': 'bsc',
-    'bnb': 'bsc',
-  };
-  
-  const lowerChain = chainId.toLowerCase();
-  return chainMap[lowerChain] || lowerChain;
-}
-
-/**
  * DexScreener Token Insights API
  * GET /api/dexscreener/token-insights?chain={chainId}&address={tokenAddress}
  * 
@@ -25,7 +11,7 @@ function normalizeChainId(chainId: string): string {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    let chainId = searchParams.get('chain');
+    const chainId = searchParams.get('chain');
     const tokenAddress = searchParams.get('address');
 
     if (!chainId || !tokenAddress) {
@@ -34,9 +20,6 @@ export async function GET(request: NextRequest) {
         { status: 400 }
       );
     }
-
-    // Normalize chain ID (convert binance to bsc, etc.)
-    chainId = normalizeChainId(chainId);
 
     // Fetch token insights from DexScreener API
     const dexScreenerUrl = `https://api.dexscreener.com/tokens/v1/${chainId}/${tokenAddress}`;

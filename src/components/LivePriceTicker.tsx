@@ -54,18 +54,6 @@ const LivePriceTicker: React.FC = () => {
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Convert chain IDs to standardized format
-  const normalizeChainId = (chainId: string): string => {
-    const chainMap: Record<string, string> = {
-      'binance': 'bsc',
-      'binance-smart-chain': 'bsc',
-      'bnb': 'bsc',
-    };
-    
-    const lowerChain = chainId.toLowerCase();
-    return chainMap[lowerChain] || lowerChain;
-  };
-
   // Fetch DexScreener latest token profiles
   const fetchDexScreenerTokens = async () => {
     try {
@@ -92,9 +80,8 @@ const LivePriceTicker: React.FC = () => {
         const tokensWithInsights = await Promise.all(
           latestTokens.slice(0, 10).map(async (token) => {
             try {
-              const normalizedChain = normalizeChainId(token.chainId);
               const insightsResponse = await fetch(
-                `/api/dexscreener/token-insights?chain=${normalizedChain}&address=${token.tokenAddress}`
+                `/api/dexscreener/token-insights?chain=${token.chainId}&address=${token.tokenAddress}`
               );
               
               if (insightsResponse.ok) {
@@ -289,10 +276,8 @@ const LivePriceTicker: React.FC = () => {
   // Navigate to trade page for DexScreener tokens
   const handleDexScreenerTokenClick = (token: DexScreenerToken) => {
     const params = new URLSearchParams();
-    const normalizedChain = normalizeChainId(token.chainId);
-    
     params.set('address', token.tokenAddress);
-    params.set('chain', normalizedChain);
+    params.set('chain', token.chainId);
     params.set('imageUri', token.icon);
     params.set('source', 'dexscreener');
     
@@ -427,18 +412,7 @@ const LivePriceTicker: React.FC = () => {
                       {/* Chain badge */}
                       <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full flex items-center justify-center">
                         <span className="text-[8px] font-bold text-white">
-                          {(() => {
-                            const chain = normalizeChainId(token.chainId);
-                            if (chain === 'solana') return 'S';
-                            if (chain === 'bsc') return 'B';
-                            if (chain === 'ethereum') return 'E';
-                            if (chain === 'polygon') return 'P';
-                            if (chain === 'arbitrum') return 'A';
-                            if (chain === 'optimism') return 'O';
-                            if (chain === 'base') return 'BA';
-                            if (chain === 'avalanche') return 'AV';
-                            return chain.charAt(0).toUpperCase();
-                          })()}
+                          {token.chainId === 'solana' ? 'S' : token.chainId === 'bsc' ? 'B' : 'E'}
                         </span>
                       </div>
                     </div>

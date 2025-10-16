@@ -95,6 +95,19 @@ const compareAddresses = (addr1: string, addr2: string, chain?: string): boolean
     return addr1.toLowerCase() === addr2.toLowerCase();
 };
 
+// Helper function to normalize chain IDs for DexScreener compatibility
+// DexScreener uses "bsc" instead of "binance"
+const normalizeDexScreenerChainId = (chain: string): string => {
+    const chainMapping: { [key: string]: string } = {
+        'binance': 'bsc',
+        'bnb': 'bsc',
+        'binance-smart-chain': 'bsc',
+    };
+    
+    const lowerChain = chain.toLowerCase();
+    return chainMapping[lowerChain] || lowerChain;
+};
+
 // Move useSearchParams into a child and wrap with Suspense to satisfy Next.js requirements
 function TradePageContent() {
     const searchParams = useSearchParams();
@@ -816,29 +829,35 @@ function TradingViewWithParams({
     const buildDexUrl = React.useCallback(() => {
         // If explicit chain/address provided, use them directly
         if (addressParam && chainParam) {
-            return `https://dexscreener.com/${chainParam}/${addressParam}?embed=1&theme=dark&trades=0&info=0`;
+            const normalizedChain = normalizeDexScreenerChainId(chainParam);
+            return `https://dexscreener.com/${normalizedChain}/${addressParam}?embed=1&theme=dark&trades=0&info=0`;
         }
         const t = resolveToken();
         if (!t) return '';
-        return `https://dexscreener.com/${t.chain}/${t.address}?embed=1&theme=dark&trades=0&info=0`;
+        const normalizedChain = normalizeDexScreenerChainId(t.chain);
+        return `https://dexscreener.com/${normalizedChain}/${t.address}?embed=1&theme=dark&trades=0&info=0`;
     }, [resolveToken, addressParam, chainParam]);
 
     const buildTransactionDexUrl = React.useCallback(() => {
         if (addressParam && chainParam) {
-            return `https://dexscreener.com/${chainParam}/${addressParam}?embed=1&theme=dark&chart=0&info=0`;
+            const normalizedChain = normalizeDexScreenerChainId(chainParam);
+            return `https://dexscreener.com/${normalizedChain}/${addressParam}?embed=1&theme=dark&chart=0&info=0`;
         }
         const t = resolveToken();
         if (!t) return '';
-        return `https://dexscreener.com/${t.chain}/${t.address}?embed=1&theme=dark&chart=0&info=0`;
+        const normalizedChain = normalizeDexScreenerChainId(t.chain);
+        return `https://dexscreener.com/${normalizedChain}/${t.address}?embed=1&theme=dark&chart=0&info=0`;
     }, [resolveToken, addressParam, chainParam]);
 
     const buildInfonDexUrl = React.useCallback(() => {
         if (addressParam && chainParam) {
-            return `https://dexscreener.com/${chainParam}/${addressParam}?embed=1&theme=dark&chart=0&trades=0`;
+            const normalizedChain = normalizeDexScreenerChainId(chainParam);
+            return `https://dexscreener.com/${normalizedChain}/${addressParam}?embed=1&theme=dark&chart=0&trades=0`;
         }
         const t = resolveToken();
         if (!t) return '';
-        return `https://dexscreener.com/${t.chain}/${t.address}?embed=1&theme=dark&chart=0&trades=0`;
+        const normalizedChain = normalizeDexScreenerChainId(t.chain);
+        return `https://dexscreener.com/${normalizedChain}/${t.address}?embed=1&theme=dark&chart=0&trades=0`;
     }, [resolveToken, addressParam, chainParam]);
 
     // Fetch token pair data
