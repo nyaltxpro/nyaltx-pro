@@ -182,6 +182,7 @@ function TradingViewWithParams({
     const [tradesIframeError, setTradesIframeError] = useState(false);
     const [infoIframeLoaded, setInfoIframeLoaded] = useState(false);
     const [infoIframeError, setInfoIframeError] = useState(false);
+    const [dexScreenerDataExists, setDexScreenerDataExists] = useState<boolean | null>(null);
     // Token pair data state
     const [pairData, setPairData] = useState<TokenPairData | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -925,11 +926,52 @@ function TradingViewWithParams({
         setTradesIframeError(false);
         setInfoIframeLoaded(false);
         setInfoIframeError(false);
+        setDexScreenerDataExists(null);
     }, [dexEmbedUrl, transactionDexEmbedUrl, infoDexEmbedUrl]);
+
+    // Check DexScreener API to see if token data exists
+    useEffect(() => {
+        const checkDexScreenerData = async () => {
+            if (addressParam && chainParam) {
+                try {
+                    const normalizedChain = normalizeDexScreenerChainId(chainParam);
+                    const apiUrl = `https://api.dexscreener.com/token-pairs/v1/${normalizedChain}/${addressParam}`;
+                    console.log('🔍 Checking DexScreener API:', apiUrl);
+                    
+                    const response = await fetch(apiUrl);
+                    const data = await response.json();
+                    
+                    if (data && Array.isArray(data) && data.length > 0) {
+                        console.log('✅ DexScreener data exists:', data.length, 'pairs found');
+                        setDexScreenerDataExists(true);
+                        setInfoIframeError(false);
+                        setChartIframeError(false);
+                        setTradesIframeError(false);
+                    } else {
+                        console.log('❌ DexScreener returned null/empty - showing fallback widgets');
+                        setDexScreenerDataExists(false);
+                        setInfoIframeError(true);
+                        setChartIframeError(true);
+                        setTradesIframeError(true);
+                    }
+                } catch (error) {
+                    console.error('❌ DexScreener API error:', error);
+                    setDexScreenerDataExists(false);
+                    setInfoIframeError(true);
+                    setChartIframeError(true);
+                    setTradesIframeError(true);
+                }
+            }
+        };
+
+        if (addressParam && chainParam) {
+            checkDexScreenerData();
+        }
+    }, [addressParam, chainParam]);
 
     // Add timeout for info iframe - if it doesn't load within 10 seconds, show InfoWidget
     useEffect(() => {
-        if (infoDexEmbedUrl && !infoIframeLoaded && !infoIframeError) {
+        if (infoDexEmbedUrl && !infoIframeLoaded && !infoIframeError && dexScreenerDataExists === true) {
             const timeout = setTimeout(() => {
                 if (!infoIframeLoaded) {
                     console.log('Info iframe timeout - showing InfoWidget fallback');
@@ -939,7 +981,7 @@ function TradingViewWithParams({
 
             return () => clearTimeout(timeout);
         }
-    }, [infoDexEmbedUrl, infoIframeLoaded, infoIframeError]);
+    }, [infoDexEmbedUrl, infoIframeLoaded, infoIframeError, dexScreenerDataExists]);
 
     // Get TradingView symbol
 
