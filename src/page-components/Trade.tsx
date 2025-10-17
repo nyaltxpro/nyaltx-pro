@@ -8,6 +8,7 @@ import {
 import Faq from '@/components/Faq';
 import InfoWidget from '@/components/InfoWidget';
 import MoralisTradingViewChart from '@/components/MoralisTradingViewChart';
+import LightweightChart from '@/components/LightweightChart';
 import SwapPage from '@/components/SwapCard';
 import TokenAvatar from '@/components/TokenAvatar';
 import tokens from '@/data/tokens.json';
@@ -1414,25 +1415,12 @@ function TradingViewWithParams({
                             ) : (
                                 <>
                                     {!dexEmbedUrl || (dexScreenerDataExists === false) || chartIframeError ? (
-                                        <div className="w-full h-full rounded-lg bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 flex flex-col items-center justify-center p-8">
-                                            <FaChartLine className="text-gray-500 text-6xl mb-4" />
-                                            <h3 className="text-xl font-semibold text-gray-300 mb-2">
-                                                Chart Not Available
-                                            </h3>
-                                            <p className="text-gray-400 text-center mb-4">
-                                                This token is not tracked on DexScreener yet.
-                                            </p>
-                                            {addressParam && chainParam && (
-                                                <a
-                                                    href={`https://dexscreener.com/${chainParam}/${addressParam}`}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
-                                                >
-                                                    View on DexScreener
-                                                </a>
-                                            )}
-                                        </div>
+                                        <LightweightChart
+                                            tokenSymbol={baseToken || 'TOKEN'}
+                                            width="100%"
+                                            height="500px"
+                                            className="w-full"
+                                        />
                                     ) : (
                                         <iframe
                                             src={dexEmbedUrl}
