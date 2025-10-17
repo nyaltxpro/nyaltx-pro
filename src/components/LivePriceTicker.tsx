@@ -182,7 +182,7 @@ const LivePriceTicker: React.FC = () => {
   // Auto-scrolling effect
   useEffect(() => {
     const scrollContainer = scrollRef.current;
-    if (!scrollContainer || loading || tokens.length === 0) return;
+    if (!scrollContainer || dexScreenerLoading || dexScreenerTokens.length === 0) return;
 
     let animationId: number;
     let position = 0;
@@ -203,7 +203,7 @@ const LivePriceTicker: React.FC = () => {
     return () => {
       cancelAnimationFrame(animationId);
     };
-  }, [loading, tokens]);
+  }, [dexScreenerLoading, dexScreenerTokens]);
 
   // Format USD price with appropriate precision
   const formatUsdPrice = (priceStr: string): string => {
