@@ -198,7 +198,7 @@ export default function InfoWidget({ data }: InfoWidgetProps) {
     };
 
     return (
-        <div className="text-white w-full h-full font-sans" style={{ backgroundColor: '#222227' }}>
+        <div className="text-white w-full h-full font-sans shadow-md" style={{ backgroundColor: '#171C1C', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.8), 0 2px 4px -1px rgba(0, 0, 0, 0.6)' }}>
             {/* Header */}
             <div className="flex items-center justify-between p-2 sm:p-3 border-b border-gray-800">
                 <div className="flex items-center gap-2">
