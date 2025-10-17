@@ -119,6 +119,7 @@ const LivePriceTicker: React.FC = () => {
       setDexScreenerTokens([]);
     } finally {
       setDexScreenerLoading(false);
+      setLoading(false);
     }
   };
 
