@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
+import { ChevronLeftIcon, ChevronRightIcon } from '@radix-ui/react-icons';
 
 interface BannerFile {
   name: string;
@@ -133,6 +134,34 @@ export default function Banner() {
     >
       {/* Enhanced Banner Container */}
       <div className="relative group">
+        {/* Navigation Arrows */}
+        {images.length > 1 && (
+          <>
+            {/* Left Arrow */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                prev();
+              }}
+              className="absolute left-4 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center transition-all duration-200 hover:scale-110 backdrop-blur-sm opacity-0 group-hover:opacity-100"
+              aria-label="Previous banner"
+            >
+              <ChevronLeftIcon className="w-6 h-6 text-white" />
+            </button>
+            {/* Right Arrow */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                next();
+              }}
+              className="absolute right-4 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center transition-all duration-200 hover:scale-110 backdrop-blur-sm opacity-0 group-hover:opacity-100"
+              aria-label="Next banner"
+            >
+              <ChevronRightIcon className="w-6 h-6 text-white" />
+            </button>
+          </>
+        )}
+
         {/* Animated background glow */}
 
         {/* Main banner container */}
