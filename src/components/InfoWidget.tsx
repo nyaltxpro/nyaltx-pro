@@ -1,30 +1,56 @@
 import { AlertTriangle, ChevronDown, Copy, ExternalLink, MoreVertical, Star } from 'lucide-react';
 import { useState } from 'react';
 
-interface TokenData {
+export interface TokenData {
+    // Basic Token Info
     name: string;
     symbol: string;
     baseToken: string;
     chain: string;
     dex: string;
+    logoUri?: string;
+    description?: string;
+    
+    // Price Data
     priceUsd: string;
     priceNative: string;
+    priceChange?: string; // Overall price change
+    high24h?: string;
+    low24h?: string;
+    
+    // Market Data
     liquidity: string;
     fdv: string;
     marketCap: string;
+    totalSupply?: string;
+    circulatingSupply?: string;
+    maxSupply?: string;
+    
+    // Price Changes (Time Intervals)
     change5m?: string;
     change1h?: string;
     change6h?: string;
     change24h?: string;
+    change7d?: string;
+    change30d?: string;
+    
+    // Trading Stats (24h)
     txns: number;
     buys: number;
     sells: number;
     volume: string;
+    volume24h?: string;
     buyVolume: string;
     sellVolume: string;
+    volumeChange24h?: string;
+    
+    // Maker Stats
     makers: number;
     buyers: number;
     sellers: number;
+    uniqueWallets24h?: number;
+    
+    // Liquidity Pool Data
     pairCreated?: string;
     pooledToken: string;
     pooledTokenAmount: string;
@@ -32,13 +58,43 @@ interface TokenData {
     pooledBase: string;
     pooledBaseAmount: string;
     pooledBaseValue: string;
+    
+    // Contract Addresses
     pairAddress?: string;
     tokenAddress?: string;
     baseAddress?: string;
-    logoUri?: string;
+    
+    // Social & External Links
+    website?: string;
+    twitter?: string;
+    telegram?: string;
+    discord?: string;
+    github?: string;
+    coingeckoId?: string;
+    coinmarketcapId?: string;
+    
+    // Security & Audit
     securityIssues?: Array<{ title: string; description: string }>;
     intelIssues?: Array<{ title: string; description: string }>;
     snifferScore?: number;
+    isVerified?: boolean;
+    isAudited?: boolean;
+    auditBy?: string;
+    
+    // Holder Information
+    holders?: string;
+    top10HoldersPercent?: string;
+    
+    // Additional Metrics
+    ath?: string; // All-time high
+    atl?: string; // All-time low
+    athDate?: string;
+    atlDate?: string;
+    rank?: number;
+    
+    // DEX Specific
+    dexUrl?: string;
+    chartUrl?: string;
 }
 
 interface InfoWidgetProps {
@@ -52,29 +108,52 @@ export default function InfoWidget({ data }: InfoWidgetProps) {
 
     // Default data if no props provided
     const tokenData: TokenData = data || {
+        // Basic Info
         name: 'xSpace Token',
         symbol: 'xSPACE',
         baseToken: 'WPOL',
         chain: 'Polygon',
         dex: 'Uniswap',
+        description: 'xSpace is a decentralized token on Polygon network',
+        
+        // Prices
         priceUsd: '$0.003139',
         priceNative: '0.01586 WPOL',
+        high24h: '$0.003250',
+        low24h: '$0.003050',
+        
+        // Market Data
         liquidity: '$43K',
         fdv: '$78K',
         marketCap: '$268K',
+        totalSupply: '250M',
+        circulatingSupply: '85M',
+        
+        // Price Changes
         change5m: '0.05%',
         change1h: '0.05%',
         change6h: '1.03%',
         change24h: '2.21%',
+        change7d: '5.40%',
+        change30d: '-12.30%',
+        
+        // Trading Stats
         txns: 28,
         buys: 13,
         sells: 15,
         volume: '$489',
+        volume24h: '$12.5K',
         buyVolume: '$287',
         sellVolume: '$202',
+        volumeChange24h: '+15.2%',
+        
+        // Makers
         makers: 20,
         buyers: 11,
         sellers: 13,
+        uniqueWallets24h: 45,
+        
+        // Pool Data
         pairCreated: '1y 11d ago',
         pooledToken: 'xSPACE',
         pooledTokenAmount: '6,821,431',
@@ -82,9 +161,18 @@ export default function InfoWidget({ data }: InfoWidgetProps) {
         pooledBase: 'WPOL',
         pooledBaseAmount: '111,232',
         pooledBaseValue: '$22K',
+        
+        // Addresses
         pairAddress: '0xDF6...cD37',
         tokenAddress: '0x1D1...056f',
         baseAddress: '0x0d5...1270',
+        
+        // Social Links
+        website: 'https://xspace.io',
+        twitter: 'https://twitter.com/xspace',
+        telegram: 'https://t.me/xspace',
+        
+        // Security
         securityIssues: [
             { title: 'Trading Cooldown Detected', description: 'The contract implements a cooldown period between trades which may limit trading frequency.' },
             { title: 'High Slippage Risk', description: 'Low liquidity may result in high slippage for larger trades.' }
@@ -93,11 +181,24 @@ export default function InfoWidget({ data }: InfoWidgetProps) {
             { title: 'Low Holder Count', description: 'Token has a relatively small number of holders which may indicate limited adoption.' },
             { title: 'Concentrated Ownership', description: 'Top 10 holders control a significant portion of the total supply.' }
         ],
-        snifferScore: 45
+        snifferScore: 45,
+        isVerified: true,
+        isAudited: false,
+        
+        // Holder Info
+        holders: '1,234',
+        top10HoldersPercent: '45%',
+        
+        // Additional Metrics
+        ath: '$0.015',
+        atl: '$0.001',
+        athDate: '3 months ago',
+        atlDate: '1 year ago',
+        rank: 1250
     };
 
     return (
-        <div className="bg-black text-white w-full h-full font-sans">
+        <div className="text-white w-full h-full font-sans" style={{ backgroundColor: '#222227' }}>
             {/* Header */}
             <div className="flex items-center justify-between p-2 sm:p-3 border-b border-gray-800">
                 <div className="flex items-center gap-2">
@@ -136,32 +237,32 @@ export default function InfoWidget({ data }: InfoWidgetProps) {
                     </div>
 
                     <div className="grid grid-cols-2 gap-1.5 sm:gap-2 mb-2">
-                        <div className="bg-gray-900 rounded-lg p-1.5 sm:p-2 border border-gray-800">
+                        <div className="bg-transparent rounded-lg p-1.5 sm:p-2 border border-gray-800">
                             <div className="text-gray-400 text-xs mb-0.5">PRICE USD</div>
                             <div className="text-sm sm:text-base font-semibold truncate">{tokenData.priceUsd}</div>
                         </div>
-                        <div className="bg-gray-900 rounded-lg p-1.5 sm:p-2 border border-gray-800">
+                        <div className="bg-transparent rounded-lg p-1.5 sm:p-2 border border-gray-800">
                             <div className="text-gray-400 text-xs mb-0.5">PRICE</div>
                             <div className="text-sm sm:text-base font-semibold truncate">{tokenData.priceNative}</div>
                         </div>
                     </div>
 
                     <div className="grid grid-cols-3 gap-1.5 sm:gap-2 mb-2">
-                        <div className="bg-gray-900 rounded-lg p-1.5 sm:p-2 border border-gray-800">
+                        <div className="bg-transparent rounded-lg p-1.5 sm:p-2 border border-gray-800">
                             <div className="text-gray-400 text-xs mb-0.5">LIQUIDITY</div>
                             <div className="text-xs sm:text-sm font-semibold truncate">{tokenData.liquidity}</div>
                         </div>
-                        <div className="bg-gray-900 rounded-lg p-1.5 sm:p-2 border border-gray-800">
+                        <div className="bg-transparent rounded-lg p-1.5 sm:p-2 border border-gray-800">
                             <div className="text-gray-400 text-xs mb-0.5">FDV</div>
                             <div className="text-xs sm:text-sm font-semibold truncate">{tokenData.fdv}</div>
                         </div>
-                        <div className="bg-gray-900 rounded-lg p-1.5 sm:p-2 border border-gray-800">
+                        <div className="bg-transparent rounded-lg p-1.5 sm:p-2 border border-gray-800">
                             <div className="text-gray-400 text-xs mb-0.5">MKT CAP</div>
                             <div className="text-xs sm:text-sm font-semibold truncate">{tokenData.marketCap}</div>
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-4 mb-2 bg-gray-900 rounded-lg border border-gray-800 overflow-hidden">
+                    <div className="grid grid-cols-4 mb-2 bg-transparent rounded-lg border border-gray-800 overflow-hidden">
                         <button className="py-1.5 sm:py-2 text-center border-r border-gray-800">
                             <div className="text-gray-400 text-xs mb-0.5">5M</div>
                             <div className={`text-xs font-semibold ${parseFloat(tokenData.change5m || '0') >= 0 ? 'text-lime-400' : 'text-red-400'}`}>{tokenData.change5m || 'N/A'}</div>
@@ -180,7 +281,7 @@ export default function InfoWidget({ data }: InfoWidgetProps) {
                         </button>
                     </div>
 
-                    <div className="bg-gray-900 rounded-lg border border-gray-800 p-2 sm:p-3 mb-2">
+                    <div className="bg-transparent rounded-lg border border-gray-800 p-2 sm:p-3 mb-2">
                         <div className="mb-2 sm:mb-3">
                             <div className="flex justify-between mb-1">
                                 <span className="text-gray-400 text-xs">TXNS</span>
@@ -245,12 +346,12 @@ export default function InfoWidget({ data }: InfoWidgetProps) {
                         </div>
                     </div>
 
-                    <button className="w-full bg-gray-900 border border-gray-700 rounded-lg py-2 sm:py-2.5 flex items-center justify-center gap-1.5 mb-1.5">
+                    <button className="w-full bg-transparent border border-gray-700 rounded-lg py-2 sm:py-2.5 flex items-center justify-center gap-1.5 mb-1.5">
                         <Star className="w-3 h-3 sm:w-4 sm:h-4" />
                         <span className="text-xs sm:text-sm">Watchlist</span>
                     </button>
 
-                    <button className="w-full bg-gray-900 border border-gray-700 rounded-lg py-2 sm:py-2.5 flex items-center justify-between px-3 sm:px-4 mb-2">
+                    <button className="w-full bg-transparent border border-gray-700 rounded-lg py-2 sm:py-2.5 flex items-center justify-between px-3 sm:px-4 mb-2">
                         <div className="flex items-center gap-1.5">
                             <svg className="w-3 h-3 sm:w-4 sm:h-4" viewBox="0 0 24 24" fill="none">
                                 <path d="M7 16V4M17 20V8M3 20L7 16L12 20L17 16L21 20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -286,7 +387,7 @@ export default function InfoWidget({ data }: InfoWidgetProps) {
                     )}
 
                     {/* Pooled Tokens */}
-                    <div className="bg-gray-900 border border-gray-800 rounded-lg p-1.5 sm:p-2 mb-1.5">
+                    <div className="bg-transparent border border-gray-800 rounded-lg p-1.5 sm:p-2 mb-1.5">
                         <div className="flex justify-between items-center">
                             <span className="text-xs sm:text-sm">Pooled {tokenData.pooledToken}</span>
                             <div className="flex gap-1.5 sm:gap-2 items-center">
@@ -296,7 +397,7 @@ export default function InfoWidget({ data }: InfoWidgetProps) {
                         </div>
                     </div>
 
-                    <div className="bg-gray-900 border border-gray-800 rounded-lg p-1.5 sm:p-2 mb-2">
+                    <div className="bg-transparent border border-gray-800 rounded-lg p-1.5 sm:p-2 mb-2">
                         <div className="flex justify-between items-center">
                             <span className="text-xs sm:text-sm">Pooled {tokenData.pooledBase}</span>
                             <div className="flex gap-1.5 sm:gap-2 items-center">
@@ -365,28 +466,138 @@ export default function InfoWidget({ data }: InfoWidgetProps) {
                         )}
                     </div>
 
+                    {/* Supply Information */}
+                    {(tokenData.totalSupply || tokenData.circulatingSupply || tokenData.holders) && (
+                        <div className="bg-transparent border border-gray-800 rounded-lg p-1.5 sm:p-2 mb-2">
+                            <div className="space-y-1">
+                                {tokenData.totalSupply && (
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-xs text-gray-400">Total Supply</span>
+                                        <span className="text-xs font-semibold">{tokenData.totalSupply}</span>
+                                    </div>
+                                )}
+                                {tokenData.circulatingSupply && (
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-xs text-gray-400">Circulating</span>
+                                        <span className="text-xs font-semibold">{tokenData.circulatingSupply}</span>
+                                    </div>
+                                )}
+                                {tokenData.holders && (
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-xs text-gray-400">Holders</span>
+                                        <span className="text-xs font-semibold">{tokenData.holders}</span>
+                                    </div>
+                                )}
+                                {tokenData.top10HoldersPercent && (
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-xs text-gray-400">Top 10 Holders</span>
+                                        <span className="text-xs font-semibold">{tokenData.top10HoldersPercent}</span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* ATH/ATL Information */}
+                    {(tokenData.ath || tokenData.atl) && (
+                        <div className="grid grid-cols-2 gap-1.5 mb-2">
+                            {tokenData.ath && (
+                                <div className="bg-transparent border border-gray-800 rounded-lg p-1.5 sm:p-2">
+                                    <div className="text-xs text-gray-400 mb-0.5">ATH</div>
+                                    <div className="text-xs sm:text-sm font-semibold text-green-400">{tokenData.ath}</div>
+                                    {tokenData.athDate && <div className="text-xs text-gray-500 mt-0.5">{tokenData.athDate}</div>}
+                                </div>
+                            )}
+                            {tokenData.atl && (
+                                <div className="bg-transparent border border-gray-800 rounded-lg p-1.5 sm:p-2">
+                                    <div className="text-xs text-gray-400 mb-0.5">ATL</div>
+                                    <div className="text-xs sm:text-sm font-semibold text-red-400">{tokenData.atl}</div>
+                                    {tokenData.atlDate && <div className="text-xs text-gray-500 mt-0.5">{tokenData.atlDate}</div>}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Social Links */}
+                    {(tokenData.website || tokenData.twitter || tokenData.telegram || tokenData.discord || tokenData.github) && (
+                        <div className="bg-transparent border border-gray-800 rounded-lg p-1.5 sm:p-2 mb-2">
+                            <div className="text-xs font-semibold mb-1.5">Social Links</div>
+                            <div className="space-y-1">
+                                {tokenData.website && (
+                                    <a href={tokenData.website} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between text-xs hover:text-cyan-400 transition-colors">
+                                        <span>Website</span>
+                                        <ExternalLink className="w-2.5 h-2.5" />
+                                    </a>
+                                )}
+                                {tokenData.twitter && (
+                                    <a href={tokenData.twitter} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between text-xs hover:text-cyan-400 transition-colors">
+                                        <span>Twitter</span>
+                                        <ExternalLink className="w-2.5 h-2.5" />
+                                    </a>
+                                )}
+                                {tokenData.telegram && (
+                                    <a href={tokenData.telegram} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between text-xs hover:text-cyan-400 transition-colors">
+                                        <span>Telegram</span>
+                                        <ExternalLink className="w-2.5 h-2.5" />
+                                    </a>
+                                )}
+                                {tokenData.discord && (
+                                    <a href={tokenData.discord} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between text-xs hover:text-cyan-400 transition-colors">
+                                        <span>Discord</span>
+                                        <ExternalLink className="w-2.5 h-2.5" />
+                                    </a>
+                                )}
+                                {tokenData.github && (
+                                    <a href={tokenData.github} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between text-xs hover:text-cyan-400 transition-colors">
+                                        <span>GitHub</span>
+                                        <ExternalLink className="w-2.5 h-2.5" />
+                                    </a>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
                     {/* Action Buttons */}
                     <div className="grid grid-cols-2 gap-1.5 mb-2">
-                        <button className="bg-gray-900 border border-gray-700 rounded-lg py-1.5 sm:py-2 flex items-center justify-center gap-1">
-                            <svg className="w-3 h-3 sm:w-4 sm:h-4" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M23.643 4.937c-.835.37-1.732.62-2.675.733.962-.576 1.7-1.49 2.048-2.578-.9.534-1.897.922-2.958 1.13-.85-.904-2.06-1.47-3.4-1.47-2.572 0-4.658 2.086-4.658 4.66 0 .364.042.718.12 1.06-3.873-.195-7.304-2.05-9.602-4.868-.4.69-.63 1.49-.63 2.342 0 1.616.823 3.043 2.072 3.878-.764-.025-1.482-.234-2.11-.583v.06c0 2.257 1.605 4.14 3.737 4.568-.392.106-.803.162-1.227.162-.3 0-.593-.028-.877-.082.593 1.85 2.313 3.198 4.352 3.234-1.595 1.25-3.604 1.995-5.786 1.995-.376 0-.747-.022-1.112-.065 2.062 1.323 4.51 2.093 7.14 2.093 8.57 0 13.255-7.098 13.255-13.254 0-.2-.005-.402-.014-.602.91-.658 1.7-1.477 2.323-2.41z" />
-                            </svg>
-                            <span className="text-xs">Twitter</span>
-                        </button>
-                        <button className="bg-gray-900 border border-gray-700 rounded-lg py-1.5 sm:py-2 flex items-center justify-center gap-1">
-                            <svg className="w-3 h-3 sm:w-4 sm:h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                <circle cx="11" cy="11" r="8" strokeWidth="2" />
-                                <path d="M21 21l-4.35-4.35" strokeWidth="2" strokeLinecap="round" />
-                            </svg>
-                            <span className="text-xs">Pairs</span>
-                        </button>
+                        {tokenData.dexUrl ? (
+                            <a href={tokenData.dexUrl} target="_blank" rel="noopener noreferrer" className="bg-transparent border border-gray-700 rounded-lg py-1.5 sm:py-2 flex items-center justify-center gap-1 hover:border-cyan-500 transition-colors">
+                                <svg className="w-3 h-3 sm:w-4 sm:h-4" viewBox="0 0 24 24" fill="none">
+                                    <path d="M7 16V4M17 20V8M3 20L7 16L12 20L17 16L21 20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
+                                <span className="text-xs">Trade</span>
+                            </a>
+                        ) : (
+                            <button className="bg-transparent border border-gray-700 rounded-lg py-1.5 sm:py-2 flex items-center justify-center gap-1">
+                                <svg className="w-3 h-3 sm:w-4 sm:h-4" viewBox="0 0 24 24" fill="none">
+                                    <path d="M7 16V4M17 20V8M3 20L7 16L12 20L17 16L21 20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
+                                <span className="text-xs">Trade</span>
+                            </button>
+                        )}
+                        {tokenData.chartUrl ? (
+                            <a href={tokenData.chartUrl} target="_blank" rel="noopener noreferrer" className="bg-transparent border border-gray-700 rounded-lg py-1.5 sm:py-2 flex items-center justify-center gap-1 hover:border-cyan-500 transition-colors">
+                                <svg className="w-3 h-3 sm:w-4 sm:h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <circle cx="11" cy="11" r="8" strokeWidth="2" />
+                                    <path d="M21 21l-4.35-4.35" strokeWidth="2" strokeLinecap="round" />
+                                </svg>
+                                <span className="text-xs">Chart</span>
+                            </a>
+                        ) : (
+                            <button className="bg-transparent border border-gray-700 rounded-lg py-1.5 sm:py-2 flex items-center justify-center gap-1">
+                                <svg className="w-3 h-3 sm:w-4 sm:h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <circle cx="11" cy="11" r="8" strokeWidth="2" />
+                                    <path d="M21 21l-4.35-4.35" strokeWidth="2" strokeLinecap="round" />
+                                </svg>
+                                <span className="text-xs">Chart</span>
+                            </button>
+                        )}
                     </div>
 
                     {/* Security Sections */}
                     <div className="space-y-1.5 mb-2">
                         {/* Go+ Security */}
                         {tokenData.securityIssues && tokenData.securityIssues.length > 0 && (
-                            <div className="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden">
+                            <div className="bg-transparent border border-gray-800 rounded-lg overflow-hidden">
                                 <button
                                     onClick={() => setGoSecurityOpen(!goSecurityOpen)}
                                     className="w-full flex items-center justify-between p-2 sm:p-2.5"
@@ -418,7 +629,7 @@ export default function InfoWidget({ data }: InfoWidgetProps) {
 
                         {/* Quick Intel */}
                         {tokenData.intelIssues && tokenData.intelIssues.length > 0 && (
-                            <div className="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden">
+                            <div className="bg-transparent border border-gray-800 rounded-lg overflow-hidden">
                                 <button
                                     onClick={() => setQuickIntelOpen(!quickIntelOpen)}
                                     className="w-full flex items-center justify-between p-2 sm:p-2.5"
@@ -450,7 +661,7 @@ export default function InfoWidget({ data }: InfoWidgetProps) {
 
                         {/* Token Sniffer */}
                         {tokenData.snifferScore !== undefined && (
-                            <div className="bg-gray-900 border border-gray-800 rounded-lg p-2 sm:p-2.5">
+                            <div className="bg-transparent border border-gray-800 rounded-lg p-2 sm:p-2.5">
                                 <div className="flex items-center justify-between">
                                     <span className="text-xs sm:text-sm font-semibold">Token Sniffer</span>
                                     <div className="flex items-center gap-1.5 sm:gap-2">
