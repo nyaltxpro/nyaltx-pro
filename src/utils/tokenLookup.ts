@@ -1,4 +1,4 @@
-import top400CoinsData from '@/scripts/top400coins-detailed.json';
+import top400CoinsData from '../../scripts/top400coins-detailed.json';
 
 export interface TokenLookupResult {
   contractAddress?: string;
