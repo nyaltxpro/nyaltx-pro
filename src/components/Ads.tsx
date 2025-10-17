@@ -6,7 +6,7 @@ import { useChainFilter } from '@/hooks/useChainFilter';
 import ChainFilterIndicator from './ChainFilterIndicator';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import * as Avatar from '@radix-ui/react-avatar';
-import { ExternalLinkIcon, RocketIcon, UpdateIcon } from '@radix-ui/react-icons';
+import { ExternalLinkIcon, RocketIcon, UpdateIcon, ChevronLeftIcon, ChevronRightIcon } from '@radix-ui/react-icons';
 
 export interface BannerItem {
   id: number;
@@ -39,6 +39,7 @@ const Ads = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [isHovering, setIsHovering] = useState(false);
+  const [scrollSpeed, setScrollSpeed] = useState<number>(1); // Speed control: 0.5, 1, 1.5, 2, 2.5
   const tickerRef = useRef<HTMLDivElement>(null);
 
   // Exclusion list (by symbol or name). Add more symbols here as needed.
@@ -106,7 +107,7 @@ const Ads = () => {
         if (Math.abs(currentX) >= ticker.scrollWidth / 2) {
           ticker.style.transform = 'translateX(0px)';
         } else {
-          ticker.style.transform = `translateX(${currentX - 1}px)`;
+          ticker.style.transform = `translateX(${currentX - scrollSpeed}px)`;
         }
       }
       animationId = requestAnimationFrame(animate);
@@ -117,7 +118,7 @@ const Ads = () => {
     return () => {
       if (animationId) cancelAnimationFrame(animationId);
     };
-  }, [filtered.length, isHovering]);
+  }, [filtered.length, isHovering, scrollSpeed]);
 
   // Duplicate items for seamless ticker effect
   const tickerItems = useMemo(() => {
@@ -132,6 +133,15 @@ const Ads = () => {
     if (t.blockchain) params.set('chain', t.blockchain);
     if (t.contractAddress) params.set('address', t.contractAddress);
     router.push(`/dashboard/trade?${params.toString()}`);
+  };
+
+  // Speed control functions
+  const decreaseSpeed = () => {
+    setScrollSpeed(prev => Math.max(0.5, prev - 0.5));
+  };
+
+  const increaseSpeed = () => {
+    setScrollSpeed(prev => Math.min(3, prev + 0.5));
   };
 
   // Empty state safeguard
@@ -161,7 +171,44 @@ const Ads = () => {
                 {filtered.length}
               </div>
             </div>
-            <div className="text-xs text-gray-500">Auto-updating</div>
+            <div className="flex items-center gap-2">
+              <div className="text-xs text-gray-500 mr-2">Speed: {scrollSpeed}x</div>
+              {/* Speed Control Arrows */}
+              <Tooltip.Root>
+                <Tooltip.Trigger asChild>
+                  <button
+                    onClick={decreaseSpeed}
+                    disabled={scrollSpeed <= 0.5}
+                    className="w-8 h-8 rounded-full bg-black/50 hover:bg-black/70 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-all duration-200 hover:scale-110 backdrop-blur-sm border border-white/10"
+                  >
+                    <ChevronLeftIcon className="w-5 h-5 text-white" />
+                  </button>
+                </Tooltip.Trigger>
+                <Tooltip.Portal>
+                  <Tooltip.Content className="bg-black/90 text-white px-2 py-1 rounded text-xs">
+                    Decrease speed
+                    <Tooltip.Arrow className="fill-black/90" />
+                  </Tooltip.Content>
+                </Tooltip.Portal>
+              </Tooltip.Root>
+              <Tooltip.Root>
+                <Tooltip.Trigger asChild>
+                  <button
+                    onClick={increaseSpeed}
+                    disabled={scrollSpeed >= 3}
+                    className="w-8 h-8 rounded-full bg-black/50 hover:bg-black/70 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-all duration-200 hover:scale-110 backdrop-blur-sm border border-white/10"
+                  >
+                    <ChevronRightIcon className="w-5 h-5 text-white" />
+                  </button>
+                </Tooltip.Trigger>
+                <Tooltip.Portal>
+                  <Tooltip.Content className="bg-black/90 text-white px-2 py-1 rounded text-xs">
+                    Increase speed
+                    <Tooltip.Arrow className="fill-black/90" />
+                  </Tooltip.Content>
+                </Tooltip.Portal>
+              </Tooltip.Root>
+            </div>
           </div>
 
           {/* Chain Filter - Compact */}
