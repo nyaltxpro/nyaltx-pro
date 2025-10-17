@@ -176,7 +176,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
   const navigateToUnifiedToken = (token: UnifiedToken) => {
     const params = new URLSearchParams();
 
-
+    console.log('Navigating to token:', token);
 
     if (token.symbol) params.set('base', token.symbol);
     if (token.name) params.set('name', token.name);
@@ -184,7 +184,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
     if (token.address && token.address !== 'N/A') params.set('address', token.address);
     if (token.logo) params.set('imageUri', token.logo);
     if (token.source) params.set('source', token.source);
-    if (token.priceUsd) params.set('priceUsd', String(token.price));
+    if (token.price) params.set('priceUsd', String(token.price));
     // Handle both price and priceUsd field names
     const price = token.price ?? token.priceUsd;
     if (price !== undefined && price !== null) params.set('price', String(price));
