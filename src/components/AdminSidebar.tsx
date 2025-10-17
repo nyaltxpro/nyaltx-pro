@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import {
   FaChartPie,
   FaCoins,
+  FaEnvelope,
   FaGift,
   FaHome,
   FaImage,
@@ -176,6 +177,7 @@ export default function AdminSidebar({ isMobileMenuOpen, toggleMobileMenu }: Adm
     { icon: <FaChartPie />, text: 'Analytics', href: '/admin/statistics' },
     // { icon: <FaChartLine />, text: 'Stats', href: '/admin/stats' },
     { icon: <FaGift />, text: 'Token Points', href: '/admin/points' },
+    { icon: <FaEnvelope />, text: 'Email Management', href: '/admin/email-management' },
     { icon: <FaNewspaper />, text: 'Corporate News', href: '/admin/news' },
     { icon: <FaImage />, text: 'Banners', href: '/admin/banners' },
     // { icon: <FaRocket />, text: 'Campaigns', href: '/admin/campaigns' },

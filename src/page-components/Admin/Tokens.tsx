@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { FaCoins, FaSearch, FaCheck, FaTimes, FaTrash, FaChevronLeft, FaChevronRight, FaArrowLeft, FaCrown, FaPause, FaPlay, FaEye, FaEyeSlash, FaSort, FaSortUp, FaSortDown, FaPlusCircle } from 'react-icons/fa';
+import { FaCoins, FaSearch, FaCheck, FaTimes, FaTrash, FaChevronLeft, FaChevronRight, FaArrowLeft, FaCrown, FaPause, FaPlay, FaEye, FaEyeSlash, FaSort, FaSortUp, FaSortDown, FaPlusCircle, FaExternalLinkAlt } from 'react-icons/fa';
 
 const AdminTokensClient = dynamic(() => Promise.resolve(AdminTokensComponent), {
     ssr: false,
@@ -591,38 +591,52 @@ function AdminTokensComponent() {
                                             </div>
                                         </td>
                                         <td className="px-4 py-3 text-sm">
-                                            <div className="flex gap-2 justify-end">
-                                                <button
-                                                    disabled={busyId === t.id || t.status === 'approved'}
-                                                    onClick={() => updateStatus(t.id, 'approved')}
-                                                    className={`px-3 py-1 rounded-lg text-xs font-medium transition-all duration-200 ${
-                                                        t.status === 'approved' 
-                                                            ? 'bg-green-500/20 text-green-300 border border-green-500/30 cursor-not-allowed' 
-                                                            : 'bg-green-500/20 hover:bg-green-500/30 text-green-300 border border-green-500/30'
-                                                    }`}
+                                            <div className="flex flex-col gap-2">
+                                                {/* Preview on Trade Page Link */}
+                                                <Link
+                                                    href={`/dashboard/trade?base=${encodeURIComponent(t.tokenSymbol)}&name=${encodeURIComponent(t.tokenName)}&chain=${encodeURIComponent(t.blockchain)}&address=${encodeURIComponent(t.contractAddress)}${t.imageUri ? `&imageUri=${encodeURIComponent(t.imageUri)}` : ''}&source=local`}
+                                                    target="_blank"
+                                                    className="px-3 py-1 rounded-lg text-xs font-medium transition-all duration-200 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/30 text-center"
                                                     style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                                                 >
-                                                    <FaCheck className="w-3 h-3 inline mr-1" />
-                                                    {t.status === 'approved' ? 'Approved' : 'Approve'}
-                                                </button>
-                                                <button
-                                                    disabled={busyId === t.id}
-                                                    onClick={() => updateStatus(t.id, 'rejected')}
-                                                    className="px-3 py-1 rounded-lg text-xs font-medium transition-all duration-200 bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30"
-                                                    style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
-                                                >
-                                                    <FaTimes className="w-3 h-3 inline mr-1" />
-                                                    Reject
-                                                </button>
-                                                <button
-                                                    disabled={busyId === t.id}
-                                                    onClick={() => remove(t.id)}
-                                                    className="px-3 py-1 rounded-lg text-xs font-medium transition-all duration-200 bg-gray-500/20 hover:bg-gray-500/30 text-gray-300 border border-gray-500/30"
-                                                    style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
-                                                >
-                                                    <FaTrash className="w-3 h-3 inline mr-1" />
-                                                    Delete
-                                                </button>
+                                                    <FaExternalLinkAlt className="w-3 h-3 inline mr-1" />
+                                                    Preview Trade
+                                                </Link>
+                                                
+                                                {/* Action Buttons */}
+                                                <div className="flex gap-2 justify-end">
+                                                    <button
+                                                        disabled={busyId === t.id || t.status === 'approved'}
+                                                        onClick={() => updateStatus(t.id, 'approved')}
+                                                        className={`px-3 py-1 rounded-lg text-xs font-medium transition-all duration-200 ${
+                                                            t.status === 'approved' 
+                                                                ? 'bg-green-500/20 text-green-300 border border-green-500/30 cursor-not-allowed' 
+                                                                : 'bg-green-500/20 hover:bg-green-500/30 text-green-300 border border-green-500/30'
+                                                        }`}
+                                                        style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                                                    >
+                                                        <FaCheck className="w-3 h-3 inline mr-1" />
+                                                        {t.status === 'approved' ? 'Approved' : 'Approve'}
+                                                    </button>
+                                                    <button
+                                                        disabled={busyId === t.id}
+                                                        onClick={() => updateStatus(t.id, 'rejected')}
+                                                        className="px-3 py-1 rounded-lg text-xs font-medium transition-all duration-200 bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30"
+                                                        style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                                                    >
+                                                        <FaTimes className="w-3 h-3 inline mr-1" />
+                                                        Reject
+                                                    </button>
+                                                    <button
+                                                        disabled={busyId === t.id}
+                                                        onClick={() => remove(t.id)}
+                                                        className="px-3 py-1 rounded-lg text-xs font-medium transition-all duration-200 bg-gray-500/20 hover:bg-gray-500/30 text-gray-300 border border-gray-500/30"
+                                                        style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                                                    >
+                                                        <FaTrash className="w-3 h-3 inline mr-1" />
+                                                        Delete
+                                                    </button>
+                                                </div>
                                             </div>
                                         </td>
                                     </tr>
