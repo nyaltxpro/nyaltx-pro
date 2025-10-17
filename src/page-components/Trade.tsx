@@ -935,7 +935,7 @@ function TradingViewWithParams({
         // Skip DexScreener check for NYAX token
         if (baseToken === 'NYAX') {
             console.log('⏭️ Skipping DexScreener API check for NYAX token');
-            setDexScreenerDataExists(false);
+            setDexScreenerDataExists(true);
             setInfoIframeError(true);
             setChartIframeError(true);
             setTradesIframeError(true);
