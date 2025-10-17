@@ -62,8 +62,8 @@ export const generateRealisticChartData = (
     const volumeSpike = Math.random() > 0.9 ? 2 + Math.random() * 3 : 1; // 10% chance of 2-5x volume
     const volume = baseVolume * (1 + volatilityFactor) * volumeSpike;
     
-    // Determine volume bar color based on price movement
-    const volumeColor = close >= open ? '#22c55e66' : '#ef444466'; // Green or red with transparency
+    // Determine volume bar color based on price movement - DexScreener colors
+    const volumeColor = close >= open ? '#26a69a66' : '#ef535066'; // Green or red with transparency
     
     data.push({
       candlestick: {

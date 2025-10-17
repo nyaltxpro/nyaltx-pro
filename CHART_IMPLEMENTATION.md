@@ -54,6 +54,8 @@ Chart automatically shows as fallback when:
 - **Interactive Crosshair**: Hover to see OHLC values
 - **Smooth Animations**: Transitions when changing timeframes
 - **Responsive Layout**: Works on all screen sizes
+- **Tools Sidebar**: Left-side toolbar with chart tools
+- **No Overflow**: Chart fits perfectly within container
 
 ### Data Generation
 - **Realistic Trends**: Uptrends and downtrends with momentum
@@ -63,11 +65,19 @@ Chart automatically shows as fallback when:
 - **Trend Changes**: Random trend reversals (5% chance)
 
 ### User Controls
+
+**Header Controls:**
 1. **Timeframe Buttons**: Switch between 1D, 1W, 1M, 3M
 2. **Volume Toggle**: Show/hide volume histogram
 3. **SMA Toggle**: Show/hide 20-period SMA line
 4. **Fullscreen**: Expand chart to fullscreen view
-5. **Auto-refresh**: Updates every time timeframe changes
+
+**Sidebar Tools:**
+1. **Zoom In**: Zoom into the chart for more detail
+2. **Zoom Out**: Zoom out to see more data
+3. **Reset Zoom**: Fit all content to view
+4. **Crosshair Toggle**: Enable/disable crosshair
+5. **Measure Tool**: Measure distances on chart
 
 ## Technical Details
 
