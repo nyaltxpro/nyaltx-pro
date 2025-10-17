@@ -31,6 +31,7 @@ import Ads from '@/components/Ads';
 import PumpFunLive from '@/components/PumpFunLive';
 import { useChainFilter } from '@/hooks/useChainFilter';
 import ChainFilterIndicator from '@/components/ChainFilterIndicator';
+import { lookupTokenWithChain } from '@/utils/tokenLookup';
 // import DashboardBanners from '@/components/DashboardBanners';
 
 // SortConfig type will be used when we reimplement the token sorting functionality
@@ -268,9 +269,35 @@ export default function Home() {
 
   const handleClick = (t: any) => {
     const params = new URLSearchParams();
-    params.set('base', (t.tokenSymbol || t.tokenName || '').toUpperCase());
-    if (t.blockchain) params.set('chain', t.blockchain);
-    if (t.contractAddress) params.set('address', t.contractAddress);
+    const symbol = (t.symbol || t.tokenSymbol || t.tokenName || '').toUpperCase();
+    params.set('base', symbol);
+    
+    // Try to get contract address and chain from the JSON lookup if not present
+    let chain = t.blockchain || t.chain;
+    let contractAddress = t.contractAddress;
+    
+    // If contract address or chain is missing, lookup from top400coins database
+    if (!contractAddress || !chain) {
+      const tokenLookup = lookupTokenWithChain(symbol, chain);
+      if (tokenLookup) {
+        if (!contractAddress && tokenLookup.contractAddress) {
+          contractAddress = tokenLookup.contractAddress;
+        }
+        if (!chain && tokenLookup.chain) {
+          chain = tokenLookup.chain;
+        }
+        // Also add image if available and not present
+        if (tokenLookup.image && !t.image && !t.logoUrl) {
+          params.set('imageUri', tokenLookup.image);
+        }
+      }
+    }
+    
+    if (chain) params.set('chain', chain);
+    if (contractAddress) params.set('address', contractAddress);
+    if (t.name) params.set('name', t.name);
+    if (t.image || t.logoUrl) params.set('imageUri', t.image || t.logoUrl);
+    
     router.push(`/dashboard/trade?${params.toString()}`);
   };
 
