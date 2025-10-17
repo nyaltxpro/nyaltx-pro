@@ -342,20 +342,20 @@ const LivePriceTicker: React.FC = () => {
     );
   }
 
-  // Show fallback message if no tokens available
-  if (error || (!loading && (!tokens || tokens.length === 0))) {
-    return (
-      <div className="w-full bg-gradient-to-r from-black/95 via-gray-900/95 to-black/95 backdrop-blur-lg border-y border-gray-800/50 py-3 flex items-center justify-center" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-        <div className="flex items-center gap-3 text-gray-400">
-          <div className="w-6 h-6 rounded-lg bg-gray-700/50 flex items-center justify-center">
-            <ActivityLogIcon className="w-3 h-3" />
-          </div>
-          <span className="text-sm">Live prices temporarily unavailable</span>
-          <div className="w-2 h-2 bg-red-400 rounded-full animate-pulse"></div>
-        </div>
-      </div>
-    );
-  }
+  // // Show fallback message if no tokens available
+  // if (error || (!loading && (!tokens || tokens.length === 0))) {
+  //   return (
+  //     <div className="w-full bg-gradient-to-r from-black/95 via-gray-900/95 to-black/95 backdrop-blur-lg border-y border-gray-800/50 py-3 flex items-center justify-center" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+  //       <div className="flex items-center gap-3 text-gray-400">
+  //         <div className="w-6 h-6 rounded-lg bg-gray-700/50 flex items-center justify-center">
+  //           <ActivityLogIcon className="w-3 h-3" />
+  //         </div>
+  //         <span className="text-sm">Live prices temporarily unavailable</span>
+  //         <div className="w-2 h-2 bg-red-400 rounded-full animate-pulse"></div>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <Tooltip.Provider>
