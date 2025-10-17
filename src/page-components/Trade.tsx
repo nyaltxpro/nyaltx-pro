@@ -969,7 +969,7 @@ function TradingViewWithParams({
         }
     }, [addressParam, chainParam]);
 
-    // Add timeout for info iframe - if it doesn't load within 10 seconds, show InfoWidget
+    // Add timeout for info iframe - if it doesn't load within 5 seconds, show InfoWidget
     useEffect(() => {
         if (infoDexEmbedUrl && !infoIframeLoaded && !infoIframeError && dexScreenerDataExists === true) {
             const timeout = setTimeout(() => {
@@ -977,7 +977,7 @@ function TradingViewWithParams({
                     console.log('Info iframe timeout - showing InfoWidget fallback');
                     setInfoIframeError(true);
                 }
-            }, 10000); // 10 second timeout
+            }, 5000); // 5 second timeout
 
             return () => clearTimeout(timeout);
         }
@@ -999,33 +999,22 @@ function TradingViewWithParams({
                 {/* Left Column - Stats and Order Panel */}
                 <div className="lg:col-span-1">
                     <div className="bg-[#2222s27] rounded-xl overflow-hidden mb-4" style={{ minHeight: '600px', position: 'relative' }}>
-                        {!infoDexEmbedUrl || infoIframeError ? (
+                        {!infoDexEmbedUrl || (dexScreenerDataExists === false) || infoIframeError ? (
                             <div className="w-full rounded-lg" style={{ maxHeight: '600px', overflow: 'auto' }}>
                                 <InfoWidget />
                             </div>
                         ) : (
-                            <>
-                                {!infoIframeLoaded && (
-                                    <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 flex items-center justify-center" style={{ minHeight: '600px' }}>
-                                        <div className="text-center">
-                                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-3"></div>
-                                            <p className="text-gray-400">Loading info...</p>
-                                        </div>
-                                    </div>
-                                )}
-                                <iframe 
-                                    src={infoDexEmbedUrl} 
-                                    width="100%" 
-                                    height="600" 
-                                    style={{ 
-                                        border: 0,
-                                        opacity: infoIframeLoaded ? 1 : 0,
-                                        transition: 'opacity 0.3s ease-in-out'
-                                    }}
-                                    onLoad={() => setInfoIframeLoaded(true)}
-                                    onError={() => setInfoIframeError(true)}
-                                />
-                            </>
+                            <iframe 
+                                src={infoDexEmbedUrl} 
+                                width="100%" 
+                                height="600" 
+                                style={{ 
+                                    border: 0,
+                                    display: 'block'
+                                }}
+                                onLoad={() => setInfoIframeLoaded(true)}
+                                onError={() => setInfoIframeError(true)}
+                            />
                         )}
                     </div>
                     <SwapPage />
@@ -1424,65 +1413,39 @@ function TradingViewWithParams({
                                 />
                             ) : (
                                 <>
-                                    {!dexEmbedUrl || chartIframeError ? (
+                                    {!dexEmbedUrl || (dexScreenerDataExists === false) || chartIframeError ? (
                                         <div className="w-full h-full rounded-lg bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 flex flex-col items-center justify-center p-8">
                                             <FaChartLine className="text-gray-500 text-6xl mb-4" />
                                             <h3 className="text-xl font-semibold text-gray-300 mb-2">
-                                                {!dexEmbedUrl ? 'Chart Not Available' : 'Failed to Load Chart'}
+                                                Chart Not Available
                                             </h3>
                                             <p className="text-gray-400 text-center mb-4">
-                                                {!dexEmbedUrl 
-                                                    ? 'Chart data is not available for this token. It may be a new token or not tracked on DexScreener yet.'
-                                                    : 'Unable to load the DexScreener chart. The data may not be available or there may be a connection issue.'}
+                                                This token is not tracked on DexScreener yet.
                                             </p>
-                                            <div className="flex gap-3">
-                                                <button
-                                                    onClick={() => {
-                                                        setChartIframeError(false);
-                                                        setChartIframeLoaded(false);
-                                                    }}
-                                                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors flex items-center gap-2"
+                                            {addressParam && chainParam && (
+                                                <a
+                                                    href={`https://dexscreener.com/${chainParam}/${addressParam}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
                                                 >
-                                                    <FaSyncAlt className="text-sm" />
-                                                    Retry
-                                                </button>
-                                                {addressParam && chainParam && (
-                                                    <a
-                                                        href={`https://dexscreener.com/${chainParam}/${addressParam}`}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
-                                                    >
-                                                        View on DexScreener
-                                                    </a>
-                                                )}
-                                            </div>
+                                                    View on DexScreener
+                                                </a>
+                                            )}
                                         </div>
                                     ) : (
-                                        <>
-                                            {!chartIframeLoaded && (
-                                                <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 flex items-center justify-center">
-                                                    <div className="text-center">
-                                                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-3"></div>
-                                                        <p className="text-gray-400">Loading chart...</p>
-                                                    </div>
-                                                </div>
-                                            )}
-                                            <iframe
-                                                src={dexEmbedUrl}
-                                                width="100%"
-                                                height="500"
-                                                style={{ 
-                                                    border: 0, 
-                                                    backgroundColor: 'transparent',
-                                                    opacity: chartIframeLoaded ? 1 : 0,
-                                                    transition: 'opacity 0.3s ease-in-out'
-                                                }}
-                                                className="rounded-lg"
-                                                onLoad={() => setChartIframeLoaded(true)}
-                                                onError={() => setChartIframeError(true)}
-                                            />
-                                        </>
+                                        <iframe
+                                            src={dexEmbedUrl}
+                                            width="100%"
+                                            height="500"
+                                            style={{ 
+                                                border: 0, 
+                                                backgroundColor: 'transparent'
+                                            }}
+                                            className="rounded-lg"
+                                            onLoad={() => setChartIframeLoaded(true)}
+                                            onError={() => setChartIframeError(true)}
+                                        />
                                     )}
                                 </>
                             )}
@@ -1538,54 +1501,30 @@ function TradingViewWithParams({
                                 </div>
 
                                 <div className="overflow-x-auto">
-                                    <div style={{ backgroundColor: '#0f1923', padding: '0px', borderRadius: '8px', minHeight: '300px', position: 'relative' }}>
-                                        {!transactionDexEmbedUrl || tradesIframeError ? (
+                                    <div style={{ backgroundColor: '#0f1923', padding: '0px', borderRadius: '8px', minHeight: '300px' }}>
+                                        {!transactionDexEmbedUrl || (dexScreenerDataExists === false) || tradesIframeError ? (
                                             <div className="w-full h-[300px] rounded-lg bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 flex flex-col items-center justify-center p-6">
                                                 <FaChartBar className="text-gray-500 text-5xl mb-3" />
                                                 <h3 className="text-lg font-semibold text-gray-300 mb-2">
-                                                    {!transactionDexEmbedUrl ? 'Trades Not Available' : 'Failed to Load Trades'}
+                                                    Trades Not Available
                                                 </h3>
-                                                <p className="text-gray-400 text-center text-sm mb-3">
-                                                    {!transactionDexEmbedUrl 
-                                                        ? 'Trade data is not available for this token yet.'
-                                                        : 'Unable to load trade data. Please try again.'}
+                                                <p className="text-gray-400 text-center text-sm">
+                                                    This token is not tracked on DexScreener yet.
                                                 </p>
-                                                <button
-                                                    onClick={() => {
-                                                        setTradesIframeError(false);
-                                                        setTradesIframeLoaded(false);
-                                                    }}
-                                                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors flex items-center gap-2 text-sm"
-                                                >
-                                                    <FaSyncAlt className="text-sm" />
-                                                    Retry
-                                                </button>
                                             </div>
                                         ) : (
-                                            <>
-                                                {!tradesIframeLoaded && (
-                                                    <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 flex items-center justify-center" style={{ minHeight: '300px' }}>
-                                                        <div className="text-center">
-                                                            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500 mx-auto mb-2"></div>
-                                                            <p className="text-gray-400 text-sm">Loading trades...</p>
-                                                        </div>
-                                                    </div>
-                                                )}
-                                                <iframe
-                                                    src={transactionDexEmbedUrl}
-                                                    width="100%"
-                                                    height="300"
-                                                    style={{ 
-                                                        border: 0, 
-                                                        display: 'block', 
-                                                        width: '100%',
-                                                        opacity: tradesIframeLoaded ? 1 : 0,
-                                                        transition: 'opacity 0.3s ease-in-out'
-                                                    }}
-                                                    onLoad={() => setTradesIframeLoaded(true)}
-                                                    onError={() => setTradesIframeError(true)}
-                                                />
-                                            </>
+                                            <iframe
+                                                src={transactionDexEmbedUrl}
+                                                width="100%"
+                                                height="300"
+                                                style={{ 
+                                                    border: 0, 
+                                                    display: 'block', 
+                                                    width: '100%'
+                                                }}
+                                                onLoad={() => setTradesIframeLoaded(true)}
+                                                onError={() => setTradesIframeError(true)}
+                                            />
                                         )}
                                     </div>
                                 </div>
