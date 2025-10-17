@@ -1,8 +1,8 @@
 'use client';
 
 import catalog from '@/data/tokens.json';
-import { LocalCoin, LocalSearchResult, useLocalCoinsSearch } from '@/hooks/useLocalCoinsSearch';
 import { useCoinGeckoSearch } from '@/hooks/useCoinGeckoSearch';
+import { LocalCoin, LocalSearchResult, useLocalCoinsSearch } from '@/hooks/useLocalCoinsSearch';
 import { useAppSelector } from '@/store';
 import { selectCoinGeckoSearchResults, selectTrendingCoins } from '@/store/slices/searchCacheSlice';
 import {
@@ -182,10 +182,10 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
     if (token.address && token.address !== 'N/A') params.set('address', token.address);
     if (token.logo) params.set('imageUri', token.logo);
     if (token.source) params.set('source', token.source);
-    
+
     // Handle both price and priceUsd field names
     const price = token.price ?? token.priceUsd;
-    if (price !== undefined && price !== null) params.set('price', price.toString());
+    if (price) params.set('price', price.toString());
 
     const tradeUrl = `/dashboard/trade?${params.toString()}`;
     router.push(tradeUrl);
@@ -903,7 +903,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                                 <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
                               </div>
                             </div>
-                            
+
                             {/* Token Details */}
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 mb-1">
@@ -911,10 +911,10 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                                 <span className="text-xs text-gray-400">•</span>
                                 <span className="text-xs text-gray-400 uppercase tracking-wide">{result.coin.name}</span>
                               </div>
-                              
+
                               <div className="flex items-center gap-3 text-xs text-gray-400">
                                 <span>Mkt Cap <span className="text-white font-medium">
-                                  ${result.coin.current_price ? (result.coin.current_price * Math.random() * 1000000).toLocaleString(undefined, {maximumFractionDigits: 0}) : 'N/A'}
+                                  ${result.coin.current_price ? (result.coin.current_price * Math.random() * 1000000).toLocaleString(undefined, { maximumFractionDigits: 0 }) : 'N/A'}
                                 </span></span>
                                 <span>•</span>
                                 <span>Liquidity <span className="text-white font-medium">
@@ -925,7 +925,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                                   ${(Math.random() * 1000 + 100).toFixed(0)}K
                                 </span></span>
                               </div>
-                              
+
                               <div className="flex items-center gap-2 mt-1">
                                 {result.coin.is_native_token && (
                                   <span className="px-2 py-0.5 bg-purple-500/20 text-purple-300 rounded text-xs font-medium">
@@ -947,17 +947,17 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                             <div className="text-sm text-white font-medium mb-1">
                               ${result.coin.current_price ? result.coin.current_price.toFixed(6) : '0.000000'}
                             </div>
-                            
+
                             {result.coin.price_change_percentage_24h !== null && (
                               <div className={`text-xs font-medium mb-1 ${result.coin.price_change_percentage_24h > 0
-                                  ? 'text-green-400'
-                                  : 'text-red-400'
+                                ? 'text-green-400'
+                                : 'text-red-400'
                                 }`}>
                                 {result.coin.price_change_percentage_24h > 0 ? '+' : ''}
                                 {result.coin.price_change_percentage_24h.toFixed(2)}%
                               </div>
                             )}
-                            
+
                             <div className="flex items-center justify-end gap-2 text-xs text-gray-400">
                               <span>PAIR:</span>
                               <span className="text-gray-300 font-mono">
@@ -965,303 +965,303 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                               </span>
                             </div>
                           </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Unified Tokens (Registered + Solana) */}
-            {searchTerm && searchTerm.length >= 2 && (unifiedTokens.length > 0 || unifiedTokensLoading) && (
-              <div className="border-b border-gray-800">
-                <div className="p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-cyan-400 font-bold flex items-center gap-2">
-                      <span>🚀 REGISTERED & SOLANA TOKENS</span>
-                      {unifiedTokensLoading && (
-                        <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-cyan-400"></div>
-                      )}
-                    </h3>
-                    <div className="text-xs text-gray-400">
-                      {unifiedTokens.length} results from unified search
-                    </div>
-                  </div>
-                  <div className="max-h-60 overflow-y-auto">
-                    {unifiedTokensLoading ? (
-                      <div className="flex items-center justify-center py-8">
-                        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-cyan-400"></div>
-                      </div>
-                    ) : (
-                      unifiedTokens.map((token, index) => (
-                        <div
-                          key={`unified-${token.id}-${index}`}
-                          className="flex items-center p-3 hover:bg-gray-700 cursor-pointer border-b border-gray-700 last:border-b-0 rounded-lg mb-1 group"
-                          onClick={() => navigateToUnifiedToken(token)}
-                        >
-                          <div className="flex items-center flex-1">
-                            <div className="w-10 h-10 mr-3 rounded-full overflow-hidden bg-gray-600 flex items-center justify-center">
-                              {token.logo ? (
-                                <TokenAvatar
-                                  src={token.logo}
-                                  symbol={token.symbol}
-                                  name={token.name}
-                                  size={40}
-                                />
-                              ) : (
-                                <div className="text-white font-bold text-sm">
-                                  {token.symbol.slice(0, 2)}
-                                </div>
-                              )}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-1">
-                                <div className="font-semibold text-white truncate">
-                                  {token.name}
-                                </div>
-                                <span className="px-2 py-1 bg-blue-500/30 rounded text-blue-200 text-xs font-bold">
-                                  {token.symbol}
-                                </span>
-                                <span className={`px-2 py-1 rounded text-xs font-bold ${token.chain === 'solana' ? 'bg-purple-500/30 text-purple-200' :
-                                  token.chain === 'ethereum' ? 'bg-blue-500/30 text-blue-200' :
-                                    token.chain === 'binance' ? 'bg-yellow-500/30 text-yellow-200' :
-                                      'bg-gray-500/30 text-gray-200'
-                                  }`}>
-                                  {token.chain.toUpperCase()}
-                                </span>
-                                <span className={`px-2 py-1 rounded text-xs font-bold ${token.source === 'local' ? 'bg-green-500/30 text-green-200' : 'bg-orange-500/30 text-orange-200'
-                                  }`}>
-                                  {token.source === 'local' ? 'REG' : 'LIVE'}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-4 text-xs text-gray-400">
-                                {token.price && (
-                                  <span>${parseFloat(token.price.toString()).toFixed(6)}</span>
-                                )}
-                                {token.market_cap && (
-                                  <span>MC: ${(token.market_cap / 1e6).toFixed(2)}M</span>
-                                )}
-                                {token.address && token.address !== 'N/A' && (
-                                  <span className="font-mono truncate max-w-[100px]" title={token.address}>
-                                    {token.address}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <ArrowRight size={16} className="text-cyan-400" />
-                            </div>
-                          </div>
                         </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Search Results */}
-            {searchTerm && searchResults.length > 0 && (
-              <div className="border-b border-gray-800">
-                <div className="p-4">
-                  <h3 className="text-blue-400 font-bold mb-3">OTHER SOURCES</h3>
-                  <div className="max-h-60 overflow-y-auto">
-                    {searchResults.map((result, index) => renderSearchResult(result, index))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* CoinGecko Cryptocurrency Results */}
-            {searchTerm &&
-              searchTerm.length >= 2 &&
-              ((cachedCoinGeckoResults && cachedCoinGeckoResults.length > 0) ||
-                isSearchingCoinGecko) && (
-                <div className="border-b border-gray-800">
-                  <div className="p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-orange-400 font-bold flex items-center gap-2">
-                        <span>🔍 MULTI-SOURCE SEARCH</span>
-                        {isSearchingCoinGecko && (
-                          <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-orange-400"></div>
-                        )}
-                      </h3>
-                      {/* API Source Legend */}
-                      <div className="flex items-center space-x-3 text-xs">
-                        <div className="flex items-center space-x-1">
-                          <div className="w-2 h-2 bg-blue-500 rounded-full" />
-                          <span className="text-gray-400">Dex</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <div className="w-2 h-2 bg-orange-500 rounded-full" />
-                          <span className="text-gray-400">CMC</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <div className="w-2 h-2 bg-purple-500 rounded-full" />
-                          <span className="text-gray-400">1inch</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <div className="w-2 h-2 bg-green-500 rounded-full" />
-                          <span className="text-gray-400">CG</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="max-h-60 overflow-y-auto">
-                      {isSearchingCoinGecko ? (
-                        <div className="space-y-3">
-                          {[...Array(3)].map((_, i) => (
-                            <div
-                              key={i}
-                              className="flex items-center p-3 rounded-lg bg-gray-800/50 animate-pulse"
-                            >
-                              <div className="relative mr-3">
-                                <div className="w-8 h-8 bg-gray-700 rounded-full" />
-                                <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-gray-600 rounded-full" />
-                              </div>
-                              <div className="flex-1">
-                                <div className="flex items-center space-x-2 mb-1">
-                                  <div className="h-4 bg-gray-700 rounded w-20" />
-                                  <div className="h-3 bg-gray-600 rounded w-12" />
-                                  <div className="h-3 bg-gray-600 rounded w-16" />
-                                </div>
-                                <div className="h-3 bg-gray-700 rounded w-2/3 mb-1" />
-                                <div className="h-2 bg-gray-700 rounded w-1/2" />
-                              </div>
-                            </div>
-                          ))}
-                          <div className="text-center text-sm text-gray-400 py-2">
-                            🔍 Searching Dexscreener, CoinPaprika, 1inch, CoinGecko...
-                          </div>
-                        </div>
-                      ) : cachedCoinGeckoResults && cachedCoinGeckoResults.length > 0 ? (
-                        cachedCoinGeckoResults.map((coin: any, index: number) => (
-                          <div
-                            key={`coingecko-${coin.id}-${index}`}
-                            className="flex items-center p-3 hover:bg-gray-700 cursor-pointer border-b border-gray-700 last:border-b-0"
-                            onClick={() => handleCoinGeckoClick(coin)}
-                          >
-                            <div className="flex items-center mr-3">
-                              <div className="relative">
-                                <div className="w-8 h-8 rounded-full overflow-hidden">
-                                  <img
-                                    src={coin.thumb}
-                                    alt={coin.symbol}
-                                    className="w-full h-full object-cover"
-                                    onError={e => {
-                                      e.currentTarget.style.display = 'none';
-                                    }}
-                                  />
-                                </div>
-                                {/* Source indicator */}
-                                {coin.source && (
-                                  <div
-                                    className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border border-gray-800 ${coin.source === 'dexscreener'
-                                      ? 'bg-blue-500'
-                                      : coin.source === 'coinpaprika'
-                                        ? 'bg-orange-500'
-                                        : coin.source === '1inch'
-                                          ? 'bg-purple-500'
-                                          : coin.source === 'multiapi'
-                                            ? 'bg-green-500'
-                                            : 'bg-gray-500'
-                                      }`}
-                                    title={`Source: ${coin.source}`}
-                                  />
-                                )}
-                              </div>
-                            </div>
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2">
-                                <span className="font-medium text-white">{coin.name}</span>
-                                {/* Source badge */}
-                                <span
-                                  className={`text-xs text-white px-2 py-0.5 rounded-full ${coin.source === 'dexscreener'
-                                    ? 'bg-blue-600'
-                                    : coin.source === 'coinpaprika'
-                                      ? 'bg-orange-600'
-                                      : coin.source === '1inch'
-                                        ? 'bg-purple-600'
-                                        : coin.source === 'multiapi'
-                                          ? 'bg-green-600'
-                                          : 'bg-orange-600'
-                                    }`}
-                                >
-                                  {coin.source === 'dexscreener'
-                                    ? 'DexScreener'
-                                    : coin.source === 'coinpaprika'
-                                      ? 'CoinPaprika'
-                                      : coin.source === '1inch'
-                                        ? '1inch'
-                                        : coin.source === 'multiapi'
-                                          ? 'Multi-API'
-                                          : 'CoinGecko'}
-                                </span>
-                                {coin.market_cap_rank && (
-                                  <span className="text-xs bg-gray-600 text-gray-300 px-2 py-0.5 rounded-full">
-                                    #{coin.market_cap_rank}
-                                  </span>
-                                )}
-                                {/* Confidence indicator */}
-                                {coin.confidence && coin.confidence > 70 && (
-                                  <span className="text-xs bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full">
-                                    {coin.confidence}%
-                                  </span>
-                                )}
-                              </div>
-                              <div className="text-sm text-gray-400">
-                                <span className="mr-2 font-mono">${coin.symbol.toUpperCase()}</span>
-                                {coin.primaryChain && (
-                                  <span className="text-xs bg-blue-600 text-white px-2 py-0.5 rounded-full mr-2">
-                                    {coin.primaryChain.toUpperCase()}
-                                  </span>
-                                )}
-                                {/* Show additional chains if available */}
-                                {coin.contractAddresses &&
-                                  Object.keys(coin.contractAddresses).length > 1 && (
-                                    <span className="text-xs bg-green-600 text-white px-2 py-0.5 rounded-full mr-2">
-                                      +{Object.keys(coin.contractAddresses).length - 1} chains
-                                    </span>
-                                  )}
-                                <span className="text-xs text-orange-400">ID: {coin.id}</span>
-                              </div>
-                              {coin.primaryAddress && (
-                                <div className="text-xs text-gray-500 font-mono mt-1">
-                                  {coin.primaryAddress.slice(0, 8)}...
-                                  {coin.primaryAddress.slice(-6)}
-                                </div>
-                              )}
-                              {/* Show all available chains */}
-                              {coin.contractAddresses &&
-                                Object.keys(coin.contractAddresses).length > 0 && (
-                                  <div className="text-xs text-gray-400 mt-1">
-                                    Available on: {Object.keys(coin.contractAddresses).join(', ')}
-                                  </div>
-                                )}
-                            </div>
-                          </div>
-                        ))
-                      ) : searchTerm.length >= 2 ? (
-                        <div className="text-center text-gray-400 py-6">
-                          <div className="text-orange-400 mb-2 text-2xl">🔍</div>
-                          <div className="font-medium">
-                            No cryptocurrencies found for "{searchTerm}"
-                          </div>
-                          <div className="text-xs text-gray-500 mt-2">
-                            Searched across multiple sources:
-                          </div>
-                          <div className="text-xs text-gray-600 mt-1">
-                            • Dexscreener • CoinPaprika • 1inch • CoinGecko
-                          </div>
-                        </div>
-                      ) : null}
+                      ))}
                     </div>
                   </div>
                 </div>
               )}
 
-            {/* Featured content */}
-            <div className="p-4">
-              {/* {!searchTerm && pumpFunTokens.length > 0 && (
+              {/* Unified Tokens (Registered + Solana) */}
+              {searchTerm && searchTerm.length >= 2 && (unifiedTokens.length > 0 || unifiedTokensLoading) && (
+                <div className="border-b border-gray-800">
+                  <div className="p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="text-cyan-400 font-bold flex items-center gap-2">
+                        <span>🚀 REGISTERED & SOLANA TOKENS</span>
+                        {unifiedTokensLoading && (
+                          <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-cyan-400"></div>
+                        )}
+                      </h3>
+                      <div className="text-xs text-gray-400">
+                        {unifiedTokens.length} results from unified search
+                      </div>
+                    </div>
+                    <div className="max-h-60 overflow-y-auto">
+                      {unifiedTokensLoading ? (
+                        <div className="flex items-center justify-center py-8">
+                          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-cyan-400"></div>
+                        </div>
+                      ) : (
+                        unifiedTokens.map((token, index) => (
+                          <div
+                            key={`unified-${token.id}-${index}`}
+                            className="flex items-center p-3 hover:bg-gray-700 cursor-pointer border-b border-gray-700 last:border-b-0 rounded-lg mb-1 group"
+                            onClick={() => navigateToUnifiedToken(token)}
+                          >
+                            <div className="flex items-center flex-1">
+                              <div className="w-10 h-10 mr-3 rounded-full overflow-hidden bg-gray-600 flex items-center justify-center">
+                                {token.logo ? (
+                                  <TokenAvatar
+                                    src={token.logo}
+                                    symbol={token.symbol}
+                                    name={token.name}
+                                    size={40}
+                                  />
+                                ) : (
+                                  <div className="text-white font-bold text-sm">
+                                    {token.symbol.slice(0, 2)}
+                                  </div>
+                                )}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <div className="font-semibold text-white truncate">
+                                    {token.name}
+                                  </div>
+                                  <span className="px-2 py-1 bg-blue-500/30 rounded text-blue-200 text-xs font-bold">
+                                    {token.symbol}
+                                  </span>
+                                  <span className={`px-2 py-1 rounded text-xs font-bold ${token.chain === 'solana' ? 'bg-purple-500/30 text-purple-200' :
+                                    token.chain === 'ethereum' ? 'bg-blue-500/30 text-blue-200' :
+                                      token.chain === 'binance' ? 'bg-yellow-500/30 text-yellow-200' :
+                                        'bg-gray-500/30 text-gray-200'
+                                    }`}>
+                                    {token.chain.toUpperCase()}
+                                  </span>
+                                  <span className={`px-2 py-1 rounded text-xs font-bold ${token.source === 'local' ? 'bg-green-500/30 text-green-200' : 'bg-orange-500/30 text-orange-200'
+                                    }`}>
+                                    {token.source === 'local' ? 'REG' : 'LIVE'}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-4 text-xs text-gray-400">
+                                  {token.price && (
+                                    <span>${parseFloat(token.price.toString()).toFixed(6)}</span>
+                                  )}
+                                  {token.market_cap && (
+                                    <span>MC: ${(token.market_cap / 1e6).toFixed(2)}M</span>
+                                  )}
+                                  {token.address && token.address !== 'N/A' && (
+                                    <span className="font-mono truncate max-w-[100px]" title={token.address}>
+                                      {token.address}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <ArrowRight size={16} className="text-cyan-400" />
+                              </div>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Search Results */}
+              {searchTerm && searchResults.length > 0 && (
+                <div className="border-b border-gray-800">
+                  <div className="p-4">
+                    <h3 className="text-blue-400 font-bold mb-3">OTHER SOURCES</h3>
+                    <div className="max-h-60 overflow-y-auto">
+                      {searchResults.map((result, index) => renderSearchResult(result, index))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* CoinGecko Cryptocurrency Results */}
+              {searchTerm &&
+                searchTerm.length >= 2 &&
+                ((cachedCoinGeckoResults && cachedCoinGeckoResults.length > 0) ||
+                  isSearchingCoinGecko) && (
+                  <div className="border-b border-gray-800">
+                    <div className="p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h3 className="text-orange-400 font-bold flex items-center gap-2">
+                          <span>🔍 MULTI-SOURCE SEARCH</span>
+                          {isSearchingCoinGecko && (
+                            <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-orange-400"></div>
+                          )}
+                        </h3>
+                        {/* API Source Legend */}
+                        <div className="flex items-center space-x-3 text-xs">
+                          <div className="flex items-center space-x-1">
+                            <div className="w-2 h-2 bg-blue-500 rounded-full" />
+                            <span className="text-gray-400">Dex</span>
+                          </div>
+                          <div className="flex items-center space-x-1">
+                            <div className="w-2 h-2 bg-orange-500 rounded-full" />
+                            <span className="text-gray-400">CMC</span>
+                          </div>
+                          <div className="flex items-center space-x-1">
+                            <div className="w-2 h-2 bg-purple-500 rounded-full" />
+                            <span className="text-gray-400">1inch</span>
+                          </div>
+                          <div className="flex items-center space-x-1">
+                            <div className="w-2 h-2 bg-green-500 rounded-full" />
+                            <span className="text-gray-400">CG</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="max-h-60 overflow-y-auto">
+                        {isSearchingCoinGecko ? (
+                          <div className="space-y-3">
+                            {[...Array(3)].map((_, i) => (
+                              <div
+                                key={i}
+                                className="flex items-center p-3 rounded-lg bg-gray-800/50 animate-pulse"
+                              >
+                                <div className="relative mr-3">
+                                  <div className="w-8 h-8 bg-gray-700 rounded-full" />
+                                  <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-gray-600 rounded-full" />
+                                </div>
+                                <div className="flex-1">
+                                  <div className="flex items-center space-x-2 mb-1">
+                                    <div className="h-4 bg-gray-700 rounded w-20" />
+                                    <div className="h-3 bg-gray-600 rounded w-12" />
+                                    <div className="h-3 bg-gray-600 rounded w-16" />
+                                  </div>
+                                  <div className="h-3 bg-gray-700 rounded w-2/3 mb-1" />
+                                  <div className="h-2 bg-gray-700 rounded w-1/2" />
+                                </div>
+                              </div>
+                            ))}
+                            <div className="text-center text-sm text-gray-400 py-2">
+                              🔍 Searching Dexscreener, CoinPaprika, 1inch, CoinGecko...
+                            </div>
+                          </div>
+                        ) : cachedCoinGeckoResults && cachedCoinGeckoResults.length > 0 ? (
+                          cachedCoinGeckoResults.map((coin: any, index: number) => (
+                            <div
+                              key={`coingecko-${coin.id}-${index}`}
+                              className="flex items-center p-3 hover:bg-gray-700 cursor-pointer border-b border-gray-700 last:border-b-0"
+                              onClick={() => handleCoinGeckoClick(coin)}
+                            >
+                              <div className="flex items-center mr-3">
+                                <div className="relative">
+                                  <div className="w-8 h-8 rounded-full overflow-hidden">
+                                    <img
+                                      src={coin.thumb}
+                                      alt={coin.symbol}
+                                      className="w-full h-full object-cover"
+                                      onError={e => {
+                                        e.currentTarget.style.display = 'none';
+                                      }}
+                                    />
+                                  </div>
+                                  {/* Source indicator */}
+                                  {coin.source && (
+                                    <div
+                                      className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border border-gray-800 ${coin.source === 'dexscreener'
+                                        ? 'bg-blue-500'
+                                        : coin.source === 'coinpaprika'
+                                          ? 'bg-orange-500'
+                                          : coin.source === '1inch'
+                                            ? 'bg-purple-500'
+                                            : coin.source === 'multiapi'
+                                              ? 'bg-green-500'
+                                              : 'bg-gray-500'
+                                        }`}
+                                      title={`Source: ${coin.source}`}
+                                    />
+                                  )}
+                                </div>
+                              </div>
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-medium text-white">{coin.name}</span>
+                                  {/* Source badge */}
+                                  <span
+                                    className={`text-xs text-white px-2 py-0.5 rounded-full ${coin.source === 'dexscreener'
+                                      ? 'bg-blue-600'
+                                      : coin.source === 'coinpaprika'
+                                        ? 'bg-orange-600'
+                                        : coin.source === '1inch'
+                                          ? 'bg-purple-600'
+                                          : coin.source === 'multiapi'
+                                            ? 'bg-green-600'
+                                            : 'bg-orange-600'
+                                      }`}
+                                  >
+                                    {coin.source === 'dexscreener'
+                                      ? 'DexScreener'
+                                      : coin.source === 'coinpaprika'
+                                        ? 'CoinPaprika'
+                                        : coin.source === '1inch'
+                                          ? '1inch'
+                                          : coin.source === 'multiapi'
+                                            ? 'Multi-API'
+                                            : 'CoinGecko'}
+                                  </span>
+                                  {coin.market_cap_rank && (
+                                    <span className="text-xs bg-gray-600 text-gray-300 px-2 py-0.5 rounded-full">
+                                      #{coin.market_cap_rank}
+                                    </span>
+                                  )}
+                                  {/* Confidence indicator */}
+                                  {coin.confidence && coin.confidence > 70 && (
+                                    <span className="text-xs bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full">
+                                      {coin.confidence}%
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="text-sm text-gray-400">
+                                  <span className="mr-2 font-mono">${coin.symbol.toUpperCase()}</span>
+                                  {coin.primaryChain && (
+                                    <span className="text-xs bg-blue-600 text-white px-2 py-0.5 rounded-full mr-2">
+                                      {coin.primaryChain.toUpperCase()}
+                                    </span>
+                                  )}
+                                  {/* Show additional chains if available */}
+                                  {coin.contractAddresses &&
+                                    Object.keys(coin.contractAddresses).length > 1 && (
+                                      <span className="text-xs bg-green-600 text-white px-2 py-0.5 rounded-full mr-2">
+                                        +{Object.keys(coin.contractAddresses).length - 1} chains
+                                      </span>
+                                    )}
+                                  <span className="text-xs text-orange-400">ID: {coin.id}</span>
+                                </div>
+                                {coin.primaryAddress && (
+                                  <div className="text-xs text-gray-500 font-mono mt-1">
+                                    {coin.primaryAddress.slice(0, 8)}...
+                                    {coin.primaryAddress.slice(-6)}
+                                  </div>
+                                )}
+                                {/* Show all available chains */}
+                                {coin.contractAddresses &&
+                                  Object.keys(coin.contractAddresses).length > 0 && (
+                                    <div className="text-xs text-gray-400 mt-1">
+                                      Available on: {Object.keys(coin.contractAddresses).join(', ')}
+                                    </div>
+                                  )}
+                              </div>
+                            </div>
+                          ))
+                        ) : searchTerm.length >= 2 ? (
+                          <div className="text-center text-gray-400 py-6">
+                            <div className="text-orange-400 mb-2 text-2xl">🔍</div>
+                            <div className="font-medium">
+                              No cryptocurrencies found for "{searchTerm}"
+                            </div>
+                            <div className="text-xs text-gray-500 mt-2">
+                              Searched across multiple sources:
+                            </div>
+                            <div className="text-xs text-gray-600 mt-1">
+                              • Dexscreener • CoinPaprika • 1inch • CoinGecko
+                            </div>
+                          </div>
+                        ) : null}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+              {/* Featured content */}
+              <div className="p-4">
+                {/* {!searchTerm && pumpFunTokens.length > 0 && (
                 <div className="mb-6">
                   <div className="flex justify-between items-center mb-3">
                     <h3 className="text-purple-400 font-bold">PUMPFUN TOKENS</h3>
@@ -1306,221 +1306,221 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                 </div>
               )} */}
 
-              {/* Trending Coins - Local Data */}
-              {!searchTerm && (
+                {/* Trending Coins - Local Data */}
+                {!searchTerm && (
+                  <motion.div
+                    className="mb-6"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1, duration: 0.3 }}
+                  >
+                    <div className="flex justify-between items-center mb-3">
+                      <h3 className="text-orange-400 font-bold flex items-center gap-2">
+                        🔥 TOP CRYPTOCURRENCIES
+                      </h3>
+                      <div className="flex space-x-2">
+                        <span className="text-xs text-gray-400">By Market Cap • Local Data</span>
+                      </div>
+                    </div>
+                    <motion.div
+                      className="flex space-x-3 overflow-x-auto pb-2"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.2, duration: 0.3 }}
+                    >
+                      {localTrendingCoins && localTrendingCoins.length > 0 ? (
+                        localTrendingCoins.map((coin: any, index: number) => (
+                          <div
+                            key={coin.id}
+                            className="relative min-w-[140px] bg-gray-800 bg-opacity-30 rounded-lg p-3 overflow-hidden cursor-pointer hover:bg-gray-700 transition-colors group"
+                            onClick={() => handleLocalCoinClick(coin)}
+                          >
+                            <div
+                              className={`absolute top-1 right-1 px-2 py-1 text-xs font-bold rounded-full ${index === 0
+                                ? 'bg-yellow-500 text-black'
+                                : index === 1
+                                  ? 'bg-gray-400 text-black'
+                                  : index === 2
+                                    ? 'bg-amber-600 text-white'
+                                    : 'bg-purple-500 text-white'
+                                }`}
+                            >
+                              #{index + 1}
+                            </div>
+                            <div className="flex items-center mb-2">
+                              <div className="mr-2">
+                                <TokenAvatar
+                                  src={coin.image?.thumb || coin.image?.small || coin.thumb}
+                                  symbol={coin.symbol}
+                                  name={coin.name}
+                                  size={32}
+                                  className="flex-shrink-0"
+                                />
+                              </div>
+                              <div className="text-sm font-bold text-white">
+                                {coin.symbol.toUpperCase()}
+                              </div>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <div
+                                className="text-xs text-gray-400 truncate max-w-[80px]"
+                                title={coin.name}
+                              >
+                                {coin.name}
+                              </div>
+                              {coin.primaryChain && (
+                                <div className="text-xs text-orange-400 font-bold">
+                                  {coin.primaryChain.toUpperCase()}
+                                </div>
+                              )}
+                            </div>
+                            {coin.market_cap_rank && (
+                              <div className="text-xs text-gray-500 mt-1">
+                                Rank #{coin.market_cap_rank}
+                              </div>
+                            )}
+                          </div>
+                        ))
+                      ) : (
+                        <div className="text-center text-gray-400 w-full py-8">
+                          <div className="text-orange-400 mb-2">🔥</div>
+                          <div>Unable to load trending coins</div>
+                          <div className="text-xs text-gray-500 mt-1">
+                            Try refreshing or search manually
+                          </div>
+                        </div>
+                      )}
+                    </motion.div>
+                  </motion.div>
+                )}
+
+                {/* All Tokens (from catalog) */}
+                {!searchTerm && (
+                  <motion.div
+                    className="mb-6"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.28, duration: 0.3 }}
+                  >
+                    <div className="flex justify-between items-center mb-3">
+                      <h3 className="text-emerald-400 font-bold">
+                        ALL TOKENS (
+                        {
+                          (
+                            catalog as Array<{
+                              symbol: string;
+                              name: string;
+                              chain: string;
+                              address: string;
+                            }>
+                          ).length
+                        }
+                        )
+                      </h3>
+                      <div className="flex space-x-2">
+                        <span className="text-xs text-gray-400">From local catalog</span>
+                      </div>
+                    </div>
+                    <motion.div
+                      className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 max-h-80 overflow-y-auto"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.3, duration: 0.3 }}
+                    >
+                      {(
+                        catalog as Array<{
+                          symbol: string;
+                          name: string;
+                          chain: string;
+                          address: string;
+                        }>
+                      ).map((item, index) => (
+                        <div
+                          key={`${item.symbol}-${item.chain}-${index}`}
+                          className="relative bg-gray-800 bg-opacity-30 rounded-lg p-3 overflow-hidden cursor-pointer hover:bg-gray-700 transition-colors group"
+                          onClick={() => handleCatalogItemClick(item)}
+                        >
+                          <div className="flex items-center mb-2">
+                            <div className="w-6 h-6 mr-2 rounded-full overflow-hidden">
+                              <Image
+                                src={getCryptoIconUrl(item.symbol)}
+                                alt={item.symbol}
+                                width={24}
+                                height={24}
+                                className="rounded-full"
+                                unoptimized
+                              />
+                            </div>
+                            <div className="text-sm font-bold">{item.symbol}</div>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div
+                              className="text-xs text-gray-400 truncate max-w-[80px]"
+                              title={item.name}
+                            >
+                              {item.name}
+                            </div>
+                            <div className="text-xs text-emerald-400 font-bold">
+                              {item.chain.toUpperCase()}
+                            </div>
+                          </div>
+                          <div
+                            className="mt-1 text-[10px] text-gray-500 font-mono truncate"
+                            title={item.address}
+                          >
+                            {item.address}
+                          </div>
+                        </div>
+                      ))}
+                    </motion.div>
+                  </motion.div>
+                )}
+
+                {/* Popular Tokens */}
                 <motion.div
                   className="mb-6"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1, duration: 0.3 }}
+                  transition={{ delay: 0.3, duration: 0.3 }}
                 >
                   <div className="flex justify-between items-center mb-3">
-                    <h3 className="text-orange-400 font-bold flex items-center gap-2">
-                      🔥 TOP CRYPTOCURRENCIES
-                    </h3>
+                    <h3 className="text-blue-400 font-bold">POPULAR TOKENS</h3>
                     <div className="flex space-x-2">
-                      <span className="text-xs text-gray-400">By Market Cap • Local Data</span>
+                      <button className="bg-blue-600 text-xs px-3 py-1 rounded">TOP</button>
+                      <button className="border border-blue-600 text-blue-400 text-xs px-3 py-1 rounded">
+                        ALL
+                      </button>
                     </div>
                   </div>
                   <motion.div
                     className="flex space-x-3 overflow-x-auto pb-2"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    transition={{ delay: 0.2, duration: 0.3 }}
+                    transition={{ delay: 0.4, duration: 0.3 }}
                   >
-                    {localTrendingCoins && localTrendingCoins.length > 0 ? (
-                      localTrendingCoins.map((coin: any, index: number) => (
-                        <div
-                          key={coin.id}
-                          className="relative min-w-[140px] bg-gray-800 bg-opacity-30 rounded-lg p-3 overflow-hidden cursor-pointer hover:bg-gray-700 transition-colors group"
-                          onClick={() => handleLocalCoinClick(coin)}
-                        >
-                          <div
-                            className={`absolute top-1 right-1 px-2 py-1 text-xs font-bold rounded-full ${index === 0
-                              ? 'bg-yellow-500 text-black'
-                              : index === 1
-                                ? 'bg-gray-400 text-black'
-                                : index === 2
-                                  ? 'bg-amber-600 text-white'
-                                  : 'bg-purple-500 text-white'
-                              }`}
-                          >
-                            #{index + 1}
-                          </div>
-                          <div className="flex items-center mb-2">
-                            <div className="mr-2">
-                              <TokenAvatar
-                                src={coin.image?.thumb || coin.image?.small || coin.thumb}
-                                symbol={coin.symbol}
-                                name={coin.name}
-                                size={32}
-                                className="flex-shrink-0"
-                              />
-                            </div>
-                            <div className="text-sm font-bold text-white">
-                              {coin.symbol.toUpperCase()}
-                            </div>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <div
-                              className="text-xs text-gray-400 truncate max-w-[80px]"
-                              title={coin.name}
-                            >
-                              {coin.name}
-                            </div>
-                            {coin.primaryChain && (
-                              <div className="text-xs text-orange-400 font-bold">
-                                {coin.primaryChain.toUpperCase()}
-                              </div>
-                            )}
-                          </div>
-                          {coin.market_cap_rank && (
-                            <div className="text-xs text-gray-500 mt-1">
-                              Rank #{coin.market_cap_rank}
-                            </div>
-                          )}
-                        </div>
-                      ))
-                    ) : (
-                      <div className="text-center text-gray-400 w-full py-8">
-                        <div className="text-orange-400 mb-2">🔥</div>
-                        <div>Unable to load trending coins</div>
-                        <div className="text-xs text-gray-500 mt-1">
-                          Try refreshing or search manually
-                        </div>
-                      </div>
-                    )}
-                  </motion.div>
-                </motion.div>
-              )}
-
-              {/* All Tokens (from catalog) */}
-              {!searchTerm && (
-                <motion.div
-                  className="mb-6"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.28, duration: 0.3 }}
-                >
-                  <div className="flex justify-between items-center mb-3">
-                    <h3 className="text-emerald-400 font-bold">
-                      ALL TOKENS (
-                      {
-                        (
-                          catalog as Array<{
-                            symbol: string;
-                            name: string;
-                            chain: string;
-                            address: string;
-                          }>
-                        ).length
-                      }
-                      )
-                    </h3>
-                    <div className="flex space-x-2">
-                      <span className="text-xs text-gray-400">From local catalog</span>
-                    </div>
-                  </div>
-                  <motion.div
-                    className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 max-h-80 overflow-y-auto"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.3, duration: 0.3 }}
-                  >
-                    {(
-                      catalog as Array<{
-                        symbol: string;
-                        name: string;
-                        chain: string;
-                        address: string;
-                      }>
-                    ).map((item, index) => (
+                    {popularTokens.map((token, index) => (
                       <div
-                        key={`${item.symbol}-${item.chain}-${index}`}
-                        className="relative bg-gray-800 bg-opacity-30 rounded-lg p-3 overflow-hidden cursor-pointer hover:bg-gray-700 transition-colors group"
-                        onClick={() => handleCatalogItemClick(item)}
+                        key={index}
+                        className="relative min-w-[120px] bg-gray-800 bg-opacity-30 rounded-lg p-3 overflow-hidden cursor-pointer hover:bg-gray-700 transition-colors"
+                        onClick={() => router.push(`/dashboard/trade?token=${token.symbol}`)}
                       >
                         <div className="flex items-center mb-2">
                           <div className="w-6 h-6 mr-2 rounded-full overflow-hidden">
-                            <Image
-                              src={getCryptoIconUrl(item.symbol)}
-                              alt={item.symbol}
-                              width={24}
-                              height={24}
-                              className="rounded-full"
-                              unoptimized
-                            />
+                            <Image src={token.image} alt={token.symbol} width={24} height={24} />
                           </div>
-                          <div className="text-sm font-bold">{item.symbol}</div>
+                          <div className="text-sm font-bold">{token.symbol}</div>
                         </div>
                         <div className="flex items-center justify-between">
-                          <div
-                            className="text-xs text-gray-400 truncate max-w-[80px]"
-                            title={item.name}
-                          >
-                            {item.name}
+                          <div className="text-xs text-gray-400 truncate max-w-[80px]">
+                            {token.name}
                           </div>
-                          <div className="text-xs text-emerald-400 font-bold">
-                            {item.chain.toUpperCase()}
-                          </div>
-                        </div>
-                        <div
-                          className="mt-1 text-[10px] text-gray-500 font-mono truncate"
-                          title={item.address}
-                        >
-                          {item.address}
+                          <div className="text-xs text-cyan-400 font-bold">USDT</div>
                         </div>
                       </div>
                     ))}
                   </motion.div>
                 </motion.div>
-              )}
-
-              {/* Popular Tokens */}
-              <motion.div
-                className="mb-6"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3, duration: 0.3 }}
-              >
-                <div className="flex justify-between items-center mb-3">
-                  <h3 className="text-blue-400 font-bold">POPULAR TOKENS</h3>
-                  <div className="flex space-x-2">
-                    <button className="bg-blue-600 text-xs px-3 py-1 rounded">TOP</button>
-                    <button className="border border-blue-600 text-blue-400 text-xs px-3 py-1 rounded">
-                      ALL
-                    </button>
-                  </div>
-                </div>
-                <motion.div
-                  className="flex space-x-3 overflow-x-auto pb-2"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.4, duration: 0.3 }}
-                >
-                  {popularTokens.map((token, index) => (
-                    <div
-                      key={index}
-                      className="relative min-w-[120px] bg-gray-800 bg-opacity-30 rounded-lg p-3 overflow-hidden cursor-pointer hover:bg-gray-700 transition-colors"
-                      onClick={() => router.push(`/dashboard/trade?token=${token.symbol}`)}
-                    >
-                      <div className="flex items-center mb-2">
-                        <div className="w-6 h-6 mr-2 rounded-full overflow-hidden">
-                          <Image src={token.image} alt={token.symbol} width={24} height={24} />
-                        </div>
-                        <div className="text-sm font-bold">{token.symbol}</div>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <div className="text-xs text-gray-400 truncate max-w-[80px]">
-                          {token.name}
-                        </div>
-                        <div className="text-xs text-cyan-400 font-bold">USDT</div>
-                      </div>
-                    </div>
-                  ))}
-                </motion.div>
-              </motion.div>
-            </div>
+              </div>
             </div> {/* Close results container */}
           </motion.div>
         </motion.div>
