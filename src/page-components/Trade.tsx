@@ -7,8 +7,8 @@ import {
 } from '@/api/coingecko/api';
 import Faq from '@/components/Faq';
 import InfoWidget from '@/components/InfoWidget';
-import MoralisTradingViewChart from '@/components/MoralisTradingViewChart';
 import LightweightChart from '@/components/LightweightChart';
+import MoralisTradingViewChart from '@/components/MoralisTradingViewChart';
 import SwapPage from '@/components/SwapCard';
 import TokenAvatar from '@/components/TokenAvatar';
 import tokens from '@/data/tokens.json';
@@ -175,7 +175,7 @@ function TradingViewWithParams({
 
     const [transactionDexEmbedUrl, setTransactionDexEmbedUrl] = useState<string>('');
     const [infoDexEmbedUrl, setInfoDexEmbedUrl] = useState<string>('');
-    
+
     // Iframe load status states
     const [chartIframeLoaded, setChartIframeLoaded] = useState(false);
     const [chartIframeError, setChartIframeError] = useState(false);
@@ -932,16 +932,26 @@ function TradingViewWithParams({
 
     // Check DexScreener API to see if token data exists
     useEffect(() => {
+        // Skip DexScreener check for NYAX token
+        if (baseToken === 'NYAX') {
+            console.log('⏭️ Skipping DexScreener API check for NYAX token');
+            setDexScreenerDataExists(false);
+            setInfoIframeError(true);
+            setChartIframeError(true);
+            setTradesIframeError(true);
+            return;
+        }
+
         const checkDexScreenerData = async () => {
             if (addressParam && chainParam) {
                 try {
                     const normalizedChain = normalizeDexScreenerChainId(chainParam);
                     const apiUrl = `https://api.dexscreener.com/token-pairs/v1/${normalizedChain}/${addressParam}`;
                     console.log('🔍 Checking DexScreener API:', apiUrl);
-                    
+
                     const response = await fetch(apiUrl);
                     const data = await response.json();
-                    
+
                     if (data && Array.isArray(data) && data.length > 0) {
                         console.log('✅ DexScreener data exists:', data.length, 'pairs found');
                         setDexScreenerDataExists(true);
@@ -968,7 +978,7 @@ function TradingViewWithParams({
         if (addressParam && chainParam) {
             checkDexScreenerData();
         }
-    }, [addressParam, chainParam]);
+    }, [addressParam, chainParam, baseToken]);
 
     // Add timeout for info iframe - if it doesn't load within 5 seconds, show InfoWidget
     useEffect(() => {
@@ -1005,11 +1015,11 @@ function TradingViewWithParams({
                                 <InfoWidget />
                             </div>
                         ) : (
-                            <iframe 
-                                src={infoDexEmbedUrl} 
-                                width="100%" 
-                                height="600" 
-                                style={{ 
+                            <iframe
+                                src={infoDexEmbedUrl}
+                                width="100%"
+                                height="600"
+                                style={{
                                     border: 0,
                                     display: 'block'
                                 }}
@@ -1373,8 +1383,8 @@ function TradingViewWithParams({
                             <button
                                 onClick={() => setChartType('dexscreener')}
                                 className={`px-3 py-1 text-xs rounded-full transition-colors ${chartType === 'dexscreener'
-                                        ? 'bg-blue-500 text-white'
-                                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                                    ? 'bg-blue-500 text-white'
+                                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                                     }`}
                             >
                                 DexScreener
@@ -1382,8 +1392,8 @@ function TradingViewWithParams({
                             <button
                                 onClick={() => setChartType('moralis')}
                                 className={`px-3 py-1 text-xs rounded-full transition-colors ${chartType === 'moralis'
-                                        ? 'bg-purple-500 text-white'
-                                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                                    ? 'bg-purple-500 text-white'
+                                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                                     }`}
                                 disabled={!addressParam || chainParam !== 'solana'}
                                 title={!addressParam || chainParam !== 'solana' ? 'Moralis charts only available for Solana tokens with contract address' : ''}
@@ -1426,8 +1436,8 @@ function TradingViewWithParams({
                                             src={dexEmbedUrl}
                                             width="100%"
                                             height="500"
-                                            style={{ 
-                                                border: 0, 
+                                            style={{
+                                                border: 0,
                                                 backgroundColor: 'transparent'
                                             }}
                                             className="rounded-lg"
@@ -1505,9 +1515,9 @@ function TradingViewWithParams({
                                                 src={transactionDexEmbedUrl}
                                                 width="100%"
                                                 height="300"
-                                                style={{ 
-                                                    border: 0, 
-                                                    display: 'block', 
+                                                style={{
+                                                    border: 0,
+                                                    display: 'block',
                                                     width: '100%'
                                                 }}
                                                 onLoad={() => setTradesIframeLoaded(true)}
