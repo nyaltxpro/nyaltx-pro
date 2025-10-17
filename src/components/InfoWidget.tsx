@@ -1,18 +1,112 @@
 import { AlertTriangle, ChevronDown, Copy, ExternalLink, MoreVertical, Star } from 'lucide-react';
 import { useState } from 'react';
 
-export default function XSpaceToken() {
+interface TokenData {
+    name: string;
+    symbol: string;
+    baseToken: string;
+    chain: string;
+    dex: string;
+    priceUsd: string;
+    priceNative: string;
+    liquidity: string;
+    fdv: string;
+    marketCap: string;
+    change5m?: string;
+    change1h?: string;
+    change6h?: string;
+    change24h?: string;
+    txns: number;
+    buys: number;
+    sells: number;
+    volume: string;
+    buyVolume: string;
+    sellVolume: string;
+    makers: number;
+    buyers: number;
+    sellers: number;
+    pairCreated?: string;
+    pooledToken: string;
+    pooledTokenAmount: string;
+    pooledTokenValue: string;
+    pooledBase: string;
+    pooledBaseAmount: string;
+    pooledBaseValue: string;
+    pairAddress?: string;
+    tokenAddress?: string;
+    baseAddress?: string;
+    logoUri?: string;
+    securityIssues?: Array<{ title: string; description: string }>;
+    intelIssues?: Array<{ title: string; description: string }>;
+    snifferScore?: number;
+}
+
+interface InfoWidgetProps {
+    data?: TokenData;
+}
+
+export default function InfoWidget({ data }: InfoWidgetProps) {
     const [showDetails, setShowDetails] = useState(false);
     const [goSecurityOpen, setGoSecurityOpen] = useState(false);
     const [quickIntelOpen, setQuickIntelOpen] = useState(false);
+
+    // Default data if no props provided
+    const tokenData: TokenData = data || {
+        name: 'xSpace Token',
+        symbol: 'xSPACE',
+        baseToken: 'WPOL',
+        chain: 'Polygon',
+        dex: 'Uniswap',
+        priceUsd: '$0.003139',
+        priceNative: '0.01586 WPOL',
+        liquidity: '$43K',
+        fdv: '$78K',
+        marketCap: '$268K',
+        change5m: '0.05%',
+        change1h: '0.05%',
+        change6h: '1.03%',
+        change24h: '2.21%',
+        txns: 28,
+        buys: 13,
+        sells: 15,
+        volume: '$489',
+        buyVolume: '$287',
+        sellVolume: '$202',
+        makers: 20,
+        buyers: 11,
+        sellers: 13,
+        pairCreated: '1y 11d ago',
+        pooledToken: 'xSPACE',
+        pooledTokenAmount: '6,821,431',
+        pooledTokenValue: '$21K',
+        pooledBase: 'WPOL',
+        pooledBaseAmount: '111,232',
+        pooledBaseValue: '$22K',
+        pairAddress: '0xDF6...cD37',
+        tokenAddress: '0x1D1...056f',
+        baseAddress: '0x0d5...1270',
+        securityIssues: [
+            { title: 'Trading Cooldown Detected', description: 'The contract implements a cooldown period between trades which may limit trading frequency.' },
+            { title: 'High Slippage Risk', description: 'Low liquidity may result in high slippage for larger trades.' }
+        ],
+        intelIssues: [
+            { title: 'Low Holder Count', description: 'Token has a relatively small number of holders which may indicate limited adoption.' },
+            { title: 'Concentrated Ownership', description: 'Top 10 holders control a significant portion of the total supply.' }
+        ],
+        snifferScore: 45
+    };
 
     return (
         <div className="bg-black text-white w-full h-full font-sans">
             {/* Header */}
             <div className="flex items-center justify-between p-2 sm:p-3 border-b border-gray-800">
                 <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 sm:w-10 sm:h-10 border-2 border-dashed border-gray-600 rounded-lg"></div>
-                    <h1 className="text-sm sm:text-base font-semibold truncate">Token Info</h1>
+                    {tokenData.logoUri ? (
+                        <img src={tokenData.logoUri} alt={tokenData.name} className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg" />
+                    ) : (
+                        <div className="w-8 h-8 sm:w-10 sm:h-10 border-2 border-dashed border-gray-600 rounded-lg"></div>
+                    )}
+                    <h1 className="text-sm sm:text-base font-semibold truncate">{tokenData.name}</h1>
                 </div>
                 <button className="p-1 sm:p-1.5 rounded-lg border border-gray-700">
                     <MoreVertical className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -23,66 +117,66 @@ export default function XSpaceToken() {
                 /* Main View */
                 <div className="p-2 sm:p-3">
                     <div className="flex items-center justify-center gap-1 sm:gap-1.5 mb-2 sm:mb-3">
-                        <h2 className="text-sm sm:text-base font-semibold">xSPACE</h2>
+                        <h2 className="text-sm sm:text-base font-semibold">{tokenData.symbol}</h2>
                         <Copy className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
                         <span className="text-sm sm:text-base text-gray-400">/</span>
-                        <span className="text-sm sm:text-base font-semibold">WPOL</span>
+                        <span className="text-sm sm:text-base font-semibold">{tokenData.baseToken}</span>
                     </div>
 
                     <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
                         <div className="flex items-center gap-1 sm:gap-1.5 bg-purple-600/20 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full">
                             <div className="w-3 h-3 sm:w-4 sm:h-4 bg-purple-600 rounded-full"></div>
-                            <span className="text-xs">Polygon</span>
+                            <span className="text-xs">{tokenData.chain}</span>
                             <span className="text-gray-400 text-xs">{'>'}</span>
                         </div>
                         <div className="flex items-center gap-1 sm:gap-1.5 bg-pink-600/20 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full">
                             <div className="w-3 h-3 sm:w-4 sm:h-4 bg-pink-600 rounded"></div>
-                            <span className="text-xs">Uniswap</span>
+                            <span className="text-xs">{tokenData.dex}</span>
                         </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-1.5 sm:gap-2 mb-2">
                         <div className="bg-gray-900 rounded-lg p-1.5 sm:p-2 border border-gray-800">
                             <div className="text-gray-400 text-xs mb-0.5">PRICE USD</div>
-                            <div className="text-sm sm:text-base font-semibold truncate">$0.003139</div>
+                            <div className="text-sm sm:text-base font-semibold truncate">{tokenData.priceUsd}</div>
                         </div>
                         <div className="bg-gray-900 rounded-lg p-1.5 sm:p-2 border border-gray-800">
                             <div className="text-gray-400 text-xs mb-0.5">PRICE</div>
-                            <div className="text-sm sm:text-base font-semibold truncate">0.01586 WPOL</div>
+                            <div className="text-sm sm:text-base font-semibold truncate">{tokenData.priceNative}</div>
                         </div>
                     </div>
 
                     <div className="grid grid-cols-3 gap-1.5 sm:gap-2 mb-2">
                         <div className="bg-gray-900 rounded-lg p-1.5 sm:p-2 border border-gray-800">
                             <div className="text-gray-400 text-xs mb-0.5">LIQUIDITY</div>
-                            <div className="text-xs sm:text-sm font-semibold truncate">$43K</div>
+                            <div className="text-xs sm:text-sm font-semibold truncate">{tokenData.liquidity}</div>
                         </div>
                         <div className="bg-gray-900 rounded-lg p-1.5 sm:p-2 border border-gray-800">
                             <div className="text-gray-400 text-xs mb-0.5">FDV</div>
-                            <div className="text-xs sm:text-sm font-semibold truncate">$78K</div>
+                            <div className="text-xs sm:text-sm font-semibold truncate">{tokenData.fdv}</div>
                         </div>
                         <div className="bg-gray-900 rounded-lg p-1.5 sm:p-2 border border-gray-800">
                             <div className="text-gray-400 text-xs mb-0.5">MKT CAP</div>
-                            <div className="text-xs sm:text-sm font-semibold truncate">$268K</div>
+                            <div className="text-xs sm:text-sm font-semibold truncate">{tokenData.marketCap}</div>
                         </div>
                     </div>
 
                     <div className="grid grid-cols-4 mb-2 bg-gray-900 rounded-lg border border-gray-800 overflow-hidden">
                         <button className="py-1.5 sm:py-2 text-center border-r border-gray-800">
                             <div className="text-gray-400 text-xs mb-0.5">5M</div>
-                            <div className="text-lime-400 text-xs font-semibold">0.05%</div>
+                            <div className={`text-xs font-semibold ${parseFloat(tokenData.change5m || '0') >= 0 ? 'text-lime-400' : 'text-red-400'}`}>{tokenData.change5m || 'N/A'}</div>
                         </button>
                         <button className="py-1.5 sm:py-2 text-center border-r border-gray-800">
                             <div className="text-gray-400 text-xs mb-0.5">1H</div>
-                            <div className="text-lime-400 text-xs font-semibold">0.05%</div>
+                            <div className={`text-xs font-semibold ${parseFloat(tokenData.change1h || '0') >= 0 ? 'text-lime-400' : 'text-red-400'}`}>{tokenData.change1h || 'N/A'}</div>
                         </button>
                         <button className="py-1.5 sm:py-2 text-center border-r border-gray-800">
                             <div className="text-gray-400 text-xs mb-0.5">6H</div>
-                            <div className="text-lime-400 text-xs font-semibold">1.03%</div>
+                            <div className={`text-xs font-semibold ${parseFloat(tokenData.change6h || '0') >= 0 ? 'text-lime-400' : 'text-red-400'}`}>{tokenData.change6h || 'N/A'}</div>
                         </button>
                         <button className="py-1.5 sm:py-2 text-center bg-gray-800">
                             <div className="text-gray-400 text-xs mb-0.5">24H</div>
-                            <div className="text-lime-400 text-xs font-semibold">2.21%</div>
+                            <div className={`text-xs font-semibold ${parseFloat(tokenData.change24h || '0') >= 0 ? 'text-lime-400' : 'text-red-400'}`}>{tokenData.change24h || 'N/A'}</div>
                         </button>
                     </div>
 
@@ -96,15 +190,15 @@ export default function XSpaceToken() {
                                 </div>
                             </div>
                             <div className="flex justify-between items-center mb-1.5">
-                                <span className="text-sm sm:text-base font-semibold">28</span>
+                                <span className="text-sm sm:text-base font-semibold">{tokenData.txns}</span>
                                 <div className="flex gap-4 sm:gap-6">
-                                    <span className="text-xs sm:text-sm font-semibold">13</span>
-                                    <span className="text-xs sm:text-sm font-semibold">15</span>
+                                    <span className="text-xs sm:text-sm font-semibold">{tokenData.buys}</span>
+                                    <span className="text-xs sm:text-sm font-semibold">{tokenData.sells}</span>
                                 </div>
                             </div>
                             <div className="flex h-1.5 rounded-full overflow-hidden">
-                                <div className="bg-lime-500" style={{ width: '46%' }}></div>
-                                <div className="bg-red-500" style={{ width: '54%' }}></div>
+                                <div className="bg-lime-500" style={{ width: `${(tokenData.buys / tokenData.txns * 100).toFixed(0)}%` }}></div>
+                                <div className="bg-red-500" style={{ width: `${(tokenData.sells / tokenData.txns * 100).toFixed(0)}%` }}></div>
                             </div>
                         </div>
 
@@ -117,15 +211,15 @@ export default function XSpaceToken() {
                                 </div>
                             </div>
                             <div className="flex justify-between items-center mb-1.5">
-                                <span className="text-sm sm:text-base font-semibold">$489</span>
+                                <span className="text-sm sm:text-base font-semibold">{tokenData.volume}</span>
                                 <div className="flex gap-4 sm:gap-6">
-                                    <span className="text-xs sm:text-sm font-semibold">$287</span>
-                                    <span className="text-xs sm:text-sm font-semibold">$202</span>
+                                    <span className="text-xs sm:text-sm font-semibold">{tokenData.buyVolume}</span>
+                                    <span className="text-xs sm:text-sm font-semibold">{tokenData.sellVolume}</span>
                                 </div>
                             </div>
                             <div className="flex h-1.5 rounded-full overflow-hidden">
-                                <div className="bg-lime-500" style={{ width: '59%' }}></div>
-                                <div className="bg-red-500" style={{ width: '41%' }}></div>
+                                <div className="bg-lime-500" style={{ width: `${(parseFloat(tokenData.buyVolume.replace(/[^0-9.]/g, '')) / parseFloat(tokenData.volume.replace(/[^0-9.]/g, '')) * 100).toFixed(0)}%` }}></div>
+                                <div className="bg-red-500" style={{ width: `${(parseFloat(tokenData.sellVolume.replace(/[^0-9.]/g, '')) / parseFloat(tokenData.volume.replace(/[^0-9.]/g, '')) * 100).toFixed(0)}%` }}></div>
                             </div>
                         </div>
 
@@ -138,15 +232,15 @@ export default function XSpaceToken() {
                                 </div>
                             </div>
                             <div className="flex justify-between items-center mb-1.5">
-                                <span className="text-sm sm:text-base font-semibold">20</span>
+                                <span className="text-sm sm:text-base font-semibold">{tokenData.makers}</span>
                                 <div className="flex gap-5 sm:gap-7">
-                                    <span className="text-xs sm:text-sm font-semibold">11</span>
-                                    <span className="text-xs sm:text-sm font-semibold">13</span>
+                                    <span className="text-xs sm:text-sm font-semibold">{tokenData.buyers}</span>
+                                    <span className="text-xs sm:text-sm font-semibold">{tokenData.sellers}</span>
                                 </div>
                             </div>
                             <div className="flex h-1.5 rounded-full overflow-hidden">
-                                <div className="bg-lime-500" style={{ width: '46%' }}></div>
-                                <div className="bg-red-500" style={{ width: '54%' }}></div>
+                                <div className="bg-lime-500" style={{ width: `${(tokenData.buyers / tokenData.makers * 100).toFixed(0)}%` }}></div>
+                                <div className="bg-red-500" style={{ width: `${(tokenData.sellers / tokenData.makers * 100).toFixed(0)}%` }}></div>
                             </div>
                         </div>
                     </div>
@@ -184,83 +278,91 @@ export default function XSpaceToken() {
                     </button>
 
                     {/* Pair Created */}
-                    <div className="flex justify-between items-center mb-2">
-                        <span className="text-xs sm:text-sm">Pair created</span>
-                        <span className="text-xs sm:text-sm">1y 11d ago</span>
-                    </div>
+                    {tokenData.pairCreated && (
+                        <div className="flex justify-between items-center mb-2">
+                            <span className="text-xs sm:text-sm">Pair created</span>
+                            <span className="text-xs sm:text-sm">{tokenData.pairCreated}</span>
+                        </div>
+                    )}
 
                     {/* Pooled Tokens */}
                     <div className="bg-gray-900 border border-gray-800 rounded-lg p-1.5 sm:p-2 mb-1.5">
                         <div className="flex justify-between items-center">
-                            <span className="text-xs sm:text-sm">Pooled xSPACE</span>
+                            <span className="text-xs sm:text-sm">Pooled {tokenData.pooledToken}</span>
                             <div className="flex gap-1.5 sm:gap-2 items-center">
-                                <span className="text-xs sm:text-sm font-semibold">6,821,431</span>
-                                <span className="text-xs sm:text-sm font-semibold">$21K</span>
+                                <span className="text-xs sm:text-sm font-semibold">{tokenData.pooledTokenAmount}</span>
+                                <span className="text-xs sm:text-sm font-semibold">{tokenData.pooledTokenValue}</span>
                             </div>
                         </div>
                     </div>
 
                     <div className="bg-gray-900 border border-gray-800 rounded-lg p-1.5 sm:p-2 mb-2">
                         <div className="flex justify-between items-center">
-                            <span className="text-xs sm:text-sm">Pooled WPOL</span>
+                            <span className="text-xs sm:text-sm">Pooled {tokenData.pooledBase}</span>
                             <div className="flex gap-1.5 sm:gap-2 items-center">
-                                <span className="text-xs sm:text-sm font-semibold">111,232</span>
-                                <span className="text-xs sm:text-sm font-semibold">$22K</span>
+                                <span className="text-xs sm:text-sm font-semibold">{tokenData.pooledBaseAmount}</span>
+                                <span className="text-xs sm:text-sm font-semibold">{tokenData.pooledBaseValue}</span>
                             </div>
                         </div>
                     </div>
 
                     {/* Contract Addresses */}
                     <div className="space-y-1.5 mb-2">
-                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1.5">
-                            <span className="text-xs sm:text-sm">Pair</span>
-                            <div className="flex items-center gap-1">
-                                <button className="flex items-center gap-0.5 bg-gray-800 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-xs">
-                                    <Copy className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                                    0xDF6...cD37
-                                </button>
-                                <button className="flex items-center gap-0.5 bg-gray-800 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-xs">
-                                    EXP
-                                    <ExternalLink className="w-2 h-2 sm:w-2.5 sm:h-2.5" />
-                                </button>
+                        {tokenData.pairAddress && (
+                            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1.5">
+                                <span className="text-xs sm:text-sm">Pair</span>
+                                <div className="flex items-center gap-1">
+                                    <button className="flex items-center gap-0.5 bg-gray-800 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-xs">
+                                        <Copy className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                                        {tokenData.pairAddress}
+                                    </button>
+                                    <button className="flex items-center gap-0.5 bg-gray-800 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-xs">
+                                        EXP
+                                        <ExternalLink className="w-2 h-2 sm:w-2.5 sm:h-2.5" />
+                                    </button>
+                                </div>
                             </div>
-                        </div>
+                        )}
 
-                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1.5">
-                            <span className="text-xs sm:text-sm">xSPACE</span>
-                            <div className="flex items-center gap-1">
-                                <button className="flex items-center gap-0.5 bg-gray-800 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-xs">
-                                    <Copy className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                                    0x1D1...056f
-                                </button>
-                                <button className="flex items-center gap-0.5 bg-gray-800 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-xs">
-                                    HLD
-                                    <ExternalLink className="w-2 h-2 sm:w-2.5 sm:h-2.5" />
-                                </button>
-                                <button className="flex items-center gap-0.5 bg-gray-800 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-xs">
-                                    EXP
-                                    <ExternalLink className="w-2 h-2 sm:w-2.5 sm:h-2.5" />
-                                </button>
+                        {tokenData.tokenAddress && (
+                            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1.5">
+                                <span className="text-xs sm:text-sm">{tokenData.symbol}</span>
+                                <div className="flex items-center gap-1">
+                                    <button className="flex items-center gap-0.5 bg-gray-800 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-xs">
+                                        <Copy className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                                        {tokenData.tokenAddress}
+                                    </button>
+                                    <button className="flex items-center gap-0.5 bg-gray-800 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-xs">
+                                        HLD
+                                        <ExternalLink className="w-2 h-2 sm:w-2.5 sm:h-2.5" />
+                                    </button>
+                                    <button className="flex items-center gap-0.5 bg-gray-800 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-xs">
+                                        EXP
+                                        <ExternalLink className="w-2 h-2 sm:w-2.5 sm:h-2.5" />
+                                    </button>
+                                </div>
                             </div>
-                        </div>
+                        )}
 
-                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1.5">
-                            <span className="text-xs sm:text-sm">WPOL</span>
-                            <div className="flex items-center gap-1">
-                                <button className="flex items-center gap-0.5 bg-gray-800 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-xs">
-                                    <Copy className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                                    0x0d5...1270
-                                </button>
-                                <button className="flex items-center gap-0.5 bg-gray-800 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-xs">
-                                    HLD
-                                    <ExternalLink className="w-2 h-2 sm:w-2.5 sm:h-2.5" />
-                                </button>
-                                <button className="flex items-center gap-0.5 bg-gray-800 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-xs">
-                                    EXP
-                                    <ExternalLink className="w-2 h-2 sm:w-2.5 sm:h-2.5" />
-                                </button>
+                        {tokenData.baseAddress && (
+                            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1.5">
+                                <span className="text-xs sm:text-sm">{tokenData.baseToken}</span>
+                                <div className="flex items-center gap-1">
+                                    <button className="flex items-center gap-0.5 bg-gray-800 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-xs">
+                                        <Copy className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                                        {tokenData.baseAddress}
+                                    </button>
+                                    <button className="flex items-center gap-0.5 bg-gray-800 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-xs">
+                                        HLD
+                                        <ExternalLink className="w-2 h-2 sm:w-2.5 sm:h-2.5" />
+                                    </button>
+                                    <button className="flex items-center gap-0.5 bg-gray-800 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-xs">
+                                        EXP
+                                        <ExternalLink className="w-2 h-2 sm:w-2.5 sm:h-2.5" />
+                                    </button>
+                                </div>
                             </div>
-                        </div>
+                        )}
                     </div>
 
                     {/* Action Buttons */}
@@ -283,88 +385,84 @@ export default function XSpaceToken() {
                     {/* Security Sections */}
                     <div className="space-y-1.5 mb-2">
                         {/* Go+ Security */}
-                        <div className="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden">
-                            <button
-                                onClick={() => setGoSecurityOpen(!goSecurityOpen)}
-                                className="w-full flex items-center justify-between p-2 sm:p-2.5"
-                            >
-                                <span className="text-xs sm:text-sm font-semibold">Go+ Security</span>
-                                <div className="flex items-center gap-1.5 sm:gap-2">
-                                    <div className="flex items-center gap-1 text-red-500">
-                                        <span className="text-xs font-semibold">2 issues</span>
-                                        <AlertTriangle className="w-3 h-3 sm:w-4 sm:h-4" />
-                                    </div>
-                                    <ChevronDown className={`w-3 h-3 sm:w-4 sm:h-4 transition-transform ${goSecurityOpen ? 'rotate-180' : ''}`} />
-                                </div>
-                            </button>
-                            {goSecurityOpen && (
-                                <div className="px-2 sm:px-2.5 pb-2 space-y-1.5 border-t border-gray-800 pt-2">
-                                    <div className="flex items-start gap-2">
-                                        <AlertTriangle className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
-                                        <div>
-                                            <p className="text-sm font-medium">Trading Cooldown Detected</p>
-                                            <p className="text-xs text-gray-400 mt-1">The contract implements a cooldown period between trades which may limit trading frequency.</p>
+                        {tokenData.securityIssues && tokenData.securityIssues.length > 0 && (
+                            <div className="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden">
+                                <button
+                                    onClick={() => setGoSecurityOpen(!goSecurityOpen)}
+                                    className="w-full flex items-center justify-between p-2 sm:p-2.5"
+                                >
+                                    <span className="text-xs sm:text-sm font-semibold">Go+ Security</span>
+                                    <div className="flex items-center gap-1.5 sm:gap-2">
+                                        <div className="flex items-center gap-1 text-red-500">
+                                            <span className="text-xs font-semibold">{tokenData.securityIssues.length} issues</span>
+                                            <AlertTriangle className="w-3 h-3 sm:w-4 sm:h-4" />
                                         </div>
+                                        <ChevronDown className={`w-3 h-3 sm:w-4 sm:h-4 transition-transform ${goSecurityOpen ? 'rotate-180' : ''}`} />
                                     </div>
-                                    <div className="flex items-start gap-2">
-                                        <AlertTriangle className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
-                                        <div>
-                                            <p className="text-sm font-medium">High Slippage Risk</p>
-                                            <p className="text-xs text-gray-400 mt-1">Low liquidity may result in high slippage for larger trades.</p>
-                                        </div>
+                                </button>
+                                {goSecurityOpen && (
+                                    <div className="px-2 sm:px-2.5 pb-2 space-y-1.5 border-t border-gray-800 pt-2">
+                                        {tokenData.securityIssues.map((issue, index) => (
+                                            <div key={index} className="flex items-start gap-2">
+                                                <AlertTriangle className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
+                                                <div>
+                                                    <p className="text-sm font-medium">{issue.title}</p>
+                                                    <p className="text-xs text-gray-400 mt-1">{issue.description}</p>
+                                                </div>
+                                            </div>
+                                        ))}
                                     </div>
-                                </div>
-                            )}
-                        </div>
+                                )}
+                            </div>
+                        )}
 
                         {/* Quick Intel */}
-                        <div className="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden">
-                            <button
-                                onClick={() => setQuickIntelOpen(!quickIntelOpen)}
-                                className="w-full flex items-center justify-between p-2 sm:p-2.5"
-                            >
-                                <span className="text-xs sm:text-sm font-semibold">Quick Intel</span>
-                                <div className="flex items-center gap-1.5 sm:gap-2">
-                                    <div className="flex items-center gap-1 text-red-500">
-                                        <span className="text-xs font-semibold">2 issues</span>
-                                        <AlertTriangle className="w-3 h-3 sm:w-4 sm:h-4" />
-                                    </div>
-                                    <ChevronDown className={`w-3 h-3 sm:w-4 sm:h-4 transition-transform ${quickIntelOpen ? 'rotate-180' : ''}`} />
-                                </div>
-                            </button>
-                            {quickIntelOpen && (
-                                <div className="px-2 sm:px-2.5 pb-2 space-y-1.5 border-t border-gray-800 pt-2">
-                                    <div className="flex items-start gap-2">
-                                        <AlertTriangle className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
-                                        <div>
-                                            <p className="text-sm font-medium">Low Holder Count</p>
-                                            <p className="text-xs text-gray-400 mt-1">Token has a relatively small number of holders which may indicate limited adoption.</p>
+                        {tokenData.intelIssues && tokenData.intelIssues.length > 0 && (
+                            <div className="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden">
+                                <button
+                                    onClick={() => setQuickIntelOpen(!quickIntelOpen)}
+                                    className="w-full flex items-center justify-between p-2 sm:p-2.5"
+                                >
+                                    <span className="text-xs sm:text-sm font-semibold">Quick Intel</span>
+                                    <div className="flex items-center gap-1.5 sm:gap-2">
+                                        <div className="flex items-center gap-1 text-red-500">
+                                            <span className="text-xs font-semibold">{tokenData.intelIssues.length} issues</span>
+                                            <AlertTriangle className="w-3 h-3 sm:w-4 sm:h-4" />
                                         </div>
+                                        <ChevronDown className={`w-3 h-3 sm:w-4 sm:h-4 transition-transform ${quickIntelOpen ? 'rotate-180' : ''}`} />
                                     </div>
-                                    <div className="flex items-start gap-2">
-                                        <AlertTriangle className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
-                                        <div>
-                                            <p className="text-sm font-medium">Concentrated Ownership</p>
-                                            <p className="text-xs text-gray-400 mt-1">Top 10 holders control a significant portion of the total supply.</p>
-                                        </div>
+                                </button>
+                                {quickIntelOpen && (
+                                    <div className="px-2 sm:px-2.5 pb-2 space-y-1.5 border-t border-gray-800 pt-2">
+                                        {tokenData.intelIssues.map((issue, index) => (
+                                            <div key={index} className="flex items-start gap-2">
+                                                <AlertTriangle className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
+                                                <div>
+                                                    <p className="text-sm font-medium">{issue.title}</p>
+                                                    <p className="text-xs text-gray-400 mt-1">{issue.description}</p>
+                                                </div>
+                                            </div>
+                                        ))}
                                     </div>
-                                </div>
-                            )}
-                        </div>
+                                )}
+                            </div>
+                        )}
 
                         {/* Token Sniffer */}
-                        <div className="bg-gray-900 border border-gray-800 rounded-lg p-2 sm:p-2.5">
-                            <div className="flex items-center justify-between">
-                                <span className="text-xs sm:text-sm font-semibold">Token Sniffer</span>
-                                <div className="flex items-center gap-1.5 sm:gap-2">
-                                    <div className="flex items-center gap-1">
-                                        <span className="text-xs sm:text-sm font-semibold">45/100</span>
-                                        <AlertTriangle className="w-3 h-3 sm:w-4 sm:h-4 text-red-500" />
+                        {tokenData.snifferScore !== undefined && (
+                            <div className="bg-gray-900 border border-gray-800 rounded-lg p-2 sm:p-2.5">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-xs sm:text-sm font-semibold">Token Sniffer</span>
+                                    <div className="flex items-center gap-1.5 sm:gap-2">
+                                        <div className="flex items-center gap-1">
+                                            <span className="text-xs sm:text-sm font-semibold">{tokenData.snifferScore}/100</span>
+                                            <AlertTriangle className={`w-3 h-3 sm:w-4 sm:h-4 ${tokenData.snifferScore < 50 ? 'text-red-500' : tokenData.snifferScore < 70 ? 'text-yellow-500' : 'text-green-500'}`} />
+                                        </div>
+                                        <ExternalLink className="w-3 h-3 sm:w-4 sm:h-4" />
                                     </div>
-                                    <ExternalLink className="w-3 h-3 sm:w-4 sm:h-4" />
                                 </div>
                             </div>
-                        </div>
+                        )}
                     </div>
 
                     {/* Warning */}
