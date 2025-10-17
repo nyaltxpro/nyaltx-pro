@@ -181,6 +181,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
     if (token.address && token.address !== 'N/A') params.set('address', token.address);
     if (token.logo) params.set('imageUri', token.logo);
     if (token.source) params.set('source', token.source);
+    if (token.price !== undefined && token.price !== null) params.set('price', token.price.toString());
 
     const tradeUrl = `/dashboard/trade?${params.toString()}`;
     router.push(tradeUrl);

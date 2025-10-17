@@ -119,6 +119,7 @@ function TradePageContent() {
     const videoId = searchParams?.get('video') || 'VNTK2Bwyq7s';
     const imageUriParam = searchParams?.get('imageUri') || '';
     const nameParam = searchParams?.get('name') || '';
+    const priceParam = searchParams?.get('price') || '';
 
     // Scroll to top when route changes
     useEffect(() => {
@@ -134,6 +135,7 @@ function TradePageContent() {
             videoId={videoId}
             imageUriParam={imageUriParam}
             nameParam={nameParam}
+            priceParam={priceParam}
         />
     );
 }
@@ -158,6 +160,7 @@ function TradingViewWithParams({
     videoId,
     imageUriParam,
     nameParam,
+    priceParam,
 }: {
     baseToken: string;
     quoteToken: string;
@@ -166,6 +169,7 @@ function TradingViewWithParams({
     videoId?: string;
     imageUriParam?: string;
     nameParam?: string;
+    priceParam?: string;
 }) {
     const { address, isConnected } = useAccount();
     const [favorited, setFavorited] = useState(false);
@@ -716,6 +720,17 @@ function TradingViewWithParams({
                 setDexChange24h(null);
                 setPriceSource(null);
 
+                // Priority 1: Use price from URL parameter if available (from search modal)
+                if (priceParam && !isManualRefresh) {
+                    const urlPrice = parseFloat(priceParam);
+                    if (!isNaN(urlPrice) && urlPrice > 0) {
+                        console.log('🎯 Using price from URL parameter:', urlPrice);
+                        setDexPriceUsd(urlPrice.toString());
+                        setPriceSource('geckoterminal'); // Set a source for consistency
+                        return; // Success, use URL price
+                    }
+                }
+
                 let chain = chainParam;
                 let address = addressParam;
                 if (!chain || !address) {
@@ -822,7 +837,7 @@ function TradingViewWithParams({
                 aborted = true;
             };
         },
-        [chainParam, addressParam, resolveToken, baseToken, moralisTokenData]
+        [chainParam, addressParam, resolveToken, baseToken, moralisTokenData, priceParam]
     );
 
     // Manual refresh function
