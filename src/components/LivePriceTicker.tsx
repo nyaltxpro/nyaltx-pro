@@ -1,11 +1,10 @@
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
+import { ActivityLogIcon, ExternalLinkIcon, RocketIcon } from '@radix-ui/react-icons';
+import * as Tooltip from '@radix-ui/react-tooltip';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { getCryptoIconUrl, cryptoIconExists, commonCryptoSymbols } from '../utils/cryptoIcons';
-import * as Tooltip from '@radix-ui/react-tooltip';
-import { ActivityLogIcon, ExternalLinkIcon, RocketIcon, TriangleUpIcon, TriangleDownIcon } from '@radix-ui/react-icons';
+import React, { useEffect, useRef, useState } from 'react';
 
 // Moralis Pump.fun Token Interface
 interface PumpFunToken {
@@ -58,7 +57,7 @@ const LivePriceTicker: React.FC = () => {
   const fetchDexScreenerTokens = async () => {
     try {
       setDexScreenerLoading(true);
-      
+
       const response = await fetch('https://api.dexscreener.com/token-profiles/latest/v1', {
         method: 'GET',
         headers: {
@@ -71,11 +70,11 @@ const LivePriceTicker: React.FC = () => {
       }
 
       const data: DexScreenerToken[] = await response.json();
-      
+
       if (Array.isArray(data) && data.length > 0) {
         // Take top 20 latest token profiles
         const latestTokens = data.slice(0, 20);
-        
+
         // Fetch insights for each token (limit to first 10 to avoid rate limits)
         const tokensWithInsights = await Promise.all(
           latestTokens.slice(0, 10).map(async (token) => {
@@ -83,11 +82,11 @@ const LivePriceTicker: React.FC = () => {
               const insightsResponse = await fetch(
                 `/api/dexscreener/token-insights?chain=${token.chainId}&address=${token.tokenAddress}`
               );
-              
+
               if (insightsResponse.ok) {
                 const insightsData = await insightsResponse.json();
                 const mainPair = insightsData.mainPair;
-                
+
                 if (mainPair) {
                   return {
                     ...token,
@@ -109,7 +108,7 @@ const LivePriceTicker: React.FC = () => {
             return token;
           })
         );
-        
+
         setDexScreenerTokens(tokensWithInsights);
         console.log(`✅ Loaded ${tokensWithInsights.length} DexScreener token profiles with insights`);
       } else {
@@ -128,7 +127,7 @@ const LivePriceTicker: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await fetch('/api/moralis/pumpfun-bonding', {
         method: 'GET',
         headers: {
@@ -141,13 +140,13 @@ const LivePriceTicker: React.FC = () => {
       }
 
       const data = await response.json();
-      
+
       if (data.result && Array.isArray(data.result)) {
         // Sort by bonding curve progress (highest first) and take top 20
         const sortedTokens = data.result
           .sort((a: PumpFunToken, b: PumpFunToken) => b.bondingCurveProgress - a.bondingCurveProgress)
           .slice(0, 20);
-        
+
         setTokens(sortedTokens);
         console.log(`✅ Loaded ${sortedTokens.length} Pump.fun bonding tokens`);
       } else {
@@ -164,17 +163,17 @@ const LivePriceTicker: React.FC = () => {
 
   useEffect(() => {
     // Initial fetch
-    fetchPumpFunTokens();
+    // fetchPumpFunTokens();
     fetchDexScreenerTokens();
 
     // Set up auto-refresh every 30 seconds for Pump.fun tokens
-    const pumpFunInterval = setInterval(fetchPumpFunTokens, 30000);
-    
+    // const pumpFunInterval = setInterval(fetchPumpFunTokens, 30000);
+
     // Set up auto-refresh every 60 seconds for DexScreener tokens
     const dexScreenerInterval = setInterval(fetchDexScreenerTokens, 60000);
 
     return () => {
-      clearInterval(pumpFunInterval);
+      // clearInterval(pumpFunInterval);
       clearInterval(dexScreenerInterval);
     };
   }, []);
@@ -280,7 +279,7 @@ const LivePriceTicker: React.FC = () => {
     params.set('chain', token.chainId);
     params.set('imageUri', token.icon);
     params.set('source', 'dexscreener');
-    
+
     // Use insights data if available
     if (token.insights?.symbol) {
       params.set('base', token.insights.symbol);
@@ -294,7 +293,7 @@ const LivePriceTicker: React.FC = () => {
         params.set('name', descWords.slice(0, 3).join(' '));
       }
     }
-    
+
     // Pass price data
     if (token.insights?.priceUsd) {
       params.set('price', token.insights.priceUsd);
@@ -308,7 +307,7 @@ const LivePriceTicker: React.FC = () => {
     if (token.insights?.liquidity) {
       params.set('liquidity', token.insights.liquidity.toString());
     }
-    
+
     router.push(`/dashboard/trade?${params.toString()}`);
   };
 
@@ -363,7 +362,7 @@ const LivePriceTicker: React.FC = () => {
         {/* Animated background accent */}
         <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-[#00d4aa] to-transparent animate-pulse"></div>
         <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-[#3b82f6] to-transparent animate-pulse"></div>
-        
+
         <div
           ref={scrollRef}
           className="flex items-center space-x-8 overflow-x-auto scrollbar-hide"
@@ -423,9 +422,8 @@ const LivePriceTicker: React.FC = () => {
                           {token.insights?.symbol || token.tokenAddress.slice(0, 6)}...{!token.insights?.symbol && token.tokenAddress.slice(-4)}
                         </span>
                         {token.insights?.priceChange24h !== undefined && (
-                          <div className={`px-1.5 py-0.5 rounded text-xs font-semibold ${
-                            token.insights.priceChange24h >= 0 ? 'text-green-400' : 'text-red-400'
-                          } bg-gray-800/50`}>
+                          <div className={`px-1.5 py-0.5 rounded text-xs font-semibold ${token.insights.priceChange24h >= 0 ? 'text-green-400' : 'text-red-400'
+                            } bg-gray-800/50`}>
                             {token.insights.priceChange24h >= 0 ? '+' : ''}{token.insights.priceChange24h.toFixed(2)}%
                           </div>
                         )}
@@ -568,7 +566,7 @@ const LivePriceTicker: React.FC = () => {
                   <div className="space-y-1">
                     <div className="font-semibold">{token.name} ({token.symbol})</div>
                     <div className="text-xs text-gray-300">
-                      Bonding: {formatBondingProgress(token.bondingCurveProgress)} • 
+                      Bonding: {formatBondingProgress(token.bondingCurveProgress)} •
                       FDV: ${parseFloat(token.fullyDilutedValuation).toLocaleString()}
                     </div>
                     <div className="text-xs text-gray-400">Click to view on Trade page</div>
