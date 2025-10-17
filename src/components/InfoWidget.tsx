@@ -10,14 +10,14 @@ export interface TokenData {
     dex: string;
     logoUri?: string;
     description?: string;
-    
+
     // Price Data
     priceUsd: string;
     priceNative: string;
     priceChange?: string; // Overall price change
     high24h?: string;
     low24h?: string;
-    
+
     // Market Data
     liquidity: string;
     fdv: string;
@@ -25,7 +25,7 @@ export interface TokenData {
     totalSupply?: string;
     circulatingSupply?: string;
     maxSupply?: string;
-    
+
     // Price Changes (Time Intervals)
     change5m?: string;
     change1h?: string;
@@ -33,7 +33,7 @@ export interface TokenData {
     change24h?: string;
     change7d?: string;
     change30d?: string;
-    
+
     // Trading Stats (24h)
     txns: number;
     buys: number;
@@ -43,13 +43,13 @@ export interface TokenData {
     buyVolume: string;
     sellVolume: string;
     volumeChange24h?: string;
-    
+
     // Maker Stats
     makers: number;
     buyers: number;
     sellers: number;
     uniqueWallets24h?: number;
-    
+
     // Liquidity Pool Data
     pairCreated?: string;
     pooledToken: string;
@@ -58,12 +58,12 @@ export interface TokenData {
     pooledBase: string;
     pooledBaseAmount: string;
     pooledBaseValue: string;
-    
+
     // Contract Addresses
     pairAddress?: string;
     tokenAddress?: string;
     baseAddress?: string;
-    
+
     // Social & External Links
     website?: string;
     twitter?: string;
@@ -72,7 +72,7 @@ export interface TokenData {
     github?: string;
     coingeckoId?: string;
     coinmarketcapId?: string;
-    
+
     // Security & Audit
     securityIssues?: Array<{ title: string; description: string }>;
     intelIssues?: Array<{ title: string; description: string }>;
@@ -80,18 +80,18 @@ export interface TokenData {
     isVerified?: boolean;
     isAudited?: boolean;
     auditBy?: string;
-    
+
     // Holder Information
     holders?: string;
     top10HoldersPercent?: string;
-    
+
     // Additional Metrics
     ath?: string; // All-time high
     atl?: string; // All-time low
     athDate?: string;
     atlDate?: string;
     rank?: number;
-    
+
     // DEX Specific
     dexUrl?: string;
     chartUrl?: string;
@@ -115,20 +115,20 @@ export default function InfoWidget({ data }: InfoWidgetProps) {
         chain: 'Polygon',
         dex: 'Uniswap',
         description: 'xSpace is a decentralized token on Polygon network',
-        
+
         // Prices
         priceUsd: '$0.003139',
         priceNative: '0.01586 WPOL',
         high24h: '$0.003250',
         low24h: '$0.003050',
-        
+
         // Market Data
         liquidity: '$43K',
         fdv: '$78K',
         marketCap: '$268K',
         totalSupply: '250M',
         circulatingSupply: '85M',
-        
+
         // Price Changes
         change5m: '0.05%',
         change1h: '0.05%',
@@ -136,7 +136,7 @@ export default function InfoWidget({ data }: InfoWidgetProps) {
         change24h: '2.21%',
         change7d: '5.40%',
         change30d: '-12.30%',
-        
+
         // Trading Stats
         txns: 28,
         buys: 13,
@@ -146,13 +146,13 @@ export default function InfoWidget({ data }: InfoWidgetProps) {
         buyVolume: '$287',
         sellVolume: '$202',
         volumeChange24h: '+15.2%',
-        
+
         // Makers
         makers: 20,
         buyers: 11,
         sellers: 13,
         uniqueWallets24h: 45,
-        
+
         // Pool Data
         pairCreated: '1y 11d ago',
         pooledToken: 'xSPACE',
@@ -161,17 +161,17 @@ export default function InfoWidget({ data }: InfoWidgetProps) {
         pooledBase: 'WPOL',
         pooledBaseAmount: '111,232',
         pooledBaseValue: '$22K',
-        
+
         // Addresses
         pairAddress: '0xDF6...cD37',
         tokenAddress: '0x1D1...056f',
         baseAddress: '0x0d5...1270',
-        
+
         // Social Links
         website: 'https://xspace.io',
         twitter: 'https://twitter.com/xspace',
         telegram: 'https://t.me/xspace',
-        
+
         // Security
         securityIssues: [
             { title: 'Trading Cooldown Detected', description: 'The contract implements a cooldown period between trades which may limit trading frequency.' },
@@ -184,11 +184,11 @@ export default function InfoWidget({ data }: InfoWidgetProps) {
         snifferScore: 45,
         isVerified: true,
         isAudited: false,
-        
+
         // Holder Info
         holders: '1,234',
         top10HoldersPercent: '45%',
-        
+
         // Additional Metrics
         ath: '$0.015',
         atl: '$0.001',
@@ -200,7 +200,7 @@ export default function InfoWidget({ data }: InfoWidgetProps) {
     return (
         <div className="text-white w-full h-full font-sans shadow-md" style={{ backgroundColor: '#171C1C', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.8), 0 2px 4px -1px rgba(0, 0, 0, 0.6)' }}>
             {/* Header */}
-            <div className="flex items-center justify-between p-2 sm:p-3 border-b border-gray-800">
+            <div className="flex items-center justify-between p-2 sm:p-3  bg-[#222227] border-b border-gray-800">
                 <div className="flex items-center gap-2">
                     {tokenData.logoUri ? (
                         <img src={tokenData.logoUri} alt={tokenData.name} className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg" />
@@ -217,22 +217,25 @@ export default function InfoWidget({ data }: InfoWidgetProps) {
             {!showDetails ? (
                 /* Main View */
                 <div className="p-2 sm:p-3">
-                    <div className="flex items-center justify-center gap-1 sm:gap-1.5 mb-2 sm:mb-3">
-                        <h2 className="text-sm sm:text-base font-semibold">{tokenData.symbol}</h2>
-                        <Copy className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
-                        <span className="text-sm sm:text-base text-gray-400">/</span>
-                        <span className="text-sm sm:text-base font-semibold">{tokenData.baseToken}</span>
-                    </div>
 
-                    <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
-                        <div className="flex items-center gap-1 sm:gap-1.5 bg-purple-600/20 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full">
-                            <div className="w-3 h-3 sm:w-4 sm:h-4 bg-purple-600 rounded-full"></div>
-                            <span className="text-xs">{tokenData.chain}</span>
-                            <span className="text-gray-400 text-xs">{'>'}</span>
+                    <div className="flex flex-col gap-2 mb-2 sm:mb-3" style={{ backgroundColor: '#111116', padding: '1rem', borderRadius: '0.5rem' }}>
+                        <div className="flex items-center justify-center gap-1 sm:gap-1.5 mb-2">
+                            <h2 className="text-sm sm:text-base font-semibold">{tokenData.symbol}</h2>
+                            <Copy className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
+                            <span className="text-sm sm:text-base text-gray-400">/</span>
+                            <span className="text-sm sm:text-base font-semibold">{tokenData.baseToken}</span>
                         </div>
-                        <div className="flex items-center gap-1 sm:gap-1.5 bg-pink-600/20 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full">
-                            <div className="w-3 h-3 sm:w-4 sm:h-4 bg-pink-600 rounded"></div>
-                            <span className="text-xs">{tokenData.dex}</span>
+
+                        <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
+                            <div className="flex items-center gap-1 sm:gap-1.5 bg-purple-600/20 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full">
+                                <div className="w-3 h-3 sm:w-4 sm:h-4 bg-purple-600 rounded-full"></div>
+                                <span className="text-xs">{tokenData.chain}</span>
+                                <span className="text-gray-400 text-xs">{'>'}</span>
+                            </div>
+                            <div className="flex items-center gap-1 sm:gap-1.5 bg-pink-600/20 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full">
+                                <div className="w-3 h-3 sm:w-4 sm:h-4 bg-pink-600 rounded"></div>
+                                <span className="text-xs">{tokenData.dex}</span>
+                            </div>
                         </div>
                     </div>
 
