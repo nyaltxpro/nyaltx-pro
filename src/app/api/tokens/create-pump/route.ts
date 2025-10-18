@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Keypair, Connection } from '@solana/web3.js';
 import bs58 from 'bs58';
+import { uploadToIPFS } from '@/lib/ipfs';
 
 export async function POST(req: NextRequest) {
   try {
@@ -17,6 +18,7 @@ export async function POST(req: NextRequest) {
     const devBuyAmount = formData.get('devBuyAmount') as string;
     const slippage = formData.get('slippage') as string;
     const priorityFee = formData.get('priorityFee') as string;
+    const ipfsProvider = (formData.get('ipfsProvider') as string) || 'platform';
 
     // Validate required fields
     if (!file || !name || !symbol || !description) {
@@ -31,56 +33,46 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'File size must be less than 5MB' }, { status: 400 });
     }
 
-    // Create metadata for IPFS upload
-    const metadataFormData = new FormData();
-    metadataFormData.append('file', file);
-    metadataFormData.append('name', name);
-    metadataFormData.append('symbol', symbol);
-    metadataFormData.append('description', description);
-    metadataFormData.append('twitter', twitter || '');
-    metadataFormData.append('telegram', telegram || '');
-    metadataFormData.append('website', website || '');
-    metadataFormData.append('showName', 'true');
-
+    // Upload to IPFS using the new unified service
+    let ipfsResult;
     let metadataUri: string;
-    let metadataResponse: any;
 
     try {
-      // Upload metadata to IPFS based on platform
-      if (platform === 'bonk') {
-        // For Bonk platform, use their specific endpoints
-        const imgResponse = await fetch('https://nft-storage.letsbonk22.workers.dev/upload/img', {
-          method: 'POST',
-          body: metadataFormData,
-        });
-        const imgUri = await imgResponse.text();
+      const metadata = {
+        name,
+        symbol,
+        description,
+        website: website || undefined,
+        twitter: twitter || undefined,
+        telegram: telegram || undefined,
+        createdOn: 'https://nyaltx.pro',
+      };
 
-        const metaResponse = await fetch('https://nft-storage.letsbonk22.workers.dev/upload/meta', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            createdOn: 'https://bonk.fun',
-            description,
-            image: imgUri,
-            name,
-            symbol,
-            website: website || '',
-          }),
-        });
-        metadataUri = await metaResponse.text();
-        metadataResponse = { metadataUri, metadata: { name, symbol } };
-      } else {
-        // For Pump.fun and Moonshot, use pump.fun IPFS
-        const ipfsResponse = await fetch('https://pump.fun/api/ipfs', {
-          method: 'POST',
-          body: metadataFormData,
-        });
-        metadataResponse = await ipfsResponse.json();
-        metadataUri = metadataResponse.metadataUri;
-      }
+      // Use the new IPFS service with provider selection
+      ipfsResult = await uploadToIPFS(
+        file,
+        metadata,
+        ipfsProvider as any,
+        platform as any
+      );
+
+      metadataUri = ipfsResult.metadataUrl;
+
+      console.log('IPFS upload successful:', {
+        provider: ipfsProvider,
+        metadataUrl: metadataUri,
+        imageUrl: ipfsResult.imageUrl,
+        ipfsHash: ipfsResult.ipfsHash,
+      });
     } catch (error) {
       console.error('IPFS upload error:', error);
-      return NextResponse.json({ error: 'Failed to upload metadata to IPFS' }, { status: 500 });
+      return NextResponse.json(
+        { 
+          error: 'Failed to upload metadata to IPFS', 
+          details: error instanceof Error ? error.message : 'Unknown error'
+        },
+        { status: 500 }
+      );
     }
 
     // Generate a random keypair for the token
@@ -88,8 +80,8 @@ export async function POST(req: NextRequest) {
 
     // Prepare the token creation request
     const tokenMetadata = {
-      name: metadataResponse.metadata.name,
-      symbol: metadataResponse.metadata.symbol,
+      name,
+      symbol,
       uri: metadataUri,
     };
 
@@ -127,7 +119,10 @@ export async function POST(req: NextRequest) {
         signature: data.signature,
         mint: mintKeypair.publicKey.toBase58(),
         metadataUri,
+        imageUrl: ipfsResult.imageUrl,
+        ipfsHash: ipfsResult.ipfsHash,
         platform,
+        ipfsProvider,
         message: 'Token created successfully!',
       });
     } else {
@@ -147,7 +142,10 @@ export async function POST(req: NextRequest) {
         signature: simulatedResponse.signature,
         mint: simulatedResponse.mint,
         metadataUri: simulatedResponse.metadataUri,
+        imageUrl: ipfsResult.imageUrl,
+        ipfsHash: ipfsResult.ipfsHash,
         platform: simulatedResponse.platform,
+        ipfsProvider,
         message:
           'Token created successfully! (Demo mode - add PUMP_PORTAL_API_KEY for real transactions)',
       });

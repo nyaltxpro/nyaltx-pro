@@ -2439,9 +2439,10 @@
         "": ""
       },
       "detail_platforms": {
-        "": {
-          "decimal_place": null,
-          "contract_address": ""
+        "bsc": {
+          "decimal_place": 18,
+          "contract_address": "0x03dc21dbb20e109aa8f013a12816e39aa1e40c66"
+          
         }
       },
       "current_price": 0.35953,

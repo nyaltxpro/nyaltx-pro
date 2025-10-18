@@ -2,7 +2,7 @@
 
 import TransactionMonitor, { useTransactionMonitor } from '@/components/TransactionMonitor';
 import React, { useRef, useState } from 'react';
-import { FaChevronDown, FaChevronUp, FaInfoCircle, FaRocket, FaUpload } from 'react-icons/fa';
+import { FaChevronDown, FaChevronUp, FaInfoCircle, FaRocket, FaUpload, FaCloud, FaCheckCircle } from 'react-icons/fa';
 
 interface FAQ {
     question: string;
@@ -31,6 +31,8 @@ export default function CreateTokenPage() {
     const [isCreating, setIsCreating] = useState(false);
     const [error, setError] = useState<string>('');
     const [success, setSuccess] = useState<string>('');
+    const [uploadProgress, setUploadProgress] = useState<string>('');
+    const [ipfsProvider, setIpfsProvider] = useState<'platform' | 'pinata' | 'nftstorage' | 'web3storage'>('platform');
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { currentTransaction, startMonitoring, setStatus } = useTransactionMonitor();
     const [faqs, setFaqs] = useState<FAQ[]>([
@@ -146,11 +148,18 @@ export default function CreateTokenPage() {
             formData.append('devBuyAmount', devBuyAmount);
             formData.append('slippage', slippage);
             formData.append('priorityFee', priorityFee);
+            formData.append('ipfsProvider', ipfsProvider);
+
+            setUploadProgress('Uploading to IPFS...');
+
+            setUploadProgress('Creating token transaction...');
 
             const response = await fetch('/api/tokens/create-pump', {
                 method: 'POST',
                 body: formData,
             });
+
+            setUploadProgress('');
 
             const data = await response.json();
 
@@ -158,7 +167,13 @@ export default function CreateTokenPage() {
                 throw new Error(data.error || 'Failed to create token');
             }
 
-            setSuccess(`Token created successfully! Transaction: ${data.signature}`);
+            let successMessage = `Token created successfully!\n`;
+            successMessage += `Transaction: ${data.signature}\n`;
+            if (data.mint) successMessage += `Mint Address: ${data.mint}\n`;
+            if (data.ipfsHash) successMessage += `IPFS Hash: ${data.ipfsHash}\n`;
+            if (data.imageUrl) successMessage += `Image URL: ${data.imageUrl}`;
+            
+            setSuccess(successMessage);
 
             // Start monitoring the transaction
             if (data.signature) {
@@ -181,6 +196,7 @@ export default function CreateTokenPage() {
             }
         } catch (err: any) {
             setError(err.message || 'Failed to create token');
+            setUploadProgress('');
         } finally {
             setIsCreating(false);
         }
@@ -333,19 +349,39 @@ export default function CreateTokenPage() {
                                     )}
                                 </div>
 
-                                <div className="mb-4">
-                                    <label className="block text-sm font-medium text-gray-300 mb-1">Platform*</label>
-                                    <select
-                                        className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
-                                        value={platform}
-                                        onChange={e => setPlatform(e.target.value)}
-                                        required
-                                    >
-                                        <option value="pump">Pump.fun</option>
-                                        <option value="bonk">Bonk.fun</option>
-                                        <option value="moonshot">Moonshot</option>
-                                    </select>
-                                    <p className="text-xs text-gray-500 mt-1">Choose your token launch platform</p>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-300 mb-1">Platform*</label>
+                                        <select
+                                            className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
+                                            value={platform}
+                                            onChange={e => setPlatform(e.target.value)}
+                                            required
+                                        >
+                                            <option value="pump">Pump.fun</option>
+                                            <option value="bonk">Bonk.fun</option>
+                                            <option value="moonshot">Moonshot</option>
+                                        </select>
+                                        <p className="text-xs text-gray-500 mt-1">Token launch platform</p>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-300 mb-1">
+                                            <FaCloud className="inline mr-1" />
+                                            IPFS Provider*
+                                        </label>
+                                        <select
+                                            className="w-full px-3 py-2 bg-[#1a2932] border border-gray-700 rounded-md text-white focus:outline-none focus:ring-1 focus:ring-[#00b8d8]"
+                                            value={ipfsProvider}
+                                            onChange={e => setIpfsProvider(e.target.value as any)}
+                                            required
+                                        >
+                                            <option value="platform">Platform Default (Free)</option>
+                                            <option value="pinata">Pinata (Requires API Key)</option>
+                                            <option value="nftstorage">NFT.Storage (Requires API Key)</option>
+                                            <option value="web3storage">Web3.Storage (Requires API Key)</option>
+                                        </select>
+                                        <p className="text-xs text-gray-500 mt-1">Choose IPFS upload provider</p>
+                                    </div>
                                 </div>
 
                                 <div className="mb-4">
@@ -463,27 +499,55 @@ export default function CreateTokenPage() {
                                     </div>
                                 </div>
 
+                                {uploadProgress && (
+                                    <div className="mb-4 p-3 bg-blue-900/30 border border-blue-700 rounded-md text-blue-300 text-sm flex items-center gap-2">
+                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-300"></div>
+                                        {uploadProgress}
+                                    </div>
+                                )}
+
                                 {error && (
                                     <div className="mb-4 p-3 bg-red-900/30 border border-red-700 rounded-md text-red-300 text-sm">
+                                        <div className="font-semibold mb-1">Error:</div>
                                         {error}
                                     </div>
                                 )}
 
                                 {success && (
                                     <div className="mb-4 p-3 bg-green-900/30 border border-green-700 rounded-md text-green-300 text-sm">
-                                        {success}
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <FaCheckCircle className="text-green-400" />
+                                            <span className="font-semibold">Success!</span>
+                                        </div>
+                                        <pre className="whitespace-pre-wrap text-xs">{success}</pre>
                                     </div>
                                 )}
 
-                                <div className="text-center">
-                                    <button
-                                        type="submit"
-                                        disabled={isCreating}
-                                        className={`bg-[#00b8d8] hover:bg-[#00a6c4] text-white font-medium py-3 px-8 rounded-full transition duration-200 flex items-center justify-center space-x-2 mx-auto ${isCreating ? 'opacity-60 cursor-not-allowed' : ''}`}
-                                    >
-                                        <FaRocket />
-                                        <span>{isCreating ? 'Creating Token...' : 'Create Token'}</span>
-                                    </button>
+                                <div className="space-y-3">
+                                    {ipfsProvider !== 'platform' && (
+                                        <div className="p-3 bg-yellow-900/20 border border-yellow-700/50 rounded-md text-yellow-300 text-sm">
+                                            <div className="font-semibold mb-1">⚠️ API Key Required</div>
+                                            <p className="text-xs">
+                                                You've selected {ipfsProvider}. Make sure your API keys are configured in environment variables.
+                                                {ipfsProvider === 'pinata' && ' (NEXT_PUBLIC_PINATA_API_KEY, NEXT_PUBLIC_PINATA_SECRET_KEY)'}
+                                                {ipfsProvider === 'nftstorage' && ' (NEXT_PUBLIC_NFT_STORAGE_TOKEN)'}
+                                                {ipfsProvider === 'web3storage' && ' (NEXT_PUBLIC_WEB3_STORAGE_TOKEN)'}
+                                            </p>
+                                        </div>
+                                    )}
+                                    <div className="text-center">
+                                        <button
+                                            type="submit"
+                                            disabled={isCreating || !imageFile}
+                                            className={`bg-gradient-to-r from-[#00b8d8] to-[#0099b8] hover:from-[#00a6c4] hover:to-[#0088a8] text-white font-medium py-3 px-8 rounded-full transition duration-200 flex items-center justify-center space-x-2 mx-auto shadow-lg ${isCreating || !imageFile ? 'opacity-60 cursor-not-allowed' : 'hover:shadow-xl'}`}
+                                        >
+                                            <FaRocket />
+                                            <span>{isCreating ? 'Creating Token...' : 'Create Token'}</span>
+                                        </button>
+                                        {!imageFile && (
+                                            <p className="text-xs text-gray-400 mt-2">Please upload a token image to continue</p>
+                                        )}
+                                    </div>
                                 </div>
                             </form>
                         </div>
