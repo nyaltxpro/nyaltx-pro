@@ -235,12 +235,12 @@ const Footer = () => {
                 >
                   About us
                 </Link>
-                <Link
+                {/* <Link
                   href="/pro-signup"
                   className="text-gray-300 hover:text-white text-xs sm:text-sm"
                 >
                   Nyaltx Pro
-                </Link>
+                </Link> */}
                 {/* <Link href="/team" className="text-gray-300 hover:text-white text-xs sm:text-sm">Team</Link> */}
                 <Link href="/contact" className="text-gray-300 hover:text-white text-xs sm:text-sm">
                   Contact
@@ -251,12 +251,12 @@ const Footer = () => {
                 >
                   Privacy policy
                 </Link>
-                <Link
+                {/* <Link
                   href="/cookies-settings"
                   className="text-gray-300 hover:text-white text-xs sm:text-sm"
                 >
                   Cookie Settings
-                </Link>
+                </Link> */}
               </div>
 
               <div className="text-xs text-gray-400/90 text-center px-2 max-w-full break-words">
