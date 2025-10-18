@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { FaEnvelope, FaPaperPlane, FaTrash, FaPlus, FaEdit } from 'react-icons/fa';
+import { FaEnvelope, FaPaperPlane, FaTrash, FaPlus, FaEdit, FaHistory, FaUsers } from 'react-icons/fa';
 import Link from 'next/link';
 
 interface EmailRecipient {
@@ -11,6 +11,16 @@ interface EmailRecipient {
   role: string;
   active: boolean;
   createdAt: string;
+}
+
+interface EmailRecord {
+  id: string;
+  subject: string;
+  message: string;
+  recipientCount: number;
+  sentBy: string;
+  sentAt: string;
+  status: 'sent' | 'failed';
 }
 
 export default function EmailManagementPage() {
@@ -31,8 +41,20 @@ export default function EmailManagementPage() {
   const [testEmail, setTestEmail] = useState('');
   const [sendingTest, setSendingTest] = useState(false);
 
+  // Client email state
+  const [showSendEmailModal, setShowSendEmailModal] = useState(false);
+  const [emailSubject, setEmailSubject] = useState('');
+  const [emailMessage, setEmailMessage] = useState('');
+  const [sendingEmail, setSendingEmail] = useState(false);
+
+  // Email history state
+  const [emailHistory, setEmailHistory] = useState<EmailRecord[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+  const [activeTab, setActiveTab] = useState<'recipients' | 'history'>('recipients');
+
   useEffect(() => {
     fetchRecipients();
+    fetchEmailHistory();
   }, []);
 
   const fetchRecipients = async () => {
@@ -103,6 +125,21 @@ export default function EmailManagementPage() {
     }
   };
 
+  const fetchEmailHistory = async () => {
+    try {
+      setLoadingHistory(true);
+      const response = await fetch('/api/admin/email-history');
+      if (response.ok) {
+        const data = await response.json();
+        setEmailHistory(data.history || []);
+      }
+    } catch (err) {
+      console.error('Failed to load email history:', err);
+    } finally {
+      setLoadingHistory(false);
+    }
+  };
+
   const handleSendTestEmail = async () => {
     if (!testEmail) {
       alert('Please enter an email address');
@@ -130,6 +167,52 @@ export default function EmailManagementPage() {
     }
   };
 
+  const handleSendClientEmail = async () => {
+    if (!emailSubject || !emailMessage) {
+      alert('Please enter both subject and message');
+      return;
+    }
+
+    const activeRecipients = recipients.filter(r => r.active && r.role !== 'admin');
+    if (activeRecipients.length === 0) {
+      alert('No active client recipients found. Please add client recipients first.');
+      return;
+    }
+
+    if (!confirm(`Send email to ${activeRecipients.length} client(s)?`)) {
+      return;
+    }
+
+    try {
+      setSendingEmail(true);
+      const response = await fetch('/api/admin/send-client-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          subject: emailSubject,
+          message: emailMessage,
+          recipients: activeRecipients.map(r => r.email)
+        })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        alert(`Email sent successfully to ${result.sentCount} recipient(s)!`);
+        setShowSendEmailModal(false);
+        setEmailSubject('');
+        setEmailMessage('');
+        fetchEmailHistory(); // Refresh history
+      } else {
+        const error = await response.json();
+        alert(error.message || 'Failed to send email');
+      }
+    } catch (err) {
+      alert('Error sending email');
+    } finally {
+      setSendingEmail(false);
+    }
+  };
+
   return (
     <div className="p-6 max-w-7xl mx-auto">
       {/* Header */}
@@ -144,6 +227,28 @@ export default function EmailManagementPage() {
         >
           Back to Dashboard
         </Link>
+      </div>
+
+      {/* Send Email to Clients Section */}
+      <div className="bg-gradient-to-r from-purple-900/20 to-pink-900/20 rounded-lg p-6 mb-6 border border-purple-700">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-xl font-semibold text-white mb-2 flex items-center gap-2">
+              <FaUsers className="text-purple-400" />
+              Send Email to Clients
+            </h2>
+            <p className="text-sm text-gray-400">
+              Send announcements to all active client recipients ({recipients.filter(r => r.active && r.role !== 'admin').length} clients)
+            </p>
+          </div>
+          <button
+            onClick={() => setShowSendEmailModal(true)}
+            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-lg font-medium transition-all shadow-lg"
+          >
+            <FaPaperPlane />
+            Compose Email
+          </button>
+        </div>
       </div>
 
       {/* Test Email Section */}
@@ -170,7 +275,34 @@ export default function EmailManagementPage() {
         </div>
       </div>
 
+      {/* Tabs */}
+      <div className="flex gap-2 mb-6">
+        <button
+          onClick={() => setActiveTab('recipients')}
+          className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
+            activeTab === 'recipients'
+              ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white'
+              : 'bg-gray-800 text-gray-400 hover:text-white border border-gray-700'
+          }`}
+        >
+          <FaEnvelope />
+          Recipients
+        </button>
+        <button
+          onClick={() => setActiveTab('history')}
+          className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
+            activeTab === 'history'
+              ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white'
+              : 'bg-gray-800 text-gray-400 hover:text-white border border-gray-700'
+          }`}
+        >
+          <FaHistory />
+          Email History
+        </button>
+      </div>
+
       {/* Recipients List */}
+      {activeTab === 'recipients' && (
       <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold text-white flex items-center gap-2">
@@ -249,6 +381,123 @@ export default function EmailManagementPage() {
           </div>
         )}
       </div>
+      )}
+
+      {/* Email History Tab */}
+      {activeTab === 'history' && (
+        <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+          <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
+            <FaHistory className="text-cyan-400" />
+            Email History
+          </h2>
+
+          {loadingHistory ? (
+            <div className="text-center py-8 text-gray-400">Loading history...</div>
+          ) : emailHistory.length === 0 ? (
+            <div className="text-center py-8 text-gray-400">
+              No emails sent yet. Send your first email to clients to see history here.
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {emailHistory.map((record) => (
+                <div
+                  key={record.id}
+                  className="bg-gray-700/30 rounded-lg p-4 border border-gray-600/50 hover:border-gray-500/50 transition-colors"
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex-1">
+                      <h3 className="text-white font-semibold text-lg">{record.subject}</h3>
+                      <p className="text-gray-400 text-sm mt-1 line-clamp-2">{record.message}</p>
+                    </div>
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        record.status === 'sent'
+                          ? 'bg-green-500/20 text-green-300'
+                          : 'bg-red-500/20 text-red-300'
+                      }`}
+                    >
+                      {record.status}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-4 text-xs text-gray-400 mt-3">
+                    <span className="flex items-center gap-1">
+                      <FaUsers className="text-purple-400" />
+                      {record.recipientCount} recipient{record.recipientCount !== 1 ? 's' : ''}
+                    </span>
+                    <span>Sent by: {record.sentBy}</span>
+                    <span>{new Date(record.sentAt).toLocaleString()}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Send Client Email Modal */}
+      {showSendEmailModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-gray-800 rounded-lg p-6 max-w-2xl w-full mx-4 border border-gray-700">
+            <h3 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
+              <FaPaperPlane className="text-purple-400" />
+              Compose Email to Clients
+            </h3>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Subject *</label>
+                <input
+                  type="text"
+                  value={emailSubject}
+                  onChange={(e) => setEmailSubject(e.target.value)}
+                  placeholder="Enter email subject..."
+                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Message *</label>
+                <textarea
+                  value={emailMessage}
+                  onChange={(e) => setEmailMessage(e.target.value)}
+                  placeholder="Enter your message..."
+                  rows={8}
+                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  required
+                />
+              </div>
+
+              <div className="bg-purple-900/20 border border-purple-700/50 rounded-lg p-3">
+                <p className="text-sm text-gray-300">
+                  <strong className="text-purple-400">Recipients:</strong> This email will be sent to{' '}
+                  <strong>{recipients.filter(r => r.active && r.role !== 'admin').length}</strong> active client(s)
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => {
+                  setShowSendEmailModal(false);
+                  setEmailSubject('');
+                  setEmailMessage('');
+                }}
+                className="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSendClientEmail}
+                disabled={sendingEmail || !emailSubject || !emailMessage}
+                className="flex-1 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-lg font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {sendingEmail ? 'Sending...' : 'Send Email'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Add Recipient Modal */}
       {showAddModal && (
@@ -287,7 +536,8 @@ export default function EmailManagementPage() {
                   onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                   className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
                 >
-                  <option value="admin">Admin</option>
+                  <option value="admin">Admin (won't receive client emails)</option>
+                  <option value="client">Client (receives announcements)</option>
                   <option value="moderator">Moderator</option>
                   <option value="support">Support</option>
                 </select>
