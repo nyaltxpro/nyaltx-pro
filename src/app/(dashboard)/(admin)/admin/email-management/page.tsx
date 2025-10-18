@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { FaEnvelope, FaPaperPlane, FaTrash, FaPlus, FaEdit, FaHistory, FaUsers } from 'react-icons/fa';
+import { FaEnvelope, FaPaperPlane, FaTrash, FaPlus, FaEdit, FaHistory, FaUsers, FaChevronDown, FaChevronUp, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import Link from 'next/link';
 
 interface EmailRecipient {
@@ -17,10 +17,12 @@ interface EmailRecord {
   id: string;
   subject: string;
   message: string;
+  recipients: string[];
   recipientCount: number;
   sentBy: string;
   sentAt: string;
   status: 'sent' | 'failed';
+  failedRecipients?: string[];
 }
 
 export default function EmailManagementPage() {
@@ -51,6 +53,7 @@ export default function EmailManagementPage() {
   const [emailHistory, setEmailHistory] = useState<EmailRecord[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [activeTab, setActiveTab] = useState<'recipients' | 'history'>('recipients');
+  const [expandedEmailId, setExpandedEmailId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchRecipients();
@@ -402,31 +405,96 @@ export default function EmailManagementPage() {
               {emailHistory.map((record) => (
                 <div
                   key={record.id}
-                  className="bg-gray-700/30 rounded-lg p-4 border border-gray-600/50 hover:border-gray-500/50 transition-colors"
+                  className="bg-gray-700/30 rounded-lg border border-gray-600/50 hover:border-gray-500/50 transition-colors overflow-hidden"
                 >
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex-1">
-                      <h3 className="text-white font-semibold text-lg">{record.subject}</h3>
-                      <p className="text-gray-400 text-sm mt-1 line-clamp-2">{record.message}</p>
+                  <div className="p-4">
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex-1">
+                        <h3 className="text-white font-semibold text-lg">{record.subject}</h3>
+                        <p className="text-gray-400 text-sm mt-1 line-clamp-2">{record.message}</p>
+                      </div>
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          record.status === 'sent'
+                            ? 'bg-green-500/20 text-green-300'
+                            : 'bg-red-500/20 text-red-300'
+                        }`}
+                      >
+                        {record.status}
+                      </span>
                     </div>
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        record.status === 'sent'
-                          ? 'bg-green-500/20 text-green-300'
-                          : 'bg-red-500/20 text-red-300'
-                      }`}
+                    <div className="flex items-center gap-4 text-xs text-gray-400 mt-3">
+                      <span className="flex items-center gap-1">
+                        <FaUsers className="text-purple-400" />
+                        {record.recipientCount} recipient{record.recipientCount !== 1 ? 's' : ''}
+                      </span>
+                      <span>Sent by: {record.sentBy}</span>
+                      <span>{new Date(record.sentAt).toLocaleString()}</span>
+                    </div>
+                    
+                    {/* View Recipients Button */}
+                    <button
+                      onClick={() => setExpandedEmailId(expandedEmailId === record.id ? null : record.id)}
+                      className="mt-3 flex items-center gap-2 text-cyan-400 hover:text-cyan-300 text-sm font-medium transition-colors"
                     >
-                      {record.status}
-                    </span>
+                      {expandedEmailId === record.id ? <FaChevronUp /> : <FaChevronDown />}
+                      {expandedEmailId === record.id ? 'Hide' : 'View'} Recipients
+                    </button>
                   </div>
-                  <div className="flex items-center gap-4 text-xs text-gray-400 mt-3">
-                    <span className="flex items-center gap-1">
-                      <FaUsers className="text-purple-400" />
-                      {record.recipientCount} recipient{record.recipientCount !== 1 ? 's' : ''}
-                    </span>
-                    <span>Sent by: {record.sentBy}</span>
-                    <span>{new Date(record.sentAt).toLocaleString()}</span>
-                  </div>
+
+                  {/* Expandable Recipients List */}
+                  {expandedEmailId === record.id && (
+                    <div className="bg-gray-800/50 border-t border-gray-600/50 p-4">
+                      <h4 className="text-white font-medium mb-3 flex items-center gap-2">
+                        <FaEnvelope className="text-cyan-400" />
+                        Email Recipients ({record.recipients?.length || 0})
+                      </h4>
+                      
+                      {/* Successful Recipients */}
+                      {record.recipients && record.recipients.length > 0 && (
+                        <div className="mb-4">
+                          <p className="text-green-300 text-sm font-medium mb-2 flex items-center gap-2">
+                            <FaCheckCircle />
+                            Successfully Sent ({record.recipients.length - (record.failedRecipients?.length || 0)})
+                          </p>
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                            {record.recipients
+                              .filter(email => !record.failedRecipients?.includes(email))
+                              .map((email, idx) => (
+                                <div
+                                  key={idx}
+                                  className="bg-gray-700/50 px-3 py-2 rounded text-sm text-gray-300 flex items-center gap-2"
+                                >
+                                  <FaCheckCircle className="text-green-400 text-xs" />
+                                  {email}
+                                </div>
+                              ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Failed Recipients */}
+                      {record.failedRecipients && record.failedRecipients.length > 0 && (
+                        <div>
+                          <p className="text-red-300 text-sm font-medium mb-2 flex items-center gap-2">
+                            <FaTimesCircle />
+                            Failed to Send ({record.failedRecipients.length})
+                          </p>
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                            {record.failedRecipients.map((email, idx) => (
+                              <div
+                                key={idx}
+                                className="bg-red-900/20 border border-red-700/50 px-3 py-2 rounded text-sm text-red-300 flex items-center gap-2"
+                              >
+                                <FaTimesCircle className="text-red-400 text-xs" />
+                                {email}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

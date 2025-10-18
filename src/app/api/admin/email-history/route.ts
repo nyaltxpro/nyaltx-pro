@@ -29,10 +29,12 @@ export async function GET(request: NextRequest) {
       id: record.id,
       subject: record.subject,
       message: record.message,
+      recipients: record.recipients || [],
       recipientCount: record.recipientCount,
       sentBy: record.sentBy || 'admin',
       sentAt: record.sentAt,
-      status: record.status
+      status: record.status,
+      failedRecipients: record.failedRecipients || []
     }));
 
     return NextResponse.json({ 

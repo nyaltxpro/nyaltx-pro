@@ -19,7 +19,7 @@ export default function DailyGainers() {
     error,
     refreshMarketMovers,
     hasCachedData
-  } = useMarketMovers(activeTab, 5);
+  } = useMarketMovers(activeTab, 15);
 
   const formatPrice = (price: number | null | undefined) => {
     if (!price || price === 0) return '$0.00';
@@ -163,7 +163,7 @@ export default function DailyGainers() {
 
       {isLoadingCoinData ? (
         <div className="animate-pulse space-y-3">
-          {[...Array(5)].map((_, index) => (
+          {[...Array(15)].map((_, index) => (
             <div key={`skeleton-${index}`} className="flex justify-between items-center p-2">
               <div className="flex items-center">
                 <div className="h-8 w-8 bg-gray-700/60 rounded-full mr-3"></div>
@@ -200,7 +200,7 @@ export default function DailyGainers() {
           </div>
         </div>
       ) : (
-        <div>
+        <div className="max-h-[600px] overflow-y-auto custom-scrollbar">
           {displayData.map((coin, index) => (
             <div
               key={coin.id ?? coin.symbol}

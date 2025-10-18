@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
       filteredCoins = marketData.filter((coin: any) => coin.price_change_percentage_24h < 0);
     }
 
-    const topCoins = filteredCoins.slice(0, Math.min(limit, 8)); // Limit to 8 for better performance
+    const topCoins = filteredCoins.slice(0, Math.min(limit, 20)); // Limit to 20 for better performance
 
     // Helper function to fetch coin details with retry logic
     const fetchCoinDetails = async (coin: any, retries = 2): Promise<any> => {
