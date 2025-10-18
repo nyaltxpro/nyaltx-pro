@@ -1,37 +1,26 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import Banner from '@/components/Banner';
-import ConnectWalletButton from '@/components/ConnectWalletButton';
-import Image from 'next/image';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import BlockchainSelector from '@/components/BlockchainSelector';
-import TokenSection from '@/components/TokenSection';
-import MemeTokenDisplay from '@/components/MemeTokenDisplay';
-import AllChainsDropdown from '@/components/AllChainsDropdown';
-import BlockchainNetworksGrid from '@/components/BlockchainNetworksGrid';
+import Ads from '@/components/Ads';
+import ChainFilterIndicator from '@/components/ChainFilterIndicator';
 import DailyGainers from '@/components/DailyGainers';
-import TokenCreator from '@/components/TokenCreator';
-import RecentSocials from '@/components/RecentSocials';
-import * as Tooltip from '@radix-ui/react-tooltip';
-import { StarIcon, RocketIcon, ActivityLogIcon, UpdateIcon, BarChartIcon } from '@radix-ui/react-icons';
-import { Blockchain, Token } from '@/lib/types/blockchain';
+import RecentlyAddedCoins from '@/components/RecentlyAddedCoins';
+import TokenSection from '@/components/TokenSection';
+import TrendingCoins from '@/components/TrendingCoins';
+import memeTokensData from '@/data/memetoken.json';
+import { useChainFilter } from '@/hooks/useChainFilter';
 import {
-  supportedBlockchains,
   getMemeTokens,
   getTronNewTokens,
   getTronPreLaunchedTokens,
+  supportedBlockchains,
 } from '@/lib/blockchain/blockchainUtils';
-import memeTokensData from '@/data/memetoken.json';
-import Header from '@/components/Header';
-import RecentlyAddedCoins from '@/components/RecentlyAddedCoins';
-import TrendingCoins from '@/components/TrendingCoins';
-import Ads from '@/components/Ads';
-import PumpFunLive from '@/components/PumpFunLive';
-import { useChainFilter } from '@/hooks/useChainFilter';
-import ChainFilterIndicator from '@/components/ChainFilterIndicator';
+import { Blockchain } from '@/lib/types/blockchain';
 import { lookupTokenWithChain } from '@/utils/tokenLookup';
+import { ActivityLogIcon, BarChartIcon, RocketIcon, StarIcon } from '@radix-ui/react-icons';
+import * as Tooltip from '@radix-ui/react-tooltip';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 // import DashboardBanners from '@/components/DashboardBanners';
 
 // SortConfig type will be used when we reimplement the token sorting functionality
@@ -271,11 +260,11 @@ export default function Home() {
     const params = new URLSearchParams();
     const symbol = (t.symbol || t.tokenSymbol || t.tokenName || '').toUpperCase();
     params.set('base', symbol);
-    
+
     // Try to get contract address and chain from the JSON lookup if not present
     let chain = t.blockchain || t.chain;
     let contractAddress = t.contractAddress;
-    
+
     // If contract address or chain is missing, lookup from top400coins database
     if (!contractAddress || !chain) {
       const tokenLookup = lookupTokenWithChain(symbol, chain);
@@ -292,12 +281,13 @@ export default function Home() {
         }
       }
     }
-    
+
     if (chain) params.set('chain', chain);
     if (contractAddress) params.set('address', contractAddress);
     if (t.name) params.set('name', t.name);
     if (t.image || t.logoUrl) params.set('imageUri', t.image || t.logoUrl);
-    
+    if (t.price) params.set('price', t.price ?? t.current_price);
+
     router.push(`/dashboard/trade?${params.toString()}`);
   };
 
@@ -397,95 +387,95 @@ export default function Home() {
       <div className={`flex flex-col min-h-screen ${!darkMode ? 'light' : ''}`} style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
         {/* <Header /> */}
 
-      {isPageLoading ? (
-        // Skeleton Loading State
-        <div className="flex flex-col min-h-screen">
-          {/* Skeleton Ads */}
-          <div className="h-16 bg-gray-700 rounded animate-pulse mx-4 mt-4"></div>
+        {isPageLoading ? (
+          // Skeleton Loading State
+          <div className="flex flex-col min-h-screen">
+            {/* Skeleton Ads */}
+            <div className="h-16 bg-gray-700 rounded animate-pulse mx-4 mt-4"></div>
 
-          {/* Skeleton Stats Bar */}
-          <div className="stats-bar mx-4 flex flex-col w-[90%] md:w-full md:flex-row md:justify-between md:items-center gap-4 mt-4">
-            <div className="h-6 bg-gray-700 rounded animate-pulse w-32"></div>
-            <div className="flex flex-wrap gap-x-4 gap-y-2">
-              {[...Array(5)].map((_, i) => (
-                <div key={i} className="h-4 bg-gray-700 rounded animate-pulse w-24"></div>
-              ))}
-            </div>
+            {/* Skeleton Stats Bar */}
+            <div className="stats-bar mx-4 flex flex-col w-[90%] md:w-full md:flex-row md:justify-between md:items-center gap-4 mt-4">
+              <div className="h-6 bg-gray-700 rounded animate-pulse w-32"></div>
+              <div className="flex flex-wrap gap-x-4 gap-y-2">
+                {[...Array(5)].map((_, i) => (
+                  <div key={i} className="h-4 bg-gray-700 rounded animate-pulse w-24"></div>
+                ))}
+              </div>
 
-            {/* Pump.fun Live Section */}
-            {/* <div className="p-4">
+              {/* Pump.fun Live Section */}
+              {/* <div className="p-4">
         <PumpFunLive />
       </div> */}
-            <div className="h-5 bg-gray-700 rounded animate-pulse w-40"></div>
-          </div>
-
-          {/* Skeleton Token Race */}
-          <div className="token-race mx-4 mt-4">
-            <div className="flex justify-between items-center mb-4">
-              <div className="h-6 bg-gray-700 rounded animate-pulse w-32"></div>
-              <div className="flex space-x-2">
-                <div className="h-8 bg-gray-700 rounded animate-pulse w-16"></div>
-                <div className="h-8 bg-gray-700 rounded animate-pulse w-20"></div>
-              </div>
+              <div className="h-5 bg-gray-700 rounded animate-pulse w-40"></div>
             </div>
-            <div className="flex gap-2 overflow-x-auto pb-4">
-              {[...Array(10)].map((_, i) => (
-                <div key={i} className="flex-shrink-0  rounded-lg p-3 w-32">
-                  <div className="h-4 bg-gray-700 rounded animate-pulse mb-2 w-8"></div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-5 h-5 bg-gray-700 rounded-full animate-pulse"></div>
-                    <div className="h-4 bg-gray-700 rounded animate-pulse w-12"></div>
-                  </div>
-                  <div className="h-4 bg-gray-700 rounded animate-pulse w-16"></div>
+
+            {/* Skeleton Token Race */}
+            <div className="token-race mx-4 mt-4">
+              <div className="flex justify-between items-center mb-4">
+                <div className="h-6 bg-gray-700 rounded animate-pulse w-32"></div>
+                <div className="flex space-x-2">
+                  <div className="h-8 bg-gray-700 rounded animate-pulse w-16"></div>
+                  <div className="h-8 bg-gray-700 rounded animate-pulse w-20"></div>
                 </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Skeleton Main Content Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="max-h-[400px] section-card">
-                <div className="h-6 bg-gray-700 rounded animate-pulse mb-4 w-32"></div>
-                <div className="space-y-3">
-                  {[...Array(8)].map((_, j) => (
-                    <div key={j} className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-gray-700 rounded-full animate-pulse"></div>
-                      <div className="flex-1">
-                        <div className="h-4 bg-gray-700 rounded animate-pulse mb-1 w-20"></div>
-                        <div className="h-3 bg-gray-700 rounded animate-pulse w-16"></div>
-                      </div>
+              </div>
+              <div className="flex gap-2 overflow-x-auto pb-4">
+                {[...Array(10)].map((_, i) => (
+                  <div key={i} className="flex-shrink-0  rounded-lg p-3 w-32">
+                    <div className="h-4 bg-gray-700 rounded animate-pulse mb-2 w-8"></div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-5 h-5 bg-gray-700 rounded-full animate-pulse"></div>
                       <div className="h-4 bg-gray-700 rounded animate-pulse w-12"></div>
                     </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Skeleton Token Categories */}
-          <div className="token-categories flex flex-col mx-4 mt-6">
-            <div className="flex items-center py-2 rounded-lg card-bg border-gray-700 overflow-x-auto mb-4">
-              <div className="flex space-x-4">
-                {[...Array(9)].map((_, i) => (
-                  <div key={i} className="h-8 bg-gray-700 rounded animate-pulse w-20"></div>
+                    <div className="h-4 bg-gray-700 rounded animate-pulse w-16"></div>
+                  </div>
                 ))}
               </div>
             </div>
-            <div className="h-64 bg-gray-700 rounded animate-pulse"></div>
-          </div>
-        </div>
-      ) : (
-        <>
-          <Ads />
 
-          {/* Dashboard Banners */}
-          {/* <div className="mx-4 mt-4">
+            {/* Skeleton Main Content Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="max-h-[400px] section-card">
+                  <div className="h-6 bg-gray-700 rounded animate-pulse mb-4 w-32"></div>
+                  <div className="space-y-3">
+                    {[...Array(8)].map((_, j) => (
+                      <div key={j} className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-gray-700 rounded-full animate-pulse"></div>
+                        <div className="flex-1">
+                          <div className="h-4 bg-gray-700 rounded animate-pulse mb-1 w-20"></div>
+                          <div className="h-3 bg-gray-700 rounded animate-pulse w-16"></div>
+                        </div>
+                        <div className="h-4 bg-gray-700 rounded animate-pulse w-12"></div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Skeleton Token Categories */}
+            <div className="token-categories flex flex-col mx-4 mt-6">
+              <div className="flex items-center py-2 rounded-lg card-bg border-gray-700 overflow-x-auto mb-4">
+                <div className="flex space-x-4">
+                  {[...Array(9)].map((_, i) => (
+                    <div key={i} className="h-8 bg-gray-700 rounded animate-pulse w-20"></div>
+                  ))}
+                </div>
+              </div>
+              <div className="h-64 bg-gray-700 rounded animate-pulse"></div>
+            </div>
+          </div>
+        ) : (
+          <>
+            <Ads />
+
+            {/* Dashboard Banners */}
+            {/* <div className="mx-4 mt-4">
             <DashboardBanners />
           </div> */}
 
-          {/* Stats Bar */}
-          {/* <div className="stats-bar mx-4 flex flex-col w-[90%] md:w-full  md:flex-row md:justify-between md:items-center gap-4">
+            {/* Stats Bar */}
+            {/* <div className="stats-bar mx-4 flex flex-col w-[90%] md:w-full  md:flex-row md:justify-between md:items-center gap-4">
             <div className="flex justify-between items-center mb-2 md:mb-0">
               <div className="text-xl font-bold">NYALTX board</div>
             </div>
@@ -520,126 +510,125 @@ export default function Home() {
             </div>
           </div> */}
 
-          {/* Token Race Section */}
-          <div className="token-race mx-4 mt-4">
-            <div className="token-race-header flex-col md:flex-row">
-              <div className="flex items-center gap-3 mb-2 md:mb-0">
-                <StarIcon className="w-6 h-6 text-yellow-400" />
-                <span className="text-xl font-bold" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>TOKEN RACE</span>
-              </div>
-              <div className="flex space-x-2 items-center">
-                <Tooltip.Root>
-                  <Tooltip.Trigger asChild>
-                    <button className="py-2 px-4 bg-gradient-to-r from-[#00d4aa] to-[#00b894] text-white font-bold rounded-lg flex items-center gap-2 hover:shadow-lg transition-all duration-300" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                      <BarChartIcon className="w-4 h-4" />
-                      RANKING
-                    </button>
-                  </Tooltip.Trigger>
-                  <Tooltip.Portal>
-                    <Tooltip.Content className="bg-black/90 text-white px-3 py-2 rounded-lg text-sm">
-                      View token rankings
-                      <Tooltip.Arrow className="fill-black/90" />
-                    </Tooltip.Content>
-                  </Tooltip.Portal>
-                </Tooltip.Root>
-              </div>
-            </div>
-
-            {/* Chain Filter Indicator for Token Race */}
-            <div className="mb-4">
-              <ChainFilterIndicator />
-            </div>
-
-            <div className="relative overflow-hidden  rounded-lg p-4">
-              <div className="relative  h-36 overflow-hidden">
-                <div
-                  className="flex gap-4 animate-pulse"
-                  style={{
-                    display: 'flex',
-                    width: `${filteredTokenRaceData.length * 200}px`,
-                    animation: 'ticker 60s linear infinite',
-                    animationFillMode: 'forwards',
-                  }}
-                >
-                  {/* Duplicate the array for seamless loop */}
-                  {[...filteredTokenRaceData, ...filteredTokenRaceData].map((token, index) => (
-                    <div
-                      key={`${token.id || `token-${index}`}-${Math.floor(index / filteredTokenRaceData.length)}`}
-                      className="flex-shrink-0 min-w-[280px] px-1"
-                    >
-                      <div
-                        onClick={() => handleClick(token)}
-                        className="relative flex flex-row justify-between items-center mt-3 p-4 bg-gradient-to-br from-black/80 to-gray-900/80 backdrop-blur-sm rounded-xl shadow-lg border border-gray-700/50 h-32 transform hover:scale-105 transition-all duration-300 cursor-pointer hover:border-[#00d4aa] hover:shadow-[#00d4aa]/25"
-                        style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
-                      >
-                        {/* Position tag on top right based on points ranking */}
-                        <div
-                          className={`absolute -top-2 -right-2 px-3 py-1 rounded-full text-xs font-bold shadow-lg ${
-                            index % filteredTokenRaceData.length === 0
-                              ? 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-black'
-                              : index % filteredTokenRaceData.length === 1
-                                ? 'bg-gradient-to-r from-gray-300 to-gray-400 text-black'
-                                : index % filteredTokenRaceData.length === 2
-                                  ? 'bg-gradient-to-r from-orange-400 to-orange-500 text-black'
-                                  : 'bg-gradient-to-r from-blue-400 to-blue-500 text-white'
-                          }`}
-                          style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
-                        >
-                          {index % filteredTokenRaceData.length === 0
-                            ? '🥇 1st'
-                            : index % filteredTokenRaceData.length === 1
-                              ? '🥈 2nd'
-                              : index % filteredTokenRaceData.length === 2
-                                ? '🥉 3rd'
-                                : `#${(index % filteredTokenRaceData.length) + 1}`}
-                        </div>
-
-                        <div className="flex items-center gap-2 mb-1">
-                          {(token.image || token.logoUrl) && (
-                            <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-500">
-                              <Image
-                                src={token.image || token.logoUrl || '/placeholder-token.png'}
-                                alt={token.symbol || token.name || 'Token'}
-                                width={32}
-                                height={32}
-                                unoptimized
-                                className="object-cover"
-                              />
-                            </div>
-                          )}
-                          <div className="token-symbol flex flex-col text-sm font-bold text-white truncate">
-                            <span style={{ fontFamily: 'Space Grotesk, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                              {token.symbol || token.name || 'Unknown'}
-                            </span>
-                            <span className="text-[#00d4aa] font-medium" style={{ fontFamily: 'SF Mono, Monaco, Inconsolata, Roboto Mono, monospace' }}>
-                              $
-                              {token.price ||
-                                (token.current_price ? token.current_price.toFixed(4) : 'N/A')}
-                            </span>
-                          </div>
-                        </div>
-
-                        <div className="flex flex-col items-center">
-                          {/* Points display */}
-                          <div className="text-center mb-1">
-                            <div className="text-lg font-bold text-[#00d4aa] flex items-center gap-1" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                              <RocketIcon className="w-4 h-4" />
-                              {token.points || 0} pts
-                            </div>
-                          </div>
-
-                          <div className="token-price text-xs font-semibold text-center text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                            Racing
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+            {/* Token Race Section */}
+            <div className="token-race mx-4 mt-4">
+              <div className="token-race-header flex-col md:flex-row">
+                <div className="flex items-center gap-3 mb-2 md:mb-0">
+                  <StarIcon className="w-6 h-6 text-yellow-400" />
+                  <span className="text-xl font-bold" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>TOKEN RACE</span>
+                </div>
+                <div className="flex space-x-2 items-center">
+                  <Tooltip.Root>
+                    <Tooltip.Trigger asChild>
+                      <button className="py-2 px-4 bg-gradient-to-r from-[#00d4aa] to-[#00b894] text-white font-bold rounded-lg flex items-center gap-2 hover:shadow-lg transition-all duration-300" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                        <BarChartIcon className="w-4 h-4" />
+                        RANKING
+                      </button>
+                    </Tooltip.Trigger>
+                    <Tooltip.Portal>
+                      <Tooltip.Content className="bg-black/90 text-white px-3 py-2 rounded-lg text-sm">
+                        View token rankings
+                        <Tooltip.Arrow className="fill-black/90" />
+                      </Tooltip.Content>
+                    </Tooltip.Portal>
+                  </Tooltip.Root>
                 </div>
               </div>
 
-              {/* Add inline keyframes */}
-              <style jsx>{`
+              {/* Chain Filter Indicator for Token Race */}
+              <div className="mb-4">
+                <ChainFilterIndicator />
+              </div>
+
+              <div className="relative overflow-hidden  rounded-lg p-4">
+                <div className="relative  h-36 overflow-hidden">
+                  <div
+                    className="flex gap-4 animate-pulse"
+                    style={{
+                      display: 'flex',
+                      width: `${filteredTokenRaceData.length * 200}px`,
+                      animation: 'ticker 60s linear infinite',
+                      animationFillMode: 'forwards',
+                    }}
+                  >
+                    {/* Duplicate the array for seamless loop */}
+                    {[...filteredTokenRaceData, ...filteredTokenRaceData].map((token, index) => (
+                      <div
+                        key={`${token.id || `token-${index}`}-${Math.floor(index / filteredTokenRaceData.length)}`}
+                        className="flex-shrink-0 min-w-[280px] px-1"
+                      >
+                        <div
+                          onClick={() => handleClick(token)}
+                          className="relative flex flex-row justify-between items-center mt-3 p-4 bg-gradient-to-br from-black/80 to-gray-900/80 backdrop-blur-sm rounded-xl shadow-lg border border-gray-700/50 h-32 transform hover:scale-105 transition-all duration-300 cursor-pointer hover:border-[#00d4aa] hover:shadow-[#00d4aa]/25"
+                          style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                        >
+                          {/* Position tag on top right based on points ranking */}
+                          <div
+                            className={`absolute -top-2 -right-2 px-3 py-1 rounded-full text-xs font-bold shadow-lg ${index % filteredTokenRaceData.length === 0
+                                ? 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-black'
+                                : index % filteredTokenRaceData.length === 1
+                                  ? 'bg-gradient-to-r from-gray-300 to-gray-400 text-black'
+                                  : index % filteredTokenRaceData.length === 2
+                                    ? 'bg-gradient-to-r from-orange-400 to-orange-500 text-black'
+                                    : 'bg-gradient-to-r from-blue-400 to-blue-500 text-white'
+                              }`}
+                            style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                          >
+                            {index % filteredTokenRaceData.length === 0
+                              ? '🥇 1st'
+                              : index % filteredTokenRaceData.length === 1
+                                ? '🥈 2nd'
+                                : index % filteredTokenRaceData.length === 2
+                                  ? '🥉 3rd'
+                                  : `#${(index % filteredTokenRaceData.length) + 1}`}
+                          </div>
+
+                          <div className="flex items-center gap-2 mb-1">
+                            {(token.image || token.logoUrl) && (
+                              <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-500">
+                                <Image
+                                  src={token.image || token.logoUrl || '/placeholder-token.png'}
+                                  alt={token.symbol || token.name || 'Token'}
+                                  width={32}
+                                  height={32}
+                                  unoptimized
+                                  className="object-cover"
+                                />
+                              </div>
+                            )}
+                            <div className="token-symbol flex flex-col text-sm font-bold text-white truncate">
+                              <span style={{ fontFamily: 'Space Grotesk, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                {token.symbol || token.name || 'Unknown'}
+                              </span>
+                              <span className="text-[#00d4aa] font-medium" style={{ fontFamily: 'SF Mono, Monaco, Inconsolata, Roboto Mono, monospace' }}>
+                                $
+                                {token.price ||
+                                  (token.current_price ? token.current_price.toFixed(4) : 'N/A')}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-col items-center">
+                            {/* Points display */}
+                            <div className="text-center mb-1">
+                              <div className="text-lg font-bold text-[#00d4aa] flex items-center gap-1" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                <RocketIcon className="w-4 h-4" />
+                                {token.points || 0} pts
+                              </div>
+                            </div>
+
+                            <div className="token-price text-xs font-semibold text-center text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                              Racing
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Add inline keyframes */}
+                <style jsx>{`
                 @keyframes ticker {
                   0% {
                     transform: translateX(0);
@@ -649,42 +638,42 @@ export default function Home() {
                   }
                 }
               `}</style>
-            </div>
-          </div>
-
-          {/* Main Content Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-4" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-            {/* Daily Gainers Section */}
-            <div className="max-h-[400px] overflow-auto bg-black/60 backdrop-blur-sm border border-gray-800/50 rounded-2xl p-6 hover:border-gray-700/50 transition-all duration-300">
-              <div className="flex items-center gap-3 mb-4">
-                <ActivityLogIcon className="w-5 h-5 text-green-400" />
-                <h3 className="text-lg font-semibold text-white">Daily Gainers</h3>
               </div>
-              <DailyGainers />
             </div>
 
-            {/* Recently Added Coins Section */}
-            <div className="max-h-[400px] overflow-auto bg-black/60 backdrop-blur-sm border border-gray-800/50 rounded-2xl p-6 hover:border-gray-700/50 transition-all duration-300">
-              <div className="flex items-center gap-3 mb-4">
-                <RocketIcon className="w-5 h-5 text-blue-400" />
-                <h3 className="text-lg font-semibold text-white">Latest Tokens</h3>
+            {/* Main Content Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-4" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+              {/* Daily Gainers Section */}
+              <div className="max-h-[400px] overflow-auto bg-black/60 backdrop-blur-sm border border-gray-800/50 rounded-2xl p-6 hover:border-gray-700/50 transition-all duration-300">
+                <div className="flex items-center gap-3 mb-4">
+                  <ActivityLogIcon className="w-5 h-5 text-green-400" />
+                  <h3 className="text-lg font-semibold text-white">Daily Gainers</h3>
+                </div>
+                <DailyGainers />
               </div>
-              <RecentlyAddedCoins />
-            </div>
 
-            {/* Trending Coins Section */}
-            <div className="max-h-[400px] overflow-auto bg-black/60 backdrop-blur-sm border border-gray-800/50 rounded-2xl p-6 hover:border-gray-700/50 transition-all duration-300">
-              <div className="flex items-center gap-3 mb-4">
-                <StarIcon className="w-5 h-5 text-yellow-400" />
-                <h3 className="text-lg font-semibold text-white">Trending</h3>
+              {/* Recently Added Coins Section */}
+              <div className="max-h-[400px] overflow-auto bg-black/60 backdrop-blur-sm border border-gray-800/50 rounded-2xl p-6 hover:border-gray-700/50 transition-all duration-300">
+                <div className="flex items-center gap-3 mb-4">
+                  <RocketIcon className="w-5 h-5 text-blue-400" />
+                  <h3 className="text-lg font-semibold text-white">Latest Tokens</h3>
+                </div>
+                <RecentlyAddedCoins />
               </div>
-              <TrendingCoins />
-            </div>
-          </div>
 
-          {/* Token Categories Section */}
-          <div className="token-categories flex flex-col mx-4 mt-6">
-            {/* <div className="flex items-center py-2 rounded-lg card-bg border-gray-700 overflow-x-auto">
+              {/* Trending Coins Section */}
+              <div className="max-h-[400px] overflow-auto bg-black/60 backdrop-blur-sm border border-gray-800/50 rounded-2xl p-6 hover:border-gray-700/50 transition-all duration-300">
+                <div className="flex items-center gap-3 mb-4">
+                  <StarIcon className="w-5 h-5 text-yellow-400" />
+                  <h3 className="text-lg font-semibold text-white">Trending</h3>
+                </div>
+                <TrendingCoins />
+              </div>
+            </div>
+
+            {/* Token Categories Section */}
+            <div className="token-categories flex flex-col mx-4 mt-6">
+              {/* <div className="flex items-center py-2 rounded-lg card-bg border-gray-700 overflow-x-auto">
           <div className="flex space-x-4 text-sm font-medium whitespace-nowrap">
             <button className="py-2 px-4 text-white">Hot Pairs</button>
             <button className="py-2 px-4 text-gray-400">Token Race</button>
@@ -701,11 +690,11 @@ export default function Home() {
           </div>
         </div> */}
 
-            {/* Token section  */}
-            <TokenSection />
-          </div>
-        </>
-      )}
+              {/* Token section  */}
+              <TokenSection />
+            </div>
+          </>
+        )}
       </div>
     </Tooltip.Provider>
   );
