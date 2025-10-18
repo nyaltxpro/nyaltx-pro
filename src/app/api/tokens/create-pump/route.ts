@@ -35,7 +35,6 @@ export async function POST(req: NextRequest) {
 
     // Upload to IPFS using the new unified service
     let ipfsResult;
-    let metadataUri: string;
 
     try {
       const metadata = {
@@ -48,6 +47,8 @@ export async function POST(req: NextRequest) {
         createdOn: 'https://nyaltx.pro',
       };
 
+      console.log('📤 Starting IPFS upload with provider:', ipfsProvider, 'platform:', platform);
+
       // Use the new IPFS service with provider selection
       ipfsResult = await uploadToIPFS(
         file,
@@ -56,16 +57,22 @@ export async function POST(req: NextRequest) {
         platform as any
       );
 
-      metadataUri = ipfsResult.metadataUrl;
-
-      console.log('IPFS upload successful:', {
+      console.log('✅ IPFS upload successful:', {
         provider: ipfsProvider,
-        metadataUrl: metadataUri,
+        metadataUri: ipfsResult.metadataUrl,
         imageUrl: ipfsResult.imageUrl,
         ipfsHash: ipfsResult.ipfsHash,
       });
+
+      // Validate IPFS result
+      if (!ipfsResult.metadataUrl) {
+        throw new Error('IPFS upload did not return metadata URI');
+      }
+      if (!ipfsResult.imageUrl) {
+        console.warn('⚠️ IPFS upload did not return image URL');
+      }
     } catch (error) {
-      console.error('IPFS upload error:', error);
+      console.error('❌ IPFS upload error:', error);
       return NextResponse.json(
         { 
           error: 'Failed to upload metadata to IPFS', 
@@ -78,12 +85,19 @@ export async function POST(req: NextRequest) {
     // Generate a random keypair for the token
     const mintKeypair = Keypair.generate();
 
-    // Prepare the token creation request
+    // Prepare the token creation request - according to Pump.fun docs
+    // Use name/symbol from original request and metadataUri from IPFS response
     const tokenMetadata = {
-      name,
-      symbol,
-      uri: metadataUri,
+      name: name,
+      symbol: symbol,
+      uri: ipfsResult.metadataUrl,
     };
+
+    console.log('🪙 Creating token with metadata:', {
+      mint: mintKeypair.publicKey.toBase58(),
+      tokenMetadata,
+      platform,
+    });
 
     // Check if we have API key for production mode
     const apiKey = process.env.PUMP_PORTAL_API_KEY;
@@ -118,7 +132,7 @@ export async function POST(req: NextRequest) {
         success: true,
         signature: data.signature,
         mint: mintKeypair.publicKey.toBase58(),
-        metadataUri,
+        metadataUri: ipfsResult.metadataUrl,
         imageUrl: ipfsResult.imageUrl,
         ipfsHash: ipfsResult.ipfsHash,
         platform,
@@ -127,27 +141,22 @@ export async function POST(req: NextRequest) {
       });
     } else {
       // Demo mode - simulated response
-      const simulatedResponse = {
-        signature: generateRandomSignature(),
-        mint: mintKeypair.publicKey.toBase58(),
-        metadataUri,
-        platform,
-        name,
-        symbol,
-        description,
-      };
+      console.log('⚠️ Running in DEMO mode - add PUMP_PORTAL_API_KEY for real token creation');
 
       return NextResponse.json({
         success: true,
-        signature: simulatedResponse.signature,
-        mint: simulatedResponse.mint,
-        metadataUri: simulatedResponse.metadataUri,
+        signature: generateRandomSignature(),
+        mint: mintKeypair.publicKey.toBase58(),
+        metadataUri: ipfsResult.metadataUrl,
         imageUrl: ipfsResult.imageUrl,
         ipfsHash: ipfsResult.ipfsHash,
-        platform: simulatedResponse.platform,
+        platform,
         ipfsProvider,
+        name,
+        symbol,
+        description,
         message:
-          'Token created successfully! (Demo mode - add PUMP_PORTAL_API_KEY for real transactions)',
+          'Token metadata uploaded successfully! (Demo mode - add PUMP_PORTAL_API_KEY environment variable for real token creation)',
       });
     }
   } catch (error: any) {

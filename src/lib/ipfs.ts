@@ -320,15 +320,25 @@ export async function uploadToPlatform(
       }
 
       const data = await response.json();
+      
+      // Extract image URL from metadata object
+      const imageUrl = data.metadata?.image || '';
+      const metadataUri = data.metadataUri || '';
+      
       console.log('✅ Pump.fun IPFS upload successful:', {
-        metadataUri: data.metadataUri,
-        imageUrl: data.metadata?.image,
+        metadataUri: metadataUri,
+        imageUrl: imageUrl,
+        fullResponse: data,
       });
 
+      if (!metadataUri) {
+        throw new Error('Pump.fun IPFS response missing metadataUri');
+      }
+
       return {
-        imageUrl: data.metadata?.image || '',
-        metadataUrl: data.metadataUri,
-        ipfsHash: data.metadataUri?.split('/').pop() || undefined,
+        imageUrl: imageUrl,
+        metadataUrl: metadataUri,
+        ipfsHash: metadataUri.split('/').pop() || undefined,
       };
     }
   } catch (error) {
