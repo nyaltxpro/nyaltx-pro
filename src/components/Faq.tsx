@@ -8,7 +8,7 @@ interface FAQ {
   answer: string;
   isOpen: boolean;
 }
-
+ 
 interface FaqProps {
   baseToken?: string;
   quoteToken?: string;
