@@ -167,11 +167,14 @@ export default function CreateTokenPage() {
                 throw new Error(data.error || 'Failed to create token');
             }
 
-            let successMessage = `Token created successfully!\n`;
-            successMessage += `Transaction: ${data.signature}\n`;
-            if (data.mint) successMessage += `Mint Address: ${data.mint}\n`;
-            if (data.ipfsHash) successMessage += `IPFS Hash: ${data.ipfsHash}\n`;
-            if (data.imageUrl) successMessage += `Image URL: ${data.imageUrl}`;
+            // Build success message
+            let successMessage = `${data.message || 'Token created successfully!'}\n\n`;
+            successMessage += `📝 Transaction: ${data.signature}\n`;
+            if (data.mint) successMessage += `🪙 Mint Address: ${data.mint}\n`;
+            if (data.metadataUri) successMessage += `📄 Metadata URI: ${data.metadataUri}\n`;
+            if (data.imageUrl) successMessage += `🖼️ Image URL: ${data.imageUrl}\n`;
+            if (data.ipfsHash) successMessage += `🔗 IPFS Hash: ${data.ipfsHash}\n`;
+            successMessage += `\nView on Solscan: https://solscan.io/tx/${data.signature}`;
             
             setSuccess(successMessage);
 
@@ -419,13 +422,15 @@ export default function CreateTokenPage() {
                                                 style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                                                 required
                                             >
-                                                <option value="platform" className="bg-gray-800">Platform Default (Free)</option>
-                                                <option value="pinata" className="bg-gray-800">Pinata (Requires API Key)</option>
-                                                <option value="nftstorage" className="bg-gray-800">NFT.Storage (Requires API Key)</option>
-                                                <option value="web3storage" className="bg-gray-800">Web3.Storage (Requires API Key)</option>
+                                                <option value="platform" className="bg-gray-800">🎯 Platform Default (Recommended - Uses {platform === 'pump' ? 'Pump.fun' : platform === 'bonk' ? 'Bonk.fun' : 'Moonshot'} IPFS)</option>
+                                                <option value="pinata" className="bg-gray-800">📌 Pinata (Requires API Key)</option>
+                                                <option value="nftstorage" className="bg-gray-800">🖼️ NFT.Storage (Requires API Key)</option>
+                                                <option value="web3storage" className="bg-gray-800">🌐 Web3.Storage (Requires API Key)</option>
                                             </select>
                                             <p className="text-xs text-gray-500" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                                                Choose IPFS upload provider
+                                                {ipfsProvider === 'platform' 
+                                                    ? `✅ Using official ${platform === 'pump' ? 'Pump.fun' : platform === 'bonk' ? 'Bonk.fun' : 'Moonshot'} IPFS API (free, no configuration needed)`
+                                                    : '⚠️ Requires API keys configured in environment variables'}
                                             </p>
                                         </div>
                                     </div>
