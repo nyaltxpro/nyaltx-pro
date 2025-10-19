@@ -11,6 +11,7 @@ import SwapPage from '@/components/SwapCard';
 import TokenAvatar from '@/components/TokenAvatar';
 import tokens from '@/data/tokens.json';
 import useMoralisTokenMetadata from '@/hooks/useMoralisTokenMetadata';
+import { useSolanaTokenData } from '@/hooks/useSolanaTokenData';
 import {
     fetchContractAddresses,
     logContractAddressInfo,
@@ -229,6 +230,29 @@ function TradingViewWithParams({
         addressParam || '',
         chainParam === 'solana' ? 'mainnet' : chainParam || 'mainnet'
     );
+
+    // Use Solana token data hook for Solana tokens
+    const { 
+        tokenData: solanaTokenData, 
+        chartData: solanaChartData, 
+        loading: solanaLoading, 
+        error: solanaError 
+    } = useSolanaTokenData(
+        chainParam === 'solana' && addressParam ? addressParam : null,
+        '24h'
+    );
+
+    // Debug log for Solana data
+    useEffect(() => {
+        if (chainParam === 'solana' && addressParam) {
+            console.log('🟣 Solana token data:', {
+                loading: solanaLoading,
+                error: solanaError,
+                tokenData: solanaTokenData,
+                chartDataPoints: solanaChartData?.length || 0
+            });
+        }
+    }, [chainParam, addressParam, solanaLoading, solanaError, solanaTokenData, solanaChartData]);
 
     // Fetch token social links and admin settings with contract address fallback
     useEffect(() => {
@@ -1041,7 +1065,7 @@ function TradingViewWithParams({
                     <div className="bg-[#2222s27] rounded-xl overflow-hidden mb-4" style={{ minHeight: '600px', position: 'relative' }}>
                         {!infoDexEmbedUrl || (dexScreenerDataExists === false) || infoIframeError ? (
                             <div className="w-full rounded-lg" style={{ maxHeight: '600px', overflow: 'auto' }}>
-                                <InfoWidget />
+                                <InfoWidget data={chainParam === 'solana' && solanaTokenData ? solanaTokenData : undefined} />
                             </div>
                         ) : (
                             <iframe
@@ -1358,12 +1382,32 @@ function TradingViewWithParams({
 
                         {/* Chart Container */}
                         <div className="w-full h-[500px] rounded-lg relative">
+                            {chainParam === 'solana' && (
+                                <>
+                                    {solanaLoading && (
+                                        <div className="absolute top-2 right-2 z-10 bg-blue-500/20 text-blue-400 px-2 py-1 rounded text-xs">
+                                            Loading Solana data...
+                                        </div>
+                                    )}
+                                    {!solanaLoading && solanaTokenData && (
+                                        <div className="absolute top-2 right-2 z-10 bg-green-500/20 text-green-400 px-2 py-1 rounded text-xs">
+                                            Solana data loaded
+                                        </div>
+                                    )}
+                                    {!solanaLoading && solanaError && (
+                                        <div className="absolute top-2 right-2 z-10 bg-red-500/20 text-red-400 px-2 py-1 rounded text-xs">
+                                            Solana data error
+                                        </div>
+                                    )}
+                                </>
+                            )}
                             {chartType === 'moralis' && addressParam && chainParam === 'solana' ? (
                                 <LightweightChart
                                     tokenSymbol={baseToken || 'TOKEN'}
                                     width="100%"
                                     height="500px"
                                     className="w-full"
+                                    priceData={solanaChartData}
                                 />
                             ) : (
                                 <>
@@ -1373,6 +1417,7 @@ function TradingViewWithParams({
                                             width="100%"
                                             height="500px"
                                             className="w-full"
+                                            priceData={chainParam === 'solana' ? solanaChartData : undefined}
                                         />
                                     ) : (
                                         <iframe
