@@ -85,7 +85,7 @@ const getChainName = (chainId: number): string => {
 // Helper function to compare addresses (case-sensitive for Solana, case-insensitive for EVM)
 const compareAddresses = (addr1: string, addr2: string, chain?: string): boolean => {
     if (!addr1 || !addr2) return false;
-    
+
     if (chain === 'solana') {
         // Solana addresses are case-sensitive
         return addr1 === addr2;
@@ -107,11 +107,11 @@ const generateDEXToolsUrl = (address: string, chain: string = 'solana'): string 
         'optimism': 'optimism',
         'base': 'base'
     };
-    
+
     const mappedChain = chainMapping[chain.toLowerCase()] || 'solana';
     const style = 'pe-light'; // Can be 'pe-light' or 'pe-dark'
     const theme = 'dark'; // Match the app's dark theme
-    
+
     return `${baseUrl}/${mappedChain}/${style}/${address}?theme=${theme}&chartType=2&chartResolution=30&drawingToolbars=false`;
 };
 
@@ -252,11 +252,11 @@ function TradingViewWithParams({
     );
 
     // Use Solana token data hook for Solana tokens
-    const { 
-        tokenData: solanaTokenData, 
-        chartData: solanaChartData, 
-        loading: solanaLoading, 
-        error: solanaError 
+    const {
+        tokenData: solanaTokenData,
+        chartData: solanaChartData,
+        loading: solanaLoading,
+        error: solanaError
     } = useSolanaTokenData(
         chainParam === 'solana' && addressParam ? addressParam : null,
         '24h'
@@ -1402,25 +1402,7 @@ function TradingViewWithParams({
 
                         {/* Chart Container */}
                         <div className="w-full h-[300px] sm:h-[400px] lg:h-[500px] rounded-lg relative">
-                            {chainParam === 'solana' && (
-                                <>
-                                    {solanaLoading && (
-                                        <div className="absolute top-2 right-2 z-10 bg-blue-500/20 text-blue-400 px-2 py-1 rounded text-xs">
-                                            Loading Solana data...
-                                        </div>
-                                    )}
-                                    {!solanaLoading && solanaTokenData && (
-                                        <div className="absolute top-2 right-2 z-10 bg-green-500/20 text-green-400 px-2 py-1 rounded text-xs">
-                                            Solana data loaded
-                                        </div>
-                                    )}
-                                    {!solanaLoading && solanaError && (
-                                        <div className="absolute top-2 right-2 z-10 bg-red-500/20 text-red-400 px-2 py-1 rounded text-xs">
-                                            {solanaError.includes('429') ? 'Rate limited - using cache' : 'Solana data error'}
-                                        </div>
-                                    )}
-                                </>
-                            )}
+
                             {chartType === 'moralis' && addressParam && ['solana', 'ethereum', 'bsc', 'polygon', 'arbitrum', 'optimism', 'base'].includes(chainParam || '') ? (
                                 <iframe
                                     title="DEXTools Trading Chart"

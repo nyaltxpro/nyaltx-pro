@@ -209,7 +209,7 @@ export default function TrendingPage() {
         router.push(`/dashboard/trade?${qs.toString()}`);
     };
 
-    // Load token data from local catalog and DexScreener boosted tokens
+    // Load DexScreener boosted tokens only
     const loadMarketData = async () => {
         try {
             setMarketDataLoading(true);
@@ -223,117 +223,33 @@ export default function TrendingPage() {
                     const dexData = await dexResponse.json();
                     dexScreenerTokens = dexData || [];
                     console.log('📈 Loaded DexScreener boosted tokens:', dexScreenerTokens.length);
+                } else {
+                    throw new Error('Failed to fetch DexScreener data');
                 }
             } catch (error) {
-                console.warn('Failed to fetch DexScreener boosted tokens:', error);
+                console.error('Failed to fetch DexScreener boosted tokens:', error);
+                setMarketDataError('Failed to load DexScreener boosted tokens. Please try again.');
+                return;
             }
 
-            // Get tokens from local catalog that have chain information
-            const tokenList = catalog as Array<{ symbol: string; chain: string; address: string; name: string }>;
-            const tokensWithChain = tokenList.filter(token => 
-                token.chain && token.chain.trim() !== '' && 
-                token.address && token.address.trim() !== ''
-            );
-
-            // Combine DexScreener tokens with local catalog tokens
-            const combinedTokens = [...dexScreenerTokens.slice(0, 20), ...tokensWithChain.slice(0, 30)];
-
-            // Process DexScreener tokens and local catalog tokens
-            const marketDataPromises = combinedTokens.slice(0, 50).map(async (token) => {
-                // Handle DexScreener token format
-                if (token.tokenAddress) {
-                    return {
-                        id: token.tokenAddress,
-                        name: token.name || token.symbol,
-                        symbol: token.symbol?.toUpperCase() || 'UNKNOWN',
-                        image: token.icon || '',
-                        current_price: token.priceUsd || 0,
-                        price_change_percentage_24h: token.priceChange?.h24 || 0,
-                        market_cap: token.marketCap || 0,
-                        total_volume: token.volume?.h24 || 0,
-                        market_cap_rank: 999,
-                        sparkline_in_7d: { price: [] },
-                        chain: token.chainId || 'ethereum',
-                        address: token.tokenAddress,
-                        source: 'dexscreener'
-                    };
-                }
-                
-                // Handle local catalog token format
-                try {
-                    // Try to find the token on CoinGecko by symbol
-                    const searchResponse = await fetch(
-                        `https://api.coingecko.com/api/v3/search?query=${encodeURIComponent(token.symbol)}`
-                    );
-                    
-                    if (searchResponse.ok) {
-                        const searchData = await searchResponse.json();
-                        const coinMatch = searchData.coins?.find((coin: any) => 
-                            coin.symbol.toLowerCase() === token.symbol.toLowerCase()
-                        );
-                        
-                        if (coinMatch) {
-                            // Get detailed market data for this coin
-                            const marketResponse = await fetch(
-                                `https://api.coingecko.com/api/v3/coins/${coinMatch.id}?localization=false&tickers=false&community_data=false&developer_data=false&sparkline=true`
-                            );
-                            
-                            if (marketResponse.ok) {
-                                const marketData = await marketResponse.json();
-                                return {
-                                    id: marketData.id,
-                                    name: token.name || marketData.name,
-                                    symbol: token.symbol.toUpperCase(),
-                                    image: marketData.image?.large || marketData.image?.small || '',
-                                    current_price: marketData.market_data?.current_price?.usd || 0,
-                                    price_change_percentage_24h: marketData.market_data?.price_change_percentage_24h || 0,
-                                    market_cap: marketData.market_data?.market_cap?.usd || 0,
-                                    total_volume: marketData.market_data?.total_volume?.usd || 0,
-                                    market_cap_rank: marketData.market_cap_rank || 999,
-                                    sparkline_in_7d: marketData.market_data?.sparkline_7d,
-                                    chain: token.chain,
-                                    address: token.address,
-                                    source: 'catalog'
-                                };
-                            }
-                        }
-                    }
-                } catch (error) {
-                    console.warn(`Failed to fetch data for token ${token.symbol}:`, error);
-                }
-                
-                // Return basic token info if API fails
+            // Process DexScreener tokens only
+            const marketData = dexScreenerTokens.map((token: any) => {
                 return {
-                    id: token.symbol.toLowerCase(),
+                    id: token.tokenAddress,
                     name: token.name || token.symbol,
-                    symbol: token.symbol.toUpperCase(),
-                    image: '',
-                    current_price: 0,
-                    price_change_percentage_24h: 0,
-                    market_cap: 0,
-                    total_volume: 0,
+                    symbol: token.symbol?.toUpperCase() || 'UNKNOWN',
+                    image: token.icon || '',
+                    current_price: token.priceUsd || 0,
+                    price_change_percentage_24h: token.priceChange?.h24 || 0,
+                    market_cap: token.marketCap || 0,
+                    total_volume: token.volume?.h24 || 0,
                     market_cap_rank: 999,
                     sparkline_in_7d: { price: [] },
-                    chain: token.chain,
-                    address: token.address,
-                    source: 'catalog'
+                    chain: token.chainId || 'ethereum',
+                    address: token.tokenAddress,
+                    source: 'dexscreener'
                 };
             });
-
-            // Execute requests with rate limiting
-            const marketData = [];
-            const batchSize = 5;
-            
-            for (let i = 0; i < marketDataPromises.length; i += batchSize) {
-                const batch = marketDataPromises.slice(i, i + batchSize);
-                const batchResults = await Promise.all(batch);
-                marketData.push(...batchResults.filter(Boolean));
-                
-                // Rate limiting delay
-                if (i + batchSize < marketDataPromises.length) {
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                }
-            }
 
             // Convert to TrendingToken format, filtering out tokens with no price data
             const trendingTokens = marketData
@@ -525,8 +441,8 @@ export default function TrendingPage() {
                     <div className="mb-8">
                         <div className="flex items-center justify-between mb-6">
                             <div>
-                                <h1 className="text-4xl font-semibold text-white mb-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>Trending Tokens</h1>
-                                <p className="text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>🚀 DexScreener boosted tokens and registered tokens with chain information</p>
+                                <h1 className="text-4xl font-semibold text-white mb-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>DexScreener Boosted Tokens</h1>
+                                <p className="text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>🚀 Top boosted tokens from DexScreener with real-time market data</p>
                             </div>
                             <div className="flex items-center gap-4">
 
@@ -543,7 +459,7 @@ export default function TrendingPage() {
                                     type="text"
                                     value={searchTerm}
                                     onChange={handleSearch}
-                                    placeholder="Search for tokens (e.g., BTC, ETH, or token name)"
+                                    placeholder="Search DexScreener boosted tokens (e.g., symbol or token name)"
                                     className="w-full pl-12 pr-4 py-3 bg-gray-800/40 border border-gray-700/30 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm transition-all"
                                     style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                                 />
