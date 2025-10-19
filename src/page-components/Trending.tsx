@@ -66,6 +66,37 @@ const convertToTrendingToken = (
     };
 };
 
+// Convert custom token data to TrendingToken format
+const convertTokenDataToTrendingToken = (
+    tokenData: any,
+    favorites: Set<string>
+): TrendingToken => {
+    const isDexScreener = tokenData.source === 'dexscreener';
+    const displayName = isDexScreener ? `🚀 ${tokenData.name}` : tokenData.name;
+    
+    return {
+        id: tokenData.id,
+        name: displayName,
+        symbol: tokenData.symbol.toUpperCase(),
+        logo: tokenData.image,
+        price: tokenData.current_price || 0,
+        priceUsd: `$${coinGeckoService.formatPrice(tokenData.current_price || 0)}`,
+        change24h: tokenData.price_change_percentage_24h || 0,
+        change24hFormatted: coinGeckoService.formatPercentageChange(
+            tokenData.price_change_percentage_24h || 0
+        ),
+        marketCap: tokenData.market_cap || 0,
+        marketCapFormatted: isDexScreener 
+            ? `🔥 ${coinGeckoService.formatMarketCap(tokenData.market_cap || 0)}` 
+            : coinGeckoService.formatMarketCap(tokenData.market_cap || 0),
+        volume24h: tokenData.total_volume || 0,
+        volume24hFormatted: coinGeckoService.formatVolume(tokenData.total_volume || 0),
+        rank: tokenData.market_cap_rank || 999,
+        favorite: favorites.has(tokenData.id),
+        sparkline: tokenData.sparkline_in_7d?.price?.slice(-15) || [],
+    };
+};
+
 // Sparkline chart component
 const SparklineChart = ({ data, change }: { data: number[]; change: number }) => {
     const isPositive = change >= 0;
@@ -178,11 +209,24 @@ export default function TrendingPage() {
         router.push(`/dashboard/trade?${qs.toString()}`);
     };
 
-    // Load token data from local catalog (tokens with chain information)
+    // Load token data from local catalog and DexScreener boosted tokens
     const loadMarketData = async () => {
         try {
             setMarketDataLoading(true);
             setMarketDataError(null);
+
+            // Get DexScreener top boosted tokens
+            let dexScreenerTokens: any[] = [];
+            try {
+                const dexResponse = await fetch('https://api.dexscreener.com/token-boosts/top/v1');
+                if (dexResponse.ok) {
+                    const dexData = await dexResponse.json();
+                    dexScreenerTokens = dexData || [];
+                    console.log('📈 Loaded DexScreener boosted tokens:', dexScreenerTokens.length);
+                }
+            } catch (error) {
+                console.warn('Failed to fetch DexScreener boosted tokens:', error);
+            }
 
             // Get tokens from local catalog that have chain information
             const tokenList = catalog as Array<{ symbol: string; chain: string; address: string; name: string }>;
@@ -191,8 +235,31 @@ export default function TrendingPage() {
                 token.address && token.address.trim() !== ''
             );
 
-            // Get market data for these tokens from CoinGecko
-            const marketDataPromises = tokensWithChain.slice(0, 50).map(async (token) => {
+            // Combine DexScreener tokens with local catalog tokens
+            const combinedTokens = [...dexScreenerTokens.slice(0, 20), ...tokensWithChain.slice(0, 30)];
+
+            // Process DexScreener tokens and local catalog tokens
+            const marketDataPromises = combinedTokens.slice(0, 50).map(async (token) => {
+                // Handle DexScreener token format
+                if (token.tokenAddress) {
+                    return {
+                        id: token.tokenAddress,
+                        name: token.name || token.symbol,
+                        symbol: token.symbol?.toUpperCase() || 'UNKNOWN',
+                        image: token.icon || '',
+                        current_price: token.priceUsd || 0,
+                        price_change_percentage_24h: token.priceChange?.h24 || 0,
+                        market_cap: token.marketCap || 0,
+                        total_volume: token.volume?.h24 || 0,
+                        market_cap_rank: 999,
+                        sparkline_in_7d: { price: [] },
+                        chain: token.chainId || 'ethereum',
+                        address: token.tokenAddress,
+                        source: 'dexscreener'
+                    };
+                }
+                
+                // Handle local catalog token format
                 try {
                     // Try to find the token on CoinGecko by symbol
                     const searchResponse = await fetch(
@@ -225,7 +292,8 @@ export default function TrendingPage() {
                                     market_cap_rank: marketData.market_cap_rank || 999,
                                     sparkline_in_7d: marketData.market_data?.sparkline_7d,
                                     chain: token.chain,
-                                    address: token.address
+                                    address: token.address,
+                                    source: 'catalog'
                                 };
                             }
                         }
@@ -247,7 +315,8 @@ export default function TrendingPage() {
                     market_cap_rank: 999,
                     sparkline_in_7d: { price: [] },
                     chain: token.chain,
-                    address: token.address
+                    address: token.address,
+                    source: 'catalog'
                 };
             });
 
@@ -269,7 +338,7 @@ export default function TrendingPage() {
             // Convert to TrendingToken format, filtering out tokens with no price data
             const trendingTokens = marketData
                 .filter(coin => coin.current_price > 0) // Only show tokens with price data
-                .map(coin => convertToTrendingToken(coin, favorites));
+                .map(coin => convertTokenDataToTrendingToken(coin, favorites));
 
             // Set global market data with calculated values from tokens
             const totalMarketCap = trendingTokens.reduce((sum, token) => sum + (token.marketCap || 0), 0);
@@ -457,7 +526,7 @@ export default function TrendingPage() {
                         <div className="flex items-center justify-between mb-6">
                             <div>
                                 <h1 className="text-4xl font-semibold text-white mb-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>Trending Tokens</h1>
-                                <p className="text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>Registered tokens with chain information and real-time market data</p>
+                                <p className="text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>🚀 DexScreener boosted tokens and registered tokens with chain information</p>
                             </div>
                             <div className="flex items-center gap-4">
 
