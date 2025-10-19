@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "tinacms dev -c \"next dev --turbopack\"",
-    "build": "tinacms build && NODE_OPTIONS=--max-old-space-size=4096 next build --turbopack",
+    "build": "NODE_OPTIONS=--max-old-space-size=4096 next build --turbopack",
+    "build:cloud": "tinacms build && NODE_OPTIONS=--max-old-space-size=4096 next build --turbopack",
     "start": "next start",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
