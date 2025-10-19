@@ -15,7 +15,7 @@ import {
   PriceScaleMode,
 } from 'lightweight-charts';
 import { FaChartLine, FaClock, FaExpand, FaCompress, FaChartBar, FaRulerHorizontal, FaSearchPlus, FaSearchMinus, FaCrosshairs, FaArrowsAlt, FaDrawPolygon, FaMinus, FaPencilAlt, FaFont, FaSmile, FaEraser, FaPlus, FaCog, FaHome, FaTh } from 'react-icons/fa';
-import { generateRealisticChartData, calculateSMA, getChartStats, ChartDataPoint } from '@/utils/chartDataGenerator';
+import { generateRealisticChartData, calculateSMA, calculateEMA, getChartStats, ChartDataPoint } from '@/utils/chartDataGenerator';
 
 interface LightweightChartProps {
   tokenSymbol?: string;
@@ -110,7 +110,7 @@ const LightweightChart: React.FC<LightweightChartProps> = ({
         horzLines: { color: '#1e222d' },
       },
       crosshair: {
-        mode: 1,
+        mode: showCrosshair ? 1 : 0,
         vertLine: {
           color: '#758696',
           width: 1,
@@ -194,19 +194,14 @@ const LightweightChart: React.FC<LightweightChartProps> = ({
       smaSeries.setData(smaData);
     }
 
-    // Add EMA if enabled
     if (showEMA && candlestickData.length > emaPeriod) {
-      // Lazy import EMA to avoid circular imports (already exported, but keep structure simple)
-      // Reuse SMA calculation if EMA not desired; but since helper exists, we'll call it via dynamic import
-      import('@/utils/chartDataGenerator').then(({ calculateEMA }) => {
-        const emaData = calculateEMA(candlestickData, emaPeriod);
-        const emaSeries = chart.addSeries(LineSeries, {
-          color: '#FF9800',
-          lineWidth: 2,
-        });
-        emaSeriesRef.current = emaSeries as any;
-        emaSeries.setData(emaData);
+      const emaData = calculateEMA(candlestickData, emaPeriod);
+      const emaSeries = chart.addSeries(LineSeries, {
+        color: '#FF9800',
+        lineWidth: 2,
       });
+      emaSeriesRef.current = emaSeries as any;
+      emaSeries.setData(emaData);
     }
 
     // Fit content
@@ -272,13 +267,12 @@ const LightweightChart: React.FC<LightweightChartProps> = ({
     }
   };
 
-  // Update clock text
   useEffect(() => {
     const update = () => {
       const d = new Date();
-      const hh = d.getHours().toString().padStart(2, '0');
-      const mm = d.getMinutes().toString().padStart(2, '0');
-      const ss = d.getSeconds().toString().padStart(2, '0');
+      const hh = d.getUTCHours().toString().padStart(2, '0');
+      const mm = d.getUTCMinutes().toString().padStart(2, '0');
+      const ss = d.getUTCSeconds().toString().padStart(2, '0');
       setNowText(`${hh}:${mm}:${ss}`);
     };
     update();
@@ -286,7 +280,6 @@ const LightweightChart: React.FC<LightweightChartProps> = ({
     return () => clearInterval(t);
   }, []);
 
-  // Drawing overlay click handler
   const handleOverlayClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (!activeTool || !chartRef.current || !seriesRef.current) return;
     const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
@@ -329,6 +322,22 @@ const LightweightChart: React.FC<LightweightChartProps> = ({
       return;
     }
   }, [activeTool]);
+
+  const [, setOverlayTick] = useState(0);
+  useEffect(() => {
+    const chart = chartRef.current;
+    if (!chart) return;
+    const rerender = () => setOverlayTick(v => v + 1);
+    const ts = chart.timeScale();
+    ts.subscribeVisibleTimeRangeChange(rerender);
+    ts.subscribeVisibleLogicalRangeChange(rerender);
+    ts.subscribeSizeChange(rerender);
+    return () => {
+      ts.unsubscribeVisibleTimeRangeChange(rerender);
+      ts.unsubscribeVisibleLogicalRangeChange(rerender);
+      ts.unsubscribeSizeChange(rerender);
+    };
+  }, [chartType, showVolume, showSMA, showEMA, smaPeriod, emaPeriod, priceScaleMode]);
 
   return (
     <div className={`relative ${className} bg-[#131722] flex flex-col overflow-hidden`} style={{ height: height || '100%' }}>
@@ -571,7 +580,6 @@ const LightweightChart: React.FC<LightweightChartProps> = ({
             </div>
           )}
 
-          {/* Drawing overlay */}
           <div
             ref={overlayRef}
             onClick={handleOverlayClick}
