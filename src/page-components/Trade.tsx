@@ -969,23 +969,35 @@ function TradingViewWithParams({
 
                     if (data && Array.isArray(data) && data.length > 0) {
                         console.log('✅ DexScreener data exists:', data.length, 'pairs found');
-                        setDexScreenerDataExists(true);
-                        setInfoIframeError(false);
-                        setChartIframeError(false);
-                        setTradesIframeError(false);
+
+                        // Extract priceUsd and imageUrl from first pair (highest priority)
+                        const firstPair = data[0];
+                        if (firstPair.priceUsd) {
+                            setDexPriceUsd(firstPair.priceUsd);
+                            console.log('💰 DexScreener Price USD:', firstPair.priceUsd);
+                        }
+                        if (firstPair.info?.imageUrl) {
+                            setHeaderImageUrl(firstPair.info.imageUrl);
+                            console.log('🖼️ DexScreener Image URL:', firstPair.info.imageUrl);
+                        }
+
+                        // setDexScreenerDataExists(true);
+                        // setInfoIframeError(false);
+                        // setChartIframeError(false);
+                        // setTradesIframeError(false);
                     } else {
                         console.log('❌ DexScreener returned null/empty - showing fallback widgets');
-                        setDexScreenerDataExists(false);
-                        setInfoIframeError(true);
-                        setChartIframeError(true);
-                        setTradesIframeError(true);
+                        // setDexScreenerDataExists(false);
+                        // setInfoIframeError(true);
+                        // setChartIframeError(true);
+                        // setTradesIframeError(true);
                     }
                 } catch (error) {
                     console.error('❌ DexScreener API error:', error);
-                    setDexScreenerDataExists(false);
-                    setInfoIframeError(true);
-                    setChartIframeError(true);
-                    setTradesIframeError(true);
+                    // setDexScreenerDataExists(false);
+                    // setInfoIframeError(true);
+                    // setChartIframeError(true);
+                    // setTradesIframeError(true);
                 }
             }
         };
