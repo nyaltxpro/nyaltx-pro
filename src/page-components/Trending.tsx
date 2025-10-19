@@ -66,37 +66,6 @@ const convertToTrendingToken = (
     };
 };
 
-// Convert custom token data to TrendingToken format
-const convertTokenDataToTrendingToken = (
-    tokenData: any,
-    favorites: Set<string>
-): TrendingToken => {
-    const isDexScreener = tokenData.source === 'dexscreener';
-    const displayName = isDexScreener ? `🚀 ${tokenData.name}` : tokenData.name;
-    
-    return {
-        id: tokenData.id,
-        name: displayName,
-        symbol: tokenData.symbol.toUpperCase(),
-        logo: tokenData.image,
-        price: tokenData.current_price || 0,
-        priceUsd: `$${coinGeckoService.formatPrice(tokenData.current_price || 0)}`,
-        change24h: tokenData.price_change_percentage_24h || 0,
-        change24hFormatted: coinGeckoService.formatPercentageChange(
-            tokenData.price_change_percentage_24h || 0
-        ),
-        marketCap: tokenData.market_cap || 0,
-        marketCapFormatted: isDexScreener 
-            ? `🔥 ${coinGeckoService.formatMarketCap(tokenData.market_cap || 0)}` 
-            : coinGeckoService.formatMarketCap(tokenData.market_cap || 0),
-        volume24h: tokenData.total_volume || 0,
-        volume24hFormatted: coinGeckoService.formatVolume(tokenData.total_volume || 0),
-        rank: tokenData.market_cap_rank || 999,
-        favorite: favorites.has(tokenData.id),
-        sparkline: tokenData.sparkline_in_7d?.price?.slice(-15) || [],
-    };
-};
-
 // Sparkline chart component
 const SparklineChart = ({ data, change }: { data: number[]; change: number }) => {
     const isPositive = change >= 0;
@@ -209,63 +178,45 @@ export default function TrendingPage() {
         router.push(`/dashboard/trade?${qs.toString()}`);
     };
 
-    // Load DexScreener boosted tokens only
+    // Load additional market data from CoinGecko (for full market view)
     const loadMarketData = async () => {
         try {
             setMarketDataLoading(true);
             setMarketDataError(null);
 
-            // Get DexScreener top boosted tokens
-            let dexScreenerTokens: any[] = [];
-            try {
-                const dexResponse = await fetch('https://api.dexscreener.com/token-boosts/top/v1');
-                if (dexResponse.ok) {
-                    const dexData = await dexResponse.json();
-                    dexScreenerTokens = dexData || [];
-                    console.log('📈 Loaded DexScreener boosted tokens:', dexScreenerTokens.length);
-                } else {
-                    throw new Error('Failed to fetch DexScreener data');
-                }
-            } catch (error) {
-                console.error('Failed to fetch DexScreener boosted tokens:', error);
-                setMarketDataError('Failed to load DexScreener boosted tokens. Please try again.');
-                return;
-            }
+            // Get top 20 cryptocurrencies and global data in parallel
+            const [marketData, globalResponse] = await Promise.all([
+                coinGeckoService.getTopCryptocurrencies(20),
+                coinGeckoService.getGlobalMarketData().catch(err => {
+                    console.warn('Global data failed, using fallback:', err);
+                    return {
+                        data: {
+                            total_market_cap: { usd: 0 },
+                            total_volume: { usd: 0 },
+                            market_cap_percentage: { btc: 0 },
+                            market_cap_change_percentage_24h_usd: 0,
+                        },
+                    };
+                }),
+            ]);
 
-            // Process DexScreener tokens only
-            const marketData = dexScreenerTokens.map((token: any) => {
-                return {
-                    id: token.tokenAddress,
-                    name: token.name || token.symbol,
-                    symbol: token.symbol?.toUpperCase() || 'UNKNOWN',
-                    image: token.icon || '',
-                    current_price: token.priceUsd || 0,
-                    price_change_percentage_24h: token.priceChange?.h24 || 0,
-                    market_cap: token.marketCap || 0,
-                    total_volume: token.volume?.h24 || 0,
-                    market_cap_rank: 999,
-                    sparkline_in_7d: { price: [] },
-                    chain: token.chainId || 'ethereum',
-                    address: token.tokenAddress,
-                    source: 'dexscreener'
-                };
-            });
+            // Convert to TrendingToken format
+            const trendingTokens = marketData.map(coin => convertToTrendingToken(coin, favorites));
 
-            // Convert to TrendingToken format, filtering out tokens with no price data
-            const trendingTokens = marketData
-                .filter(coin => coin.current_price > 0) // Only show tokens with price data
-                .map(coin => convertTokenDataToTrendingToken(coin, favorites));
-
-            // Set global market data with calculated values from tokens
-            const totalMarketCap = trendingTokens.reduce((sum, token) => sum + (token.marketCap || 0), 0);
-            const totalVolume = trendingTokens.reduce((sum, token) => sum + (token.volume24h || 0), 0);
-            
+            // Set global market data with fallback
+            const global = globalResponse.data;
             setGlobalData({
-                totalMarketCap: coinGeckoService.formatMarketCap(totalMarketCap),
-                totalVolume: coinGeckoService.formatVolume(totalVolume),
-                btcDominance: 'N/A', // Not applicable for token-only view
-                marketCapChange24h: 0,
-                volumeChange24h: 0,
+                totalMarketCap: global.total_market_cap?.usd
+                    ? coinGeckoService.formatMarketCap(global.total_market_cap.usd)
+                    : 'N/A',
+                totalVolume: global.total_volume?.usd
+                    ? coinGeckoService.formatVolume(global.total_volume.usd)
+                    : 'N/A',
+                btcDominance: global.market_cap_percentage?.btc
+                    ? `${global.market_cap_percentage.btc.toFixed(1)}%`
+                    : 'N/A',
+                marketCapChange24h: global.market_cap_change_percentage_24h_usd || 0,
+                volumeChange24h: 0, // CoinGecko doesn't provide volume change in global endpoint
             });
 
             setTokens(trendingTokens);
@@ -405,18 +356,14 @@ export default function TrendingPage() {
                 token.symbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 token.name.toLowerCase().includes(searchTerm.toLowerCase());
 
-            // Filter out coins with no chain information
-            const { chain } = resolveCatalogBySymbol(token.symbol);
-            const hasChain = chain && chain.trim() !== '';
-
             if (activeFilter === 'gainers') {
-                return matchesSearch && token.change24h > 0 && hasChain;
+                return matchesSearch && token.change24h > 0;
             } else if (activeFilter === 'losers') {
-                return matchesSearch && token.change24h < 0 && hasChain;
+                return matchesSearch && token.change24h < 0;
             } else if (activeFilter === 'favorites') {
-                return matchesSearch && token.favorite && hasChain;
+                return matchesSearch && token.favorite;
             } else {
-                return matchesSearch && hasChain;
+                return matchesSearch;
             }
         });
     }, [sortedTokens, searchTerm, activeFilter]);
@@ -441,11 +388,27 @@ export default function TrendingPage() {
                     <div className="mb-8">
                         <div className="flex items-center justify-between mb-6">
                             <div>
-                                <h1 className="text-4xl font-semibold text-white mb-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>DexScreener Boosted Tokens</h1>
-                                <p className="text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>🚀 Top boosted tokens from DexScreener with real-time market data</p>
+                                <h1 className="text-4xl font-bold text-white mb-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>Trending Cryptocurrencies</h1>
+                                <p className="text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>Top performing cryptocurrencies with real-time market data</p>
                             </div>
                             <div className="flex items-center gap-4">
-
+                                <div className="flex items-center gap-2">
+                                    {hasCachedData && !trendingLoading && (
+                                        <span className="text-xs text-green-400 bg-green-900/20 px-2 py-1 rounded" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                            📱 Trending Cached
+                                        </span>
+                                    )}
+                                    {(trendingLoading || marketDataLoading) && (
+                                        <span className="text-xs text-blue-400 bg-blue-900/20 px-2 py-1 rounded animate-pulse" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                            🔄 Loading Market Data...
+                                        </span>
+                                    )}
+                                    {tokens.length > 0 && !trendingLoading && !marketDataLoading && (
+                                        <span className="text-xs text-green-400 bg-green-900/20 px-2 py-1 rounded" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                            ✅ {tokens.length} Tokens Loaded
+                                        </span>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -459,7 +422,7 @@ export default function TrendingPage() {
                                     type="text"
                                     value={searchTerm}
                                     onChange={handleSearch}
-                                    placeholder="Search DexScreener boosted tokens (e.g., symbol or token name)"
+                                    placeholder="Search for cryptocurrencies (e.g., BTC, ETH, or token name)"
                                     className="w-full pl-12 pr-4 py-3 bg-gray-800/40 border border-gray-700/30 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm transition-all"
                                     style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                                 />
