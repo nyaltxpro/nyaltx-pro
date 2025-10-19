@@ -178,45 +178,109 @@ export default function TrendingPage() {
         router.push(`/dashboard/trade?${qs.toString()}`);
     };
 
-    // Load additional market data from CoinGecko (for full market view)
+    // Load token data from local catalog (tokens with chain information)
     const loadMarketData = async () => {
         try {
             setMarketDataLoading(true);
             setMarketDataError(null);
 
-            // Get top 20 cryptocurrencies and global data in parallel
-            const [marketData, globalResponse] = await Promise.all([
-                coinGeckoService.getTopCryptocurrencies(20),
-                coinGeckoService.getGlobalMarketData().catch(err => {
-                    console.warn('Global data failed, using fallback:', err);
-                    return {
-                        data: {
-                            total_market_cap: { usd: 0 },
-                            total_volume: { usd: 0 },
-                            market_cap_percentage: { btc: 0 },
-                            market_cap_change_percentage_24h_usd: 0,
-                        },
-                    };
-                }),
-            ]);
+            // Get tokens from local catalog that have chain information
+            const tokenList = catalog as Array<{ symbol: string; chain: string; address: string; name: string }>;
+            const tokensWithChain = tokenList.filter(token => 
+                token.chain && token.chain.trim() !== '' && 
+                token.address && token.address.trim() !== ''
+            );
 
-            // Convert to TrendingToken format
-            const trendingTokens = marketData.map(coin => convertToTrendingToken(coin, favorites));
+            // Get market data for these tokens from CoinGecko
+            const marketDataPromises = tokensWithChain.slice(0, 50).map(async (token) => {
+                try {
+                    // Try to find the token on CoinGecko by symbol
+                    const searchResponse = await fetch(
+                        `https://api.coingecko.com/api/v3/search?query=${encodeURIComponent(token.symbol)}`
+                    );
+                    
+                    if (searchResponse.ok) {
+                        const searchData = await searchResponse.json();
+                        const coinMatch = searchData.coins?.find((coin: any) => 
+                            coin.symbol.toLowerCase() === token.symbol.toLowerCase()
+                        );
+                        
+                        if (coinMatch) {
+                            // Get detailed market data for this coin
+                            const marketResponse = await fetch(
+                                `https://api.coingecko.com/api/v3/coins/${coinMatch.id}?localization=false&tickers=false&community_data=false&developer_data=false&sparkline=true`
+                            );
+                            
+                            if (marketResponse.ok) {
+                                const marketData = await marketResponse.json();
+                                return {
+                                    id: marketData.id,
+                                    name: token.name || marketData.name,
+                                    symbol: token.symbol.toUpperCase(),
+                                    image: marketData.image?.large || marketData.image?.small || '',
+                                    current_price: marketData.market_data?.current_price?.usd || 0,
+                                    price_change_percentage_24h: marketData.market_data?.price_change_percentage_24h || 0,
+                                    market_cap: marketData.market_data?.market_cap?.usd || 0,
+                                    total_volume: marketData.market_data?.total_volume?.usd || 0,
+                                    market_cap_rank: marketData.market_cap_rank || 999,
+                                    sparkline_in_7d: marketData.market_data?.sparkline_7d,
+                                    chain: token.chain,
+                                    address: token.address
+                                };
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.warn(`Failed to fetch data for token ${token.symbol}:`, error);
+                }
+                
+                // Return basic token info if API fails
+                return {
+                    id: token.symbol.toLowerCase(),
+                    name: token.name || token.symbol,
+                    symbol: token.symbol.toUpperCase(),
+                    image: '',
+                    current_price: 0,
+                    price_change_percentage_24h: 0,
+                    market_cap: 0,
+                    total_volume: 0,
+                    market_cap_rank: 999,
+                    sparkline_in_7d: { price: [] },
+                    chain: token.chain,
+                    address: token.address
+                };
+            });
 
-            // Set global market data with fallback
-            const global = globalResponse.data;
+            // Execute requests with rate limiting
+            const marketData = [];
+            const batchSize = 5;
+            
+            for (let i = 0; i < marketDataPromises.length; i += batchSize) {
+                const batch = marketDataPromises.slice(i, i + batchSize);
+                const batchResults = await Promise.all(batch);
+                marketData.push(...batchResults.filter(Boolean));
+                
+                // Rate limiting delay
+                if (i + batchSize < marketDataPromises.length) {
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                }
+            }
+
+            // Convert to TrendingToken format, filtering out tokens with no price data
+            const trendingTokens = marketData
+                .filter(coin => coin.current_price > 0) // Only show tokens with price data
+                .map(coin => convertToTrendingToken(coin, favorites));
+
+            // Set global market data with calculated values from tokens
+            const totalMarketCap = trendingTokens.reduce((sum, token) => sum + (token.marketCap || 0), 0);
+            const totalVolume = trendingTokens.reduce((sum, token) => sum + (token.volume24h || 0), 0);
+            
             setGlobalData({
-                totalMarketCap: global.total_market_cap?.usd
-                    ? coinGeckoService.formatMarketCap(global.total_market_cap.usd)
-                    : 'N/A',
-                totalVolume: global.total_volume?.usd
-                    ? coinGeckoService.formatVolume(global.total_volume.usd)
-                    : 'N/A',
-                btcDominance: global.market_cap_percentage?.btc
-                    ? `${global.market_cap_percentage.btc.toFixed(1)}%`
-                    : 'N/A',
-                marketCapChange24h: global.market_cap_change_percentage_24h_usd || 0,
-                volumeChange24h: 0, // CoinGecko doesn't provide volume change in global endpoint
+                totalMarketCap: coinGeckoService.formatMarketCap(totalMarketCap),
+                totalVolume: coinGeckoService.formatVolume(totalVolume),
+                btcDominance: 'N/A', // Not applicable for token-only view
+                marketCapChange24h: 0,
+                volumeChange24h: 0,
             });
 
             setTokens(trendingTokens);
@@ -392,8 +456,8 @@ export default function TrendingPage() {
                     <div className="mb-8">
                         <div className="flex items-center justify-between mb-6">
                             <div>
-                                <h1 className="text-4xl font-semibold text-white mb-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>Trending Cryptocurrencies</h1>
-                                <p className="text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>Top performing cryptocurrencies with real-time market data</p>
+                                <h1 className="text-4xl font-semibold text-white mb-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>Trending Tokens</h1>
+                                <p className="text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>Registered tokens with chain information and real-time market data</p>
                             </div>
                             <div className="flex items-center gap-4">
 
@@ -410,7 +474,7 @@ export default function TrendingPage() {
                                     type="text"
                                     value={searchTerm}
                                     onChange={handleSearch}
-                                    placeholder="Search for cryptocurrencies (e.g., BTC, ETH, or token name)"
+                                    placeholder="Search for tokens (e.g., BTC, ETH, or token name)"
                                     className="w-full pl-12 pr-4 py-3 bg-gray-800/40 border border-gray-700/30 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm transition-all"
                                     style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                                 />
