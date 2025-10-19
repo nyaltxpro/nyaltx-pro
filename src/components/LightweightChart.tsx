@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { 
   createChart, 
   IChartApi, 
@@ -11,7 +11,8 @@ import {
   ColorType,
   CandlestickSeries,
   HistogramSeries,
-  LineSeries
+  LineSeries,
+  PriceScaleMode,
 } from 'lightweight-charts';
 import { FaChartLine, FaClock, FaExpand, FaCompress, FaChartBar, FaRulerHorizontal, FaSearchPlus, FaSearchMinus, FaCrosshairs, FaArrowsAlt, FaDrawPolygon, FaMinus, FaPencilAlt, FaFont, FaSmile, FaEraser, FaPlus, FaCog, FaHome, FaTh } from 'react-icons/fa';
 import { generateRealisticChartData, calculateSMA, getChartStats, ChartDataPoint } from '@/utils/chartDataGenerator';
@@ -33,16 +34,35 @@ const LightweightChart: React.FC<LightweightChartProps> = ({
 }) => {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
-  const seriesRef = useRef<ISeriesApi<'Candlestick'> | null>(null);
+  const seriesRef = useRef<ISeriesApi<any> | null>(null);
   const volumeSeriesRef = useRef<ISeriesApi<'Histogram'> | null>(null);
   const smaSeriesRef = useRef<ISeriesApi<'Line'> | null>(null);
+  const emaSeriesRef = useRef<ISeriesApi<'Line'> | null>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [timeframe, setTimeframe] = useState<'1D' | '1W' | '1M' | '3M'>('1M');
   const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
   const [showVolume, setShowVolume] = useState(true);
   const [showSMA, setShowSMA] = useState(true);
+  const [smaPeriod, setSmaPeriod] = useState<number>(20);
+  const [showEMA, setShowEMA] = useState(false);
+  const [emaPeriod, setEmaPeriod] = useState<number>(50);
   const [showCrosshair, setShowCrosshair] = useState(true);
   const [activeTool, setActiveTool] = useState<string | null>(null);
+  const [chartType, setChartType] = useState<'candlestick' | 'line'>('candlestick');
+  const [priceScaleMode, setPriceScaleMode] = useState<PriceScaleMode>(PriceScaleMode.Normal);
+  const [autoScaleActive, setAutoScaleActive] = useState<boolean>(true);
+  const [nowText, setNowText] = useState<string>('');
+
+  type Drawing =
+    | { id: string; type: 'hline'; price: number; color: string }
+    | { id: string; type: 'trendline'; a: { time: UTCTimestamp; price: number }; b: { time: UTCTimestamp; price: number }; color: string }
+    | { id: string; type: 'text'; anchor: { time: UTCTimestamp; price: number }; text: string; color: string }
+    | { id: string; type: 'emoji'; anchor: { time: UTCTimestamp; price: number }; emoji: string };
+
+  const [drawings, setDrawings] = useState<Drawing[]>([]);
+  const pendingPointRef = useRef<{ time: UTCTimestamp; price: number } | null>(null);
+  const idCounterRef = useRef<number>(1);
 
   // Generate or use provided data
   useEffect(() => {
@@ -96,12 +116,14 @@ const LightweightChart: React.FC<LightweightChartProps> = ({
           width: 1,
           style: 2,
           labelBackgroundColor: '#363c4e',
+          visible: showCrosshair,
         },
         horzLine: {
           color: '#758696',
           width: 1,
           style: 2,
           labelBackgroundColor: '#363c4e',
+          visible: showCrosshair,
         },
       },
       rightPriceScale: {
@@ -110,6 +132,7 @@ const LightweightChart: React.FC<LightweightChartProps> = ({
           top: 0.1,
           bottom: showVolume ? 0.3 : 0.1,
         },
+        mode: priceScaleMode,
       },
       timeScale: {
         borderColor: '#2a2e39',
@@ -120,21 +143,29 @@ const LightweightChart: React.FC<LightweightChartProps> = ({
 
     chartRef.current = chart;
 
-    // Add candlestick series using v5.x API - DexScreener colors
-    const candlestickSeries = chart.addSeries(CandlestickSeries, {
-      upColor: '#26a69a',
-      downColor: '#ef5350',
-      borderUpColor: '#26a69a',
-      borderDownColor: '#ef5350',
-      wickUpColor: '#26a69a',
-      wickDownColor: '#ef5350',
-    });
-
-    seriesRef.current = candlestickSeries as any;
-    candlestickSeries.setData(candlestickData);
+    // Add primary price series based on chart type
+    if (chartType === 'candlestick') {
+      const candlestickSeries = chart.addSeries(CandlestickSeries, {
+        upColor: '#26a69a',
+        downColor: '#ef5350',
+        borderUpColor: '#26a69a',
+        borderDownColor: '#ef5350',
+        wickUpColor: '#26a69a',
+        wickDownColor: '#ef5350',
+      });
+      seriesRef.current = candlestickSeries as any;
+      candlestickSeries.setData(candlestickData);
+    } else {
+      const lineSeries = chart.addSeries(LineSeries, {
+        color: '#00bcd4',
+        lineWidth: 2,
+      });
+      seriesRef.current = lineSeries as any;
+      lineSeries.setData(candlestickData.map(c => ({ time: c.time as UTCTimestamp, value: c.close })));
+    }
 
     // Add volume series if enabled
-    if (showVolume) {
+    if (showVolume && chartType === 'candlestick') {
       const volumeSeries = chart.addSeries(HistogramSeries, {
         color: '#26a69a',
         priceFormat: {
@@ -153,14 +184,29 @@ const LightweightChart: React.FC<LightweightChartProps> = ({
     }
 
     // Add SMA if enabled
-    if (showSMA && candlestickData.length > 20) {
-      const smaData = calculateSMA(candlestickData, 20);
+    if (showSMA && candlestickData.length > smaPeriod) {
+      const smaData = calculateSMA(candlestickData, smaPeriod);
       const smaSeries = chart.addSeries(LineSeries, {
         color: '#2196F3',
         lineWidth: 2,
       });
       smaSeriesRef.current = smaSeries as any;
       smaSeries.setData(smaData);
+    }
+
+    // Add EMA if enabled
+    if (showEMA && candlestickData.length > emaPeriod) {
+      // Lazy import EMA to avoid circular imports (already exported, but keep structure simple)
+      // Reuse SMA calculation if EMA not desired; but since helper exists, we'll call it via dynamic import
+      import('@/utils/chartDataGenerator').then(({ calculateEMA }) => {
+        const emaData = calculateEMA(candlestickData, emaPeriod);
+        const emaSeries = chart.addSeries(LineSeries, {
+          color: '#FF9800',
+          lineWidth: 2,
+        });
+        emaSeriesRef.current = emaSeries as any;
+        emaSeries.setData(emaData);
+      });
     }
 
     // Fit content
@@ -181,7 +227,7 @@ const LightweightChart: React.FC<LightweightChartProps> = ({
         chartRef.current.remove();
       }
     };
-  }, [chartData, height, showVolume, showSMA]);
+  }, [chartData, height, showVolume, showSMA, showEMA, smaPeriod, emaPeriod, chartType, showCrosshair, priceScaleMode]);
 
   const toggleFullscreen = () => {
     if (!chartContainerRef.current) return;
@@ -226,6 +272,64 @@ const LightweightChart: React.FC<LightweightChartProps> = ({
     }
   };
 
+  // Update clock text
+  useEffect(() => {
+    const update = () => {
+      const d = new Date();
+      const hh = d.getHours().toString().padStart(2, '0');
+      const mm = d.getMinutes().toString().padStart(2, '0');
+      const ss = d.getSeconds().toString().padStart(2, '0');
+      setNowText(`${hh}:${mm}:${ss}`);
+    };
+    update();
+    const t = setInterval(update, 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  // Drawing overlay click handler
+  const handleOverlayClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (!activeTool || !chartRef.current || !seriesRef.current) return;
+    const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    const time = chartRef.current.timeScale().coordinateToTime(x) as UTCTimestamp | null;
+    const price = seriesRef.current.coordinateToPrice(y) as number | null;
+    if (time == null || price == null) return;
+
+    if (activeTool === 'hline') {
+      const id = `h_${idCounterRef.current++}`;
+      setDrawings(prev => [...prev, { id, type: 'hline', price, color: '#9aa0a6' }]);
+      return;
+    }
+
+    if (activeTool === 'trendline') {
+      if (!pendingPointRef.current) {
+        pendingPointRef.current = { time, price };
+      } else {
+        const id = `t_${idCounterRef.current++}`;
+        setDrawings(prev => [...prev, { id, type: 'trendline', a: pendingPointRef.current!, b: { time, price }, color: '#42a5f5' }]);
+        pendingPointRef.current = null;
+      }
+      return;
+    }
+
+    if (activeTool === 'text') {
+      const text = window.prompt('Text label:', 'Label');
+      if (text && text.trim().length > 0) {
+        const id = `tx_${idCounterRef.current++}`;
+        setDrawings(prev => [...prev, { id, type: 'text', anchor: { time, price }, text, color: '#e0e0e0' }]);
+      }
+      return;
+    }
+
+    if (activeTool === 'emoji') {
+      const id = `em_${idCounterRef.current++}`;
+      setDrawings(prev => [...prev, { id, type: 'emoji', anchor: { time, price }, emoji: '🚀' }]);
+      return;
+    }
+  }, [activeTool]);
+
   return (
     <div className={`relative ${className} bg-[#131722] flex flex-col overflow-hidden`} style={{ height: height || '100%' }}>
       {/* Top Control Bar */}
@@ -255,10 +359,18 @@ const LightweightChart: React.FC<LightweightChartProps> = ({
 
         {/* Center Section - Chart Type */}
         <div className="flex items-center gap-2">
-          <button className="p-1.5 hover:bg-[#2a2e39] rounded text-gray-400">
+          <button
+            className={`p-1.5 hover:bg-[#2a2e39] rounded ${chartType === 'line' ? 'text-[#2962ff]' : 'text-gray-400'}`}
+            onClick={() => setChartType('line')}
+            title="Line"
+          >
             <FaChartLine size={16} />
           </button>
-          <button className="p-1.5 hover:bg-[#2a2e39] rounded text-[#2962ff]">
+          <button
+            className={`p-1.5 hover:bg-[#2a2e39] rounded ${chartType === 'candlestick' ? 'text-[#2962ff]' : 'text-gray-400'}`}
+            onClick={() => setChartType('candlestick')}
+            title="Candles"
+          >
             <FaChartBar size={16} />
           </button>
           <button className="p-1.5 hover:bg-[#2a2e39] rounded text-gray-400">
@@ -268,12 +380,31 @@ const LightweightChart: React.FC<LightweightChartProps> = ({
 
         {/* Right Section - Price/MCap & Currency */}
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 text-sm">
-            <span className="text-[#2962ff] font-medium">Price</span>
-            <span className="text-gray-500">/</span>
-            <span className="text-gray-400">MCap</span>
+          <div className="hidden sm:flex items-center gap-2 text-xs">
+            <button
+              onClick={() => setShowSMA(s => !s)}
+              className={`px-2 py-1 rounded ${showSMA ? 'bg-[#2a2e39] text-[#2196F3]' : 'text-gray-400 hover:text-gray-300'}`}
+              title={`SMA${showSMA ? ` (${smaPeriod})` : ''}`}
+            >SMA</button>
+            <button
+              onClick={() => setShowEMA(e => !e)}
+              className={`px-2 py-1 rounded ${showEMA ? 'bg-[#2a2e39] text-[#FF9800]' : 'text-gray-400 hover:text-gray-300'}`}
+              title={`EMA${showEMA ? ` (${emaPeriod})` : ''}`}
+            >EMA</button>
+            <button
+              onClick={() => setShowVolume(v => !v)}
+              className={`px-2 py-1 rounded ${showVolume ? 'bg-[#2a2e39] text-[#26a69a]' : 'text-gray-400 hover:text-gray-300'}`}
+              title="Toggle Volume"
+            >VOL</button>
           </div>
-          <span className="text-[#2962ff] text-sm font-medium">USD</span>
+          <div className="flex items-center gap-1">
+            <button onClick={handleZoomIn} className="p-1.5 rounded hover:bg-[#2a2e39] text-gray-400" title="Zoom In"><FaSearchPlus size={14} /></button>
+            <button onClick={handleZoomOut} className="p-1.5 rounded hover:bg-[#2a2e39] text-gray-400" title="Zoom Out"><FaSearchMinus size={14} /></button>
+            <button onClick={handleResetZoom} className="p-1.5 rounded hover:bg-[#2a2e39] text-gray-400" title="Reset View"><FaHome size={14} /></button>
+            <button onClick={toggleFullscreen} className="p-1.5 rounded hover:bg-[#2a2e39] text-gray-400" title="Fullscreen">
+              {isFullscreen ? <FaCompress size={14} /> : <FaExpand size={14} />}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -321,9 +452,9 @@ const LightweightChart: React.FC<LightweightChartProps> = ({
         <div className="w-14 bg-[#1e222d] border-r border-[#2a2e39] flex flex-col items-center py-4 gap-1.5 overflow-y-auto flex-shrink-0">
           {/* Crosshair */}
           <button
-            onClick={() => setActiveTool(activeTool === 'crosshair' ? null : 'crosshair')}
+            onClick={() => setShowCrosshair(v => !v)}
             className={`p-2.5 rounded transition-colors hover:bg-[#2a2e39] ${
-              activeTool === 'crosshair' ? 'bg-[#2a2e39] text-white' : 'text-gray-400'
+              showCrosshair ? 'bg-[#2a2e39] text-white' : 'text-gray-400'
             }`}
             title="Crosshair"
           >
@@ -398,9 +529,9 @@ const LightweightChart: React.FC<LightweightChartProps> = ({
           
           {/* Eraser */}
           <button
-            onClick={() => setActiveTool(activeTool === 'eraser' ? null : 'eraser')}
+            onClick={() => { setDrawings([]); pendingPointRef.current = null; setActiveTool(null); }}
             className={`p-2.5 rounded transition-colors hover:bg-[#2a2e39] ${
-              activeTool === 'eraser' ? 'bg-[#2a2e39] text-white' : 'text-gray-400'
+              'text-gray-400'
             }`}
             title="Eraser"
           >
@@ -439,6 +570,54 @@ const LightweightChart: React.FC<LightweightChartProps> = ({
               </div>
             </div>
           )}
+
+          {/* Drawing overlay */}
+          <div
+            ref={overlayRef}
+            onClick={handleOverlayClick}
+            className={`absolute inset-0 ${activeTool ? 'pointer-events-auto' : 'pointer-events-none'}`}
+          >
+            <svg className="w-full h-full">
+              {drawings.map(d => {
+                if (!chartRef.current || !seriesRef.current) return null;
+                const ts = chartRef.current.timeScale();
+                if (d.type === 'hline') {
+                  const y = seriesRef.current.priceToCoordinate(d.price);
+                  if (y == null) return null;
+                  return (
+                    <line key={d.id} x1={0} x2={'100%'} y1={y} y2={y} stroke={d.color} strokeWidth={1} opacity={0.8} />
+                  );
+                }
+                if (d.type === 'trendline') {
+                  const x1 = ts.timeToCoordinate(d.a.time as Time);
+                  const y1 = seriesRef.current.priceToCoordinate(d.a.price);
+                  const x2 = ts.timeToCoordinate(d.b.time as Time);
+                  const y2 = seriesRef.current.priceToCoordinate(d.b.price);
+                  if (x1 == null || x2 == null || y1 == null || y2 == null) return null;
+                  return (
+                    <line key={d.id} x1={x1} y1={y1} x2={x2} y2={y2} stroke={d.color} strokeWidth={2} />
+                  );
+                }
+                if (d.type === 'text') {
+                  const x = ts.timeToCoordinate(d.anchor.time as Time);
+                  const y = seriesRef.current.priceToCoordinate(d.anchor.price);
+                  if (x == null || y == null) return null;
+                  return (
+                    <text key={d.id} x={x} y={y} fill={d.color} fontSize={12} textAnchor="start" dominantBaseline="central">{d.text}</text>
+                  );
+                }
+                if (d.type === 'emoji') {
+                  const x = ts.timeToCoordinate(d.anchor.time as Time);
+                  const y = seriesRef.current.priceToCoordinate(d.anchor.price);
+                  if (x == null || y == null) return null;
+                  return (
+                    <text key={d.id} x={x} y={y} fontSize={16} textAnchor="start" dominantBaseline="central">{d.emoji}</text>
+                  );
+                }
+                return null;
+              })}
+            </svg>
+          </div>
         </div>
       </div>
 
@@ -467,11 +646,20 @@ const LightweightChart: React.FC<LightweightChartProps> = ({
 
         {/* Right Section */}
         <div className="flex items-center gap-4 text-xs text-gray-400">
-          <span>06:58:35 (UTC+5)</span>
+          <span>{nowText} (UTC)</span>
           <div className="flex items-center gap-2">
-            <button className="px-2 py-1 rounded hover:bg-[#2a2e39]">%</button>
-            <button className="px-2 py-1 rounded hover:bg-[#2a2e39]">log</button>
-            <button className="px-2 py-1 rounded text-[#2962ff]">auto</button>
+            <button
+              className={`px-2 py-1 rounded ${priceScaleMode === PriceScaleMode.Percentage ? 'bg-[#2a2e39] text-white' : 'hover:bg-[#2a2e39]'}`}
+              onClick={() => setPriceScaleMode(m => m === PriceScaleMode.Percentage ? PriceScaleMode.Normal : PriceScaleMode.Percentage)}
+            >%</button>
+            <button
+              className={`px-2 py-1 rounded ${priceScaleMode === PriceScaleMode.Logarithmic ? 'bg-[#2a2e39] text-white' : 'hover:bg-[#2a2e39]'}`}
+              onClick={() => setPriceScaleMode(m => m === PriceScaleMode.Logarithmic ? PriceScaleMode.Normal : PriceScaleMode.Logarithmic)}
+            >log</button>
+            <button
+              className={`px-2 py-1 rounded ${autoScaleActive ? 'text-[#2962ff]' : 'hover:bg-[#2a2e39]'}`}
+              onClick={() => { setAutoScaleActive(true); handleResetZoom(); }}
+            >auto</button>
           </div>
         </div>
       </div>

@@ -7,7 +7,6 @@ import {
 import Faq from '@/components/Faq';
 import InfoWidget from '@/components/InfoWidget';
 import LightweightChart from '@/components/LightweightChart';
-import MoralisTradingViewChart from '@/components/MoralisTradingViewChart';
 import SwapPage from '@/components/SwapCard';
 import TokenAvatar from '@/components/TokenAvatar';
 import tokens from '@/data/tokens.json';
@@ -1333,7 +1332,7 @@ function TradingViewWithParams({
                         </div>
 
                         {/* Chart Type Toggle */}
-                        {/* <div className="flex items-center gap-2 mb-4">
+                        <div className="flex items-center gap-2 mb-4">
                             <span className="text-sm text-gray-400">Chart:</span>
                             <button
                                 onClick={() => setChartType('dexscreener')}
@@ -1355,27 +1354,16 @@ function TradingViewWithParams({
                             >
                                 Moralis TradingView
                             </button>
-                        </div> */}
+                        </div>
 
                         {/* Chart Container */}
                         <div className="w-full h-[500px] rounded-lg relative">
                             {chartType === 'moralis' && addressParam && chainParam === 'solana' ? (
-                                <MoralisTradingViewChart
-                                    tokenAddress={addressParam}
-                                    chainId="solana"
+                                <LightweightChart
+                                    tokenSymbol={baseToken || 'TOKEN'}
                                     width="100%"
                                     height="500px"
-                                    defaultInterval="1D"
-                                    theme="moralis"
-                                    backgroundColor="#071321"
-                                    gridColor="#0d2035"
-                                    textColor="#68738D"
-                                    candleUpColor="#4CE666"
-                                    candleDownColor="#E64C4C"
-                                    hideLeftToolbar={false}
-                                    hideTopToolbar={false}
-                                    hideBottomToolbar={false}
-                                    className="rounded-lg overflow-hidden"
+                                    className="w-full"
                                 />
                             ) : (
                                 <>
