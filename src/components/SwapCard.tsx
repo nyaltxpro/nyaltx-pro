@@ -20,6 +20,16 @@ import NetworkSelector from '@/components/NetworkSelector';
 import { dexManager } from '@/lib/dex/dexManager';
 import { CHAIN_IDS, DEX_PROTOCOL, DexInterface, PriceQuote, Token } from '@/lib/dex/types';
 import { getCryptoIconUrl } from '@/utils/cryptoIcons';
+import toast from 'react-hot-toast';
+import {
+  useAccount,
+  usePublicClient,
+  useSwitchChain,
+  useWriteContract,
+  useChainId as useWagmiChainId,
+} from 'wagmi';
+import { useWeb3Modal } from '@web3modal/wagmi/react';
+import { erc20Abi, parseUnits, isAddress, type Address } from 'viem';
 
 // Network definitions for UI display
 const networks = [
@@ -31,6 +41,104 @@ const networks = [
   { id: CHAIN_IDS.AVALANCHE, name: 'Avalanche', icon: '/avalanche.svg', color: '#E84142' },
   { id: CHAIN_IDS.SOLANA, name: 'Solana', icon: '/solana.svg', color: '#14F195' },
 ];
+
+// Native placeholder used in this component to denote native coin
+const NATIVE_PLACEHOLDER = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
+
+// PancakeSwap routers (subset matching the user's example + common deployments)
+const PANCAKE_ROUTERS: Record<number, Address> = {
+  1: '0xEfF92A263d31888d860bD50809A8D171709b7b1c', // Ethereum
+  56: '0x10ED43C718714eb63d5aA57B78B54704E256024E', // BSC
+  42161: '0x8cFe327CEc66d1C090Dd72bd0FF11d690C33a2Eb', // Arbitrum
+};
+
+// Wrapped native tokens per chain
+const WETH_BY_CHAIN: Record<number, Address> = {
+  1: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', // WETH
+  56: '0xBB4CdB9CBd36B01bD1cBaEBF2De08d9173bc095C', // WBNB
+  42161: '0x82aF49447D8a07e3bd95BD0d56f35241523FBab1', // WETH (Arbitrum)
+};
+
+// Common tokens per supported chain (symbol -> address/decimals)
+const TOKEN_MAP: Record<number, Record<string, { address: Address; decimals: number }>> = {
+  1: {
+    ETH: { address: WETH_BY_CHAIN[1], decimals: 18 },
+    USDT: { address: '0xdAC17F958D2ee523a2206206994597C13D831ec7', decimals: 6 },
+    USDC: { address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', decimals: 6 },
+    DAI: { address: '0x6B175474E89094C44Da98b954EedeAC495271d0F', decimals: 18 },
+    WBTC: { address: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', decimals: 8 },
+    LINK: { address: '0x514910771AF9Ca656af840dff83E8264EcF986CA', decimals: 18 },
+    UNI: { address: '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984', decimals: 18 },
+    AAVE: { address: '0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9', decimals: 18 },
+    BNB: { address: '0xB8c77482e45F1F44dE1745F52C74426C631bDD52', decimals: 18 },
+  },
+  56: {
+    BNB: { address: WETH_BY_CHAIN[56], decimals: 18 },
+    USDT: { address: '0x55d398326f99059fF775485246999027B3197955', decimals: 18 },
+    USDC: { address: '0x8AC76a51cc950d9822D68b83Fe1Ad97B32Cd580d', decimals: 18 },
+    DAI: { address: '0x1AF3F329e8BE154074D8769D1FFa4eE058B1DBc3', decimals: 18 },
+    WBTC: { address: '0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c', decimals: 18 },
+  },
+  42161: {
+    ETH: { address: WETH_BY_CHAIN[42161], decimals: 18 },
+    USDT: { address: '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9', decimals: 6 },
+    USDC: { address: '0xaf88d065e77c8cc2239327c5edb3a432268e5831', decimals: 6 },
+    DAI: { address: '0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1', decimals: 18 },
+    WBTC: { address: '0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f', decimals: 8 },
+  },
+};
+
+// Minimal router ABI for required calls
+const routerAbi = [
+  {
+    type: 'function',
+    name: 'getAmountsOut',
+    stateMutability: 'view',
+    inputs: [
+      { name: 'amountIn', type: 'uint256' },
+      { name: 'path', type: 'address[]' },
+    ],
+    outputs: [{ name: 'amounts', type: 'uint256[]' }],
+  },
+  {
+    type: 'function',
+    name: 'swapExactTokensForTokens',
+    stateMutability: 'nonpayable',
+    inputs: [
+      { name: 'amountIn', type: 'uint256' },
+      { name: 'amountOutMin', type: 'uint256' },
+      { name: 'path', type: 'address[]' },
+      { name: 'to', type: 'address' },
+      { name: 'deadline', type: 'uint256' },
+    ],
+    outputs: [{ name: 'amounts', type: 'uint256[]' }],
+  },
+  {
+    type: 'function',
+    name: 'swapExactETHForTokens',
+    stateMutability: 'payable',
+    inputs: [
+      { name: 'amountOutMin', type: 'uint256' },
+      { name: 'path', type: 'address[]' },
+      { name: 'to', type: 'address' },
+      { name: 'deadline', type: 'uint256' },
+    ],
+    outputs: [{ name: 'amounts', type: 'uint256[]' }],
+  },
+  {
+    type: 'function',
+    name: 'swapExactTokensForETH',
+    stateMutability: 'nonpayable',
+    inputs: [
+      { name: 'amountIn', type: 'uint256' },
+      { name: 'amountOutMin', type: 'uint256' },
+      { name: 'path', type: 'address[]' },
+      { name: 'to', type: 'address' },
+      { name: 'deadline', type: 'uint256' },
+    ],
+    outputs: [{ name: 'amounts', type: 'uint256[]' }],
+  },
+] as const;
 
 interface SwapPageProps {
   inTradeView?: boolean;
@@ -57,6 +165,13 @@ export default function SwapPage({ inTradeView = false, baseToken, quoteToken }:
   const [trendingCoins, setTrendingCoins] = useState<any[]>([]);
   const [isLoadingTrending, setIsLoadingTrending] = useState(false);
   const [trendingError, setTrendingError] = useState<string | null>(null);
+  const account = useAccount();
+  const walletChainId = useWagmiChainId();
+  const { switchChainAsync } = useSwitchChain();
+  const publicClient = usePublicClient();
+  const { writeContractAsync } = useWriteContract();
+  const [isSwapping, setIsSwapping] = useState(false);
+  const { open } = useWeb3Modal();
 
   // Token selection state
   const [fromToken, setFromToken] = useState<Token>({
@@ -249,6 +364,206 @@ export default function SwapPage({ inTradeView = false, baseToken, quoteToken }:
     const value = e.target.value;
     setToAmount(value);
     // This is just for UI feedback, actual swaps are always based on exact input
+  };
+
+  // --- Swap helpers (Pancake style) ---
+  const getRouterAddress = (chain: number): Address | null => PANCAKE_ROUTERS[chain] || null;
+
+  const resolveTokenMeta = (
+    token: Token,
+    chain: number
+  ): { address: Address; decimals: number; isNative: boolean } | null => {
+    const isNative = token.address?.toLowerCase() === NATIVE_PLACEHOLDER.toLowerCase();
+    if (isNative) {
+      const wrapped = WETH_BY_CHAIN[chain];
+      if (!wrapped) return null;
+      return { address: wrapped, decimals: 18, isNative: true };
+    }
+    const symbol = (token.symbol || '').toUpperCase();
+    const tokenMap = TOKEN_MAP[chain] || {};
+    if (tokenMap[symbol]) {
+      return { address: tokenMap[symbol].address, decimals: tokenMap[symbol].decimals, isNative: false };
+    }
+    if (isAddress(token.address as Address)) {
+      return { address: token.address as Address, decimals: token.decimals || 18, isNative: false };
+    }
+    return null;
+  };
+
+  const getAmountOutMin = async (
+    routerAddr: Address,
+    amountIn: bigint,
+    path: Address[],
+    slipPercent: number
+  ): Promise<bigint> => {
+    const amounts = (await publicClient?.readContract({
+      address: routerAddr,
+      abi: routerAbi,
+      functionName: 'getAmountsOut',
+      args: [amountIn, path],
+    })) as readonly bigint[] | undefined;
+    if (!amounts || amounts.length < 2) throw new Error('Failed to fetch amounts');
+    const out = amounts[amounts.length - 1];
+    const bps = Math.floor(slipPercent * 100); // 1% = 100 bps
+    return (out * BigInt(10000 - bps)) / BigInt(10000);
+  };
+
+  const minOutFromUiQuote = (toDecimals: number, slipPercent: number): bigint => {
+    if (!toAmount || Number(toAmount) <= 0) throw new Error('missing_ui_quote');
+    const out = parseUnits(toAmount, toDecimals);
+    const bps = Math.floor(slipPercent * 100);
+    return (out * BigInt(10000 - bps)) / BigInt(10000);
+  };
+
+  const approveIfNeeded = async (
+    tokenAddr: Address,
+    owner: Address,
+    spender: Address,
+    amount: bigint
+  ) => {
+    const allowance = (await publicClient?.readContract({
+      address: tokenAddr,
+      abi: erc20Abi,
+      functionName: 'allowance',
+      args: [owner, spender],
+    })) as bigint | undefined;
+    if (!allowance || allowance < amount) {
+      const txHash = await writeContractAsync({
+        address: tokenAddr,
+        abi: erc20Abi,
+        functionName: 'approve',
+        args: [spender, amount],
+      });
+      await publicClient?.waitForTransactionReceipt({ hash: txHash });
+    }
+  };
+
+  const executeSwap = async () => {
+    try {
+      if (chainId === CHAIN_IDS.SOLANA) {
+        toast.error('Solana swaps are not supported in this widget.');
+        return;
+      }
+      const routerAddr = getRouterAddress(chainId);
+      if (!routerAddr) {
+        toast.error('Selected network not supported by PancakeSwap in this widget.');
+        return;
+      }
+      const user = account?.address as Address | undefined;
+      if (!user) {
+        toast.error('Please connect your wallet first.');
+        return;
+      }
+      if (!fromAmount || Number(fromAmount) <= 0) {
+        toast.error('Enter a valid amount.');
+        return;
+      }
+
+      // Ensure wallet on correct chain
+      if (walletChainId !== chainId) {
+        await switchChainAsync({ chainId });
+      }
+
+      const fromMeta = resolveTokenMeta(fromToken, chainId);
+      const toMeta = resolveTokenMeta(toToken, chainId);
+      if (!fromMeta || !toMeta) {
+        toast.error('Unsupported token on selected network.');
+        return;
+      }
+
+      const amountIn = parseUnits(fromAmount, fromMeta.decimals);
+      const slip = Math.max(0, Math.min(50, parseFloat(slippage || '0.5'))); // clamp 0-50%
+      const deadline = Math.floor(Date.now() / 1000) + 60 * 20; // 20 minutes
+
+      setIsSwapping(true);
+
+      // Native -> Token
+      if (fromMeta.isNative && !toMeta.isNative) {
+        const path: Address[] = [WETH_BY_CHAIN[chainId], toMeta.address];
+        let minOut: bigint;
+        try {
+          minOut = await getAmountOutMin(routerAddr, amountIn, path, slip);
+        } catch {
+          minOut = minOutFromUiQuote(toMeta.decimals, slip);
+        }
+        const txHash = await writeContractAsync({
+          address: routerAddr,
+          abi: routerAbi,
+          functionName: 'swapExactETHForTokens',
+          args: [minOut, path, user, BigInt(deadline)],
+          value: amountIn,
+        });
+        await publicClient?.waitForTransactionReceipt({ hash: txHash });
+        toast.success('Swap submitted');
+        return;
+      }
+
+      // Token -> Native
+      if (!fromMeta.isNative && toMeta.isNative) {
+        await approveIfNeeded(fromMeta.address, user, routerAddr, amountIn);
+        const path: Address[] = [fromMeta.address, WETH_BY_CHAIN[chainId]];
+        let minOut: bigint;
+        try {
+          minOut = await getAmountOutMin(routerAddr, amountIn, path, slip);
+        } catch {
+          minOut = minOutFromUiQuote(18, slip);
+        }
+        const txHash = await writeContractAsync({
+          address: routerAddr,
+          abi: routerAbi,
+          functionName: 'swapExactTokensForETH',
+          args: [amountIn, minOut, path, user, BigInt(deadline)],
+        });
+        await publicClient?.waitForTransactionReceipt({ hash: txHash });
+        toast.success('Swap submitted');
+        return;
+      }
+
+      // Token -> Token (try direct, fallback via WETH)
+      if (!fromMeta.isNative && !toMeta.isNative) {
+        await approveIfNeeded(fromMeta.address, user, routerAddr, amountIn);
+        let path: Address[] = [fromMeta.address, toMeta.address];
+        let minOut: bigint;
+        try {
+          minOut = await getAmountOutMin(routerAddr, amountIn, path, slip);
+        } catch {
+          path = [fromMeta.address, WETH_BY_CHAIN[chainId], toMeta.address];
+          try {
+            minOut = await getAmountOutMin(routerAddr, amountIn, path, slip);
+          } catch {
+            minOut = minOutFromUiQuote(toMeta.decimals, slip);
+          }
+        }
+        const txHash = await writeContractAsync({
+          address: routerAddr,
+          abi: routerAbi,
+          functionName: 'swapExactTokensForTokens',
+          args: [amountIn, minOut, path, user, BigInt(deadline)],
+        });
+        await publicClient?.waitForTransactionReceipt({ hash: txHash });
+        toast.success('Swap submitted');
+        return;
+      }
+
+      toast.error('Unsupported swap combination.');
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err?.shortMessage || err?.message || 'Swap failed');
+    } finally {
+      setIsSwapping(false);
+    }
+  };
+
+  const handlePrimaryAction = async () => {
+    if (!account?.address) {
+      try {
+        await open({ view: 'Connect' });
+      } catch (e) {
+        // ignore
+      }
+      return;
+    }
+    await executeSwap();
   };
 
   // Swap tokens
@@ -498,8 +813,12 @@ export default function SwapPage({ inTradeView = false, baseToken, quoteToken }:
               </div>
             )}
 
-            {/* Connect Wallet Button */}
-            <button className="w-full bg-[#fffff1]/40 text-white font-medium py-3 px-4 rounded-lg transition-colors">
+            {/* Primary Action Button (keeps same design/label) */}
+            <button
+              onClick={handlePrimaryAction}
+              disabled={isSwapping}
+              className="w-full bg-[#fffff1]/40 text-white font-medium py-3 px-4 rounded-lg transition-colors disabled:opacity-60"
+            >
               Connect wallet
             </button>
 

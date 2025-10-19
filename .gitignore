@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# tina cms
+.tina/__generated__
+public/admin
+tina/__generated__

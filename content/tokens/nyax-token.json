@@ -1,0 +1,13 @@
+{
+  "name": "NYAX Token",
+  "symbol": "NYAX",
+  "description": "The native utility token of the NYALTX platform. Use NYAX to get discounts on trading fees, token creation, and access to premium features.",
+  "logo": "/uploads/nyax-logo.png",
+  "contractAddress": "0x0000000000000000000000000000000000000000",
+  "chain": "ethereum",
+  "website": "https://nyaltx.pro",
+  "twitter": "https://twitter.com/nyaltx",
+  "telegram": "https://t.me/nyaltx",
+  "featured": true,
+  "order": 1
+}

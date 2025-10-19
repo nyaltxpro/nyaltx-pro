@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "NODE_OPTIONS=--max-old-space-size=4096 next build --turbopack",
+    "dev": "tinacms dev -c \"next dev --turbopack\"",
+    "build": "tinacms build && NODE_OPTIONS=--max-old-space-size=4096 next build --turbopack",
     "start": "next start",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
@@ -15,7 +15,10 @@
     "seed:nyax": "node scripts/seedNyaxTokens.js",
     "fetch:coins": "node scripts/getTopCoinsSimple.js",
     "fetch:coins:full": "node scripts/fetchTop400Coins.js",
-    "fetch:coins:detailed": "node scripts/getTop400CoinsDetailed.js"
+    "fetch:coins:detailed": "node scripts/getTop400CoinsDetailed.js",
+    "tina:init": "tinacms init",
+    "tina:build": "tinacms build",
+    "tina:dev": "tinacms dev"
   },
   "dependencies": {
     "@paypal/react-paypal-js": "^8.9.1",
@@ -44,6 +47,7 @@
     "@stream-io/video-react-sdk": "^1.22.0",
     "@supabase/supabase-js": "^2.57.4",
     "@tanstack/react-query": "^5.85.5",
+    "@tinacms/cli": "^1.11.0",
     "@types/nodemailer": "^7.0.2",
     "@types/uuid": "^10.0.0",
     "@uniswap/sdk-core": "^7.7.2",
@@ -76,6 +80,7 @@
     "socket.io-client": "^4.8.1",
     "stream-chat": "^9.20.1",
     "stripe": "^16.6.0",
+    "tinacms": "^2.9.0",
     "uuid": "^13.0.0",
     "viem": "^2.38.1",
     "wagmi": "^2.16.8"
