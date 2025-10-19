@@ -511,11 +511,11 @@ export default function Home() {
           </div> */}
 
             {/* Token Race Section */}
-            <div className="token-race mx-4 mt-4">
+            <div className="token-race mx-3 sm:mx-4 mt-3 sm:mt-4">
               <div className="token-race-header flex-col md:flex-row">
-                <div className="flex items-center gap-3 mb-2 md:mb-0">
-                  <StarIcon className="w-6 h-6 text-yellow-400" />
-                  <span className="text-xl font-bold" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>TOKEN RACE</span>
+                <div className="flex items-center gap-2 sm:gap-3 mb-2 md:mb-0">
+                  <StarIcon className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-400" />
+                  <span className="text-lg sm:text-xl font-bold" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>TOKEN RACE</span>
                 </div>
                 <div className="flex space-x-2 items-center">
                   <Tooltip.Root>
@@ -642,37 +642,37 @@ export default function Home() {
             </div>
 
             {/* Main Content Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-4" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 p-3 sm:p-4" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
               {/* Daily Gainers Section */}
-              <div className="max-h-[400px] overflow-auto bg-black/60 backdrop-blur-sm border border-gray-800/50 rounded-2xl p-6 hover:border-gray-700/50 transition-all duration-300">
-                <div className="flex items-center gap-3 mb-4">
-                  <ActivityLogIcon className="w-5 h-5 text-green-400" />
-                  <h3 className="text-lg font-semibold text-white">Daily Gainers</h3>
+              <div className="max-h-[350px] sm:max-h-[400px] overflow-auto bg-black/60 backdrop-blur-sm border border-gray-800/50 rounded-xl sm:rounded-2xl p-4 sm:p-6 hover:border-gray-700/50 transition-all duration-300">
+                <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+                  <ActivityLogIcon className="w-4 h-4 sm:w-5 sm:h-5 text-green-400" />
+                  <h3 className="text-base sm:text-lg font-semibold text-white">Daily Gainers</h3>
                 </div>
                 <DailyGainers />
               </div>
 
               {/* Recently Added Coins Section */}
-              <div className="max-h-[400px] overflow-auto bg-black/60 backdrop-blur-sm border border-gray-800/50 rounded-2xl p-6 hover:border-gray-700/50 transition-all duration-300">
-                <div className="flex items-center gap-3 mb-4">
-                  <RocketIcon className="w-5 h-5 text-blue-400" />
-                  <h3 className="text-lg font-semibold text-white">Latest Tokens</h3>
+              <div className="max-h-[350px] sm:max-h-[400px] overflow-auto bg-black/60 backdrop-blur-sm border border-gray-800/50 rounded-xl sm:rounded-2xl p-4 sm:p-6 hover:border-gray-700/50 transition-all duration-300">
+                <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+                  <RocketIcon className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
+                  <h3 className="text-base sm:text-lg font-semibold text-white">Latest Tokens</h3>
                 </div>
                 <RecentlyAddedCoins />
               </div>
 
               {/* Trending Coins Section */}
-              <div className="max-h-[400px] overflow-auto bg-black/60 backdrop-blur-sm border border-gray-800/50 rounded-2xl p-6 hover:border-gray-700/50 transition-all duration-300">
-                <div className="flex items-center gap-3 mb-4">
-                  <StarIcon className="w-5 h-5 text-yellow-400" />
-                  <h3 className="text-lg font-semibold text-white">Trending</h3>
+              <div className="max-h-[350px] sm:max-h-[400px] overflow-auto bg-black/60 backdrop-blur-sm border border-gray-800/50 rounded-xl sm:rounded-2xl p-4 sm:p-6 hover:border-gray-700/50 transition-all duration-300">
+                <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+                  <StarIcon className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400" />
+                  <h3 className="text-base sm:text-lg font-semibold text-white">Trending</h3>
                 </div>
                 <TrendingCoins />
               </div>
             </div>
 
             {/* Token Categories Section */}
-            <div className="token-categories flex flex-col mx-4 mt-6">
+            <div className="token-categories flex flex-col mx-3 sm:mx-4 mt-4 sm:mt-6">
               {/* <div className="flex items-center py-2 rounded-lg card-bg border-gray-700 overflow-x-auto">
           <div className="flex space-x-4 text-sm font-medium whitespace-nowrap">
             <button className="py-2 px-4 text-white">Hot Pairs</button>

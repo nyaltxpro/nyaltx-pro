@@ -192,10 +192,10 @@ const Row: React.FC<{ item: any; onInspect: (o: any) => void }> = ({ item, onIns
       {/* Glow effect */}
       <div className="absolute -inset-0.5 bg-gradient-to-r from-[#00d4aa]/20 via-[#3b82f6]/20 to-[#f59e0b]/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
       
-      <div className="relative bg-black/60 backdrop-blur-sm border border-gray-800/50 rounded-xl p-4 hover:border-gray-700/50 transition-all duration-300 group-hover:transform group-hover:scale-[1.02]" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+      <div className="relative bg-black/60 backdrop-blur-sm border border-gray-800/50 rounded-lg sm:rounded-xl p-3 sm:p-4 hover:border-gray-700/50 transition-all duration-300 group-hover:transform group-hover:scale-[1.02]" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3 flex-1 min-w-0">
-            <Avatar.Root className="w-12 h-12">
+          <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+            <Avatar.Root className="w-10 h-10 sm:w-12 sm:h-12">
               {isLoading ? (
                 <div className="w-full h-full bg-gray-700/50 rounded-full animate-pulse"></div>
               ) : tokenData.image ? (
@@ -576,18 +576,18 @@ export default function PumpPortalSimpleUI() {
             <ChainFilterIndicator />
           </div>
 
-          <main className="grid md:grid-cols-2 gap-6">
-            <section className="bg-black/60 backdrop-blur-sm border border-gray-800/50 rounded-2xl p-6 hover:border-gray-700/50 transition-all duration-300">
-              <div className="flex items-center gap-3 mb-4">
-                <RocketIcon className="w-5 h-5 text-blue-400" />
-                <h2 className="text-lg font-semibold text-white">
+          <main className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+            <section className="bg-black/60 backdrop-blur-sm border border-gray-800/50 rounded-xl sm:rounded-2xl p-4 sm:p-6 hover:border-gray-700/50 transition-all duration-300">
+              <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+                <RocketIcon className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
+                <h2 className="text-base sm:text-lg font-semibold text-white">
                   New Tokens
                 </h2>
                 <span className="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded-full font-medium">
                   {filteredNewTokens.length}
                 </span>
               </div>
-              <div className="space-y-3 max-h-[70vh] overflow-auto pr-1">
+              <div className="space-y-2 sm:space-y-3 max-h-[50vh] sm:max-h-[70vh] overflow-auto pr-1">
               {filtered(filteredNewTokens).map((it, idx) => {
                 // Use mint as key to prevent duplicate rendering
                 const tokenFields = pickTokenFields(it.event?.token || it.event || it);
@@ -625,10 +625,10 @@ export default function PumpPortalSimpleUI() {
             </div>
           </section> */}
 
-            <section className="bg-black/60 backdrop-blur-sm border border-gray-800/50 rounded-2xl p-6 hover:border-gray-700/50 transition-all duration-300">
-              <div className="flex items-center gap-3 mb-4">
-                <UpdateIcon className="w-5 h-5 text-green-400" />
-                <h2 className="text-lg font-semibold text-white">
+            <section className="bg-black/60 backdrop-blur-sm border border-gray-800/50 rounded-xl sm:rounded-2xl p-4 sm:p-6 hover:border-gray-700/50 transition-all duration-300">
+              <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+                <UpdateIcon className="w-4 h-4 sm:w-5 sm:h-5 text-green-400" />
+                <h2 className="text-base sm:text-lg font-semibold text-white">
                   Launched Tokens
                 </h2>
                 <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded-full font-medium">
@@ -654,7 +654,7 @@ export default function PumpPortalSimpleUI() {
                   </Tooltip.Portal>
                 </Tooltip.Root>
               </div>
-            <div className="space-y-3 max-h-[70vh] overflow-auto pr-1">
+            <div className="space-y-2 sm:space-y-3 max-h-[50vh] sm:max-h-[70vh] overflow-auto pr-1">
               {filteredLaunchedList.length > 0 ? (
                 filtered(filteredLaunchedList).map((it: any, index: number) => {
                   // Extract the appropriate data structure for the Row component

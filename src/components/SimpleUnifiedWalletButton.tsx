@@ -100,11 +100,12 @@ export default function SimpleUnifiedWalletButton({
   if (isConnecting || isModalOpening) {
     return (
       <button
-        className={`py-2 px-4 rounded-xl bg-gradient-to-r from-[#00b8d8]/20 to-[#3b82f6]/20 text-white font-medium border border-[#00b8d8]/30 transition-all duration-200 text-sm tracking-wide flex items-center gap-2 ${className}`}
+        className={`py-2 px-3 sm:px-4 rounded-lg sm:rounded-xl bg-gradient-to-r from-[#00b8d8]/20 to-[#3b82f6]/20 text-white font-medium border border-[#00b8d8]/30 transition-all duration-200 text-xs sm:text-sm tracking-wide flex items-center gap-1 sm:gap-2 ${className}`}
         disabled
       >
-        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-        Connecting...
+        <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+        <span className="hidden sm:inline">Connecting...</span>
+        <span className="sm:hidden">...</span>
       </button>
     );
   }
@@ -113,14 +114,14 @@ export default function SimpleUnifiedWalletButton({
     return (
       <div className="relative">
         <button
-          className={`py-2 px-4 rounded-xl bg-gradient-to-r from-red-500 to-red-600 text-white font-medium hover:from-red-500/90 hover:to-red-600/90 transition-all duration-200 text-sm tracking-wide flex items-center gap-2 shadow-lg shadow-red-500/20 ${className}`}
+          className={`py-2 px-3 sm:px-4 rounded-lg sm:rounded-xl bg-gradient-to-r from-red-500 to-red-600 text-white font-medium hover:from-red-500/90 hover:to-red-600/90 transition-all duration-200 text-xs sm:text-sm tracking-wide flex items-center gap-1 sm:gap-2 shadow-lg shadow-red-500/20 ${className}`}
           onClick={handleMainButtonClick}
           title={`Disconnect from ${chainName}`}
         >
-          <ExitIcon className="w-4 h-4" />
+          <ExitIcon className="w-3 h-3 sm:w-4 sm:h-4" />
           <div className="flex flex-col items-start">
-            <span className="text-xs opacity-75">Disconnect</span>
-            <span>{formatAddress(address || '')}</span>
+            <span className="text-xs opacity-75 hidden sm:block">Disconnect</span>
+            <span className="text-xs sm:text-sm">{formatAddress(address || '')}</span>
           </div>
         </button>
       </div>
@@ -131,13 +132,14 @@ export default function SimpleUnifiedWalletButton({
     <>
       <div className="relative wallet-dropdown-container">
         <button
-          className={`py-2 px-4 rounded-xl bg-gradient-to-r from-[#00b8d8] to-[#3b82f6] text-white font-medium hover:from-[#00b8d8]/90 hover:to-[#3b82f6]/90 transition-all duration-200 text-sm tracking-wide flex items-center gap-2 shadow-lg shadow-[#00b8d8]/20 ${className}`}
+          className={`py-2 px-3 sm:px-4 rounded-lg sm:rounded-xl bg-gradient-to-r from-[#00b8d8] to-[#3b82f6] text-white font-medium hover:from-[#00b8d8]/90 hover:to-[#3b82f6]/90 transition-all duration-200 text-xs sm:text-sm tracking-wide flex items-center gap-1 sm:gap-2 shadow-lg shadow-[#00b8d8]/20 ${className}`}
           onClick={handleMainButtonClick}
           data-wallet-button
         >
-          <PersonIcon className="w-4 h-4" />
-          Connect Wallet
-          <ChevronDownIcon className="w-4 h-4" />
+          <PersonIcon className="w-3 h-3 sm:w-4 sm:h-4" />
+          <span className="hidden sm:inline">Connect Wallet</span>
+          <span className="sm:hidden">Connect</span>
+          <ChevronDownIcon className="w-3 h-3 sm:w-4 sm:h-4" />
         </button>
       </div>
 

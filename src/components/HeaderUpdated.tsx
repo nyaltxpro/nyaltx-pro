@@ -187,16 +187,16 @@ const Header = ({ toggleMobileMenu }: HeaderProps) => {
         {/* Animated background accent */}
         <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-[#00d4aa] to-transparent opacity-60"></div>
 
-        <div className="grid grid-cols-12 gap-4 items-center px-6 py-4">
+        <div className="grid grid-cols-12 gap-2 sm:gap-3 lg:gap-4 items-center px-3 sm:px-4 lg:px-6 py-3 sm:py-4">
           {/* Left Section - Mobile Menu + Blockchain Dropdown */}
-          <div className="col-span-3 flex items-center gap-3">
+          <div className="col-span-2 sm:col-span-3 flex items-center gap-2 sm:gap-3">
             {/* Mobile Menu Button */}
             <div className="md:hidden">
               <button 
                 onClick={toggleMobileMenu} 
-                className="flex items-center justify-center w-10 h-10 rounded-xl bg-gray-800/50 hover:bg-gray-700/50 text-gray-400 hover:text-white transition-all duration-300 border border-transparent hover:border-white/20"
+                className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-gray-800/50 hover:bg-gray-700/50 text-gray-400 hover:text-white transition-all duration-300 border border-transparent hover:border-white/20"
               >
-                <FiMenu size={18} />
+                <FiMenu size={16} className="sm:w-[18px] sm:h-[18px]" />
               </button>
             </div>
             
@@ -209,7 +209,7 @@ const Header = ({ toggleMobileMenu }: HeaderProps) => {
           </div>
 
           {/* Center Section - Enhanced Search Input */}
-          <div className="col-span-6 flex items-center justify-center">
+          <div className="col-span-7 sm:col-span-6 flex items-center justify-center">
             <div className="w-full max-w-lg relative" ref={searchRef}>
               <div className="relative cursor-pointer group" onClick={openSearchModal}>
                 {/* Animated background glow */}
@@ -221,17 +221,17 @@ const Header = ({ toggleMobileMenu }: HeaderProps) => {
                   <div className="absolute inset-0 bg-gradient-to-r from-[#00d4aa]/5 via-transparent to-[#3b82f6]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                   
                   {/* Search icon */}
-                  <div className="absolute left-5 top-1/2 transform -translate-y-1/2 z-10">
-                    <div className="w-8 h-8 bg-gradient-to-r from-[#00d4aa]/20 to-[#3b82f6]/20 rounded-lg flex items-center justify-center group-hover:from-[#00d4aa]/30 group-hover:to-[#3b82f6]/30 transition-all duration-300">
-                      <BiSearch className="w-4 h-4 text-gray-400 group-hover:text-[#00d4aa] transition-colors duration-300" />
+                  <div className="absolute left-3 sm:left-5 top-1/2 transform -translate-y-1/2 z-10">
+                    <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r from-[#00d4aa]/20 to-[#3b82f6]/20 rounded-lg flex items-center justify-center group-hover:from-[#00d4aa]/30 group-hover:to-[#3b82f6]/30 transition-all duration-300">
+                      <BiSearch className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 group-hover:text-[#00d4aa] transition-colors duration-300" />
                     </div>
                   </div>
 
                   {/* Search input */}
                   <input
                     type="text"
-                    placeholder="Search tokens, contracts, pairs..."
-                    className="relative w-full h-14 py-4 pl-16 pr-20 bg-transparent text-white placeholder-gray-500 focus:outline-none cursor-pointer transition-all duration-300 group-hover:placeholder-gray-400"
+                    placeholder="Search tokens..."
+                    className="relative w-full h-12 sm:h-14 py-3 sm:py-4 pl-12 sm:pl-16 pr-16 sm:pr-20 bg-transparent text-white placeholder-gray-500 focus:outline-none cursor-pointer transition-all duration-300 group-hover:placeholder-gray-400"
                     style={{ 
                       fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
                       fontSize: '15px',
@@ -242,8 +242,8 @@ const Header = ({ toggleMobileMenu }: HeaderProps) => {
                   />
 
                   {/* Keyboard shortcut hint */}
-                  <div className="absolute right-5 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
-                    <div className="flex items-center gap-1 px-2 py-1 bg-gray-800/50 rounded-lg border border-gray-700/50 opacity-60 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="absolute right-3 sm:right-5 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
+                    <div className="hidden sm:flex items-center gap-1 px-2 py-1 bg-gray-800/50 rounded-lg border border-gray-700/50 opacity-60 group-hover:opacity-100 transition-opacity duration-300">
                       <span className="text-xs text-gray-400 font-medium">⌘</span>
                       <span className="text-xs text-gray-400 font-medium">K</span>
                     </div>
@@ -257,14 +257,14 @@ const Header = ({ toggleMobileMenu }: HeaderProps) => {
           </div>
 
           {/* Right Section - Enhanced Action Buttons */}
-          <div className="col-span-3 flex items-center justify-end gap-2">
+          <div className="col-span-3 flex items-center justify-end gap-1 sm:gap-2">
             {/* Settings Button */}
             <div className="hidden md:block">
               <Link
                 href="/dashboard/settings"
-                className="group relative flex items-center justify-center w-11 h-11 rounded-xl transition-all duration-300 text-gray-400 hover:bg-gradient-to-br hover:from-white/10 hover:to-white/5 hover:text-white hover:shadow-lg hover:shadow-black/20 border border-transparent hover:border-white/20"
+                className="group relative flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 lg:w-11 lg:h-11 rounded-lg sm:rounded-xl transition-all duration-300 text-gray-400 hover:bg-gradient-to-br hover:from-white/10 hover:to-white/5 hover:text-white hover:shadow-lg hover:shadow-black/20 border border-transparent hover:border-white/20"
               >
-                <FiSettings className="w-5 h-5 transition-transform duration-200 group-hover:rotate-90" />
+                <FiSettings className="w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-200 group-hover:rotate-90" />
               </Link>
             </div>
 
@@ -272,14 +272,14 @@ const Header = ({ toggleMobileMenu }: HeaderProps) => {
             <div className="hidden md:block">
               <Link
                 href="/dashboard/favorites"
-                className="group relative flex items-center justify-center w-11 h-11 rounded-xl transition-all duration-300 text-gray-400 hover:bg-gradient-to-br hover:from-white/10 hover:to-white/5 hover:text-white hover:shadow-lg hover:shadow-black/20 border border-transparent hover:border-white/20"
+                className="group relative flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 lg:w-11 lg:h-11 rounded-lg sm:rounded-xl transition-all duration-300 text-gray-400 hover:bg-gradient-to-br hover:from-white/10 hover:to-white/5 hover:text-white hover:shadow-lg hover:shadow-black/20 border border-transparent hover:border-white/20"
               >
-                <SlStar className="w-5 h-5 transition-transform duration-200 group-hover:scale-110" />
+                <SlStar className="w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-200 group-hover:scale-110" />
               </Link>
             </div>
 
             {/* Connect Wallet Button */}
-            <div className="ml-2">
+            <div className="ml-1 sm:ml-2">
               <SimpleUnifiedWalletButton />
             </div>
           </div>

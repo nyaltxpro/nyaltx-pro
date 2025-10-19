@@ -1075,13 +1075,13 @@ function TradingViewWithParams({
     }, []);
 
     return (
-        <div className="p-4 text-white min-h-screen" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+        <div className="p-2 sm:p-4 text-white min-h-screen" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
             {/* Token Header */}
             {/* <Header /> */}
             {/* Main Content Grid */}
-            <div className="grid grid-cols-4 mt-8 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 mt-4 md:mt-6 lg:mt-8 gap-3 md:gap-4">
                 {/* Left Column - Stats and Order Panel */}
-                <div className="lg:col-span-1">
+                <div className="col-span-1 md:col-span-1 lg:col-span-1 order-2 md:order-1">
                     <div className="bg-[#2222s27] rounded-xl overflow-hidden mb-4" style={{ minHeight: '600px', position: 'relative' }}>
                         {!infoDexEmbedUrl || (dexScreenerDataExists === false) || infoIframeError ? (
                             <div className="w-full rounded-lg" style={{ maxHeight: '600px', overflow: 'auto' }}>
@@ -1105,13 +1105,13 @@ function TradingViewWithParams({
 
                 </div>
 
-                {/* Right Column - Chart and Trades */}
-                <div className="col-span-2 lg:col-span-2">
+                {/* Middle Column - Chart and Trades */}
+                <div className="col-span-1 md:col-span-2 lg:col-span-2 order-1 md:order-2">
                     {/* Chart */}
                     <div className="bg-[#222227] rounded-xl p-4 mb-4">
-                        <div className="flex justify-between items-center mb-4">
+                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-3 sm:gap-0">
                             {/* Token Header Bar */}
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-2 sm:gap-3">
                                 <TokenAvatar
                                     src={
                                         tokenSocialLinks?.imageUri?.replace('gateway.pinata.cloud', 'ipfs.io') ||
@@ -1129,7 +1129,7 @@ function TradingViewWithParams({
                                 />
                                 <div>
                                     <div className="flex items-center gap-2">
-                                        <h3 className="text-lg font-semibold">
+                                        <h3 className="text-base sm:text-lg font-semibold">
                                             {tokenSocialLinks?.tokenName ||
                                                 moralisTokenData?.metadata?.name ||
                                                 getCryptoName(baseToken)}
@@ -1152,7 +1152,7 @@ function TradingViewWithParams({
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-2 sm:gap-3 flex-wrap sm:flex-nowrap">
                                 <button
                                     className={`p-2 rounded-full transition-all duration-200 ${favorited
                                         ? 'text-yellow-400 bg-yellow-400/10 hover:bg-yellow-400/20'
@@ -1184,9 +1184,9 @@ function TradingViewWithParams({
                                 >
                                     <FaRegCopy />
                                 </button>
-                                <div className="ml-4 text-right">
-                                    <div className="flex items-center gap-2">
-                                        <div className="text-2xl font-bold">
+                                <div className="ml-2 sm:ml-4 text-right">
+                                    <div className="flex items-center gap-1 sm:gap-2">
+                                        <div className="text-lg sm:text-2xl font-bold">
                                             {dexPriceUsd
                                                 ? formatCurrency(
                                                     parseFloat(dexPriceUsd),
@@ -1237,7 +1237,7 @@ function TradingViewWithParams({
                             </div>
                         </div>
                         {/* Quick Links Row */}
-                        <div className="flex items-center gap-3 mb-3 text-gray-300">
+                        <div className="flex items-center gap-2 sm:gap-3 mb-3 text-gray-300 flex-wrap">
                             {(() => {
                                 const t = resolveToken();
                                 const pairLink =
@@ -1401,7 +1401,7 @@ function TradingViewWithParams({
                         </div>
 
                         {/* Chart Container */}
-                        <div className="w-full h-[500px] rounded-lg relative">
+                        <div className="w-full h-[300px] sm:h-[400px] lg:h-[500px] rounded-lg relative">
                             {chainParam === 'solana' && (
                                 <>
                                     {solanaLoading && (
@@ -1425,7 +1425,7 @@ function TradingViewWithParams({
                                 <iframe
                                     title="DEXTools Trading Chart"
                                     width="100%"
-                                    height="500"
+                                    height="100%"
                                     src={generateDEXToolsUrl(addressParam, chainParam)}
                                     style={{
                                         border: 0,
@@ -1442,7 +1442,7 @@ function TradingViewWithParams({
                                             <iframe
                                                 title="DEXTools Trading Chart"
                                                 width="100%"
-                                                height="500"
+                                                height="100%"
                                                 src={generateDEXToolsUrl(addressParam, chainParam)}
                                                 style={{
                                                     border: 0,
@@ -1456,15 +1456,15 @@ function TradingViewWithParams({
                                             <LightweightChart
                                                 tokenSymbol={baseToken || 'TOKEN'}
                                                 width="100%"
-                                                height="500px"
-                                                className="w-full"
+                                                height="100%"
+                                                className="w-full h-full"
                                             />
                                         )
                                     ) : (
                                         <iframe
                                             src={dexEmbedUrl}
                                             width="100%"
-                                            height="500"
+                                            height="100%"
                                             style={{
                                                 border: 0,
                                                 backgroundColor: 'transparent'
@@ -1548,12 +1548,12 @@ function TradingViewWithParams({
                     </div>
                 </div>
 
-                <div className=" col-span-1 lg:col-span-1">
+                <div className="col-span-1 md:col-span-1 lg:col-span-1 order-3">
                     <div className="bg-[#222227] rounded-xl p-4 mb-4">
                         <div className="flex justify-between items-center mb-4">
                             <div className="flex items-center">
-                                <h2 className="text-lg font-semibold">FAVORITES</h2>
-                                <FaInfoCircle className="text-gray-400 ml-2" size={16} />
+                                <h2 className="text-base sm:text-lg font-semibold">FAVORITES</h2>
+                                <FaInfoCircle className="text-gray-400 ml-2" size={14} />
                             </div>
                             <div className="flex items-center">
                                 <button className="p-2 text-gray-400 hover:text-white">
@@ -1565,17 +1565,17 @@ function TradingViewWithParams({
                             </div>
                         </div>
 
-                        <div className="flex justify-between mb-4">
-                            <div className="bg-[#1a2932] rounded-md px-4 py-2 flex-grow mr-2">
+                        <div className="flex flex-col sm:flex-row justify-between mb-4 gap-2 sm:gap-0">
+                            <div className="bg-[#1a2932] rounded-md px-3 sm:px-4 py-2 flex-grow sm:mr-2">
                                 <div className="flex items-center">
-                                    <span className="text-gray-400">Last added</span>
-                                    <FaChevronDown className="ml-1 text-gray-400" size={12} />
+                                    <span className="text-gray-400 text-sm sm:text-base">Last added</span>
+                                    <FaChevronDown className="ml-1 text-gray-400" size={10} />
                                 </div>
                             </div>
-                            <div className="bg-[#1a2932] rounded-md px-4 py-2 w-24">
+                            <div className="bg-[#1a2932] rounded-md px-3 sm:px-4 py-2 w-full sm:w-24">
                                 <div className="flex items-center justify-between">
-                                    <span>All</span>
-                                    <FaChevronDown className="text-gray-400" size={12} />
+                                    <span className="text-sm sm:text-base">All</span>
+                                    <FaChevronDown className="text-gray-400" size={10} />
                                 </div>
                             </div>
                         </div>
@@ -1657,7 +1657,7 @@ function TradingViewWithParams({
                     </div>
                     <div>
                         <div>
-                            <div className="w-full min-h-[500px] aspect-video">
+                            <div className="w-full min-h-[250px] sm:min-h-[350px] lg:min-h-[500px] aspect-video">
                                 {(() => {
                                     // Extract video ID from YouTube URL if custom video is available
                                     const getYouTubeVideoId = (url: string): string | null => {
@@ -1682,7 +1682,7 @@ function TradingViewWithParams({
 
                                     return (
                                         <iframe
-                                            className="min-h-[500px] inset-0 w-full h-full rounded-lg"
+                                            className="min-h-[250px] sm:min-h-[350px] lg:min-h-[500px] inset-0 w-full h-full rounded-lg"
                                             src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1`}
                                             title={videoTitle}
                                             frameBorder="0"
