@@ -553,7 +553,7 @@ export default function LiveStreamPage() {
                                 <div className="flex justify-between items-center mb-4">
                                     <div>
                                         <h2 className="text-2xl font-bold text-white">Broadcasting: {streamTitle}</h2>
-                                        <p className="text-cyan-400 text-sm">Powered by Stream.io Professional</p>
+                                        {/* <p className="text-cyan-400 text-sm">Powered by Stream.io Professional</p> */}
                                     </div>
                                     <button
                                         onClick={handleStreamEnd}

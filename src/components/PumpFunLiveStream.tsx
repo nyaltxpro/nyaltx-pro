@@ -1,26 +1,24 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import { useAccount } from 'wagmi';
 import {
-  FaVideo,
-  FaVideoSlash,
+  LiveStreamData,
+  liveStreamWebSocket,
+  StreamMessage,
+  WebSocketStreamMessage,
+} from '@/services/LiveStreamWebSocket';
+import { useEffect, useRef, useState } from 'react';
+import {
+  FaGift,
   FaMicrophone,
   FaMicrophoneSlash,
   FaPlay,
   FaStop,
-  FaUsers,
-  FaComments,
-  FaPaperPlane,
   FaTimes,
-  FaGift,
+  FaUsers,
+  FaVideo,
+  FaVideoSlash
 } from 'react-icons/fa';
-import {
-  liveStreamWebSocket,
-  LiveStreamData,
-  StreamMessage,
-  WebSocketStreamMessage,
-} from '@/services/LiveStreamWebSocket';
+import { useAccount } from 'wagmi';
 
 interface PumpFunLiveStreamProps {
   onClose: () => void;
@@ -378,22 +376,20 @@ export default function PumpFunLiveStream({ onClose }: PumpFunLiveStreamProps) {
                 <div className="flex items-center gap-3">
                   <button
                     onClick={toggleVideo}
-                    className={`p-3 rounded-full transition-colors ${
-                      isVideoEnabled
+                    className={`p-3 rounded-full transition-colors ${isVideoEnabled
                         ? 'bg-gray-700 text-white hover:bg-gray-600'
                         : 'bg-red-600 text-white hover:bg-red-700'
-                    }`}
+                      }`}
                   >
                     {isVideoEnabled ? <FaVideo /> : <FaVideoSlash />}
                   </button>
 
                   <button
                     onClick={toggleAudio}
-                    className={`p-3 rounded-full transition-colors ${
-                      isAudioEnabled
+                    className={`p-3 rounded-full transition-colors ${isAudioEnabled
                         ? 'bg-gray-700 text-white hover:bg-gray-600'
                         : 'bg-red-600 text-white hover:bg-red-700'
-                    }`}
+                      }`}
                   >
                     {isAudioEnabled ? <FaMicrophone /> : <FaMicrophoneSlash />}
                   </button>
@@ -424,67 +420,7 @@ export default function PumpFunLiveStream({ onClose }: PumpFunLiveStreamProps) {
             </div>
           </div>
 
-          {/* Chat Sidebar */}
-          <div className="w-80 bg-gray-900 border-l border-gray-700 flex flex-col">
-            {/* Chat Header */}
-            <div className="p-4 border-b border-gray-700 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <FaComments className="text-cyan-400" />
-                <span className="font-medium text-white">Live Chat</span>
-              </div>
-              <button
-                onClick={() => setIsChatVisible(!isChatVisible)}
-                className="text-gray-400 hover:text-white transition-colors"
-              >
-                {isChatVisible ? '−' : '+'}
-              </button>
-            </div>
 
-            {isChatVisible && (
-              <>
-                {/* Messages */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-2">
-                  {messages.length === 0 ? (
-                    <div className="text-center py-8">
-                      <div className="text-gray-500 mb-2">💬</div>
-                      <div className="text-gray-400 text-sm">No messages yet</div>
-                      <div className="text-gray-500 text-xs">Be the first to chat!</div>
-                    </div>
-                  ) : (
-                    messages.map(renderMessage)
-                  )}
-                  <div ref={messagesEndRef} />
-                </div>
-
-                {/* Chat Input */}
-                {isStreaming && (
-                  <div className="p-4 border-t border-gray-700">
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        value={chatMessage}
-                        onChange={e => setChatMessage(e.target.value)}
-                        onKeyPress={handleKeyPress}
-                        placeholder="Type a message..."
-                        className="flex-1 px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-cyan-500 focus:outline-none text-sm"
-                        disabled={!isConnected}
-                      />
-                      <button
-                        onClick={sendChatMessage}
-                        disabled={!chatMessage.trim() || !isConnected}
-                        className="px-3 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                      >
-                        <FaPaperPlane />
-                      </button>
-                    </div>
-                    {!isConnected && (
-                      <div className="text-xs text-gray-400 mt-2">Connect wallet to chat</div>
-                    )}
-                  </div>
-                )}
-              </>
-            )}
-          </div>
         </div>
 
         {/* Stream Setup Form (when not streaming) */}

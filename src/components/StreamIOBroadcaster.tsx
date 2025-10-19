@@ -1,32 +1,24 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
-import { useAccount } from 'wagmi';
+import { ChatMessage, streamIOService, StreamUser } from '@/services/StreamIOService';
 import {
-  StreamVideo,
-  StreamVideoClient,
   Call,
-  StreamCall,
-  CallControls,
   SpeakerLayout,
-  CallParticipantsList,
-  useCallStateHooks,
+  StreamCall,
+  StreamVideo,
+  StreamVideoClient
 } from '@stream-io/video-react-sdk';
-import { streamIOService, StreamUser, ChatMessage } from '@/services/StreamIOService';
-import { Channel } from 'stream-chat';
-import EnhancedStreamChat from './EnhancedStreamChat';
-import {
-  FaDesktop,
-  FaStop,
-  FaUsers,
-  FaComments,
-  FaPaperPlane,
-  FaCamera,
-  FaMicrophone,
-  FaMicrophoneSlash,
-  FaVideoSlash,
-} from 'react-icons/fa';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+import {
+  FaCamera,
+  FaDesktop,
+  FaMicrophone,
+  FaStop,
+  FaUsers
+} from 'react-icons/fa';
+import { Channel } from 'stream-chat';
+import { useAccount } from 'wagmi';
 
 interface StreamIOBroadcasterProps {
   onStreamEnd?: () => void;
@@ -331,7 +323,7 @@ export default function StreamIOBroadcaster({
             <div className="text-center">
               <FaDesktop className="w-16 h-16 text-gray-500 mx-auto mb-4" />
               <p className="text-gray-400 text-lg">Click "Start Stream" to begin broadcasting</p>
-              <p className="text-gray-500 text-sm mt-2">Powered by Stream.io</p>
+              {/* <p className="text-gray-500 text-sm mt-2">Powered by Stream.io</p> */}
             </div>
           </div>
         )}
@@ -353,7 +345,7 @@ export default function StreamIOBroadcaster({
             <>
               <button
                 onClick={stopStream}
-                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-gray-600 to-gray-700 text-white font-medium rounded-lg hover:from-gray-700 hover:to-gray-800 transition-all"
+                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-gray-600 to-gray-700 text-white font-medium rounded-full hover:from-gray-700 hover:to-gray-800 transition-all"
               >
                 <FaStop />
                 End Stream
@@ -381,11 +373,10 @@ export default function StreamIOBroadcaster({
               {/* Camera Controls */}
               <button
                 onClick={toggleCamera}
-                className={`p-3 rounded-lg transition-colors ${
-                  streamIOService.getCameraState && streamIOService.getCameraState()
-                    ? 'bg-green-600 hover:bg-green-700'
-                    : 'bg-gray-700 hover:bg-gray-600'
-                } text-white`}
+                className={`p-3 rounded-lg transition-colors ${streamIOService.getCameraState && streamIOService.getCameraState()
+                  ? 'bg-green-600 hover:bg-green-700'
+                  : 'bg-gray-700 hover:bg-gray-600'
+                  } text-white`}
                 title="Toggle Camera"
               >
                 <FaCamera />
@@ -394,11 +385,10 @@ export default function StreamIOBroadcaster({
               {/* Microphone Controls */}
               <button
                 onClick={toggleMicrophone}
-                className={`p-3 rounded-lg transition-colors ${
-                  streamIOService.getMicrophoneState && streamIOService.getMicrophoneState()
-                    ? 'bg-green-600 hover:bg-green-700'
-                    : 'bg-gray-700 hover:bg-gray-600'
-                } text-white`}
+                className={`p-3 rounded-lg transition-colors ${streamIOService.getMicrophoneState && streamIOService.getMicrophoneState()
+                  ? 'bg-green-600 hover:bg-green-700'
+                  : 'bg-gray-700 hover:bg-gray-600'
+                  } text-white`}
                 title="Toggle Microphone"
               >
                 <FaMicrophone />
@@ -419,29 +409,19 @@ export default function StreamIOBroadcaster({
       {/* Stream.io Call Controls (when streaming) */}
       {client && call && isStreaming && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Video Controls */}
-          <div className="bg-gray-800 rounded-lg p-4">
-            <StreamVideo client={client}>
-              <StreamCall call={call}>
-                <CallControls />
-                <div className="mt-4">
-                  <h3 className="text-white font-medium mb-2">Participants ({viewerCount + 1})</h3>
-                  {/* <CallParticipantsList onClose={() => {}} /> */}
-                </div>
-              </StreamCall>
-            </StreamVideo>
-          </div>
+
+
 
           {/* Enhanced Chat Interface */}
           <div className="bg-gray-800 rounded-lg h-96">
-            <EnhancedStreamChat
+            {/* <EnhancedStreamChat
               messages={chatMessages}
               onSendMessage={sendChatMessage}
               onSendAnnouncement={sendStreamerAnnouncement}
               isStreamer={true}
               isConnected={isStreaming}
               className="h-full"
-            />
+            /> */}
           </div>
         </div>
       )}
