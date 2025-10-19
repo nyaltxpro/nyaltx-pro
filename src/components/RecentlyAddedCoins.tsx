@@ -123,6 +123,7 @@ export default function RecentlyAddedCoins() {
     if (chain) params.set('chain', chain);
     if (address) params.set('address', address);
     if (coin.id) params.set('coingecko_id', coin.id);
+    if (coin.image) params.set('imageUri', coin.image);
 
     router.push(`/dashboard/trade?${params.toString()}`);
   };

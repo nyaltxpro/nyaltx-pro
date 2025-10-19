@@ -95,9 +95,20 @@ export default function TrendingCoins() {
       setBoostedLoading(true);
       setBoostedError(null);
       
-      const response = await fetch('https://api.dexscreener.com/token-boosts/top/v1');
+      console.log('Fetching DexScreener boosted tokens...');
+      const response = await fetch('https://api.dexscreener.com/token-boosts/top/v1', {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+        },
+      });
+      
+      console.log('DexScreener API response status:', response.status);
+      
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        console.error('DexScreener API error:', errorText);
+        throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
       }
       
       const data = await response.json();
@@ -137,6 +148,13 @@ export default function TrendingCoins() {
     const interval = setInterval(fetchBoostedTokens, 5 * 60 * 1000);
     return () => clearInterval(interval);
   }, []);
+
+  // Helper function to check if coin has chain information
+  const hasChainInfo = (coin: any) => {
+    const list = tokens as Array<{ symbol: string; chain: string; address: string; name: string }>;
+    const matches = list.filter(t => t.symbol.toUpperCase() === coin.symbol.toUpperCase());
+    return matches.length > 0 && matches.some(t => t.chain && t.chain.trim() !== '');
+  };
 
   const handleNavigate = async (coin: CachedTrendingCoin) => {
     const base = coin.symbol?.toUpperCase() || coin.name?.toUpperCase();
@@ -285,6 +303,16 @@ export default function TrendingCoins() {
             >
               📈 Trending
             </button>
+            {showBoosted && (
+              <button
+                onClick={fetchBoostedTokens}
+                disabled={boostedLoading}
+                className="px-2 py-1 text-xs bg-gray-600 hover:bg-gray-500 disabled:bg-gray-700 rounded transition-colors"
+                title="Refresh boosted tokens"
+              >
+                {boostedLoading ? '🔄' : '↻'}
+              </button>
+            )}
           </div>
         </div>
         {/* <div className="flex items-center gap-2">
@@ -395,7 +423,10 @@ export default function TrendingCoins() {
           </div>
         ) : (
           <div className="space-y-3">
-            {trendingCoins.slice(0, 5).map(coin => (
+            {trendingCoins
+              .filter(coin => hasChainInfo(coin)) // Filter out coins with no chain info
+              .slice(0, 5)
+              .map(coin => (
               <div
                 key={coin.id}
                 className="rounded-lg p-2 flex flex-col sm:flex-row sm:justify-between sm:items-center cursor-pointer hover:bg-gray-800/40"
@@ -442,8 +473,13 @@ export default function TrendingCoins() {
               </div>
             ))}
 
-            {trendingCoins.length === 0 && (
-              <div className="text-center text-gray-400 py-4">No trending coins found</div>
+            {trendingCoins.filter(coin => hasChainInfo(coin)).length === 0 && (
+              <div className="text-center text-gray-400 py-4">
+                {trendingCoins.length === 0 
+                  ? "No trending coins found" 
+                  : "No trending tokens with chain information found"
+                }
+              </div>
             )}
           </div>
         )
