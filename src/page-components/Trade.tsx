@@ -82,17 +82,37 @@ const getChainName = (chainId: number): string => {
     return chainNames[chainId] || 'ethereum';
 };
 
-// Helper function to compare addresses (case-insensitive for EVM, case-sensitive for Solana)
+// Helper function to compare addresses (case-sensitive for Solana, case-insensitive for EVM)
 const compareAddresses = (addr1: string, addr2: string, chain?: string): boolean => {
     if (!addr1 || !addr2) return false;
-
-    // Solana addresses are case-sensitive
-    if (chain?.toLowerCase() === 'solana') {
+    
+    if (chain === 'solana') {
+        // Solana addresses are case-sensitive
         return addr1 === addr2;
+    } else {
+        // EVM addresses are case-insensitive
+        return addr1.toLowerCase() === addr2.toLowerCase();
     }
+};
 
-    // EVM addresses are case-insensitive
-    return addr1.toLowerCase() === addr2.toLowerCase();
+// Helper function to generate DEXTools widget URL
+const generateDEXToolsUrl = (address: string, chain: string = 'solana'): string => {
+    const baseUrl = 'https://www.dextools.io/widget-chart/en';
+    const chainMapping: { [key: string]: string } = {
+        'solana': 'solana',
+        'ethereum': 'ether',
+        'bsc': 'bsc',
+        'polygon': 'polygon',
+        'arbitrum': 'arbitrum',
+        'optimism': 'optimism',
+        'base': 'base'
+    };
+    
+    const mappedChain = chainMapping[chain.toLowerCase()] || 'solana';
+    const style = 'pe-light'; // Can be 'pe-light' or 'pe-dark'
+    const theme = 'dark'; // Match the app's dark theme
+    
+    return `${baseUrl}/${mappedChain}/${style}/${address}?theme=${theme}&chartType=2&chartResolution=30&drawingToolbars=false`;
 };
 
 // Helper function to normalize chain IDs for DexScreener compatibility
@@ -1373,10 +1393,10 @@ function TradingViewWithParams({
                                     ? 'bg-purple-500 text-white'
                                     : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                                     }`}
-                                disabled={!addressParam || chainParam !== 'solana'}
-                                title={!addressParam || chainParam !== 'solana' ? 'Moralis charts only available for Solana tokens with contract address' : ''}
+                                disabled={!addressParam || !['solana', 'ethereum', 'bsc', 'polygon', 'arbitrum', 'optimism', 'base'].includes(chainParam || '')}
+                                title={!addressParam ? 'Contract address required for DEXTools charts' : !['solana', 'ethereum', 'bsc', 'polygon', 'arbitrum', 'optimism', 'base'].includes(chainParam || '') ? 'DEXTools charts available for Solana, Ethereum, BSC, Polygon, Arbitrum, Optimism, and Base' : ''}
                             >
-                                Moralis TradingView
+                                DEXTools Chart
                             </button>
                         </div>
 
@@ -1401,24 +1421,45 @@ function TradingViewWithParams({
                                     )}
                                 </>
                             )}
-                            {chartType === 'moralis' && addressParam && chainParam === 'solana' ? (
-                                <LightweightChart
-                                    tokenSymbol={baseToken || 'TOKEN'}
+                            {chartType === 'moralis' && addressParam && ['solana', 'ethereum', 'bsc', 'polygon', 'arbitrum', 'optimism', 'base'].includes(chainParam || '') ? (
+                                <iframe
+                                    title="DEXTools Trading Chart"
                                     width="100%"
-                                    height="500px"
-                                    className="w-full"
-                                    priceData={solanaChartData}
+                                    height="500"
+                                    src={generateDEXToolsUrl(addressParam, chainParam)}
+                                    style={{
+                                        border: 0,
+                                        backgroundColor: 'transparent'
+                                    }}
+                                    className="rounded-lg"
+                                    onLoad={() => setChartIframeLoaded(true)}
+                                    onError={() => setChartIframeError(true)}
                                 />
                             ) : (
                                 <>
                                     {!dexEmbedUrl || (dexScreenerDataExists === false) || chartIframeError ? (
-                                        <LightweightChart
-                                            tokenSymbol={baseToken || 'TOKEN'}
-                                            width="100%"
-                                            height="500px"
-                                            className="w-full"
-                                            priceData={chainParam === 'solana' ? solanaChartData : undefined}
-                                        />
+                                        ['solana', 'ethereum', 'bsc', 'polygon', 'arbitrum', 'optimism', 'base'].includes(chainParam || '') && addressParam ? (
+                                            <iframe
+                                                title="DEXTools Trading Chart"
+                                                width="100%"
+                                                height="500"
+                                                src={generateDEXToolsUrl(addressParam, chainParam)}
+                                                style={{
+                                                    border: 0,
+                                                    backgroundColor: 'transparent'
+                                                }}
+                                                className="rounded-lg"
+                                                onLoad={() => setChartIframeLoaded(true)}
+                                                onError={() => setChartIframeError(true)}
+                                            />
+                                        ) : (
+                                            <LightweightChart
+                                                tokenSymbol={baseToken || 'TOKEN'}
+                                                width="100%"
+                                                height="500px"
+                                                className="w-full"
+                                            />
+                                        )
                                     ) : (
                                         <iframe
                                             src={dexEmbedUrl}
