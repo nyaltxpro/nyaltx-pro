@@ -66,7 +66,9 @@ export const useSolanaTokenData = (address: string | null, timeframe: string = '
         ]);
 
         if (!tokenResponse.ok || !chartResponse.ok) {
-          throw new Error('Failed to fetch Solana token data');
+          const tokenError = !tokenResponse.ok ? `Token API: ${tokenResponse.status}` : '';
+          const chartError = !chartResponse.ok ? `Chart API: ${chartResponse.status}` : '';
+          throw new Error(`Failed to fetch Solana token data - ${tokenError} ${chartError}`.trim());
         }
 
         const tokenInfo: SolanaTokenInfo = await tokenResponse.json();

@@ -1396,7 +1396,7 @@ function TradingViewWithParams({
                                     )}
                                     {!solanaLoading && solanaError && (
                                         <div className="absolute top-2 right-2 z-10 bg-red-500/20 text-red-400 px-2 py-1 rounded text-xs">
-                                            Solana data error
+                                            {solanaError.includes('429') ? 'Rate limited - using cache' : 'Solana data error'}
                                         </div>
                                     )}
                                 </>
