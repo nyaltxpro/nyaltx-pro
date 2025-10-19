@@ -1004,7 +1004,7 @@ function TradingViewWithParams({
         if (addressParam && chainParam) {
             checkDexScreenerData();
         }
-    }, [addressParam, chainParam, baseToken]);
+    }, [addressParam, chainParam, baseToken, dexPriceUsd, headerImageUrl]);
 
     // Add timeout for info iframe - if it doesn't load within 5 seconds, show InfoWidget
     useEffect(() => {
