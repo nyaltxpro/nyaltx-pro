@@ -3,18 +3,14 @@
 import { CoinGeckoMarketData, coinGeckoService } from '@/api/coingecko/trending';
 import catalog from '@/data/tokens.json';
 import { useTrendingCoins } from '@/hooks/useTrendingCoins';
+import * as Tooltip from '@radix-ui/react-tooltip';
+import { Loader, RefreshCw, Search, Star, TrendingUp } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
-import * as Tooltip from '@radix-ui/react-tooltip';
-import { ArrowRight, ChevronDown, Filter, Loader, RefreshCw, Search, SortAsc, SortDesc, Star, TrendingUp } from 'lucide-react';
 import {
     FaCaretDown,
-    FaCaretUp,
-    FaExternalLinkAlt,
-    FaRegStar,
-    FaStar,
-    FaSync
+    FaCaretUp
 } from 'react-icons/fa';
 
 // Define types
@@ -396,23 +392,7 @@ export default function TrendingPage() {
                                 <p className="text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>Top performing cryptocurrencies with real-time market data</p>
                             </div>
                             <div className="flex items-center gap-4">
-                                <div className="flex items-center gap-2">
-                                    {hasCachedData && !trendingLoading && (
-                                        <span className="text-xs text-green-400 bg-green-900/20 px-2 py-1 rounded" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                                            📱 Trending Cached
-                                        </span>
-                                    )}
-                                    {(trendingLoading || marketDataLoading) && (
-                                        <span className="text-xs text-blue-400 bg-blue-900/20 px-2 py-1 rounded animate-pulse" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                                            🔄 Loading Market Data...
-                                        </span>
-                                    )}
-                                    {tokens.length > 0 && !trendingLoading && !marketDataLoading && (
-                                        <span className="text-xs text-green-400 bg-green-900/20 px-2 py-1 rounded" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                                            ✅ {tokens.length} Tokens Loaded
-                                        </span>
-                                    )}
-                                </div>
+
                             </div>
                         </div>
                     </div>
@@ -474,44 +454,40 @@ export default function TrendingPage() {
                         <div className="flex flex-wrap gap-3 mb-4">
                             <div className="flex gap-2">
                                 <button
-                                    className={`px-4 py-2 rounded-lg text-xs font-medium transition-all ${
-                                        activeFilter === 'all'
+                                    className={`px-4 py-2 rounded-lg text-xs font-medium transition-all ${activeFilter === 'all'
                                             ? 'bg-blue-600 text-white shadow-lg'
                                             : 'bg-white/10 text-gray-300 hover:bg-white/20'
-                                    }`}
+                                        }`}
                                     onClick={() => setActiveFilter('all')}
                                     style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                                 >
                                     All Tokens
                                 </button>
                                 <button
-                                    className={`px-4 py-2 rounded-lg text-xs font-medium transition-all ${
-                                        activeFilter === 'gainers'
+                                    className={`px-4 py-2 rounded-lg text-xs font-medium transition-all ${activeFilter === 'gainers'
                                             ? 'bg-green-600 text-white shadow-lg'
                                             : 'bg-white/10 text-gray-300 hover:bg-white/20'
-                                    }`}
+                                        }`}
                                     onClick={() => setActiveFilter('gainers')}
                                     style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                                 >
                                     Gainers
                                 </button>
                                 <button
-                                    className={`px-4 py-2 rounded-lg text-xs font-medium transition-all ${
-                                        activeFilter === 'losers'
+                                    className={`px-4 py-2 rounded-lg text-xs font-medium transition-all ${activeFilter === 'losers'
                                             ? 'bg-red-600 text-white shadow-lg'
                                             : 'bg-white/10 text-gray-300 hover:bg-white/20'
-                                    }`}
+                                        }`}
                                     onClick={() => setActiveFilter('losers')}
                                     style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                                 >
                                     Losers
                                 </button>
                                 <button
-                                    className={`px-4 py-2 rounded-lg text-xs font-medium transition-all ${
-                                        activeFilter === 'favorites'
+                                    className={`px-4 py-2 rounded-lg text-xs font-medium transition-all ${activeFilter === 'favorites'
                                             ? 'bg-yellow-600 text-white shadow-lg'
                                             : 'bg-white/10 text-gray-300 hover:bg-white/20'
-                                    }`}
+                                        }`}
                                     onClick={() => setActiveFilter('favorites')}
                                     style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                                 >
@@ -522,44 +498,40 @@ export default function TrendingPage() {
 
                             <div className="flex gap-2 ml-auto">
                                 <button
-                                    className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
-                                        timeframe === '1h'
+                                    className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${timeframe === '1h'
                                             ? 'bg-cyan-600 text-white shadow-lg'
                                             : 'bg-white/10 text-gray-300 hover:bg-white/20'
-                                    }`}
+                                        }`}
                                     onClick={() => setTimeframe('1h')}
                                     style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                                 >
                                     1H
                                 </button>
                                 <button
-                                    className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
-                                        timeframe === '24h'
+                                    className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${timeframe === '24h'
                                             ? 'bg-cyan-600 text-white shadow-lg'
                                             : 'bg-white/10 text-gray-300 hover:bg-white/20'
-                                    }`}
+                                        }`}
                                     onClick={() => setTimeframe('24h')}
                                     style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                                 >
                                     24H
                                 </button>
                                 <button
-                                    className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
-                                        timeframe === '7d'
+                                    className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${timeframe === '7d'
                                             ? 'bg-cyan-600 text-white shadow-lg'
                                             : 'bg-white/10 text-gray-300 hover:bg-white/20'
-                                    }`}
+                                        }`}
                                     onClick={() => setTimeframe('7d')}
                                     style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                                 >
                                     7D
                                 </button>
                                 <button
-                                    className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
-                                        timeframe === '30d'
+                                    className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${timeframe === '30d'
                                             ? 'bg-cyan-600 text-white shadow-lg'
                                             : 'bg-white/10 text-gray-300 hover:bg-white/20'
-                                    }`}
+                                        }`}
                                     onClick={() => setTimeframe('30d')}
                                     style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                                 >
@@ -569,97 +541,97 @@ export default function TrendingPage() {
                         </div>
                     </div>
 
-                {/* Enhanced Skeleton Loading State */}
-                {(trendingLoading || marketDataLoading || tokens.length === 0) && (
-                    <div className="animate-pulse">
-                        {/* Skeleton Stats Cards */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                            {[1, 2, 3].map(i => (
-                                <div
-                                    key={i}
-                                    className="bg-gray-800/50 p-4 rounded-lg border border-gray-700/50"
-                                >
-                                    <div className="h-4 bg-gray-700/60 rounded mb-2 w-24"></div>
-                                    <div className="h-6 bg-gray-700/60 rounded mb-1 w-32"></div>
-                                    <div className="h-4 bg-gray-700/60 rounded w-20"></div>
-                                </div>
-                            ))}
-                        </div>
+                    {/* Enhanced Skeleton Loading State */}
+                    {(trendingLoading || marketDataLoading || tokens.length === 0) && (
+                        <div className="animate-pulse">
+                            {/* Skeleton Stats Cards */}
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                                {[1, 2, 3].map(i => (
+                                    <div
+                                        key={i}
+                                        className="bg-gray-800/50 p-4 rounded-lg border border-gray-700/50"
+                                    >
+                                        <div className="h-4 bg-gray-700/60 rounded mb-2 w-24"></div>
+                                        <div className="h-6 bg-gray-700/60 rounded mb-1 w-32"></div>
+                                        <div className="h-4 bg-gray-700/60 rounded w-20"></div>
+                                    </div>
+                                ))}
+                            </div>
 
-                        {/* Skeleton Table */}
-                        <div className="overflow-x-auto">
-                            <table className="min-w-full bg-gray-800/50 rounded-lg overflow-hidden border border-gray-700/50">
-                                <thead className="bg-gray-900/50">
-                                    <tr>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider w-16">
-                                            Rank
-                                        </th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                                            Name
-                                        </th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                                            Price
-                                        </th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                                            24h Change
-                                        </th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                                            Chart (7d)
-                                        </th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                                            Market Cap
-                                        </th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                                            Volume (24h)
-                                        </th>
-                                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-300 uppercase tracking-wider">
-                                            Actions
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-700/50">
-                                    {[...Array(10)].map((_, index) => (
-                                        <tr key={`skeleton-${index}`} className="bg-gray-800/30">
-                                            <td className="px-4 py-4 whitespace-nowrap">
-                                                <div className="h-4 bg-gray-700/60 rounded w-6"></div>
-                                            </td>
-                                            <td className="px-4 py-4 whitespace-nowrap">
-                                                <div className="flex items-center">
-                                                    <div className="h-8 w-8 bg-gray-700/60 rounded-full mr-3"></div>
-                                                    <div>
-                                                        <div className="h-4 bg-gray-700/60 rounded w-16 mb-1"></div>
-                                                        <div className="h-3 bg-gray-700/60 rounded w-12"></div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td className="px-4 py-4 whitespace-nowrap">
-                                                <div className="h-4 bg-gray-700/60 rounded w-20"></div>
-                                            </td>
-                                            <td className="px-4 py-4 whitespace-nowrap">
-                                                <div className="h-4 bg-gray-700/60 rounded w-16"></div>
-                                            </td>
-                                            <td className="px-4 py-4 whitespace-nowrap">
-                                                <div className="h-8 bg-gray-700/60 rounded w-20"></div>
-                                            </td>
-                                            <td className="px-4 py-4 whitespace-nowrap">
-                                                <div className="h-4 bg-gray-700/60 rounded w-24"></div>
-                                            </td>
-                                            <td className="px-4 py-4 whitespace-nowrap">
-                                                <div className="h-4 bg-gray-700/60 rounded w-20"></div>
-                                            </td>
-                                            <td className="px-4 py-4 text-center">
-                                                <div className="flex items-center justify-center space-x-3">
-                                                    <div className="h-4 w-4 bg-gray-700/60 rounded"></div>
-                                                    <div className="h-4 w-4 bg-gray-700/60 rounded"></div>
-                                                </div>
-                                            </td>
+                            {/* Skeleton Table */}
+                            <div className="overflow-x-auto">
+                                <table className="min-w-full bg-gray-800/50 rounded-lg overflow-hidden border border-gray-700/50">
+                                    <thead className="bg-gray-900/50">
+                                        <tr>
+                                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider w-16">
+                                                Rank
+                                            </th>
+                                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                                Name
+                                            </th>
+                                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                                Price
+                                            </th>
+                                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                                24h Change
+                                            </th>
+                                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                                Chart (7d)
+                                            </th>
+                                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                                Market Cap
+                                            </th>
+                                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                                Volume (24h)
+                                            </th>
+                                            <th className="px-4 py-3 text-center text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                                Actions
+                                            </th>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-700/50">
+                                        {[...Array(10)].map((_, index) => (
+                                            <tr key={`skeleton-${index}`} className="bg-gray-800/30">
+                                                <td className="px-4 py-4 whitespace-nowrap">
+                                                    <div className="h-4 bg-gray-700/60 rounded w-6"></div>
+                                                </td>
+                                                <td className="px-4 py-4 whitespace-nowrap">
+                                                    <div className="flex items-center">
+                                                        <div className="h-8 w-8 bg-gray-700/60 rounded-full mr-3"></div>
+                                                        <div>
+                                                            <div className="h-4 bg-gray-700/60 rounded w-16 mb-1"></div>
+                                                            <div className="h-3 bg-gray-700/60 rounded w-12"></div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="px-4 py-4 whitespace-nowrap">
+                                                    <div className="h-4 bg-gray-700/60 rounded w-20"></div>
+                                                </td>
+                                                <td className="px-4 py-4 whitespace-nowrap">
+                                                    <div className="h-4 bg-gray-700/60 rounded w-16"></div>
+                                                </td>
+                                                <td className="px-4 py-4 whitespace-nowrap">
+                                                    <div className="h-8 bg-gray-700/60 rounded w-20"></div>
+                                                </td>
+                                                <td className="px-4 py-4 whitespace-nowrap">
+                                                    <div className="h-4 bg-gray-700/60 rounded w-24"></div>
+                                                </td>
+                                                <td className="px-4 py-4 whitespace-nowrap">
+                                                    <div className="h-4 bg-gray-700/60 rounded w-20"></div>
+                                                </td>
+                                                <td className="px-4 py-4 text-center">
+                                                    <div className="flex items-center justify-center space-x-3">
+                                                        <div className="h-4 w-4 bg-gray-700/60 rounded"></div>
+                                                        <div className="h-4 w-4 bg-gray-700/60 rounded"></div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
-                    </div>
-                )}
+                    )}
 
                     {(trendingError || marketDataError) && (
                         <div className="my-4 p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-red-200">
@@ -855,7 +827,7 @@ export default function TrendingPage() {
                         </div>
                     )}
 
-                {/* Hot Trends Section */}
+                    {/* Hot Trends Section */}
 
                 </div>
             </div>
