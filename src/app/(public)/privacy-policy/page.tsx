@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import PublicHeader from '@/components/PublicHeader';
 import { motion } from 'framer-motion';
 import { FiLock } from 'react-icons/fi';
@@ -11,10 +10,10 @@ export default function PrivacyPolicyPage() {
       <PublicHeader />
 
       {/* Background accents */}
-      <div className="pointer-events-none fixed inset-0 -z-10">
+      {/* <div className="pointer-events-none fixed inset-0 -z-10">
         <div className="absolute inset-0 bg-[radial-gradient(1000px_600px_at_50%_-100px,rgba(56,189,248,0.12),rgba(67,56,202,0)_60%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(800px_400px_at_80%_10%,rgba(99,102,241,0.18),rgba(14,165,233,0)_60%)]" />
-      </div>
+      </div> */}
 
       {/* Hero */}
       <section className="container mx-auto px-4 pt-16 pb-8">
@@ -29,7 +28,7 @@ export default function PrivacyPolicyPage() {
             <span>Privacy First</span>
           </div>
           <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">
-            <span className="bg-gradient-to-r from-cyan-300 via-sky-400 to-indigo-400 bg-clip-text text-transparent">
+            <span className="bg-white bg-clip-text text-transparent">
               Privacy Policy
             </span>
           </h1>

@@ -1,10 +1,8 @@
 'use client';
 
-import React from 'react';
-import Image from 'next/image';
 import PublicHeader from '@/components/PublicHeader';
 import { motion } from 'framer-motion';
-import { FiUsers, FiTarget, FiCpu } from 'react-icons/fi';
+import { FiCpu, FiTarget, FiUsers } from 'react-icons/fi';
 
 export default function AboutUs() {
   return (
@@ -12,10 +10,10 @@ export default function AboutUs() {
       <PublicHeader />
 
       {/* Background accents */}
-      <div className="pointer-events-none fixed inset-0 -z-10">
+      {/* <div className="pointer-events-none fixed inset-0 -z-10">
         <div className="absolute inset-0 bg-[radial-gradient(1000px_600px_at_50%_-100px,rgba(56,189,248,0.12),rgba(67,56,202,0)_60%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(800px_400px_at_80%_10%,rgba(99,102,241,0.18),rgba(14,165,233,0)_60%)]" />
-      </div>
+      </div> */}
 
       {/* Hero */}
       <section className="container mx-auto px-4 pt-16 pb-10">

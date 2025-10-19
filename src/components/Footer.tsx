@@ -69,9 +69,9 @@ const Footer = () => {
     <footer className="relative text-white border-t border-white/10 py-10 px-4 mt-8 font-poppins md:ml-16 footer-with-sidebar">
       {/* subtle aurora background */}
       <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute -top-10 left-10 h-40 w-40 rounded-full bg-cyan-500/10 blur-3xl" />
+        {/* <div className="absolute -top-10 left-10 h-40 w-40 rounded-full bg-cyan-500/10 blur-3xl" />
         <div className="absolute bottom-0 right-10 h-44 w-44 rounded-full bg-indigo-500/10 blur-3xl" />
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent_0,transparent_95%,rgba(255,255,255,0.04)_95%,rgba(255,255,255,0.04)_100%),linear-gradient(to_bottom,transparent_0,transparent_95%,rgba(255,255,255,0.04)_95%,rgba(255,255,255,0.04)_100%)] bg-[length:22px_22px] opacity-10" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent_0,transparent_95%,rgba(255,255,255,0.04)_95%,rgba(255,255,255,0.04)_100%),linear-gradient(to_bottom,transparent_0,transparent_95%,rgba(255,255,255,0.04)_95%,rgba(255,255,255,0.04)_100%)] bg-[length:22px_22px] opacity-10" /> */}
       </div>
       <div className="container mx-auto max-w-7xl px-4">
         {/* Top section */}

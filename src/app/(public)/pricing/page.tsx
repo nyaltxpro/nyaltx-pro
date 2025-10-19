@@ -416,7 +416,7 @@ export default function PricingPage() {
           {/* Header row */}
           <div className="flex items-start justify-between gap-4 mb-8">
             <div>
-              <h1 className="text-6xl md:text-7xl font-extrabold tracking-tight bg-clip-text my-6 p-3 text-transparent bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+              <h1 className="text-2xl md:text-7xl font-semibold tracking-tight bg-clip-text my-6 p-3 text-transparent bg-white" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                 Pricing
               </h1>
               <p className="text-gray-300 mt-4 max-w-2xl text-lg leading-relaxed" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
