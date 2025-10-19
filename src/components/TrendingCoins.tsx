@@ -101,7 +101,26 @@ export default function TrendingCoins() {
       }
       
       const data = await response.json();
-      setBoostedTokens(data.slice(0, 5)); // Show top 5 boosted tokens
+      console.log('DexScreener API response:', data);
+      
+      // Validate the response structure
+      if (!Array.isArray(data)) {
+        console.error('Expected array from DexScreener API, got:', typeof data);
+        setBoostedError('Invalid response format from DexScreener API');
+        return;
+      }
+      
+      // Filter out invalid tokens and log any issues
+      const validTokens = data.filter(token => {
+        if (!token?.baseToken?.symbol || !token?.baseToken?.name) {
+          console.warn('Filtering out invalid token:', token);
+          return false;
+        }
+        return true;
+      });
+      
+      console.log(`Filtered ${validTokens.length} valid tokens from ${data.length} total`);
+      setBoostedTokens(validTokens.slice(0, 5)); // Show top 5 valid boosted tokens
     } catch (err) {
       console.error('Error fetching boosted tokens:', err);
       setBoostedError('Failed to load boosted tokens');
@@ -211,6 +230,11 @@ export default function TrendingCoins() {
 
   // Handle navigation for boosted tokens
   const handleBoostedNavigate = (token: DexScreenerBoost) => {
+    if (!token?.baseToken?.symbol) {
+      console.error('Invalid token data for navigation:', token);
+      return;
+    }
+    
     const base = token.baseToken.symbol.toUpperCase();
     const chainMapping: { [key: string]: string } = {
       'ethereum': 'ethereum',
@@ -225,12 +249,12 @@ export default function TrendingCoins() {
     };
     
     const chain = chainMapping[token.chainId] || token.chainId;
-    const address = token.baseToken.address;
+    const address = token.baseToken?.address;
     
     const params = new URLSearchParams({ base });
     if (chain) params.set('chain', chain);
     if (address) params.set('address', address);
-    params.set('dexscreener_pair', token.pairAddress);
+    if (token.pairAddress) params.set('dexscreener_pair', token.pairAddress);
     
     router.push(`/dashboard/trade?${params.toString()}`);
   };
@@ -301,7 +325,9 @@ export default function TrendingCoins() {
           </div>
         ) : (
           <div className="space-y-3">
-            {boostedTokens.map((token, index) => (
+            {boostedTokens
+              .filter(token => token?.baseToken?.symbol && token?.baseToken?.name) // Filter out invalid tokens
+              .map((token, index) => (
               <div
                 key={`${token.chainId}-${token.pairAddress}`}
                 className="rounded-lg p-3 flex flex-col sm:flex-row sm:justify-between sm:items-center cursor-pointer hover:bg-gray-800/40 border border-orange-500/20 bg-orange-900/10"
@@ -310,20 +336,20 @@ export default function TrendingCoins() {
                 <div className="flex items-center">
                   <div className="relative h-8 w-8 mr-3 bg-orange-500/20 rounded-full flex items-center justify-center">
                     <span className="text-orange-400 font-bold text-sm">
-                      {token.baseToken.symbol.charAt(0)}
+                      {token.baseToken?.symbol?.charAt(0) || '?'}
                     </span>
                   </div>
                   <div>
                     <div className="font-medium flex items-center gap-2">
-                      {token.baseToken.name}
+                      {token.baseToken?.name || 'Unknown Token'}
                       <span className="bg-orange-500 text-white px-2 py-0.5 rounded text-xs font-bold">
                         🚀 BOOSTED
                       </span>
                     </div>
                     <div className="text-gray-400 text-xs flex items-center gap-2">
-                      <span>{token.baseToken.symbol.toUpperCase()}</span>
+                      <span>{token.baseToken?.symbol?.toUpperCase() || 'UNKNOWN'}</span>
                       <span className="bg-gray-700 text-gray-300 px-1 rounded text-xs">
-                        {token.chainId.toUpperCase()}
+                        {token.chainId?.toUpperCase() || 'UNKNOWN'}
                       </span>
                     </div>
                   </div>
@@ -331,13 +357,13 @@ export default function TrendingCoins() {
 
                 <div className="text-right w-full sm:w-auto mt-2 sm:mt-0">
                   <div className="font-medium text-sm text-green-400">
-                    {formatUsdPrice(token.priceUsd)}
+                    {formatUsdPrice(token.priceUsd || '0')}
                   </div>
                   <div className="text-xs text-gray-400 flex items-center justify-end gap-2">
-                    <span className={`${token.priceChange.h24 >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      {token.priceChange.h24 >= 0 ? '+' : ''}{token.priceChange.h24.toFixed(2)}%
+                    <span className={`${(token.priceChange?.h24 || 0) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      {(token.priceChange?.h24 || 0) >= 0 ? '+' : ''}{(token.priceChange?.h24 || 0).toFixed(2)}%
                     </span>
-                    <span>Vol: {formatVolume(token.volume.h24)}</span>
+                    <span>Vol: {formatVolume(token.volume?.h24 || 0)}</span>
                   </div>
                 </div>
               </div>
