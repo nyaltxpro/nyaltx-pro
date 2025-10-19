@@ -565,12 +565,12 @@ export default function Home() {
                           {/* Position tag on top right based on points ranking */}
                           <div
                             className={`absolute -top-2 -right-2 px-3 py-1 rounded-full text-xs font-bold shadow-lg ${index % filteredTokenRaceData.length === 0
-                                ? 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-black'
-                                : index % filteredTokenRaceData.length === 1
-                                  ? 'bg-gradient-to-r from-gray-300 to-gray-400 text-black'
-                                  : index % filteredTokenRaceData.length === 2
-                                    ? 'bg-gradient-to-r from-orange-400 to-orange-500 text-black'
-                                    : 'bg-gradient-to-r from-blue-400 to-blue-500 text-white'
+                              ? 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-black'
+                              : index % filteredTokenRaceData.length === 1
+                                ? 'bg-gradient-to-r from-gray-300 to-gray-400 text-black'
+                                : index % filteredTokenRaceData.length === 2
+                                  ? 'bg-gradient-to-r from-orange-400 to-orange-500 text-black'
+                                  : 'bg-gradient-to-r from-blue-400 to-blue-500 text-white'
                               }`}
                             style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                           >
@@ -642,30 +642,30 @@ export default function Home() {
             </div>
 
             {/* Main Content Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 p-3 sm:p-4" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-4" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
               {/* Daily Gainers Section */}
-              <div className="max-h-[350px] sm:max-h-[400px] overflow-auto bg-black/60 backdrop-blur-sm border border-gray-800/50 rounded-xl sm:rounded-2xl p-4 sm:p-6 hover:border-gray-700/50 transition-all duration-300">
-                <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-                  <ActivityLogIcon className="w-4 h-4 sm:w-5 sm:h-5 text-green-400" />
-                  <h3 className="text-base sm:text-lg font-semibold text-white">Daily Gainers</h3>
+              <div className="max-h-[400px] overflow-auto bg-black/60 backdrop-blur-sm border border-gray-800/50 rounded-2xl p-6 hover:border-gray-700/50 transition-all duration-300">
+                <div className="flex items-center gap-3 mb-4">
+                  <ActivityLogIcon className="w-5 h-5 text-green-400" />
+                  <h3 className="text-lg font-semibold text-white">Daily Gainers</h3>
                 </div>
                 <DailyGainers />
               </div>
 
               {/* Recently Added Coins Section */}
-              <div className="max-h-[350px] sm:max-h-[400px] overflow-auto bg-black/60 backdrop-blur-sm border border-gray-800/50 rounded-xl sm:rounded-2xl p-4 sm:p-6 hover:border-gray-700/50 transition-all duration-300">
-                <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-                  <RocketIcon className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
-                  <h3 className="text-base sm:text-lg font-semibold text-white">Latest Tokens</h3>
+              <div className="max-h-[400px] overflow-auto bg-black/60 backdrop-blur-sm border border-gray-800/50 rounded-2xl p-6 hover:border-gray-700/50 transition-all duration-300">
+                <div className="flex items-center gap-3 mb-4">
+                  <RocketIcon className="w-5 h-5 text-blue-400" />
+                  <h3 className="text-lg font-semibold text-white">Latest Tokens</h3>
                 </div>
                 <RecentlyAddedCoins />
               </div>
 
               {/* Trending Coins Section */}
-              <div className="max-h-[350px] sm:max-h-[400px] overflow-auto bg-black/60 backdrop-blur-sm border border-gray-800/50 rounded-xl sm:rounded-2xl p-4 sm:p-6 hover:border-gray-700/50 transition-all duration-300">
-                <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-                  <StarIcon className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400" />
-                  <h3 className="text-base sm:text-lg font-semibold text-white">Trending</h3>
+              <div className="max-h-[400px] overflow-auto bg-black/60 backdrop-blur-sm border border-gray-800/50 rounded-2xl p-6 hover:border-gray-700/50 transition-all duration-300">
+                <div className="flex items-center gap-3 mb-4">
+                  <StarIcon className="w-5 h-5 text-yellow-400" />
+                  <h3 className="text-lg font-semibold text-white">Trending</h3>
                 </div>
                 <TrendingCoins />
               </div>
