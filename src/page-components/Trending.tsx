@@ -388,7 +388,7 @@ export default function TrendingPage() {
                     <div className="mb-8">
                         <div className="flex items-center justify-between mb-6">
                             <div>
-                                <h1 className="text-4xl font-bold text-white mb-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>Trending Cryptocurrencies</h1>
+                                <h1 className="text-4xl font-semibold text-white mb-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>Trending Cryptocurrencies</h1>
                                 <p className="text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>Top performing cryptocurrencies with real-time market data</p>
                             </div>
                             <div className="flex items-center gap-4">
@@ -455,8 +455,8 @@ export default function TrendingPage() {
                             <div className="flex gap-2">
                                 <button
                                     className={`px-4 py-2 rounded-lg text-xs font-medium transition-all ${activeFilter === 'all'
-                                            ? 'bg-blue-600 text-white shadow-lg'
-                                            : 'bg-white/10 text-gray-300 hover:bg-white/20'
+                                        ? 'bg-blue-600 text-white shadow-lg'
+                                        : 'bg-white/10 text-gray-300 hover:bg-white/20'
                                         }`}
                                     onClick={() => setActiveFilter('all')}
                                     style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
@@ -465,8 +465,8 @@ export default function TrendingPage() {
                                 </button>
                                 <button
                                     className={`px-4 py-2 rounded-lg text-xs font-medium transition-all ${activeFilter === 'gainers'
-                                            ? 'bg-green-600 text-white shadow-lg'
-                                            : 'bg-white/10 text-gray-300 hover:bg-white/20'
+                                        ? 'bg-green-600 text-white shadow-lg'
+                                        : 'bg-white/10 text-gray-300 hover:bg-white/20'
                                         }`}
                                     onClick={() => setActiveFilter('gainers')}
                                     style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
@@ -475,8 +475,8 @@ export default function TrendingPage() {
                                 </button>
                                 <button
                                     className={`px-4 py-2 rounded-lg text-xs font-medium transition-all ${activeFilter === 'losers'
-                                            ? 'bg-red-600 text-white shadow-lg'
-                                            : 'bg-white/10 text-gray-300 hover:bg-white/20'
+                                        ? 'bg-red-600 text-white shadow-lg'
+                                        : 'bg-white/10 text-gray-300 hover:bg-white/20'
                                         }`}
                                     onClick={() => setActiveFilter('losers')}
                                     style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
@@ -485,8 +485,8 @@ export default function TrendingPage() {
                                 </button>
                                 <button
                                     className={`px-4 py-2 rounded-lg text-xs font-medium transition-all ${activeFilter === 'favorites'
-                                            ? 'bg-yellow-600 text-white shadow-lg'
-                                            : 'bg-white/10 text-gray-300 hover:bg-white/20'
+                                        ? 'bg-yellow-600 text-white shadow-lg'
+                                        : 'bg-white/10 text-gray-300 hover:bg-white/20'
                                         }`}
                                     onClick={() => setActiveFilter('favorites')}
                                     style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
@@ -499,8 +499,8 @@ export default function TrendingPage() {
                             <div className="flex gap-2 ml-auto">
                                 <button
                                     className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${timeframe === '1h'
-                                            ? 'bg-cyan-600 text-white shadow-lg'
-                                            : 'bg-white/10 text-gray-300 hover:bg-white/20'
+                                        ? 'bg-cyan-600 text-white shadow-lg'
+                                        : 'bg-white/10 text-gray-300 hover:bg-white/20'
                                         }`}
                                     onClick={() => setTimeframe('1h')}
                                     style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
@@ -509,8 +509,8 @@ export default function TrendingPage() {
                                 </button>
                                 <button
                                     className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${timeframe === '24h'
-                                            ? 'bg-cyan-600 text-white shadow-lg'
-                                            : 'bg-white/10 text-gray-300 hover:bg-white/20'
+                                        ? 'bg-cyan-600 text-white shadow-lg'
+                                        : 'bg-white/10 text-gray-300 hover:bg-white/20'
                                         }`}
                                     onClick={() => setTimeframe('24h')}
                                     style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
@@ -519,8 +519,8 @@ export default function TrendingPage() {
                                 </button>
                                 <button
                                     className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${timeframe === '7d'
-                                            ? 'bg-cyan-600 text-white shadow-lg'
-                                            : 'bg-white/10 text-gray-300 hover:bg-white/20'
+                                        ? 'bg-cyan-600 text-white shadow-lg'
+                                        : 'bg-white/10 text-gray-300 hover:bg-white/20'
                                         }`}
                                     onClick={() => setTimeframe('7d')}
                                     style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
@@ -529,8 +529,8 @@ export default function TrendingPage() {
                                 </button>
                                 <button
                                     className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${timeframe === '30d'
-                                            ? 'bg-cyan-600 text-white shadow-lg'
-                                            : 'bg-white/10 text-gray-300 hover:bg-white/20'
+                                        ? 'bg-cyan-600 text-white shadow-lg'
+                                        : 'bg-white/10 text-gray-300 hover:bg-white/20'
                                         }`}
                                     onClick={() => setTimeframe('30d')}
                                     style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
