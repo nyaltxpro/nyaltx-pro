@@ -1,5 +1,4 @@
 'use client';
-
 import {
     fetchTokenPairData,
     formatCurrency,
@@ -9,6 +8,7 @@ import Faq from '@/components/Faq';
 import InfoWidget from '@/components/InfoWidget';
 import LightweightChart from '@/components/LightweightChart';
 import MoralisTradingViewChart from '@/components/MoralisTradingViewChart';
+import SwapPage from '@/components/SwapCard';
 import TokenAvatar from '@/components/TokenAvatar';
 import tokens from '@/data/tokens.json';
 import useMoralisTokenMetadata from '@/hooks/useMoralisTokenMetadata';
@@ -954,11 +954,10 @@ function TradingViewWithParams({
     // Check DexScreener API to see if token data exists
     useEffect(() => {
         // Skip DexScreener check for NYAX token
-        if (baseToken === 'NYAX') {
-            console.log('⏭️ Skipping DexScreener API check for NYAX token');
-
-            return;
-        }
+        // if (baseToken === 'NYAX') {
+        //     console.log('⏭️ Skipping DexScreener API check for NYAX token');
+        //     return;
+        // }
 
         const checkDexScreenerData = async () => {
             if (addressParam && chainParam) {
@@ -1059,36 +1058,8 @@ function TradingViewWithParams({
                             />
                         )}
                     </div>
-                    {/* <SwapPage /> */}
-                    {/* <iframe
-            src={`https://app.uniswap.org/#/swap?field=input&value=10&inputCurrency=${addressParam}`}
-            height="660px"
-            width="100%"
-            style={{
-              border: 0,
-              margin: "0 auto",
-              marginBottom: ".5rem",
-              display: "block",
-              borderRadius: "10px",
-              maxWidth: "960px",
-              minWidth: "300px",
-            }}
-            title="Uniswap Swap Widget"
-          /> */}
+                    <SwapPage />
 
-                    {/* <iframe
-            src={`https://raydium.io/swap/?inputCurrency=${addressParam}&outputCurrency=USDC`}
-            height="660px"
-            width="100%"
-            style={{
-              border: 0,
-              margin: " 0 auto",
-              marginBottom: "0.5rem",
-              display: "block",
-              borderRadius: "10px",
-              maxWidth: "960px",
-            }}
-          ></iframe> */}
                 </div>
 
                 {/* Right Column - Chart and Trades */}
@@ -1222,53 +1193,6 @@ function TradingViewWithParams({
                                 </div>
                             </div>
                         </div>
-
-                        {/* Moralis Token Metadata */}
-                        {/* {moralisTokenData?.metadata && (
-                            <div className="bg-[#1a2932] rounded-lg p-3 mb-3">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
-                                    <span className="text-xs font-medium text-purple-400">Moralis Token Data</span>
-                                    {isLoadingMoralisData && (
-                                        <div className="animate-spin w-3 h-3 border border-purple-400 border-t-transparent rounded-full"></div>
-                                    )}
-                                </div>
-                                <div className="grid grid-cols-2 gap-3 text-xs">
-                                    <div>
-                                        <span className="text-gray-400">Name:</span>
-                                        <div className="text-white font-medium">{moralisTokenData.metadata.name}</div>
-                                    </div>
-                                    <div>
-                                        <span className="text-gray-400">Symbol:</span>
-                                        <div className="text-white font-medium">{moralisTokenData.metadata.symbol}</div>
-                                    </div>
-                                    <div>
-                                        <span className="text-gray-400">Decimals:</span>
-                                        <div className="text-white font-medium">{moralisTokenData.metadata.decimals}</div>
-                                    </div>
-                                    <div>
-                                        <span className="text-gray-400">Verified:</span>
-                                        <div className={`font-medium ${moralisTokenData.metadata.verified_contract ? 'text-green-400' : 'text-red-400'}`}>
-                                            {moralisTokenData.metadata.verified_contract ? '✓ Yes' : '✗ No'}
-                                        </div>
-                                    </div>
-                                    {moralisTokenData.metadata.total_supply_formatted && (
-                                        <div className="col-span-2">
-                                            <span className="text-gray-400">Total Supply:</span>
-                                            <div className="text-white font-medium">{moralisTokenData.metadata.total_supply_formatted}</div>
-                                        </div>
-                                    )}
-                                    {moralisTokenData.metadata.possible_spam && (
-                                        <div className="col-span-2">
-                                            <div className="bg-red-500/20 text-red-400 px-2 py-1 rounded text-xs">
-                                                ⚠️ Flagged as possible spam
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        )} */}
-
                         {/* Quick Links Row */}
                         <div className="flex items-center gap-3 mb-3 text-gray-300">
                             {(() => {
@@ -1409,7 +1333,7 @@ function TradingViewWithParams({
                         </div>
 
                         {/* Chart Type Toggle */}
-                        <div className="flex items-center gap-2 mb-4">
+                        {/* <div className="flex items-center gap-2 mb-4">
                             <span className="text-sm text-gray-400">Chart:</span>
                             <button
                                 onClick={() => setChartType('dexscreener')}
@@ -1431,7 +1355,7 @@ function TradingViewWithParams({
                             >
                                 Moralis TradingView
                             </button>
-                        </div>
+                        </div> */}
 
                         {/* Chart Container */}
                         <div className="w-full h-[500px] rounded-lg relative">
@@ -1493,24 +1417,6 @@ function TradingViewWithParams({
                             >
                                 Trades
                             </button>
-                            {/* <button
-                className={`px-6 py-3 text-sm font-medium ${activeTab === 'info'
-                  ? 'text-blue-400 border-b-2 border-blue-400'
-                  : 'text-gray-400 hover:text-gray-300'
-                  }`}
-                onClick={() => setActiveTab('info')}
-              >
-                Info
-              </button>
-              <button
-                className={`px-6 py-3 text-sm font-medium ${activeTab === 'analytics'
-                  ? 'text-blue-400 border-b-2 border-blue-400'
-                  : 'text-gray-400 hover:text-gray-300'
-                  }`}
-                onClick={() => setActiveTab('analytics')}
-              >
-                Analytics
-              </button> */}
                         </div>
 
                         {activeTab === 'trades' && (
@@ -1560,136 +1466,7 @@ function TradingViewWithParams({
                             </div>
                         )}
 
-                        {/* {activeTab === 'info' && (
-              <div className="p-4">
-                <h3 className="text-lg font-semibold mb-3">Token Information</h3>
-                <p className="text-gray-300 mb-4">
-                  {baseToken === 'USDT' ?
-                    `Tether USD (USDT) is a stablecoin pegged to the US Dollar. Each USDT token is backed by one US dollar, maintaining a 1:1 ratio with the USD. It enables users to transfer value globally without the volatility associated with cryptocurrencies.` :
-                    baseToken === 'BTC' ?
-                      `Bitcoin (BTC) is the first decentralized cryptocurrency, created in 2009 by an unknown person or group using the pseudonym Satoshi Nakamoto. It operates on a blockchain, a distributed ledger that records all transactions across a network of computers.` :
-                      baseToken === 'ETH' ?
-                        `Ethereum (ETH) is a decentralized, open-source blockchain with smart contract functionality. Ether is the native cryptocurrency of the platform. It is the second-largest cryptocurrency by market capitalization, after Bitcoin.` :
-                        `${getCryptoName(baseToken)} (${baseToken}) is a cryptocurrency traded against ${getCryptoName(quoteToken)} (${quoteToken}). View the chart for real-time price information.`
-                  }
-                </p>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <h4 className="font-medium mb-2">Contract Details</h4>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Network</span>
-                        <span>Ethereum</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Contract</span>
-                        <a href="#" className="text-blue-400 hover:underline">0xdAC17...4DD0</a>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Decimals</span>
-                        <span>6</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Issuer</span>
-                        <span>Tether Limited</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h4 className="font-medium mb-2">Social Links</h4>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Website</span>
-                        <a href="#" className="text-blue-400 hover:underline">tether.to</a>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Twitter</span>
-                        <a href="#" className="text-blue-400 hover:underline">@Tether_to</a>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Support</span>
-                        <a href="#" className="text-blue-400 hover:underline">support@tether.to</a>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )} */}
-
-                        {/* {activeTab === 'analytics' && (
-              <div className="p-4">
-                <h3 className="text-lg font-semibold mb-3">Token Analytics</h3>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                  <div>
-                    <h4 className="font-medium mb-3">Price Performance</h4>
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">1h Change</span>
-                        <span className="text-green-500">+0.01%</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">24h Change</span>
-                        <span className="text-green-500">+0.01%</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">7d Change</span>
-                        <span className="text-red-500">-0.02%</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">30d Change</span>
-                        <span className="text-green-500">+0.05%</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h4 className="font-medium mb-3">Trading Volume</h4>
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">24h Volume</span>
-                        <span>$42.7B</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">7d Volume</span>
-                        <span>$298.4B</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Market Cap Rank</span>
-                        <span>#3</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Volume/Market Cap</span>
-                        <span>0.413</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <h4 className="font-medium mb-3">Holder Distribution</h4>
-                <div className="w-full bg-[#1a2932] rounded-lg p-4 h-48 flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="text-gray-400">USDT Holder Distribution</div>
-                    <div className="mt-2 flex justify-center space-x-4">
-                      <div className="text-center">
-                        <div className="text-xl font-bold">65%</div>
-                        <div className="text-xs text-gray-500">Exchanges</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-xl font-bold">20%</div>
-                        <div className="text-xs text-gray-500">Institutions</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-xl font-bold">15%</div>
-                        <div className="text-xs text-gray-500">Retail</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )} */}
                     </div>
 
                     <div className="mt-4">
@@ -1804,24 +1581,6 @@ function TradingViewWithParams({
                             </div>
                         )}
                     </div>
-                    {/* YouTube Video (below favorites) */}
-                    {/* <div className="bg-[#0f1923] rounded-xl p-4">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-lg font-semibold">Video</h2>
-              <FaInfoCircle className="text-gray-400" size={16} />
-            </div>
-            <div className="relative w-full" style={{ paddingTop: '56.25%' }}>
-              <iframe
-                className="absolute min-h-[500px] inset-0 w-full h-full rounded-lg"
-                src="https://www.youtube.com/embed/z8uiTA1cdWA?autoplay=1&mute=1"
-                title="YouTube video player"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                referrerPolicy="strict-origin-when-cross-origin"
-                allowFullScreen
-              />
-            </div>
-          </div> */}
                     <div>
                         <div>
                             <div className="w-full min-h-[500px] aspect-video">

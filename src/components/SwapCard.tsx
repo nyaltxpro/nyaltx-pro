@@ -20,16 +20,16 @@ import NetworkSelector from '@/components/NetworkSelector';
 import { dexManager } from '@/lib/dex/dexManager';
 import { CHAIN_IDS, DEX_PROTOCOL, DexInterface, PriceQuote, Token } from '@/lib/dex/types';
 import { getCryptoIconUrl } from '@/utils/cryptoIcons';
+import { useWeb3Modal } from '@web3modal/wagmi/react';
 import toast from 'react-hot-toast';
+import { erc20Abi, isAddress, parseUnits, type Address } from 'viem';
 import {
   useAccount,
   usePublicClient,
   useSwitchChain,
-  useWriteContract,
   useChainId as useWagmiChainId,
+  useWriteContract,
 } from 'wagmi';
-import { useWeb3Modal } from '@web3modal/wagmi/react';
-import { erc20Abi, parseUnits, isAddress, type Address } from 'viem';
 
 // Network definitions for UI display
 const networks = [
@@ -147,6 +147,7 @@ interface SwapPageProps {
 }
 
 export default function SwapPage({ inTradeView = false, baseToken, quoteToken }: SwapPageProps) {
+  const { open } = useWeb3Modal();
   const router = useRouter();
   const [darkMode] = useState(true);
   const [fromAmount, setFromAmount] = useState('');
@@ -171,7 +172,7 @@ export default function SwapPage({ inTradeView = false, baseToken, quoteToken }:
   const publicClient = usePublicClient();
   const { writeContractAsync } = useWriteContract();
   const [isSwapping, setIsSwapping] = useState(false);
-  const { open } = useWeb3Modal();
+
 
   // Token selection state
   const [fromToken, setFromToken] = useState<Token>({
