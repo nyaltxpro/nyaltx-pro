@@ -714,6 +714,13 @@ function TradingViewWithParams({
             }
 
             try {
+                // Don't reset price if DexScreener already set it (unless manual refresh)
+                if (!isManualRefresh && priceSource === 'dexscreener' && dexPriceUsd) {
+                    console.log('⏭️ Skipping price fetch - DexScreener price already set:', dexPriceUsd);
+                    setIsRefreshingPrice(false);
+                    return;
+                }
+
                 // Reset price data when starting new fetch
                 setDexPriceUsd(null);
                 setDexChange24h(null);
@@ -836,7 +843,7 @@ function TradingViewWithParams({
                 aborted = true;
             };
         },
-        [chainParam, addressParam, resolveToken, baseToken, moralisTokenData, priceParam]
+        [chainParam, addressParam, resolveToken, baseToken, moralisTokenData, priceParam, priceSource, dexPriceUsd]
     );
 
     // Manual refresh function
@@ -935,13 +942,13 @@ function TradingViewWithParams({
 
     // Reset iframe states when URLs change
     useEffect(() => {
-        setChartIframeLoaded(false);
-        setChartIframeError(false);
-        setTradesIframeLoaded(false);
-        setTradesIframeError(false);
-        setInfoIframeLoaded(false);
-        setInfoIframeError(false);
-        setDexScreenerDataExists(null);
+        // setChartIframeLoaded(false);
+        // setChartIframeError(false);
+        // setTradesIframeLoaded(false);
+        // setTradesIframeError(false);
+        // setInfoIframeLoaded(false);
+        // setInfoIframeError(false);
+        // setDexScreenerDataExists(null);
     }, [dexEmbedUrl, transactionDexEmbedUrl, infoDexEmbedUrl]);
 
     // Check DexScreener API to see if token data exists
@@ -949,10 +956,7 @@ function TradingViewWithParams({
         // Skip DexScreener check for NYAX token
         if (baseToken === 'NYAX') {
             console.log('⏭️ Skipping DexScreener API check for NYAX token');
-            setDexScreenerDataExists(true);
-            setInfoIframeError(true);
-            setChartIframeError(true);
-            setTradesIframeError(true);
+
             return;
         }
 
@@ -973,6 +977,7 @@ function TradingViewWithParams({
                         const firstPair = data[0];
                         if (firstPair.priceUsd) {
                             setDexPriceUsd(firstPair.priceUsd);
+                            setPriceSource('dexscreener');
                             console.log('💰 DexScreener Price USD:', firstPair.priceUsd);
                         }
                         if (firstPair.info?.imageUrl) {
@@ -1004,7 +1009,7 @@ function TradingViewWithParams({
         if (addressParam && chainParam) {
             checkDexScreenerData();
         }
-    }, [addressParam, chainParam, baseToken, dexPriceUsd, headerImageUrl]);
+    }, [addressParam, chainParam, baseToken]);
 
     // Add timeout for info iframe - if it doesn't load within 5 seconds, show InfoWidget
     useEffect(() => {
