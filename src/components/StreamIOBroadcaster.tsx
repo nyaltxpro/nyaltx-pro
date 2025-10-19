@@ -14,7 +14,6 @@ import {
   FaCamera,
   FaDesktop,
   FaMicrophone,
-  FaStop,
   FaUsers
 } from 'react-icons/fa';
 import { Channel } from 'stream-chat';
@@ -343,13 +342,13 @@ export default function StreamIOBroadcaster({
             </button>
           ) : (
             <>
-              <button
+              {/* <button
                 onClick={stopStream}
                 className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-gray-600 to-gray-700 text-white font-medium rounded-full hover:from-gray-700 hover:to-gray-800 transition-all"
               >
                 <FaStop />
                 End Stream
-              </button>
+              </button> */}
 
               {/* Screen Share Controls */}
               {streamIOService.getScreenShareState && streamIOService.getScreenShareState() ? (
