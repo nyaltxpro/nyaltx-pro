@@ -38,12 +38,21 @@ const GainersLosers = () => {
     fetchCoins();
   }, []);
 
-  // Sort coins by price change percentage
+  // Helper function to check if coin has chain information
+  const hasChainInfo = (coin: Coin) => {
+    const list = tokens as Array<{ symbol: string; chain: string; address: string; name: string }>;
+    const matches = list.filter(t => t.symbol.toUpperCase() === coin.symbol.toUpperCase());
+    return matches.length > 0 && matches.some(t => t.chain && t.chain.trim() !== '');
+  };
+
+  // Sort coins by price change percentage and filter out coins with no chain info
   const gainers = [...coins]
+    .filter(hasChainInfo)
     .sort((a, b) => b.price_change_percentage_24h - a.price_change_percentage_24h)
     .slice(0, 5);
 
   const losers = [...coins]
+    .filter(hasChainInfo)
     .sort((a, b) => a.price_change_percentage_24h - b.price_change_percentage_24h)
     .slice(0, 5);
 

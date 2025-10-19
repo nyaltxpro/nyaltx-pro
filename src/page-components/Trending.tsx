@@ -356,14 +356,18 @@ export default function TrendingPage() {
                 token.symbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 token.name.toLowerCase().includes(searchTerm.toLowerCase());
 
+            // Filter out coins with no chain information
+            const { chain } = resolveCatalogBySymbol(token.symbol);
+            const hasChain = chain && chain.trim() !== '';
+
             if (activeFilter === 'gainers') {
-                return matchesSearch && token.change24h > 0;
+                return matchesSearch && token.change24h > 0 && hasChain;
             } else if (activeFilter === 'losers') {
-                return matchesSearch && token.change24h < 0;
+                return matchesSearch && token.change24h < 0 && hasChain;
             } else if (activeFilter === 'favorites') {
-                return matchesSearch && token.favorite;
+                return matchesSearch && token.favorite && hasChain;
             } else {
-                return matchesSearch;
+                return matchesSearch && hasChain;
             }
         });
     }, [sortedTokens, searchTerm, activeFilter]);

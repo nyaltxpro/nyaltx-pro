@@ -187,10 +187,15 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // Filter out coins with no chain information (no contract addresses)
+    const coinsWithChain = coinsWithDetails.filter(coin => {
+      return coin.contractAddresses && Object.keys(coin.contractAddresses).length > 0;
+    });
+
     return NextResponse.json({
-      coins: coinsWithDetails,
+      coins: coinsWithChain,
       type,
-      total: coinsWithDetails.length,
+      total: coinsWithChain.length,
     });
   } catch (error) {
     console.error('Market movers error:', error);

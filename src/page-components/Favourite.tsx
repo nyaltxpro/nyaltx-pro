@@ -1,13 +1,12 @@
 'use client';
 
 import { getCryptoIconUrl } from '@/utils/cryptoIcons';
-import Image from 'next/image';
+import * as Avatar from '@radix-ui/react-avatar';
+import { ExternalLinkIcon, PersonIcon, StarIcon, TrashIcon, UpdateIcon } from '@radix-ui/react-icons';
+import * as Tooltip from '@radix-ui/react-tooltip';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
-import * as Avatar from '@radix-ui/react-avatar';
-import * as Tooltip from '@radix-ui/react-tooltip';
-import { ExternalLinkIcon, UpdateIcon, StarIcon, TrashIcon, PersonIcon } from '@radix-ui/react-icons';
 import { useAccount } from 'wagmi';
 
 interface Favorite {
@@ -197,7 +196,7 @@ export default function FavoritesPage() {
 
     return (
         <Tooltip.Provider>
-            <div className="min-h-screen bg-gradient-to-br from-[#0a0e1a] via-[#0f1419] to-[#1a1f2e] px-4 py-6 md:px-6 lg:px-8">
+            <div className="min-h-screen  px-4 py-6 md:px-6 lg:px-8">
                 <div className="mx-auto">
                     {/* Header Section */}
                     <div className="relative mb-8">
