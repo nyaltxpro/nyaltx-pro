@@ -164,12 +164,7 @@ export default function StreamIOLiveStreams({ onStreamSelect }: StreamIOLiveStre
         </div>
 
         <div className="flex items-center gap-2">
-          <button
-            onClick={handleDebug}
-            className="flex items-center gap-2 px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors"
-          >
-            🔍 Debug
-          </button>
+
 
           <button
             onClick={handleRefresh}
