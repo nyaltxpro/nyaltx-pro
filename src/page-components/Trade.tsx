@@ -9,7 +9,6 @@ import Faq from '@/components/Faq';
 import InfoWidget from '@/components/InfoWidget';
 import LightweightChart from '@/components/LightweightChart';
 import MoralisTradingViewChart from '@/components/MoralisTradingViewChart';
-import SwapPage from '@/components/SwapCard';
 import TokenAvatar from '@/components/TokenAvatar';
 import tokens from '@/data/tokens.json';
 import useMoralisTokenMetadata from '@/hooks/useMoralisTokenMetadata';
@@ -1055,7 +1054,7 @@ function TradingViewWithParams({
                             />
                         )}
                     </div>
-                    <SwapPage />
+                    {/* <SwapPage /> */}
                     {/* <iframe
             src={`https://app.uniswap.org/#/swap?field=input&value=10&inputCurrency=${addressParam}`}
             height="660px"
