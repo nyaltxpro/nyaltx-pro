@@ -20,7 +20,7 @@ import NetworkSelector from '@/components/NetworkSelector';
 import { dexManager } from '@/lib/dex/dexManager';
 import { CHAIN_IDS, DEX_PROTOCOL, DexInterface, PriceQuote, Token } from '@/lib/dex/types';
 import { getCryptoIconUrl } from '@/utils/cryptoIcons';
-import { useWeb3Modal } from '@web3modal/wagmi/react';
+import { useAppKit } from '@reown/appkit/react';
 import toast from 'react-hot-toast';
 import { erc20Abi, isAddress, parseUnits, type Address } from 'viem';
 import {
@@ -147,7 +147,7 @@ interface SwapPageProps {
 }
 
 export default function SwapPage({ inTradeView = false, baseToken, quoteToken }: SwapPageProps) {
-  const { open } = useWeb3Modal();
+  const { open } = useAppKit();
   const router = useRouter();
   const [darkMode] = useState(true);
   const [fromAmount, setFromAmount] = useState('');
