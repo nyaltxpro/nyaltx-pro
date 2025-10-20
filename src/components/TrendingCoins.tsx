@@ -88,7 +88,7 @@ export default function TrendingCoins() {
       
       // Filter out invalid tokens and log any issues
       const validTokens = data.filter(token => {
-        if (!token?.baseToken?.symbol || !token?.baseToken?.name) {
+        if (!token?.tokenAddress || !token?.chainId || !token?.description) {
           console.warn('Filtering out invalid token:', token);
           return false;
         }
@@ -96,7 +96,7 @@ export default function TrendingCoins() {
       });
       
       console.log(`Filtered ${validTokens.length} valid tokens from ${data.length} total`);
-      setBoostedTokens(validTokens.slice(0, 5)); // Show top 5 valid boosted tokens
+      setBoostedTokens(validTokens.slice(0, 10)); // Show top 10 valid boosted tokens
     } catch (err) {
       console.error('Error fetching boosted tokens:', err);
       setBoostedError('Failed to load boosted tokens');
