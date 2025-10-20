@@ -319,7 +319,7 @@ export default function TokenData() {
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="mb-8">
-                    <h1 className="text-3xl font-bold mb-2">🔍 DeFi Token Explorer</h1>
+                    <h1 className="text-3xl font-bold mb-2">DeFi Token Explorer</h1>
                     <p className="text-gray-400">
                         Comprehensive token data across 290+ DeFi platforms and 10+ networks
                     </p>
