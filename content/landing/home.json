@@ -2,7 +2,7 @@
   "hero": {
     "title": "Discover. Track. Grow your token with NYALTX",
     "subtitle": "Real-time insights, curated listings, and promotional placements to help your project reach more holders across chains.",
-    "ctaText": "Start Trading Now",
+    "ctaText": "Explore Dashboard",
     "ctaLink": "/dashboard",
     "backgroundImage": "/images/hero-bg.jpg"
   },
@@ -80,31 +80,31 @@
         "quote": "NYALTX has completely transformed my DeFi trading experience. The multi-chain support and advanced analytics give me the edge I need in this competitive market.",
         "author": "Sarah Chen",
         "role": "Professional Trader",
-        "avatar": "/images/testimonials/sarah.jpg"
+        "avatar": "/alex-suprun-ZHvM3XIOHoE-unsplash.jpg"
       },
       {
         "quote": "The gamification features make trading so much more engaging. I love competing in the Race to Liberty and climbing the leaderboards while making profitable trades.",
         "author": "Marcus Rodriguez",
         "role": "DeFi Enthusiast",
-        "avatar": "/images/testimonials/marcus.jpg"
+        "avatar": "/alex-suprun-ZHvM3XIOHoE-unsplash.jpg"
       },
       {
         "quote": "As a developer, I appreciate the technical excellence behind NYALTX. The platform is fast, reliable, and the API integration is seamless.",
         "author": "Alex Thompson",
         "role": "Blockchain Developer",
-        "avatar": "/images/testimonials/alex.jpg"
+        "avatar": "/alex-suprun-ZHvM3XIOHoE-unsplash.jpg"
       },
       {
         "quote": "The token discovery features are incredible. I've found so many hidden gems that I would have never discovered otherwise. The search functionality is top-notch.",
         "author": "Emma Wilson",
         "role": "Crypto Investor",
-        "avatar": "/images/testimonials/emma.jpg"
+        "avatar": "/alex-suprun-ZHvM3XIOHoE-unsplash.jpg"
       },
       {
         "quote": "Security was my biggest concern when choosing a DeFi platform. NYALTX's institutional-grade security measures give me complete peace of mind.",
         "author": "David Park",
         "role": "Portfolio Manager",
-        "avatar": "/images/testimonials/david.jpg"
+        "avatar": "/alex-suprun-ZHvM3XIOHoE-unsplash.jpg"
       }
     ]
   },
