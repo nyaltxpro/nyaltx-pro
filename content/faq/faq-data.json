@@ -1,6 +1,6 @@
 {
   "title": "Frequently Asked Questions",
-  "description": "Find answers to common questions about NYALTX, our DeFi trading platform, gamification features, and more.",
+  "description": "Find answers to common questions about NYALTX, our DeFi trading platform, gamification features, and more",
   "categories": [
     {
       "name": "Getting Started",
@@ -8,56 +8,17 @@
       "questions": [
         {
           "question": "What is NYALTX?",
-          "answer": {
-            "type": "doc",
-            "content": [
-              {
-                "type": "paragraph",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "NYALTX is a comprehensive DeFi trading platform that provides access to 400+ tokens across 10+ blockchain networks. We offer advanced analytics, gamification features, and institutional-grade security for cryptocurrency traders of all levels."
-                  }
-                ]
-              }
-            ]
-          },
+          "answer": "\\[object Object]\n",
           "tags": "platform, defi, trading"
         },
         {
           "question": "How do I get started with NYALTX?",
-          "answer": {
-            "type": "doc",
-            "content": [
-              {
-                "type": "paragraph",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "Getting started is easy! Simply connect your Web3 wallet (MetaMask, Coinbase Wallet, etc.), explore our token discovery features, and start trading. No account creation or KYC required."
-                  }
-                ]
-              }
-            ]
-          },
+          "answer": "\\[object Object]\n",
           "tags": "getting started, wallet, setup"
         },
         {
           "question": "Which wallets are supported?",
-          "answer": {
-            "type": "doc",
-            "content": [
-              {
-                "type": "paragraph",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "We support all major Web3 wallets including MetaMask, Coinbase Wallet, Trust Wallet, Rainbow, Phantom (for Solana), and OKX Wallet. Any WalletConnect-compatible wallet will work."
-                  }
-                ]
-              }
-            ]
-          },
+          "answer": "\\[object Object]\n",
           "tags": "wallets, metamask, coinbase"
         }
       ]
@@ -68,56 +29,17 @@
       "questions": [
         {
           "question": "What blockchains does NYALTX support?",
-          "answer": {
-            "type": "doc",
-            "content": [
-              {
-                "type": "paragraph",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "NYALTX supports 10+ major blockchain networks including Ethereum, BSC, Polygon, Arbitrum, Optimism, Base, Avalanche, Fantom, Solana, and more. We're constantly adding new networks based on user demand."
-                  }
-                ]
-              }
-            ]
-          },
+          "answer": "\\[object Object]\n",
           "tags": "blockchain, ethereum, solana, polygon"
         },
         {
           "question": "What is Race to Liberty?",
-          "answer": {
-            "type": "doc",
-            "content": [
-              {
-                "type": "paragraph",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "Race to Liberty is our gamification system where projects compete for visibility and promotion. Users can purchase boost packs (Kayak, Paddle, Motor, Helicopter) to climb the leaderboard and gain marketing benefits including social media promotion and podcast mentions."
-                  }
-                ]
-              }
-            ]
-          },
+          "answer": "\\[object Object]\n",
           "tags": "gamification, race to liberty, marketing"
         },
         {
           "question": "How do I register my token on NYALTX?",
-          "answer": {
-            "type": "doc",
-            "content": [
-              {
-                "type": "paragraph",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "Visit our Token Registration page, fill out the form with your token details (name, symbol, contract address, description, etc.), and submit for admin review. Approved tokens get enhanced visibility and can participate in our gamification features."
-                  }
-                ]
-              }
-            ]
-          },
+          "answer": "\\[object Object]\n",
           "tags": "token registration, listing, approval"
         }
       ]
@@ -128,38 +50,12 @@
       "questions": [
         {
           "question": "What payment methods do you accept?",
-          "answer": {
-            "type": "doc",
-            "content": [
-              {
-                "type": "paragraph",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "We accept cryptocurrency payments including ETH, USDT, and NYAX tokens. NYAX token payments receive a 20% discount. We also accept traditional payments via Stripe for certain services."
-                  }
-                ]
-              }
-            ]
-          },
+          "answer": "\\[object Object]\n",
           "tags": "payments, crypto, nyax, discount"
         },
         {
           "question": "What are the Race to Liberty pricing tiers?",
-          "answer": {
-            "type": "doc",
-            "content": [
-              {
-                "type": "paragraph",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "Our tiers are: Kayak ($1, 0.5x multiplier, 3 days), Paddle ($300, 1x multiplier, 7 days), Motor ($500, 2x multiplier, 14 days), and Helicopter ($700, 3x multiplier, 30 days). Higher tiers provide better visibility and promotional benefits."
-                  }
-                ]
-              }
-            ]
-          },
+          "answer": "\\[object Object]\n",
           "tags": "pricing, tiers, race to liberty"
         }
       ]
@@ -170,38 +66,12 @@
       "questions": [
         {
           "question": "How secure is NYALTX?",
-          "answer": {
-            "type": "doc",
-            "content": [
-              {
-                "type": "paragraph",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "NYALTX is built with security as a top priority. We use non-custodial architecture (you control your funds), implement comprehensive smart contract audits, and follow industry best practices for data protection and user privacy."
-                  }
-                ]
-              }
-            ]
-          },
+          "answer": "\\[object Object]\n",
           "tags": "security, non-custodial, audits"
         },
         {
           "question": "How can I get support?",
-          "answer": {
-            "type": "doc",
-            "content": [
-              {
-                "type": "paragraph",
-                "content": [
-                  {
-                    "type": "text",
-                    "text": "You can reach our support team through our Discord server, Telegram group, or by emailing support@nyaltx.pro. We also have comprehensive documentation and tutorials available on our platform."
-                  }
-                ]
-              }
-            ]
-          },
+          "answer": "\\[object Object]\n",
           "tags": "support, discord, telegram, email"
         }
       ]
