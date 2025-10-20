@@ -46,8 +46,8 @@ export default function Page() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-400 mb-4">Failed to load content</p>
-          <button 
-            onClick={() => window.location.reload()} 
+          <button
+            onClick={() => window.location.reload()}
             className="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700"
           >
             Retry
@@ -194,21 +194,21 @@ export default function Page() {
           variants={fadeUp}
         >
           {landingContent?.stats?.items?.map((stat, index) => (
-            <Stat 
+            <Stat
               key={index}
-              label={stat.label} 
-              value={parseInt(stat.value.replace(/[^\d]/g, '')) || 0} 
+              label={stat.label}
+              value={parseInt(stat.value.replace(/[^\d]/g, '')) || 0}
               suffix={stat.value.replace(/[\d,]/g, '')}
               highlight={index === landingContent.stats.items.length - 1}
             />
           )) || (
-            <>
-              <Stat label="Networks" value={132} />
-              <Stat label="Dexes" value={21586} />
-              <Stat label="Pools" value={19440364} />
-              <Stat label="Tokens" value={29055602} />
-            </>
-          )}
+              <>
+                <Stat label="Networks" value={132} />
+                <Stat label="Dexes" value={21586} />
+                <Stat label="Pools" value={19440364} />
+                <Stat label="Tokens" value={29055602} />
+              </>
+            )}
         </motion.div>
       </motion.section>
 
@@ -239,27 +239,27 @@ export default function Page() {
               />
             </motion.div>
           )) || (
-            <>
-              <motion.div variants={scaleIn}>
-                <Feature
-                  title="Multi-chain coverage"
-                  desc="Follow activity across popular EVM networks and beyond, with fast updates."
-                />
-              </motion.div>
-              <motion.div variants={scaleIn}>
-                <Feature
-                  title="Promotional placements"
-                  desc="Race to Liberty campaign placements, podcast mentions, and homepage features."
-                />
-              </motion.div>
-              <motion.div variants={scaleIn}>
-                <Feature
-                  title="Flexible payments"
-                  desc="Pay with cards (Stripe), ETH, or NYAX with a 20% discount on token payments."
-                />
-              </motion.div>
-            </>
-          )}
+              <>
+                <motion.div variants={scaleIn}>
+                  <Feature
+                    title="Multi-chain coverage"
+                    desc="Follow activity across popular EVM networks and beyond, with fast updates."
+                  />
+                </motion.div>
+                <motion.div variants={scaleIn}>
+                  <Feature
+                    title="Promotional placements"
+                    desc="Race to Liberty campaign placements, podcast mentions, and homepage features."
+                  />
+                </motion.div>
+                <motion.div variants={scaleIn}>
+                  <Feature
+                    title="Flexible payments"
+                    desc="Pay with cards (Stripe), ETH, or NYAX with a 20% discount on token payments."
+                  />
+                </motion.div>
+              </>
+            )}
         </div>
       </motion.section>
 
@@ -376,7 +376,7 @@ export default function Page() {
             >
               <p className="text-gray-200">"{testimonial.quote}"</p>
               <div className="mt-3 flex items-center gap-3">
-                {testimonial.avatar && (
+                {/* {testimonial.avatar && (
                   <Image
                     src={testimonial.avatar}
                     alt={testimonial.author}
@@ -384,7 +384,7 @@ export default function Page() {
                     height={32}
                     className="rounded-full"
                   />
-                )}
+                )} */}
                 <div>
                   <p className="text-sm font-medium text-gray-300">— {testimonial.author}</p>
                   {testimonial.role && (
@@ -394,30 +394,30 @@ export default function Page() {
               </div>
             </motion.div>
           )) || (
-            [
-              {
-                q: 'NYALTX helped us boost discovery during launch week.',
-                a: '— Team Atlas',
-              },
-              {
-                q: 'The Race to Liberty brought real traffic and holders.',
-                a: '— Liberty Labs',
-              },
-              {
-                q: 'Smooth UX and flexible payments — exactly what we needed.',
-                a: '— DeltaX',
-              },
-            ].map((t, i) => (
-              <motion.div
-                key={i}
-                variants={scaleIn}
-                className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur-md"
-              >
-                <p className="text-gray-200">"{t.q}"</p>
-                <p className="mt-3 text-sm text-gray-400">{t.a}</p>
-              </motion.div>
-            ))
-          )}
+              [
+                {
+                  q: 'NYALTX helped us boost discovery during launch week.',
+                  a: '— Team Atlas',
+                },
+                {
+                  q: 'The Race to Liberty brought real traffic and holders.',
+                  a: '— Liberty Labs',
+                },
+                {
+                  q: 'Smooth UX and flexible payments — exactly what we needed.',
+                  a: '— DeltaX',
+                },
+              ].map((t, i) => (
+                <motion.div
+                  key={i}
+                  variants={scaleIn}
+                  className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur-md"
+                >
+                  <p className="text-gray-200">"{t.q}"</p>
+                  <p className="mt-3 text-sm text-gray-400">{t.a}</p>
+                </motion.div>
+              ))
+            )}
         </div>
       </motion.section>
 
