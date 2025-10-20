@@ -1,10 +1,123 @@
 'use client';
 
 import PublicHeader from '@/components/PublicHeader';
+import TinaRichText from '@/components/TinaRichText';
+import { usePublicPageContent } from '@/hooks/useTinaContent';
 import { motion } from 'framer-motion';
 import { FiLock } from 'react-icons/fi';
 
 export default function PrivacyPolicyPage() {
+  const { content, loading, error } = usePublicPageContent('privacy-policy');
+
+  // Fallback content using existing JSON structure
+  const fallbackContent = {
+    hero: {
+      title: "Privacy Policy",
+      subtitle: "Learn how we handle your data, protect your privacy, and respect your preferences."
+    },
+    content: {
+      type: "doc" as const,
+      content: [
+        {
+          type: "paragraph" as const,
+          content: [{ type: "text" as const, text: "Last updated: January 1, 2024" }]
+        },
+        {
+          type: "heading" as const,
+          attrs: { level: 2 },
+          content: [{ type: "text" as const, text: "Information We Collect" }]
+        },
+        {
+          type: "paragraph" as const,
+          content: [{ 
+            type: "text" as const, 
+            text: "We collect information you provide directly to us, such as when you create an account, use our services, or contact us for support. This may include:" 
+          }]
+        },
+        {
+          type: "bulletList" as const,
+          content: [
+            {
+              type: "listItem" as const,
+              content: [{ 
+                type: "paragraph" as const, 
+                content: [{ type: "text" as const, text: "Wallet addresses and transaction data" }] 
+              }]
+            },
+            {
+              type: "listItem" as const,
+              content: [{ 
+                type: "paragraph" as const, 
+                content: [{ type: "text" as const, text: "Usage data and analytics" }] 
+              }]
+            },
+            {
+              type: "listItem" as const,
+              content: [{ 
+                type: "paragraph" as const, 
+                content: [{ type: "text" as const, text: "Communication preferences" }] 
+              }]
+            }
+          ]
+        },
+        {
+          type: "heading" as const,
+          attrs: { level: 2 },
+          content: [{ type: "text" as const, text: "How We Use Your Information" }]
+        },
+        {
+          type: "paragraph" as const,
+          content: [{ 
+            type: "text" as const, 
+            text: "We use the information we collect to provide, maintain, and improve our services, process transactions, and communicate with you about your account and our services." 
+          }]
+        },
+        {
+          type: "heading" as const,
+          attrs: { level: 2 },
+          content: [{ type: "text" as const, text: "Data Security" }]
+        },
+        {
+          type: "paragraph" as const,
+          content: [{ 
+            type: "text" as const, 
+            text: "We implement appropriate technical and organizational measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction." 
+          }]
+        },
+        {
+          type: "heading" as const,
+          attrs: { level: 2 },
+          content: [{ type: "text" as const, text: "Contact Us" }]
+        },
+        {
+          type: "paragraph" as const,
+          content: [{ 
+            type: "text" as const, 
+            text: "If you have any questions about this Privacy Policy, please contact us at privacy@nyaltx.pro." 
+          }]
+        }
+      ]
+    }
+  };
+
+  const pageContent = content || fallbackContent;
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-inherit text-white">
+        <PublicHeader />
+        <div className="container mx-auto px-4 pt-16 pb-10">
+          <div className="animate-pulse">
+            <div className="h-8 bg-white/10 rounded mb-4"></div>
+            <div className="h-12 bg-white/10 rounded mb-6"></div>
+            <div className="h-4 bg-white/10 rounded mb-2"></div>
+            <div className="h-4 bg-white/10 rounded w-3/4"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-inherit text-white">
       <PublicHeader />
@@ -29,11 +142,11 @@ export default function PrivacyPolicyPage() {
           </div>
           <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">
             <span className="bg-gradient-to-r from-cyan-300 via-sky-400 to-indigo-400 bg-clip-text text-transparent">
-              Privacy Policy
+              {pageContent.hero?.title || "Privacy Policy"}
             </span>
           </h1>
           <p className="max-w-3xl text-white/70">
-            Learn how we handle your data, protect your privacy, and respect your preferences.
+            {pageContent.hero?.subtitle || "Learn how we handle your data, protect your privacy, and respect your preferences."}
           </p>
         </motion.div>
       </section>
@@ -50,41 +163,9 @@ export default function PrivacyPolicyPage() {
 
           <div className="relative p-6 md:p-10">
             <div className="prose dark:prose-invert max-w-none prose-p:leading-relaxed">
-              <h2 className="text-2xl font-semibold mt-2 mb-4">1. Information We Collect</h2>
-              <p className="mb-4">
-                We collect minimal data required to operate and improve our services. This may
-                include usage metrics, device information, and cookie preferences. We do not sell
-                personal data.
-              </p>
-
-              <h2 className="text-2xl font-semibold mt-8 mb-4">2. How We Use Information</h2>
-              <p className="mb-4">
-                Data is used to maintain service quality, detect abuse, and enhance user experience.
-                We apply industry-standard security practices.
-              </p>
-
-              <h2 className="text-2xl font-semibold mt-8 mb-4">3. Cookies & Preferences</h2>
-              <p className="mb-4">
-                See the Cookie Settings page to control how cookies are used. Essential cookies are
-                required for core functionality.
-              </p>
-
-              <h2 className="text-2xl font-semibold mt-8 mb-4">4. Third‑Party Services</h2>
-              <p className="mb-4">
-                We may integrate with third‑party providers (e.g., analytics) that process data
-                under their own policies. We select partners with strong security practices.
-              </p>
-
-              <h2 className="text-2xl font-semibold mt-8 mb-4">5. Your Rights</h2>
-              <p className="mb-4">
-                You can request access, correction, or deletion of your data where applicable.
-                Contact us for privacy inquiries.
-              </p>
-
-              <h2 className="text-2xl font-semibold mt-8 mb-4">6. Updates</h2>
-              <p className="mb-4">
-                We may update this policy. Material changes will be communicated via the website.
-              </p>
+              {pageContent.content && (
+                <TinaRichText content={pageContent.content} />
+              )}
             </div>
           </div>
         </motion.div>
