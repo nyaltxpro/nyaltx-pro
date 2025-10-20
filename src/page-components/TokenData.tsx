@@ -25,6 +25,7 @@ interface PortalsToken {
     addresses: { [network: string]: string };
     platform: string;
     network: string;
+    image?: string;
     images?: string[];
     updatedAt: string;
     createdAt: string;
@@ -36,6 +37,7 @@ interface PortalsToken {
     totalSupply?: string;
     reserves?: string[];
     pricePerShare?: number;
+    isClaimed?: boolean;
 }
 
 interface PortalsResponse {
@@ -633,9 +635,9 @@ export default function TokenData() {
                                         <td className="px-4 py-3 whitespace-nowrap border-r border-gray-700/20">
                                             <div className="flex items-center">
                                                 <div className="relative w-8 h-8 mr-3 flex-shrink-0">
-                                                    {token.images && token.images.length > 0 ? (
+                                                    {token.image && token.image !== 'https://images.portals.fi/unknown-token.png' ? (
                                                         <Image
-                                                            src={token.images[0]}
+                                                            src={token.image}
                                                             alt={token.name}
                                                             width={32}
                                                             height={32}
@@ -648,7 +650,7 @@ export default function TokenData() {
                                                             }}
                                                         />
                                                     ) : null}
-                                                    <div className={`w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center ${token.images && token.images.length > 0 ? 'hidden' : ''}`}>
+                                                    <div className={`w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center ${token.image && token.image !== 'https://images.portals.fi/unknown-token.png' ? 'hidden' : ''}`}>
                                                         <span className="text-white font-bold text-xs">
                                                             {token.symbol.charAt(0)}
                                                         </span>
