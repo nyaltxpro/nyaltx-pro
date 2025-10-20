@@ -353,7 +353,7 @@ export default function TokenData() {
                 </div>
 
                 {/* Search and Controls */}
-                <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl p-6 mb-6 shadow-xl">
+                <div className=" rounded-xl p-6 mb-6 shadow-xl">
                     <div className="flex flex-col lg:flex-row gap-4 mb-4">
                         {/* Search */}
                         <div className="flex-1">
