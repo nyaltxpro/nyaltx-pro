@@ -1,10 +1,9 @@
 'use client';
 
 import { useAppKit } from '@reown/appkit/react';
-import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FormEvent, useState } from 'react';
-import { FaWallet, FaEye, FaEyeSlash, FaShieldAlt, FaLock } from 'react-icons/fa';
+import { FaEye, FaEyeSlash, FaLock, FaShieldAlt, FaWallet } from 'react-icons/fa';
 import { useAccount, useSignMessage } from 'wagmi';
 
 export default function AdminLoginComponent() {
@@ -38,7 +37,7 @@ export default function AdminLoginComponent() {
       const data = await response.json();
 
       if (data.success) {
-        const redirectTo = params?.get('redirect') || '/admin';
+        const redirectTo = params?.get('redirect') || '/adminpanel';
         router.push(redirectTo);
       } else {
         setError(data.message || 'Login failed');
@@ -61,7 +60,7 @@ export default function AdminLoginComponent() {
 
     try {
       // Get nonce
-      const nonceResponse = await fetch('/api/admin/login/nonce', {
+      const nonceResponse = await fetch('/api/adminpanel/login/nonce', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -76,7 +75,7 @@ export default function AdminLoginComponent() {
       const signature = await signMessageAsync({ message });
 
       // Verify signature
-      const verifyResponse = await fetch('/api/admin/login/verify', {
+      const verifyResponse = await fetch('/api/panel/login/verify', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -91,7 +90,7 @@ export default function AdminLoginComponent() {
       const verifyData = await verifyResponse.json();
 
       if (verifyData.success) {
-        const redirectTo = params?.get('redirect') || '/admin';
+        const redirectTo = params?.get('redirect') || '/adminpanel';
         router.push(redirectTo);
       } else {
         setWError(verifyData.message || 'Wallet authentication failed');
@@ -111,7 +110,7 @@ export default function AdminLoginComponent() {
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#00b8d8]/5 rounded-full blur-3xl"></div>
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#00b8d8]/5 rounded-full blur-3xl"></div>
       </div>
-      
+
       <div className="bg-gray-800/40 backdrop-blur-xl border border-gray-700/20 rounded-2xl p-8 w-full max-w-md shadow-2xl relative z-10">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-6">

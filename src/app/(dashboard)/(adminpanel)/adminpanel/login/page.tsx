@@ -85,7 +85,7 @@ function AdminLoginInner() {
       const signature = await signMessageAsync({ message });
 
       // Step 4: Verify signature and complete login
-      const verifyRes = await fetch("/api//login/verify", {
+      const verifyRes = await fetch("/api/admin/login/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: 'include', // Important for cookies
