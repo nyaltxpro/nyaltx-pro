@@ -255,33 +255,33 @@ export default function TokenData() {
     // Filter tokens based on active tab
     const getFilteredTokens = () => {
         let filtered = tokens;
-        
+
         switch (activeTab) {
             case 'defi':
-                filtered = tokens.filter(token => 
-                    token.metadata?.tags?.some(tag => 
+                filtered = tokens.filter(token =>
+                    token.metadata?.tags?.some(tag =>
                         tag.includes('defi') || tag.includes('yield') || tag.includes('lending')
-                    ) || ['yearn', 'curve', 'balancer', 'uniswap'].some(platform => 
+                    ) || ['yearn', 'curve', 'balancer', 'uniswap'].some(platform =>
                         token.platform.includes(platform)
                     )
                 );
                 break;
             case 'yield':
-                filtered = tokens.filter(token => 
+                filtered = tokens.filter(token =>
                     token.metadata?.tags?.some(tag => tag.includes('yield')) ||
                     ['yearn', 'morpho'].some(platform => token.platform.includes(platform)) ||
                     (token.metrics?.apy && parseFloat(token.metrics.apy) > 0)
                 );
                 break;
             case 'lending':
-                filtered = tokens.filter(token => 
+                filtered = tokens.filter(token =>
                     token.metadata?.tags?.some(tag => tag.includes('lending')) ||
                     ['aave', 'compound', 'euler', 'morpho'].some(platform => token.platform.includes(platform))
                 );
                 break;
             case 'dex':
-                filtered = tokens.filter(token => 
-                    ['uniswap', 'curve', 'balancer', 'sushiswap'].some(platform => 
+                filtered = tokens.filter(token =>
+                    ['uniswap', 'curve', 'balancer', 'sushiswap'].some(platform =>
                         token.platform.includes(platform)
                     )
                 );
@@ -289,7 +289,7 @@ export default function TokenData() {
             default:
                 filtered = tokens;
         }
-        
+
         return filtered;
     };
 
@@ -313,7 +313,7 @@ export default function TokenData() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-900 text-white p-6">
+        <div className="min-h-screen  text-white p-6">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="mb-8">
@@ -337,11 +337,10 @@ export default function TokenData() {
                                 <button
                                     key={tab.id}
                                     onClick={() => setActiveTab(tab.id as any)}
-                                    className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                                        activeTab === tab.id
-                                            ? 'border-blue-500 text-blue-400'
-                                            : 'border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-300'
-                                    }`}
+                                    className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === tab.id
+                                        ? 'border-blue-500 text-blue-400'
+                                        : 'border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-300'
+                                        }`}
                                 >
                                     <span>{tab.icon}</span>
                                     {tab.label}
@@ -427,11 +426,10 @@ export default function TokenData() {
                                     <button
                                         key={tab.id}
                                         onClick={() => setActiveFilterTab(tab.id as any)}
-                                        className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-lg font-medium text-sm transition-all ${
-                                            activeFilterTab === tab.id
-                                                ? 'bg-blue-600 text-white shadow-lg'
-                                                : 'text-gray-400 hover:text-gray-300 hover:bg-gray-600/30'
-                                        }`}
+                                        className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-lg font-medium text-sm transition-all ${activeFilterTab === tab.id
+                                            ? 'bg-blue-600 text-white shadow-lg'
+                                            : 'text-gray-400 hover:text-gray-300 hover:bg-gray-600/30'
+                                            }`}
                                     >
                                         <span>{tab.icon}</span>
                                         {tab.label}
@@ -730,7 +728,7 @@ export default function TokenData() {
                             <span>•</span>
                             <span>{filteredTokens.length} total tokens</span>
                         </div>
-                        
+
                         <div className="flex items-center gap-2">
                             {/* First Page */}
                             <button
@@ -774,11 +772,10 @@ export default function TokenData() {
                                         <button
                                             key={pageNum}
                                             onClick={() => handlePageChange(pageNum)}
-                                            className={`px-3 py-2 text-sm rounded-lg transition-all ${
-                                                page === pageNum
-                                                    ? 'bg-blue-600 text-white'
-                                                    : 'bg-gray-700/50 hover:bg-gray-600/50 text-gray-300'
-                                            }`}
+                                            className={`px-3 py-2 text-sm rounded-lg transition-all ${page === pageNum
+                                                ? 'bg-blue-600 text-white'
+                                                : 'bg-gray-700/50 hover:bg-gray-600/50 text-gray-300'
+                                                }`}
                                         >
                                             {pageNum + 1}
                                         </button>
