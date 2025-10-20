@@ -28,60 +28,60 @@ export default defineConfig({
   // See docs on content modeling for more info on how to setup new content models: https://tina.io/docs/r/content-modelling-collections/
   schema: {
     collections: [
-      // {
-      //   name: "post",
-      //   label: "Blog Posts",
-      //   path: "content/posts",
-      //   format: "mdx",
-      //   fields: [
-      //     {
-      //       type: "string",
-      //       name: "title",
-      //       label: "Title",
-      //       isTitle: true,
-      //       required: true,
-      //     },
-      //     {
-      //       type: "string",
-      //       name: "description",
-      //       label: "Description",
-      //       required: false,
-      //     },
-      //     {
-      //       type: "datetime",
-      //       name: "date",
-      //       label: "Date",
-      //       required: false,
-      //     },
-      //     {
-      //       type: "string",
-      //       name: "author",
-      //       label: "Author",
-      //       required: false,
-      //     },
-      //     {
-      //       type: "string",
-      //       name: "category",
-      //       label: "Category",
-      //       options: ["crypto", "trading", "news", "tutorial"],
-      //     },
-      //     {
-      //       type: "string",
-      //       name: "tags",
-      //       label: "Tags",
-      //       list: true,
-      //     },
-      //     {
-      //       type: "rich-text",
-      //       name: "body",
-      //       label: "Body",
-      //       isBody: true,
-      //     },
-      //   ],
-      //   ui: {
-      //     router: ({ document }) => `/blog/${document._sys.filename}`,
-      //   },
-      // },
+      {
+        name: "post",
+        label: "Blog Posts",
+        path: "content/posts",
+        format: "mdx",
+        fields: [
+          {
+            type: "string",
+            name: "title",
+            label: "Title",
+            isTitle: true,
+            required: true,
+          },
+          {
+            type: "string",
+            name: "description",
+            label: "Description",
+            required: false,
+          },
+          {
+            type: "datetime",
+            name: "date",
+            label: "Date",
+            required: false,
+          },
+          {
+            type: "string",
+            name: "author",
+            label: "Author",
+            required: false,
+          },
+          {
+            type: "string",
+            name: "category",
+            label: "Category",
+            options: ["crypto", "trading", "news", "tutorial"],
+          },
+          {
+            type: "string",
+            name: "tags",
+            label: "Tags",
+            list: true,
+          },
+          {
+            type: "rich-text",
+            name: "body",
+            label: "Body",
+            isBody: true,
+          },
+        ],
+        ui: {
+          router: ({ document }) => `/blog/${document._sys.filename}`,
+        },
+      },
       {
         name: "announcement",
         label: "Announcements",
