@@ -12,7 +12,7 @@ const AdminSidebar = dynamic(() => import('@/components/AdminSidebar'), {
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const isLogin = pathname === '/admin/login';
+  const isLogin = pathname === '/adminpanel/login';
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const toggleMobileMenu = () => {
