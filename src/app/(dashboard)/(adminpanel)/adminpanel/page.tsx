@@ -216,7 +216,7 @@ export default function AdminDashboardComponent() {
               Pending Token Approvals
             </h3>
             <a
-              href="/admin/tokens"
+              href="/adminpanel/tokens"
               className="flex items-center gap-2 px-4 py-2 bg-gray-800/50 hover:bg-gray-700/50 rounded-xl text-gray-300 hover:text-white transition-all duration-200 backdrop-blur-sm"
               style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
             >
@@ -390,7 +390,7 @@ export default function AdminDashboardComponent() {
           </h3>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             <a
-              href="/admin/tokens"
+              href="/adminpanel/tokens"
               className="group block p-6 bg-gray-900/30 hover:bg-gray-800/40 rounded-2xl border border-gray-700/30 transition-all duration-300 hover:shadow-lg hover:shadow-[#00d4aa]/10 backdrop-blur-sm"
             >
               <div className="flex items-center gap-4 mb-4">
@@ -407,7 +407,7 @@ export default function AdminDashboardComponent() {
             </a>
 
             <a
-              href="/admin/points"
+              href="/adminpanel/points"
               className="group block p-6 bg-gray-900/30 hover:bg-gray-800/40 rounded-2xl border border-gray-700/30 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/10 backdrop-blur-sm"
             >
               <div className="flex items-center gap-4 mb-4">
@@ -424,7 +424,7 @@ export default function AdminDashboardComponent() {
             </a>
 
             <a
-              href="/admin/orders"
+              href="/adminpanel/orders"
               className="group block p-6 bg-gray-900/30 hover:bg-gray-800/40 rounded-2xl border border-gray-700/30 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/10 backdrop-blur-sm"
             >
               <div className="flex items-center gap-4 mb-4">
@@ -441,7 +441,7 @@ export default function AdminDashboardComponent() {
             </a>
 
             <a
-              href="/admin/banners"
+              href="/adminpanel/banners"
               className="group block p-6 bg-gray-900/30 hover:bg-gray-800/40 rounded-2xl border border-gray-700/30 transition-all duration-300 hover:shadow-lg hover:shadow-orange-500/10 backdrop-blur-sm"
             >
               <div className="flex items-center gap-4 mb-4">

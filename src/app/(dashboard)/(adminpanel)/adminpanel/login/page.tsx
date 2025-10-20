@@ -28,7 +28,7 @@ function AdminLoginInner() {
   const { open } = useAppKit();
   const { signMessageAsync } = useSignMessage();
 
-  const from = params?.get("from") || "/admin";
+  const from = params?.get("from") || "/adminpanel";
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -67,7 +67,7 @@ function AdminLoginInner() {
       }
 
       // Step 2: Get nonce for signing
-      const nonceRes = await fetch("/api/admin/login/nonce", {
+      const nonceRes = await fetch("/api/adminpanel/login/nonce", {
         method: "GET",
         credentials: 'include' // Important for cookies
       });
@@ -85,7 +85,7 @@ function AdminLoginInner() {
       const signature = await signMessageAsync({ message });
 
       // Step 4: Verify signature and complete login
-      const verifyRes = await fetch("/api/admin/login/verify", {
+      const verifyRes = await fetch("/api//login/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: 'include', // Important for cookies

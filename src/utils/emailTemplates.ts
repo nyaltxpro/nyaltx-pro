@@ -356,13 +356,13 @@ export const createAdminTokenRegistrationEmail = (tokenData: TokenRegistration) 
           <h3 style="margin-top: 0; color: #0c5460;">Quick Actions</h3>
           <p>Review this token registration and take appropriate action:</p>
           <div style="text-align: center; margin: 20px 0;">
-            <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'https://nyaltx.com'}/admin/tokens?id=${tokenData.id}" class="button btn-review">
+            <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'https://nyaltx.com'}/adminpanel/tokens?id=${tokenData.id}" class="button btn-review">
               Review Details
             </a>
-            <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'https://nyaltx.com'}/admin/tokens?id=${tokenData.id}&action=approve" class="button btn-approve">
+            <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'https://nyaltx.com'}/adminpanel/tokens?id=${tokenData.id}&action=approve" class="button btn-approve">
               Quick Approve
             </a>
-            <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'https://nyaltx.com'}/admin/tokens?id=${tokenData.id}&action=reject" class="button btn-reject">
+            <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'https://nyaltx.com'}/adminpanel/tokens?id=${tokenData.id}&action=reject" class="button btn-reject">
               Reject
             </a>
           </div>

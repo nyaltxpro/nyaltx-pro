@@ -97,17 +97,17 @@ const LogoutButton = ({ isExpanded }: { isExpanded: boolean }) => {
           window.location.href = response.url;
         } else {
           // Fallback: manually redirect to login page
-          window.location.href = '/admin/login';
+          window.location.href = '/adminpanel/login';
         }
       } else {
         console.error('❌ Logout failed:', response.status, response.statusText);
         // Force redirect even if API fails
-        window.location.href = '/admin/login';
+        window.location.href = '/adminpanel/login';
       }
     } catch (error) {
       console.error('❌ Logout error:', error);
       // Force redirect on any error
-      window.location.href = '/admin/login';
+      window.location.href = '/adminpanel/login';
     }
   };
 
@@ -168,18 +168,18 @@ export default function AdminSidebar({ isMobileMenuOpen, toggleMobileMenu }: Adm
   }, []);
 
   const navItems = [
-    { icon: <FaHome />, text: 'Dashboard', href: '/admin' },
-    { icon: <FaCoins />, text: 'Tokens', href: '/admin/tokens' },
-    { icon: <FaPlusCircle />, text: 'Register Token', href: '/admin/tokens/register' },
-    { icon: <FaShoppingCart />, text: 'Orders', href: '/admin/orders' },
-    { icon: <FaUserFriends />, text: 'Users', href: '/admin/users' },
+    { icon: <FaHome />, text: 'Dashboard', href: '/adminpanel' },
+    { icon: <FaCoins />, text: 'Tokens', href: '/adminpanel/tokens' },
+    { icon: <FaPlusCircle />, text: 'Register Token', href: '/adminpanel/tokens/register' },
+    { icon: <FaShoppingCart />, text: 'Orders', href: '/adminpanel/orders' },
+    { icon: <FaUserFriends />, text: 'Users', href: '/adminpanel/users' },
     // { icon: <FaUsers />, text: 'Profiles', href: '/admin/profiles' },
-    { icon: <FaChartPie />, text: 'Analytics', href: '/admin/statistics' },
+    { icon: <FaChartPie />, text: 'Analytics', href: '/adminpanel/statistics' },
     // { icon: <FaChartLine />, text: 'Stats', href: '/admin/stats' },
-    { icon: <FaGift />, text: 'Token Points', href: '/admin/points' },
-    { icon: <FaEnvelope />, text: 'Email Management', href: '/admin/email-management' },
-    { icon: <FaNewspaper />, text: 'Corporate News', href: '/admin/news' },
-    { icon: <FaImage />, text: 'Banners', href: '/admin/banners' },
+    { icon: <FaGift />, text: 'Token Points', href: '/adminpanel/points' },
+    { icon: <FaEnvelope />, text: 'Email Management', href: '/adminpanel/email-management' },
+    { icon: <FaNewspaper />, text: 'Corporate News', href: '/adminpanel/news' },
+    { icon: <FaImage />, text: 'Banners', href: '/adminpanel/banners' },
     // { icon: <FaRocket />, text: 'Campaigns', href: '/admin/campaigns' },
     // { icon: <FaFootballBall />, text: 'Footer Settings', href: '/admin/footer-settings' },
   ];
@@ -263,7 +263,7 @@ export default function AdminSidebar({ isMobileMenuOpen, toggleMobileMenu }: Adm
                 href={item.href}
                 isActive={
                   pathname === item.href ||
-                  (item.href !== '/admin' && pathname?.startsWith(item.href))
+                  (item.href !== '/adminpanel' && pathname?.startsWith(item.href))
                 }
                 isExpanded={sidebarExpanded}
               />
@@ -294,7 +294,7 @@ export default function AdminSidebar({ isMobileMenuOpen, toggleMobileMenu }: Adm
                 href={item.href}
                 isActive={
                   pathname === item.href ||
-                  (item.href !== '/admin' && pathname?.startsWith(item.href))
+                  (item.href !== '/adminpanel' && pathname?.startsWith(item.href))
                 }
                 isExpanded={sidebarExpanded}
               />

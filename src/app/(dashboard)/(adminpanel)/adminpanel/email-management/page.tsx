@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { FaEnvelope, FaPaperPlane, FaTrash, FaPlus, FaEdit, FaHistory, FaUsers, FaChevronDown, FaChevronUp, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { FaCheckCircle, FaChevronDown, FaChevronUp, FaEnvelope, FaHistory, FaPaperPlane, FaPlus, FaTimesCircle, FaTrash, FaUsers } from 'react-icons/fa';
 
 interface EmailRecipient {
   id: string;
@@ -31,7 +31,7 @@ export default function EmailManagementPage() {
   const [error, setError] = useState<string | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingRecipient, setEditingRecipient] = useState<EmailRecipient | null>(null);
-  
+
   // Form state
   const [formData, setFormData] = useState({
     email: '',
@@ -224,8 +224,8 @@ export default function EmailManagementPage() {
           <h1 className="text-3xl font-bold text-white mb-2">Email Management</h1>
           <p className="text-gray-400">Manage admin email recipients and notifications</p>
         </div>
-        <Link 
-          href="/admin" 
+        <Link
+          href="/adminpanel"
           className="text-sm text-cyan-400 hover:text-cyan-300 underline"
         >
           Back to Dashboard
@@ -282,22 +282,20 @@ export default function EmailManagementPage() {
       <div className="flex gap-2 mb-6">
         <button
           onClick={() => setActiveTab('recipients')}
-          className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
-            activeTab === 'recipients'
+          className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${activeTab === 'recipients'
               ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white'
               : 'bg-gray-800 text-gray-400 hover:text-white border border-gray-700'
-          }`}
+            }`}
         >
           <FaEnvelope />
           Recipients
         </button>
         <button
           onClick={() => setActiveTab('history')}
-          className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
-            activeTab === 'history'
+          className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${activeTab === 'history'
               ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white'
               : 'bg-gray-800 text-gray-400 hover:text-white border border-gray-700'
-          }`}
+            }`}
         >
           <FaHistory />
           Email History
@@ -306,84 +304,84 @@ export default function EmailManagementPage() {
 
       {/* Recipients List */}
       {activeTab === 'recipients' && (
-      <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold text-white flex items-center gap-2">
-            <FaEnvelope className="text-cyan-400" />
-            Email Recipients
-          </h2>
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white rounded-lg font-medium transition-all"
-          >
-            <FaPlus />
-            Add Recipient
-          </button>
-        </div>
+        <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold text-white flex items-center gap-2">
+              <FaEnvelope className="text-cyan-400" />
+              Email Recipients
+            </h2>
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white rounded-lg font-medium transition-all"
+            >
+              <FaPlus />
+              Add Recipient
+            </button>
+          </div>
 
-        {loading ? (
-          <div className="text-center py-8 text-gray-400">Loading recipients...</div>
-        ) : error ? (
-          <div className="text-center py-8 text-red-400">{error}</div>
-        ) : recipients.length === 0 ? (
-          <div className="text-center py-8 text-gray-400">
-            No recipients configured. Add one to get started.
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-700/50 border-b border-gray-600">
-                <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">Email</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">Name</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">Role</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">Status</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">Added</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-300 uppercase">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-700">
-                {recipients.map((recipient) => (
-                  <tr key={recipient.id} className="hover:bg-gray-700/30 transition-colors">
-                    <td className="px-4 py-3 text-sm text-white">{recipient.email}</td>
-                    <td className="px-4 py-3 text-sm text-gray-300">{recipient.name || '-'}</td>
-                    <td className="px-4 py-3 text-sm">
-                      <span className="px-2 py-1 bg-blue-500/20 text-blue-300 rounded text-xs font-medium">
-                        {recipient.role}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-sm">
-                      <label className="inline-flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={recipient.active}
-                          onChange={(e) => handleUpdateRecipient(recipient.id, { active: e.target.checked })}
-                          className="w-4 h-4 text-cyan-600 bg-gray-700 border-gray-600 rounded focus:ring-cyan-500"
-                        />
-                        <span className={`ml-2 text-xs font-medium ${recipient.active ? 'text-green-300' : 'text-red-300'}`}>
-                          {recipient.active ? 'Active' : 'Inactive'}
-                        </span>
-                      </label>
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-400">
-                      {new Date(recipient.createdAt).toLocaleDateString()}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-right">
-                      <button
-                        onClick={() => handleDeleteRecipient(recipient.id)}
-                        className="px-3 py-1 bg-red-500/20 hover:bg-red-500/30 text-red-300 rounded-lg text-xs font-medium transition-all"
-                      >
-                        <FaTrash className="inline mr-1" />
-                        Delete
-                      </button>
-                    </td>
+          {loading ? (
+            <div className="text-center py-8 text-gray-400">Loading recipients...</div>
+          ) : error ? (
+            <div className="text-center py-8 text-red-400">{error}</div>
+          ) : recipients.length === 0 ? (
+            <div className="text-center py-8 text-gray-400">
+              No recipients configured. Add one to get started.
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-700/50 border-b border-gray-600">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">Email</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">Name</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">Role</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">Status</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">Added</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-300 uppercase">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+                </thead>
+                <tbody className="divide-y divide-gray-700">
+                  {recipients.map((recipient) => (
+                    <tr key={recipient.id} className="hover:bg-gray-700/30 transition-colors">
+                      <td className="px-4 py-3 text-sm text-white">{recipient.email}</td>
+                      <td className="px-4 py-3 text-sm text-gray-300">{recipient.name || '-'}</td>
+                      <td className="px-4 py-3 text-sm">
+                        <span className="px-2 py-1 bg-blue-500/20 text-blue-300 rounded text-xs font-medium">
+                          {recipient.role}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-sm">
+                        <label className="inline-flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={recipient.active}
+                            onChange={(e) => handleUpdateRecipient(recipient.id, { active: e.target.checked })}
+                            className="w-4 h-4 text-cyan-600 bg-gray-700 border-gray-600 rounded focus:ring-cyan-500"
+                          />
+                          <span className={`ml-2 text-xs font-medium ${recipient.active ? 'text-green-300' : 'text-red-300'}`}>
+                            {recipient.active ? 'Active' : 'Inactive'}
+                          </span>
+                        </label>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-400">
+                        {new Date(recipient.createdAt).toLocaleDateString()}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-right">
+                        <button
+                          onClick={() => handleDeleteRecipient(recipient.id)}
+                          className="px-3 py-1 bg-red-500/20 hover:bg-red-500/30 text-red-300 rounded-lg text-xs font-medium transition-all"
+                        >
+                          <FaTrash className="inline mr-1" />
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
       )}
 
       {/* Email History Tab */}
@@ -414,11 +412,10 @@ export default function EmailManagementPage() {
                         <p className="text-gray-400 text-sm mt-1 line-clamp-2">{record.message}</p>
                       </div>
                       <span
-                        className={`px-3 py-1 rounded-full text-xs font-medium ${
-                          record.status === 'sent'
+                        className={`px-3 py-1 rounded-full text-xs font-medium ${record.status === 'sent'
                             ? 'bg-green-500/20 text-green-300'
                             : 'bg-red-500/20 text-red-300'
-                        }`}
+                          }`}
                       >
                         {record.status}
                       </span>
@@ -431,7 +428,7 @@ export default function EmailManagementPage() {
                       <span>Sent by: {record.sentBy}</span>
                       <span>{new Date(record.sentAt).toLocaleString()}</span>
                     </div>
-                    
+
                     {/* View Recipients Button */}
                     <button
                       onClick={() => setExpandedEmailId(expandedEmailId === record.id ? null : record.id)}
@@ -449,7 +446,7 @@ export default function EmailManagementPage() {
                         <FaEnvelope className="text-cyan-400" />
                         Email Recipients ({record.recipients?.length || 0})
                       </h4>
-                      
+
                       {/* Successful Recipients */}
                       {record.recipients && record.recipients.length > 0 && (
                         <div className="mb-4">
@@ -572,7 +569,7 @@ export default function EmailManagementPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4 border border-gray-700">
             <h3 className="text-xl font-semibold text-white mb-4">Add Email Recipient</h3>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">Email Address *</label>
