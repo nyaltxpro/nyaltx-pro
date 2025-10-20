@@ -1,0 +1,225 @@
+fragment PostParts on Post {
+  __typename
+  title
+  description
+  heroImg
+  date
+  author
+  category
+  tags
+  body
+}
+
+fragment PageParts on Page {
+  __typename
+  title
+  description
+  body
+}
+
+fragment AnnouncementParts on Announcement {
+  __typename
+  title
+  message
+  startDate
+  endDate
+  active
+  type
+  link
+}
+
+fragment TokenParts on Token {
+  __typename
+  name
+  symbol
+  description
+  logo
+  contractAddress
+  chain
+  website
+  twitter
+  telegram
+  featured
+  order
+}
+
+fragment LandingPageParts on LandingPage {
+  __typename
+  hero {
+    __typename
+    title
+    subtitle
+    ctaText
+    ctaLink
+    backgroundImage
+  }
+  features {
+    __typename
+    title
+    subtitle
+    items {
+      __typename
+      title
+      description
+      icon
+      image
+    }
+  }
+  stats {
+    __typename
+    title
+    items {
+      __typename
+      value
+      label
+      description
+    }
+  }
+  testimonials {
+    __typename
+    title
+    items {
+      __typename
+      quote
+      author
+      role
+      avatar
+    }
+  }
+}
+
+fragment FooterParts on Footer {
+  __typename
+  branding {
+    __typename
+    title
+    subtitle
+    description
+    logo
+  }
+  links {
+    __typename
+    sections {
+      __typename
+      title
+      items {
+        __typename
+        label
+        url
+        external
+      }
+    }
+  }
+  social {
+    __typename
+    title
+    description
+    platforms {
+      __typename
+      twitter
+      discord
+      telegram
+      youtube
+      linkedin
+      github
+    }
+  }
+  newsletter {
+    __typename
+    title
+    description
+    placeholder
+    buttonText
+  }
+  legal {
+    __typename
+    copyright
+    disclaimer
+    links {
+      __typename
+      label
+      url
+    }
+  }
+}
+
+fragment PublicPageParts on PublicPage {
+  __typename
+  slug
+  title
+  description
+  hero {
+    __typename
+    title
+    subtitle
+    backgroundImage
+  }
+  content
+  seo {
+    __typename
+    metaTitle
+    metaDescription
+    keywords
+    ogImage
+  }
+}
+
+fragment FaqParts on Faq {
+  __typename
+  title
+  description
+  categories {
+    __typename
+    name
+    description
+    questions {
+      __typename
+      question
+      answer
+      tags
+    }
+  }
+}
+
+fragment PricingParts on Pricing {
+  __typename
+  hero {
+    __typename
+    title
+    subtitle
+  }
+  plans {
+    __typename
+    name
+    description
+    price
+    period
+    features
+    ctaText
+    ctaLink
+    popular
+    badge
+  }
+}
+
+fragment ContactParts on Contact {
+  __typename
+  hero {
+    __typename
+    title
+    subtitle
+  }
+  contactInfo {
+    __typename
+    email
+    phone
+    address
+    businessHours
+  }
+  form {
+    __typename
+    title
+    description
+    submitText
+  }
+}
