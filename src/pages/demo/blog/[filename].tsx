@@ -14,9 +14,27 @@ const BlogPage = (props) => {
     data: props.data,
   })
 
+  // Handle case where data is not available
+  if (!data || !data.post) {
+    return (
+      <>
+        <Head>
+          <title>Post Not Found</title>
+        </Head>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">Post Not Found</h1>
+            <p className="text-gray-600">The requested blog post could not be found.</p>
+          </div>
+        </div>
+      </>
+    )
+  }
+
   return (
     <>
       <Head>
+        <title>{data.post.title || 'Blog Post'}</title>
         {/* Tailwind CDN */}
         <link
           rel='stylesheet'
@@ -33,7 +51,7 @@ const BlogPage = (props) => {
           }}
         >
           <h1 className='text-3xl m-8 text-center leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl'>
-            {data.post.title}
+            {data.post.title || 'Untitled Post'}
           </h1>
           <ContentSection content={data.post.body}></ContentSection>
         </div>
@@ -56,14 +74,24 @@ const BlogPage = (props) => {
 export const getStaticProps = async ({ params }) => {
   let data = {}
   let query = {}
-  let variables = { relativePath: `${params.filename}.md` }
+  let variables = { relativePath: `${params.filename}.mdx` }
   try {
     const res = await client.queries.post(variables)
     query = res.query
     data = res.data
     variables = res.variables
-  } catch {
-    // swallow errors related to document creation
+  } catch (error) {
+    // Try .md extension as fallback
+    try {
+      variables = { relativePath: `${params.filename}.md` }
+      const res = await client.queries.post(variables)
+      query = res.query
+      data = res.data
+      variables = res.variables
+    } catch {
+      // If both fail, return empty data
+      console.warn(`Could not find post: ${params.filename}`)
+    }
   }
 
   return {
@@ -71,7 +99,6 @@ export const getStaticProps = async ({ params }) => {
       variables: variables,
       data: data,
       query: query,
-      //myOtherProp: 'some-other-data',
     },
   }
 }
