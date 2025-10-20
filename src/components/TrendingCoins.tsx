@@ -21,6 +21,16 @@ export default function TrendingCoins() {
 
   // Helper function to check if coin has chain information
   const hasChainInfo = (coin: CachedTrendingCoin) => {
+    // Check if coin has contract addresses from API or local token data
+    if (coin.contractAddresses && Object.keys(coin.contractAddresses).length > 0) {
+      return true;
+    }
+    
+    if (coin.primaryChain && coin.primaryAddress) {
+      return true;
+    }
+
+    // Fallback to local token data check
     const list = tokens as Array<{ symbol: string; chain: string; address: string; name: string }>;
     const matches = list.filter(t => t.symbol.toUpperCase() === coin.symbol.toUpperCase());
     return matches.length > 0 && matches.some(t => t.chain && t.chain.trim() !== '');
@@ -120,7 +130,7 @@ export default function TrendingCoins() {
     <div className="w-full">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">Trending Search List</h2>
-        {/* <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2">
           {hasCachedData && (
             <span className="text-xs text-green-400 bg-green-900/20 px-2 py-1 rounded">
               📱 Cached
@@ -134,7 +144,7 @@ export default function TrendingCoins() {
           >
             {loading ? '🔄' : '↻'} Refresh
           </button>
-        </div> */}
+        </div>
       </div>
 
       {loading && !hasCachedData ? (
@@ -156,8 +166,28 @@ export default function TrendingCoins() {
         </div>
       ) : (
         <div className="space-y-3">
+          {(() => {
+            console.log('📊 Total trending coins received:', trendingCoins.length);
+            console.log('📊 Trending coins data:', trendingCoins.map(c => ({ 
+              symbol: c.symbol, 
+              hasContract: !!c.contractAddresses && Object.keys(c.contractAddresses).length > 0, 
+              primaryChain: c.primaryChain,
+              contractAddresses: c.contractAddresses 
+            })));
+            return null;
+          })()}
           {trendingCoins
-            .filter(coin => hasChainInfo(coin)) // Filter out coins with no chain info
+            .filter(coin => {
+              const hasChain = hasChainInfo(coin);
+              if (!hasChain) {
+                console.log(`🔍 Filtering out ${coin.symbol} - no chain info:`, {
+                  contractAddresses: coin.contractAddresses,
+                  primaryChain: coin.primaryChain,
+                  primaryAddress: coin.primaryAddress
+                });
+              }
+              return hasChain;
+            })
             .slice(0, 5)
             .map(coin => (
             <div
