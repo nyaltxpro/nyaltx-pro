@@ -1,8 +1,8 @@
 {
   "branding": {
     "title": "NYALTX",
-    "subtitle": "The Future of DeFi Trading",
-    "description": "NYALTX is a next-generation DeFi trading platform that provides access to 400+ tokens across 10+ blockchain networks. Experience advanced analytics, gamification, and institutional-grade security in one comprehensive platform.",
+    "subtitle": "",
+    "description": "The Web3 Community for Creativity, Culture, and Fun",
     "logo": "/images/logo-footer.png"
   },
   "links": {
@@ -129,7 +129,7 @@
   },
   "legal": {
     "copyright": "© 2025 Corporate Roadshow,Inc. | Nyaltx.pro",
-    "disclaimer": "Trading cryptocurrencies involves substantial risk and may not be suitable for all investors. Past performance does not guarantee future results. Please trade responsibly and only invest what you can afford to lose.",
+    "disclaimer": "All content available on our website, on hyperlinked websites, and on applications, forums, blogs, social media accounts and other platforms associated with Nyaltx is intended solely to provide you with general information. We make no warranties of any kind with respect to our content, including, but not limited to, the accuracy and currency of the information. None of the content we provide should be construed as financial, legal or any other type of advice on which you may rely. Nothing on our Site should be considered an invitation or offer to take any action.",
     "links": [
       {
         "label": "Privacy Policy",
