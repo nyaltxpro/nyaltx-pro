@@ -67,7 +67,7 @@ function AdminLoginInner() {
       }
 
       // Step 2: Get nonce for signing
-      const nonceRes = await fetch("/api/adminpanel/login/nonce", {
+      const nonceRes = await fetch("/api/admin/login/nonce", {
         method: "GET",
         credentials: 'include' // Important for cookies
       });

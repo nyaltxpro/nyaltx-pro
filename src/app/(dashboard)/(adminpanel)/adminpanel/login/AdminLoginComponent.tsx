@@ -60,7 +60,7 @@ export default function AdminLoginComponent() {
 
     try {
       // Get nonce
-      const nonceResponse = await fetch('/api/adminpanel/login/nonce', {
+      const nonceResponse = await fetch('/api/admin/login/nonce', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
