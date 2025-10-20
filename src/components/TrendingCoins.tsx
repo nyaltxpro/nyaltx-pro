@@ -19,6 +19,13 @@ export default function TrendingCoins() {
     return price.toFixed(6);
   };
 
+  // Helper function to check if coin has chain information
+  const hasChainInfo = (coin: CachedTrendingCoin) => {
+    const list = tokens as Array<{ symbol: string; chain: string; address: string; name: string }>;
+    const matches = list.filter(t => t.symbol.toUpperCase() === coin.symbol.toUpperCase());
+    return matches.length > 0 && matches.some(t => t.chain && t.chain.trim() !== '');
+  };
+
   const handleNavigate = async (coin: CachedTrendingCoin) => {
     const base = coin.symbol?.toUpperCase() || coin.name?.toUpperCase();
     if (!base) return;
@@ -149,7 +156,10 @@ export default function TrendingCoins() {
         </div>
       ) : (
         <div className="space-y-3">
-          {trendingCoins.slice(0, 5).map(coin => (
+          {trendingCoins
+            .filter(coin => hasChainInfo(coin)) // Filter out coins with no chain info
+            .slice(0, 5)
+            .map(coin => (
             <div
               key={coin.id}
               className="rounded-lg p-2 flex flex-col sm:flex-row sm:justify-between sm:items-center cursor-pointer hover:bg-gray-800/40"
@@ -196,8 +206,13 @@ export default function TrendingCoins() {
             </div>
           ))}
 
-          {trendingCoins.length === 0 && (
-            <div className="text-center text-gray-400 py-4">No trending coins found</div>
+          {trendingCoins.filter(coin => hasChainInfo(coin)).length === 0 && (
+            <div className="text-center text-gray-400 py-4">
+              {trendingCoins.length === 0 
+                ? "No trending coins found" 
+                : "No trending tokens with chain information found"
+              }
+            </div>
           )}
         </div>
       )}

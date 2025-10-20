@@ -109,6 +109,7 @@ export default function TokenData() {
     });
 
     const [showFilters, setShowFilters] = useState(false);
+    const [activeTab, setActiveTab] = useState<'all' | 'defi' | 'yield' | 'lending' | 'dex'>('all');
 
     // Format numbers with appropriate suffixes
     const formatNumber = (num: number) => {
@@ -247,6 +248,49 @@ export default function TokenData() {
         });
     };
 
+    // Filter tokens based on active tab
+    const getFilteredTokens = () => {
+        let filtered = tokens;
+        
+        switch (activeTab) {
+            case 'defi':
+                filtered = tokens.filter(token => 
+                    token.metadata?.tags?.some(tag => 
+                        tag.includes('defi') || tag.includes('yield') || tag.includes('lending')
+                    ) || ['yearn', 'curve', 'balancer', 'uniswap'].some(platform => 
+                        token.platform.includes(platform)
+                    )
+                );
+                break;
+            case 'yield':
+                filtered = tokens.filter(token => 
+                    token.metadata?.tags?.some(tag => tag.includes('yield')) ||
+                    ['yearn', 'morpho'].some(platform => token.platform.includes(platform)) ||
+                    (token.metrics?.apy && parseFloat(token.metrics.apy) > 0)
+                );
+                break;
+            case 'lending':
+                filtered = tokens.filter(token => 
+                    token.metadata?.tags?.some(tag => tag.includes('lending')) ||
+                    ['aave', 'compound', 'euler', 'morpho'].some(platform => token.platform.includes(platform))
+                );
+                break;
+            case 'dex':
+                filtered = tokens.filter(token => 
+                    ['uniswap', 'curve', 'balancer', 'sushiswap'].some(platform => 
+                        token.platform.includes(platform)
+                    )
+                );
+                break;
+            default:
+                filtered = tokens;
+        }
+        
+        return filtered;
+    };
+
+    const filteredTokens = getFilteredTokens();
+
     return (
         <div className="min-h-screen bg-gray-900 text-white p-6">
             <div className="max-w-7xl mx-auto">
@@ -256,6 +300,34 @@ export default function TokenData() {
                     <p className="text-gray-400">
                         Comprehensive token data across 290+ DeFi platforms and 10+ networks
                     </p>
+                </div>
+
+                {/* Tabs */}
+                <div className="mb-6">
+                    <div className="border-b border-gray-700">
+                        <nav className="-mb-px flex space-x-8">
+                            {[
+                                { id: 'all', label: 'All Tokens', icon: '🔍' },
+                                { id: 'defi', label: 'DeFi', icon: '🏦' },
+                                { id: 'yield', label: 'Yield Farming', icon: '🌾' },
+                                { id: 'lending', label: 'Lending', icon: '💰' },
+                                { id: 'dex', label: 'DEX', icon: '🔄' },
+                            ].map((tab) => (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => setActiveTab(tab.id as any)}
+                                    className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                                        activeTab === tab.id
+                                            ? 'border-blue-500 text-blue-400'
+                                            : 'border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-300'
+                                    }`}
+                                >
+                                    <span>{tab.icon}</span>
+                                    {tab.label}
+                                </button>
+                            ))}
+                        </nav>
+                    </div>
                 </div>
 
                 {/* Search and Controls */}
@@ -419,7 +491,7 @@ export default function TokenData() {
                     {loading && tokens.length === 0 ? (
                         'Loading tokens...'
                     ) : (
-                        `Showing ${tokens.length} of ${totalItems} tokens`
+                        `Showing ${filteredTokens.length} of ${totalItems} tokens in ${activeTab === 'all' ? 'All Categories' : activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}`
                     )}
                 </div>
 
@@ -437,101 +509,129 @@ export default function TokenData() {
                     </div>
                 )}
 
-                {/* Tokens Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 mb-6">
-                    {tokens.map((token) => (
-                        <div
-                            key={token.key}
-                            onClick={() => handleTokenClick(token)}
-                            className="bg-gray-800 rounded-lg p-6 hover:bg-gray-750 transition-colors cursor-pointer border border-gray-700 hover:border-gray-600"
-                        >
-                            {/* Token Header */}
-                            <div className="flex items-center mb-4">
-                                <div className="relative w-12 h-12 mr-4">
-                                    {token.images && token.images.length > 0 ? (
-                                        <Image
-                                            src={token.images[0]}
-                                            alt={token.name}
-                                            fill
-                                            className="rounded-full object-cover"
-                                            unoptimized
-                                        />
-                                    ) : (
-                                        <div className="w-full h-full bg-gray-600 rounded-full flex items-center justify-center">
-                                            <span className="text-white font-bold text-lg">
-                                                {token.symbol.charAt(0)}
+                {/* Tokens Table */}
+                <div className="bg-gray-800 rounded-lg overflow-hidden mb-6">
+                    <div className="overflow-x-auto">
+                        <table className="w-full">
+                            <thead className="bg-gray-700">
+                                <tr>
+                                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                        Token
+                                    </th>
+                                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                        Price
+                                    </th>
+                                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                        Liquidity
+                                    </th>
+                                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                        APY
+                                    </th>
+                                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                        24h Volume
+                                    </th>
+                                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                        Network
+                                    </th>
+                                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                        Platform
+                                    </th>
+                                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                        Updated
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-700">
+                                {filteredTokens.map((token) => (
+                                    <tr
+                                        key={token.key}
+                                        onClick={() => handleTokenClick(token)}
+                                        className="hover:bg-gray-700 cursor-pointer transition-colors"
+                                    >
+                                        {/* Token Info */}
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="flex items-center">
+                                                <div className="relative w-10 h-10 mr-3">
+                                                    {token.images && token.images.length > 0 ? (
+                                                        <Image
+                                                            src={token.images[0]}
+                                                            alt={token.name}
+                                                            fill
+                                                            className="rounded-full object-cover"
+                                                            unoptimized
+                                                        />
+                                                    ) : (
+                                                        <div className="w-full h-full bg-gray-600 rounded-full flex items-center justify-center">
+                                                            <span className="text-white font-bold text-sm">
+                                                                {token.symbol.charAt(0)}
+                                                            </span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div>
+                                                    <div className="text-sm font-medium text-white truncate max-w-48">
+                                                        {token.name}
+                                                    </div>
+                                                    <div className="text-sm text-gray-400">
+                                                        {token.symbol}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+
+                                        {/* Price */}
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
+                                            {formatPrice(token.price)}
+                                        </td>
+
+                                        {/* Liquidity */}
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
+                                            {formatNumber(token.liquidity)}
+                                        </td>
+
+                                        {/* APY */}
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                            {token.metrics?.apy ? (
+                                                <span className="text-green-400 font-medium">
+                                                    {formatApy(token.metrics.apy)}
+                                                </span>
+                                            ) : (
+                                                <span className="text-gray-400">-</span>
+                                            )}
+                                        </td>
+
+                                        {/* 24h Volume */}
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
+                                            {token.metrics?.volumeUsd1d ? (
+                                                formatNumber(parseFloat(token.metrics.volumeUsd1d))
+                                            ) : (
+                                                <span className="text-gray-400">-</span>
+                                            )}
+                                        </td>
+
+                                        {/* Network */}
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-900 text-blue-200">
+                                                {token.network.toUpperCase()}
                                             </span>
-                                        </div>
-                                    )}
-                                </div>
-                                <div className="flex-1">
-                                    <h3 className="font-semibold text-lg truncate">{token.name}</h3>
-                                    <div className="flex items-center gap-2 text-sm text-gray-400">
-                                        <span>{token.symbol}</span>
-                                        <span className="bg-blue-600 px-2 py-0.5 rounded text-xs">
-                                            {token.network.toUpperCase()}
-                                        </span>
-                                        <span className="bg-green-600 px-2 py-0.5 rounded text-xs">
-                                            {token.platform.toUpperCase()}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
+                                        </td>
 
-                            {/* Token Metrics */}
-                            <div className="space-y-3">
-                                <div className="flex justify-between">
-                                    <span className="text-gray-400">Price:</span>
-                                    <span className="font-medium">{formatPrice(token.price)}</span>
-                                </div>
+                                        {/* Platform */}
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-900 text-green-200">
+                                                {token.platform.replace('-', ' ').toUpperCase()}
+                                            </span>
+                                        </td>
 
-                                <div className="flex justify-between">
-                                    <span className="text-gray-400">Liquidity:</span>
-                                    <span className="font-medium">{formatNumber(token.liquidity)}</span>
-                                </div>
-
-                                {token.metrics?.apy && (
-                                    <div className="flex justify-between">
-                                        <span className="text-gray-400">APY:</span>
-                                        <span className="font-medium text-green-400">{formatApy(token.metrics.apy)}</span>
-                                    </div>
-                                )}
-
-                                {token.metrics?.volumeUsd1d && (
-                                    <div className="flex justify-between">
-                                        <span className="text-gray-400">24h Volume:</span>
-                                        <span className="font-medium">{formatNumber(parseFloat(token.metrics.volumeUsd1d))}</span>
-                                    </div>
-                                )}
-
-                                {token.pricePerShare && (
-                                    <div className="flex justify-between">
-                                        <span className="text-gray-400">Price/Share:</span>
-                                        <span className="font-medium">{token.pricePerShare.toFixed(6)}</span>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Tags */}
-                            {token.metadata?.tags && token.metadata.tags.length > 0 && (
-                                <div className="mt-4 flex flex-wrap gap-1">
-                                    {token.metadata.tags.slice(0, 3).map((tag, index) => (
-                                        <span
-                                            key={index}
-                                            className="bg-gray-700 px-2 py-1 rounded text-xs text-gray-300"
-                                        >
-                                            {tag.replace('#', '')}
-                                        </span>
-                                    ))}
-                                </div>
-                            )}
-
-                            {/* Updated At */}
-                            <div className="mt-4 text-xs text-gray-500">
-                                Updated: {new Date(token.updatedAt).toLocaleString()}
-                            </div>
-                        </div>
-                    ))}
+                                        {/* Updated */}
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                                            {new Date(token.updatedAt).toLocaleDateString()}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
                 {/* Load More */}
@@ -548,18 +648,26 @@ export default function TokenData() {
                 )}
 
                 {/* No Results */}
-                {!loading && tokens.length === 0 && !error && (
+                {!loading && filteredTokens.length === 0 && !error && (
                     <div className="text-center py-12">
                         <div className="text-gray-400 mb-4">
                             <div className="text-4xl mb-2">🔍</div>
-                            <p>No tokens found matching your criteria</p>
+                            <p>No tokens found in {activeTab === 'all' ? 'any category' : activeTab} matching your criteria</p>
                         </div>
-                        <button
-                            onClick={clearFilters}
-                            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
-                        >
-                            Clear Filters
-                        </button>
+                        <div className="flex gap-4 justify-center">
+                            <button
+                                onClick={clearFilters}
+                                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+                            >
+                                Clear Filters
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('all')}
+                                className="px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg transition-colors"
+                            >
+                                View All Categories
+                            </button>
+                        </div>
                     </div>
                 )}
             </div>
