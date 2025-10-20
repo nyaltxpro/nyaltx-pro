@@ -1,0 +1,95 @@
+{
+  "slug": "about-us",
+  "title": "About NYALTX",
+  "description": "Learn about NYALTX, the leading DeFi trading platform revolutionizing cryptocurrency trading with advanced analytics, gamification, and multi-chain support.",
+  "hero": {
+    "title": "About NYALTX",
+    "subtitle": "We're building the future of decentralized finance trading. Our mission is to make DeFi accessible, engaging, and profitable for everyone.",
+    "backgroundImage": "/images/about-hero.jpg"
+  },
+  "content": {
+    "type": "doc",
+    "content": [
+      {
+        "type": "heading",
+        "attrs": { "level": 2 },
+        "content": [{ "type": "text", "text": "Our Mission" }]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "At NYALTX, we believe that decentralized finance should be accessible to everyone. Our platform combines cutting-edge technology with user-friendly design to create the ultimate DeFi trading experience."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": { "level": 2 },
+        "content": [{ "type": "text", "text": "What We Do" }]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "NYALTX provides comprehensive cryptocurrency trading tools across 10+ blockchain networks, supporting 400+ tokens with advanced analytics, gamification features, and institutional-grade security."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": { "level": 2 },
+        "content": [{ "type": "text", "text": "Our Values" }]
+      },
+      {
+        "type": "bulletList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  { "type": "text", "marks": [{ "type": "bold" }], "text": "Innovation: " },
+                  { "type": "text", "text": "We continuously push the boundaries of what's possible in DeFi." }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  { "type": "text", "marks": [{ "type": "bold" }], "text": "Security: " },
+                  { "type": "text", "text": "Your funds and data are protected by industry-leading security measures." }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  { "type": "text", "marks": [{ "type": "bold" }], "text": "Community: " },
+                  { "type": "text", "text": "We're building a thriving ecosystem of traders, developers, and DeFi enthusiasts." }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "seo": {
+    "metaTitle": "About NYALTX - Leading DeFi Trading Platform",
+    "metaDescription": "Discover NYALTX's mission to revolutionize DeFi trading with advanced analytics, multi-chain support, and gamification features. Join 25K+ active traders.",
+    "keywords": "NYALTX, DeFi trading, cryptocurrency platform, blockchain, about us",
+    "ogImage": "/images/og/about-nyaltx.jpg"
+  }
+}

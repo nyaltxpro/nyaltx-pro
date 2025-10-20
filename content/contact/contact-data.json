@@ -1,0 +1,17 @@
+{
+  "hero": {
+    "title": "Get in Touch",
+    "subtitle": "Have questions about NYALTX? Need support with your trading or want to discuss partnership opportunities? We're here to help."
+  },
+  "contactInfo": {
+    "email": "support@nyaltx.pro",
+    "phone": "+1 (555) 123-4567",
+    "address": "123 DeFi Street\nCrypto Valley, CV 12345\nUnited States",
+    "businessHours": "Monday - Friday: 9:00 AM - 6:00 PM EST\nSaturday: 10:00 AM - 4:00 PM EST\nSunday: Closed"
+  },
+  "form": {
+    "title": "Send us a Message",
+    "description": "Fill out the form below and we'll get back to you within 24 hours.",
+    "submitText": "Send Message"
+  }
+}

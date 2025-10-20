@@ -1,0 +1,152 @@
+{
+  "branding": {
+    "title": "NYALTX",
+    "subtitle": "The Future of DeFi Trading",
+    "description": "NYALTX is a next-generation DeFi trading platform that provides access to 400+ tokens across 10+ blockchain networks. Experience advanced analytics, gamification, and institutional-grade security in one comprehensive platform.",
+    "logo": "/images/logo-footer.png"
+  },
+  "links": {
+    "sections": [
+      {
+        "title": "Platform",
+        "items": [
+          {
+            "label": "Dashboard",
+            "url": "/dashboard",
+            "external": false
+          },
+          {
+            "label": "Trading",
+            "url": "/dashboard/trade",
+            "external": false
+          },
+          {
+            "label": "Token Explorer",
+            "url": "/dashboard/tokens",
+            "external": false
+          },
+          {
+            "label": "Trending",
+            "url": "/dashboard/trending",
+            "external": false
+          }
+        ]
+      },
+      {
+        "title": "Features",
+        "items": [
+          {
+            "label": "Race to Liberty",
+            "url": "/dashboard/gamification",
+            "external": false
+          },
+          {
+            "label": "Leaderboard",
+            "url": "/dashboard/leaderboard",
+            "external": false
+          },
+          {
+            "label": "Token Registration",
+            "url": "/dashboard/token-registration",
+            "external": false
+          },
+          {
+            "label": "Favorites",
+            "url": "/dashboard/favorites",
+            "external": false
+          }
+        ]
+      },
+      {
+        "title": "Resources",
+        "items": [
+          {
+            "label": "Documentation",
+            "url": "/docs",
+            "external": false
+          },
+          {
+            "label": "API Reference",
+            "url": "/api-docs",
+            "external": false
+          },
+          {
+            "label": "Help Center",
+            "url": "/help",
+            "external": false
+          },
+          {
+            "label": "Blog",
+            "url": "/blog",
+            "external": false
+          }
+        ]
+      },
+      {
+        "title": "Company",
+        "items": [
+          {
+            "label": "About Us",
+            "url": "/about",
+            "external": false
+          },
+          {
+            "label": "Careers",
+            "url": "/careers",
+            "external": false
+          },
+          {
+            "label": "Contact",
+            "url": "/contact",
+            "external": false
+          },
+          {
+            "label": "Press Kit",
+            "url": "/press",
+            "external": false
+          }
+        ]
+      }
+    ]
+  },
+  "social": {
+    "title": "Join Our Community",
+    "description": "Stay connected with the latest updates, trading insights, and community discussions.",
+    "platforms": {
+      "twitter": "https://twitter.com/nyaltx",
+      "discord": "https://discord.gg/nyaltx",
+      "telegram": "https://t.me/nyaltx",
+      "youtube": "https://youtube.com/@nyaltx",
+      "linkedin": "https://linkedin.com/company/nyaltx",
+      "github": "https://github.com/nyaltx"
+    }
+  },
+  "newsletter": {
+    "title": "Stay Updated",
+    "description": "Get the latest market insights, platform updates, and exclusive trading opportunities delivered to your inbox.",
+    "placeholder": "Enter your email address",
+    "buttonText": "Subscribe"
+  },
+  "legal": {
+    "copyright": "© 2024 NYALTX. All rights reserved.",
+    "disclaimer": "Trading cryptocurrencies involves substantial risk and may not be suitable for all investors. Past performance does not guarantee future results. Please trade responsibly and only invest what you can afford to lose.",
+    "links": [
+      {
+        "label": "Privacy Policy",
+        "url": "/privacy"
+      },
+      {
+        "label": "Terms of Service",
+        "url": "/terms"
+      },
+      {
+        "label": "Cookie Policy",
+        "url": "/cookies"
+      },
+      {
+        "label": "Risk Disclosure",
+        "url": "/risk-disclosure"
+      }
+    ]
+  }
+}

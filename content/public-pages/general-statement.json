@@ -1,0 +1,118 @@
+{
+  "slug": "general-statement",
+  "title": "General Statement",
+  "description": "Important general information and disclaimers about NYALTX platform and cryptocurrency trading services.",
+  "hero": {
+    "title": "General Statement",
+    "subtitle": "Important information about NYALTX platform, services, and cryptocurrency trading risks.",
+    "backgroundImage": "/images/general-hero.jpg"
+  },
+  "content": {
+    "type": "doc",
+    "content": [
+      {
+        "type": "heading",
+        "attrs": { "level": 2 },
+        "content": [{ "type": "text", "text": "Platform Overview" }]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "NYALTX is a decentralized finance (DeFi) trading platform that provides access to cryptocurrency trading across multiple blockchain networks. Our platform aggregates data and liquidity from various decentralized exchanges to offer users comprehensive trading tools and analytics."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": { "level": 2 },
+        "content": [{ "type": "text", "text": "Risk Disclosure" }]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "Cryptocurrency trading involves substantial risk of loss and is not suitable for all investors. The value of cryptocurrencies can be extremely volatile and unpredictable. You should carefully consider your investment objectives, level of experience, and risk appetite before engaging in cryptocurrency trading."
+          }
+        ]
+      },
+      {
+        "type": "bulletList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  { "type": "text", "marks": [{ "type": "bold" }], "text": "Market Volatility: " },
+                  { "type": "text", "text": "Cryptocurrency prices can fluctuate dramatically within short periods." }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  { "type": "text", "marks": [{ "type": "bold" }], "text": "Regulatory Risk: " },
+                  { "type": "text", "text": "Changes in regulations may affect the value and legality of cryptocurrencies." }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  { "type": "text", "marks": [{ "type": "bold" }], "text": "Technology Risk: " },
+                  { "type": "text", "text": "Smart contracts and blockchain technology may contain vulnerabilities." }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": { "level": 2 },
+        "content": [{ "type": "text", "text": "No Investment Advice" }]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "The information provided on NYALTX is for informational purposes only and should not be construed as investment advice, financial advice, trading advice, or any other sort of advice. You should not treat any of the platform's content as such."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": { "level": 2 },
+        "content": [{ "type": "text", "text": "User Responsibility" }]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "Users are solely responsible for their trading decisions and should conduct their own research before making any investment decisions. NYALTX does not guarantee the accuracy, completeness, or timeliness of any information provided on the platform."
+          }
+        ]
+      }
+    ]
+  },
+  "seo": {
+    "metaTitle": "General Statement - NYALTX",
+    "metaDescription": "Read NYALTX's general statement including platform overview, risk disclosures, and important information about cryptocurrency trading.",
+    "keywords": "general statement, risk disclosure, cryptocurrency trading, NYALTX platform",
+    "ogImage": "/images/og/general-statement.jpg"
+  }
+}

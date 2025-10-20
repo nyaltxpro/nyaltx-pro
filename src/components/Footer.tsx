@@ -5,8 +5,10 @@ import React, { useState } from 'react';
 import { BsDiscord } from 'react-icons/bs';
 import { FaTelegram, FaYoutube } from 'react-icons/fa';
 import { FaXTwitter } from 'react-icons/fa6';
+import { useFooterContent } from '@/hooks/useTinaContent';
 
 const Footer = () => {
+  const { content: footerContent, loading, error } = useFooterContent();
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -79,17 +81,23 @@ const Footer = () => {
           {/* Left column */}
           <div className="xl:col-span-2">
             <div className="p-5">
-              <h1 className="text-2xl  font-medium mb-4">NYALTX</h1>
-              {/* <h2 className="text-xl font-medium mb-4">Get news about cryptocurrencies every day!</h2> */}
+              <h1 className="text-2xl font-medium mb-4">
+                {footerContent?.branding?.title || "NYALTX"}
+              </h1>
+              {footerContent?.branding?.subtitle && (
+                <h2 className="text-xl font-medium mb-4">{footerContent.branding.subtitle}</h2>
+              )}
               <h3 className="text-lg font-medium mb-4">
-                The Web3 Community for Creativity, Culture, and Fun.
+                {footerContent?.branding?.description || "The Web3 Community for Creativity, Culture, and Fun."}
               </h3>
 
               {/* Newsletter Signup */}
               <div className="mt-6 p-4 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/20 rounded-xl backdrop-blur-sm">
-                <h4 className="text-lg font-semibold mb-3 text-cyan-400">Join Our Community</h4>
+                <h4 className="text-lg font-semibold mb-3 text-cyan-400">
+                  {footerContent?.newsletter?.title || "Join Our Community"}
+                </h4>
                 <p className="text-sm text-gray-300 mb-4">
-                  Get exclusive crypto insights, market updates, and early access to new features.
+                  {footerContent?.newsletter?.description || "Get exclusive crypto insights, market updates, and early access to new features."}
                 </p>
                 <form onSubmit={handleNewsletterSignup} className="space-y-3">
                   <div className="flex flex-col sm:flex-row gap-3">
@@ -105,7 +113,7 @@ const Footer = () => {
                       type="email"
                       value={email}
                       onChange={e => setEmail(e.target.value)}
-                      placeholder="Enter your email address"
+                      placeholder={footerContent?.newsletter?.placeholder || "Enter your email address"}
                       className="flex-1 px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all duration-300"
                       required
                       disabled={isSubmitting}
@@ -116,7 +124,7 @@ const Footer = () => {
                     disabled={isSubmitting}
                     className="w-full sm:w-auto px-6 py-3 bg-[#00b8d8] rounded-full text-white font-semibold   transition-all duration-300 shadow-lg hover:shadow-cyan-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {isSubmitting ? 'Signing Up...' : 'Join Community'}
+                    {isSubmitting ? 'Signing Up...' : (footerContent?.newsletter?.buttonText || 'Join Community')}
                   </button>
                 </form>
 
@@ -146,49 +154,59 @@ const Footer = () => {
 
           {/* Right column */}
           <div className="xl:col-span-1">
-            <h3 className="text-lg font-medium mb-4">Follow us on social media!</h3>
+            <h3 className="text-lg font-medium mb-4">
+              {footerContent?.social?.title || "Follow us on social media!"}
+            </h3>
             <p className="text-sm mb-6">
-              Follow us on social media and find all you need to know about crypto world!
+              {footerContent?.social?.description || "Follow us on social media and find all you need to know about crypto world!"}
             </p>
 
             {/* Social media icons */}
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-              <Link
-                href="https://x.com/nyaltx"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex flex-col items-center rounded-xl border border-white/10 bg-white/[0.03] p-3 hover:border-white/20 transition-colors"
-              >
-                <FaXTwitter className="text-xl mb-1 opacity-90" />
-                <span className="text-xs text-gray-300/90">Twitter</span>
-              </Link>
-              <Link
-                href="https://discord.gg/tFMJ7eHj"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex flex-col items-center rounded-xl border border-white/10 bg-white/[0.03] p-3 hover:border-white/20 transition-colors"
-              >
-                <BsDiscord className="text-xl mb-1 opacity-90" />
-                <span className="text-xs text-gray-300/90">Discord</span>
-              </Link>
-              <Link
-                href="https://www.youtube.com/c/Nyaltx"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex flex-col items-center rounded-xl border border-white/10 bg-white/[0.03] p-3 hover:border-white/20 transition-colors"
-              >
-                <FaYoutube className="text-xl mb-1 opacity-90" />
-                <span className="text-xs text-gray-300/90">Youtube</span>
-              </Link>
-              <Link
-                href="https://t.me/nyaltx"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex flex-col items-center rounded-xl border border-white/10 bg-white/[0.03] p-3 hover:border-white/20 transition-colors"
-              >
-                <FaTelegram className="text-xl mb-1 opacity-90" />
-                <span className="text-xs text-gray-300/90">Telegram</span>
-              </Link>
+              {footerContent?.social?.platforms?.twitter && (
+                <Link
+                  href={footerContent.social.platforms.twitter}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center rounded-xl border border-white/10 bg-white/[0.03] p-3 hover:border-white/20 transition-colors"
+                >
+                  <FaXTwitter className="text-xl mb-1 opacity-90" />
+                  <span className="text-xs text-gray-300/90">Twitter</span>
+                </Link>
+              )}
+              {footerContent?.social?.platforms?.discord && (
+                <Link
+                  href={footerContent.social.platforms.discord}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center rounded-xl border border-white/10 bg-white/[0.03] p-3 hover:border-white/20 transition-colors"
+                >
+                  <BsDiscord className="text-xl mb-1 opacity-90" />
+                  <span className="text-xs text-gray-300/90">Discord</span>
+                </Link>
+              )}
+              {footerContent?.social?.platforms?.youtube && (
+                <Link
+                  href={footerContent.social.platforms.youtube}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center rounded-xl border border-white/10 bg-white/[0.03] p-3 hover:border-white/20 transition-colors"
+                >
+                  <FaYoutube className="text-xl mb-1 opacity-90" />
+                  <span className="text-xs text-gray-300/90">Youtube</span>
+                </Link>
+              )}
+              {footerContent?.social?.platforms?.telegram && (
+                <Link
+                  href={footerContent.social.platforms.telegram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center rounded-xl border border-white/10 bg-white/[0.03] p-3 hover:border-white/20 transition-colors"
+                >
+                  <FaTelegram className="text-xl mb-1 opacity-90" />
+                  <span className="text-xs text-gray-300/90">Telegram</span>
+                </Link>
+              )}
               {/* <Link href="https://www.tiktok.com/@Nyaltx.io" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center rounded-xl border border-white/10 bg-white/[0.03] p-3 hover:border-white/20 transition-colors">
                 <FaTiktok className="text-xl mb-1 opacity-90" />
                 <span className="text-xs text-gray-300/90">TikTok</span>
@@ -204,13 +222,9 @@ const Footer = () => {
         <div className="flex w-full flex-col backdrop-blur">
           {/* Disclaimer */}
           <div className="text-xs text-justify text-gray-400/90 mb-6 max-w-full mx-auto px-2 sm:px-4 leading-relaxed">
-            All content available on our website, on hyperlinked websites, and on applications,
-            forums, blogs, social media accounts and other platforms associated with Nyaltx is
-            intended solely to provide you with general information. We make no warranties of any
-            kind with respect to our content, including, but not limited to, the accuracy and
-            currency of the information. None of the content we provide should be construed as
-            financial, legal or any other type of advice on which you may rely. Nothing on our Site
-            should be considered an invitation or offer to take any action.
+            {footerContent?.legal?.disclaimer || 
+              "All content available on our website, on hyperlinked websites, and on applications, forums, blogs, social media accounts and other platforms associated with Nyaltx is intended solely to provide you with general information. We make no warranties of any kind with respect to our content, including, but not limited to, the accuracy and currency of the information. None of the content we provide should be construed as financial, legal or any other type of advice on which you may rely. Nothing on our Site should be considered an invitation or offer to take any action."
+            }
           </div>
 
           {/* Bottom section with links and app store badges */}
@@ -260,7 +274,7 @@ const Footer = () => {
               </div>
 
               <div className="text-xs text-gray-400/90 text-center px-2 max-w-full break-words">
-                © 2025 Corporate Roadshow,Inc. | Nyaltx.pro
+                {footerContent?.legal?.copyright || "© 2025 Corporate Roadshow,Inc. | Nyaltx.pro"}
               </div>
             </div>
           </div>

@@ -600,11 +600,11 @@ export default function Home() {
                               <span style={{ fontFamily: 'Space Grotesk, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                                 {token.symbol || token.name || 'Unknown'}
                               </span>
-                              <span className="text-[#00d4aa] font-medium" style={{ fontFamily: 'SF Mono, Monaco, Inconsolata, Roboto Mono, monospace' }}>
+                              {/* <span className="text-[#00d4aa] font-medium" style={{ fontFamily: 'SF Mono, Monaco, Inconsolata, Roboto Mono, monospace' }}>
                                 $
                                 {token.price ||
                                   (token.current_price ? token.current_price.toFixed(4) : 'N/A')}
-                              </span>
+                              </span> */}
                             </div>
                           </div>
 

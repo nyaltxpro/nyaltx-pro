@@ -1,0 +1,146 @@
+{
+  "slug": "legal-advice",
+  "title": "Legal Advice & Disclaimer",
+  "description": "Important legal information and disclaimers regarding the use of NYALTX platform and cryptocurrency trading services.",
+  "hero": {
+    "title": "Legal Advice & Disclaimer",
+    "subtitle": "Important legal information you should read before using NYALTX platform and services.",
+    "backgroundImage": "/images/legal-hero.jpg"
+  },
+  "content": {
+    "type": "doc",
+    "content": [
+      {
+        "type": "heading",
+        "attrs": { "level": 2 },
+        "content": [{ "type": "text", "text": "General Disclaimer" }]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "The information provided on NYALTX is for general informational purposes only and should not be considered as financial, investment, or legal advice. Cryptocurrency trading involves substantial risk and may not be suitable for all investors."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": { "level": 2 },
+        "content": [{ "type": "text", "text": "Investment Risks" }]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "Trading cryptocurrencies and DeFi tokens carries significant risks, including:"
+          }
+        ]
+      },
+      {
+        "type": "bulletList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [{ "type": "text", "text": "High volatility and potential for substantial losses" }]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [{ "type": "text", "text": "Regulatory changes that may affect token values" }]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [{ "type": "text", "text": "Smart contract vulnerabilities and technical risks" }]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [{ "type": "text", "text": "Market manipulation and liquidity issues" }]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": { "level": 2 },
+        "content": [{ "type": "text", "text": "No Financial Advice" }]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "NYALTX does not provide investment advice, financial planning, or recommendations. All trading decisions are made at your own discretion and risk. Past performance does not guarantee future results."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": { "level": 2 },
+        "content": [{ "type": "text", "text": "Platform Limitations" }]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "While we strive to provide accurate and up-to-date information, NYALTX makes no warranties about the completeness, reliability, or accuracy of the information provided. Users should conduct their own research before making any trading decisions."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": { "level": 2 },
+        "content": [{ "type": "text", "text": "Regulatory Compliance" }]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "Users are responsible for complying with all applicable laws and regulations in their jurisdiction. Some services may not be available in certain countries or regions."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": { "level": 2 },
+        "content": [{ "type": "text", "text": "Contact Information" }]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "For legal inquiries, please contact our legal team at legal@nyaltx.pro."
+          }
+        ]
+      }
+    ]
+  },
+  "seo": {
+    "metaTitle": "Legal Advice & Disclaimer - NYALTX",
+    "metaDescription": "Read important legal disclaimers and risk information before using NYALTX cryptocurrency trading platform.",
+    "keywords": "legal disclaimer, investment risks, cryptocurrency trading, NYALTX legal",
+    "ogImage": "/images/og/legal-advice.jpg"
+  }
+}

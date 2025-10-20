@@ -7,6 +7,7 @@ import React from 'react';
 // Using named icons from @web3icons/react
 import Faq from '@/components/Faq';
 import PublicHeader from '@/components/PublicHeader';
+import { useLandingPageContent } from '@/hooks/useTinaContent';
 import { ExchangeIcon, NetworkIcon, TokenIcon, WalletIcon } from '@web3icons/react';
 import type { Variants } from 'framer-motion';
 const container: Variants = {
@@ -28,6 +29,34 @@ const scaleIn: Variants = {
 };
 
 export default function Page() {
+  const { content: landingContent, loading, error } = useLandingPageContent();
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-cyan-500"></div>
+      </div>
+    );
+  }
+
+  // Show error state with fallback
+  if (error && !landingContent) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-400 mb-4">Failed to load content</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen">
       {/* 1) Hero */}
@@ -49,18 +78,17 @@ export default function Page() {
           <div className="grid grid-cols-1 md:grid-cols-2 items-center gap-10">
             <motion.div className="max-w-3xl" variants={fadeUp}>
               <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-indigo-400">
-                Discover. Track. Grow your token with NYALTX
+                {landingContent?.hero?.title || "Discover. Track. Grow your token with NYALTX"}
               </h1>
               <p className="mt-4 text-gray-300/90 max-w-2xl">
-                Real-time insights, curated listings, and promotional placements to help your
-                project reach more holders across chains.
+                {landingContent?.hero?.subtitle || "Real-time insights, curated listings, and promotional placements to help your project reach more holders across chains."}
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
                 <Link
-                  href="/dashboard"
+                  href={landingContent?.hero?.ctaLink || "/dashboard"}
                   className="rounded-full bg-cyan-500/90 px-5 py-2.5 font-medium text-black hover:bg-cyan-400 transition-colors"
                 >
-                  Explore Dashboard
+                  {landingContent?.hero?.ctaText || "Explore Dashboard"}
                 </Link>
                 <Link
                   href="/pricing"
@@ -162,14 +190,25 @@ export default function Page() {
         viewport={{ once: true, amount: 0.2 }}
       >
         <motion.div
-          className="mx-auto max-w-7xl px-6 py-8 grid grid-cols-2 md:grid-cols-5 gap-4 text-sm"
+          className="mx-auto max-w-7xl px-6 py-8 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm"
           variants={fadeUp}
         >
-          <Stat label="Networks" value={132} />
-          <Stat label="Dexes" value={21586} />
-          <Stat label="Pools" value={19440364} />
-          <Stat label="Tokens" value={29055602} />
-          <Stat label="Next token burn" value={18973} suffix=" NYAX" highlight />
+          {landingContent?.stats?.items?.map((stat, index) => (
+            <Stat 
+              key={index}
+              label={stat.label} 
+              value={parseInt(stat.value.replace(/[^\d]/g, '')) || 0} 
+              suffix={stat.value.replace(/[\d,]/g, '')}
+              highlight={index === landingContent.stats.items.length - 1}
+            />
+          )) || (
+            <>
+              <Stat label="Networks" value={132} />
+              <Stat label="Dexes" value={21586} />
+              <Stat label="Pools" value={19440364} />
+              <Stat label="Tokens" value={29055602} />
+            </>
+          )}
         </motion.div>
       </motion.section>
 
@@ -185,30 +224,42 @@ export default function Page() {
           className="text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-indigo-400"
           variants={fadeUp}
         >
-          Why NYALTX
+          {landingContent?.features?.title || "Why NYALTX"}
         </motion.h2>
         <motion.p className="mt-2 text-gray-300/90 max-w-2xl" variants={fadeUp}>
-          A modern stack for token discovery, analytics, and promotion.
+          {landingContent?.features?.subtitle || "A modern stack for token discovery, analytics, and promotion."}
         </motion.p>
         <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-          <motion.div variants={scaleIn}>
-            <Feature
-              title="Multi-chain coverage"
-              desc="Follow activity across popular EVM networks and beyond, with fast updates."
-            />
-          </motion.div>
-          <motion.div variants={scaleIn}>
-            <Feature
-              title="Promotional placements"
-              desc="Race to Liberty campaign placements, podcast mentions, and homepage features."
-            />
-          </motion.div>
-          <motion.div variants={scaleIn}>
-            <Feature
-              title="Flexible payments"
-              desc="Pay with cards (Stripe), ETH, or NYAX with a 20% discount on token payments."
-            />
-          </motion.div>
+          {landingContent?.features?.items?.slice(0, 3).map((feature, index) => (
+            <motion.div key={index} variants={scaleIn}>
+              <Feature
+                title={feature.title}
+                desc={feature.description}
+                icon={feature.icon}
+              />
+            </motion.div>
+          )) || (
+            <>
+              <motion.div variants={scaleIn}>
+                <Feature
+                  title="Multi-chain coverage"
+                  desc="Follow activity across popular EVM networks and beyond, with fast updates."
+                />
+              </motion.div>
+              <motion.div variants={scaleIn}>
+                <Feature
+                  title="Promotional placements"
+                  desc="Race to Liberty campaign placements, podcast mentions, and homepage features."
+                />
+              </motion.div>
+              <motion.div variants={scaleIn}>
+                <Feature
+                  title="Flexible payments"
+                  desc="Pay with cards (Stripe), ETH, or NYAX with a 20% discount on token payments."
+                />
+              </motion.div>
+            </>
+          )}
         </div>
       </motion.section>
 
@@ -314,32 +365,59 @@ export default function Page() {
           className="text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-indigo-400"
           variants={fadeUp}
         >
-          What builders say
+          {landingContent?.testimonials?.title || "What builders say"}
         </motion.h2>
         <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-          {[
-            {
-              q: 'NYALTX helped us boost discovery during launch week.',
-              a: '— Team Atlas',
-            },
-            {
-              q: 'The Race to Liberty brought real traffic and holders.',
-              a: '— Liberty Labs',
-            },
-            {
-              q: 'Smooth UX and flexible payments — exactly what we needed.',
-              a: '— DeltaX',
-            },
-          ].map((t, i) => (
+          {landingContent?.testimonials?.items?.map((testimonial, i) => (
             <motion.div
               key={i}
               variants={scaleIn}
               className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur-md"
             >
-              <p className="text-gray-200">“{t.q}”</p>
-              <p className="mt-3 text-sm text-gray-400">{t.a}</p>
+              <p className="text-gray-200">"{testimonial.quote}"</p>
+              <div className="mt-3 flex items-center gap-3">
+                {testimonial.avatar && (
+                  <Image
+                    src={testimonial.avatar}
+                    alt={testimonial.author}
+                    width={32}
+                    height={32}
+                    className="rounded-full"
+                  />
+                )}
+                <div>
+                  <p className="text-sm font-medium text-gray-300">— {testimonial.author}</p>
+                  {testimonial.role && (
+                    <p className="text-xs text-gray-500">{testimonial.role}</p>
+                  )}
+                </div>
+              </div>
             </motion.div>
-          ))}
+          )) || (
+            [
+              {
+                q: 'NYALTX helped us boost discovery during launch week.',
+                a: '— Team Atlas',
+              },
+              {
+                q: 'The Race to Liberty brought real traffic and holders.',
+                a: '— Liberty Labs',
+              },
+              {
+                q: 'Smooth UX and flexible payments — exactly what we needed.',
+                a: '— DeltaX',
+              },
+            ].map((t, i) => (
+              <motion.div
+                key={i}
+                variants={scaleIn}
+                className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur-md"
+              >
+                <p className="text-gray-200">"{t.q}"</p>
+                <p className="mt-3 text-sm text-gray-400">{t.a}</p>
+              </motion.div>
+            ))
+          )}
         </div>
       </motion.section>
 
@@ -597,9 +675,12 @@ function Stat({
   );
 }
 
-function Feature({ title, desc }: { title: string; desc: string }) {
+function Feature({ title, desc, icon }: { title: string; desc: string; icon?: string }) {
   return (
     <div className="group relative rounded-2xl border border-white/10 bg-gradient-to-b from-white/5 to-white/[0.03] p-5 backdrop-blur-md transition-all duration-300 hover:shadow-[0_0_40px_-10px_rgba(99,102,241,0.35)]">
+      {icon && (
+        <div className="text-2xl mb-3">{icon}</div>
+      )}
       <div className="text-lg font-semibold">{title}</div>
       <p className="mt-1 text-gray-300/90 text-sm">{desc}</p>
       <div className="pointer-events-none absolute inset-0 rounded-2xl border border-transparent group-hover:border-white/15 transition-colors" />

@@ -1,0 +1,99 @@
+{
+  "hero": {
+    "title": "The Future of DeFi Trading is Here",
+    "subtitle": "Experience next-generation cryptocurrency trading with NYALTX. Access 400+ tokens across 10+ networks with advanced analytics, gamification, and institutional-grade security.",
+    "ctaText": "Start Trading Now",
+    "ctaLink": "/dashboard",
+    "backgroundImage": "/images/hero-bg.jpg"
+  },
+  "features": {
+    "title": "Why Choose NYALTX?",
+    "subtitle": "Built for traders, by traders. Our platform combines cutting-edge technology with user-friendly design to deliver the ultimate DeFi experience.",
+    "items": [
+      {
+        "title": "Multi-Chain Trading",
+        "description": "Trade seamlessly across Ethereum, BSC, Polygon, Arbitrum, Optimism, Solana, and more. One platform, unlimited possibilities.",
+        "icon": "🌐",
+        "image": "/images/features/multi-chain.jpg"
+      },
+      {
+        "title": "Advanced Analytics",
+        "description": "Make informed decisions with real-time market data, comprehensive token metrics, and professional-grade charting tools.",
+        "icon": "📊",
+        "image": "/images/features/analytics.jpg"
+      },
+      {
+        "title": "Gamified Experience",
+        "description": "Earn rewards, climb leaderboards, and compete in our Race to Liberty system. Trading has never been this engaging.",
+        "icon": "🏆",
+        "image": "/images/features/gamification.jpg"
+      },
+      {
+        "title": "Institutional Security",
+        "description": "Your funds are protected by industry-leading security measures, multi-signature wallets, and comprehensive audit protocols.",
+        "icon": "🔒",
+        "image": "/images/features/security.jpg"
+      },
+      {
+        "title": "Token Discovery",
+        "description": "Discover trending tokens, hidden gems, and new opportunities with our advanced search and filtering capabilities.",
+        "icon": "🔍",
+        "image": "/images/features/discovery.jpg"
+      },
+      {
+        "title": "Community Driven",
+        "description": "Join a thriving community of traders, developers, and DeFi enthusiasts. Share insights, strategies, and grow together.",
+        "icon": "👥",
+        "image": "/images/features/community.jpg"
+      }
+    ]
+  },
+  "stats": {
+    "title": "Trusted by Thousands",
+    "items": [
+      {
+        "value": "400+",
+        "label": "Supported Tokens",
+        "description": "Access to the most comprehensive token selection in DeFi"
+      },
+      {
+        "value": "10+",
+        "label": "Blockchain Networks",
+        "description": "Trade across all major blockchain ecosystems"
+      },
+      {
+        "value": "$50M+",
+        "label": "Trading Volume",
+        "description": "Processed safely through our platform"
+      },
+      {
+        "value": "25K+",
+        "label": "Active Traders",
+        "description": "Growing community of DeFi enthusiasts"
+      }
+    ]
+  },
+  "testimonials": {
+    "title": "What Our Users Say",
+    "items": [
+      {
+        "quote": "NYALTX has completely transformed my DeFi trading experience. The multi-chain support and advanced analytics give me the edge I need in this competitive market.",
+        "author": "Sarah Chen",
+        "role": "Professional Trader",
+        "avatar": "/images/testimonials/sarah.jpg"
+      },
+      {
+        "quote": "The gamification features make trading so much more engaging. I love competing in the Race to Liberty and climbing the leaderboards while making profitable trades.",
+        "author": "Marcus Rodriguez",
+        "role": "DeFi Enthusiast",
+        "avatar": "/images/testimonials/marcus.jpg"
+      },
+      {
+        "quote": "As a developer, I appreciate the technical excellence behind NYALTX. The platform is fast, reliable, and the API integration is seamless.",
+        "author": "Alex Thompson",
+        "role": "Blockchain Developer",
+        "avatar": "/images/testimonials/alex.jpg"
+      }
+    ]
+  }
+}
