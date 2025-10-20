@@ -5,6 +5,24 @@ const nextConfig: NextConfig = {
     // Disable ESLint during builds
     ignoreDuringBuilds: true,
   },
+
+  async headers() {
+    return [
+      {
+        source: '/(.*)', // apply to all routes
+        headers: [
+          {
+            key: 'X-Frame-Options',
+            value: 'ALLOWALL', // allow embedding anywhere
+          },
+          {
+            key: 'Content-Security-Policy',
+            value: "frame-ancestors *;", // optional: modern CSP replacement
+          },
+        ],
+      },
+    ]
+  },
   
   typescript: {
     // Disable TypeScript errors during builds (optional)
@@ -30,6 +48,7 @@ const nextConfig: NextConfig = {
     
     return config;
   },
+  
   images: {
     domains: [
       "coin-images.coingecko.com", 
