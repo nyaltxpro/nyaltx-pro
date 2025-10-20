@@ -93,6 +93,140 @@
         "author": "Alex Thompson",
         "role": "Blockchain Developer",
         "avatar": "/images/testimonials/alex.jpg"
+      },
+      {
+        "quote": "The token discovery features are incredible. I've found so many hidden gems that I would have never discovered otherwise. The search functionality is top-notch.",
+        "author": "Emma Wilson",
+        "role": "Crypto Investor",
+        "avatar": "/images/testimonials/emma.jpg"
+      },
+      {
+        "quote": "Security was my biggest concern when choosing a DeFi platform. NYALTX's institutional-grade security measures give me complete peace of mind.",
+        "author": "David Park",
+        "role": "Portfolio Manager",
+        "avatar": "/images/testimonials/david.jpg"
+      }
+    ]
+  },
+  "cta": {
+    "title": "Ready to Start Your DeFi Journey?",
+    "subtitle": "Join thousands of traders who are already discovering, trading, and growing their portfolios with NYALTX. Experience the future of decentralized finance today.",
+    "primaryButtonText": "Get Started Now",
+    "primaryButtonLink": "/dashboard",
+    "secondaryButtonText": "View Features",
+    "secondaryButtonLink": "#features",
+    "backgroundImage": "/images/cta-bg.jpg"
+  },
+  "howItWorks": {
+    "title": "How NYALTX Works",
+    "subtitle": "Get started in three simple steps and begin your journey to DeFi success",
+    "steps": [
+      {
+        "step": "1",
+        "title": "Connect Your Wallet",
+        "description": "Securely connect your preferred crypto wallet to access all NYALTX features. We support MetaMask, WalletConnect, and many more.",
+        "icon": "🔗",
+        "image": "/images/steps/connect-wallet.jpg"
+      },
+      {
+        "step": "2",
+        "title": "Discover Tokens",
+        "description": "Use our advanced search and filtering tools to discover trending tokens, hidden gems, and new opportunities across multiple blockchains.",
+        "icon": "🔍",
+        "image": "/images/steps/discover-tokens.jpg"
+      },
+      {
+        "step": "3",
+        "title": "Trade & Compete",
+        "description": "Execute trades with confidence using our analytics tools, then compete in Race to Liberty to earn rewards and climb the leaderboards.",
+        "icon": "🚀",
+        "image": "/images/steps/trade-compete.jpg"
+      }
+    ]
+  },
+  "partnerships": {
+    "title": "Trusted Partners & Integrations",
+    "subtitle": "We work with industry leaders to provide you with the best DeFi experience",
+    "partners": [
+      {
+        "name": "CoinGecko",
+        "logo": "/images/partners/coingecko.png",
+        "description": "Real-time market data and analytics"
+      },
+      {
+        "name": "Stream.io",
+        "logo": "/images/partners/stream.png",
+        "description": "Professional live streaming infrastructure"
+      },
+      {
+        "name": "MongoDB",
+        "logo": "/images/partners/mongodb.png",
+        "description": "Secure and scalable database solutions"
+      },
+      {
+        "name": "Vercel",
+        "logo": "/images/partners/vercel.png",
+        "description": "Fast and reliable hosting platform"
+      },
+      {
+        "name": "WalletConnect",
+        "logo": "/images/partners/walletconnect.png",
+        "description": "Secure wallet connection protocol"
+      },
+      {
+        "name": "Ethereum",
+        "logo": "/images/partners/ethereum.png",
+        "description": "Leading blockchain network"
+      }
+    ]
+  },
+  "roadmap": {
+    "title": "Platform Roadmap",
+    "subtitle": "Exciting features and improvements coming to NYALTX",
+    "quarters": [
+      {
+        "period": "Q1 2025",
+        "title": "Enhanced Analytics",
+        "status": "in-progress",
+        "features": [
+          "Advanced charting tools",
+          "Portfolio tracking",
+          "Risk assessment metrics",
+          "Custom alerts system"
+        ]
+      },
+      {
+        "period": "Q2 2025",
+        "title": "Mobile Applications",
+        "status": "planned",
+        "features": [
+          "iOS native app",
+          "Android native app",
+          "Push notifications",
+          "Offline mode support"
+        ]
+      },
+      {
+        "period": "Q3 2025",
+        "title": "DeFi Expansion",
+        "status": "planned",
+        "features": [
+          "Yield farming integration",
+          "Liquidity pool analytics",
+          "Cross-chain bridges",
+          "NFT marketplace"
+        ]
+      },
+      {
+        "period": "Q4 2025",
+        "title": "AI Integration",
+        "status": "research",
+        "features": [
+          "AI-powered trading signals",
+          "Smart portfolio optimization",
+          "Predictive analytics",
+          "Automated strategies"
+        ]
       }
     ]
   }
