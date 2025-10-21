@@ -45,7 +45,7 @@ import {
 } from 'react-icons/fa';
 import { useAccount } from 'wagmi';
 import nyaxTokensData from '../../nyax-tokens-data.json';
-import CryptocurrencyIcon from '../components/CryptocurrencyIcon';
+import CryptocurrencyIcon, { type CryptocurrencyIconName } from '../components/CryptocurrencyIcon';
 
 // Chain name mapping utility
 const getChainName = (chainId: number): string => {
@@ -80,6 +80,60 @@ const getChainName = (chainId: number): string => {
         81457: 'blast',
     };
     return chainNames[chainId] || 'ethereum';
+};
+
+const mapChainToIconName = (chain?: string | null): CryptocurrencyIconName => {
+    if (!chain) return 'solana';
+
+    switch (chain.toLowerCase()) {
+        case 'ethereum':
+            return 'ethereum';
+        case 'solana':
+            return 'solana';
+        case 'binance':
+        case 'bsc':
+            return 'binance';
+        case 'polygon':
+        case 'matic':
+            return 'polygon';
+        case 'avalanche':
+        case 'avax':
+            return 'avalanche';
+        case 'base':
+            return 'base';
+        case 'arbitrum':
+            return 'arbitrum';
+        case 'optimism':
+            return 'optimism';
+        case 'abstract':
+            return 'abstract';
+        case 'balancer':
+            return 'balancer';
+        case 'cronos':
+            return 'cronos';
+        case 'hyperevm':
+            return 'hyperevm';
+        case 'linea':
+            return 'linea';
+        case 'near':
+            return 'near';
+        case 'pumpswap':
+            return 'pumpswap';
+        case 'sonic':
+            return 'sonic';
+        case 'starknet':
+            return 'starknet';
+        case 'sui':
+            return 'sui';
+        case 'sushiswap':
+            return 'sushiswap';
+        case 'unichain':
+            return 'unichain';
+        case 'zksync':
+            return 'zksync';
+        default:
+            return 'solana';
+    }
 };
 
 // Helper function to compare addresses (case-sensitive for Solana, case-insensitive for EVM)
@@ -1257,7 +1311,7 @@ function TradingViewWithParams({
                                                 className="p-2 bg-[#1a2932] rounded-full hover:bg-[#253440]"
                                                 title="View on Dexscreener"
                                             >
-                                                <CryptocurrencyIcon name={t?.chain || 'solana'} className='h-5 w-5' />
+                                                <CryptocurrencyIcon name={mapChainToIconName(t?.chain)} className='h-4 w-4' />
                                             </a>
                                         )}
 
