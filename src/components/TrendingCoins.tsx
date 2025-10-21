@@ -25,7 +25,7 @@ export default function TrendingCoins() {
     if (coin.contractAddresses && Object.keys(coin.contractAddresses).length > 0) {
       return true;
     }
-    
+
     if (coin.primaryChain && coin.primaryAddress) {
       return true;
     }
@@ -131,7 +131,7 @@ export default function TrendingCoins() {
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">Trending Search List</h2>
         <div className="flex items-center gap-2">
-          {hasCachedData && (
+          {/* {hasCachedData && (
             <span className="text-xs text-green-400 bg-green-900/20 px-2 py-1 rounded">
               📱 Cached
             </span>
@@ -143,7 +143,7 @@ export default function TrendingCoins() {
             title="Refresh trending coins"
           >
             {loading ? '🔄' : '↻'} Refresh
-          </button>
+          </button> */}
         </div>
       </div>
 
@@ -168,11 +168,11 @@ export default function TrendingCoins() {
         <div className="space-y-3">
           {(() => {
             console.log('📊 Total trending coins received:', trendingCoins.length);
-            console.log('📊 Trending coins data:', trendingCoins.map(c => ({ 
-              symbol: c.symbol, 
-              hasContract: !!c.contractAddresses && Object.keys(c.contractAddresses).length > 0, 
+            console.log('📊 Trending coins data:', trendingCoins.map(c => ({
+              symbol: c.symbol,
+              hasContract: !!c.contractAddresses && Object.keys(c.contractAddresses).length > 0,
               primaryChain: c.primaryChain,
-              contractAddresses: c.contractAddresses 
+              contractAddresses: c.contractAddresses
             })));
             return null;
           })()}
@@ -190,56 +190,56 @@ export default function TrendingCoins() {
             })
             .slice(0, 5)
             .map(coin => (
-            <div
-              key={coin.id}
-              className="rounded-lg p-2 flex flex-col sm:flex-row sm:justify-between sm:items-center cursor-pointer hover:bg-gray-800/40"
-              onClick={() => handleNavigate(coin)}
-            >
-              <div className="flex items-center">
-                <div className="relative h-8 w-8 mr-3">
-                  <Image
-                    src={coin.thumb}
-                    alt={coin.name}
-                    fill
-                    className="rounded-full object-cover"
-                    unoptimized
-                  />
+              <div
+                key={coin.id}
+                className="rounded-lg p-2 flex flex-col sm:flex-row sm:justify-between sm:items-center cursor-pointer hover:bg-gray-800/40"
+                onClick={() => handleNavigate(coin)}
+              >
+                <div className="flex items-center">
+                  <div className="relative h-8 w-8 mr-3">
+                    <Image
+                      src={coin.thumb}
+                      alt={coin.name}
+                      fill
+                      className="rounded-full object-cover"
+                      unoptimized
+                    />
+                  </div>
+                  <div>
+                    <div className="font-medium">{coin.name}</div>
+                    <div className="text-gray-400 text-xs flex items-center gap-2">
+                      <span>{coin.symbol.toUpperCase()}</span>
+                      {coin.primaryChain && (
+                        <span className="bg-blue-900/30 text-blue-300 px-1 rounded text-xs">
+                          {coin.primaryChain}
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <div className="font-medium">{coin.name}</div>
-                  <div className="text-gray-400 text-xs flex items-center gap-2">
-                    <span>{coin.symbol.toUpperCase()}</span>
-                    {coin.primaryChain && (
-                      <span className="bg-blue-900/30 text-blue-300 px-1 rounded text-xs">
-                        {coin.primaryChain}
+
+                <div className="text-right w-full sm:w-auto mt-2 sm:mt-0 flex justify-between sm:block">
+                  <div className="font-medium text-sm flex items-center">
+                    {coin.price_btc && (
+                      <span className="text-orange-400">{formatBtcPrice(coin.price_btc)}</span>
+                    )}
+                  </div>
+                  <div className="text-xs text-gray-400 flex items-center gap-2">
+                    <span>Rank #{coin.market_cap_rank || 'N/A'}</span>
+                    {coin.contractAddresses && Object.keys(coin.contractAddresses).length > 0 && (
+                      <span className="text-green-400" title="Contract addresses cached">
+                        🔗
                       </span>
                     )}
                   </div>
                 </div>
               </div>
-
-              <div className="text-right w-full sm:w-auto mt-2 sm:mt-0 flex justify-between sm:block">
-                <div className="font-medium text-sm flex items-center">
-                  {coin.price_btc && (
-                    <span className="text-orange-400">{formatBtcPrice(coin.price_btc)}</span>
-                  )}
-                </div>
-                <div className="text-xs text-gray-400 flex items-center gap-2">
-                  <span>Rank #{coin.market_cap_rank || 'N/A'}</span>
-                  {coin.contractAddresses && Object.keys(coin.contractAddresses).length > 0 && (
-                    <span className="text-green-400" title="Contract addresses cached">
-                      🔗
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
+            ))}
 
           {trendingCoins.filter(coin => hasChainInfo(coin)).length === 0 && (
             <div className="text-center text-gray-400 py-4">
-              {trendingCoins.length === 0 
-                ? "No trending coins found" 
+              {trendingCoins.length === 0
+                ? "No trending coins found"
                 : "No trending tokens with chain information found"
               }
             </div>
