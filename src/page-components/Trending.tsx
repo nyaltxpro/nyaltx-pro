@@ -392,23 +392,7 @@ export default function TrendingPage() {
                                 <p className="text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>Top performing cryptocurrencies with real-time market data</p>
                             </div>
                             <div className="flex items-center gap-4">
-                                <div className="flex items-center gap-2">
-                                    {hasCachedData && !trendingLoading && (
-                                        <span className="text-xs text-green-400 bg-green-900/20 px-2 py-1 rounded" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                                            📱 Trending Cached
-                                        </span>
-                                    )}
-                                    {(trendingLoading || marketDataLoading) && (
-                                        <span className="text-xs text-blue-400 bg-blue-900/20 px-2 py-1 rounded animate-pulse" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                                            🔄 Loading Market Data...
-                                        </span>
-                                    )}
-                                    {tokens.length > 0 && !trendingLoading && !marketDataLoading && (
-                                        <span className="text-xs text-green-400 bg-green-900/20 px-2 py-1 rounded" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                                            ✅ {tokens.length} Tokens Loaded
-                                        </span>
-                                    )}
-                                </div>
+
                             </div>
                         </div>
                     </div>
@@ -507,7 +491,7 @@ export default function TrendingPage() {
                                     onClick={() => setActiveFilter('favorites')}
                                     style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                                 >
-                                    <Star size={14} className="mr-1" />
+                                    {/* <Star size={14} className="mr-1" /> */}
                                     Favorites
                                 </button>
                             </div>
