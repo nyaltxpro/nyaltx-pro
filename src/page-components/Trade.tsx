@@ -1311,7 +1311,7 @@ function TradingViewWithParams({
                                                 className="p-2 bg-[#1a2932] rounded-full hover:bg-[#253440]"
                                                 title="View on Dexscreener"
                                             >
-                                                <CryptocurrencyIcon name={mapChainToIconName(t?.chain)} className='h-4 w-4' />
+                                                <CryptocurrencyIcon name={mapChainToIconName(chainParam)} className='h-4 w-4' />
                                             </a>
                                         )}
 
