@@ -131,7 +131,7 @@ export default function FavoritesPage() {
     if (!isConnected) {
         return (
             <Tooltip.Provider>
-                <div className="min-h-screen bg-gradient-to-br from-[#0a0e1a] via-[#0f1419] to-[#1a1f2e] px-4 py-6 md:px-6 lg:px-8">
+                <div className="min-h-screen  px-4 py-6 md:px-6 lg:px-8">
                     <div className="mx-auto">
                         {/* Header Section */}
                         <div className="relative mb-8">
