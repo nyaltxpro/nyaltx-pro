@@ -815,6 +815,24 @@ export default defineConfig({
             name: "members",
             label: "Team Members",
             list: true,
+            ui: {
+              itemProps: (item) => {
+                return {
+                  label: item?.name || "New Team Member",
+                };
+              },
+              defaultItem: () => ({
+                name: "New Team Member",
+                role: "Role / Title",
+                description: "",
+                image: "",
+                socials: {
+                  twitter: "",
+                  linkedin: "",
+                  telegram: "",
+                },
+              }),
+            },
             fields: [
               {
                 type: "string",
@@ -839,6 +857,7 @@ export default defineConfig({
                 type: "image",
                 name: "image",
                 label: "Photo",
+                required: true,
               },
               {
                 type: "object",
