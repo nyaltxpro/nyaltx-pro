@@ -229,6 +229,11 @@ const Row: React.FC<{ item: any; onInspect: (o: any) => void }> = ({ item, onIns
               <div className="text-xs text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                 {formatTime(tokenData.ts)}
               </div>
+              <div className="px-2 py-1 bg-gray-800/50 rounded-md text-xs font-mono text-gray-300" style={{ fontFamily: 'SF Mono, Monaco, Inconsolata, Roboto Mono, monospace' }}>
+                {tokenData.mint
+                  ? `${tokenData.mint.slice(0, 4)}...${tokenData.mint.slice(-4)}`
+                  : '—'}
+              </div>
             </div>
           </div>
 
