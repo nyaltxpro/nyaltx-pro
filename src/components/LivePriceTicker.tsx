@@ -5,7 +5,6 @@ import * as Tooltip from '@radix-ui/react-tooltip';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useRef, useState } from 'react';
-import NetworkIcon from '../utils/nerowrkIcon';
 
 // Moralis Pump.fun Token Interface
 interface PumpFunToken {
@@ -415,7 +414,7 @@ const LivePriceTicker: React.FC = () => {
                         {/* <span className="text-[8px] font-bold text-white">
                           {token.chainId === 'solana' ? 'S' : token.chainId === 'bsc' ? 'B' : 'E'}
                         </span> */}
-                        <NetworkIcon
+                        {/* <NetworkIcon
                           network={
                             token.chainId === 'bsc'
                               ? 'binance-smart-chain'
@@ -427,7 +426,7 @@ const LivePriceTicker: React.FC = () => {
                           }
                           variant="branded"
                           size="14"
-                        />
+                        /> */}
                       </div>
                     </div>
 
