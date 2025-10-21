@@ -275,9 +275,12 @@ const Ads = () => {
                             <h3 className="text-xl font-bold text-white mb-1 truncate" style={{ fontFamily: 'Space Grotesk, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                               {item.tokenSymbol || item.tokenName}
                             </h3>
-                            <p className="text-sm text-gray-400 font-medium truncate" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                              {item.tokenName || 'Token Name'}
-                            </p>
+                            <div className='flex'>
+                              <p className="text-sm text-gray-400 font-medium truncate" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                {item.tokenName || 'Token Name'}
+                              </p>
+                              <CryptocurrencyIcon className='px-2 py-1' name={item.blockchain === 'solana' ? 'solana' : item.blockchain === 'bsc' ? 'bsc' : 'ethereum'} />
+                            </div>
                           </div>
 
                           {/* Contract Address - Enhanced */}
@@ -318,7 +321,6 @@ const Ads = () => {
                               LIVE
                             </div>
                             <div className="px-3 py-1 bg-gradient-to-r from-[#00d4aa]/25 to-[#3b82f6]/25 text-[#00d4aa] text-xs rounded-lg border border-[#00d4aa]/40 font-bold backdrop-blur-sm uppercase">
-                              <CryptocurrencyIcon className='px-2 py-1' name={item.blockchain === 'solana' ? 'solana' : item.blockchain === 'bsc' ? 'bsc' : 'ethereum'} />
                               {item.blockchain || 'CHAIN'}
                             </div>
 
