@@ -1,11 +1,11 @@
 'use client';
-
+import CryptocurrencyIcon from '@/components/CryptocurrencyIcon';
 import { ActivityLogIcon, ExternalLinkIcon, RocketIcon } from '@radix-ui/react-icons';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useRef, useState } from 'react';
-
+// import NetworkWeb3Icon from '@/utils/networkIcon'
 // Moralis Pump.fun Token Interface
 interface PumpFunToken {
   tokenAddress: string;
@@ -414,19 +414,7 @@ const LivePriceTicker: React.FC = () => {
                         {/* <span className="text-[8px] font-bold text-white">
                           {token.chainId === 'solana' ? 'S' : token.chainId === 'bsc' ? 'B' : 'E'}
                         </span> */}
-                        {/* <NetworkIcon
-                          network={
-                            token.chainId === 'bsc'
-                              ? 'binance-smart-chain'
-                              : token.chainId === 'eth'
-                                ? 'ethereum'
-                                : token.chainId === 'solana'
-                                  ? 'solana'
-                                  : token.chainId // fallback if already full name
-                          }
-                          variant="branded"
-                          size="14"
-                        /> */}
+                        <CryptocurrencyIcon name={token.chainId === 'solana' ? 'solana' : token.chainId === 'bsc' ? 'bsc' : 'ethereum'} />
                       </div>
                     </div>
 
