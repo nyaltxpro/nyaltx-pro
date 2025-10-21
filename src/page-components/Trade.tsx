@@ -1162,7 +1162,7 @@ function TradingViewWithParams({
                 {/* Middle Column - Chart and Trades */}
                 <div className="col-span-1 md:col-span-2 lg:col-span-2 order-1 md:order-2">
                     {/* Chart */}
-                    <div className="bg-[#222227] rounded-xl p-4 mb-4">
+                    <div className="bg-[#222227] shadow-md rounded-xl p-4 mb-4">
                         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-3 sm:gap-0">
                             {/* Token Header Bar */}
                             <div className="flex items-center gap-2 sm:gap-3">
