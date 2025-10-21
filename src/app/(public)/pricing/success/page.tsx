@@ -1,7 +1,6 @@
-import React from 'react';
-import Link from 'next/link';
 import PublicHeader from '@/components/PublicHeader';
-import { FaCheckCircle, FaArrowRight } from 'react-icons/fa';
+import Link from 'next/link';
+import { FaArrowRight, FaCheckCircle } from 'react-icons/fa';
 
 export default function PaymentSuccessPage({
   searchParams,
@@ -11,7 +10,7 @@ export default function PaymentSuccessPage({
   const { tier, orderId, method } = searchParams;
 
   return (
-    <div className="min-h-screen bg-[#0a0b0f] text-white">
+    <div className="min-h-screen  text-white">
       <PublicHeader />
 
       {/* Success background effects */}
@@ -155,7 +154,7 @@ export default function PaymentSuccessPage({
             <p className="text-gray-400 text-sm">
               Need help? Contact our support team at{' '}
               <a href="mailto:support@nyaltx.com" className="text-cyan-400 hover:underline">
-                support@nyaltx.com
+                nyaltxpro@gmail.com
               </a>
             </p>
           </div>

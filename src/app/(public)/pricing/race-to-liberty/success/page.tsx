@@ -1,10 +1,9 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
 import PublicHeader from '@/components/PublicHeader';
-import { FaCheck, FaTrophy, FaCoins, FaArrowRight, FaHome, FaGift, FaTag } from 'react-icons/fa';
-import Image from 'next/image';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense, useEffect, useState } from 'react';
+import { FaCheck, FaCoins, FaGift, FaHome, FaTag, FaTrophy } from 'react-icons/fa';
 
 const TIER_INFO = {
   paddle: {
@@ -62,7 +61,7 @@ function RaceToLibertySuccessContent() {
   return (
     <>
       <PublicHeader />
-      <div className="min-h-screen bg-black text-white">
+      <div className="min-h-screen  text-white">
         {/* Background Effects */}
         <div className="pointer-events-none absolute inset-0 -z-10">
           <div className="absolute -top-24 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-green-500/20 blur-3xl" />

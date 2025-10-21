@@ -63,7 +63,7 @@ function BoostPackSuccessContent() {
 
   if (!mounted || !boostPack) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen  flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-500"></div>
       </div>
     );
@@ -74,7 +74,7 @@ function BoostPackSuccessContent() {
   return (
     <>
       <PublicHeader />
-      <div className="min-h-screen bg-black text-white">
+      <div className="min-h-screen  text-white">
         {/* Background Effects */}
         <div className="pointer-events-none absolute inset-0 -z-10">
           <div className="absolute -top-24 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-green-500/20 blur-3xl" />

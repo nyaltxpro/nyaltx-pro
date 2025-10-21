@@ -958,7 +958,7 @@ export default function RaceToLibertyCheckout({
         <div className="max-w-6xl mx-auto">
           {/* Modern Header */}
           <div className="mb-12">
-            <button
+            {/* <button
               onClick={() => router.back()}
               className="mb-6 group flex items-center gap-2 text-gray-400 hover:text-white transition-all duration-300 hover:translate-x-1"
             >
@@ -966,7 +966,7 @@ export default function RaceToLibertyCheckout({
                 ←
               </div>
               Back to Pricing
-            </button>
+            </button> */}
 
             <div className="text-center mb-8">
               <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 mb-6">
@@ -1194,11 +1194,10 @@ export default function RaceToLibertyCheckout({
                         onChange={e => handleEmailChange(e.target.value)}
                         placeholder="your@email.com"
                         required
-                        className={`w-full px-4 py-3 rounded-xl bg-white/5 border text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-cyan-500/50 transition-all duration-300 ${
-                          emailError 
-                            ? 'border-red-500/50 focus:ring-red-500/50' 
+                        className={`w-full px-4 py-3 rounded-xl bg-white/5 border text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-cyan-500/50 transition-all duration-300 ${emailError
+                            ? 'border-red-500/50 focus:ring-red-500/50'
                             : 'border-white/10 focus:ring-cyan-500/50'
-                        }`}
+                          }`}
                       />
                       {emailError && (
                         <p className="mt-2 text-sm text-red-400">

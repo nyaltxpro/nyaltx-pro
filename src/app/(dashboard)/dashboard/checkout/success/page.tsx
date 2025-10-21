@@ -34,7 +34,7 @@ function CheckoutSuccessContent() {
   }, [router]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center p-4">
+    <div className="min-h-screen 0 flex items-center justify-center p-4">
       <div className="max-w-2xl w-full">
         {/* Success Card */}
         <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-8 text-center">
@@ -219,7 +219,7 @@ function CheckoutSuccessContent() {
             href="mailto:support@nyaltx.com"
             className="text-[#00b8d8] hover:text-[#0099b8] text-sm underline"
           >
-            support@nyaltx.com
+            nyaltxpro@gmail.com
           </Link>
         </div>
       </div>

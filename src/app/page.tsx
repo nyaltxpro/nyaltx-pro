@@ -99,12 +99,7 @@ export default function Page() {
               </div>
               {/* Chains / badges */}
               <div className="mt-6 flex items-center gap-3 text-xs text-gray-400">
-                <span className="px-2 py-1 rounded-full border border-white/10 bg-black/30">
-                  EVM • Multi-chain
-                </span>
-                <span className="px-2 py-1 rounded-full border border-white/10 bg-black/30">
-                  Web3-native
-                </span>
+
               </div>
             </motion.div>
             <motion.div className="flex justify-center md:justify-center" variants={scaleIn}>

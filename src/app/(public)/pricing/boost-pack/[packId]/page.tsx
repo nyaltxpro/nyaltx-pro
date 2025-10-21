@@ -433,7 +433,7 @@ export default function BoostPackCheckout() {
         try {
           for (const token of selectedTokenData) {
             const finalBoost = Math.floor(boostPack.points * (token.multiplier || 1.0));
-            
+
             const boostResponse = await fetch('/api/gamification/boost', {
               method: 'POST',
               headers: {
@@ -566,7 +566,7 @@ export default function BoostPackCheckout() {
         case 'paypal':
           // Handle PayPal payment via Stripe
           const selectedTokenDataForPaypal = userTokens.filter(token => selectedTokens.includes(token.id));
-          
+
           const paypalResponse = await fetch('/api/create-payment-intent', {
             method: 'POST',
             headers: {
@@ -593,7 +593,7 @@ export default function BoostPackCheckout() {
           }
 
           const { clientSecret } = await paypalResponse.json();
-          
+
           // Redirect to Stripe checkout
           router.push(`/pricing/checkout?client_secret=${clientSecret}&type=boost_pack&pack=${packId}&tokens=${selectedTokens.join(',')}`);
           return;
@@ -648,7 +648,7 @@ export default function BoostPackCheckout() {
       try {
         for (const token of selectedTokenData) {
           const finalBoost = Math.floor(boostPack.points * (token.multiplier || 1.0));
-          
+
           const boostResponse = await fetch('/api/gamification/boost', {
             method: 'POST',
             headers: {
@@ -795,7 +795,7 @@ export default function BoostPackCheckout() {
   return (
     <>
       <PublicHeader />
-      <div className="min-h-screen bg-black text-white">
+      <div className="min-h-screen  text-white">
         {/* Background Effects */}
         <div className="pointer-events-none absolute inset-0 -z-10">
           <div className="absolute -top-24 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-cyan-500/20 blur-3xl" />
@@ -876,8 +876,8 @@ export default function BoostPackCheckout() {
                         <div
                           key={token.id}
                           className={`p-4 rounded-lg border cursor-pointer transition-all ${selectedTokens.includes(token.id)
-                              ? 'border-cyan-500 bg-cyan-500/10'
-                              : 'border-gray-700 bg-gray-800/50 hover:border-gray-600'
+                            ? 'border-cyan-500 bg-cyan-500/10'
+                            : 'border-gray-700 bg-gray-800/50 hover:border-gray-600'
                             }`}
                           onClick={() => handleTokenToggle(token.id)}
                         >
@@ -928,8 +928,8 @@ export default function BoostPackCheckout() {
 
                               <div
                                 className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${selectedTokens.includes(token.id)
-                                    ? 'border-cyan-500 bg-cyan-500'
-                                    : 'border-gray-600'
+                                  ? 'border-cyan-500 bg-cyan-500'
+                                  : 'border-gray-600'
                                   }`}
                               >
                                 {selectedTokens.includes(token.id) && (
@@ -1101,8 +1101,8 @@ export default function BoostPackCheckout() {
                   <button
                     onClick={() => setPaymentMethod('eth')}
                     className={`w-full p-3 rounded-lg border transition-colors ${paymentMethod === 'eth'
-                        ? 'border-cyan-500 bg-cyan-500/10'
-                        : 'border-gray-700 hover:border-gray-600'
+                      ? 'border-cyan-500 bg-cyan-500/10'
+                      : 'border-gray-700 hover:border-gray-600'
                       }`}
                   >
                     <div className="flex items-center justify-between">
@@ -1117,8 +1117,8 @@ export default function BoostPackCheckout() {
                   <button
                     onClick={() => setPaymentMethod('sol')}
                     className={`w-full p-3 rounded-lg border transition-colors ${paymentMethod === 'sol'
-                        ? 'border-cyan-500 bg-cyan-500/10'
-                        : 'border-gray-700 hover:border-gray-600'
+                      ? 'border-cyan-500 bg-cyan-500/10'
+                      : 'border-gray-700 hover:border-gray-600'
                       }`}
                   >
                     <div className="flex items-center justify-between">
@@ -1138,8 +1138,8 @@ export default function BoostPackCheckout() {
                   <button
                     onClick={() => setPaymentMethod('nyax')}
                     className={`w-full p-3 rounded-lg border transition-colors ${paymentMethod === 'nyax'
-                        ? 'border-cyan-500 bg-cyan-500/10'
-                        : 'border-gray-700 hover:border-gray-600'
+                      ? 'border-cyan-500 bg-cyan-500/10'
+                      : 'border-gray-700 hover:border-gray-600'
                       }`}
                   >
                     <div className="flex items-center justify-between">
@@ -1157,8 +1157,8 @@ export default function BoostPackCheckout() {
                   <button
                     onClick={() => setPaymentMethod('paypal')}
                     className={`w-full p-3 rounded-lg border transition-colors ${paymentMethod === 'paypal'
-                        ? 'border-cyan-500 bg-cyan-500/10'
-                        : 'border-gray-700 hover:border-gray-600'
+                      ? 'border-cyan-500 bg-cyan-500/10'
+                      : 'border-gray-700 hover:border-gray-600'
                       }`}
                   >
                     <div className="flex items-center justify-between">
@@ -1256,8 +1256,8 @@ export default function BoostPackCheckout() {
                 onClick={handlePayment}
                 // disabled={selectedTokens.length === 0 || isProcessing}
                 className={`w-full py-4 text-white font-bold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 ${appliedPromo && appliedPromo.type === 'free'
-                    ? 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700'
-                    : 'bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-700 hover:to-indigo-700'
+                  ? 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700'
+                  : 'bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-700 hover:to-indigo-700'
                   }`}
               >
                 {isProcessing ? (
@@ -1275,9 +1275,9 @@ export default function BoostPackCheckout() {
                     ) : (
                       <>
                         <FaRocket />
-                        {pricing.finalPrice === 0 
-                          ? 'Claim Free Boost Pack' 
-                          : paymentMethod === 'paypal' 
+                        {pricing.finalPrice === 0
+                          ? 'Claim Free Boost Pack'
+                          : paymentMethod === 'paypal'
                             ? 'Continue to PayPal Checkout'
                             : 'Purchase Boost Pack'
                         }

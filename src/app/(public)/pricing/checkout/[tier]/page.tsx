@@ -12,7 +12,7 @@ export default async function CheckoutPage({
   const { method } = await searchParams;
 
   return (
-    <div className="min-h-screen bg-[#0a0b0f] text-white">
+    <div className="min-h-screen  text-white">
       <PublicHeader />
       <main className="container mx-auto px-4 py-10">
         <div className="mb-6">
