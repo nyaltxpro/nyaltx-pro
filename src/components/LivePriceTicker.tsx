@@ -5,6 +5,7 @@ import * as Tooltip from '@radix-ui/react-tooltip';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useRef, useState } from 'react';
+import NetworkIcon from '../utils/nerowrkIcon';
 
 // Moralis Pump.fun Token Interface
 interface PumpFunToken {
@@ -410,10 +411,23 @@ const LivePriceTicker: React.FC = () => {
                         />
                       </div>
                       {/* Chain badge */}
-                      <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full flex items-center justify-center">
-                        <span className="text-[8px] font-bold text-white">
+                      <div className="absolute -bottom-1 -right-1 w-4 h-4 flex items-center justify-center">
+                        {/* <span className="text-[8px] font-bold text-white">
                           {token.chainId === 'solana' ? 'S' : token.chainId === 'bsc' ? 'B' : 'E'}
-                        </span>
+                        </span> */}
+                        <NetworkIcon
+                          network={
+                            token.chainId === 'bsc'
+                              ? 'binance-smart-chain'
+                              : token.chainId === 'eth'
+                                ? 'ethereum'
+                                : token.chainId === 'solana'
+                                  ? 'solana'
+                                  : token.chainId // fallback if already full name
+                          }
+                          variant="branded"
+                          size="14"
+                        />
                       </div>
                     </div>
 
