@@ -1,11 +1,11 @@
 'use client';
 
+import { useFooterContent } from '@/hooks/useTinaContent';
 import Link from 'next/link';
 import React, { useState } from 'react';
 import { BsDiscord } from 'react-icons/bs';
 import { FaTelegram, FaYoutube } from 'react-icons/fa';
 import { FaXTwitter } from 'react-icons/fa6';
-import { useFooterContent } from '@/hooks/useTinaContent';
 
 const Footer = () => {
   const { content: footerContent, loading, error } = useFooterContent();
@@ -92,7 +92,7 @@ const Footer = () => {
               </h3>
 
               {/* Newsletter Signup */}
-              <div className="mt-6 p-4 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/20 rounded-xl backdrop-blur-sm">
+              <div className="mt-6 p-4 bg-gradient-to-r from-black-500/10 to-blue-black/10 border border-gray-500/20 rounded-xl backdrop-blur-sm">
                 <h4 className="text-lg font-semibold mb-3 text-cyan-400">
                   {footerContent?.newsletter?.title || "Join Our Community"}
                 </h4>
@@ -222,7 +222,7 @@ const Footer = () => {
         <div className="flex w-full flex-col backdrop-blur">
           {/* Disclaimer */}
           <div className="text-xs text-justify text-gray-400/90 mb-6 max-w-full mx-auto px-2 sm:px-4 leading-relaxed">
-            {footerContent?.legal?.disclaimer || 
+            {footerContent?.legal?.disclaimer ||
               "All content available on our website, on hyperlinked websites, and on applications, forums, blogs, social media accounts and other platforms associated with Nyaltx is intended solely to provide you with general information. We make no warranties of any kind with respect to our content, including, but not limited to, the accuracy and currency of the information. None of the content we provide should be construed as financial, legal or any other type of advice on which you may rely. Nothing on our Site should be considered an invitation or offer to take any action."
             }
           </div>
