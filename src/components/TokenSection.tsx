@@ -1,11 +1,12 @@
 'use client';
+import { useChainFilter } from '@/hooks/useChainFilter';
+import * as Avatar from '@radix-ui/react-avatar';
+import { InfoCircledIcon, RocketIcon, UpdateIcon } from '@radix-ui/react-icons';
+import * as Tooltip from '@radix-ui/react-tooltip';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { useChainFilter } from '@/hooks/useChainFilter';
 import ChainFilterIndicator from './ChainFilterIndicator';
-import * as Tooltip from '@radix-ui/react-tooltip';
-import * as Avatar from '@radix-ui/react-avatar';
-import { RocketIcon, ExternalLinkIcon, InfoCircledIcon, UpdateIcon } from '@radix-ui/react-icons';
+import CryptocurrencyIcon from './CryptocurrencyIcon';
 
 function formatTime(ts: number | string | undefined) {
   if (!ts) return '';
@@ -191,25 +192,30 @@ const Row: React.FC<{ item: any; onInspect: (o: any) => void }> = ({ item, onIns
     <div className="group relative">
       {/* Glow effect */}
       <div className="absolute -inset-0.5 bg-gradient-to-r from-[#00d4aa]/20 via-[#3b82f6]/20 to-[#f59e0b]/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
-      
+
       <div className="relative bg-black/60 backdrop-blur-sm border border-gray-800/50 rounded-lg sm:rounded-xl p-3 sm:p-4 hover:border-gray-700/50 transition-all duration-300 group-hover:transform group-hover:scale-[1.02]" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-            <Avatar.Root className="w-10 h-10 sm:w-12 sm:h-12">
-              {isLoading ? (
-                <div className="w-full h-full bg-gray-700/50 rounded-full animate-pulse"></div>
-              ) : tokenData.image ? (
-                <Avatar.Image
-                  src={tokenData.image}
-                  alt={tokenData.symbol || 'icon'}
-                  className="w-full h-full object-cover rounded-full"
-                />
-              ) : (
-                <Avatar.Fallback className="w-full h-full bg-gradient-to-br from-orange-500 to-pink-600 flex items-center justify-center text-white font-bold text-sm rounded-full">
-                  {tokenData.symbol?.[0] || '?'}
-                </Avatar.Fallback>
-              )}
-            </Avatar.Root>
+            <div className="relative w-10 h-10 sm:w-12 sm:h-12">
+              <Avatar.Root className="w-full h-full">
+                {isLoading ? (
+                  <div className="w-full h-full bg-gray-700/50 rounded-full animate-pulse"></div>
+                ) : tokenData.image ? (
+                  <Avatar.Image
+                    src={tokenData.image}
+                    alt={tokenData.symbol || 'icon'}
+                    className="w-full h-full object-cover rounded-full"
+                  />
+                ) : (
+                  <Avatar.Fallback className="w-full h-full bg-gradient-to-br from-orange-500 to-pink-600 flex items-center justify-center text-white font-bold text-sm rounded-full">
+                    {tokenData.symbol?.[0] || '?'}
+                  </Avatar.Fallback>
+                )}
+              </Avatar.Root>
+
+              {/* PumpSap icon overlay */}
+              <CryptocurrencyIcon name={'pumpswap'} />
+            </div>
 
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
@@ -231,10 +237,10 @@ const Row: React.FC<{ item: any; onInspect: (o: any) => void }> = ({ item, onIns
               <Tooltip.Trigger asChild>
                 <button
                   onClick={() => handleClick(tokenData)}
-                  className="px-3 py-2 bg-gradient-to-r from-[#00d4aa] to-[#00b894] text-white text-xs font-medium rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-[#00d4aa]/25 flex items-center gap-1"
+                  className="px-3 py-2 border-gradient-to-r from-[#00d4aa] to-[#00b894] border text-white text-xs font-medium rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-[#00d4aa]/25 flex items-center gap-1"
                   style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                 >
-                  <ExternalLinkIcon className="w-3 h-3" />
+                  <CryptocurrencyIcon name={'solana'} />
                   Trade
                 </button>
               </Tooltip.Trigger>
@@ -588,19 +594,19 @@ export default function PumpPortalSimpleUI() {
                 </span>
               </div>
               <div className="space-y-2 sm:space-y-3 max-h-[50vh] sm:max-h-[70vh] overflow-auto pr-1">
-              {filtered(filteredNewTokens).map((it, idx) => {
-                // Use mint as key to prevent duplicate rendering
-                const tokenFields = pickTokenFields(it.event?.token || it.event || it);
-                const key = tokenFields.mint || `new-${idx}-${Math.random()}`;
-                return <Row key={key} item={it} onInspect={setInspect} />;
-              })}
-              {newTokens.length === 0 && (
-                <p className="text-sm opacity-60">Listening for new tokens…</p>
-              )}
-            </div>
-          </section>
+                {filtered(filteredNewTokens).map((it, idx) => {
+                  // Use mint as key to prevent duplicate rendering
+                  const tokenFields = pickTokenFields(it.event?.token || it.event || it);
+                  const key = tokenFields.mint || `new-${idx}-${Math.random()}`;
+                  return <Row key={key} item={it} onInspect={setInspect} />;
+                })}
+                {newTokens.length === 0 && (
+                  <p className="text-sm opacity-60">Listening for new tokens…</p>
+                )}
+              </div>
+            </section>
 
-          {/* <section className="bg-gray-950 rounded-2xl p-4 border border-gray-800">
+            {/* <section className="bg-gray-950 rounded-2xl p-4 border border-gray-800">
             <h2 className="text-lg font-semibold mb-3">
               Pre‑launched 
               <span className="text-xs ml-2 text-gray-400">{Object.keys(preLaunched).length} tokens</span>
@@ -654,34 +660,34 @@ export default function PumpPortalSimpleUI() {
                   </Tooltip.Portal>
                 </Tooltip.Root>
               </div>
-            <div className="space-y-2 sm:space-y-3 max-h-[50vh] sm:max-h-[70vh] overflow-auto pr-1">
-              {filteredLaunchedList.length > 0 ? (
-                filtered(filteredLaunchedList).map((it: any, index: number) => {
-                  // Extract the appropriate data structure for the Row component
-                  const tokenFields = pickTokenFields(it.event?.token || it.event || it);
-                  const key = tokenFields.mint || `launched-${index}-${Math.random()}`;
-                  return <Row key={key} item={it} onInspect={setInspect} />;
-                })
-              ) : (
-                <div className="text-center py-8">
-                  <div className="w-16 h-16 bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <UpdateIcon className="w-8 h-8 text-gray-500" />
+              <div className="space-y-2 sm:space-y-3 max-h-[50vh] sm:max-h-[70vh] overflow-auto pr-1">
+                {filteredLaunchedList.length > 0 ? (
+                  filtered(filteredLaunchedList).map((it: any, index: number) => {
+                    // Extract the appropriate data structure for the Row component
+                    const tokenFields = pickTokenFields(it.event?.token || it.event || it);
+                    const key = tokenFields.mint || `launched-${index}-${Math.random()}`;
+                    return <Row key={key} item={it} onInspect={setInspect} />;
+                  })
+                ) : (
+                  <div className="text-center py-8">
+                    <div className="w-16 h-16 bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                      <UpdateIcon className="w-8 h-8 text-gray-500" />
+                    </div>
+                    <p className="text-sm text-gray-400 mb-4" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                      Listening for migrations...
+                    </p>
+                    <button
+                      onClick={simulateLaunchedToken}
+                      className="px-4 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white text-xs font-medium rounded-lg hover:shadow-lg hover:shadow-green-600/25 transition-all duration-200"
+                      style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                    >
+                      Add Test Token
+                    </button>
                   </div>
-                  <p className="text-sm text-gray-400 mb-4" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                    Listening for migrations...
-                  </p>
-                  <button
-                    onClick={simulateLaunchedToken}
-                    className="px-4 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white text-xs font-medium rounded-lg hover:shadow-lg hover:shadow-green-600/25 transition-all duration-200"
-                    style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
-                  >
-                    Add Test Token
-                  </button>
-                </div>
-              )}
-            </div>
-          </section>
-        </main>
+                )}
+              </div>
+            </section>
+          </main>
 
           {inspect && (
             <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end md:items-center justify-center p-4 z-50">
