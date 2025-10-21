@@ -142,6 +142,9 @@ export default defineConfig({
         label: "Public Pages",
         path: "content/public-pages",
         format: "json",
+        match: {
+          exclude: "venture-group.json",
+        },
         fields: [
           {
             type: "string",
@@ -390,10 +393,13 @@ export default defineConfig({
         ],
       },
       {
-        name: "landing",
-        label: "Landing Page",
-        path: "content/landing",
+        name: "collectionVenture",
+        label: "Venture Group Page",
+        path: "content/public-pages",
         format: "json",
+        match: {
+          include: "venture-group.json",
+        },
         ui: {
           allowedActions: {
             create: false,
@@ -401,6 +407,27 @@ export default defineConfig({
           },
         },
         fields: [
+          {
+            type: "string",
+            name: "slug",
+            label: "Page Slug",
+            isTitle: true,
+            required: true,
+          },
+          {
+            type: "string",
+            name: "title",
+            label: "Page Title",
+            required: true,
+          },
+          {
+            type: "string",
+            name: "description",
+            label: "Meta Description",
+            ui: {
+              component: "textarea",
+            },
+          },
           {
             type: "object",
             name: "hero",
@@ -410,7 +437,6 @@ export default defineConfig({
                 type: "string",
                 name: "title",
                 label: "Hero Title",
-                required: true,
               },
               {
                 type: "string",
@@ -421,16 +447,6 @@ export default defineConfig({
                 },
               },
               {
-                type: "string",
-                name: "ctaText",
-                label: "CTA Button Text",
-              },
-              {
-                type: "string",
-                name: "ctaLink",
-                label: "CTA Button Link",
-              },
-              {
                 type: "image",
                 name: "backgroundImage",
                 label: "Background Image",
@@ -438,9 +454,14 @@ export default defineConfig({
             ],
           },
           {
+            type: "rich-text",
+            name: "content",
+            label: "Page Content",
+          },
+          {
             type: "object",
-            name: "features",
-            label: "Features Section",
+            name: "teamSection",
+            label: "Team Section",
             fields: [
               {
                 type: "string",
@@ -457,218 +478,51 @@ export default defineConfig({
               },
               {
                 type: "object",
-                name: "items",
-                label: "Feature Items",
+                name: "members",
+                label: "Team Members",
                 list: true,
+                ui: {
+                  itemProps: (item) => {
+                    return {
+                      label: item?.name,
+                    };
+                  },
+                },
                 fields: [
                   {
                     type: "string",
-                    name: "title",
-                    label: "Feature Title",
-                    required: true,
-                  },
-                  {
-                    type: "string",
-                    name: "description",
-                    label: "Feature Description",
-                    ui: {
-                      component: "textarea",
-                    },
-                  },
-                  {
-                    type: "string",
-                    name: "icon",
-                    label: "Feature Icon (emoji)",
-                  },
-                  {
-                    type: "image",
-                    name: "image",
-                    label: "Feature Image",
-                  },
-                ],
-              },
-            ],
-          },
-          {
-            type: "object",
-            name: "stats",
-            label: "Statistics Section",
-            fields: [
-              {
-                type: "string",
-                name: "title",
-                label: "Section Title",
-              },
-              {
-                type: "object",
-                name: "items",
-                label: "Stat Items",
-                list: true,
-                fields: [
-                  {
-                    type: "string",
-                    name: "value",
-                    label: "Stat Value",
-                    required: true,
-                  },
-                  {
-                    type: "string",
-                    name: "label",
-                    label: "Stat Label",
-                    required: true,
-                  },
-                  {
-                    type: "string",
-                    name: "description",
-                    label: "Stat Description",
-                  },
-                ],
-              },
-            ],
-          },
-          {
-            type: "object",
-            name: "testimonials",
-            label: "Testimonials Section",
-            fields: [
-              {
-                type: "string",
-                name: "title",
-                label: "Section Title",
-              },
-              {
-                type: "object",
-                name: "items",
-                label: "Testimonial Items",
-                list: true,
-                fields: [
-                  {
-                    type: "string",
-                    name: "quote",
-                    label: "Testimonial Quote",
-                    ui: {
-                      component: "textarea",
-                    },
-                    required: true,
-                  },
-                  {
-                    type: "string",
-                    name: "author",
-                    label: "Author Name",
+                    name: "name",
+                    label: "Name",
                     required: true,
                   },
                   {
                     type: "string",
                     name: "role",
-                    label: "Author Role",
-                  },
-                  {
-                    type: "image",
-                    name: "avatar",
-                    label: "Author Avatar",
-                  },
-                ],
-              },
-            ],
-          },
-          {
-            type: "object",
-            name: "cta",
-            label: "Call to Action Section",
-            fields: [
-              {
-                type: "string",
-                name: "title",
-                label: "CTA Title",
-              },
-              {
-                type: "string",
-                name: "subtitle",
-                label: "CTA Subtitle",
-                ui: {
-                  component: "textarea",
-                },
-              },
-              {
-                type: "string",
-                name: "primaryButtonText",
-                label: "Primary Button Text",
-              },
-              {
-                type: "string",
-                name: "primaryButtonLink",
-                label: "Primary Button Link",
-              },
-              {
-                type: "string",
-                name: "secondaryButtonText",
-                label: "Secondary Button Text",
-              },
-              {
-                type: "string",
-                name: "secondaryButtonLink",
-                label: "Secondary Button Link",
-              },
-              {
-                type: "image",
-                name: "backgroundImage",
-                label: "Background Image",
-              },
-            ],
-          },
-          {
-            type: "object",
-            name: "howItWorks",
-            label: "How It Works Section",
-            fields: [
-              {
-                type: "string",
-                name: "title",
-                label: "Section Title",
-              },
-              {
-                type: "string",
-                name: "subtitle",
-                label: "Section Subtitle",
-                ui: {
-                  component: "textarea",
-                },
-              },
-              {
-                type: "object",
-                name: "steps",
-                label: "Steps",
-                list: true,
-                fields: [
-                  {
-                    type: "string",
-                    name: "step",
-                    label: "Step Number",
+                    label: "Role",
                     required: true,
                   },
                   {
                     type: "string",
-                    name: "title",
-                    label: "Step Title",
-                    required: true,
-                  },
-                  {
-                    type: "string",
-                    name: "description",
-                    label: "Step Description",
+                    name: "bio",
+                    label: "Short Bio",
                     ui: {
                       component: "textarea",
                     },
                   },
                   {
-                    type: "string",
-                    name: "icon",
-                    label: "Step Icon (emoji)",
+                    type: "image",
+                    name: "photo",
+                    label: "Photo",
                   },
                   {
-                    type: "image",
-                    name: "image",
-                    label: "Step Image",
+                    type: "string",
+                    name: "linkedin",
+                    label: "LinkedIn URL",
+                  },
+                  {
+                    type: "string",
+                    name: "twitter",
+                    label: "Twitter URL",
                   },
                 ],
               },
@@ -676,8 +530,16 @@ export default defineConfig({
           },
           {
             type: "object",
-            name: "partnerships",
-            label: "Partnerships Section",
+            name: "sections",
+            label: "Additional Sections",
+            list: true,
+            ui: {
+              itemProps: (item) => {
+                return {
+                  label: item?.title,
+                };
+              },
+            },
             fields: [
               {
                 type: "string",
@@ -686,33 +548,37 @@ export default defineConfig({
               },
               {
                 type: "string",
-                name: "subtitle",
-                label: "Section Subtitle",
+                name: "description",
+                label: "Section Description",
                 ui: {
                   component: "textarea",
                 },
               },
               {
                 type: "object",
-                name: "partners",
-                label: "Partners",
+                name: "items",
+                label: "Highlights",
                 list: true,
+                ui: {
+                  itemProps: (item) => {
+                    return {
+                      label: item?.title,
+                    };
+                  },
+                },
                 fields: [
                   {
                     type: "string",
-                    name: "name",
-                    label: "Partner Name",
-                    required: true,
-                  },
-                  {
-                    type: "image",
-                    name: "logo",
-                    label: "Partner Logo",
+                    name: "title",
+                    label: "Title",
                   },
                   {
                     type: "string",
                     name: "description",
-                    label: "Partner Description",
+                    label: "Description",
+                    ui: {
+                      component: "textarea",
+                    },
                   },
                 ],
               },
@@ -720,53 +586,31 @@ export default defineConfig({
           },
           {
             type: "object",
-            name: "roadmap",
-            label: "Roadmap Section",
+            name: "seo",
+            label: "SEO Settings",
             fields: [
               {
                 type: "string",
-                name: "title",
-                label: "Section Title",
+                name: "metaTitle",
+                label: "Meta Title",
               },
               {
                 type: "string",
-                name: "subtitle",
-                label: "Section Subtitle",
+                name: "metaDescription",
+                label: "Meta Description",
                 ui: {
                   component: "textarea",
                 },
               },
               {
-                type: "object",
-                name: "quarters",
-                label: "Roadmap Quarters",
-                list: true,
-                fields: [
-                  {
-                    type: "string",
-                    name: "period",
-                    label: "Time Period",
-                    required: true,
-                  },
-                  {
-                    type: "string",
-                    name: "title",
-                    label: "Quarter Title",
-                    required: true,
-                  },
-                  {
-                    type: "string",
-                    name: "status",
-                    label: "Status",
-                    options: ["completed", "in-progress", "planned", "research"],
-                  },
-                  {
-                    type: "string",
-                    name: "features",
-                    label: "Features",
-                    list: true,
-                  },
-                ],
+                type: "string",
+                name: "keywords",
+                label: "Keywords (comma-separated)",
+              },
+              {
+                type: "image",
+                name: "ogImage",
+                label: "Open Graph Image",
               },
             ],
           },

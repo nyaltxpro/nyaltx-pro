@@ -98,6 +98,72 @@
       }
     ]
   },
+  "teamSection": {
+    "title": "Our Operating Team",
+    "subtitle": "A multi-disciplinary crew of venture investors, product operators, and token engineers supporting every founder we back.",
+    "members": [
+      {
+        "name": "Frank Ferraro",
+        "role": "Managing Partner",
+        "bio": "Former NYSE trader turned venture investor guiding strategic capital allocation and market entry for emerging projects.",
+        "photo": "/images/team/frank-ferraro.jpg",
+        "linkedin": "https://www.linkedin.com/in/frank-ferraro",
+        "twitter": "https://twitter.com/ferrarofrank"
+      },
+      {
+        "name": "Emily Chen",
+        "role": "Head of Product",
+        "bio": "Product strategist specializing in on-chain UX, tokenomics design, and go-to-market readiness for web3 applications.",
+        "photo": "/images/team/emily-chen.jpg",
+        "linkedin": "https://www.linkedin.com/in/emily-chen"
+      },
+      {
+        "name": "Luis Moreno",
+        "role": "Technical Advisor",
+        "bio": "Smart contract engineer advising portfolio teams on protocol architecture, security reviews, and infrastructure scalability.",
+        "photo": "/images/team/luis-moreno.jpg",
+        "twitter": "https://twitter.com/luiscodes"
+      }
+    ]
+  },
+  "sections": [
+    {
+      "title": "Investment Focus",
+      "description": "We prioritize teams building critical infrastructure for decentralized markets and immersive crypto-native experiences.",
+      "items": [
+        {
+          "title": "DeFi Liquidity",
+          "description": "Protocols that expand market access, improve on-chain liquidity, and unlock new forms of composable yield."
+        },
+        {
+          "title": "Infrastructure",
+          "description": "Developer platforms, data services, and tooling that accelerate adoption for founders and enterprises."
+        },
+        {
+          "title": "Consumer Crypto",
+          "description": "Playable, social, and creator-driven experiences that connect mainstream audiences to web3 utility."
+        }
+      ]
+    },
+    {
+      "title": "How We Partner",
+      "description": "Beyond capital, the NYALTX operating team embeds with founders to unlock distribution and scale.",
+      "items": [
+        {
+          "title": "Strategic Advisory",
+          "description": "Weekly strategy sessions, tokenomics workshops, and targeted mentorship from seasoned operators."
+        },
+        {
+          "title": "Go-To-Market",
+          "description": "Launch support, community growth, and co-marketing through the NYALTX media network."
+        },
+        {
+          "title": "Capital Network",
+          "description": "Warm introductions to co-investors, exchanges, and liquidity partners aligned with your roadmap."
+        }
+      ]
+    }
+  ],
   "seo": {
     "metaTitle": "NYALTX Venture Group",
     "metaDescription": "Learn how the NYALTX Venture Group funds and supports crypto-native founders with capital, advisory, and strategic partnerships.",
