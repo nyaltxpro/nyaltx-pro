@@ -9,6 +9,7 @@ const CRYPTOCURRENCY_ICON_PATHS = {
     balancer: '/cryptocurrency/balancer.svg',
     base: '/cryptocurrency/base.svg',
     bsc: '/cryptocurrency/bsc.svg',
+    binance: '/cryptocurrency/bsc.svg',
     cronos: '/cryptocurrency/cronos.svg',
     ethereum: '/cryptocurrency/ethereum.svg',
     hyperevm: '/cryptocurrency/hyperevm.svg',

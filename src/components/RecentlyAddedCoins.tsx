@@ -6,6 +6,7 @@ import tokens from '@/data/tokens.json';
 import { useRecentlyAddedCoins } from '@/hooks/useRecentlyAddedCoins';
 import { CachedRecentlyAddedCoin } from '@/store/slices/searchCacheSlice';
 import { useRouter } from 'next/navigation';
+import CryptocurrencyIcon from './CryptocurrencyIcon';
 
 export default function RecentlyAddedCoins() {
   const router = useRouter();
@@ -203,7 +204,7 @@ export default function RecentlyAddedCoins() {
         </div>
       ) : (
         <div className="space-y-4">
-          {coins.slice(0, 5).map(coin => (
+          {coins.slice(0, 5).map((coin: any) => (
             <div
               key={coin.id}
               className="rounded-lg p-2 flex flex-col sm:flex-row sm:justify-between sm:items-center cursor-pointer hover:bg-gray-800/40"
@@ -220,19 +221,13 @@ export default function RecentlyAddedCoins() {
                   />
                 </div>
                 <div>
-                  <div className="font-medium">{coin.name}</div>
+                  <div className="flex items-center font-medium">{coin.name} <CryptocurrencyIcon className='h-4 w-4 mx-4' name={coin.primaryChain || 'solana'} /></div>
                   <div className="text-gray-400 text-xs">{coin.symbol.toUpperCase()}</div>
                 </div>
               </div>
 
               <div className="text-right w-full sm:w-auto mt-2 sm:mt-0 flex justify-between sm:block">
-                <div className="font-medium">{formatPrice(coin.current_price)}</div>
-                <div
-                  className={`text-xs ${(coin.price_change_percentage_24h || 0) >= 0 ? 'text-green-500' : 'text-red-500'}`}
-                >
-                  {(coin.price_change_percentage_24h || 0) >= 0 ? '+' : ''}
-                  {(coin.price_change_percentage_24h || 0).toFixed(2)}%
-                </div>
+
               </div>
             </div>
           ))}

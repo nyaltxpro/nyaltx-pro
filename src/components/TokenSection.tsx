@@ -199,22 +199,22 @@ const Row: React.FC<{ item: any; onInspect: (o: any) => void }> = ({ item, onIns
             <div className="relative w-10 h-10 sm:w-12 sm:h-12">
               <Avatar.Root className="w-full h-full">
                 {isLoading ? (
-                  <div className="w-full h-full bg-gray-700/50 rounded-full animate-pulse"></div>
+                  <div className="w-full h-full bg-gray-700/50  rounded-md animate-pulse"></div>
                 ) : tokenData.image ? (
                   <Avatar.Image
                     src={tokenData.image}
                     alt={tokenData.symbol || 'icon'}
-                    className="w-full h-full object-cover rounded-full"
+                    className="w-full h-full object-cover shadow-md rounded-md"
                   />
                 ) : (
-                  <Avatar.Fallback className="w-full h-full bg-gradient-to-br from-orange-500 to-pink-600 flex items-center justify-center text-white font-bold text-sm rounded-full">
+                  <Avatar.Fallback className="w-full h-full border-dashed border-gray-500 border flex items-center justify-center text-white font-bold text-sm rounded-md">
                     {tokenData.symbol?.[0] || '?'}
                   </Avatar.Fallback>
                 )}
               </Avatar.Root>
 
               {/* PumpSap icon overlay */}
-              <CryptocurrencyIcon name={'pumpswap'} />
+              <CryptocurrencyIcon className='absolute bottom-0 left-0 w-3 h-3 sm:w-4 sm:h-4 rounded-full  shadow-md' name={'pumpswap'} />
             </div>
 
             <div className="flex-1 min-w-0">
@@ -229,7 +229,7 @@ const Row: React.FC<{ item: any; onInspect: (o: any) => void }> = ({ item, onIns
               <div className="text-xs text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                 {formatTime(tokenData.ts)}
               </div>
-              <div className="px-2 py-1 bg-gray-800/50 rounded-md text-xs font-mono text-gray-300" style={{ fontFamily: 'SF Mono, Monaco, Inconsolata, Roboto Mono, monospace' }}>
+              <div className="px-2 py-1  rounded-md text-xs font-mono text-gray-300" style={{ fontFamily: 'SF Mono, Monaco, Inconsolata, Roboto Mono, monospace' }}>
                 {tokenData.mint
                   ? `${tokenData.mint.slice(0, 4)}...${tokenData.mint.slice(-4)}`
                   : '—'}
@@ -245,7 +245,7 @@ const Row: React.FC<{ item: any; onInspect: (o: any) => void }> = ({ item, onIns
                   className="px-3 py-2 border-gradient-to-r from-[#00d4aa] to-[#00b894] border text-white text-xs font-medium rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-[#00d4aa]/25 flex items-center gap-1"
                   style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                 >
-                  <CryptocurrencyIcon name={'solana'} />
+                  <CryptocurrencyIcon className='h-4 w-4' name={'solana'} />
                   Trade
                 </button>
               </Tooltip.Trigger>
