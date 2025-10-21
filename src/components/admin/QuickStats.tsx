@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { FaUsers, FaChevronUp, FaChevronDown, FaSyncAlt } from 'react-icons/fa';
+import { FaChevronDown, FaChevronUp, FaSyncAlt, FaUsers } from 'react-icons/fa';
 
 interface QuickStatsData {
   onlineUsers: number;
@@ -37,7 +37,7 @@ export default function QuickStats() {
 
   useEffect(() => {
     fetchStats();
-    
+
     // Refresh every 30 seconds
     const interval = setInterval(fetchStats, 30000);
     return () => clearInterval(interval);
@@ -62,8 +62,8 @@ export default function QuickStats() {
     return (
       <div className="bg-gray-800/40 backdrop-blur-lg border border-red-700/20 rounded-xl shadow-xl p-6">
         <div className="text-red-400 mb-4">Error: {error}</div>
-        <button 
-          onClick={fetchStats} 
+        <button
+          onClick={fetchStats}
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
         >
           Retry
@@ -224,61 +224,7 @@ export default function QuickStats() {
           </div>
 
           {/* Chart: Hits in the last 10 days */}
-          <div className="mt-6 pt-6 border-t border-gray-700/20">
-            <h4 className="text-sm font-semibold text-gray-300 mb-4" style={{ fontFamily: 'Poppins, sans-serif' }}>
-              Hits in the last 10 days
-            </h4>
-            
-            <div className="bg-gray-700/20 rounded-lg p-4">
-              <div className="flex items-end justify-between gap-1 h-32">
-                {stats.dailyHits.map((day, index) => {
-                  const visitorHeight = (day.visitors / maxValue) * 100;
-                  const visitHeight = (day.visits / maxValue) * 100;
-                  const dayLabel = new Date(day.date).getDate();
-                  
-                  return (
-                    <div key={day.date} className="flex-1 flex flex-col items-center gap-2">
-                      <div className="w-full flex flex-col items-center gap-1 flex-1 justify-end">
-                        {/* Visits bar (blue) */}
-                        <div 
-                          className="w-full bg-gradient-to-t from-blue-500 to-blue-400 rounded-t transition-all duration-300 hover:from-blue-400 hover:to-blue-300"
-                          style={{ 
-                            height: `${visitHeight}%`,
-                            minHeight: day.visits > 0 ? '4px' : '0px'
-                          }}
-                          title={`${day.date}\nVisits: ${day.visits.toLocaleString()}`}
-                        ></div>
-                        {/* Visitors bar (red/pink) */}
-                        <div 
-                          className="w-full bg-gradient-to-t from-pink-500 to-pink-400 rounded-t transition-all duration-300 hover:from-pink-400 hover:to-pink-300"
-                          style={{ 
-                            height: `${visitorHeight}%`,
-                            minHeight: day.visitors > 0 ? '4px' : '0px'
-                          }}
-                          title={`${day.date}\nVisitors: ${day.visitors.toLocaleString()}`}
-                        ></div>
-                      </div>
-                      <div className="text-xs text-gray-400" style={{ fontFamily: 'Poppins, sans-serif' }}>
-                        {dayLabel}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-              
-              {/* Legend */}
-              <div className="flex items-center justify-center gap-6 mt-4 pt-4 border-t border-gray-700/30">
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-gradient-to-t from-blue-500 to-blue-400 rounded"></div>
-                  <span className="text-xs text-gray-300" style={{ fontFamily: 'Poppins, sans-serif' }}>Visits</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-gradient-to-t from-pink-500 to-pink-400 rounded"></div>
-                  <span className="text-xs text-gray-300" style={{ fontFamily: 'Poppins, sans-serif' }}>Visitors</span>
-                </div>
-              </div>
-            </div>
-          </div>
+
         </div>
       )}
     </div>

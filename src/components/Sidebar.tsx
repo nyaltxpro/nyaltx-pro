@@ -123,7 +123,10 @@ export default function Sidebar({ isMobileMenuOpen, toggleMobileMenu }: SidebarP
   return (
     <>
       {!isDesktop && isMobileMenuOpen && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[99999999] sidebar-mobile-backdrop" onClick={toggleMobileMenu} />
+        <div
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[999998] sidebar-mobile-backdrop"
+          onClick={toggleMobileMenu}
+        />
       )}
       <motion.div
         className={`fixed left-0 top-0 h-full bg-black/95 backdrop-blur-xl border-r border-gray-800/50 z-[999999] sidebar-container sidebar-desktop ${!isDesktop && (isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full')
