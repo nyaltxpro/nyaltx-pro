@@ -1512,7 +1512,7 @@ function TradingViewWithParams({
                     </div>
 
                     {/* Trades/Info Tabs */}
-                    <div className="bg-[#111116] rounded-xl overflow-hidden">
+                    <div className="bg-[#222227] rounded-xl overflow-hidden">
                         <div className="flex border-b border-gray-800">
                             <button
                                 className={`px-6 py-3 text-sm font-medium ${activeTab === 'trades'
