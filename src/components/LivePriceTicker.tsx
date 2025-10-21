@@ -411,10 +411,8 @@ const LivePriceTicker: React.FC = () => {
                       </div>
                       {/* Chain badge */}
                       <div className="absolute -bottom-1 -right-1 w-4 h-4 flex items-center justify-center">
-                        {/* <span className="text-[8px] font-bold text-white">
-                          {token.chainId === 'solana' ? 'S' : token.chainId === 'bsc' ? 'B' : 'E'}
-                        </span> */}
-                        <CryptocurrencyIcon name={token.chainId === 'solana' ? 'solana' : token.chainId === 'bsc' ? 'bsc' : 'ethereum'} />
+
+                        <CryptocurrencyIcon name={token.chainId === 'solana' ? 'solana' : token.chainId === 'bsc' ? 'bsc' : token.chainId as any} />
                       </div>
                     </div>
 
