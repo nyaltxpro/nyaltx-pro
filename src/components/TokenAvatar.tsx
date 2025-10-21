@@ -11,22 +11,22 @@ interface TokenAvatarProps {
 }
 
 // Generate a consistent color based on the token symbol
-const generateAvatarColor = (symbol: string): string => {
-    const colors = [
-        '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FECA57',
-        '#FF9FF3', '#54A0FF', '#5F27CD', '#00D2D3', '#FF9F43',
-        '#10AC84', '#EE5A24', '#0984E3', '#6C5CE7', '#A29BFE',
-        '#FD79A8', '#E17055', '#00B894', '#00CEC9', '#6C5CE7'
-    ];
+// const generateAvatarColor = (symbol: string): string => {
+//     const colors = [
+//         '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FECA57',
+//         '#FF9FF3', '#54A0FF', '#5F27CD', '#00D2D3', '#FF9F43',
+//         '#10AC84', '#EE5A24', '#0984E3', '#6C5CE7', '#A29BFE',
+//         '#FD79A8', '#E17055', '#00B894', '#00CEC9', '#6C5CE7'
+//     ];
 
-    let hash = 0;
-    for (let i = 0; i < symbol.length; i++) {
-        hash = symbol.charCodeAt(i) + ((hash << 5) - hash);
-    }
+//     let hash = 0;
+//     for (let i = 0; i < symbol.length; i++) {
+//         hash = symbol.charCodeAt(i) + ((hash << 5) - hash);
+//     }
 
-    const index = Math.abs(hash) % colors.length;
-    return colors[index];
-};
+//     const index = Math.abs(hash) % colors.length;
+//     return colors[index];
+// };
 
 // Generate initials from token symbol or name
 const generateInitials = (symbol: string, name?: string): string => {
@@ -102,17 +102,17 @@ const TokenAvatar: React.FC<TokenAvatarProps> = ({
     }
 
     // Generate avatar with initials and color
-    const backgroundColor = generateAvatarColor(symbol);
+    // const backgroundColor = generateAvatarColor(symbol);
     const initials = generateInitials(symbol, name);
     const fontSize = Math.max(size * 0.35, 12);
 
     return (
         <div
-            className={`flex items-center justify-center rounded-full text-white font-bold ${className}`}
+            className={`flex items-center justify-center bg-gray-600 shadow-md rounded-full text-white font-bold ${className}`}
             style={{
                 width: size,
                 height: size,
-                backgroundColor,
+                // backgroundColor,
                 fontSize: `${fontSize}px`,
             }}
             title={name || symbol}

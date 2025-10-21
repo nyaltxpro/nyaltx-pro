@@ -27,7 +27,6 @@ import React, { Suspense, useEffect, useState } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 import {
     FaChartBar,
-    FaChartLine,
     FaChevronDown,
     FaDiscord,
     FaEllipsisV,
@@ -42,10 +41,11 @@ import {
     FaTelegram,
     FaTwitter,
     FaWallet,
-    FaYoutube,
+    FaYoutube
 } from 'react-icons/fa';
 import { useAccount } from 'wagmi';
 import nyaxTokensData from '../../nyax-tokens-data.json';
+import CryptocurrencyIcon from '../components/CryptocurrencyIcon';
 
 // Chain name mapping utility
 const getChainName = (chainId: number): string => {
@@ -1134,11 +1134,7 @@ function TradingViewWithParams({
                                                 moralisTokenData?.metadata?.name ||
                                                 getCryptoName(baseToken)}
                                         </h3>
-                                        {moralisTokenData?.metadata && (
-                                            <span className="text-xs bg-purple-500/20 text-purple-400 px-2 py-1 rounded">
-                                                Moralis
-                                            </span>
-                                        )}
+
                                     </div>
                                     <div className="text-sm text-gray-400">
                                         {/* {tokenSocialLinks?.tokenSymbol || baseToken}{' '}
@@ -1261,7 +1257,7 @@ function TradingViewWithParams({
                                                 className="p-2 bg-[#1a2932] rounded-full hover:bg-[#253440]"
                                                 title="View on Dexscreener"
                                             >
-                                                <FaChartLine />
+                                                <CryptocurrencyIcon name={t?.chain || 'solana'} className='h-5 w-5' />
                                             </a>
                                         )}
 
