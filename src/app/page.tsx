@@ -113,8 +113,8 @@ export default function Page() {
                 <Image
                   src="/hero2.png"
                   alt="NYALTX Logo"
-                  width={500}
-                  height={500}
+                  width={300}
+                  height={300}
                   priority
                   className="relative h-auto w-[580px]   "
                 />
@@ -262,23 +262,6 @@ export default function Page() {
             )}
         </div>
       </motion.section>
-
-      {/* 3.3) Popular assets */}
-      {/* <motion.section className="mx-auto max-w-7xl px-6 py-16 md:py-20" variants={container} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }}>
-        <motion.h2 className="text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-indigo-400" variants={fadeUp}>Popular assets</motion.h2>
-        <motion.p className="mt-2 text-gray-300/90 max-w-2xl" variants={fadeUp}>Top tokens supported out of the box.</motion.p>
-        <div className="mt-8 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
-          {['Bitcoin','Ethereum','USDC','USDT','DAI','Solana'].map((name, i) => (
-            <motion.div key={i} variants={scaleIn} className="group relative border border-white/10 rounded-2xl bg-gradient-to-b from-white/5 to-white/[0.03] p-4 backdrop-blur-md flex flex-col items-center justify-center gap-2 hover:shadow-[0_0_40px_-10px_rgba(99,102,241,0.35)]">
-              <CryptoIcon name={name} kind="token" size={36} />
-              <div className="text-xs text-gray-300/90">{name}</div>
-              <div className="pointer-events-none absolute inset-0 rounded-2xl border border-transparent group-hover:border-white/15 transition-colors" />
-            </motion.div>
-          ))}
-        </div>
-      </motion.section> */}
-
-      {/* 3.4) Popular wallets */}
       <motion.section
         className="mx-auto max-w-7xl px-6 py-10"
         variants={container}
