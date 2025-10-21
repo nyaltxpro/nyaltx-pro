@@ -1,5 +1,5 @@
-import AdminTokenChain from '@/page-components/Admin/AdminTokenChain';
+// import AdminTokenChain from '@/page-components/Admin/AdminTokenChain';
 
-export default function AdminTokenChainPage() {
-  return <AdminTokenChain />;
-}
+// export default function AdminTokenChainPage() {
+//   return <AdminTokenChain />;
+// }
