@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { FaUsers, FaEye, FaGlobe, FaDesktop, FaClock, FaWallet, FaChartLine, FaMapMarkerAlt } from 'react-icons/fa';
+import { FaChartLine, FaClock, FaDesktop, FaEye, FaGlobe, FaMapMarkerAlt, FaUsers, FaWallet } from 'react-icons/fa';
+import QuickStats from './QuickStats';
+import TrafficLineGraph from './TrafficLineGraph';
 
 interface AnalyticsData {
   onlineUsers: number;
@@ -88,7 +90,7 @@ export default function AnalyticsDashboard() {
     };
 
     fetchAnalytics();
-    
+
     // Refresh every 30 seconds
     const interval = setInterval(fetchAnalytics, 30000);
     return () => clearInterval(interval);
@@ -126,8 +128,8 @@ export default function AnalyticsDashboard() {
     return (
       <div className="text-center py-8">
         <div className="text-red-400 mb-4">Error loading analytics: {error}</div>
-        <button 
-          onClick={() => window.location.reload()} 
+        <button
+          onClick={() => window.location.reload()}
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
         >
           Retry
@@ -326,11 +328,10 @@ export default function AnalyticsDashboard() {
                     </td>
                     <td className="px-4 py-3 text-sm">
                       <div className="flex flex-col gap-1">
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${
-                          visitor.isActive 
-                            ? 'bg-green-500/10 text-green-300 border-green-500/20' 
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${visitor.isActive
+                            ? 'bg-green-500/10 text-green-300 border-green-500/20'
                             : 'bg-gray-500/10 text-gray-400 border-gray-500/20'
-                        }`} style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                          }`} style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                           {visitor.isActive ? 'Online' : 'Offline'}
                         </span>
                         {visitor.deviceType && visitor.deviceType !== 'unknown' && (
@@ -347,6 +348,8 @@ export default function AnalyticsDashboard() {
           </div>
         </div>
       </div>
+      <QuickStats />
+      <TrafficLineGraph />
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Traffic by Country */}
@@ -498,15 +501,15 @@ export default function AnalyticsDashboard() {
                   </div>
                 </div>
               )) || (
-                <div className="text-center py-8">
-                  <div className="w-16 h-16 bg-gray-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <FaWallet className="w-8 h-8 text-gray-400" />
+                  <div className="text-center py-8">
+                    <div className="w-16 h-16 bg-gray-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <FaWallet className="w-8 h-8 text-gray-400" />
+                    </div>
+                    <p className="text-gray-400 font-medium" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                      No wallet connection data
+                    </p>
                   </div>
-                  <p className="text-gray-400 font-medium" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                    No wallet connection data
-                  </p>
-                </div>
-              )}
+                )}
             </div>
           </div>
         </div>
@@ -522,8 +525,8 @@ export default function AnalyticsDashboard() {
           <div className="p-6">
             <div className="space-y-4">
               {analytics.deviceStats?.map((device, index) => {
-                const deviceIcon = device.deviceType === 'mobile' ? '📱' : 
-                                 device.deviceType === 'tablet' ? '📱' : '💻';
+                const deviceIcon = device.deviceType === 'mobile' ? '📱' :
+                  device.deviceType === 'tablet' ? '📱' : '💻';
                 return (
                   <div key={device.deviceType} className="flex items-center justify-between p-4 bg-gray-700/30 border border-gray-600/30 rounded-lg hover:bg-gray-700/40 transition-all duration-200">
                     <div className="flex items-center gap-3">
@@ -550,15 +553,15 @@ export default function AnalyticsDashboard() {
                   </div>
                 );
               }) || (
-                <div className="text-center py-8">
-                  <div className="w-16 h-16 bg-gray-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <FaDesktop className="w-8 h-8 text-gray-400" />
+                  <div className="text-center py-8">
+                    <div className="w-16 h-16 bg-gray-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <FaDesktop className="w-8 h-8 text-gray-400" />
+                    </div>
+                    <p className="text-gray-400 font-medium" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                      No device data
+                    </p>
                   </div>
-                  <p className="text-gray-400 font-medium" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                    No device data
-                  </p>
-                </div>
-              )}
+                )}
             </div>
           </div>
         </div>
@@ -577,10 +580,10 @@ export default function AnalyticsDashboard() {
             {analytics.hourlyTraffic.map((hour, index) => {
               const maxVisits = Math.max(...analytics.hourlyTraffic.map(h => h.visits));
               const height = maxVisits > 0 ? (hour.visits / maxVisits) * 100 : 0;
-              
+
               return (
                 <div key={hour.hour} className="flex-1 flex flex-col items-center">
-                  <div 
+                  <div
                     className="w-full bg-gradient-to-t from-orange-500 to-orange-400 rounded-t transition-all duration-300 hover:from-orange-400 hover:to-orange-300 shadow-lg"
                     style={{ height: `${height}%`, minHeight: hour.visits > 0 ? '4px' : '0px' }}
                     title={`${hour.hour}:00 - ${hour.visits} visits`}
