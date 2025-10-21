@@ -1,0 +1,25 @@
+{
+  "hero": {
+    "title": "Meet the NYALTX Team",
+    "subtitle": "A multidisciplinary crew of builders, traders, and storytellers committed to elevating crypto-native projects.",
+    "backgroundImage": "/images/team-hero.jpg"
+  },
+  "members": [
+    {
+      "name": "Frank Ferraro",
+      "role": "Founder & Host",
+      "description": "Veteran broadcaster and crypto advocate leading strategic partnerships and community storytelling.",
+      "image": "/images/team/frank-ferraro.jpg",
+      "socials": {
+        "twitter": "https://twitter.com/frankferraro",
+        "linkedin": "https://www.linkedin.com/in/frankferraro/"
+      }
+    }
+  ],
+  "seo": {
+    "metaTitle": "NYALTX Team",
+    "metaDescription": "Get to know the NYALTX team of crypto-native builders, traders, and storytellers powering the platform.",
+    "keywords": "NYALTX team, crypto founders, web3 crew",
+    "ogImage": "/images/og/team.jpg"
+  }
+}

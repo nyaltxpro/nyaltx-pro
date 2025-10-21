@@ -1,0 +1,107 @@
+{
+  "slug": "venture-group",
+  "title": "NYALTX Venture Group",
+  "description": "Discover how the NYALTX Venture Group supports the next generation of crypto-native builders through capital, advisory, and strategic partnerships.",
+  "hero": {
+    "title": "Backing the Next Wave of Crypto Innovation",
+    "subtitle": "The NYALTX Venture Group invests in founders building high-impact products across decentralized finance, infrastructure, and on-chain experiences.",
+    "backgroundImage": "/images/venture-group-hero.jpg"
+  },
+  "content": {
+    "type": "doc",
+    "content": [
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "We partner with visionary founders shaping the future of decentralized markets. From pre-seed strategic support to growth-stage capital allocation, the NYALTX Venture Group combines deep industry expertise with a hands-on operating team."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": { "level": 2 },
+        "content": [
+          { "type": "text", "text": "What We Offer" }
+        ]
+      },
+      {
+        "type": "bulletList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  { "type": "text", "text": "Strategic capital with flexible structures tailored to early-stage builders." }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  { "type": "text", "text": "Product, growth, and tokenomics advisory from the NYALTX operating network." }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  { "type": "text", "text": "Introductions to exchanges, liquidity providers, and strategic partners across web3." }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": { "level": 2 },
+        "content": [
+          { "type": "text", "text": "Focus Areas" }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "We actively look for teams redefining on-chain trading, improving liquidity infrastructure, and creating compelling crypto-native consumer experiences. If you are building in DeFi, web3 gaming, infrastructure, or creator tooling, we would love to hear from you."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": { "level": 2 },
+        "content": [
+          { "type": "text", "text": "Let’s Build Together" }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "Reach out to venture@nyaltx.pro with your deck, product demo, and current milestones. Our team reviews every submission and responds within two weeks."
+          }
+        ]
+      }
+    ]
+  },
+  "seo": {
+    "metaTitle": "NYALTX Venture Group",
+    "metaDescription": "Learn how the NYALTX Venture Group funds and supports crypto-native founders with capital, advisory, and strategic partnerships.",
+    "keywords": "NYALTX venture group, crypto venture fund, web3 investors",
+    "ogImage": "/images/og/venture-group.jpg"
+  }
+}

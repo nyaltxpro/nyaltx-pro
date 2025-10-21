@@ -54,6 +54,38 @@ export interface LandingPageContent {
   testimonials: TestimonialsSection;
 }
 
+export interface TeamMemberSocials {
+  twitter?: string;
+  linkedin?: string;
+  telegram?: string;
+  [key: string]: string | undefined;
+}
+
+export interface TeamMember {
+  name: string;
+  role?: string;
+  description?: string;
+  image?: string;
+  socials?: TeamMemberSocials;
+}
+
+export interface TeamHeroSection {
+  title: string;
+  subtitle?: string;
+  backgroundImage?: string;
+}
+
+export interface TeamContent {
+  hero?: TeamHeroSection;
+  members?: TeamMember[];
+  seo?: {
+    metaTitle?: string;
+    metaDescription?: string;
+    keywords?: string;
+    ogImage?: string;
+  };
+}
+
 // Types for footer content
 export interface FooterLink {
   label: string;
@@ -163,6 +195,54 @@ export const useLandingPageContent = () => {
   return { content, loading, error };
 };
 
+export const useTeamContent = () => {
+  const [content, setContent] = useState<TeamContent | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchContent = async () => {
+      try {
+        setLoading(true);
+
+        const response = await fetch('/api/tina/team');
+
+        if (!response.ok) {
+          const fallbackResponse = await fetch('/content/team/team.json');
+          if (!fallbackResponse.ok) {
+            throw new Error('Failed to fetch team content');
+          }
+          const fallbackData = await fallbackResponse.json();
+          setContent(fallbackData);
+          return;
+        }
+
+        const data = await response.json();
+        setContent(data);
+      } catch (err) {
+        console.error('Error fetching team content:', err);
+        setError(err instanceof Error ? err.message : 'Unknown error');
+
+        try {
+          const fallbackResponse = await fetch('/content/team/team.json');
+          if (fallbackResponse.ok) {
+            const fallbackData = await fallbackResponse.json();
+            setContent(fallbackData);
+            setError(null);
+          }
+        } catch (fallbackErr) {
+          console.error('Failed to load fallback team content:', fallbackErr);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchContent();
+  }, []);
+
+  return { content, loading, error };
+};
 
 export const useGeneralStatmentContent = () => {
   const [content, setContent] = useState<any | null>(null);

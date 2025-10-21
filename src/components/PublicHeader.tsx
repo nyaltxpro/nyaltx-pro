@@ -89,6 +89,8 @@ export default function PublicHeader() {
               <div className="absolute top-full left-0 mt-1 w-48 bg-gray-900 border border-gray-700 rounded-md shadow-lg z-50">
                 <div className="py-1">
                   <DropdownLink href="/about-us" label="About Us" />
+                  <DropdownLink href="/venture-group" label="Venture Group" />
+                  <DropdownLink href="/team" label="Team" />
                   <DropdownLink href="/contact" label="Contact" />
                   <DropdownLink href="/contact" label="Help & Support" />
                   <DropdownLink href="/news" label="Our News" />

@@ -773,6 +773,130 @@ export default defineConfig({
         ],
       },
       {
+        name: "team",
+        label: "Team",
+        path: "content/team",
+        format: "json",
+        ui: {
+          allowedActions: {
+            create: false,
+            delete: false,
+          },
+        },
+        fields: [
+          {
+            type: "object",
+            name: "hero",
+            label: "Hero Section",
+            fields: [
+              {
+                type: "string",
+                name: "title",
+                label: "Title",
+                required: true,
+              },
+              {
+                type: "string",
+                name: "subtitle",
+                label: "Subtitle",
+                ui: {
+                  component: "textarea",
+                },
+              },
+              {
+                type: "image",
+                name: "backgroundImage",
+                label: "Background Image",
+              },
+            ],
+          },
+          {
+            type: "object",
+            name: "members",
+            label: "Team Members",
+            list: true,
+            fields: [
+              {
+                type: "string",
+                name: "name",
+                label: "Name",
+                required: true,
+              },
+              {
+                type: "string",
+                name: "role",
+                label: "Role",
+              },
+              {
+                type: "string",
+                name: "description",
+                label: "Description",
+                ui: {
+                  component: "textarea",
+                },
+              },
+              {
+                type: "image",
+                name: "image",
+                label: "Photo",
+              },
+              {
+                type: "object",
+                name: "socials",
+                label: "Social Links",
+                fields: [
+                  {
+                    type: "string",
+                    name: "twitter",
+                    label: "Twitter URL",
+                  },
+                  {
+                    type: "string",
+                    name: "linkedin",
+                    label: "LinkedIn URL",
+                  },
+                  {
+                    type: "string",
+                    name: "telegram",
+                    label: "Telegram URL",
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            type: "object",
+            name: "seo",
+            label: "SEO Settings",
+            fields: [
+              {
+                type: "string",
+                name: "metaTitle",
+                label: "Meta Title",
+              },
+              {
+                type: "string",
+                name: "metaDescription",
+                label: "Meta Description",
+                ui: {
+                  component: "textarea",
+                },
+              },
+              {
+                type: "string",
+                name: "keywords",
+                label: "Keywords (comma-separated)",
+              },
+              {
+                type: "image",
+                name: "ogImage",
+                label: "Open Graph Image",
+              },
+            ],
+          },
+        ],
+      },
+      {
         name: "footer",
         label: "Footer Settings",
         path: "content/footer",
