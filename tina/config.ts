@@ -83,6 +83,610 @@ export default defineConfig({
         },
       },
       {
+        name: "landing",
+        label: "Landing Page",
+        path: "content/landing",
+        format: "json",
+        ui: {
+          allowedActions: {
+            create: false,
+            delete: false,
+          },
+        },
+        fields: [
+          {
+            type: "object",
+            name: "hero",
+            label: "Hero Section",
+            fields: [
+              {
+                type: "string",
+                name: "title",
+                label: "Hero Title",
+                required: true,
+              },
+              {
+                type: "string",
+                name: "subtitle",
+                label: "Hero Subtitle",
+                ui: {
+                  component: "textarea",
+                },
+              },
+              {
+                type: "string",
+                name: "ctaText",
+                label: "CTA Button Text",
+              },
+              {
+                type: "string",
+                name: "ctaLink",
+                label: "CTA Button Link",
+              },
+              {
+                type: "image",
+                name: "backgroundImage",
+                label: "Background Image",
+              },
+            ],
+          },
+          {
+            type: "object",
+            name: "features",
+            label: "Features Section",
+            fields: [
+              {
+                type: "string",
+                name: "title",
+                label: "Section Title",
+              },
+              {
+                type: "string",
+                name: "subtitle",
+                label: "Section Subtitle",
+                ui: {
+                  component: "textarea",
+                },
+              },
+              {
+                type: "object",
+                name: "items",
+                label: "Feature Items",
+                list: true,
+                fields: [
+                  {
+                    type: "string",
+                    name: "title",
+                    label: "Feature Title",
+                    required: true,
+                  },
+                  {
+                    type: "string",
+                    name: "description",
+                    label: "Feature Description",
+                    ui: {
+                      component: "textarea",
+                    },
+                  },
+                  {
+                    type: "string",
+                    name: "icon",
+                    label: "Feature Icon (emoji)",
+                  },
+                  {
+                    type: "image",
+                    name: "image",
+                    label: "Feature Image",
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            type: "object",
+            name: "stats",
+            label: "Statistics Section",
+            fields: [
+              {
+                type: "string",
+                name: "title",
+                label: "Section Title",
+              },
+              {
+                type: "object",
+                name: "items",
+                label: "Stat Items",
+                list: true,
+                fields: [
+                  {
+                    type: "string",
+                    name: "value",
+                    label: "Stat Value",
+                    required: true,
+                  },
+                  {
+                    type: "string",
+                    name: "label",
+                    label: "Stat Label",
+                    required: true,
+                  },
+                  {
+                    type: "string",
+                    name: "description",
+                    label: "Stat Description",
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            type: "object",
+            name: "testimonials",
+            label: "Testimonials Section",
+            fields: [
+              {
+                type: "string",
+                name: "title",
+                label: "Section Title",
+              },
+              {
+                type: "object",
+                name: "items",
+                label: "Testimonial Items",
+                list: true,
+                fields: [
+                  {
+                    type: "string",
+                    name: "quote",
+                    label: "Testimonial Quote",
+                    ui: {
+                      component: "textarea",
+                    },
+                    required: true,
+                  },
+                  {
+                    type: "string",
+                    name: "author",
+                    label: "Author Name",
+                    required: true,
+                  },
+                  {
+                    type: "string",
+                    name: "role",
+                    label: "Author Role",
+                  },
+                  {
+                    type: "image",
+                    name: "avatar",
+                    label: "Author Avatar",
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            type: "object",
+            name: "cta",
+            label: "Call to Action Section",
+            fields: [
+              {
+                type: "string",
+                name: "title",
+                label: "CTA Title",
+              },
+              {
+                type: "string",
+                name: "subtitle",
+                label: "CTA Subtitle",
+                ui: {
+                  component: "textarea",
+                },
+              },
+              {
+                type: "string",
+                name: "primaryButtonText",
+                label: "Primary Button Text",
+              },
+              {
+                type: "string",
+                name: "primaryButtonLink",
+                label: "Primary Button Link",
+              },
+              {
+                type: "string",
+                name: "secondaryButtonText",
+                label: "Secondary Button Text",
+              },
+              {
+                type: "string",
+                name: "secondaryButtonLink",
+                label: "Secondary Button Link",
+              },
+              {
+                type: "image",
+                name: "backgroundImage",
+                label: "Background Image",
+              },
+            ],
+          },
+          {
+            type: "object",
+            name: "howItWorks",
+            label: "How It Works Section",
+            fields: [
+              {
+                type: "string",
+                name: "title",
+                label: "Section Title",
+              },
+              {
+                type: "string",
+                name: "subtitle",
+                label: "Section Subtitle",
+                ui: {
+                  component: "textarea",
+                },
+              },
+              {
+                type: "object",
+                name: "steps",
+                label: "Steps",
+                list: true,
+                fields: [
+                  {
+                    type: "string",
+                    name: "step",
+                    label: "Step Number",
+                    required: true,
+                  },
+                  {
+                    type: "string",
+                    name: "title",
+                    label: "Step Title",
+                    required: true,
+                  },
+                  {
+                    type: "string",
+                    name: "description",
+                    label: "Step Description",
+                    ui: {
+                      component: "textarea",
+                    },
+                  },
+                  {
+                    type: "string",
+                    name: "icon",
+                    label: "Step Icon (emoji)",
+                  },
+                  {
+                    type: "image",
+                    name: "image",
+                    label: "Step Image",
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            type: "object",
+            name: "partnerships",
+            label: "Partnerships Section",
+            fields: [
+              {
+                type: "string",
+                name: "title",
+                label: "Section Title",
+              },
+              {
+                type: "string",
+                name: "subtitle",
+                label: "Section Subtitle",
+                ui: {
+                  component: "textarea",
+                },
+              },
+              {
+                type: "object",
+                name: "partners",
+                label: "Partners",
+                list: true,
+                fields: [
+                  {
+                    type: "string",
+                    name: "name",
+                    label: "Partner Name",
+                    required: true,
+                  },
+                  {
+                    type: "image",
+                    name: "logo",
+                    label: "Partner Logo",
+                  },
+                  {
+                    type: "string",
+                    name: "description",
+                    label: "Partner Description",
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            type: "object",
+            name: "roadmap",
+            label: "Roadmap Section",
+            fields: [
+              {
+                type: "string",
+                name: "title",
+                label: "Section Title",
+              },
+              {
+                type: "string",
+                name: "subtitle",
+                label: "Section Subtitle",
+                ui: {
+                  component: "textarea",
+                },
+              },
+              {
+                type: "object",
+                name: "quarters",
+                label: "Roadmap Quarters",
+                list: true,
+                fields: [
+                  {
+                    type: "string",
+                    name: "period",
+                    label: "Time Period",
+                    required: true,
+                  },
+                  {
+                    type: "string",
+                    name: "title",
+                    label: "Quarter Title",
+                    required: true,
+                  },
+                  {
+                    type: "string",
+                    name: "status",
+                    label: "Status",
+                    options: ["completed", "in-progress", "planned", "research"],
+                  },
+                  {
+                    type: "string",
+                    name: "features",
+                    label: "Features",
+                    list: true,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: "footer",
+        label: "Footer Settings",
+        path: "content/footer",
+        format: "json",
+        ui: {
+          allowedActions: {
+            create: false,
+            delete: false,
+          },
+        },
+        fields: [
+          {
+            type: "object",
+            name: "branding",
+            label: "Branding",
+            fields: [
+              {
+                type: "string",
+                name: "title",
+                label: "Company Title",
+                required: true,
+              },
+              {
+                type: "string",
+                name: "subtitle",
+                label: "Company Subtitle",
+              },
+              {
+                type: "string",
+                name: "description",
+                label: "Company Description",
+                ui: {
+                  component: "textarea",
+                },
+              },
+              {
+                type: "image",
+                name: "logo",
+                label: "Footer Logo",
+              },
+            ],
+          },
+          {
+            type: "object",
+            name: "links",
+            label: "Footer Links",
+            fields: [
+              {
+                type: "object",
+                name: "sections",
+                label: "Link Sections",
+                list: true,
+                fields: [
+                  {
+                    type: "string",
+                    name: "title",
+                    label: "Section Title",
+                    required: true,
+                  },
+                  {
+                    type: "object",
+                    name: "items",
+                    label: "Links",
+                    list: true,
+                    fields: [
+                      {
+                        type: "string",
+                        name: "label",
+                        label: "Link Label",
+                        required: true,
+                      },
+                      {
+                        type: "string",
+                        name: "url",
+                        label: "Link URL",
+                        required: true,
+                      },
+                      {
+                        type: "boolean",
+                        name: "external",
+                        label: "External Link",
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            type: "object",
+            name: "social",
+            label: "Social Media",
+            fields: [
+              {
+                type: "string",
+                name: "title",
+                label: "Social Section Title",
+              },
+              {
+                type: "string",
+                name: "description",
+                label: "Social Section Description",
+                ui: {
+                  component: "textarea",
+                },
+              },
+              {
+                type: "object",
+                name: "platforms",
+                label: "Social Platforms",
+                fields: [
+                  {
+                    type: "string",
+                    name: "twitter",
+                    label: "Twitter URL",
+                  },
+                  {
+                    type: "string",
+                    name: "discord",
+                    label: "Discord URL",
+                  },
+                  {
+                    type: "string",
+                    name: "telegram",
+                    label: "Telegram URL",
+                  },
+                  {
+                    type: "string",
+                    name: "youtube",
+                    label: "YouTube URL",
+                  },
+                  {
+                    type: "string",
+                    name: "linkedin",
+                    label: "LinkedIn URL",
+                  },
+                  {
+                    type: "string",
+                    name: "github",
+                    label: "GitHub URL",
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            type: "object",
+            name: "newsletter",
+            label: "Newsletter",
+            fields: [
+              {
+                type: "string",
+                name: "title",
+                label: "Newsletter Title",
+              },
+              {
+                type: "string",
+                name: "description",
+                label: "Newsletter Description",
+                ui: {
+                  component: "textarea",
+                },
+              },
+              {
+                type: "string",
+                name: "placeholder",
+                label: "Email Placeholder",
+              },
+              {
+                type: "string",
+                name: "buttonText",
+                label: "Subscribe Button Text",
+              },
+            ],
+          },
+          {
+            type: "object",
+            name: "legal",
+            label: "Legal Information",
+            fields: [
+              {
+                type: "string",
+                name: "copyright",
+                label: "Copyright Text",
+                ui: {
+                  component: "textarea",
+                },
+              },
+              {
+                type: "string",
+                name: "disclaimer",
+                label: "Disclaimer Text",
+                ui: {
+                  component: "textarea",
+                },
+              },
+              {
+                type: "object",
+                name: "links",
+                label: "Legal Links",
+                list: true,
+                fields: [
+                  {
+                    type: "string",
+                    name: "label",
+                    label: "Link Label",
+                    required: true,
+                  },
+                  {
+                    type: "string",
+                    name: "url",
+                    label: "Link URL",
+                    required: true,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      {
         name: "announcement",
         label: "Announcements",
         path: "content/announcements",
