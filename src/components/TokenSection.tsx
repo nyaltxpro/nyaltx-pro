@@ -8,8 +8,6 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import ChainFilterIndicator from './ChainFilterIndicator';
 import CryptocurrencyIcon from './CryptocurrencyIcon';
 
-const MIN_TOKEN_AGE_MS = 5 * 60 * 1000;
-
 function formatTime(ts: number | string | undefined) {
   if (!ts) return '';
   const d = typeof ts === 'number' ? new Date(ts) : new Date(ts);
@@ -80,14 +78,6 @@ function pickTokenFields(ev: any): TokenData {
 
   // Return object with URI for async fetching
   return { name, symbol, mint, creator, ts, image, uri };
-}
-
-function normalizeTimestamp(ts: number | string | undefined) {
-  if (!ts) return null;
-  let value = typeof ts === 'string' ? Date.parse(ts) : ts;
-  if (!Number.isFinite(value)) return null;
-  if (value < 1e12) value *= 1000;
-  return value;
 }
 
 // Function to fetch metadata from URI and update the token data
@@ -299,7 +289,6 @@ export default function PumpPortalSimpleUI() {
   const [filter, setFilter] = useState('');
   const [inspect, setInspect] = useState<any | null>(null);
   const [lastUpdate, setLastUpdate] = useState<number>(Date.now());
-  const [ageTick, setAgeTick] = useState(0);
   const wsRef = useRef<WebSocket | null>(null);
   const msgCounter = useRef(0);
   const ticker = useRef<number | null>(null);
@@ -392,31 +381,6 @@ export default function PumpPortalSimpleUI() {
     includeUnknown: true,
   });
 
-  const filterByMinAge = useMemo(() => {
-    return (items: any[]) => {
-      const now = Date.now();
-      return items.filter(it => {
-        const fields = pickTokenFields(it.event?.token || it.event || it);
-        const tsMs = normalizeTimestamp(fields.ts);
-        if (tsMs === null) return false;
-        return now - tsMs >= MIN_TOKEN_AGE_MS;
-      });
-    };
-  }, []);
-
-  const ageFilteredNewTokens = useMemo(
-    () => filterByMinAge(filteredNewTokens),
-    [filteredNewTokens, filterByMinAge, ageTick]
-  );
-  const ageFilteredPreList = useMemo(
-    () => filterByMinAge(filteredPreList),
-    [filteredPreList, filterByMinAge, ageTick]
-  );
-  const ageFilteredLaunchedList = useMemo(
-    () => filterByMinAge(filteredLaunchedList),
-    [filteredLaunchedList, filterByMinAge, ageTick]
-  );
-
   // Debug the current state of tokens
   useEffect(() => {
     console.log('🔄 Launched tokens updated:', Object.keys(launched).length);
@@ -438,13 +402,6 @@ export default function PumpPortalSimpleUI() {
     return () => {
       if (ticker.current) window.clearInterval(ticker.current);
     };
-  }, []);
-
-  useEffect(() => {
-    const id = window.setInterval(() => {
-      setAgeTick(t => (t + 1) % Number.MAX_SAFE_INTEGER);
-    }, 30000);
-    return () => window.clearInterval(id);
   }, []);
 
   useEffect(() => {
@@ -638,11 +595,11 @@ export default function PumpPortalSimpleUI() {
                   New Tokens
                 </h2>
                 <span className="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded-full font-medium">
-                  {ageFilteredNewTokens.length}
+                  {filteredNewTokens.length}
                 </span>
               </div>
               <div className="space-y-2 sm:space-y-3 max-h-[50vh] sm:max-h-[70vh] overflow-auto pr-1">
-                {filtered(ageFilteredNewTokens).map((it, idx) => {
+                {filtered(filteredNewTokens).map((it, idx) => {
                   // Use mint as key to prevent duplicate rendering
                   const tokenFields = pickTokenFields(it.event?.token || it.event || it);
                   const key = tokenFields.mint || `new-${idx}-${Math.random()}`;
@@ -686,7 +643,7 @@ export default function PumpPortalSimpleUI() {
                   Launched Tokens
                 </h2>
                 <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded-full font-medium">
-                  {ageFilteredLaunchedList.length}
+                  {filteredLaunchedList.length}
                 </span>
                 <Tooltip.Root>
                   <Tooltip.Trigger asChild>
@@ -709,8 +666,8 @@ export default function PumpPortalSimpleUI() {
                 </Tooltip.Root>
               </div>
               <div className="space-y-2 sm:space-y-3 max-h-[50vh] sm:max-h-[70vh] overflow-auto pr-1">
-                {ageFilteredLaunchedList.length > 0 ? (
-                  filtered(ageFilteredLaunchedList).map((it: any, index: number) => {
+                {filteredLaunchedList.length > 0 ? (
+                  filtered(filteredLaunchedList).map((it: any, index: number) => {
                     // Extract the appropriate data structure for the Row component
                     const tokenFields = pickTokenFields(it.event?.token || it.event || it);
                     const key = tokenFields.mint || `launched-${index}-${Math.random()}`;
