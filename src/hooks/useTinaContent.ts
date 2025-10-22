@@ -195,6 +195,153 @@ export const useLandingPageContent = () => {
   return { content, loading, error };
 };
 
+// export const useLegalAdvicePageContent = () => {
+//   const [content, setContent] = useState<any | null>(null);
+//   const [loading, setLoading] = useState(true);
+//   const [error, setError] = useState<string | null>(null);
+
+//   useEffect(() => {
+//     const fetchContent = async () => {
+//       try {
+//         setLoading(true);
+
+//         const response = await fetch('/api/tina/legaladvice');
+
+//         if (!response.ok) {
+//           const fallbackResponse = await fetch('/content/legaladvice/settings.json');
+//           if (!fallbackResponse.ok) {
+//             throw new Error('Failed to fetch about us content');
+//           }
+//           const fallbackData = await fallbackResponse.json();
+//           setContent(fallbackData);
+//           return;
+//         }
+
+//         const data = await response.json();
+//         setContent(data);
+//       } catch (err) {
+//         console.error('Error fetching about us content:', err);
+//         setError(err instanceof Error ? err.message : 'Unknown error');
+
+//         try {
+//           const fallbackResponse = await fetch('/content/legaladvice/settings.json');
+//           if (fallbackResponse.ok) {
+//             const fallbackData = await fallbackResponse.json();
+//             setContent(fallbackData);
+//             setError(null);
+//           }
+//         } catch (fallbackErr) {
+//           console.error('Failed to load fallback about us content:', fallbackErr);
+//         }
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+
+//     fetchContent();
+//   }, []);
+
+//   return { content, loading, error };
+// };
+
+export const useLegalAdvicePageContent = () => {
+  const [content, setContent] = useState<{ legalAdvice: any } | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchContent = async () => {
+      try {
+        setLoading(true);
+
+        const response = await fetch('/api/tina/legaladvice');
+
+        if (!response.ok) {
+          const fallbackResponse = await fetch('/content/legaladvice/settings.json');
+          if (!fallbackResponse.ok) {
+            throw new Error('Failed to fetch legal advice content');
+          }
+          const fallbackData = await fallbackResponse.json();
+          setContent({ legalAdvice: fallbackData });
+          return;
+        }
+
+        const data = await response.json();
+        setContent({ legalAdvice: data });
+      } catch (err) {
+        console.error('Error fetching legal advice content:', err);
+        setError(err instanceof Error ? err.message : 'Unknown error');
+
+        try {
+          const fallbackResponse = await fetch('/content/legaladvice/settings.json');
+          if (fallbackResponse.ok) {
+            const fallbackData = await fallbackResponse.json();
+            setContent({ legalAdvice: fallbackData });
+            setError(null);
+          }
+        } catch (fallbackErr) {
+          console.error('Failed to load fallback legal advice content:', fallbackErr);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchContent();
+  }, []);
+
+  return { content, loading, error };
+};
+
+export const useAboutPageContent = () => {
+  const [content, setContent] = useState<any | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchContent = async () => {
+      try {
+        setLoading(true);
+
+        const response = await fetch('/api/tina/aboutus');
+
+        if (!response.ok) {
+          const fallbackResponse = await fetch('/content/aboutus/settings.json');
+          if (!fallbackResponse.ok) {
+            throw new Error('Failed to fetch about us content');
+          }
+          const fallbackData = await fallbackResponse.json();
+          setContent(fallbackData);
+          return;
+        }
+
+        const data = await response.json();
+        setContent(data);
+      } catch (err) {
+        console.error('Error fetching about us content:', err);
+        setError(err instanceof Error ? err.message : 'Unknown error');
+
+        try {
+          const fallbackResponse = await fetch('/content/aboutus/settings.json');
+          if (fallbackResponse.ok) {
+            const fallbackData = await fallbackResponse.json();
+            setContent(fallbackData);
+            setError(null);
+          }
+        } catch (fallbackErr) {
+          console.error('Failed to load fallback about us content:', fallbackErr);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchContent();
+  }, []);
+
+  return { content, loading, error };
+};
+
 export const useTeamContent = () => {
   const [content, setContent] = useState<TeamContent | null>(null);
   const [loading, setLoading] = useState(true);

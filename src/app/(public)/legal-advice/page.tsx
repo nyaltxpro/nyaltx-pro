@@ -1,21 +1,45 @@
-'use client';
 
-import PublicHeader from '@/components/PublicHeader';
-import { motion } from 'framer-motion';
-import { FiShield } from 'react-icons/fi';
+"use client";
 
-const LegalAdvice = () => {
+import PublicHeader from "@/components/PublicHeader";
+import { useLegalAdvicePageContent } from "@/hooks/useTinaContent";
+import { motion } from "framer-motion";
+import { FiShield } from "react-icons/fi";
+export default function LegalAdvicePage() {
+  const { content: data, loading, error } = useLegalAdvicePageContent();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-inherit text-white">
+        <PublicHeader />
+        <section className="container mx-auto px-4 pt-16 pb-10">
+          <div className="animate-pulse space-y-4">
+            <div className="h-8 rounded bg-white/10" />
+            <div className="h-12 rounded bg-white/10" />
+            <div className="h-4 rounded bg-white/10" />
+            <div className="h-4 w-3/4 rounded bg-white/10" />
+          </div>
+        </section>
+      </div>
+    );
+  }
+
+  if (error || !data?.legalAdvice) {
+    return (
+      <div className="min-h-screen bg-inherit text-white">
+        <PublicHeader />
+        <section className="container mx-auto px-4 pt-16 pb-10">
+          <p className="text-white/70">Unable to load legal advice content right now. Please try again later.</p>
+        </section>
+      </div>
+    );
+  }
+
+  const { tagline, title, description, body } = data.legalAdvice;
+
   return (
     <div className="min-h-screen bg-inherit text-white">
       <PublicHeader />
-
-      {/* Background accents */}
-      {/* <div className="pointer-events-none fixed inset-0 -z-10">
-        <div className="absolute inset-0 bg-[radial-gradient(1000px_600px_at_50%_-100px,rgba(56,189,248,0.12),rgba(67,56,202,0)_60%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(800px_400px_at_80%_10%,rgba(99,102,241,0.18),rgba(14,165,233,0)_60%)]" />
-      </div> */}
-
-      {/* Hero */}
       <section className="container mx-auto px-4 pt-16 pb-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -25,55 +49,29 @@ const LegalAdvice = () => {
         >
           <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-sm text-white/80 backdrop-blur">
             <FiShield className="h-4 w-4 text-cyan-300" />
-            <span>Compliance & Transparency</span>
+            <span>{tagline}</span>
           </div>
           <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">
             <span className="bg-gradient-to-r from-cyan-300 via-sky-400 to-indigo-400 bg-clip-text text-transparent">
-              NYALTX Legal Advice
+              {title}
             </span>
           </h1>
-          <p className="max-w-3xl text-white/70">
-            Important legal notices regarding information usage and investment risk.
-          </p>
+          <p className="max-w-3xl text-white/70">{description}</p>
         </motion.div>
       </section>
 
-      {/* Content Card */}
       <section className="container mt-10 mx-auto px-4 pb-20">
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl"
+          className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-6 md:p-10"
         >
-          <div className="pointer-events-none absolute -inset-px rounded-2xl  blur-[10px]" />
-
-          <div className="relative p-6 md:p-10">
-            <div className="prose dark:prose-invert max-w-none prose-p:leading-relaxed">
-              <p className="leading-loose">
-                All the contents of our Website and those to which its hyperlinks refer, as well as
-                those that may result from applications, forums, blogs, social network accounts and
-                other platforms associated with NYALTX are intended solely to provide its users with
-                general information and in no case are aimed at the marketing of specific products.
-                We cannot guarantee the accuracy of the data published or the accuracy and
-                timeliness of such data. The publication of information by NYALTX in no case
-                involves or should be interpreted as financial, legal or any other kind of advice
-                regarding the opportunity to invest in the markets and products to which it refers.
-                Any use or exploitation that users may make of the information provided will be at
-                their own risk. The user interested in investing must carry out his own research and
-                analysis, reviewing and verifying such data and contents, before relying on them.
-                The commercial transactions referred to in the information constitute a very high
-                risk activity, which may entail serious losses for the investor, and therefore the
-                investor should seek appropriate advice before making any decision. Nothing on our
-                Web Page constitutes or should be considered an invitation or an offer to carry out
-                acts of investment.
-              </p>
-            </div>
+          <div className="prose dark:prose-invert max-w-none prose-p:leading-relaxed whitespace-pre-line">
+            {body}
           </div>
         </motion.div>
       </section>
     </div>
   );
-};
-
-export default LegalAdvice;
+}

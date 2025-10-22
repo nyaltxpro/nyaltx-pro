@@ -1,5 +1,5 @@
 import { defineConfig } from "tinacms";
-
+import generalStatement from "./schema/generalstatment";
 // Your hosting provider likely exposes this as an environment variable
 const branch =
   process.env.GITHUB_BRANCH ||
@@ -28,6 +28,7 @@ export default defineConfig({
   // See docs on content modeling for more info on how to setup new content models: https://tina.io/docs/r/content-modelling-collections/
   schema: {
     collections: [
+      generalStatement,
       {
         name: "post",
         label: "Blog Posts",
@@ -997,6 +998,356 @@ export default defineConfig({
         ],
       },
       {
+        name: "aboutus",
+        label: "About Us",
+        path: "content/aboutus",
+        format: "json",
+        ui: {
+          allowedActions: {
+            create: false,
+            delete: false,
+          },
+        },
+        fields: [
+          {
+            type: "string",
+            name: "slug",
+            label: "Page Slug",
+            isTitle: true,
+            required: true,
+          },
+          {
+            type: "string",
+            name: "title",
+            label: "Page Title",
+            required: true,
+          },
+          {
+            type: "string",
+            name: "description",
+            label: "Meta Description",
+            ui: {
+              component: "textarea",
+            },
+          },
+          {
+            type: "object",
+            name: "hero",
+            label: "Hero Section",
+            fields: [
+              {
+                type: "string",
+                name: "title",
+                label: "Hero Title",
+              },
+              {
+                type: "string",
+                name: "subtitle",
+                label: "Hero Subtitle",
+                ui: {
+                  component: "textarea",
+                },
+              },
+              {
+                type: "image",
+                name: "backgroundImage",
+                label: "Background Image",
+              },
+            ],
+          },
+          {
+            type: "rich-text",
+            name: "content",
+            label: "Page Content",
+          },
+          {
+            type: "object",
+            name: "teamSection",
+            label: "Team Section",
+            fields: [
+              {
+                type: "string",
+                name: "title",
+                label: "Section Title",
+              },
+              {
+                type: "string",
+                name: "subtitle",
+                label: "Section Subtitle",
+                ui: {
+                  component: "textarea",
+                },
+              },
+              {
+                type: "object",
+                name: "members",
+                label: "Team Members",
+                list: true,
+                ui: {
+                  itemProps: (item) => {
+                    return {
+                      label: item?.name,
+                    };
+                  },
+                },
+                fields: [
+                  {
+                    type: "string",
+                    name: "name",
+                    label: "Name",
+                    required: true,
+                  },
+                  {
+                    type: "string",
+                    name: "role",
+                    label: "Role",
+                    required: true,
+                  },
+                  {
+                    type: "string",
+                    name: "bio",
+                    label: "Short Bio",
+                    ui: {
+                      component: "textarea",
+                    },
+                  },
+                  {
+                    type: "image",
+                    name: "photo",
+                    label: "Photo",
+                  },
+                  {
+                    type: "string",
+                    name: "linkedin",
+                    label: "LinkedIn URL",
+                  },
+                  {
+                    type: "string",
+                    name: "twitter",
+                    label: "Twitter URL",
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            type: "object",
+            name: "sections",
+            label: "Additional Sections",
+            list: true,
+            ui: {
+              itemProps: (item) => {
+                return {
+                  label: item?.title,
+                };
+              },
+            },
+            fields: [
+              {
+                type: "string",
+                name: "title",
+                label: "Section Title",
+              },
+              {
+                type: "string",
+                name: "description",
+                label: "Section Description",
+                ui: {
+                  component: "textarea",
+                },
+              },
+              {
+                type: "object",
+                name: "items",
+                label: "Highlights",
+                list: true,
+                ui: {
+                  itemProps: (item) => {
+                    return {
+                      label: item?.title,
+                    };
+                  },
+                },
+                fields: [
+                  {
+                    type: "string",
+                    name: "title",
+                    label: "Title",
+                  },
+                  {
+                    type: "string",
+                    name: "description",
+                    label: "Description",
+                    ui: {
+                      component: "textarea",
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            type: "object",
+            name: "seo",
+            label: "SEO Settings",
+            fields: [
+              {
+                type: "string",
+                name: "metaTitle",
+                label: "Meta Title",
+              },
+              {
+                type: "string",
+                name: "metaDescription",
+                label: "Meta Description",
+                ui: {
+                  component: "textarea",
+                },
+              },
+              {
+                type: "string",
+                name: "keywords",
+                label: "Keywords (comma-separated)",
+              },
+              {
+                type: "image",
+                name: "ogImage",
+                label: "Open Graph Image",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: "privacypolicy",
+        label: "Privacy Policy",
+        path: "content/privacypolicy",
+        format: "json",
+        ui: {
+          allowedActions: {
+            create: false,
+            delete: false,
+          },
+        },
+        fields: [
+          {
+            type: "string",
+            name: "slug",
+            label: "Page Slug",
+            isTitle: true,
+            required: true,
+          },
+          {
+            type: "string",
+            name: "title",
+            label: "Page Title",
+            required: true,
+          },
+          {
+            type: "string",
+            name: "description",
+            label: "Meta Description",
+            ui: {
+              component: "textarea",
+            },
+          },
+          {
+            type: "object",
+            name: "hero",
+            label: "Hero Section",
+            fields: [
+              {
+                type: "string",
+                name: "title",
+                label: "Hero Title",
+                required: true,
+              },
+              {
+                type: "string",
+                name: "subtitle",
+                label: "Hero Subtitle",
+                ui: {
+                  component: "textarea",
+                },
+              },
+              {
+                type: "image",
+                name: "backgroundImage",
+                label: "Background Image",
+              },
+            ],
+          },
+          {
+            type: "rich-text",
+            name: "content",
+            label: "Page Content",
+            isBody: true,
+          },
+          {
+            type: "object",
+            name: "seo",
+            label: "SEO Settings",
+            fields: [
+              {
+                type: "string",
+                name: "metaTitle",
+                label: "Meta Title",
+              },
+              {
+                type: "string",
+                name: "metaDescription",
+                label: "Meta Description",
+                ui: {
+                  component: "textarea",
+                },
+              },
+              {
+                type: "string",
+                name: "keywords",
+                label: "Keywords (comma-separated)",
+              },
+              {
+                type: "image",
+                name: "ogImage",
+                label: "Open Graph Image",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        label: "Legal Advice Page",
+        name: "legalAdvice",
+        path: "src/content/legal",
+        format: "json",
+        fields: [
+          {
+            type: "string",
+            name: "title",
+            label: "Title",
+            required: true,
+          },
+          {
+            type: "string",
+            name: "tagline",
+            label: "Tagline",
+          },
+          {
+            type: "string",
+            name: "description",
+            label: "Short Description",
+          },
+          {
+            type: "string",
+            name: "body",
+            label: "Main Content",
+            ui: {
+              component: "textarea",
+            },
+          },
+        ],
+      },
+      {
         name: "venturegroup",
         label: "Venture Group",
         path: "content/venturegroup",
@@ -1220,6 +1571,7 @@ export default defineConfig({
           },
         ],
       },
+  
       {
         name: "team",
         label: "Team",

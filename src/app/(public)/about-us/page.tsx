@@ -4,7 +4,7 @@ import PublicHeader from '@/components/PublicHeader';
 import TinaRichText from '@/components/TinaRichText';
 import { usePublicPageContent } from '@/hooks/useTinaContent';
 import { motion } from 'framer-motion';
-import { FiCpu, FiTarget, FiUsers } from 'react-icons/fi';
+import { FiUsers } from 'react-icons/fi';
 
 export default function AboutUs() {
   const { content, loading, error } = usePublicPageContent('about-us');
@@ -31,17 +31,17 @@ export default function AboutUs() {
             {
               type: "element" as const,
               tag: "p",
-              children: [{ 
-                type: "text" as const, 
-                text: "At NYALTX, we're on a mission to make cryptocurrency trading accessible, transparent, and efficient for everyone. We believe in the power of decentralized finance to transform the global economy and create new opportunities for people worldwide." 
+              children: [{
+                type: "text" as const,
+                text: "At NYALTX, we're on a mission to make cryptocurrency trading accessible, transparent, and efficient for everyone. We believe in the power of decentralized finance to transform the global economy and create new opportunities for people worldwide."
               }]
             },
             {
               type: "element" as const,
               tag: "p",
-              children: [{ 
-                type: "text" as const, 
-                text: "Our platform aggregates data from multiple decentralized exchanges to provide you with the best possible trading experience, ensuring you always get the best rates and lowest fees when swapping your digital assets." 
+              children: [{
+                type: "text" as const,
+                text: "Our platform aggregates data from multiple decentralized exchanges to provide you with the best possible trading experience, ensuring you always get the best rates and lowest fees when swapping your digital assets."
               }]
             }
           ]
@@ -59,17 +59,17 @@ export default function AboutUs() {
             {
               type: "element" as const,
               tag: "p",
-              children: [{ 
-                type: "text" as const, 
-                text: "NYALTX leverages cutting-edge blockchain technology to provide a seamless trading experience across multiple chains and protocols. Our platform integrates with leading DEXs including Uniswap, SushiSwap, PancakeSwap, and more to ensure you always get the best rates." 
+              children: [{
+                type: "text" as const,
+                text: "NYALTX leverages cutting-edge blockchain technology to provide a seamless trading experience across multiple chains and protocols. Our platform integrates with leading DEXs including Uniswap, SushiSwap, PancakeSwap, and more to ensure you always get the best rates."
               }]
             },
             {
               type: "element" as const,
               tag: "p",
-              children: [{ 
-                type: "text" as const, 
-                text: "We're committed to security, transparency, and continuous improvement. Our smart contract integrations are regularly audited, and we're constantly working to add new features and support for additional chains and protocols." 
+              children: [{
+                type: "text" as const,
+                text: "We're committed to security, transparency, and continuous improvement. Our smart contract integrations are regularly audited, and we're constantly working to add new features and support for additional chains and protocols."
               }]
             }
           ]
@@ -87,9 +87,9 @@ export default function AboutUs() {
             {
               type: "element" as const,
               tag: "p",
-              children: [{ 
-                type: "text" as const, 
-                text: "Have questions, suggestions, or just want to say hello? We'd love to hear from you!" 
+              children: [{
+                type: "text" as const,
+                text: "Have questions, suggestions, or just want to say hello? We'd love to hear from you!"
               }]
             },
             {
