@@ -1,4 +1,5 @@
 import { defineConfig } from "tinacms";
+import { aboutUs } from './schema/aboutus';
 import generalStatement from "./schema/generalstatment";
 // Your hosting provider likely exposes this as an environment variable
 const branch =
@@ -29,6 +30,7 @@ export default defineConfig({
   schema: {
     collections: [
       generalStatement,
+      aboutUs,
       {
         name: "post",
         label: "Blog Posts",
