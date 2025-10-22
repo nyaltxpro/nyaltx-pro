@@ -104,7 +104,11 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={inter.className}>
+      <body className={`${inter.variable} ${poppins.variable} antialiased`}
+        style={{
+          fontFamily:
+            "'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+        }} >
         <Providers>
           {/* DexScreener-inspired background pattern */}
           <div className="dex-bg-pattern"></div>
