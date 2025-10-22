@@ -1,124 +1,197 @@
 import type { Collection } from "tinacms";
 
 export const aboutUs: Collection = {
-    name: "aboutUs",
-    label: "About Us Page",
-    path: "src/content/aboutus",
-    format: "json",
-    fields: [
-      {
-        name: "slug",
-        label: "Slug",
-        type: "string",
-        required: true,
-      },
-      {
-        name: "title",
-        label: "Page Title",
-        type: "string",
-      },
-      {
-        name: "description",
-        label: "Page Description",
-        type: "string",
-        ui: {
-          component: "textarea",
+  name: "aboutUs",
+  label: "About Us Page",
+  path: "src/content/aboutus",
+  format: "json",
+  fields: [
+    {
+      name: "slug",
+      label: "Slug",
+      type: "string",
+      required: true,
+      description: "URL slug for the page"
+    },
+    {
+      name: "meta",
+      label: "Metadata",
+      type: "object",
+      fields: [
+        {
+          name: "title",
+          label: "Title",
+          type: "string",
+          required: true
         },
-      },
-      {
-        name: "hero",
-        label: "Hero Section",
-        type: "object",
-        fields: [
-          {
-            name: "title",
-            label: "Hero Title",
-            type: "string",
-          },
-          {
-            name: "subtitle",
-            label: "Hero Subtitle",
-            type: "string",
-            ui: {
-              component: "textarea",
+        {
+          name: "description",
+          label: "Description",
+          type: "string",
+          ui: { component: "textarea" }
+        },
+        {
+          name: "lastUpdated",
+          label: "Last Updated",
+          type: "datetime",
+          required: true
+        },
+        {
+          name: "version",
+          label: "Version",
+          type: "string"
+        }
+      ]
+    },
+    {
+      name: "hero",
+      label: "Hero Section",
+      type: "object",
+      fields: [
+        {
+          name: "badge",
+          label: "Badge",
+          type: "object",
+          fields: [
+            {
+              name: "icon",
+              label: "Icon",
+              type: "string",
+              description: "React Icon name, e.g., 'FiUsers'"
             },
-          },
-        ],
-      },
-      {
-        name: "content",
-        label: "Page Content",
-        type: "rich-text",
-        isBody: true,
-      },
-      {
-        name: "teamSection",
-        label: "Team Section",
-        type: "object",
-        fields: [
-          {
-            name: "title",
-            label: "Title",
-            type: "string",
-          },
-          {
-            name: "subtitle",
-            label: "Subtitle",
-            type: "string",
-          },
-          {
-            name: "members",
-            label: "Team Members",
-            type: "object",
-            list: true,
-            fields: [
-              { name: "name", label: "Name", type: "string" },
-              { name: "role", label: "Role", type: "string" },
-              { name: "image", label: "Image", type: "image" },
-              { name: "bio", label: "Bio", type: "string", ui: { component: "textarea" } },
-            ],
-          },
-        ],
-      },
-      {
-        name: "sections",
-        label: "Additional Sections",
-        type: "object",
-        list: true,
-        fields: [
-          { name: "title", label: "Title", type: "string" },
-          { name: "content", label: "Content", type: "rich-text" },
-        ],
-      },
-      {
-        name: "seo",
-        label: "SEO Settings",
-        type: "object",
-        fields: [
-          {
-            name: "metaTitle",
-            label: "Meta Title",
-            type: "string",
-          },
-          {
-            name: "metaDescription",
-            label: "Meta Description",
-            type: "string",
-            ui: {
-              component: "textarea",
+            {
+              name: "text",
+              label: "Text",
+              type: "string"
+            }
+          ]
+        },
+        {
+          name: "title",
+          label: "Title",
+          type: "object",
+          fields: [
+            {
+              name: "text",
+              label: "Text",
+              type: "string",
+              required: true
             },
-          },
-          {
-            name: "keywords",
-            label: "Keywords",
-            type: "string",
-          },
-          {
-            name: "ogImage",
-            label: "OG Image",
-            type: "image",
-          },
-        ],
-      },
-    ],
-  }
+            {
+              name: "gradient",
+              label: "Gradient Classes",
+              type: "string",
+              description: "Tailwind gradient classes"
+            }
+          ]
+        },
+        {
+          name: "description",
+          label: "Description",
+          type: "string",
+          ui: { component: "textarea" }
+        }
+      ]
+    },
+    {
+      name: "content",
+      label: "Page Content",
+      type: "object",
+      fields: [
+        {
+          name: "sections",
+          label: "Content Sections",
+          type: "object",
+          list: true,
+          fields: [
+            {
+              name: "id",
+              label: "Section ID",
+              type: "string",
+              required: true
+            },
+            {
+              name: "icon",
+              label: "Section Icon",
+              type: "string",
+              description: "React Icon name (optional), e.g., 'FiTarget', 'FiCpu'"
+            },
+            {
+              name: "title",
+              label: "Section Title",
+              type: "string",
+              required: true
+            },
+            {
+              name: "type",
+              label: "Section Type",
+              type: "string",
+              options: ["default", "highlight", "warning"],
+              description: "Visual style of the section"
+            },
+            {
+              name: "paragraphs",
+              label: "Paragraphs",
+              type: "string",
+              list: true,
+              ui: { component: "textarea" },
+              description: "Array of paragraph texts"
+            },
+            {
+              name: "contactInfo",
+              label: "Contact Information",
+              type: "object",
+              list: true,
+              description: "Optional contact details for contact sections",
+              fields: [
+                {
+                  name: "label",
+                  label: "Label",
+                  type: "string",
+                  description: "e.g., 'Email', 'Twitter'"
+                },
+                {
+                  name: "value",
+                  label: "Value",
+                  type: "string",
+                  description: "e.g., 'info@nyaltx.com', '@nyaltx'"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      name: "seo",
+      label: "SEO Settings",
+      type: "object",
+      fields: [
+        {
+          name: "metaTitle",
+          label: "Meta Title",
+          type: "string",
+          required: true
+        },
+        {
+          name: "metaDescription",
+          label: "Meta Description",
+          type: "string",
+          ui: { component: "textarea" },
+          required: true
+        },
+        {
+          name: "keywords",
+          label: "Keywords",
+          type: "string",
+          description: "Comma-separated keywords"
+        },
+        {
+          name: "canonical",
+          label: "Canonical URL",
+          type: "string"
+        }
+      ]
+    }
+  ]
+};
