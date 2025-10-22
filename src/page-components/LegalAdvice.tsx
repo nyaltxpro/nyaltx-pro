@@ -1,6 +1,7 @@
 'use client';
 
 import PublicHeader from '@/components/PublicHeader';
+import TinaRichText from '@/components/TinaRichText';
 import { motion } from 'framer-motion';
 import { FiShield } from 'react-icons/fi';
 import { useTina } from 'tinacms/dist/react';
@@ -90,7 +91,7 @@ export default function LegalAdviceClient(props: LegalAdviceClientProps) {
                         transition={{ duration: 0.5, delay: 0.05 }}
                         className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-6 md:p-10"
                     >
-                        {pageContent.body}
+                        <TinaRichText content={pageContent.body} />
                     </motion.div>
                 )}
 
