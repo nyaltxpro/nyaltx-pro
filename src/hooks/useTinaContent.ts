@@ -392,6 +392,60 @@ export const usePublicPageContent = (slug: string) => {
   return { content, loading, error };
 };
 
+
+export const useVenturePageContent = () => {
+  const [content, setContent] = useState<any | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchContent = async () => {
+      try {
+        setLoading(true);
+        
+        // In development, we'll fetch from the static JSON file
+        // In production with Tina Cloud, this would use Tina's GraphQL API
+        const response = await fetch('/api/tina/venturepage');
+        
+        if (!response.ok) {
+          // Fallback to static content
+          const fallbackResponse = await fetch('/content/venturegroup/settings.json');
+          if (!fallbackResponse.ok) {
+            throw new Error('Failed to fetch footer content');
+          }
+          const fallbackData = await fallbackResponse.json();
+          setContent(fallbackData);
+          return;
+        }
+
+        const data = await response.json();
+        setContent(data);
+      } catch (err) {
+        console.error('Error fetching footer content:', err);
+        setError(err instanceof Error ? err.message : 'Unknown error');
+        
+        // Try to load fallback content
+        try {
+          const fallbackResponse = await fetch('/content/venturegroup/settings.json');
+          if (fallbackResponse.ok) {
+            const fallbackData = await fallbackResponse.json();
+            setContent(fallbackData);
+            setError(null);
+          }
+        } catch (fallbackErr) {
+          console.error('Failed to load fallback content:', fallbackErr);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchContent();
+  }, []);
+
+  return { content, loading, error };
+};
+
 // Hook for FAQ content
 export const useFAQContent = () => {
   const [content, setContent] = useState<any | null>(null);

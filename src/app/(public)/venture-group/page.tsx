@@ -2,7 +2,7 @@
 
 import PublicHeader from '@/components/PublicHeader';
 import TinaRichText from '@/components/TinaRichText';
-import { usePublicPageContent } from '@/hooks/useTinaContent';
+import { useVenturePageContent } from '@/hooks/useTinaContent';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 
@@ -27,7 +27,7 @@ type VentureGroupSection = {
 };
 
 export default function VentureGroupPage() {
-  const { content } = usePublicPageContent('venture-group');
+  const { content: content, loading, error } = useVenturePageContent();
 
   const fallbackContent = {
     hero: {

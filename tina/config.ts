@@ -393,8 +393,8 @@ export default defineConfig({
         ],
       },
       {
-        name: "collectionVenture",
-        label: "Venture Group Page",
+        name: "venturegroup",
+        label: "Venture Group",
         path: "content/public-pages",
         format: "json",
         match: {
@@ -760,8 +760,8 @@ export default defineConfig({
         ],
       },
       {
-        name: "venturegroup",
-        label: "Venture Group",
+        name: "venturegroup2",
+        label: "Venture Group2",
         path: "content/venturegroup",
         format: "json",
         ui: {
