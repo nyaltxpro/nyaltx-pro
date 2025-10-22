@@ -1,8 +1,8 @@
+import PublicHeader from '@/components/PublicHeader';
+import { getDb } from '@/lib/mongodb';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import PublicHeader from '@/components/PublicHeader';
 import NewsArticle from '../../../../components/NewsArticle';
-import { getDb } from '@/lib/mongodb';
 
 interface NewsData {
   _id: string;
@@ -20,37 +20,37 @@ interface NewsData {
 async function getNewsArticle(slug: string): Promise<NewsData | null> {
   try {
     console.log('Fetching article with slug:', slug);
-    
+
     const db = await getDb();
     const collection = db.collection('corporate_news');
-    
+
     // Check all articles with this slug for debugging
     const allMatchingArticles = await collection.find({ slug }).toArray();
-    console.log('All articles with slug:', slug, allMatchingArticles.map(a => ({ 
-      title: a.title, 
-      status: a.status, 
+    console.log('All articles with slug:', slug, allMatchingArticles.map(a => ({
+      title: a.title,
+      status: a.status,
       publishedAt: a.publishedAt,
-      slug: a.slug 
+      slug: a.slug
     })));
-    
+
     // Find the published article
-    const newsArticle = await collection.findOne({ 
-      slug, 
-      status: 'published' 
+    const newsArticle = await collection.findOne({
+      slug,
+      status: 'published'
     });
-    
+
     console.log('Published article found:', newsArticle ? 'YES' : 'NO');
-    
+
     if (!newsArticle) {
       return null;
     }
-    
+
     // Increment view count
     await collection.updateOne(
       { _id: newsArticle._id },
       { $inc: { views: 1 } }
     );
-    
+
     return {
       _id: newsArticle._id.toString(),
       title: newsArticle.title,
@@ -71,7 +71,7 @@ async function getNewsArticle(slug: string): Promise<NewsData | null> {
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const article = await getNewsArticle(params.slug);
-  
+
   if (!article) {
     return {
       title: 'Article Not Found - NYALTX News',
@@ -116,7 +116,7 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen  text-white">
       <PublicHeader />
       <NewsArticle article={article} />
     </div>
