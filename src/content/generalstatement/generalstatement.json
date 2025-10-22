@@ -1,49 +1,52 @@
 {
-    "title": "NYALTX Legal Advice",
-    "tagline": "Compliance & Transparency",
-    "description": "Please review our general terms, severe risk warnings, and responsibilities when interacting with cryptoassets and related information services.",
-    "badges": ["Updated", "Legal", "Web3"],
-    "sections": [
-      {
-        "heading": "GENERAL TERMS AND CONDITIONS OF USE OF THE WEBSITE",
-        "subsections": [
-          {
-            "title": "Acceptance of terms and conditions of use",
-            "content": "Any person accessing this website and make use of it declares to know and also accepts these 'General Conditions', fully accessible to any user through its 'Legal Notice'. Knowledge and acceptance of these 'General Conditions' constitute a necessary prerequisite for accessing the information society services offered by Corporate Roadshow, Inc. and its wholly owned subsidiary NYALTX and benefiting from their provision. Therefore, any person who does not agree with what is stipulated therein shall not have the right to make use of this Website."
-          },
-          {
-            "title": "Web Site Ownership",
-            "content": "This Web Page (www.nyaltx.com) is the property of Corporate Roadshow, Inc. The intellectual property rights and rights of exploitation and reproduction of said Web Site, as well as its content, appearance and design, are the exclusive property of this Company, unless expressly specified otherwise. Any improper use of this Web site or its contents may be prosecuted in accordance with applicable law.\n\nCorporate Roadshow, Inc. reserves the right to modify, update, expand and delete at any time, without prior notice, the content of this Website, including its own conditions of use. Likewise, it may restrict or remove access to this Website, for the reasons it deems appropriate and at its sole discretion."
-          },
-          {
-            "title": "Scope of the Website",
-            "content": "All information made available to the user through this website constitutes its 'Content' and shall be for information purposes only.\n\nIt is not the intention of the Company to use this Web Site as a means or instrument, directly or indirectly, of conducting business or contracting for services. Under no circumstances should this Web Site be used or considered as an offer to enter into a contract, a solicitation of an offer to enter into a contract, or as an offer to enter into any other type of transaction, unless expressly stated otherwise."
-          }
-        ]
-      },
-      {
-        "heading": "Severe Warning",
-        "icon": "alert",
-        "list": [
-          "Investments in crypto-assets and the yield obtained therefrom may experience significant changes in value, both upward and downward, and the entire amount invested may even be lost.",
-          "Investments made in projects that are in early stages of development always involve a high level of risk.",
-          "Cryptoassets are not covered by investor protection mechanisms such as deposit or guarantee funds.",
-          "The lack of liquidity of many cryptoassets can make it difficult or impossible for investors to unwind their investments.",
-          "Distributed ledger technologies are still in early maturity stages and may have flaws in operation and security.",
-          "The anonymity of cryptoassets makes them a target for cybercriminals, and lost credentials can lead to permanent loss.",
-          "Custody of cryptoassets carries the risk of total loss in the event of theft or loss of private keys.",
-          "Acceptance of cryptoassets as payment is still very limited and not legally mandatory.",
-          "Service providers outside the EU may complicate dispute resolution for investors."
-        ]
-      },
-      {
-        "heading": "Privacy Policy",
-        "content": "Corporate Roadshow, Inc. does not collect or process users' personal data beyond legal obligations. The company guarantees confidentiality and adopts legally required security measures."
-      },
-      {
-        "heading": "Responsibilities",
-        "content": "The Company is not liable for damages, losses, claims or expenses of any kind arising from the use or inability to use this website. Updates may occur without prior notice. Information is provided as-is, without warranty of complete security or privacy."
-      }
-    ]
-  }
-  
+  "title": "NYALTX Legal Advice",
+  "tagline": "Compliance & Transparency",
+  "description": "Please review our general terms, severe risk warnings, and responsibilities when interacting with cryptoassets and related information services",
+  "badges": [
+    "Updated",
+    "Legal",
+    "Web3"
+  ],
+  "sections": [
+    {
+      "heading": "GENERAL TERMS AND CONDITIONS OF USE OF THE WEBSITE",
+      "subsections": [
+        {
+          "title": "Acceptance of terms and conditions of use",
+          "content": "Any person accessing this website and make use of it declares to know and also accepts these 'General Conditions', fully accessible to any user through its 'Legal Notice'. Knowledge and acceptance of these 'General Conditions' constitute a necessary prerequisite for accessing the information society services offered by Corporate Roadshow, Inc. and its wholly owned subsidiary NYALTX and benefiting from their provision. Therefore, any person who does not agree with what is stipulated therein shall not have the right to make use of this Website."
+        },
+        {
+          "title": "Web Site Ownership",
+          "content": "This Web Page (www.nyaltx.com) is the property of Corporate Roadshow, Inc. The intellectual property rights and rights of exploitation and reproduction of said Web Site, as well as its content, appearance and design, are the exclusive property of this Company, unless expressly specified otherwise. Any improper use of this Web site or its contents may be prosecuted in accordance with applicable law.\n\nCorporate Roadshow, Inc. reserves the right to modify, update, expand and delete at any time, without prior notice, the content of this Website, including its own conditions of use. Likewise, it may restrict or remove access to this Website, for the reasons it deems appropriate and at its sole discretion."
+        },
+        {
+          "title": "Scope of the Website",
+          "content": "All information made available to the user through this website constitutes its 'Content' and shall be for information purposes only.\n\nIt is not the intention of the Company to use this Web Site as a means or instrument, directly or indirectly, of conducting business or contracting for services. Under no circumstances should this Web Site be used or considered as an offer to enter into a contract, a solicitation of an offer to enter into a contract, or as an offer to enter into any other type of transaction, unless expressly stated otherwise."
+        }
+      ]
+    },
+    {
+      "heading": "Severe Warning",
+      "icon": "alert",
+      "list": [
+        "Investments in crypto-assets and the yield obtained therefrom may experience significant changes in value, both upward and downward, and the entire amount invested may even be lost.",
+        "Investments made in projects that are in early stages of development always involve a high level of risk.",
+        "Cryptoassets are not covered by investor protection mechanisms such as deposit or guarantee funds.",
+        "The lack of liquidity of many cryptoassets can make it difficult or impossible for investors to unwind their investments.",
+        "Distributed ledger technologies are still in early maturity stages and may have flaws in operation and security.",
+        "The anonymity of cryptoassets makes them a target for cybercriminals, and lost credentials can lead to permanent loss.",
+        "Custody of cryptoassets carries the risk of total loss in the event of theft or loss of private keys.",
+        "Acceptance of cryptoassets as payment is still very limited and not legally mandatory.",
+        "Service providers outside the EU may complicate dispute resolution for investors."
+      ]
+    },
+    {
+      "heading": "Privacy Policy",
+      "content": "Corporate Roadshow, Inc. does not collect or process users' personal data beyond legal obligations. The company guarantees confidentiality and adopts legally required security measures."
+    },
+    {
+      "heading": "Responsibilities",
+      "content": "The Company is not liable for damages, losses, claims or expenses of any kind arising from the use or inability to use this website. Updates may occur without prior notice. Information is provided as-is, without warranty of complete security or privacy."
+    }
+  ]
+}
