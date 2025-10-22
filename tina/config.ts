@@ -760,6 +760,69 @@ export default defineConfig({
         ],
       },
       {
+        name: "venturegroup",
+        label: "Venture Group",
+        path: "content/venturegroup",
+        format: "json",
+        ui: {
+          allowedActions: {
+            create: false,
+            delete: false,
+          },
+        },
+        fields:[
+          {
+            type: "object",
+            name: "hero",
+            label: "Hero",
+            fields:[
+              {
+                type: "string",
+                name: "title",
+                label: "Title",
+                required: true,
+              },
+              {
+                type: "string",
+                name: "subtitle",
+                label: "Subtitle",
+                ui: {
+                  component: "textarea",
+                },
+              },
+              {
+                type: "image",
+                name: "backgroundImage",
+                label: "Background Image",
+              },
+            ],
+          },
+          {
+            type: "object",
+            name: "team",
+            label: "Team",
+            fields:[
+              {
+                type: "string",
+                name: "title",
+                label: "Title",
+                required: true,
+              },
+              {
+                type: "string",
+                name: "role",
+                label: "Subtitle",
+                ui: {
+                  component: "textarea",
+                },
+              },
+          
+            ]
+        
+          }
+        ]
+      },
+      {
         name: "footer",
         label: "Footer Settings",
         path: "content/footer",
