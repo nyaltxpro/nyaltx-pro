@@ -2,7 +2,7 @@
 
 import PublicHeader from '@/components/PublicHeader';
 import { motion } from 'framer-motion';
-import { FiShield } from 'react-icons/fi';
+import * as Icons from 'react-icons/fi';
 import { useTina } from 'tinacms/dist/react';
 import type { LegalAdviceQuery } from '../../tina/__generated__/types';
 
@@ -14,37 +14,12 @@ interface LegalAdviceClientProps {
 
 export default function LegalAdviceClient(props: LegalAdviceClientProps) {
     const { data } = useTina<LegalAdviceQuery>(props);
-    const pageContent = data?.legalAdvice;
+    const pageContent: any = data?.legalAdvice;
 
-    type ContentSection = {
-        id?: string | null;
-        heading?: string | null;
-        type?: string | null;
-        paragraphs?: (string | null)[] | null;
-    };
-
-    const heroBadgeText = pageContent?.hero?.badge?.text ?? 'Compliance & Transparency';
-    const heroTitleText = pageContent?.hero?.title?.text ?? 'NYALTX Legal Advice';
-    const heroGradient = pageContent?.hero?.title?.gradient ?? 'from-cyan-300 via-sky-400 to-indigo-400';
-    const heroDescription = pageContent?.hero?.description ?? 'Important legal notices regarding information usage and investment risk.';
-
-    const defaultSections: ContentSection[] = [
-        {
-            id: 'legal-disclaimer',
-            heading: 'Legal Disclaimer',
-            type: 'warning',
-            paragraphs: [
-                'All the contents of our Website and those to which its hyperlinks refer, as well as those that may result from applications, forums, blogs, social network accounts and other platforms associated with NYALTX are intended solely to provide its users with general information and in no case are aimed at the marketing of specific products. We cannot guarantee the accuracy of the data published or the accuracy and timeliness of such data.',
-                'The publication of information by NYALTX in no case involves or should be interpreted as financial, legal or any other kind of advice regarding the opportunity to invest in the markets and products to which it refers. Any use or exploitation that users may make of the information provided will be at their own risk.',
-                'The user interested in investing must carry out his own research and analysis, reviewing and verifying such data and contents, before relying on them. The commercial transactions referred to in the information constitute a very high risk activity, which may entail serious losses for the investor, and therefore the investor should seek appropriate advice before making any decision.',
-                'Nothing on our Web Page constitutes or should be considered an invitation or an offer to carry out acts of investment.'
-            ]
-        }
-    ];
-
-    const sections: ContentSection[] = pageContent?.content?.sections?.length
-        ? pageContent.content.sections
-        : defaultSections;
+    // Dynamically get the icon component
+    const IconComponent = pageContent?.hero?.badge?.icon
+        ? (Icons as any)[pageContent.hero.badge.icon]
+        : Icons.FiShield;
 
     return (
         <div className="min-h-screen bg-inherit text-white">
@@ -58,50 +33,71 @@ export default function LegalAdviceClient(props: LegalAdviceClientProps) {
                     transition={{ duration: 0.5 }}
                     className="flex flex-col items-start gap-4"
                 >
-                    <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-sm text-white/80 backdrop-blur">
-                        <FiShield className="h-4 w-4 text-cyan-300" />
-                        <span>{heroBadgeText}</span>
-                    </div>
-                    <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">
-                        <span className={`bg-gradient-to-r ${heroGradient} bg-clip-text text-transparent`}>
-                            {heroTitleText}
-                        </span>
-                    </h1>
-                    <p className="max-w-3xl text-white/70">{heroDescription}</p>
+                    {/* Badge */}
+                    {pageContent?.hero?.badge && (
+                        <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-sm text-white/80 backdrop-blur">
+                            <IconComponent className="h-4 w-4 text-cyan-300" />
+                            <span>{pageContent.hero.badge.text}</span>
+                        </div>
+                    )}
+
+                    {/* Title with Gradient */}
+                    {pageContent?.hero?.title && (
+                        <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">
+                            <span className={`bg-gradient-to-r ${pageContent.hero.title.gradient} bg-clip-text text-transparent`}>
+                                {pageContent.hero.title.text}
+                            </span>
+                        </h1>
+                    )}
+
+                    {/* Description */}
+                    {pageContent?.hero?.description && (
+                        <p className="max-w-3xl text-white/70">
+                            {pageContent.hero.description}
+                        </p>
+                    )}
                 </motion.div>
             </section>
 
-            {/* Main Content */}
+            {/* Main Content Sections */}
             <main className="container mx-auto px-4 pb-20 space-y-8">
-                {sections.map((section, index) => {
-                    if (!section) return null;
+                {pageContent?.content?.sections?.map((section: any, index: number) => (
+                    <motion.div
+                        key={section.id || index}
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: 0.1 * index }}
+                        className={`
+                            relative overflow-hidden rounded-2xl border backdrop-blur-xl p-6 md:p-10
+                            ${section.type === 'warning'
+                                ? 'border-red-500/20 bg-red-500/5'
+                                : 'border-white/10 bg-white/5'
+                            }
+                        `}
+                    >
+                        {/* Section ID as visual label if needed */}
+                        {section.id && section.type === 'warning' && (
+                            <div className="mb-4 inline-flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-1 text-xs font-medium text-red-300 uppercase tracking-wider">
+                                {section.id}
+                            </div>
+                        )}
 
-                    const paragraphs = section.paragraphs?.filter(Boolean) as string[] | undefined;
-
-                    return (
-                        <motion.div
-                            key={section.id ?? `section-${index}`}
-                            initial={{ opacity: 0, y: 12 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5, delay: 0.05 + index * 0.05 }}
-                            className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-6 md:p-10"
-                        >
-                            {section.heading && (
-                                <h2 className="text-2xl md:text-3xl font-bold text-white mb-6">
-                                    {section.heading}
-                                </h2>
-                            )}
-                            {paragraphs && paragraphs.length > 0 && (
-                                <div className="space-y-4 text-white/80 leading-relaxed">
-                                    {paragraphs.map((paragraph, paragraphIndex) => (
-                                        <p key={`${section.id ?? index}-paragraph-${paragraphIndex}`}>{paragraph}</p>
-                                    ))}
-                                </div>
-                            )}
-                        </motion.div>
-                    );
-                })}
+                        {/* Paragraphs */}
+                        <div className="space-y-4">
+                            {section.paragraphs?.map((paragraph: string, pIndex: number) => (
+                                <p
+                                    key={pIndex}
+                                    className="text-white/80 leading-relaxed"
+                                >
+                                    {paragraph}
+                                </p>
+                            ))}
+                        </div>
+                    </motion.div>
+                ))}
             </main>
+
+            {/* SEO Metadata (handled in page/layout) */}
         </div>
     );
 }
