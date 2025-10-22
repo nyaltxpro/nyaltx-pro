@@ -1320,38 +1320,6 @@ export default defineConfig({
         ],
       },
       {
-        label: "Legal Advice Page",
-        name: "legalAdvice",
-        path: "src/content/legal",
-        format: "json",
-        fields: [
-          {
-            type: "string",
-            name: "title",
-            label: "Title",
-            required: true,
-          },
-          {
-            type: "string",
-            name: "tagline",
-            label: "Tagline",
-          },
-          {
-            type: "string",
-            name: "description",
-            label: "Short Description",
-          },
-          {
-            type: "string",
-            name: "body",
-            label: "Main Content",
-            ui: {
-              component: "textarea",
-            },
-          },
-        ],
-      },
-      {
         name: "venturegroup",
         label: "Venture Group",
         path: "content/venturegroup",
