@@ -119,12 +119,12 @@
   },
   "howItWorks": {
     "title": "How NYALTX Works",
-    "subtitle": "Get started in three simple steps and begin your journey to DeFi success",
+    "subtitle": "Get started in three simple steps and begin your journey to DeFi",
     "steps": [
       {
         "step": "1",
         "title": "Connect Your Wallet",
-        "description": "Securely connect your preferred crypto wallet to access all NYALTX features. We support MetaMask, WalletConnect, and many more.",
+        "description": "Securely connect your preferred crypto wallet to access all NYALTX features. We support MetaMask, WalletConnect, and etc.",
         "icon": "🔗",
         "image": "/images/steps/connect-wallet.jpg"
       },
