@@ -2,6 +2,7 @@ import { defineConfig } from "tinacms";
 import { aboutUs } from './schema/aboutus';
 import generalStatement from "./schema/generalstatment";
 import { legalAdvice } from "./schema/legalAdvice";
+import { privacyPolicy } from "./schema/privacyPolicy";
 // Your hosting provider likely exposes this as an environment variable
 const branch =
   process.env.GITHUB_BRANCH ||
@@ -33,6 +34,7 @@ export default defineConfig({
       generalStatement,
       aboutUs,
       legalAdvice,
+      privacyPolicy,
       {
         name: "post",
         label: "Blog Posts",
@@ -783,103 +785,6 @@ export default defineConfig({
         ],
       },
     
-      {
-        name: "privacypolicy",
-        label: "Privacy Policy",
-        path: "content/privacypolicy",
-        format: "json",
-        ui: {
-          allowedActions: {
-            create: false,
-            delete: false,
-          },
-        },
-        fields: [
-          {
-            type: "string",
-            name: "slug",
-            label: "Page Slug",
-            isTitle: true,
-            required: true,
-          },
-          {
-            type: "string",
-            name: "title",
-            label: "Page Title",
-            required: true,
-          },
-          {
-            type: "string",
-            name: "description",
-            label: "Meta Description",
-            ui: {
-              component: "textarea",
-            },
-          },
-          {
-            type: "object",
-            name: "hero",
-            label: "Hero Section",
-            fields: [
-              {
-                type: "string",
-                name: "title",
-                label: "Hero Title",
-                required: true,
-              },
-              {
-                type: "string",
-                name: "subtitle",
-                label: "Hero Subtitle",
-                ui: {
-                  component: "textarea",
-                },
-              },
-              {
-                type: "image",
-                name: "backgroundImage",
-                label: "Background Image",
-              },
-            ],
-          },
-          {
-            type: "rich-text",
-            name: "content",
-            label: "Page Content",
-            isBody: true,
-          },
-          {
-            type: "object",
-            name: "seo",
-            label: "SEO Settings",
-            fields: [
-              {
-                type: "string",
-                name: "metaTitle",
-                label: "Meta Title",
-              },
-              {
-                type: "string",
-                name: "metaDescription",
-                label: "Meta Description",
-                ui: {
-                  component: "textarea",
-                },
-              },
-              {
-                type: "string",
-                name: "keywords",
-                label: "Keywords (comma-separated)",
-              },
-              {
-                type: "image",
-                name: "ogImage",
-                label: "Open Graph Image",
-              },
-            ],
-          },
-        ],
-      },
       {
         name: "venturegroup",
         label: "Venture Group",
