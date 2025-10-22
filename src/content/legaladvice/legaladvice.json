@@ -1,37 +1,13 @@
 {
-    "slug": "legal-advice",
-    "tagline": "Your Rights, Our Guidance",
-    "title": "Legal Advice & Support",
-    "description": "Get reliable legal advice and guidance to navigate your rights and responsibilities.",
-    "body": {
-      "type": "root",
-      "children": [
-        {
-          "type": "element",
-          "tag": "section",
-          "props": { "className": "legal-section" },
-          "children": [
-            {
-              "type": "element",
-              "tag": "h2",
-              "children": [{ "type": "text", "text": "Introduction" }]
-            },
-            {
-              "type": "element",
-              "tag": "p",
-              "children": [
-                { "type": "text", "text": "We provide professional legal advice tailored to your needs. Our team ensures you understand your rights and available options." }
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    "seo": {
-      "metaTitle": "Legal Advice - NYALTX",
-      "metaDescription": "Reliable legal advice for your rights and responsibilities. NYALTX Legal Advice Page.",
-      "keywords": "legal advice, rights, support, NYALTX",
-      "ogImage": "/images/og/legal-advice.jpg"
-    }
+  "slug": "legal-advice",
+  "tagline": "Your Rights, Our Guidance",
+  "title": "Legal Advice ",
+  "description": "Get reliable legal advice and guidance to navigate your rights and responsibilities.",
+  "body": "\\[object Object]\n",
+  "seo": {
+    "metaTitle": "Legal Advice - NYALTX",
+    "metaDescription": "Reliable legal advice for your rights and responsibilities. NYALTX Legal Advice Page.",
+    "keywords": "legal advice, rights, support, NYALTX",
+    "ogImage": "/images/og/legal-advice.jpg"
   }
-  
+}
