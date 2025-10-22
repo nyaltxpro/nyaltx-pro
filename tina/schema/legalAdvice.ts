@@ -3,7 +3,7 @@ import type { Collection } from "tinacms";
 export const legalAdvice: Collection = {
   name: "legalAdvice",
   label: "Legal Advice Page",
-  path: "content/pages",
+  path: "src/content/legaladvice",
   format: "json",
   fields: [
     {
