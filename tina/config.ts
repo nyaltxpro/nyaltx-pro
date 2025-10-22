@@ -1,6 +1,7 @@
 import { defineConfig } from "tinacms";
 import { aboutUs } from './schema/aboutus';
 import generalStatement from "./schema/generalstatment";
+import { legalAdvice } from "./schema/legalAdvice";
 // Your hosting provider likely exposes this as an environment variable
 const branch =
   process.env.GITHUB_BRANCH ||
@@ -31,6 +32,7 @@ export default defineConfig({
     collections: [
       generalStatement,
       aboutUs,
+      legalAdvice,
       {
         name: "post",
         label: "Blog Posts",
