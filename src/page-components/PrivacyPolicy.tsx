@@ -8,6 +8,8 @@ interface PrivacyPolicyProps {
     tinaData: any;
 }
 
+
+
 const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ tinaData }) => {
     const { data }: any = useTina(tinaData);
 
@@ -19,16 +21,21 @@ const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ tinaData }) => {
         }
         : undefined;
 
+    const richTextContent =
+        typeof pageData.content === 'string'
+            ? { type: 'root', children: [{ type: 'p', children: [{ text: pageData.content }] }] }
+            : pageData.content;
+
     return (
-        <div className="min-h-screen bg-slate-950 text-white">
+        <div className="min-h-screen  text-white">
             <PublicHeader />
 
             {hero ? (
                 <section
-                    className="relative isolate overflow-hidden border-b border-white/10 bg-slate-900/70"
+                    className="relative isolate overflow-hidden border-b border-white/10 "
                     style={heroStyle}
                 >
-                    <span className="absolute inset-0 bg-slate-900/70" aria-hidden />
+                    <span className="absolute inset-0 " aria-hidden />
                     <div className="relative mx-auto flex w-full max-w-6xl flex-col items-center px-6 py-20 text-center sm:py-28 lg:py-32">
                         <h1 className="text-3xl font-bold tracking-tight text-cyan-400 sm:text-4xl lg:text-5xl">
                             {hero.title}
@@ -43,10 +50,10 @@ const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ tinaData }) => {
             ) : null}
 
             <section className="mx-auto w-full max-w-5xl px-6 py-12 sm:py-16 lg:py-20">
-                <div className="rounded-2xl border border-white/10 bg-slate-900/50 p-6 shadow-lg shadow-cyan-500/5 sm:p-10">
+                <div className="rounded-2xl border border-white/10  p-6 shadow-lg shadow-cyan-500/5 sm:p-10">
                     <div className="prose prose-invert max-w-none prose-headings:text-cyan-400 prose-a:text-cyan-300">
                         {typeof pageData.content === 'object' ? (
-                            <TinaMarkdown content={pageData.content} />
+                            <TinaMarkdown content={richTextContent} />
                         ) : (
                             <p className="whitespace-pre-line text-slate-200">{pageData.content}</p>
                         )}
