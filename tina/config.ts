@@ -395,11 +395,11 @@ export default defineConfig({
       {
         name: "venturegroup",
         label: "Venture Group",
-        path: "content/public-pages",
+        path: "content/venturegroup",
         format: "json",
-        match: {
-          include: "venture-group.json",
-        },
+        // match: {
+        //   include: "venture-group.json",
+        // },
         ui: {
           allowedActions: {
             create: false,
@@ -762,7 +762,7 @@ export default defineConfig({
       {
         name: "venturegroup2",
         label: "Venture Group2",
-        path: "content/venturegroup",
+        path: "content/venturegrou2",
         format: "json",
         ui: {
           allowedActions: {
