@@ -44,7 +44,7 @@ export default function LegalAdviceClient(props: LegalAdviceClientProps) {
                     {/* Title with Gradient */}
                     {pageContent?.hero?.title && (
                         <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">
-                            <span className={`bg-gradient-to-r ${pageContent.hero.title.gradient} bg-clip-text text-transparent`}>
+                            <span className={`bg-gradient-to-r bg-black/10  bg-clip-text text-transparent`}>
                                 {pageContent.hero.title.text}
                             </span>
                         </h1>
