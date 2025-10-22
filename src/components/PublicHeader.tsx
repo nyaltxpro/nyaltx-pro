@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
 import { FaChevronDown } from 'react-icons/fa';
 import ConnectWalletButton from './ConnectWalletButton';
 
@@ -60,7 +60,7 @@ export default function PublicHeader() {
 
   return (
     <header className="z-40 bg-transparent">
-      <div className="mx-auto max-w-7xl px-4 h-14 flex items-center gap-4">
+      <div className="mx-auto max-w-7xl px-4 h-20 py-4 flex items-center gap-4">
         {/* Logo - Left */}
         <div className="flex items-center shrink-0">
           <Link href="/" className="flex items-center gap-2">
@@ -86,7 +86,7 @@ export default function PublicHeader() {
             </button>
 
             {isAboutDropdownOpen && (
-              <div className="absolute top-full left-0 mt-1 w-48 bg-gray-900 border border-gray-700 rounded-md shadow-lg z-50">
+              <div className="absolute top-full  left-0 mt-1 w-48 bg-gray-900 border border-gray-700 rounded-md shadow-lg z-50">
                 <div className="py-1">
                   <DropdownLink href="/about-us" label="About Us" />
                   <DropdownLink href="/venture-group" label="Venture Group" />
