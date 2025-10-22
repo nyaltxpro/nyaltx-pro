@@ -11,46 +11,154 @@ export const legalAdvice: Collection = {
       label: "Slug",
       type: "string",
       required: true,
-      description: "URL slug for the page, e.g., 'legal-advice'"
+      description: "URL slug for the page"
     },
     {
-      name: "tagline",
-      label: "Tagline",
-      type: "string",
-      description: "Short tagline displayed at the top of the page"
+      name: "meta",
+      label: "Metadata",
+      type: "object",
+      fields: [
+        {
+          name: "title",
+          label: "Title",
+          type: "string",
+          required: true
+        },
+        {
+          name: "description",
+          label: "Description",
+          type: "string",
+          ui: { component: "textarea" }
+        },
+        {
+          name: "lastUpdated",
+          label: "Last Updated",
+          type: "datetime",
+          required: true
+        },
+        {
+          name: "version",
+          label: "Version",
+          type: "string"
+        }
+      ]
     },
     {
-      name: "title",
-      label: "Title",
-      type: "string",
-      description: "Main heading of the Legal Advice page"
+      name: "hero",
+      label: "Hero Section",
+      type: "object",
+      fields: [
+        {
+          name: "badge",
+          label: "Badge",
+          type: "object",
+          fields: [
+            {
+              name: "icon",
+              label: "Icon",
+              type: "string",
+              description: "React Icon name, e.g., 'FiShield'"
+            },
+            {
+              name: "text",
+              label: "Text",
+              type: "string"
+            }
+          ]
+        },
+        {
+          name: "title",
+          label: "Title",
+          type: "object",
+          fields: [
+            {
+              name: "text",
+              label: "Text",
+              type: "string",
+              required: true
+            },
+            {
+              name: "gradient",
+              label: "Gradient Classes",
+              type: "string",
+              description: "Tailwind gradient classes"
+            }
+          ]
+        },
+        {
+          name: "description",
+          label: "Description",
+          type: "string",
+          ui: { component: "textarea" }
+        }
+      ]
     },
     {
-      name: "description",
-      label: "Description",
-      type: "string",
-      ui: {
-        component: "textarea",
-      },
-      description: "Short description displayed under the title"
-    },
-    {
-      name: "body",
-      label: "Body Content",
-      type: "rich-text",
-      isBody: true,
-      description: "Main content of the page, supports rich text formatting"
+      name: "content",
+      label: "Page Content",
+      type: "object",
+      fields: [
+        {
+          name: "sections",
+          label: "Content Sections",
+          type: "object",
+          list: true,
+          fields: [
+            {
+              name: "id",
+              label: "Section ID",
+              type: "string",
+              required: true
+            },
+            {
+              name: "type",
+              label: "Section Type",
+              type: "string",
+              options: ["warning", "info", "default"],
+              description: "Visual style of the section"
+            },
+            {
+              name: "paragraphs",
+              label: "Paragraphs",
+              type: "string",
+              list: true,
+              ui: { component: "textarea" },
+              description: "Array of paragraph texts"
+            }
+          ]
+        }
+      ]
     },
     {
       name: "seo",
       label: "SEO Settings",
       type: "object",
       fields: [
-        { name: "metaTitle", label: "Meta Title", type: "string" },
-        { name: "metaDescription", label: "Meta Description", type: "string", ui: { component: "textarea" } },
-        { name: "keywords", label: "Keywords", type: "string" },
-        { name: "ogImage", label: "OG Image", type: "image" },
-      ],
-    },
-  ],
+        {
+          name: "metaTitle",
+          label: "Meta Title",
+          type: "string",
+          required: true
+        },
+        {
+          name: "metaDescription",
+          label: "Meta Description",
+          type: "string",
+          ui: { component: "textarea" },
+          required: true
+        },
+        {
+          name: "keywords",
+          label: "Keywords",
+          type: "string",
+          description: "Comma-separated keywords"
+        },
+        {
+          name: "canonical",
+          label: "Canonical URL",
+          type: "string"
+        }
+      ]
+    }
+  ]
 };
