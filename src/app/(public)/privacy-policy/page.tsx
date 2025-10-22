@@ -7,7 +7,7 @@ import client from '../../../../tina/__generated__/client';
 
 const PrivacyPolicy = async () => {
   // Use the correct query name 'privacypolicy'
-  const tinaData = await client.queries.privacypolicy({
+  const tinaData = await client.queries.privacyPolicy({
     relativePath: 'privacypolicy.json',
   });
 
