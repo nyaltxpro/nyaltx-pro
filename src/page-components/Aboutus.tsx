@@ -25,7 +25,7 @@ export default function AboutUsClient(props: AboutUsClientProps) {
   const HeroIcon = getIcon(pageContent?.hero?.badge?.icon);
 
   return (
-    <div className="min-h-screen bg-[#0a0b0f] text-white">
+    <div className="min-h-screen  text-white">
       <PublicHeader />
 
       {/* Background accents */}

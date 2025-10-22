@@ -3,6 +3,7 @@ import { aboutUs } from './schema/aboutus';
 import generalStatement from "./schema/generalstatment";
 import { legalAdvice } from "./schema/legalAdvice";
 import { privacyPolicy } from "./schema/privacyPolicy";
+import ventureGroup from "./schema/ventureGroup";
 // Your hosting provider likely exposes this as an environment variable
 const branch =
   process.env.GITHUB_BRANCH ||
@@ -35,6 +36,7 @@ export default defineConfig({
       aboutUs,
       legalAdvice,
       privacyPolicy,
+      ventureGroup,
       {
         name: "post",
         label: "Blog Posts",

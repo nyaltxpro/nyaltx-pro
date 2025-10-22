@@ -2,8 +2,8 @@
 
 import PublicHeader from '@/components/PublicHeader';
 import { useTeamContent } from '@/hooks/useTinaContent';
-import Image from 'next/image';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 import { FiLinkedin, FiSend, FiTwitter } from 'react-icons/fi';
 
 export default function TeamPage() {
@@ -50,9 +50,10 @@ export default function TeamPage() {
 
   return (
     <div className="min-h-screen bg-inherit text-white">
-      <PublicHeader />
+
 
       <main>
+        <PublicHeader />
         <section className="relative overflow-hidden border-b border-white/10">
           <div className="absolute inset-0 bg-[radial-gradient(900px_600px_at_50%_-100px,rgba(14,165,233,0.25),rgba(14,165,233,0)_65%)]" />
           {hero?.backgroundImage && (
