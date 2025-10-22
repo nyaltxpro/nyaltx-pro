@@ -1,144 +1,22 @@
 {
-    "slug": "about-us",
-    "title": "About NYALTX",
-    "description": "Learn about NYALTX, the leading DeFi trading platform revolutionizing cryptocurrency trading with advanced analytics, gamification, and multi-chain support",
-    "hero": {
-      "title": "Building the future of DeFi UX",
-      "subtitle": "We make crypto trading accessible, transparent, and efficient with data-driven aggregation and a design-first approach."
-    },
-    "content": {
-      "type": "root",
-      "children": [
-        {
-          "type": "element",
-          "tag": "section",
-          "props": {
-            "className": "mission-section"
-          },
-          "children": [
-            {
-              "type": "element",
-              "tag": "h2",
-              "children": [
-                {
-                  "type": "text",
-                  "text": "Our Mission"
-                }
-              ]
-            },
-            {
-              "type": "element",
-              "tag": "p",
-              "children": [
-                {
-                  "type": "text",
-                  "text": "At NYALTX, we're on a mission to make cryptocurrency trading accessible, transparent, and efficient for everyone. We believe in the power of decentralized finance to transform the global economy and create new opportunities for people worldwide."
-                }
-              ]
-            },
-            {
-              "type": "element",
-              "tag": "p",
-              "children": [
-                {
-                  "type": "text",
-                  "text": "Our platform aggregates data from multiple decentralized exchanges to provide you with the best possible trading experience, ensuring you always get the best rates and lowest fees when swapping your digital assets."
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "element",
-          "tag": "section",
-          "props": {
-            "className": "technology-section"
-          },
-          "children": [
-            {
-              "type": "element",
-              "tag": "h2",
-              "children": [
-                {
-                  "type": "text",
-                  "text": "Our Technology"
-                }
-              ]
-            },
-            {
-              "type": "element",
-              "tag": "p",
-              "children": [
-                {
-                  "type": "text",
-                  "text": "NYALTX leverages cutting-edge blockchain technology to provide a seamless trading experience across multiple chains and protocols. Our platform integrates with leading DEXs including Uniswap, SushiSwap, PancakeSwap, and more to ensure you always get the best rates."
-                }
-              ]
-            },
-            {
-              "type": "element",
-              "tag": "p",
-              "children": [
-                {
-                  "type": "text",
-                  "text": "We're committed to security, transparency, and continuous improvement. Our smart contract integrations are regularly audited, and we're constantly working to add new features and support for additional chains and protocols."
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "element",
-          "tag": "section",
-          "props": {
-            "className": "contact-section"
-          },
-          "children": [
-            {
-              "type": "element",
-              "tag": "h2",
-              "children": [
-                {
-                  "type": "text",
-                  "text": "Contact Us"
-                }
-              ]
-            },
-            {
-              "type": "element",
-              "tag": "p",
-              "children": [
-                {
-                  "type": "text",
-                  "text": "Have questions, suggestions, or just want to say hello? We'd love to hear from you!"
-                }
-              ]
-            },
-            {
-              "type": "element",
-              "tag": "p",
-              "children": [
-                {
-                  "type": "text",
-                  "text": "Email: info@nyaltx.com"
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    "teamSection": {
-      "title": "",
-      "subtitle": "",
-      "members": []
-    },
-    "sections": [],
-    "seo": {
-      "metaTitle": "About NYALTX - Leading DeFi Trading Platform",
-      "metaDescription": "Discover NYALTX's mission to revolutionize DeFi trading with advanced analytics, multi-chain support, and gamification features. Join 25K+ active traders.",
-      "keywords": "NYALTX, DeFi trading, cryptocurrency platform, blockchain, about us",
-      "ogImage": "/images/og/about-nyaltx.jpg"
-    }
+  "slug": "about-us",
+  "title": "About NYALTX",
+  "description": "Learn about NYALTX, the leading DeFi trading platform revolutionizing cryptocurrency trading with advanced analytics, gamification, and multi-chain support",
+  "hero": {
+    "title": "Building the future of DeFi UX",
+    "subtitle": "We make crypto trading accessible, transparent, and efficient with data-driven aggregation and a design-first approach."
+  },
+  "content": " All the contents of our Website and those to which its hyperlinks refer, as well as those that may result from applications, forums, blogs, social network accounts and other platforms associated with NYALTX are intended solely to provide its users with general information and in no case are aimed at the marketing of specific products. We cannot guarantee the accuracy of the data published or the accuracy and timeliness of such data.\n\nThe publication of information by NYALTX in no case involves or should be interpreted as financial, legal or any other kind of advice regarding the opportunity to invest in the markets and products to which it refers. Any use or exploitation that users may make of the information provided will be at their own risk.\n\nThe user interested in investing must carry out his own research and analysis, reviewing and verifying such data and contents, before relying on them. The commercial transactions referred to in the information constitute a very high risk activity, which may entail serious losses for the investor, and therefore the investor should seek appropriate advice before making any decision.\n\n Nothing on our Web Page constitutes or should be considered an invitation or an offer to carry out acts of investment.\"\n",
+  "teamSection": {
+    "title": "",
+    "subtitle": "",
+    "members": []
+  },
+  "sections": [],
+  "seo": {
+    "metaTitle": "About NYALTX - Leading DeFi Trading Platform",
+    "metaDescription": "Discover NYALTX's mission to revolutionize DeFi trading with advanced analytics, multi-chain support, and gamification features. Join 25K+ active traders.",
+    "keywords": "NYALTX, DeFi trading, cryptocurrency platform, blockchain, about us",
+    "ogImage": "/images/og/about-nyaltx.jpg"
   }
-  
+}
