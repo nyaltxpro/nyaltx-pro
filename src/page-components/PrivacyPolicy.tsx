@@ -2,7 +2,7 @@
 
 import PublicHeader from '@/components/PublicHeader';
 import { useTina } from 'tinacms/dist/react';
-
+import { TinaMarkdown } from 'tinacms/dist/rich-text';
 interface PrivacyPolicyProps {
     tinaData: any;
 }
@@ -51,10 +51,7 @@ const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ tinaData }) => {
             <section className="mx-auto w-full max-w-5xl px-6 py-12 sm:py-16 lg:py-20">
                 <div className="rounded-2xl border border-white/10  p-6 shadow-lg shadow-cyan-500/5 sm:p-10">
                     <div className="prose prose-invert max-w-none prose-headings:text-cyan-400 prose-a:text-cyan-300">
-                        <div
-                            className="prose prose-invert max-w-none prose-headings:text-cyan-400 prose-a:text-cyan-300"
-                            dangerouslySetInnerHTML={{ __html: pageData.content }}
-                        />
+                        {pageData.content && <TinaMarkdown content={pageData.content} />}
                     </div>
                 </div>
             </section>
