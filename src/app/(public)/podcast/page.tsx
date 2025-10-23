@@ -1,6 +1,6 @@
 import { fetchBuzzsproutEpisodes, type PodcastRssEpisode } from '@/lib/podcastRss';
-import PodcastPage from '@/page-components/PodcastPage';
 import { tinaClient } from '@/lib/tinaClient';
+import PodcastPage from '@/page-components/PodcastPage';
 
 const Podcast = async () => {
   const tinaData = await tinaClient.queries.podcast({
@@ -14,6 +14,8 @@ const Podcast = async () => {
     const rssResult = await fetchBuzzsproutEpisodes();
     rssEpisodes = rssResult.episodes;
     rssPodcastImage = rssResult.podcastImage;
+    console.log('RSS Episodes:', rssEpisodes);
+
   } catch (error) {
     console.error('Failed to fetch Buzzsprout RSS feed:', error);
   }

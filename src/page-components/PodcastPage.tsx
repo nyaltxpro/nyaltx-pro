@@ -107,7 +107,14 @@ const PodcastPage: React.FC<PodcastPageProps> = ({ tinaData, rssEpisodes = [], r
     });
   }, [rssEpisodes]);
 
-  const upcomingEpisodes: PodcastEpisode[] = manualEpisodes.length ? manualEpisodes : rssFallbackEpisodes;
+  const hasRssEpisodes = rssFallbackEpisodes.length > 0;
+  const upcomingEpisodes: PodcastEpisode[] = hasRssEpisodes ? rssFallbackEpisodes : manualEpisodes;
+
+  console.log('🎙️ Podcast episodes source', {
+    manualCount: manualEpisodes.length,
+    rssCount: rssFallbackEpisodes.length,
+    using: hasRssEpisodes ? 'rss' : 'manual',
+  });
   const sortedEpisodes = useMemo(() => {
     return [...upcomingEpisodes].sort((a, b) => {
       const aDate = a?.datetime ? new Date(a.datetime).getTime() : Number.MAX_SAFE_INTEGER;
