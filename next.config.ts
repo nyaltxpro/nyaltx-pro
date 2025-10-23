@@ -162,6 +162,11 @@ const nextConfig: NextConfig = {
         hostname: "dd.dexscreener.com",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "assets.tina.io", // ✅ Added TinaCMS remote pattern
+        pathname: "/**",
+      },
     ],
   },
 };
