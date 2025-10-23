@@ -16,7 +16,8 @@ import {
   FaPlusCircle,
   FaShoppingCart,
   FaSignOutAlt,
-  FaUserFriends
+  FaUserFriends,
+  FaYoutube,
 } from 'react-icons/fa';
 
 interface AdminSidebarProps {
@@ -180,6 +181,7 @@ export default function AdminSidebar({ isMobileMenuOpen, toggleMobileMenu }: Adm
     { icon: <FaEnvelope />, text: 'Email Management', href: '/adminpanel/email-management' },
     { icon: <FaNewspaper />, text: 'Corporate News', href: '/adminpanel/news' },
     { icon: <FaImage />, text: 'Banners', href: '/adminpanel/banners' },
+    { icon: <FaYoutube />, text: 'Trade Videos', href: '/adminpanel/trade-videos' },
     // { icon: <FaRocket />, text: 'Campaigns', href: '/admin/campaigns' },
     // { icon: <FaFootballBall />, text: 'Footer Settings', href: '/admin/footer-settings' },
   ];

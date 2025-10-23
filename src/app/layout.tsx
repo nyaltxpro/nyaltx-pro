@@ -54,7 +54,7 @@ const poppins = Poppins({
   variable: "--font-poppins",
 });
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
 const roboto = Roboto({
   weight: ['400', '500', '700'],

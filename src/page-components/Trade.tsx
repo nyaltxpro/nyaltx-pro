@@ -182,6 +182,13 @@ const normalizeDexScreenerChainId = (chain: string): string => {
     return chainMapping[lowerChain] || lowerChain;
 };
 
+const extractYouTubeVideoId = (url: string): string | null => {
+    if (!url) return null;
+    const regex = /(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/;
+    const match = url.match(regex);
+    return match ? match[1] : null;
+};
+
 // Move useSearchParams into a child and wrap with Suspense to satisfy Next.js requirements
 function TradePageContent() {
     const searchParams = useSearchParams();
@@ -298,6 +305,15 @@ function TradingViewWithParams({
     const [customVideoUrl, setCustomVideoUrl] = useState<string | null>(null);
     const [showMoralisChart, setShowMoralisChart] = useState<boolean>(false);
     const [chartType, setChartType] = useState<'dexscreener' | 'moralis'>('dexscreener');
+    const [tradeVideos, setTradeVideos] = useState<Array<{
+        id: string;
+        title: string;
+        videoId: string;
+        description?: string;
+        thumbnailUrl?: string;
+    }>>([]);
+    const [selectedTradeVideo, setSelectedTradeVideo] = useState<{ id: string; title: string; videoId: string } | null>(null);
+    const [tradeVideosLoading, setTradeVideosLoading] = useState<boolean>(false);
 
     // Use Moralis token metadata hook
     const { metadata: moralisMetadata, loading: metadataLoading, error: metadataError } = useMoralisTokenMetadata(
@@ -505,6 +521,36 @@ function TradingViewWithParams({
             fetchTokenData();
         }
     }, [addressParam, baseToken]);
+
+    useEffect(() => {
+        const fetchTradeVideos = async () => {
+            try {
+                setTradeVideosLoading(true);
+                const response = await fetch('/api/trade-videos');
+                if (!response.ok) {
+                    throw new Error('Failed to load trade videos');
+                }
+                const data = await response.json();
+                if (Array.isArray(data?.videos)) {
+                    setTradeVideos(data.videos);
+                    if (data.videos.length > 0) {
+                        const firstVideo = data.videos[0];
+                        setSelectedTradeVideo({
+                            id: firstVideo.id,
+                            title: firstVideo.title,
+                            videoId: firstVideo.videoId,
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to fetch trade videos:', error);
+            } finally {
+                setTradeVideosLoading(false);
+            }
+        };
+
+        fetchTradeVideos();
+    }, []);
 
     // Fetch user favorites
     useEffect(() => {
@@ -1691,25 +1737,32 @@ function TradingViewWithParams({
                         <div>
                             <div className="w-full min-h-[250px] sm:min-h-[350px] lg:min-h-[500px] aspect-video">
                                 {(() => {
-                                    // Extract video ID from YouTube URL if custom video is available
-                                    const getYouTubeVideoId = (url: string): string | null => {
-                                        const regex =
-                                            /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
-                                        const match = url.match(regex);
-                                        return match ? match[1] : null;
-                                    };
+                                    let videoId: string | null = null;
+                                    let videoTitle = 'Featured Video';
 
-                                    // Determine which video to show
-                                    let videoId = 'z8uiTA1cdWA'; // Default video ID
-                                    let videoTitle = 'Default Video';
-
-                                    // If token is registered, admin allows social links, and custom video URL exists
-                                    if (isRegisteredToken && adminSocialLinksEnabled && customVideoUrl) {
-                                        const extractedId = getYouTubeVideoId(customVideoUrl);
-                                        if (extractedId) {
-                                            videoId = extractedId;
-                                            videoTitle = `${baseToken} Video`;
+                                    if (customVideoUrl && isRegisteredToken && adminSocialLinksEnabled) {
+                                        videoId = extractYouTubeVideoId(customVideoUrl);
+                                        if (videoId) {
+                                            videoTitle = `${baseToken} Token Video`;
                                         }
+                                    }
+
+                                    if (!videoId && selectedTradeVideo) {
+                                        videoId = selectedTradeVideo.videoId;
+                                        videoTitle = selectedTradeVideo.title || videoTitle;
+                                    }
+
+                                    if (!videoId) {
+                                        const defaultVideo = tradeVideos.find(v => v.videoId);
+                                        if (defaultVideo) {
+                                            videoId = defaultVideo.videoId;
+                                            videoTitle = defaultVideo.title || videoTitle;
+                                        }
+                                    }
+
+                                    if (!videoId) {
+                                        videoId = 'z8uiTA1cdWA';
+                                        videoTitle = 'NYALTX Overview';
                                     }
 
                                     return (
@@ -1724,6 +1777,61 @@ function TradingViewWithParams({
                                         />
                                     );
                                 })()}
+                            </div>
+                            <div className="mt-3">
+                                {tradeVideosLoading ? (
+                                    <div className="flex items-center justify-center py-4 text-gray-400 text-sm">
+                                        Loading curated videos…
+                                    </div>
+                                ) : tradeVideos.length > 0 ? (
+                                    <div className="space-y-2">
+                                        <div className="flex items-center justify-between">
+                                            <h3 className="text-sm font-semibold text-white">Featured Videos</h3>
+                                            <span className="text-xs text-gray-500">{tradeVideos.length} video{tradeVideos.length === 1 ? '' : 's'}</span>
+                                        </div>
+                                        <div className="grid grid-cols-1 gap-2">
+                                            {tradeVideos.map(video => {
+                                                const isActive = selectedTradeVideo?.id === video.id;
+                                                const buttonClasses = isActive
+                                                    ? 'border-[#00b8d8]/70 bg-[#00b8d8]/10 text-[#00b8d8] shadow-[0_0_12px_rgba(0,184,216,0.25)]'
+                                                    : 'border-gray-700 hover:border-[#00b8d8]/50 text-gray-300 hover:text-white';
+
+                                                return (
+                                                    <button
+                                                        key={video.id}
+                                                        onClick={() => setSelectedTradeVideo({ id: video.id, title: video.title, videoId: video.videoId })}
+                                                        className={`w-full flex items-center gap-3 rounded-lg border px-3 py-2 text-left transition ${buttonClasses}`}
+                                                    >
+                                                        {video.thumbnailUrl ? (
+                                                            <img
+                                                                src={video.thumbnailUrl}
+                                                                alt={video.title}
+                                                                className="h-14 w-24 rounded-md object-cover"
+                                                            />
+                                                        ) : (
+                                                            <div className="h-14 w-24 rounded-md bg-[#1a2932] flex items-center justify-center text-gray-500 text-xs">
+                                                                No Thumbnail
+                                                            </div>
+                                                        )}
+                                                        <div className="flex-1">
+                                                            <div className="text-sm font-medium truncate">{video.title}</div>
+                                                            {video.description && (
+                                                                <div className="text-xs text-gray-400 truncate">{video.description}</div>
+                                                            )}
+                                                        </div>
+                                                        {isActive && (
+                                                            <span className="text-xs font-semibold text-[#00b8d8] uppercase tracking-wider">Now Playing</span>
+                                                        )}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="text-sm text-gray-500 bg-[#1a2932] border border-gray-800 rounded-lg p-3">
+                                        No curated videos available yet. Registered tokens can supply a custom YouTube link from their dashboard.
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
