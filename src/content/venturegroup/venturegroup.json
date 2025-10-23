@@ -7,29 +7,7 @@
     "subtitle": "We invest in founders building high-impact products across decentralized finance, infrastructure, and on-chain experiences.",
     "backgroundImage": "/images/venture-group-hero.jpg"
   },
-  "content": {
-    "type": "doc",
-    "content": [
-      {
-        "type": "paragraph",
-        "content": [
-          {
-            "type": "text",
-            "text": "NYALTX Venture Group fuels builders who are reshaping decentralized markets. We partner from day zero through scale, combining capital with operating expertise across liquidity, token design, and go-to-market."
-          }
-        ]
-      },
-      {
-        "type": "paragraph",
-        "content": [
-          {
-            "type": "text",
-            "text": "Our mandate is to accelerate real-world adoption by supporting founders who push the limits of web3 infrastructure, consumer experiences, and programmable finance."
-          }
-        ]
-      }
-    ]
-  },
+  "content": "\\[object Object]\n",
   "teamSection": {
     "title": "Our Operating Team",
     "subtitle": "A multi-disciplinary crew of venture investors, product operators, and token engineers supporting every founder we back.",
@@ -38,7 +16,7 @@
         "name": "Frank Ferraro",
         "role": "Managing Partner",
         "bio": "Former NYSE trader turned venture investor guiding strategic capital allocation and market entry for emerging projects.",
-        "photo": "/images/team/frank-ferraro.jpg",
+        "photo": "/IMG_0374.png",
         "linkedin": "https://www.linkedin.com/in/frank-ferraro",
         "twitter": "https://twitter.com/ferrarofrank"
       },
