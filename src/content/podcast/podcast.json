@@ -1,0 +1,96 @@
+{
+  "slug": "podcast",
+  "title": "NYALTX Podcast",
+  "description": "Weekly conversations with builders, investors, and innovators shaping the future of decentralized markets.",
+  "hero": {
+    "badge": "Weekly Live Podcast",
+    "title": "Inside the NYALTX Studio",
+    "subtitle": "Join host Ava Martinez for deep dives with the founders and technologists powering web3 adoption.",
+    "backgroundImage": "/images/podcast/podcast-hero.jpg",
+    "host": {
+      "name": "Ava Martinez",
+      "title": "Head of Ecosystem, NYALTX",
+      "bio": "Investor, operator, and storyteller bridging institutional capital with crypto-native builders.",
+      "photo": "/images/podcast/ava-martinez.jpg",
+      "twitter": "https://twitter.com/avamartinez",
+      "linkedin": "https://www.linkedin.com/in/ava-martinez"
+    }
+  },
+  "schedule": {
+    "title": "Upcoming Episodes",
+    "subtitle": "Livestream every Wednesday at 2:00 PM UTC",
+    "episodes": [
+      {
+        "datetime": "2025-11-05T14:00:00.000Z",
+        "duration": "45 min",
+        "topic": "Arbitrum Liquidity Flywheels",
+        "description": "Exploring incentive design and cross-rollup liquidity with the Arbitrum Catalyst team.",
+        "guest": {
+          "name": "Noah Patel",
+          "title": "Protocol Lead, Arbitrum Catalyst",
+          "bio": "Designs adaptive liquidity programs and governance frameworks for the Arbitrum ecosystem.",
+          "photo": "/images/podcast/guests/noah-patel.jpg",
+          "twitter": "https://twitter.com/noahpatel",
+          "linkedin": "https://www.linkedin.com/in/noah-patel"
+        },
+        "resources": [
+          {
+            "label": "Project Deck",
+            "url": "https://example.com/arbitrum-catalyst.pdf"
+          }
+        ]
+      },
+      {
+        "datetime": "2025-11-12T14:00:00.000Z",
+        "duration": "50 min",
+        "topic": "Scaling Real-World Assets On-Chain",
+        "description": "Tokenizing infrastructure and cash-flow assets with modular compliance rails.",
+        "guest": {
+          "name": "Kim Lee",
+          "title": "CEO, Parallax Labs",
+          "bio": "Former structured finance exec building compliant tokenization products for institutions.",
+          "photo": "/images/podcast/guests/kim-lee.jpg",
+          "twitter": "https://twitter.com/kimleedefi"
+        }
+      }
+    ]
+  },
+  "pastEpisodes": {
+    "title": "Listen Back",
+    "subtitle": "Catch the highlights from recent conversations.",
+    "episodes": [
+      {
+        "topic": "Modular Chain Security",
+        "summary": "How shared sequencers and validity proofs reshape settlement assurances across L2 ecosystems.",
+        "guest": {
+          "name": "Dr. Priya Sethi",
+          "title": "CTO, Caldera Labs",
+          "photo": "/images/podcast/guests/priya-sethi.jpg"
+        },
+        "recordingUrl": "https://example.com/podcast/episode-modular-chain-security.mp3"
+      },
+      {
+        "topic": "Liquidity Infrastructure for DeFi Derivatives",
+        "summary": "Deploying market-neutral strategies and synthetic primitives for advanced hedging.",
+        "guest": {
+          "name": "Felix Grant",
+          "title": "Founder, Vega Forge",
+          "photo": "/images/podcast/guests/felix-grant.jpg"
+        },
+        "recordingUrl": "https://example.com/podcast/episode-liquidity-infra.mp3"
+      }
+    ]
+  },
+  "cta": {
+    "title": "Want to feature your project?",
+    "description": "Pitch your protocol, request a deep-dive, or nominate a guest for the NYALTX Podcast.",
+    "buttonLabel": "Submit a Guest",
+    "buttonLink": "mailto:podcast@nyaltx.com"
+  },
+  "seo": {
+    "metaTitle": "NYALTX Podcast",
+    "metaDescription": "Explore weekly NYALTX conversations with crypto founders, investors, and ecosystem operators.",
+    "keywords": "NYALTX podcast, web3 podcast, crypto founders, defi interviews",
+    "ogImage": "/images/og/podcast.jpg"
+  }
+}

@@ -2,8 +2,8 @@
 
 import PublicHeader from '@/components/PublicHeader';
 import TinaRichText from '@/components/TinaRichText';
-import Image from 'next/image';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 import { useTina } from 'tinacms/dist/react';
 
 interface VentureGroupPageProps {
@@ -41,12 +41,15 @@ const VentureGroupPage: React.FC<VentureGroupPageProps> = ({ tinaData }) => {
   const introContent = pageData.content;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
-      <PublicHeader />
+    <div className="min-h-screen  text-white">
+
 
       <main>
-        <section className="relative overflow-hidden border-b border-white/10">
-          <div className="absolute inset-0 bg-[radial-gradient(900px_600px_at_50%_-100px,rgba(14,165,233,0.25),rgba(14,165,233,0)_65%)]" />
+
+        <section className="relative overflow-hidden  ">
+          <PublicHeader />
+          <div className="absolute inset-0 " />
+
           {hero.backgroundImage ? (
             <div className="absolute inset-0">
               <Image
