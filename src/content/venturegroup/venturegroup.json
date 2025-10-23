@@ -19,20 +19,6 @@
         "photo": "/IMG_0374.png",
         "linkedin": "https://www.linkedin.com/in/frank-ferraro",
         "twitter": "https://twitter.com/ferrarofrank"
-      },
-      {
-        "name": "Emily Chen",
-        "role": "Head of Product",
-        "bio": "Product strategist specializing in on-chain UX, tokenomics design, and go-to-market readiness for web3 applications.",
-        "photo": "/alex-suprun-ZHvM3XIOHoE-unsplash.jpg",
-        "linkedin": "https://www.linkedin.com/in/emily-chen"
-      },
-      {
-        "name": "Luis Moreno",
-        "role": "Technical Advisor",
-        "bio": "Smart contract engineer advising portfolio teams on protocol architecture, security reviews, and infrastructure scalability.",
-        "photo": "/alex-suprun-ZHvM3XIOHoE-unsplash.jpg",
-        "twitter": "https://twitter.com/luiscodes"
       }
     ]
   },
