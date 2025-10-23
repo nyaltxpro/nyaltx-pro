@@ -253,7 +253,13 @@ const PodcastPage: React.FC<PodcastPageProps> = ({ tinaData, rssEpisodes = [], r
                             {episode.duration ? <span className="text-xs text-white/60">{episode.duration}</span> : null}
                           </div>
                           {episode.topic ? <h3 className="text-2xl font-semibold leading-snug">{episode.topic}</h3> : null}
-                          {episode.description ? <p className="text-sm text-white/70 leading-relaxed">{episode.description}</p> : null}
+                          {episode.description ? (
+                            <p className="text-sm text-white/70 leading-relaxed">
+                              {episode.description.length > 80
+                                ? episode.description.slice(0, 80) + '...'
+                                : episode.description}
+                            </p>
+                          ) : null}
                           {episode.guest?.name ? (
                             <div className="flex items-center gap-4">
                               <div className="relative h-12 w-12 overflow-hidden rounded-full border border-cyan-400/40">
