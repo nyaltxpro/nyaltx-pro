@@ -302,7 +302,7 @@ const PodcastPage: React.FC<PodcastPageProps> = ({ tinaData, rssEpisodes = [], r
           </section>
         ) : null}
 
-        {pastEpisodes.length ? (
+        {/* {pastEpisodes.length ? (
           <section className="mx-auto max-w-6xl px-4 pb-16">
             <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4 }}>
               <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
@@ -355,7 +355,7 @@ const PodcastPage: React.FC<PodcastPageProps> = ({ tinaData, rssEpisodes = [], r
               </div>
             </motion.div>
           </section>
-        ) : null}
+        ) : null} */}
 
         {cta.title || cta.description ? (
           <section className="mx-auto max-w-4xl px-4 pb-20">
