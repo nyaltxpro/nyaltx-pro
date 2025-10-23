@@ -55,7 +55,7 @@
       },
       {
         "datetime": "2025-10-07T00:00:00.000Z",
-        "duration": "30min",
+        "duration": "50 min",
         "topic": "NYALTX  LAUNCH",
         "description": "Scaling Real-World Assets On-Chain",
         "guest": {
