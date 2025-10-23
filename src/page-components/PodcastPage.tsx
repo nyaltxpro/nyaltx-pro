@@ -1,8 +1,8 @@
 'use client';
 
 import PublicHeader from '@/components/PublicHeader';
-import Image from 'next/image';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 import { useMemo } from 'react';
 import { useTina } from 'tinacms/dist/react';
 
@@ -85,8 +85,16 @@ const PodcastPage: React.FC<PodcastPageProps> = ({ tinaData }) => {
   const pastEpisodes: PodcastPastEpisode[] = pastEpisodesSection.episodes ?? [];
   const cta = page.cta ?? {};
 
+  // --- Check image paths before normalizing ---
+  console.log('🖼️ [Hero backgroundImage raw]:', hero.backgroundImage);
+  console.log('🧑‍💼 [Host photo raw]:', host.photo);
+
   const heroImage = normalizeImageSrc(hero.backgroundImage);
   const hostImage = normalizeImageSrc(host.photo);
+
+  // --- After normalization ---
+  console.log('✨ [Hero image normalized]:', heroImage);
+  console.log('✨ [Host image normalized]:', hostImage);
 
   return (
     <div className="min-h-screen bg-slate-950 text-white">
