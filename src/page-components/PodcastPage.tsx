@@ -6,8 +6,20 @@ import Image from 'next/image';
 import { useMemo } from 'react';
 import { useTina } from 'tinacms/dist/react';
 
+interface PodcastRssEpisode {
+  title?: string | null;
+  description?: string | null;
+  publishedAt?: string | null;
+  link?: string | null;
+  audioUrl?: string | null;
+  duration?: string | null;
+  image?: string | null;
+}
+
 interface PodcastPageProps {
   tinaData: any;
+  rssEpisodes?: PodcastRssEpisode[];
+  rssPodcastImage?: string | null;
 }
 
 interface PodcastHost {
@@ -65,14 +77,37 @@ const formatDateTime = (value?: string) => {
   }).format(date);
 };
 
-const PodcastPage: React.FC<PodcastPageProps> = ({ tinaData }) => {
+const PodcastPage: React.FC<PodcastPageProps> = ({ tinaData, rssEpisodes = [], rssPodcastImage }) => {
   const { data }: any = useTina(tinaData);
   const page = (data?.podcast ?? data) || {};
 
   const hero = page.hero ?? {};
   const host: PodcastHost = hero.host ?? {};
   const schedule = page.schedule ?? {};
-  const upcomingEpisodes: PodcastEpisode[] = schedule.episodes ?? [];
+  const manualEpisodes: PodcastEpisode[] = schedule.episodes ?? [];
+
+  const rssFallbackEpisodes = useMemo<PodcastEpisode[]>(() => {
+    return (rssEpisodes ?? []).map(episode => {
+      const resourceUrl = episode.audioUrl ?? episode.link ?? undefined;
+      return {
+        datetime: episode.publishedAt ?? undefined,
+        duration: episode.duration ?? undefined,
+        topic: episode.title ?? undefined,
+        description: episode.description ?? undefined,
+        guest: undefined,
+        resources: resourceUrl
+          ? [
+              {
+                label: episode.audioUrl ? 'Listen' : 'View',
+                url: resourceUrl,
+              },
+            ]
+          : undefined,
+      };
+    });
+  }, [rssEpisodes]);
+
+  const upcomingEpisodes: PodcastEpisode[] = manualEpisodes.length ? manualEpisodes : rssFallbackEpisodes;
   const sortedEpisodes = useMemo(() => {
     return [...upcomingEpisodes].sort((a, b) => {
       const aDate = a?.datetime ? new Date(a.datetime).getTime() : Number.MAX_SAFE_INTEGER;
@@ -102,9 +137,15 @@ const PodcastPage: React.FC<PodcastPageProps> = ({ tinaData }) => {
       <main>
         <section className="relative overflow-hidden ">
           <div className="absolute inset-0 " />
-          {heroImage ? (
+          {heroImage || rssPodcastImage ? (
             <div className="absolute inset-0">
-              <Image src={heroImage} alt={hero.title ?? 'Podcast hero background'} fill className="object-cover opacity-10" priority />
+              <Image
+                src={heroImage ?? rssPodcastImage!}
+                alt={hero.title ?? 'Podcast hero background'}
+                fill
+                className="object-cover opacity-10"
+                priority
+              />
             </div>
           ) : null}
           <div className="relative mx-auto max-w-5xl px-4 py-20">
@@ -164,6 +205,16 @@ const PodcastPage: React.FC<PodcastPageProps> = ({ tinaData }) => {
                   {schedule.title ? <h2 className="text-3xl font-semibold">{schedule.title}</h2> : null}
                   {schedule.subtitle ? <p className="mt-2 text-sm text-white/70 max-w-2xl">{schedule.subtitle}</p> : null}
                 </div>
+                {schedule.spotifyShowUrl ? (
+                  <a
+                    href={schedule.spotifyShowUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 rounded-full border border-cyan-400/30 bg-cyan-500/10 px-4 py-2 text-sm text-cyan-200 transition-colors hover:border-cyan-300"
+                  >
+                    Listen on Spotify
+                  </a>
+                ) : null}
               </div>
               <div className="mt-10 grid gap-6 lg:grid-cols-2">
                 {sortedEpisodes.map((episode, index) => {
