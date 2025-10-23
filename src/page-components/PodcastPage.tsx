@@ -232,7 +232,7 @@ const PodcastPage: React.FC<PodcastPageProps> = ({ tinaData, rssEpisodes = [], r
                   </a>
                 ) : null}
               </div>
-              <div className="mt-10 grid gap-6 lg:grid-cols-2">
+              <div className="mt-10 grid gap-6 lg:grid-cols-1">
                 {sortedEpisodes.map((episode, index) => {
                   const formattedDate = formatDateTime(episode.datetime);
                   const guestImage = normalizeImageSrc(episode.guest?.photo);
@@ -241,12 +241,12 @@ const PodcastPage: React.FC<PodcastPageProps> = ({ tinaData, rssEpisodes = [], r
                   return (
                     <div key={episode.topic ?? index} className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
                       <div className="flex flex-col gap-5 md:flex-row">
-                        {episodeImage ? (
+                        {/* {episodeImage ? (
                           <div className="relative w-full overflow-hidden rounded-2xl border border-cyan-400/40 bg-black/30 md:w-48">
                             <div className="aspect-square md:aspect-[3/4]" />
                             <Image src={episodeImage} alt={episode.topic ?? 'Podcast episode artwork'} fill className="object-cover" />
                           </div>
-                        ) : null}
+                        ) : null} */}
                         <div className="flex flex-1 flex-col gap-5">
                           <div className="flex items-center justify-between gap-3">
                             {formattedDate ? <span className="text-sm font-medium text-cyan-300">{formattedDate}</span> : null}
