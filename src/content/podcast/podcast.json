@@ -65,7 +65,13 @@
           "photo": "/alex-suprun-ZHvM3XIOHoE-unsplash.jpg",
           "twitter": "x.com",
           "linkedin": "linkedin.com"
-        }
+        },
+        "resources": [
+          {
+            "label": "Link",
+            "url": "google.com"
+          }
+        ]
       }
     ]
   },
