@@ -68,7 +68,8 @@ const nextConfig: NextConfig = {
       "images.pump.fun",
       "logo.moralis.io",
       "cdn.dexscreener.com",
-      "dd.dexscreener.com"
+      "dd.dexscreener.com",
+        "assets.tina.io"
     ],
     remotePatterns: [
       {
