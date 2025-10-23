@@ -97,11 +97,11 @@ const PodcastPage: React.FC<PodcastPageProps> = ({ tinaData, rssEpisodes = [], r
         guest: undefined,
         resources: resourceUrl
           ? [
-              {
-                label: episode.audioUrl ? 'Listen' : 'View',
-                url: resourceUrl,
-              },
-            ]
+            {
+              label: episode.audioUrl ? 'Listen' : 'View',
+              url: resourceUrl,
+            },
+          ]
           : undefined,
       };
     });
