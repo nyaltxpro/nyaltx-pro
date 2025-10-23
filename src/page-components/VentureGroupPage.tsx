@@ -45,9 +45,9 @@ const VentureGroupPage: React.FC<VentureGroupPageProps> = ({ tinaData }) => {
 
 
       <main>
-
+        <PublicHeader />
         <section className="relative overflow-hidden  ">
-          <PublicHeader />
+
           <div className="absolute inset-0 " />
 
           {hero.backgroundImage ? (

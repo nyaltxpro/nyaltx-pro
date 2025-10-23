@@ -97,11 +97,11 @@ const PodcastPage: React.FC<PodcastPageProps> = ({ tinaData }) => {
   console.log('✨ [Host image normalized]:', hostImage);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
+    <div className="min-h-screen text-white">
       <PublicHeader />
       <main>
-        <section className="relative overflow-hidden border-b border-white/10">
-          <div className="absolute inset-0 bg-[radial-gradient(900px_600px_at_50%_-100px,rgba(14,165,233,0.25),rgba(14,165,233,0)_65%)]" />
+        <section className="relative overflow-hidden ">
+          <div className="absolute inset-0 " />
           {heroImage ? (
             <div className="absolute inset-0">
               <Image src={heroImage} alt={hero.title ?? 'Podcast hero background'} fill className="object-cover opacity-10" priority />
