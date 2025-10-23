@@ -49,6 +49,12 @@ interface PodcastPastEpisode {
   recordingUrl?: string;
 }
 
+const normalizeImageSrc = (value?: string) => {
+  if (!value) return null;
+  if (value.startsWith('http') || value.startsWith('data:')) return value;
+  return value.startsWith('/') ? value : `/${value}`;
+};
+
 const formatDateTime = (value?: string) => {
   if (!value) return null;
   const date = new Date(value);
@@ -79,15 +85,18 @@ const PodcastPage: React.FC<PodcastPageProps> = ({ tinaData }) => {
   const pastEpisodes: PodcastPastEpisode[] = pastEpisodesSection.episodes ?? [];
   const cta = page.cta ?? {};
 
+  const heroImage = normalizeImageSrc(hero.backgroundImage);
+  const hostImage = normalizeImageSrc(host.photo);
+
   return (
     <div className="min-h-screen bg-slate-950 text-white">
       <PublicHeader />
       <main>
         <section className="relative overflow-hidden border-b border-white/10">
           <div className="absolute inset-0 bg-[radial-gradient(900px_600px_at_50%_-100px,rgba(14,165,233,0.25),rgba(14,165,233,0)_65%)]" />
-          {hero.backgroundImage ? (
+          {heroImage ? (
             <div className="absolute inset-0">
-              <Image src={hero.backgroundImage} alt={hero.title ?? 'Podcast hero background'} fill className="object-cover opacity-10" priority />
+              <Image src={heroImage} alt={hero.title ?? 'Podcast hero background'} fill className="object-cover opacity-10" priority />
             </div>
           ) : null}
           <div className="relative mx-auto max-w-5xl px-4 py-20">
@@ -106,8 +115,8 @@ const PodcastPage: React.FC<PodcastPageProps> = ({ tinaData }) => {
               {host.name || host.bio ? (
                 <div className="mt-10 flex flex-col gap-6 rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur md:flex-row md:items-center md:gap-8">
                   <div className="relative h-24 w-24 overflow-hidden rounded-full border border-cyan-400/50">
-                    {host.photo ? (
-                      <Image src={host.photo} alt={host.name ?? 'Podcast host'} fill className="object-cover" />
+                    {hostImage ? (
+                      <Image src={hostImage} alt={host.name ?? 'Podcast host'} fill className="object-cover" />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center bg-cyan-500/20 text-2xl text-cyan-200">
                         {host.name?.[0] ?? 'H'}
@@ -151,6 +160,8 @@ const PodcastPage: React.FC<PodcastPageProps> = ({ tinaData }) => {
               <div className="mt-10 grid gap-6 lg:grid-cols-2">
                 {sortedEpisodes.map((episode, index) => {
                   const formattedDate = formatDateTime(episode.datetime);
+                  const guestImage = normalizeImageSrc(episode.guest?.photo);
+                  const guestInitial = episode.guest?.name?.[0]?.toUpperCase() ?? 'G';
                   return (
                     <div key={episode.topic ?? index} className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
                       <div className="flex flex-col gap-5">
@@ -163,11 +174,11 @@ const PodcastPage: React.FC<PodcastPageProps> = ({ tinaData }) => {
                         {episode.guest?.name ? (
                           <div className="flex items-center gap-4">
                             <div className="relative h-12 w-12 overflow-hidden rounded-full border border-cyan-400/40">
-                              {episode.guest.photo ? (
-                                <Image src={episode.guest.photo} alt={episode.guest.name} fill className="object-cover" />
+                              {guestImage ? (
+                                <Image src={guestImage} alt={episode.guest.name} fill className="object-cover" />
                               ) : (
                                 <div className="flex h-full w-full items-center justify-center bg-cyan-500/20 text-cyan-200">
-                                  {episode.guest.name[0]}
+                                  {guestInitial}
                                 </div>
                               )}
                             </div>
@@ -211,41 +222,46 @@ const PodcastPage: React.FC<PodcastPageProps> = ({ tinaData }) => {
                 </div>
               </div>
               <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {pastEpisodes.map((episode, index) => (
-                  <div key={episode.topic ?? index} className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
-                    <div className="flex flex-col gap-4">
-                      {episode.topic ? <h3 className="text-xl font-semibold leading-snug">{episode.topic}</h3> : null}
-                      {episode.summary ? <p className="text-sm text-white/70 leading-relaxed">{episode.summary}</p> : null}
-                      {episode.guest?.name ? (
-                        <div className="flex items-center gap-3">
-                          <div className="relative h-10 w-10 overflow-hidden rounded-full border border-cyan-400/40">
-                            {episode.guest.photo ? (
-                              <Image src={episode.guest.photo} alt={episode.guest.name} fill className="object-cover" />
-                            ) : (
-                              <div className="flex h-full w-full items-center justify-center bg-cyan-500/20 text-cyan-200">
-                                {episode.guest.name[0]}
-                              </div>
-                            )}
+                {pastEpisodes.map((episode, index) => {
+                  const pastGuestImage = normalizeImageSrc(episode.guest?.photo);
+                  const pastGuestInitial = episode.guest?.name?.[0]?.toUpperCase() ?? 'G';
+
+                  return (
+                    <div key={episode.topic ?? index} className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
+                      <div className="flex flex-col gap-4">
+                        {episode.topic ? <h3 className="text-xl font-semibold leading-snug">{episode.topic}</h3> : null}
+                        {episode.summary ? <p className="text-sm text-white/70 leading-relaxed">{episode.summary}</p> : null}
+                        {episode.guest?.name ? (
+                          <div className="flex items-center gap-3">
+                            <div className="relative h-10 w-10 overflow-hidden rounded-full border border-cyan-400/40">
+                              {pastGuestImage ? (
+                                <Image src={pastGuestImage} alt={episode.guest.name} fill className="object-cover" />
+                              ) : (
+                                <div className="flex h-full w-full items-center justify-center bg-cyan-500/20 text-cyan-200">
+                                  {pastGuestInitial}
+                                </div>
+                              )}
+                            </div>
+                            <div>
+                              <p className="text-sm font-semibold">{episode.guest.name}</p>
+                              {episode.guest.title ? <p className="text-xs text-white/60">{episode.guest.title}</p> : null}
+                            </div>
                           </div>
-                          <div>
-                            <p className="text-sm font-semibold">{episode.guest.name}</p>
-                            {episode.guest.title ? <p className="text-xs text-white/60">{episode.guest.title}</p> : null}
-                          </div>
-                        </div>
-                      ) : null}
-                      {episode.recordingUrl ? (
-                        <a
-                          href={episode.recordingUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-sm text-cyan-300 transition-colors hover:text-cyan-200"
-                        >
-                          Listen to recording
-                        </a>
-                      ) : null}
+                        ) : null}
+                        {episode.recordingUrl ? (
+                          <a
+                            href={episode.recordingUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-sm text-cyan-300 transition-colors hover:text-cyan-200"
+                          >
+                            Listen to recording
+                          </a>
+                        ) : null}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </motion.div>
           </section>
