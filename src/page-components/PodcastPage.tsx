@@ -52,6 +52,7 @@ interface PodcastEpisode {
   description?: string;
   guest?: PodcastGuest;
   resources?: PodcastResource[];
+  image?: string | null;
 }
 
 interface PodcastPastEpisode {
@@ -65,6 +66,11 @@ const normalizeImageSrc = (value?: string) => {
   if (!value) return null;
   if (value.startsWith('http') || value.startsWith('data:')) return value;
   return value.startsWith('/') ? value : `/${value}`;
+};
+
+const stripHtml = (value?: string | null) => {
+  if (!value) return undefined;
+  return value.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() || undefined;
 };
 
 const formatDateTime = (value?: string) => {
@@ -89,11 +95,13 @@ const PodcastPage: React.FC<PodcastPageProps> = ({ tinaData, rssEpisodes = [], r
   const rssFallbackEpisodes = useMemo<PodcastEpisode[]>(() => {
     return (rssEpisodes ?? []).map(episode => {
       const resourceUrl = episode.audioUrl ?? episode.link ?? undefined;
+      const plainDescription = stripHtml(episode.description);
+      const normalizedImage = normalizeImageSrc(episode.image ?? rssPodcastImage ?? undefined);
       return {
         datetime: episode.publishedAt ?? undefined,
         duration: episode.duration ?? undefined,
         topic: episode.title ?? undefined,
-        description: episode.description ?? undefined,
+        description: plainDescription,
         guest: undefined,
         resources: resourceUrl
           ? [
@@ -103,9 +111,10 @@ const PodcastPage: React.FC<PodcastPageProps> = ({ tinaData, rssEpisodes = [], r
             },
           ]
           : undefined,
+        image: normalizedImage,
       };
     });
-  }, [rssEpisodes]);
+  }, [rssEpisodes, rssPodcastImage]);
 
   const hasRssEpisodes = rssFallbackEpisodes.length > 0;
   const upcomingEpisodes: PodcastEpisode[] = hasRssEpisodes ? rssFallbackEpisodes : manualEpisodes;
@@ -228,47 +237,56 @@ const PodcastPage: React.FC<PodcastPageProps> = ({ tinaData, rssEpisodes = [], r
                   const formattedDate = formatDateTime(episode.datetime);
                   const guestImage = normalizeImageSrc(episode.guest?.photo);
                   const guestInitial = episode.guest?.name?.[0]?.toUpperCase() ?? 'G';
+                  const episodeImage = normalizeImageSrc(episode.image ?? undefined);
                   return (
                     <div key={episode.topic ?? index} className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
-                      <div className="flex flex-col gap-5">
-                        <div className="flex items-center justify-between gap-3">
-                          {formattedDate ? <span className="text-sm font-medium text-cyan-300">{formattedDate}</span> : null}
-                          {episode.duration ? <span className="text-xs text-white/60">{episode.duration}</span> : null}
+                      <div className="flex flex-col gap-5 md:flex-row">
+                        {episodeImage ? (
+                          <div className="relative w-full overflow-hidden rounded-2xl border border-cyan-400/40 bg-black/30 md:w-48">
+                            <div className="aspect-square md:aspect-[3/4]" />
+                            <Image src={episodeImage} alt={episode.topic ?? 'Podcast episode artwork'} fill className="object-cover" />
+                          </div>
+                        ) : null}
+                        <div className="flex flex-1 flex-col gap-5">
+                          <div className="flex items-center justify-between gap-3">
+                            {formattedDate ? <span className="text-sm font-medium text-cyan-300">{formattedDate}</span> : null}
+                            {episode.duration ? <span className="text-xs text-white/60">{episode.duration}</span> : null}
+                          </div>
+                          {episode.topic ? <h3 className="text-2xl font-semibold leading-snug">{episode.topic}</h3> : null}
+                          {episode.description ? <p className="text-sm text-white/70 leading-relaxed">{episode.description}</p> : null}
+                          {episode.guest?.name ? (
+                            <div className="flex items-center gap-4">
+                              <div className="relative h-12 w-12 overflow-hidden rounded-full border border-cyan-400/40">
+                                {guestImage ? (
+                                  <Image src={guestImage} alt={episode.guest.name} fill className="object-cover" />
+                                ) : (
+                                  <div className="flex h-full w-full items-center justify-center bg-cyan-500/20 text-cyan-200">
+                                    {guestInitial}
+                                  </div>
+                                )}
+                              </div>
+                              <div>
+                                <p className="text-sm font-semibold">{episode.guest.name}</p>
+                                {episode.guest.title ? <p className="text-xs text-white/60">{episode.guest.title}</p> : null}
+                              </div>
+                            </div>
+                          ) : null}
+                          {episode.resources?.length ? (
+                            <div className="flex flex-wrap gap-3">
+                              {episode.resources.map((resource, resourceIndex) => (
+                                <a
+                                  key={resource.url ?? resourceIndex}
+                                  href={resource.url}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="inline-flex items-center gap-2 rounded-full border border-cyan-400/30 bg-cyan-500/10 px-3 py-1 text-xs text-cyan-200 transition-colors hover:border-cyan-300"
+                                >
+                                  {resource.label ?? 'View'}
+                                </a>
+                              ))}
+                            </div>
+                          ) : null}
                         </div>
-                        {episode.topic ? <h3 className="text-2xl font-semibold leading-snug">{episode.topic}</h3> : null}
-                        {episode.description ? <p className="text-sm text-white/70 leading-relaxed">{episode.description}</p> : null}
-                        {episode.guest?.name ? (
-                          <div className="flex items-center gap-4">
-                            <div className="relative h-12 w-12 overflow-hidden rounded-full border border-cyan-400/40">
-                              {guestImage ? (
-                                <Image src={guestImage} alt={episode.guest.name} fill className="object-cover" />
-                              ) : (
-                                <div className="flex h-full w-full items-center justify-center bg-cyan-500/20 text-cyan-200">
-                                  {guestInitial}
-                                </div>
-                              )}
-                            </div>
-                            <div>
-                              <p className="text-sm font-semibold">{episode.guest.name}</p>
-                              {episode.guest.title ? <p className="text-xs text-white/60">{episode.guest.title}</p> : null}
-                            </div>
-                          </div>
-                        ) : null}
-                        {episode.resources?.length ? (
-                          <div className="flex flex-wrap gap-3">
-                            {episode.resources.map((resource, resourceIndex) => (
-                              <a
-                                key={resource.url ?? resourceIndex}
-                                href={resource.url}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="inline-flex items-center gap-2 rounded-full border border-cyan-400/30 bg-cyan-500/10 px-3 py-1 text-xs text-cyan-200 transition-colors hover:border-cyan-300"
-                              >
-                                {resource.label ?? 'View'}
-                              </a>
-                            ))}
-                          </div>
-                        ) : null}
                       </div>
                     </div>
                   );
