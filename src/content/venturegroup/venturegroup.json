@@ -10,17 +10,7 @@
   "content": "\\[object Object]\n",
   "teamSection": {
     "title": "Our Operating Team",
-    "subtitle": "A multi-disciplinary crew of venture investors, product operators, and token engineers supporting every founder we back.",
-    "members": [
-      {
-        "name": "Frank Ferraro",
-        "role": "Managing Partner",
-        "bio": "Former NYSE trader turned venture investor guiding strategic capital allocation and market entry for emerging projects.",
-        "photo": "/IMG_0374.png",
-        "linkedin": "https://www.linkedin.com/in/frank-ferraro",
-        "twitter": "https://twitter.com/ferrarofrank"
-      }
-    ]
+    "subtitle": "A multi-disciplinary crew of venture investors, product operators, and token engineers supporting every founder we back."
   },
   "sections": [
     {
