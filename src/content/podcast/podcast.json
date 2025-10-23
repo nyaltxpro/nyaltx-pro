@@ -85,7 +85,7 @@
     "title": "Want to feature your project?",
     "description": "Pitch your protocol, request a deep-dive, or nominate a guest for the NYALTX Podcast.",
     "buttonLabel": "Submit a Guest",
-    "buttonLink": "mailto:podcast@nyaltx.com"
+    "buttonLink": "https://nyaltx-pro-5hqd.vercel.app/contact"
   },
   "seo": {
     "metaTitle": "NYALTX Podcast",
