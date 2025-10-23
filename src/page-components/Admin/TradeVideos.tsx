@@ -221,7 +221,7 @@ export default function AdminTradeVideos() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm text-gray-300">Short Description (optional)</label>
+            <label className="text-sm text-gray-300">Video Description (optional)</label>
             <textarea
               name="description"
               rows={3}
