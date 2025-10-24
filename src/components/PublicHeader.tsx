@@ -60,7 +60,7 @@ export default function PublicHeader() {
 
   return (
     <header className="z-40 bg-transparent">
-      <div className="mx-auto max-w-7xl px-4 h-20 py-4 flex items-center gap-4">
+      <div className="mx-auto max-w-7xl px-4 h-20 py-4 flex items-center justify-between gap-4">
         {/* Logo - Left */}
         <div className="flex items-center shrink-0">
           <Link href="/" className="flex items-center gap-2">
