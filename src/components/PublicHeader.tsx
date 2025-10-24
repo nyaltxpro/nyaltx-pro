@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { FaChevronDown } from 'react-icons/fa';
-import ConnectWalletButton from './ConnectWalletButton';
+import SimpleUnifiedWalletButton from './SimpleUnifiedWalletButton';
 
 export default function PublicHeader() {
   const pathname = usePathname();
@@ -103,7 +103,8 @@ export default function PublicHeader() {
 
         {/* Connect Wallet - Right */}
         <div className="shrink-0 flex items-center gap-2">
-          <ConnectWalletButton />
+          {/* <ConnectWalletButton /> */}
+          <SimpleUnifiedWalletButton />
         </div>
       </div>
     </header>
