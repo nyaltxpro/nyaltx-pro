@@ -216,7 +216,7 @@ const PodcastPage: React.FC<PodcastPageProps> = ({ tinaData, rssEpisodes = [], r
         {sortedEpisodes.length ? (
           <section className="mx-auto max-w-6xl px-4 py-16">
             <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4 }}>
-              <div className="flex flex-col-reverse gap-3 md:flex-row md:items-end md:justify-between">
+              <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                 <div>
                   {schedule.title ? <h2 className="text-3xl font-semibold">{schedule.title}</h2> : null}
                   {schedule.subtitle ? <p className="mt-2 text-sm text-white/70 max-w-2xl">{schedule.subtitle}</p> : null}
@@ -240,7 +240,7 @@ const PodcastPage: React.FC<PodcastPageProps> = ({ tinaData, rssEpisodes = [], r
                   const episodeImage = normalizeImageSrc(episode.image ?? undefined);
                   return (
                     <div key={episode.topic ?? index} className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
-                      <div className="flex flex-col gap-5 md:flex-row">
+                      <div className="flex flex-col-reverse gap-5 md:flex-row">
                         {/* {episodeImage ? (
                           <div className="relative w-full overflow-hidden rounded-2xl border border-cyan-400/40 bg-black/30 md:w-48">
                             <div className="aspect-square md:aspect-[3/4]" />
