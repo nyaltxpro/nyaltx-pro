@@ -34,8 +34,7 @@
         "title": "Our Technology",
         "type": "default",
         "paragraphs": [
-          "NYALTX leverages cutting-edge blockchain technology to provide a seamless trading experience across multiple chains and protocols. Our platform integrates with leading DEXs including Uniswap, SushiSwap, PancakeSwap, and more to ensure you always get the best rates.",
-          "We're committed to security, transparency, and continuous improvement. Our smart contract integrations are regularly audited, and we're constantly working to add new features and support for additional chains and protocols."
+          "The NYALTX technology stack is built on cross-chain aggregation and liquidity intelligence, allowing users to access multiple decentralized exchanges through a single interface. Our proprietary routing engine connects to Uniswap, SushiSwap, PancakeSwap, and other major protocols, ensuring best-price discovery and minimal slippage across markets.\n\nAll smart contract integrations are independently audited and monitored, ensuring that every transaction meets institutional security standards. We deploy real-time analytics, automated trade validation, and blockchain-native compliance layers to support both transparency and investor protection.\n\nOur ongoing R&D focuses on multi-chain scalability, on-chain data aggregation, and tokenized asset interoperability, laying the foundation for a next-generation trading ecosystem. As decentralized markets evolve, NYALTX continues to align with best practices in governance, data integrity, and market access — positioning itself at the intersection of Wall Street discipline and Web3 innovation."
         ]
       },
       {
