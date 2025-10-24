@@ -25,8 +25,7 @@
         "title": "Our Mission",
         "type": "default",
         "paragraphs": [
-          "At NYALTX, we're on a mission to make cryptocurrency trading accessible, transparent, and efficient for everyone. We believe in the power of decentralized finance to transform the global economy and create new opportunities for people worldwide.",
-          "Our platform aggregates data from multiple decentralized exchanges to provide you with the best possible trading experience, ensuring you always get the best rates and lowest fees when swapping your digital assets."
+          "At NYALTX, our mission is to bring institutional-grade efficiency, transparency, and visibility to decentralized markets. We believe blockchain technology and decentralized finance (DeFi) are redefining global capital formation — enabling a more inclusive, liquid, and transparent marketplace for digital assets.\n\nBeyond trading infrastructure, NYALTX also excels as a multimedia and issuer-visibility platform, helping blockchain projects communicate their stories through strategic media production, digital roadshows, and investor-focused campaigns. By integrating financial technology with professional media and marketing, we deliver the full spectrum of advisory and exposure services required for successful capital engagement.\n\nOur platform aggregates liquidity and pricing data across leading decentralized exchanges, delivering best-execution routing, lowest transaction costs, and real-time market intelligence. By merging traditional market discipline with the innovation of DeFi and multimedia storytelling, NYALTX positions itself as a trusted gateway for investors, issuers, and communities seeking institutional access, credibility, and scale in the decentralized economy."
         ]
       },
       {
@@ -35,8 +34,7 @@
         "title": "Our Technology",
         "type": "default",
         "paragraphs": [
-          "NYALTX leverages cutting-edge blockchain technology to provide a seamless trading experience across multiple chains and protocols. Our platform integrates with leading DEXs including Uniswap, SushiSwap, PancakeSwap, and more to ensure you always get the best rates.",
-          "We're committed to security, transparency, and continuous improvement. Our smart contract integrations are regularly audited, and we're constantly working to add new features and support for additional chains and protocols."
+          "The NYALTX technology stack is built on cross-chain aggregation and liquidity intelligence, allowing users to access multiple decentralized exchanges through a single interface. Our proprietary routing engine connects to Uniswap, SushiSwap, PancakeSwap, and other major protocols, ensuring best-price discovery and minimal slippage across markets.\n\nAll smart contract integrations are independently audited and monitored, ensuring that every transaction meets institutional security standards. We deploy real-time analytics, automated trade validation, and blockchain-native compliance layers to support both transparency and investor protection.\n\nOur ongoing R&D focuses on multi-chain scalability, on-chain data aggregation, and tokenized asset interoperability, laying the foundation for a next-generation trading ecosystem. As decentralized markets evolve, NYALTX continues to align with best practices in governance, data integrity, and market access — positioning itself at the intersection of Wall Street discipline and Web3 innovation."
         ]
       },
       {
