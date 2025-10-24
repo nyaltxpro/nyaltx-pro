@@ -125,11 +125,13 @@ const PodcastPage: React.FC<PodcastPageProps> = ({ tinaData, rssEpisodes = [], r
     using: hasRssEpisodes ? 'rss' : 'manual',
   });
   const sortedEpisodes = useMemo(() => {
-    return [...upcomingEpisodes].sort((a, b) => {
-      const aDate = a?.datetime ? new Date(a.datetime).getTime() : Number.MAX_SAFE_INTEGER;
-      const bDate = b?.datetime ? new Date(b.datetime).getTime() : Number.MAX_SAFE_INTEGER;
-      return aDate - bDate;
-    });
+    const getTimestamp = (value?: string) => {
+      if (!value) return Number.MIN_SAFE_INTEGER;
+      const timestamp = new Date(value).getTime();
+      return Number.isNaN(timestamp) ? Number.MIN_SAFE_INTEGER : timestamp;
+    };
+
+    return [...upcomingEpisodes].sort((a, b) => getTimestamp(b?.datetime) - getTimestamp(a?.datetime));
   }, [upcomingEpisodes]);
 
   const pastEpisodesSection = page.pastEpisodes ?? {};
