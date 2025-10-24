@@ -216,7 +216,7 @@ const PodcastPage: React.FC<PodcastPageProps> = ({ tinaData, rssEpisodes = [], r
         {sortedEpisodes.length ? (
           <section className="mx-auto max-w-6xl px-4 py-16">
             <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4 }}>
-              <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+              <div className="flex flex-col-reverse gap-3 md:flex-row md:items-end md:justify-between">
                 <div>
                   {schedule.title ? <h2 className="text-3xl font-semibold">{schedule.title}</h2> : null}
                   {schedule.subtitle ? <p className="mt-2 text-sm text-white/70 max-w-2xl">{schedule.subtitle}</p> : null}
@@ -302,60 +302,10 @@ const PodcastPage: React.FC<PodcastPageProps> = ({ tinaData, rssEpisodes = [], r
           </section>
         ) : null}
 
-        {/* {pastEpisodes.length ? (
-          <section className="mx-auto max-w-6xl px-4 pb-16">
-            <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4 }}>
-              <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-                <div>
-                  {pastEpisodesSection.title ? <h2 className="text-3xl font-semibold">{pastEpisodesSection.title}</h2> : null}
-                  {pastEpisodesSection.subtitle ? <p className="mt-2 text-sm text-white/70 max-w-2xl">{pastEpisodesSection.subtitle}</p> : null}
-                </div>
-              </div>
-              <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {pastEpisodes.map((episode, index) => {
-                  const pastGuestImage = normalizeImageSrc(episode.guest?.photo);
-                  const pastGuestInitial = episode.guest?.name?.[0]?.toUpperCase() ?? 'G';
 
-                  return (
-                    <div key={episode.topic ?? index} className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
-                      <div className="flex flex-col gap-4">
-                        {episode.topic ? <h3 className="text-xl font-semibold leading-snug">{episode.topic}</h3> : null}
-                        {episode.summary ? <p className="text-sm text-white/70 leading-relaxed">{episode.summary}</p> : null}
-                        {episode.guest?.name ? (
-                          <div className="flex items-center gap-3">
-                            <div className="relative h-10 w-10 overflow-hidden rounded-full border border-cyan-400/40">
-                              {pastGuestImage ? (
-                                <Image src={pastGuestImage} alt={episode.guest.name} fill className="object-cover" />
-                              ) : (
-                                <div className="flex h-full w-full items-center justify-center bg-cyan-500/20 text-cyan-200">
-                                  {pastGuestInitial}
-                                </div>
-                              )}
-                            </div>
-                            <div>
-                              <p className="text-sm font-semibold">{episode.guest.name}</p>
-                              {episode.guest.title ? <p className="text-xs text-white/60">{episode.guest.title}</p> : null}
-                            </div>
-                          </div>
-                        ) : null}
-                        {episode.recordingUrl ? (
-                          <a
-                            href={episode.recordingUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="text-sm text-cyan-300 transition-colors hover:text-cyan-200"
-                          >
-                            Listen to recording
-                          </a>
-                        ) : null}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </motion.div>
-          </section>
-        ) : null} */}
+
+
+
 
         {cta.title || cta.description ? (
           <section className="mx-auto max-w-4xl px-4 pb-20">
