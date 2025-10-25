@@ -1,6 +1,6 @@
+import { TokenData } from '@/components/InfoWidget';
 import { CandlestickData, UTCTimestamp } from 'lightweight-charts';
 import { useEffect, useState } from 'react';
-import { TokenData } from '@/components/InfoWidget';
 
 interface SolanaChartData {
   oclhv: Array<{
@@ -65,6 +65,7 @@ export const useSolanaTokenData = (address: string | null, timeframe: string = '
           fetch(`/api/solanatracker/chart/${address}?timeframe=${timeframe}`)
         ]);
 
+
         if (!tokenResponse.ok || !chartResponse.ok) {
           const tokenError = !tokenResponse.ok ? `Token API: ${tokenResponse.status}` : '';
           const chartError = !chartResponse.ok ? `Chart API: ${chartResponse.status}` : '';
@@ -74,6 +75,8 @@ export const useSolanaTokenData = (address: string | null, timeframe: string = '
         const tokenInfo: SolanaTokenInfo = await tokenResponse.json();
         const chartInfo: SolanaChartData = await chartResponse.json();
 
+        console.log(tokenInfo);
+        console.log(chartInfo);
         const formattedTokenData: TokenData = {
           name: tokenInfo.name || 'Unknown Token',
           symbol: tokenInfo.symbol || 'UNKNOWN',
