@@ -474,7 +474,7 @@ export default function PricingPage() {
                         `/dashboard/register-token?redirect=pricing/checkout/nyaltxpro&method=paypal`
                       )
                     }
-                    className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-300 transform hover:scale-105 shadow-lg" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                    className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600  text-sm sm:text-base to-blue-700 text-white font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-300 transform hover:scale-105 shadow-lg" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                   >
                     <span className="inline-flex items-center gap-2">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -489,7 +489,7 @@ export default function PricingPage() {
                         `/dashboard/register-token?redirect=pricing/checkout/nyaltxpro&method=eth`
                       )
                     }
-                    className="w-full py-3 rounded-xl border border-gray-600/50 bg-gray-800/30 text-white font-semibold hover:bg-indigo-600/20 hover:border-indigo-500/50 transition-all duration-300" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                    className="w-full py-3 rounded-xl border text-sm sm:text-base border-gray-600/50 bg-gray-800/30 text-white font-light hover:bg-indigo-600/20 hover:border-indigo-500/50 transition-all duration-300" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                   >
                     <span className="inline-flex items-center gap-2">
                       <Image src="/crypto-icons/color/eth.svg" width={16} height={16} alt="eth" />{' '}
@@ -502,7 +502,7 @@ export default function PricingPage() {
                         `/dashboard/register-token?redirect=pricing/checkout/nyaltxpro&method=sol`
                       )
                     }
-                    className="w-full py-3 rounded-xl border border-gray-600/50 bg-gray-800/30 text-white font-semibold hover:bg-emerald-600/20 hover:border-emerald-500/50 transition-all duration-300" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                    className="w-full py-3 rounded-xl border border-gray-600/50 bg-gray-800/30 text-white font-light hover:bg-emerald-600/20 hover:border-emerald-500/50 transition-all duration-300" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                   >
                     <span className="inline-flex items-center gap-2">
                       <Image src="/crypto-icons/color/sol.svg" width={16} height={16} alt="sol" />{' '}
@@ -515,7 +515,7 @@ export default function PricingPage() {
                         `/dashboard/register-token?redirect=pricing/checkout/nyaltxpro&method=nyax`
                       )
                     }
-                    className="w-full py-3 rounded-xl border border-gray-600/50 bg-gray-800/30 text-white font-semibold hover:bg-cyan-600/20 hover:border-cyan-500/50 transition-all duration-300" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                    className="w-full py-3 rounded-xl border text-sm sm:text-base border-gray-600/50 bg-gray-800/30 text-white font-light hover:bg-cyan-600/20 hover:border-cyan-500/50 transition-all duration-300" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                   >
                     <span className="inline-flex items-center gap-2">
                       <Image src="/logo.png" width={16} height={16} alt="nyax" /> Register Token &
@@ -523,11 +523,11 @@ export default function PricingPage() {
                     </span>
                   </button>
                   {/* $1 trial offer */}
-                  <div className="mt-6 pt-4 border-t border-gray-700/30">
+                  <div className="mt-6 pt-4 border-t text-sm sm:text-base border-gray-700/30">
                     <div className="text-sm text-gray-400 mb-3" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>Or try NyaltxPro with our $1 starter:</div>
                     <button
                       onClick={() => router.push(`/dashboard/register-token?redirect=pricing/checkout/nyaltxpro1&method=paypal`)}
-                      className="w-full py-3 rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold hover:from-green-700 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105 shadow-lg" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                      className="w-full py-3 rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 text-white font-light hover:from-green-700 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105 shadow-lg" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                     >
                       <span className="inline-flex items-center gap-2">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
