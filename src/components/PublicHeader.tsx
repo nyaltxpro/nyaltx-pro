@@ -92,7 +92,7 @@ export default function PublicHeader() {
                   <DropdownLink href="/venture-group" label="Venture Group" />
                   <DropdownLink href="/podcast" label="Podcast" />
                   <DropdownLink href="/team" label="Team" />
-                  <DropdownLink href="/contact" label="Contact" />
+                  {/* <DropdownLink href="/contact" label="Contact" /> */}
                   <DropdownLink href="/contact" label="Help & Support" />
                   <DropdownLink href="/news" label="Our News" />
                 </div>

@@ -107,7 +107,7 @@ export default function Sidebar({ isMobileMenuOpen, toggleMobileMenu }: SidebarP
     { icon: <RocketIcon />, text: 'Trending', href: '/dashboard/trending' },
     { icon: <ReaderIcon />, text: 'News', href: '/dashboard/news' },
     { icon: <CalendarIcon />, text: 'Events', href: '/dashboard/events' },
-    { icon: <MagnifyingGlassIcon />, text: 'Token Data', href: '/dashboard/token-data' },
+    { icon: <MagnifyingGlassIcon />, text: 'Search Token', href: '/dashboard/token-data' },
     { icon: <TargetIcon />, text: 'Gamification', href: '/dashboard/gamification' },
     { icon: <ListBulletIcon />, text: 'Leaderboard', href: '/dashboard/leaderboard' },
     // { icon: <LockClosedIcon />, text: 'Connect', href: '/dashboard/connect' },
