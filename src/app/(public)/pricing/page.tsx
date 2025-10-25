@@ -523,7 +523,7 @@ export default function PricingPage() {
                     </span>
                   </button>
                   {/* $1 trial offer */}
-                  <div className="mt-6 pt-4 border-t text-sm sm:text-base border-gray-700/30">
+                  <div className="mt-6 pt-4 border-t gap-4 text-sm sm:text-base border-gray-700/30">
                     <div className="text-sm text-gray-400 mb-3" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>Or try NyaltxPro with our $1 starter:</div>
                     <button
                       onClick={() => router.push(`/dashboard/register-token?redirect=pricing/checkout/nyaltxpro1&method=paypal`)}
