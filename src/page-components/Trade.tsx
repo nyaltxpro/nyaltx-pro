@@ -1181,7 +1181,7 @@ function TradingViewWithParams({
                 {/* Left Column - Stats and Order Panel */}
                 <div className="col-span-1 md:col-span-1 lg:col-span-1 order-2 md:order-1">
                     <div className="bg-[#2222s27] rounded-xl overflow-hidden mb-4" style={{ minHeight: '600px', position: 'relative' }}>
-                        {!infoDexEmbedUrl || (dexScreenerDataExists === false) || infoIframeError ? (
+                        {chartType === 'moralis' && addressParam && ['solana', 'ethereum', 'bsc', 'polygon', 'arbitrum', 'optimism', 'base'].includes(chainParam || '') ? (
                             <div className="w-full rounded-lg" style={{ maxHeight: '600px', overflow: 'auto' }}>
                                 <InfoWidget data={chainParam === 'solana' && solanaTokenData ? solanaTokenData : undefined} />
                             </div>
@@ -1490,7 +1490,7 @@ function TradingViewWithParams({
                                 disabled={!addressParam || !['solana', 'ethereum', 'bsc', 'polygon', 'arbitrum', 'optimism', 'base'].includes(chainParam || '')}
                                 title={!addressParam ? 'Contract address required for DEXTools charts' : !['solana', 'ethereum', 'bsc', 'polygon', 'arbitrum', 'optimism', 'base'].includes(chainParam || '') ? 'DEXTools charts available for Solana, Ethereum, BSC, Polygon, Arbitrum, Optimism, and Base' : ''}
                             >
-                                DEXTools Chart
+                                NYALTX Chart
                             </button>
                         </div>
 
