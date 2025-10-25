@@ -301,17 +301,20 @@ export default function SimpleUnifiedWalletButton({
                     <div className="text-xs text-gray-400 mb-2">Solana Wallets</div>
                     <div
                       className="w-full rounded-lg bg-gradient-to-r from-[#9945ff]/20 to-[#14f195]/20 border border-[#9945ff]/30 overflow-hidden relative cursor-pointer hover:from-[#9945ff]/30 hover:to-[#14f195]/30 transition-colors"
-                      onClick={() => {
-                        // ✅ Close your current modal first
-                        setShowModal(false);
+                      onClick={(e) => {
+                        e.stopPropagation(); // 🧩 prevent click from bubbling to backdrop
+                        setShowModal(false); // 🧩 close your unified modal
 
-                        // ✅ Wait a short moment to ensure it's closed before triggering WalletMultiButton
+                        // 🕐 small delay to ensure modal closes before opening WalletMultiButton
                         setTimeout(() => {
                           const walletButton = document.querySelector(
                             '.wallet-adapter-button'
                           ) as HTMLButtonElement | null;
-                          if (walletButton) walletButton.click();
-                        }, 200);
+
+                          if (walletButton) {
+                            walletButton.click();
+                          }
+                        }, 350); // ← delay increased slightly for stability
                       }}
                     >
                       {/* Solana Icon */}
