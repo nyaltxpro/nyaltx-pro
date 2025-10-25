@@ -330,6 +330,8 @@ function TradingViewWithParams({
         '24h'
     );
 
+    console.log('Solana Tracker', solanaError, solanaTokenData, solanaChartData);
+
     // Debug log for Solana data
     useEffect(() => {
         if (chainParam === 'solana' && addressParam) {
@@ -341,6 +343,7 @@ function TradingViewWithParams({
             });
         }
     }, [chainParam, addressParam, solanaLoading, solanaError, solanaTokenData, solanaChartData]);
+
 
     // Fetch token social links and admin settings with contract address fallback
     useEffect(() => {
@@ -1498,18 +1501,10 @@ function TradingViewWithParams({
                         <div className="w-full h-[300px] sm:h-[400px] lg:h-[500px] rounded-lg relative">
 
                             {chartType === 'moralis' && addressParam && ['solana', 'ethereum', 'bsc', 'polygon', 'arbitrum', 'optimism', 'base'].includes(chainParam || '') ? (
-                                <iframe
-                                    title="DEXTools Trading Chart"
-                                    width="100%"
-                                    height="100%"
-                                    src={generateDEXToolsUrl(addressParam, chainParam)}
-                                    style={{
-                                        border: 0,
-                                        backgroundColor: 'transparent'
-                                    }}
-                                    className="rounded-lg"
-                                    onLoad={() => setChartIframeLoaded(true)}
-                                    onError={() => setChartIframeError(true)}
+                                <LightweightChart
+
+                                    chartDataSolana={solanaChartData}
+
                                 />
                             ) : (
                                 <>

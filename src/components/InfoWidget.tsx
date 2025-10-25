@@ -107,42 +107,46 @@ export default function InfoWidget({ data }: InfoWidgetProps) {
     const [quickIntelOpen, setQuickIntelOpen] = useState(false);
 
     // Default data if no props provided
-    const tokenData: TokenData = data || {
+    const tokenData = {
         // Basic Info
-        name: 'xSpace Token',
-        symbol: 'xSPACE',
-        baseToken: 'WPOL',
-        chain: 'Polygon',
-        dex: 'Uniswap',
-        description: 'xSpace is a decentralized token on Polygon network',
+        name: data?.token?.name,
+        symbol: data?.token?.name,
+        baseToken: data?.token?.name,
+        chain: 'SOL',
+        dex: 'pummpfun',
+        description: data?.token?.description,
+        logoUri: data?.token?.image,
 
         // Prices
-        priceUsd: '$0.003139',
-        priceNative: '0.01586 WPOL',
+        priceUsd: data?.pools[0]?.price?.usd,
+        priceNative: data?.pools[0]?.price?.quote,
         high24h: '$0.003250',
         low24h: '$0.003050',
 
         // Market Data
-        liquidity: '$43K',
+        liquidity: data?.pools[0]?.liquidity?.usd,
         fdv: '$78K',
-        marketCap: '$268K',
-        totalSupply: '250M',
+        marketCap: data?.pools[0]?.marketCap?.usd,
+        totalSupply: data?.pools[0]?.tokenSupply,
         circulatingSupply: '85M',
 
         // Price Changes
-        change5m: '0.05%',
-        change1h: '0.05%',
-        change6h: '1.03%',
-        change24h: '2.21%',
-        change7d: '5.40%',
-        change30d: '-12.30%',
+
+        change5m: data?.events["5m"]?.priceChangePercentage,
+        change30m: data?.events["30m"]?.priceChangePercentage,
+        change1h: data?.events["1h"]?.priceChangePercentage,
+        change2h: data?.events["2h"]?.priceChangePercentage,
+        change6h: data?.events["6h"]?.priceChangePercentage,
+        change24h: data?.events["24h"]?.priceChangePercentage,
+
+
 
         // Trading Stats
-        txns: 28,
-        buys: 13,
-        sells: 15,
-        volume: '$489',
-        volume24h: '$12.5K',
+        txns: data?.pools[0]?.txns?.total,
+        buys: data?.pools[0]?.txns?.buys,
+        sells: data?.pools[0]?.txns?.sells,
+        volume: data?.pools[0]?.txns?.volume,
+        volume24h: data?.pools[0]?.txns?.volume24h,
         buyVolume: '$287',
         sellVolume: '$202',
         volumeChange24h: '+15.2%',
@@ -322,8 +326,8 @@ export default function InfoWidget({ data }: InfoWidgetProps) {
                                 </div>
                             </div>
                             <div className="flex h-1.5 rounded-full overflow-hidden">
-                                <div className="bg-lime-500" style={{ width: `${(parseFloat(tokenData.buyVolume.replace(/[^0-9.]/g, '')) / parseFloat(tokenData.volume.replace(/[^0-9.]/g, '')) * 100).toFixed(0)}%` }}></div>
-                                <div className="bg-red-500" style={{ width: `${(parseFloat(tokenData.sellVolume.replace(/[^0-9.]/g, '')) / parseFloat(tokenData.volume.replace(/[^0-9.]/g, '')) * 100).toFixed(0)}%` }}></div>
+                                <div className="bg-lime-500" style={{ width: `${(parseFloat(tokenData.buyVolume) / parseFloat(tokenData.volume) * 100).toFixed(0)}%` }}></div>
+                                <div className="bg-red-500" style={{ width: `${(parseFloat(tokenData.sellVolume) / parseFloat(tokenData.volume) * 100).toFixed(0)}%` }}></div>
                             </div>
                         </div>
 

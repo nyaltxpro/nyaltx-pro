@@ -132,7 +132,7 @@ export const useSolanaTokenData = (address: string | null, timeframe: string = '
           pooledBaseValue: '$0'
         };
 
-        setTokenData(formattedTokenData);
+        setTokenData(tokenInfo);
 
         if (chartInfo.oclhv && Array.isArray(chartInfo.oclhv)) {
           const formattedChartData: CandlestickData<UTCTimestamp>[] = chartInfo.oclhv.map(point => ({
