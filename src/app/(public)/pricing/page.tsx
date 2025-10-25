@@ -419,7 +419,7 @@ export default function PricingPage() {
               <h1 className="text-2xl md:text-7xl font-semibold tracking-tight bg-clip-text my-6 p-3 text-transparent bg-white" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                 Pricing
               </h1>
-              <p className="text-gray-300 mt-4 max-w-2xl text-lg leading-relaxed" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+              <p className="text-gray-300 mt-4 max-w-2xl text-sm md:text-lg leading-relaxed" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                 Start with <strong className="text-cyan-400">NyaltxPro</strong> to unlock your project profile and media. Then
                 upgrade to the <strong className="text-indigo-400">Race to Liberty</strong> campaign for broader visibility.
               </p>
