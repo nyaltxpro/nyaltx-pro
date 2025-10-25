@@ -496,7 +496,7 @@ export default function TrendingPage() {
                                 </button>
                             </div>
 
-                            <div className="flex gap-2 ml-auto">
+                            {/* <div className="flex gap-2 ml-auto">
                                 <button
                                     className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${timeframe === '1h'
                                         ? 'bg-cyan-600 text-white shadow-lg'
@@ -537,7 +537,7 @@ export default function TrendingPage() {
                                 >
                                     30D
                                 </button>
-                            </div>
+                            </div> */}
                         </div>
                     </div>
 
