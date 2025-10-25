@@ -299,24 +299,45 @@ export default function SimpleUnifiedWalletButton({
                   {/* Solana Wallet Option */}
                   <div>
                     <div className="text-xs text-gray-400 mb-2">Solana Wallets</div>
-
-                    <WalletMultiButton
-                      onClick={handleConnectSolana}
-                      style={{
-                        background: 'transparent',
-                        border: 'none',
-                        width: '100%',
-                        justifyContent: 'flex-start',
-                        padding: '12px 16px 12px 48px', // Add left padding for icon
-                        fontSize: '14px',
-                        fontWeight: '500',
-                        borderRadius: '8px'
+                    <div
+                      className="w-full rounded-lg bg-gradient-to-r from-[#9945ff]/20 to-[#14f195]/20 border border-[#9945ff]/30 overflow-hidden relative cursor-pointer hover:from-[#9945ff]/30 hover:to-[#14f195]/30 transition-colors"
+                      onClick={() => {
+                        // simulate a click on WalletMultiButton
+                        const walletButton = document.querySelector(
+                          '.wallet-adapter-button'
+                        ) as HTMLButtonElement | null;
+                        if (walletButton) walletButton.click();
                       }}
-                    />
-                    {isSolanaConnected && (
-                      <div className="absolute top-3 right-3 w-2 h-2 bg-green-500 rounded-full"></div>
-                    )}
+                    >
+                      {/* Solana Icon */}
+                      <div className="absolute left-3 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-gradient-to-r from-[#9945ff] to-[#14f195] rounded-lg flex items-center justify-center z-10">
+                        <Image
+                          src="/solana.svg"
+                          alt="Solana"
+                          width={16}
+                          height={16}
+                          className="w-4 h-4"
+                        />
+                      </div>
 
+                      {/* Hidden WalletMultiButton that triggers modal */}
+                      <WalletMultiButton
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          width: '100%',
+                          justifyContent: 'flex-start',
+                          padding: '12px 16px 12px 48px',
+                          fontSize: '14px',
+                          fontWeight: '500',
+                          borderRadius: '8px',
+                          cursor: 'pointer',
+                        }}
+                      />
+                      {isSolanaConnected && (
+                        <div className="absolute top-3 right-3 w-2 h-2 bg-green-500 rounded-full"></div>
+                      )}
+                    </div>
                   </div>
                 </>
               )}
