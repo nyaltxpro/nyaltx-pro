@@ -302,11 +302,16 @@ export default function SimpleUnifiedWalletButton({
                     <div
                       className="w-full rounded-lg bg-gradient-to-r from-[#9945ff]/20 to-[#14f195]/20 border border-[#9945ff]/30 overflow-hidden relative cursor-pointer hover:from-[#9945ff]/30 hover:to-[#14f195]/30 transition-colors"
                       onClick={() => {
-                        // simulate a click on WalletMultiButton
-                        const walletButton = document.querySelector(
-                          '.wallet-adapter-button'
-                        ) as HTMLButtonElement | null;
-                        if (walletButton) walletButton.click();
+                        // ✅ Close your current modal first
+                        setShowModal(false);
+
+                        // ✅ Wait a short moment to ensure it's closed before triggering WalletMultiButton
+                        setTimeout(() => {
+                          const walletButton = document.querySelector(
+                            '.wallet-adapter-button'
+                          ) as HTMLButtonElement | null;
+                          if (walletButton) walletButton.click();
+                        }, 200);
                       }}
                     >
                       {/* Solana Icon */}
@@ -316,7 +321,7 @@ export default function SimpleUnifiedWalletButton({
                           alt="Solana"
                           width={16}
                           height={16}
-                          className="w-4 h-4"
+                          className="w-4 h-4 mr-1"
                         />
                       </div>
 
