@@ -277,7 +277,7 @@ const Header = ({ toggleMobileMenu }: HeaderProps) => {
             </div>
 
             {/* Connect Wallet Button */}
-            <div className="ml-1 sm:ml-2">
+            <div className="hidden md:block ml-1 sm:ml-2">
               <SimpleUnifiedWalletButton />
             </div>
           </div>
