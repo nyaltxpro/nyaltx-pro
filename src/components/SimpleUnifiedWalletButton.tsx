@@ -9,6 +9,7 @@ import Image from 'next/image';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import toast from 'react-hot-toast';
+import { CiWallet } from "react-icons/ci";
 import { useDisconnect } from 'wagmi';
 interface SimpleUnifiedWalletButtonProps {
   className?: string;
@@ -141,7 +142,8 @@ export default function SimpleUnifiedWalletButton({
           onClick={handleMainButtonClick}
           data-wallet-button
         >
-          <PersonIcon className="w-3 h-3 sm:w-4 sm:h-4" />
+          <PersonIcon />
+          <CiWallet className="w-3 h-3 sm:w-4 sm:h-4" fill='#ffffff' />
           <span className="hidden sm:inline">Connect Wallet</span>
           <span className="sm:hidden">Connect</span>
           <ChevronDownIcon className="w-3 h-3 sm:w-4 sm:h-4" />
