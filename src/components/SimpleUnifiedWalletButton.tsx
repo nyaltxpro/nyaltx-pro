@@ -142,7 +142,7 @@ export default function SimpleUnifiedWalletButton({
           onClick={handleMainButtonClick}
           data-wallet-button
         >
-          <PersonIcon />
+          {/* <PersonIcon /> */}
           <CiWallet className="w-3 h-3 sm:w-4 sm:h-4" fill='#ffffff' />
           <span className="hidden sm:inline">Connect Wallet</span>
           <span className="sm:hidden">Connect</span>
