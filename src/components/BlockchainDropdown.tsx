@@ -202,7 +202,7 @@ const BlockchainDropdown: React.FC<BlockchainDropdownProps> = ({
 
       <DropdownMenu.Portal>
         <DropdownMenu.Content
-          className="min-w-[350px] max-w-[600px] bg-[#1c2531] rounded-lg shadow-lg p-4 animate-scaleIn border border-gray-800 blockchain-dropdown-content"
+          className="min-w-[350px] max-w-[600px] bg-[#222227] rounded-lg shadow-lg p-4 animate-scaleIn border border-gray-800 blockchain-dropdown-content"
           style={{ zIndex: 999999 }}
           sideOffset={5}
           align="start"
