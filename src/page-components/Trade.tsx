@@ -1558,8 +1558,8 @@ function TradingViewWithParams({
                     </div>
 
                     {/* Trades/Info Tabs */}
-                    <div className="bg-[#222227] rounded-xl overflow-hidden">
-                        <div className="flex border-b border-gray-800">
+                    <div className=" rounded-xl overflow-hidden">
+                        {/* <div className="flex border-b border-gray-800">
                             <button
                                 className={`px-6 py-3 text-sm font-medium ${activeTab === 'trades'
                                     ? 'text-blue-400 border-b-2 border-blue-400'
@@ -1569,54 +1569,53 @@ function TradingViewWithParams({
                             >
                                 Trades
                             </button>
+                        </div> */}
+
+
+                        <div className="flex justify-between items-center mb-4">
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    placeholder="Search transactions..."
+                                    className="pl-9 pr-4 py-2 bg-[#1a2932] rounded-md text-white w-64 focus:outline-none"
+                                />
+                                <FaSearch className="absolute left-3 top-3 text-gray-400" />
+                            </div>
+                            <button className="p-2 bg-[#1a2932] rounded hover:bg-[#253440]">
+                                <FaFilter className="text-gray-400" />
+                            </button>
                         </div>
 
-                        {activeTab === 'trades' && (
-                            <div className="p-4">
-                                <div className="flex justify-between items-center mb-4">
-                                    <div className="relative">
-                                        <input
-                                            type="text"
-                                            placeholder="Search transactions..."
-                                            className="pl-9 pr-4 py-2 bg-[#1a2932] rounded-md text-white w-64 focus:outline-none"
-                                        />
-                                        <FaSearch className="absolute left-3 top-3 text-gray-400" />
+                        <div className="overflow-x-auto">
+                            <div style={{ backgroundColor: '#0f1923', padding: '0px', borderRadius: '8px', minHeight: '300px' }}>
+                                {!transactionDexEmbedUrl || (dexScreenerDataExists === false) || tradesIframeError ? (
+                                    <div className="w-full h-[300px] rounded-lg bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 flex flex-col items-center justify-center p-6">
+                                        <FaChartBar className="text-gray-500 text-5xl mb-3" />
+                                        <h3 className="text-lg font-semibold text-gray-300 mb-2">
+                                            Trades Not Available
+                                        </h3>
+                                        <p className="text-gray-400 text-center text-sm">
+                                            This token is not tracked on DexScreener yet.
+                                        </p>
                                     </div>
-                                    <button className="p-2 bg-[#1a2932] rounded hover:bg-[#253440]">
-                                        <FaFilter className="text-gray-400" />
-                                    </button>
-                                </div>
-
-                                <div className="overflow-x-auto">
-                                    <div style={{ backgroundColor: '#0f1923', padding: '0px', borderRadius: '8px', minHeight: '300px' }}>
-                                        {!transactionDexEmbedUrl || (dexScreenerDataExists === false) || tradesIframeError ? (
-                                            <div className="w-full h-[300px] rounded-lg bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 flex flex-col items-center justify-center p-6">
-                                                <FaChartBar className="text-gray-500 text-5xl mb-3" />
-                                                <h3 className="text-lg font-semibold text-gray-300 mb-2">
-                                                    Trades Not Available
-                                                </h3>
-                                                <p className="text-gray-400 text-center text-sm">
-                                                    This token is not tracked on DexScreener yet.
-                                                </p>
-                                            </div>
-                                        ) : (
-                                            <iframe
-                                                src={transactionDexEmbedUrl}
-                                                width="100%"
-                                                height="300"
-                                                style={{
-                                                    border: 0,
-                                                    display: 'block',
-                                                    width: '100%'
-                                                }}
-                                                onLoad={() => setTradesIframeLoaded(true)}
-                                                onError={() => setTradesIframeError(true)}
-                                            />
-                                        )}
-                                    </div>
-                                </div>
+                                ) : (
+                                    <iframe
+                                        src={transactionDexEmbedUrl}
+                                        width="100%"
+                                        height="300"
+                                        style={{
+                                            border: 0,
+                                            display: 'block',
+                                            width: '100%'
+                                        }}
+                                        onLoad={() => setTradesIframeLoaded(true)}
+                                        onError={() => setTradesIframeError(true)}
+                                    />
+                                )}
                             </div>
-                        )}
+                        </div>
+
+
 
 
                     </div>
