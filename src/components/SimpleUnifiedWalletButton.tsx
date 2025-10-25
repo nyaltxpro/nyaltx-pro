@@ -302,19 +302,24 @@ export default function SimpleUnifiedWalletButton({
                     <div
                       className="w-full rounded-lg bg-gradient-to-r from-[#9945ff]/20 to-[#14f195]/20 border border-[#9945ff]/30 overflow-hidden relative cursor-pointer hover:from-[#9945ff]/30 hover:to-[#14f195]/30 transition-colors"
                       onClick={(e) => {
-                        e.stopPropagation(); // 🧩 prevent click from bubbling to backdrop
-                        setShowModal(false); // 🧩 close your unified modal
+                        e.preventDefault();
+                        e.stopPropagation();
 
-                        // 🕐 small delay to ensure modal closes before opening WalletMultiButton
+                        // Close your unified modal first
+                        setShowModal(false);
+
+                        // Delay to let backdrop fully unmount before triggering Solana modal
                         setTimeout(() => {
-                          const walletButton = document.querySelector(
-                            '.wallet-adapter-button'
-                          ) as HTMLButtonElement | null;
+                          const walletButton = document.querySelector<HTMLButtonElement>(
+                            '.wallet-adapter-button:not([disabled])'
+                          );
 
                           if (walletButton) {
                             walletButton.click();
+                          } else {
+                            console.warn('Solana wallet button not found');
                           }
-                        }, 350); // ← delay increased slightly for stability
+                        }, 600); // ⏱ increase delay for stability (500–700ms works best)
                       }}
                     >
                       {/* Solana Icon */}
