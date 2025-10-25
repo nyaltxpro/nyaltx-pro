@@ -1,19 +1,17 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import Link from 'next/link';
-import Banner from './Banner';
-import SimpleUnifiedWalletButton from './SimpleUnifiedWalletButton';
-import BlockchainDropdown from './BlockchainDropdown';
-import './animations.css';
-import { SlStar } from 'react-icons/sl';
+import { useRouter } from 'next/navigation';
+import React, { useEffect, useRef, useState } from 'react';
 import { BiSearch } from 'react-icons/bi';
-import { FiSettings } from 'react-icons/fi';
 import { FiMenu } from 'react-icons/fi'; // Import hamburger menu icon
-import LivePriceTicker from './LivePriceTicker';
-import { commonCryptoSymbols, getCryptoIconUrl } from '../utils/cryptoIcons';
+import { SlStar } from 'react-icons/sl';
+import { commonCryptoSymbols } from '../utils/cryptoIcons';
 import { getCryptoName } from '../utils/cryptoNames';
+import Banner from './Banner';
+import BlockchainDropdown from './BlockchainDropdown';
+import LivePriceTicker from './LivePriceTicker';
 import SearchModal from './SearchModal';
+import SimpleUnifiedWalletButton from './SimpleUnifiedWalletButton';
+import './animations.css';
 
 // Define token pair type
 interface TokenPair {
@@ -192,14 +190,14 @@ const Header = ({ toggleMobileMenu }: HeaderProps) => {
           <div className="col-span-2 sm:col-span-3 flex items-center gap-2 sm:gap-3">
             {/* Mobile Menu Button */}
             <div className="md:hidden">
-              <button 
-                onClick={toggleMobileMenu} 
+              <button
+                onClick={toggleMobileMenu}
                 className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-gray-800/50 hover:bg-gray-700/50 text-gray-400 hover:text-white transition-all duration-300 border border-transparent hover:border-white/20"
               >
                 <FiMenu size={16} className="sm:w-[18px] sm:h-[18px]" />
               </button>
             </div>
-            
+
             {/* Blockchain Dropdown - Hidden on mobile */}
             <div className="hidden md:block">
               <BlockchainDropdown
@@ -214,12 +212,12 @@ const Header = ({ toggleMobileMenu }: HeaderProps) => {
               <div className="relative cursor-pointer group" onClick={openSearchModal}>
                 {/* Animated background glow */}
                 <div className="absolute -inset-0.5 bg-gradient-to-r from-[#00d4aa]/20 via-[#3b82f6]/20 to-[#00d4aa]/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-500 blur-sm"></div>
-                
+
                 {/* Main search container */}
                 <div className="relative bg-black/40 backdrop-blur-xl border border-gray-800/60 rounded-2xl overflow-hidden group-hover:border-[#00d4aa]/40 transition-all duration-500 shadow-2xl">
                   {/* Inner glow effect */}
                   <div className="absolute inset-0 bg-gradient-to-r from-[#00d4aa]/5 via-transparent to-[#3b82f6]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                  
+
                   {/* Search icon */}
                   <div className="absolute left-3 sm:left-5 top-1/2 transform -translate-y-1/2 z-10">
                     <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r from-[#00d4aa]/20 to-[#3b82f6]/20 rounded-lg flex items-center justify-center group-hover:from-[#00d4aa]/30 group-hover:to-[#3b82f6]/30 transition-all duration-300">
@@ -232,7 +230,7 @@ const Header = ({ toggleMobileMenu }: HeaderProps) => {
                     type="text"
                     placeholder="Search tokens..."
                     className="relative w-full h-12 sm:h-14 py-3 sm:py-4 pl-12 sm:pl-16 pr-16 sm:pr-20 bg-transparent text-white placeholder-gray-500 focus:outline-none cursor-pointer transition-all duration-300 group-hover:placeholder-gray-400"
-                    style={{ 
+                    style={{
                       fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
                       fontSize: '15px',
                       fontWeight: '400'
@@ -259,14 +257,14 @@ const Header = ({ toggleMobileMenu }: HeaderProps) => {
           {/* Right Section - Enhanced Action Buttons */}
           <div className="col-span-3 flex items-center justify-end gap-1 sm:gap-2">
             {/* Settings Button */}
-            <div className="hidden md:block">
+            {/* <div className="hidden md:block">
               <Link
                 href="/dashboard/settings"
                 className="group relative flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 lg:w-11 lg:h-11 rounded-lg sm:rounded-xl transition-all duration-300 text-gray-400 hover:bg-gradient-to-br hover:from-white/10 hover:to-white/5 hover:text-white hover:shadow-lg hover:shadow-black/20 border border-transparent hover:border-white/20"
               >
                 <FiSettings className="w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-200 group-hover:rotate-90" />
               </Link>
-            </div>
+            </div> */}
 
             {/* Favorites Button */}
             <div className="hidden md:block">
