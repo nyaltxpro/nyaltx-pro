@@ -30,12 +30,10 @@ import {
     FaChevronDown,
     FaDiscord,
     FaEllipsisV,
-    FaFilter,
     FaGithub,
     FaGlobe,
     FaInfoCircle,
     FaRegCopy,
-    FaSearch,
     FaStar,
     FaSyncAlt,
     FaTelegram,
@@ -1572,7 +1570,7 @@ function TradingViewWithParams({
                         </div> */}
 
 
-                        <div className="flex justify-between items-center mb-4">
+                        {/* <div className="flex justify-between items-center mb-4">
                             <div className="relative">
                                 <input
                                     type="text"
@@ -1584,7 +1582,7 @@ function TradingViewWithParams({
                             <button className="p-2 bg-[#1a2932] rounded hover:bg-[#253440]">
                                 <FaFilter className="text-gray-400" />
                             </button>
-                        </div>
+                        </div> */}
 
                         <div className="overflow-x-auto">
                             <div style={{ backgroundColor: '#0f1923', padding: '0px', borderRadius: '8px', minHeight: '300px' }}>
