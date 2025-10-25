@@ -7,6 +7,7 @@ import {
   HomeIcon,
   ImageIcon,
   ListBulletIcon,
+  MagnifyingGlassIcon,
   PersonIcon,
   PlayIcon,
   PlusIcon,
