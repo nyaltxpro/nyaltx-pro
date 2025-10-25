@@ -1778,7 +1778,7 @@ function TradingViewWithParams({
                                     );
                                 })()}
                             </div>
-                            <div className="mt-3">
+                            {/* <div className="mt-3">
                                 {tradeVideosLoading ? (
                                     <div className="flex items-center justify-center py-4 text-gray-400 text-sm">
                                         Loading curated videos…
@@ -1832,7 +1832,7 @@ function TradingViewWithParams({
                                         No curated videos available yet. Registered tokens can supply a custom YouTube link from their dashboard.
                                     </div>
                                 )}
-                            </div>
+                            </div> */}
                         </div>
                     </div>
                 </div>
