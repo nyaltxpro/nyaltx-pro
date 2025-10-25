@@ -1,20 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
-import Image from 'next/image';
+import chainsData from '@/data/chains.json';
 import { useAppDispatch, useAppSelector } from '@/store';
 import {
-  setSelectedChain,
-  setAvailableChains,
-  selectSelectedChain,
-  selectAvailableChains,
-  filterTokensByChain,
   BlockchainNetwork,
   allNetworksChain,
+  filterTokensByChain,
+  selectAvailableChains,
+  selectSelectedChain,
+  setAvailableChains,
+  setSelectedChain,
 } from '@/store/slices/chainSlice';
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
+import Image from 'next/image';
+import React, { useEffect, useState } from 'react';
 import { isTopBlockchain } from '../lib/blockchain/topBlockchains';
-import { getBlockchainLogoUrl } from '../lib/blockchain/blockchainLogos';
-import { getCryptoIconUrl } from '../utils/cryptoIcons';
-import chainsData from '@/data/chains.json';
 
 // Blockchain logo component with fallbacks
 const BlockchainLogo: React.FC<{
@@ -177,7 +175,7 @@ const BlockchainDropdown: React.FC<BlockchainDropdownProps> = ({
       <DropdownMenu.Trigger asChild>
         <button
           type="button"
-          className={`flex items-center space-x-2 bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-full transition-colors border border-gray-700 shadow-sm ${isOpen ? 'ring-2 ring-blue-500' : ''} ${className}`}
+          className={`flex items-center space-x-2 bg-black/40 backdrop-blur-xl border border-gray-800/60 rounded-2xl  text-white px-4 py-2  transition-colors  shadow-sm ${isOpen ? 'ring-2 ring-blue-500' : ''} ${className}`}
         >
           <div className="w-6 h-6 relative">
             <BlockchainLogo
