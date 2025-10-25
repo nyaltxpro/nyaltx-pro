@@ -86,7 +86,7 @@ export default function PublicHeader() {
             </button>
 
             {isAboutDropdownOpen && (
-              <div className="absolute top-full  left-0 mt-1 w-48 bg-gray-900 border border-gray-700 rounded-md shadow-lg z-50">
+              <div className="absolute top-full  left-0 mt-1 w-48 bg-[#101010] border border-gray-700 rounded-md shadow-lg z-50">
                 <div className="py-1">
                   <DropdownLink href="/about-us" label="About Us" />
                   <DropdownLink href="/venture-group" label="Venture Group" />

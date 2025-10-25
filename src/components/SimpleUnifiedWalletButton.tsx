@@ -10,7 +10,6 @@ import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import toast from 'react-hot-toast';
 import { useDisconnect } from 'wagmi';
-
 interface SimpleUnifiedWalletButtonProps {
   className?: string;
   onConnect?: () => void;
@@ -36,6 +35,12 @@ export default function SimpleUnifiedWalletButton({
   const { disconnect: disconnectEvm } = useDisconnect();
   const [showModal, setShowModal] = useState(false);
   const [isModalOpening, setIsModalOpening] = useState(false);
+
+  // const { buttonState, onConnect, onDisconnect, publicKey, walletIcon, walletName } = useWalletMultiButton({
+  //   onSelectWallet() {
+  //     setModalVisible(true);
+  //   },
+  // });
 
   const handleConnectEvm = async () => {
     console.log('Opening EVM modal...');
