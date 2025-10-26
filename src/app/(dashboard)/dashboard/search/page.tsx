@@ -274,7 +274,7 @@ export default function TokensPage() {
 
     return (
         <Tooltip.Provider>
-            <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black p-6">
+            <div className="min-h-screen bg-inherit p-6">
                 <div className="mx-auto max-w-7xl">
                     <div className="backdrop-blur-lg rounded-md mb-6">
                         <div className="flex gap-3 mb-6">
@@ -330,9 +330,7 @@ export default function TokensPage() {
                         </div>
 
                         <div className="flex items-center justify-between">
-                            <div className="text-gray-400 text-sm">
-                                Powered by DexScreener API
-                            </div>
+
                             <DropdownMenu.Root>
                                 <DropdownMenu.Trigger asChild>
                                     <button className="flex items-center text-xs gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors border border-white/20 text-white">
@@ -429,7 +427,7 @@ export default function TokensPage() {
                                                         <div className="flex items-center gap-3">
                                                             <Avatar.Root className="w-8 h-8">
                                                                 <Avatar.Image src={token.logo} alt={token.name} className="w-full h-full object-cover rounded-full" />
-                                                                <Avatar.Fallback className="w-full h-full bg-gradient-to-br from-orange-500 to-pink-600 flex items-center justify-center text-white font-bold text-xs rounded-full">
+                                                                <Avatar.Fallback className="w-full h-full border border-dotted border-gray-100 flex items-center justify-center text-white font-bold text-xs rounded-md">
                                                                     {token.symbol?.slice(0, 2) || '??'}
                                                                 </Avatar.Fallback>
                                                             </Avatar.Root>
@@ -496,24 +494,7 @@ export default function TokensPage() {
                                                                 </Tooltip.Portal>
                                                             </Tooltip.Root>
 
-                                                            <Tooltip.Root>
-                                                                <Tooltip.Trigger asChild>
-                                                                    <a
-                                                                        href={token.url}
-                                                                        target="_blank"
-                                                                        rel="noopener noreferrer"
-                                                                        className="px-3 py-1.5 bg-blue-600/90 hover:bg-blue-600 text-white text-xs font-medium rounded-md transition-all"
-                                                                    >
-                                                                        DexScreener
-                                                                    </a>
-                                                                </Tooltip.Trigger>
-                                                                <Tooltip.Portal>
-                                                                    <Tooltip.Content className="bg-black/90 text-white px-3 py-2 rounded-lg text-sm z-50">
-                                                                        View on DexScreener
-                                                                        <Tooltip.Arrow className="fill-black/90" />
-                                                                    </Tooltip.Content>
-                                                                </Tooltip.Portal>
-                                                            </Tooltip.Root>
+
 
                                                             <Tooltip.Root>
                                                                 <Tooltip.Trigger asChild>
