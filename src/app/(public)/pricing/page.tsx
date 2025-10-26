@@ -523,7 +523,7 @@ export default function PricingPage() {
                     </span>
                   </button>
                   {/* $1 trial offer */}
-                  <div className="mt-6 pt-4 border-t gap-4 text-sm sm:text-base border-gray-700/30">
+                  {/* <div className="mt-6 pt-4 border-t gap-4 text-sm sm:text-base border-gray-700/30">
                     <div className="text-sm text-gray-400 mb-3" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>Or try NyaltxPro with our $1 starter:</div>
                     <button
                       onClick={() => router.push(`/dashboard/register-token?redirect=pricing/checkout/nyaltxpro1&method=paypal`)}
@@ -548,7 +548,7 @@ export default function PricingPage() {
                     >
                       <span className="inline-flex items-center gap-2"><Image src="/crypto-icons/color/sol.svg" width={16} height={16} alt="sol" /> Register Token & Pay $1 with SOL</span>
                     </button>
-                  </div>
+                  </div> */}
                 </div>
                 {isPro && (
                   <div className="mt-4 p-4 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-sm text-cyan-300" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
@@ -683,7 +683,7 @@ export default function PricingPage() {
 
                     <div className="mt-auto flex flex-col gap-2">
                       <button
-                        disabled={!isPro || busy !== null}
+                        // disabled={!isPro || busy !== null}
                         onClick={() => router.push(`/pricing/race-to-liberty/${t.id}`)}
                         className="w-full py-3 rounded-lg bg-gradient-to-r from-cyan-600 to-indigo-600 text-white font-medium hover:from-cyan-700 hover:to-indigo-700 disabled:opacity-50 transition-all transform hover:scale-105"
                       >
