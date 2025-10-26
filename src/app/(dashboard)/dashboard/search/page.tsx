@@ -4,6 +4,7 @@ import * as Avatar from '@radix-ui/react-avatar';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { ChevronDown, ExternalLink, Filter, Loader, RefreshCw, Search, SortAsc, SortDesc, TrendingUp } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 
 interface Token {
@@ -85,6 +86,7 @@ export default function TokensPage() {
     const [error, setError] = useState<string | null>(null);
     const [sortField, setSortField] = useState<string>('volume24h');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+    const router = useRouter();
 
     const searchTokens = async () => {
         if (!query.trim()) {
@@ -219,6 +221,55 @@ export default function TokensPage() {
         };
 
         return (explorers[chain] || 'https://etherscan.io/token/') + address;
+    };
+
+    const navigateToTrade = (token: Token) => {
+        // Build trade URL with available parameters
+        const params = new URLSearchParams();
+
+        // Add base symbol parameter
+        if (token.symbol) {
+            params.set('base', token.symbol);
+        }
+
+        // Add token name for display
+        if (token.name) {
+            params.set('name', token.name);
+        }
+
+        // Add chain parameter
+        if (token.chain) {
+            params.set('chain', token.chain);
+        }
+
+        // Add contract address if available
+        if (token.address && token.address !== 'N/A') {
+            params.set('address', token.address);
+        }
+
+        // Add image URI for fallback display on trade page
+        if (token.logo) {
+            params.set('imageUri', token.logo);
+        }
+
+        // Add price for display
+        if (token.price) {
+            params.set('price', token.price.toString());
+        }
+
+        // Add dex info
+        if (token.dexId) {
+            params.set('dex', token.dexId);
+        }
+
+        // Add pair address
+        if (token.pairAddress) {
+            params.set('pairAddress', token.pairAddress);
+        }
+
+        // Navigate to trade page with parameters
+        const tradeUrl = `/dashboard/trade?${params.toString()}`;
+        router.push(tradeUrl);
     };
 
     return (
@@ -427,12 +478,61 @@ export default function TokensPage() {
                                                     </td>
                                                     <td className="px-4 py-3">
                                                         <div className="flex items-center gap-2">
-                                                            <a href={token.url} target="_blank" rel="noopener noreferrer" className="px-3 py-1.5 bg-blue-600/90 hover:bg-blue-600 text-white text-xs font-medium rounded-md transition-all">
-                                                                View
-                                                            </a>
-                                                            <a href={getExplorerUrl(token.chain, token.address)} target="_blank" rel="noopener noreferrer" className="p-2 text-gray-400 hover:text-white hover:bg-gray-700/50 rounded-md transition-all">
-                                                                <ExternalLink size={14} />
-                                                            </a>
+                                                            <Tooltip.Root>
+                                                                <Tooltip.Trigger asChild>
+                                                                    <button
+                                                                        onClick={() => navigateToTrade(token)}
+                                                                        className="px-3 py-1.5 bg-green-600/90 hover:bg-green-600 text-white text-xs font-medium rounded-md transition-all duration-200 hover:shadow-md"
+                                                                        style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                                                                    >
+                                                                        Trade
+                                                                    </button>
+                                                                </Tooltip.Trigger>
+                                                                <Tooltip.Portal>
+                                                                    <Tooltip.Content className="bg-black/90 text-white px-3 py-2 rounded-lg text-sm z-50">
+                                                                        Trade {token.symbol}
+                                                                        <Tooltip.Arrow className="fill-black/90" />
+                                                                    </Tooltip.Content>
+                                                                </Tooltip.Portal>
+                                                            </Tooltip.Root>
+
+                                                            <Tooltip.Root>
+                                                                <Tooltip.Trigger asChild>
+                                                                    <a
+                                                                        href={token.url}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        className="px-3 py-1.5 bg-blue-600/90 hover:bg-blue-600 text-white text-xs font-medium rounded-md transition-all"
+                                                                    >
+                                                                        DexScreener
+                                                                    </a>
+                                                                </Tooltip.Trigger>
+                                                                <Tooltip.Portal>
+                                                                    <Tooltip.Content className="bg-black/90 text-white px-3 py-2 rounded-lg text-sm z-50">
+                                                                        View on DexScreener
+                                                                        <Tooltip.Arrow className="fill-black/90" />
+                                                                    </Tooltip.Content>
+                                                                </Tooltip.Portal>
+                                                            </Tooltip.Root>
+
+                                                            <Tooltip.Root>
+                                                                <Tooltip.Trigger asChild>
+                                                                    <a
+                                                                        href={getExplorerUrl(token.chain, token.address)}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        className="p-2 text-gray-400 hover:text-white hover:bg-gray-700/50 rounded-md transition-all"
+                                                                    >
+                                                                        <ExternalLink size={14} />
+                                                                    </a>
+                                                                </Tooltip.Trigger>
+                                                                <Tooltip.Portal>
+                                                                    <Tooltip.Content className="bg-black/90 text-white px-3 py-2 rounded-lg text-sm z-50">
+                                                                        View on Explorer
+                                                                        <Tooltip.Arrow className="fill-black/90" />
+                                                                    </Tooltip.Content>
+                                                                </Tooltip.Portal>
+                                                            </Tooltip.Root>
                                                         </div>
                                                     </td>
                                                 </tr>
