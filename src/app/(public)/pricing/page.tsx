@@ -1,13 +1,10 @@
 'use client';
 
 import PublicHeader from '@/components/PublicHeader';
-import { usePricingContent } from '@/hooks/useTinaContent';
 import { getNYAXPriceUSD } from '@/utils/nyaxPriceApi';
 import { useAppKit } from '@reown/appkit/react';
 import { TokenETH } from '@web3icons/react';
 import Image from 'next/image';
-import Link from 'next/link';
-import { FaCheck, FaStar } from 'react-icons/fa';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { erc20Abi, parseEther, parseUnits } from 'viem';
@@ -159,15 +156,10 @@ export default function PricingPage() {
   const { isConnected, chain } = useAccount();
   const { switchChainAsync } = useSwitchChain();
   const isPro = useIsPro();
-  const {
-    content,
-    loading: pricingContentLoading,
-    error: pricingContentError,
-  } = usePricingContent();
   const [ethPrice, setEthPrice] = useState<number | null>(null);
   const [nyaxPrice, setNyaxPrice] = useState<number | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
-  const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
   const { open } = useAppKit();
   const router = useRouter();
@@ -218,7 +210,7 @@ export default function PricingPage() {
   );
 
   const handleStripeCheckout = useCallback(async (tierId: string) => {
-    setPaymentError(null);
+    setError(null);
     setBusy(tierId + ':stripe');
     try {
       const res = await fetch('/api/checkout', {
@@ -234,7 +226,7 @@ export default function PricingPage() {
         throw new Error('Missing checkout url');
       }
     } catch (e: any) {
-      setPaymentError(e?.message || 'Stripe checkout error');
+      setError(e?.message || 'Stripe checkout error');
     } finally {
       setBusy(null);
     }
@@ -243,7 +235,7 @@ export default function PricingPage() {
   const handlePayETH = useCallback(
     async (tierId: string, priceUSD: number) => {
       if (!RECEIVER) {
-        setPaymentError('Receiver address not configured');
+        setError('Receiver address not configured');
         return;
       }
       if (!isConnected) {
@@ -256,7 +248,7 @@ export default function PricingPage() {
         try {
           await switchChainAsync({ chainId: PAYMENT_CHAIN_ID });
         } catch {
-          setPaymentError('Please switch to the correct chain to pay');
+          setError('Please switch to the correct chain to pay');
           return;
         }
       }
@@ -273,12 +265,12 @@ export default function PricingPage() {
         if (FALLBACK_ETH_PRICE > 0) {
           ethAmt = priceUSD / FALLBACK_ETH_PRICE;
         } else {
-          setPaymentError('Unable to compute ETH amount. Please try again in a moment.');
+          setError('Unable to compute ETH amount. Please try again in a moment.');
           return;
         }
       }
 
-      setPaymentError(null);
+      setError(null);
       setBusy(tierId + ':eth');
       try {
         const hash = await sendTransactionAsync({
@@ -288,7 +280,7 @@ export default function PricingPage() {
         // Optionally, track transaction or show toast
         console.log('ETH payment tx:', hash);
       } catch (e: any) {
-        setPaymentError(e?.shortMessage || e?.message || 'ETH payment failed');
+        setError(e?.shortMessage || e?.message || 'ETH payment failed');
       } finally {
         setBusy(null);
       }
@@ -299,11 +291,11 @@ export default function PricingPage() {
   const handlePayNYAX = useCallback(
     async (tierId: string, priceUSD: number) => {
       if (!RECEIVER) {
-        setPaymentError('Receiver address not configured');
+        setError('Receiver address not configured');
         return;
       }
       if (!NYAX_TOKEN) {
-        setPaymentError('NYAX token address not configured');
+        setError('NYAX token address not configured');
         return;
       }
       if (!isConnected) {
@@ -316,7 +308,7 @@ export default function PricingPage() {
         try {
           await switchChainAsync({ chainId: PAYMENT_CHAIN_ID });
         } catch {
-          setPaymentError('Please switch to the correct chain to pay');
+          setError('Please switch to the correct chain to pay');
           return;
         }
       }
@@ -341,7 +333,7 @@ export default function PricingPage() {
         }
       }
 
-      setPaymentError(null);
+      setError(null);
       setBusy(tierId + ':nyax');
       try {
         // Convert to token units (NYAX has 18 decimals)
@@ -354,7 +346,7 @@ export default function PricingPage() {
         });
         console.log('NYAX payment tx:', hash);
       } catch (e: any) {
-        setPaymentError(e?.shortMessage || e?.message || 'NYAX payment failed');
+        setError(e?.shortMessage || e?.message || 'NYAX payment failed');
       } finally {
         setBusy(null);
       }
@@ -365,11 +357,11 @@ export default function PricingPage() {
   const handlePaySOL = useCallback(
     async (tierId: string, priceUSD: number) => {
       if (!RECEIVER) {
-        setPaymentError('Receiver address not configured');
+        setError('Receiver address not configured');
         return;
       }
       if (!SOL_TOKEN) {
-        setPaymentError('SOL token address not configured');
+        setError('SOL token address not configured');
         return;
       }
       if (!isConnected) {
@@ -382,12 +374,12 @@ export default function PricingPage() {
         try {
           await switchChainAsync({ chainId: PAYMENT_CHAIN_ID });
         } catch {
-          setPaymentError('Please switch to the correct chain to pay');
+          setError('Please switch to the correct chain to pay');
           return;
         }
       }
 
-      setPaymentError(null);
+      setError(null);
       setBusy(tierId + ':sol');
       try {
         // SOL uses 9 decimals (like native Solana)
@@ -400,7 +392,7 @@ export default function PricingPage() {
         });
         console.log('SOL payment tx:', hash);
       } catch (e: any) {
-        setPaymentError(e?.shortMessage || e?.message || 'SOL payment failed');
+        setError(e?.shortMessage || e?.message || 'SOL payment failed');
       } finally {
         setBusy(null);
       }
@@ -424,22 +416,12 @@ export default function PricingPage() {
           {/* Header row */}
           <div className="flex items-start justify-between gap-4 mb-8">
             <div>
-              <h1
-                className="text-2xl md:text-7xl font-semibold tracking-tight bg-clip-text my-6 p-3 text-transparent bg-white"
-                style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
-              >
-                {content?.hero?.title ?? 'Pricing'}
+              <h1 className="text-2xl md:text-7xl font-semibold tracking-tight bg-clip-text my-6 p-3 text-transparent bg-white" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                Pricing
               </h1>
-              <p
-                className="text-gray-300 mt-4 max-w-2xl text-sm md:text-lg leading-relaxed"
-                style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
-              >
-                {content?.hero?.subtitle ?? (
-                  <>
-                    Start with <strong className="text-cyan-400">NyaltxPro</strong> to unlock your project profile and media. Then
-                    upgrade to the <strong className="text-indigo-400">Race to Liberty</strong> campaign for broader visibility.
-                  </>
-                )}
+              <p className="text-gray-300 mt-4 max-w-2xl text-sm md:text-lg leading-relaxed" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                Start with <strong className="text-cyan-400">NyaltxPro</strong> to unlock your project profile and media. Then
+                upgrade to the <strong className="text-indigo-400">Race to Liberty</strong> campaign for broader visibility.
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -451,94 +433,6 @@ export default function PricingPage() {
               {/* <ConnectWalletButton /> */}
             </div>
           </div>
-
-          {pricingContentLoading && (
-            <div className="mb-6 flex items-center gap-2 text-sm text-cyan-300">
-              <span className="h-3 w-3 animate-ping rounded-full bg-cyan-400" />
-              Loading pricing plans...
-            </div>
-          )}
-
-          {pricingContentError && (
-            <div className="mb-6 rounded-md border border-yellow-500/40 bg-yellow-500/10 p-4 text-sm text-yellow-200">
-              {pricingContentError}
-            </div>
-          )}
-
-          {Array.isArray(content?.plans) && content.plans.length > 0 && (
-            <section aria-labelledby="cms-pricing-plans" className="mb-12">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-1 h-8 rounded-full bg-gradient-to-b from-indigo-400 to-purple-500" />
-                <h2
-                  id="cms-pricing-plans"
-                  className="text-2xl font-bold text-white"
-                  style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
-                >
-                  Pricing Plans
-                </h2>
-              </div>
-
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
-                {content.plans.map((plan: any, index: number) => (
-                  <div
-                    key={`${plan.name}-${index}`}
-                    className={`relative rounded-2xl border p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_40px_-15px_rgba(6,182,212,0.6)] ${
-                      plan?.popular
-                        ? 'border-cyan-500/60 bg-gradient-to-b from-cyan-500/10 to-indigo-500/10'
-                        : 'border-gray-700/60 bg-gray-800/40'
-                    }`}
-                  >
-                    {plan?.popular && (
-                      <div className="absolute -top-3 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-full bg-gradient-to-r from-cyan-500 to-indigo-500 px-4 py-1 text-sm font-medium text-white">
-                        <FaStar className="h-3 w-3" />
-                        {plan?.badge || 'Most Popular'}
-                      </div>
-                    )}
-
-                    {!plan?.popular && plan?.badge && (
-                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gray-700 px-4 py-1 text-sm font-medium text-gray-300">
-                        {plan.badge}
-                      </div>
-                    )}
-
-                    <div className="mb-6 text-center">
-                      <h3 className="text-2xl font-semibold text-white">{plan?.name}</h3>
-                      {plan?.description && (
-                        <p className="mt-2 text-sm text-gray-300">{plan.description}</p>
-                      )}
-                      <div className="mt-4">
-                        <span className="text-4xl font-bold text-white">{plan?.price}</span>
-                        {plan?.period && (
-                          <span className="ml-2 text-sm text-gray-400">/ {plan.period}</span>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="mb-6 space-y-3">
-                      {Array.isArray(plan?.features) &&
-                        plan.features.map((feature: string, featureIndex: number) => (
-                          <div key={`${feature}-${featureIndex}`} className="flex items-center gap-3">
-                            <FaCheck className="h-4 w-4 text-green-400" />
-                            <span className="text-sm text-gray-300">{feature}</span>
-                          </div>
-                        ))}
-                    </div>
-
-                    <Link
-                      href={plan?.ctaLink || '#'}
-                      className={`block w-full rounded-lg py-3 text-center text-sm font-semibold transition-colors ${
-                        plan?.popular
-                          ? 'bg-gradient-to-r from-cyan-500 to-indigo-500 text-white hover:from-cyan-600 hover:to-indigo-600'
-                          : 'bg-gray-700 text-white hover:bg-gray-600'
-                      }`}
-                    >
-                      {plan?.ctaText || 'Get Started'}
-                    </Link>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
 
           {/* NyaltxPro primary offer */}
           <section aria-labelledby="nyaltxpro" className="mb-12">
@@ -701,9 +595,9 @@ export default function PricingPage() {
 
             {/* Cards */}
 
-            {paymentError && (
+            {error && (
               <div className="mb-6 p-3 rounded-md border border-red-500 bg-red-900/30 text-red-200">
-                {paymentError}
+                {error}
               </div>
             )}
 
@@ -783,8 +677,8 @@ export default function PricingPage() {
                       )}
                     </ul>
 
-                    {paymentError && busy?.startsWith(t.id) && (
-                      <div className="text-red-400 text-sm mb-2">{paymentError}</div>
+                    {error && busy?.startsWith(t.id) && (
+                      <div className="text-red-400 text-sm mb-2">{error}</div>
                     )}
 
                     <div className="mt-auto flex flex-col gap-2">
