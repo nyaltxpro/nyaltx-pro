@@ -6,6 +6,7 @@ import { privacyPolicy } from "./schema/privacyPolicy";
 import ventureGroup from "./schema/ventureGroup";
 import podcast from "./schema/podcast";
 import tradeVideos from "./schema/tradeVideos";
+import pricing from "./schema/pricing";
 // Your hosting provider likely exposes this as an environment variable
 const branch =
   process.env.GITHUB_BRANCH ||
@@ -41,6 +42,7 @@ export default defineConfig({
       ventureGroup,
       podcast,
       tradeVideos,
+      pricing,
       {
         name: "navigation",
         label: "Navigation",

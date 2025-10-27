@@ -7,64 +7,17 @@ import { TokenETH } from '@web3icons/react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
+import { useTina } from 'tinacms/dist/react';
 import { erc20Abi, parseEther, parseUnits } from 'viem';
 import { useAccount, useSendTransaction, useSwitchChain, useWriteContract } from 'wagmi';
+import { client } from '../../../../tina/__generated__/client';
 
-// Pricing tiers in USD (Race to Liberty tiers)
-const TIERS = [
-  {
-    id: 'speedboat',
-    name: 'Speed Boat',
-    description: '1 week on Recently Updated.',
-    priceUSD: 199,
-  },
-  { id: 'helicopter', name: 'Helicopter', description: '1 month placement.', priceUSD: 349 },
-  { id: 'submarine', name: 'Submarine', description: '3 months placement.', priceUSD: 599 },
-];
-
-// Boost Packs for projects to climb the board
-const BOOST_PACKS = [
-  {
-    id: 'starter',
-    name: 'Starter Boost',
-    points: 250,
-    priceUSD: 199,
-    description: 'Gain entry into the Boosted Zone',
-    icon: '🔹',
-  },
-  {
-    id: 'growth',
-    name: 'Growth Boost',
-    points: 750,
-    priceUSD: 399,
-    description: 'Highlighted in daily "Top Movers" feed',
-    icon: '🔹',
-  },
-  {
-    id: 'pro',
-    name: 'Pro Boost',
-    points: 1500,
-    priceUSD: 599,
-    description: 'Unlocks "Featured" placement (color frames, 48h push)',
-    icon: '🔹',
-  },
-  {
-    id: 'elite',
-    name: 'Elite Boost',
-    points: 7500,
-    priceUSD: 2999,
-    description: 'Premium: Top of board + Featured Video slot + Podcast appearance',
-    icon: '🔹',
-  },
-];
-
-// Payment configuration (with sensible defaults per request)
+// Payment configuration
 const DEFAULT_RECEIVER: `0x${string}` = '0x81bA7b98E49014Bff22F811E9405640bC2B39cC0';
-const DEFAULT_NYAX: `0x${string}` = '0x5eed5621b92be4473f99bacac77acfa27deb57d9'; // NYAX on Ethereum
-// Solana native token (SOL) - using wrapped SOL on Ethereum for cross-chain compatibility
+const DEFAULT_NYAX: `0x${string}` = '0x5eed5621b92be4473f99bacac27deb57d9'; // NYAX on Ethereum
 const DEFAULT_SOL: `0x${string}` =
   (process.env.NEXT_PUBLIC_SOL_TOKEN_ADDRESS as `0x${string}` | undefined) ??
-  ('0xD31a59c85aE9D8edEFeC411D448f90841571b89c' as `0x${string}`); // Wrapped SOL on Ethereum
+  ('0xD31a59c85aE9D8edEFeC411D448f90841571b89c' as `0x${string}`);
 
 const RECEIVER =
   (process.env.NEXT_PUBLIC_PAYMENT_RECEIVER_ADDRESS as `0x${string}` | undefined) ??
@@ -74,27 +27,23 @@ const NYAX_TOKEN =
 const SOL_TOKEN = DEFAULT_SOL;
 const PAYMENT_CHAIN_ID = process.env.NEXT_PUBLIC_PAYMENT_CHAIN_ID
   ? Number(process.env.NEXT_PUBLIC_PAYMENT_CHAIN_ID)
-  : 1; // Default to mainnet Ethereum
+  : 1;
 const FALLBACK_ETH_PRICE = process.env.NEXT_PUBLIC_FALLBACK_ETH_PRICE
   ? Number(process.env.NEXT_PUBLIC_FALLBACK_ETH_PRICE)
-  : 3000; // USD per ETH fallback
+  : 3000;
 
 function useIsPro() {
   const [isPro, setIsPro] = useState<boolean>(false);
   useEffect(() => {
     try {
-      // Check for pro cookie
       const value = document.cookie
         .split(';')
         .map(c => c.trim())
         .find(c => c.startsWith('nyaltx_pro='));
       const hasProCookie = !!value && value.split('=')[1] === '1';
-
-      // Allow access on localhost for development
       const isLocalhost =
         typeof window !== 'undefined' &&
         (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-
       setIsPro(hasProCookie || isLocalhost);
     } catch {
       setIsPro(false);
@@ -104,8 +53,6 @@ function useIsPro() {
 }
 
 async function fetchETHPriceUSD(): Promise<number> {
-  // Try multiple providers for robustness
-  // 1) CoinGecko
   try {
     const res = await fetch(
       'https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd',
@@ -118,7 +65,6 @@ async function fetchETHPriceUSD(): Promise<number> {
     }
   } catch { }
 
-  // 2) Dexscreener (WETH token) — pick highest liquidity pair priceUsd
   try {
     const res = await fetch(
       'https://api.dexscreener.com/latest/dex/tokens/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
@@ -137,7 +83,6 @@ async function fetchETHPriceUSD(): Promise<number> {
     }
   } catch { }
 
-  // 3) Coinbase spot
   try {
     const res = await fetch('https://api.coinbase.com/v2/prices/ETH-USD/spot', {
       cache: 'no-store',
@@ -152,7 +97,16 @@ async function fetchETHPriceUSD(): Promise<number> {
   return 0;
 }
 
-export default function PricingPage() {
+export default function PricingPage(props: any) {
+  // Use Tina CMS
+  const { data } = useTina({
+    query: props.query,
+    variables: props.variables,
+    data: props.data,
+  });
+
+  const content = data?.pricing || props.data?.pricing;
+
   const { isConnected, chain } = useAccount();
   const { switchChainAsync } = useSwitchChain();
   const isPro = useIsPro();
@@ -164,24 +118,20 @@ export default function PricingPage() {
   const { open } = useAppKit();
   const router = useRouter();
 
-  // wagmi hooks
   const { sendTransactionAsync } = useSendTransaction();
   const { writeContractAsync } = useWriteContract();
 
   useEffect(() => {
-    // Fetch ETH price
     fetchETHPriceUSD()
       .then(setEthPrice)
       .catch(() => setEthPrice(null));
 
-    // Fetch NYAX price
     getNYAXPriceUSD()
       .then(setNyaxPrice)
       .catch(() => setNyaxPrice(null));
   }, []);
 
   useEffect(() => {
-    // trigger entrance transitions
     const t = setTimeout(() => setMounted(true), 30);
     return () => clearTimeout(t);
   }, []);
@@ -198,39 +148,12 @@ export default function PricingPage() {
 
   const computeNyaxAmount = useCallback(
     (usd: number) => {
-      // Apply 20% discount first
       const discountedUSD = usd * 0.8;
-
-      // Use real NYAX price if available, otherwise fallback to $1 assumption
       const nyaxPriceUSD = nyaxPrice && nyaxPrice > 0 ? nyaxPrice : 1.0;
-
       return discountedUSD / nyaxPriceUSD;
     },
     [nyaxPrice]
   );
-
-  const handleStripeCheckout = useCallback(async (tierId: string) => {
-    setError(null);
-    setBusy(tierId + ':stripe');
-    try {
-      const res = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tierId }),
-      });
-      if (!res.ok) throw new Error('Checkout session failed');
-      const data = await res.json();
-      if (data?.url) {
-        window.location.href = data.url;
-      } else {
-        throw new Error('Missing checkout url');
-      }
-    } catch (e: any) {
-      setError(e?.message || 'Stripe checkout error');
-    } finally {
-      setBusy(null);
-    }
-  }, []);
 
   const handlePayETH = useCallback(
     async (tierId: string, priceUSD: number) => {
@@ -261,7 +184,6 @@ export default function PricingPage() {
         } catch { }
       }
       if (!ethAmt) {
-        // last-resort fallback using default fallback price if everything failed
         if (FALLBACK_ETH_PRICE > 0) {
           ethAmt = priceUSD / FALLBACK_ETH_PRICE;
         } else {
@@ -277,7 +199,6 @@ export default function PricingPage() {
           to: RECEIVER,
           value: parseEther(ethAmt.toFixed(6)),
         });
-        // Optionally, track transaction or show toast
         console.log('ETH payment tx:', hash);
       } catch (e: any) {
         setError(e?.shortMessage || e?.message || 'ETH payment failed');
@@ -290,12 +211,8 @@ export default function PricingPage() {
 
   const handlePayNYAX = useCallback(
     async (tierId: string, priceUSD: number) => {
-      if (!RECEIVER) {
-        setError('Receiver address not configured');
-        return;
-      }
-      if (!NYAX_TOKEN) {
-        setError('NYAX token address not configured');
+      if (!RECEIVER || !NYAX_TOKEN) {
+        setError('Configuration error');
         return;
       }
       if (!isConnected) {
@@ -313,10 +230,8 @@ export default function PricingPage() {
         }
       }
 
-      // Calculate NYAX amount using real market price
       let nyaxAmount = computeNyaxAmount(priceUSD);
       if (!nyaxAmount) {
-        // Fallback: try to fetch fresh NYAX price
         try {
           const freshNyaxPrice = await getNYAXPriceUSD();
           if (freshNyaxPrice && freshNyaxPrice > 0) {
@@ -324,19 +239,16 @@ export default function PricingPage() {
             const discountedUSD = priceUSD * 0.8;
             nyaxAmount = discountedUSD / freshNyaxPrice;
           } else {
-            // Final fallback: use $1 assumption
-            nyaxAmount = priceUSD * 0.8; // 20% discount, 1 NYAX = $1
+            nyaxAmount = priceUSD * 0.8;
           }
         } catch {
-          // Final fallback: use $1 assumption
-          nyaxAmount = priceUSD * 0.8; // 20% discount, 1 NYAX = $1
+          nyaxAmount = priceUSD * 0.8;
         }
       }
 
       setError(null);
       setBusy(tierId + ':nyax');
       try {
-        // Convert to token units (NYAX has 18 decimals)
         const value = parseUnits(nyaxAmount.toFixed(6), 18);
         const hash = await writeContractAsync({
           abi: erc20Abi,
@@ -356,12 +268,8 @@ export default function PricingPage() {
 
   const handlePaySOL = useCallback(
     async (tierId: string, priceUSD: number) => {
-      if (!RECEIVER) {
-        setError('Receiver address not configured');
-        return;
-      }
-      if (!SOL_TOKEN) {
-        setError('SOL token address not configured');
+      if (!RECEIVER || !SOL_TOKEN) {
+        setError('Configuration error');
         return;
       }
       if (!isConnected) {
@@ -382,7 +290,6 @@ export default function PricingPage() {
       setError(null);
       setBusy(tierId + ':sol');
       try {
-        // SOL uses 9 decimals (like native Solana)
         const value = parseUnits(priceUSD.toFixed(2), 9);
         const hash = await writeContractAsync({
           abi: erc20Abi,
@@ -402,27 +309,16 @@ export default function PricingPage() {
 
   return (
     <>
-      {' '}
       <PublicHeader />
       <div className="relative">
-        {/* Web3 aurora background */}
-        {/* <div className="pointer-events-none absolute inset-0 -z-10">
-          <div className="absolute -top-24 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-cyan-500/20 blur-3xl" />
-          <div className="absolute top-40 right-10 h-72 w-72 rounded-full bg-indigo-500/10 blur-3xl" />
-          <div className="absolute bottom-0 left-10 h-64 w-64 rounded-full bg-fuchsia-500/10 blur-3xl" />
-        </div> */}
-
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-10">
-          {/* Header row */}
+          {/* Hero Section */}
           <div className="flex items-start justify-between gap-4 mb-8">
             <div>
               <h1 className="text-2xl md:text-7xl font-semibold tracking-tight bg-clip-text my-6 p-3 text-transparent bg-white" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                Pricing
+                {content?.hero?.title}
               </h1>
-              <p className="text-gray-300 mt-4 max-w-2xl text-sm md:text-lg leading-relaxed" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                Start with <strong className="text-cyan-400">NyaltxPro</strong> to unlock your project profile and media. Then
-                upgrade to the <strong className="text-indigo-400">Race to Liberty</strong> campaign for broader visibility.
-              </p>
+              <p className="text-gray-300 mt-4 max-w-2xl text-sm md:text-lg leading-relaxed" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }} dangerouslySetInnerHTML={{ __html: content?.hero?.description.replace(/\*\*(.*?)\*\*/g, '<strong class="text-cyan-400">$1</strong>') }} />
             </div>
             <div className="flex items-center gap-3">
               {chain?.name && (
@@ -430,155 +326,107 @@ export default function PricingPage() {
                   {chain.name}
                 </span>
               )}
-              {/* <ConnectWalletButton /> */}
             </div>
           </div>
 
-          {/* NyaltxPro primary offer */}
+          {/* NyaltxPro Section */}
           <section aria-labelledby="nyaltxpro" className="mb-12">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-1 h-8 bg-gradient-to-b from-cyan-400 to-blue-500 rounded-full"></div>
               <h2 id="nyaltxpro" className="text-3xl font-bold text-white" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                NyaltxPro
+                {content?.nyaltxPro?.sectionTitle}
               </h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div
-                className={`group relative bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-2xl p-8 shadow-2xl flex flex-col min-h-[400px] transition-all duration-500 ease-out hover:-translate-y-2 hover:shadow-[0_0_50px_-10px_rgba(6,182,212,0.5)] hover:border-cyan-500/30`}
-              >
+              <div className="group relative bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-2xl p-8 shadow-2xl flex flex-col min-h-[400px] transition-all duration-500 ease-out hover:-translate-y-2 hover:shadow-[0_0_50px_-10px_rgba(6,182,212,0.5)] hover:border-cyan-500/30">
                 <span className="absolute -top-3 right-6 text-xs uppercase tracking-wider px-3 py-2 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold shadow-lg">
-                  Start Here
+                  {content?.nyaltxPro?.badge}
                 </span>
-                <h3 className="text-2xl font-semibold mb-2 text-white" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>NyaltxPro Membership</h3>
-                <p className="text-gray-300 text-base mb-6" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>Unlock your project profile on NYALTX.</p>
+                <h3 className="text-2xl font-semibold mb-2 text-white" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                  {content?.nyaltxPro?.title}
+                </h3>
+                <p className="text-gray-300 text-base mb-6" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                  {content?.nyaltxPro?.description}
+                </p>
                 <div className="mb-6">
-                  <div className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>$199</div>
+                  <div className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                    ${content?.nyaltxPro?.price}
+                  </div>
                 </div>
                 <ul className="text-sm text-gray-300 space-y-2 mb-6 list-none pl-0" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                  <li className="flex items-center gap-3"><span className="w-2 h-2 bg-cyan-400 rounded-full flex-shrink-0"></span>Dedicated project profile page</li>
-                  <li className="flex items-center gap-3"><span className="w-2 h-2 bg-cyan-400 rounded-full flex-shrink-0"></span>Social media links (Twitter/X, Telegram, Website, etc.)</li>
-                  <li className="flex items-center gap-3">
-                    <span className="w-2 h-2 bg-cyan-400 rounded-full flex-shrink-0"></span>
-                    <span>Embedded project video
-                      <span className="text-gray-400 text-xs">
-                        {' '}
-                        — default video provided if none purchased
-                      </span></span>
-                  </li>
-                  <li className="flex items-center gap-3 text-cyan-400 font-medium"><span className="w-2 h-2 bg-cyan-400 rounded-full flex-shrink-0"></span>Valid for 1 year</li>
+                  {content?.nyaltxPro?.features?.map((feature: any, idx: number) => (
+                    <li key={idx} className="flex items-center gap-3">
+                      <span className="w-2 h-2 bg-cyan-400 rounded-full flex-shrink-0"></span>
+                      <span dangerouslySetInnerHTML={{ __html: feature.text.replace(/—/g, '<span class="text-gray-400 text-xs"> — ').replace(/default video/g, 'default video</span>') }} />
+                    </li>
+                  ))}
                 </ul>
                 <div className="mt-auto flex flex-col gap-3">
                   <button
-                    onClick={() =>
-                      router.push(
-                        `/dashboard/register-token?redirect=pricing/checkout/nyaltxpro&method=paypal`
-                      )
-                    }
-                    className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600  text-sm sm:text-base to-blue-700 text-white font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-300 transform hover:scale-105 shadow-lg" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                    onClick={() => router.push(`/dashboard/register-token?redirect=pricing/checkout/nyaltxpro&method=paypal`)}
+                    className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 text-sm sm:text-base to-blue-700 text-white font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-300 transform hover:scale-105 shadow-lg"
+                    style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                   >
                     <span className="inline-flex items-center gap-2">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a9.124 9.124 0 0 1-.077.437c-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287z" />
                       </svg>
-                      Register Token & Pay $199 with PayPal
+                      Register Token & Pay ${content?.nyaltxPro?.price} with PayPal
                     </span>
                   </button>
                   <button
-                    onClick={() =>
-                      router.push(
-                        `/dashboard/register-token?redirect=pricing/checkout/nyaltxpro&method=eth`
-                      )
-                    }
-                    className="w-full py-3 rounded-xl border text-sm sm:text-base border-gray-600/50 bg-gray-800/30 text-white font-light hover:bg-indigo-600/20 hover:border-indigo-500/50 transition-all duration-300" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                    onClick={() => router.push(`/dashboard/register-token?redirect=pricing/checkout/nyaltxpro&method=eth`)}
+                    className="w-full py-3 rounded-xl border text-sm sm:text-base border-gray-600/50 bg-gray-800/30 text-white font-light hover:bg-indigo-600/20 hover:border-indigo-500/50 transition-all duration-300"
+                    style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                   >
                     <span className="inline-flex items-center gap-2">
-                      <Image src="/crypto-icons/color/eth.svg" width={16} height={16} alt="eth" />{' '}
-                      Register Token & Pay $199 with ETH
+                      <Image src="/crypto-icons/color/eth.svg" width={16} height={16} alt="eth" />
+                      Register Token & Pay ${content?.nyaltxPro?.price} with ETH
                     </span>
                   </button>
                   <button
-                    onClick={() =>
-                      router.push(
-                        `/dashboard/register-token?redirect=pricing/checkout/nyaltxpro&method=sol`
-                      )
-                    }
-                    className="w-full py-3 rounded-xl border border-gray-600/50 bg-gray-800/30 text-white font-light hover:bg-emerald-600/20 hover:border-emerald-500/50 transition-all duration-300" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                    onClick={() => router.push(`/dashboard/register-token?redirect=pricing/checkout/nyaltxpro&method=sol`)}
+                    className="w-full py-3 rounded-xl border border-gray-600/50 bg-gray-800/30 text-white font-light hover:bg-emerald-600/20 hover:border-emerald-500/50 transition-all duration-300"
+                    style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                   >
                     <span className="inline-flex items-center gap-2">
-                      <Image src="/crypto-icons/color/sol.svg" width={16} height={16} alt="sol" />{' '}
-                      Register Token & Pay $199 with SOL
+                      <Image src="/crypto-icons/color/sol.svg" width={16} height={16} alt="sol" />
+                      Register Token & Pay ${content?.nyaltxPro?.price} with SOL
                     </span>
                   </button>
                   <button
-                    onClick={() =>
-                      router.push(
-                        `/dashboard/register-token?redirect=pricing/checkout/nyaltxpro&method=nyax`
-                      )
-                    }
-                    className="w-full py-3 rounded-xl border text-sm sm:text-base border-gray-600/50 bg-gray-800/30 text-white font-light hover:bg-cyan-600/20 hover:border-cyan-500/50 transition-all duration-300" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                    onClick={() => router.push(`/dashboard/register-token?redirect=pricing/checkout/nyaltxpro&method=nyax`)}
+                    className="w-full py-3 rounded-xl border text-sm sm:text-base border-gray-600/50 bg-gray-800/30 text-white font-light hover:bg-cyan-600/20 hover:border-cyan-500/50 transition-all duration-300"
+                    style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                   >
                     <span className="inline-flex items-center gap-2">
-                      <Image src="/logo.png" width={16} height={16} alt="nyax" /> Register Token &
-                      Pay $160 with NYAX (20% off)
+                      <Image src="/logo.png" width={16} height={16} alt="nyax" />
+                      Register Token & Pay ${Math.round(content?.nyaltxPro?.price * 0.8)} with NYAX (20% off)
                     </span>
                   </button>
-                  {/* $1 trial offer */}
-                  {/* <div className="mt-6 pt-4 border-t gap-4 text-sm sm:text-base border-gray-700/30">
-                    <div className="text-sm text-gray-400 mb-3" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>Or try NyaltxPro with our $1 starter:</div>
-                    <button
-                      onClick={() => router.push(`/dashboard/register-token?redirect=pricing/checkout/nyaltxpro1&method=paypal`)}
-                      className="w-full py-3 rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 text-white font-light hover:from-green-700 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105 shadow-lg" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
-                    >
-                      <span className="inline-flex items-center gap-2">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a9.124 9.124 0 0 1-.077.437c-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287z" />
-                        </svg>
-                        Register Token & Pay $1 with PayPal
-                      </span>
-                    </button>
-                    <button
-                      onClick={() => router.push(`/dashboard/register-token?redirect=pricing/checkout/nyaltxpro1&method=eth`)}
-                      className="w-full py-3 rounded-xl border border-gray-600/50 bg-gray-800/30 text-white font-semibold hover:bg-indigo-600/20 hover:border-indigo-500/50 transition-all duration-300" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
-                    >
-                      <span className="inline-flex items-center gap-2"><Image src="/crypto-icons/color/eth.svg" width={16} height={16} alt="eth" /> Register Token & Pay $1 with ETH</span>
-                    </button>
-                    <button
-                      onClick={() => router.push(`/dashboard/register-token?redirect=pricing/checkout/nyaltxpro1&method=sol`)}
-                      className="w-full py-3 rounded-xl border border-gray-600/50 bg-gray-800/30 text-white font-semibold hover:bg-emerald-600/20 hover:border-emerald-500/50 transition-all duration-300" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
-                    >
-                      <span className="inline-flex items-center gap-2"><Image src="/crypto-icons/color/sol.svg" width={16} height={16} alt="sol" /> Register Token & Pay $1 with SOL</span>
-                    </button>
-                  </div> */}
                 </div>
                 {isPro && (
                   <div className="mt-4 p-4 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-sm text-cyan-300" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                    {typeof window !== 'undefined' &&
-                      (window.location.hostname === 'localhost' ||
-                        window.location.hostname === '127.0.0.1')
+                    {typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
                       ? '🚀 Development Mode: Race to Liberty unlocked! '
-                      : '✅ You have NyaltxPro! '}
-                    Ready to gain more visibility?{' '}
+                      : content?.nyaltxPro?.proMessage.split('Upgrade to Race to Liberty')[0]}
                     <a href="#race" className="underline hover:text-cyan-200 transition-colors">
                       Upgrade to Race to Liberty
-                    </a>
-                    .
+                    </a>.
                   </div>
                 )}
               </div>
 
-              {/* Visual or banner teaser */}
+              {/* Banner */}
               <div className="relative border border-white/10 rounded-2xl overflow-hidden bg-gray-800/20 backdrop-blur-sm hover:border-indigo-500/30 transition-all duration-500">
-                <Image
-                  src="/banner23.png"
-                  alt="Race to Liberty"
-                  fill
-                  className="object-contain opacity-90"
-                />
+                <Image src="/banner23.png" alt="Race to Liberty" fill className="object-contain opacity-90" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                 <div className="absolute bottom-6 left-6 right-6">
-                  <div className="text-white text-2xl font-bold mb-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>Race to Liberty</div>
+                  <div className="text-white text-2xl font-bold mb-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                    {content?.nyaltxPro?.bannerTitle}
+                  </div>
                   <p className="text-gray-200 text-base leading-relaxed" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                    After NyaltxPro, boost your exposure with our Statue of Liberty–themed campaign.
+                    {content?.nyaltxPro?.bannerDescription}
                   </p>
                 </div>
               </div>
@@ -588,12 +436,10 @@ export default function PricingPage() {
           {/* Race to Liberty Section */}
           <section id="race" aria-labelledby="race-title" className="mt-12">
             <div className="flex items-center justify-between mb-4">
-              <h2 id="race-title" className="text-2xl font-bold text-white">
-                Race to Liberty
+              <h2 id="race-title" className="text-2xl font-bold text-white" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                {content?.raceToLiberty?.sectionTitle}
               </h2>
             </div>
-
-            {/* Cards */}
 
             {error && (
               <div className="mb-6 p-3 rounded-md border border-red-500 bg-red-900/30 text-red-200">
@@ -602,7 +448,7 @@ export default function PricingPage() {
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {TIERS.map((t, idx) => {
+              {content?.raceToLiberty?.tiers?.map((t: any, idx: number) => {
                 const ethAmt = ethPrice ? computeEthAmount(t.priceUSD) : null;
                 const nyaxAmount = computeNyaxAmount(t.priceUSD);
                 const nyaxUSD = t.priceUSD * 0.8;
@@ -612,69 +458,40 @@ export default function PricingPage() {
                     className={`group relative border border-white/10 rounded-2xl p-5 bg-gradient-to-b from-white/5 to-white/[0.03] backdrop-blur-md flex flex-col min-h-[440px] transition-all duration-500 ease-out hover:-translate-y-1 hover:shadow-[0_0_40px_-10px_rgba(99,102,241,0.4)] ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}
                     style={{ transitionDelay: mounted ? (`${idx * 80}ms` as any) : undefined }}
                   >
-                    {/* Ribbon for popular */}
-                    {t.id === 'motor' && (
+                    {t.isPopular && (
                       <span className="absolute -top-2 right-4 text-[10px] uppercase tracking-wider px-2 py-1 rounded-full bg-cyan-600 text-black font-bold shadow shadow-cyan-500/30">
-                        Most Popular
+                        {t.popularBadge}
                       </span>
                     )}
-                    <h2 className="text-xl font-semibold mb-1">{t.name}</h2>
-                    <p className="text-gray-400 text-sm mb-4">{t.description}</p>
+                    <h2 className="text-xl font-semibold mb-1" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                      {t.name}
+                    </h2>
+                    <p className="text-gray-400 text-sm mb-4" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                      {t.description}
+                    </p>
                     <div className="mb-4">
-                      <div className="text-3xl font-bold">${t.priceUSD.toLocaleString()}</div>
+                      <div className="text-3xl font-bold" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                        ${t.priceUSD.toLocaleString()}
+                      </div>
                       <div className="mt-1 grid grid-cols-1 gap-1 text-xs text-gray-400">
                         <div className="flex items-center gap-2">
-                          <TokenETH />{' '}
+                          <TokenETH />
                           <span>ETH est.: {ethAmt ? `${ethAmt.toFixed(5)} ETH` : '—'}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Image
-                            src="/crypto-icons/color/sol.svg"
-                            alt="SOL"
-                            width={20}
-                            height={20}
-                            className="opacity-60"
-                          />{' '}
+                          <Image src="/crypto-icons/color/sol.svg" alt="SOL" width={20} height={20} className="opacity-60" />
                           <span>SOL: ${t.priceUSD.toFixed(2)}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Image
-                            src="/logo.png"
-                            alt="NYAX"
-                            width={20}
-                            height={20}
-                            className="opacity-60"
-                          />{' '}
+                          <Image src="/logo.png" alt="NYAX" width={20} height={20} className="opacity-60" />
                           <span>NYAX: {nyaxAmount ? `${nyaxAmount.toFixed(2)} NYAX` : `${nyaxUSD.toFixed(2)} USD`} (−20%)</span>
                         </div>
                       </div>
                     </div>
-                    {/* Features */}
-                    <ul className="text-sm text-gray-300 space-y-1 mb-4 list-disc pl-5">
-                      {t.id === 'paddle' && (
-                        <>
-                          <li>Placement on Recently Updated for 1 week</li>
-                          <li>Eligible for Off Road podcast mention</li>
-                          <li>Project logo showcased in Race to Liberty rollup</li>
-                          <li>Basic socials link-out</li>
-                        </>
-                      )}
-                      {t.id === 'motor' && (
-                        <>
-                          <li>Homepage placement for 1 month</li>
-                          <li>Priority slot in Race to Liberty carousel</li>
-                          <li>Podcast Off Road shout-out (scheduled)</li>
-                          <li>Enhanced socials and website spotlight</li>
-                        </>
-                      )}
-                      {t.id === 'helicopter' && (
-                        <>
-                          <li>Premium placement for 3 months</li>
-                          <li>Featured in Race to Liberty highlights</li>
-                          <li>Podcast Off Road guest eligibility</li>
-                          <li>Priority support and promo coordination</li>
-                        </>
-                      )}
+                    <ul className="text-sm text-gray-300 space-y-1 mb-4 list-disc pl-5" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                      {t.features?.map((feature: any, fIdx: number) => (
+                        <li key={fIdx}>{feature.text}</li>
+                      ))}
                     </ul>
 
                     {error && busy?.startsWith(t.id) && (
@@ -683,16 +500,14 @@ export default function PricingPage() {
 
                     <div className="mt-auto flex flex-col gap-2">
                       <button
-                        // disabled={!isPro || busy !== null}
                         onClick={() => router.push(`/pricing/race-to-liberty/${t.id}`)}
                         className="w-full py-3 rounded-lg bg-gradient-to-r from-cyan-600 to-indigo-600 text-white font-medium hover:from-cyan-700 hover:to-indigo-700 disabled:opacity-50 transition-all transform hover:scale-105"
+                        style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                       >
-                        <span className="inline-flex items-center gap-2">
-                          🏆 Select Coin & Enter Race
-                        </span>
+                        <span className="inline-flex items-center gap-2">{t.buttonText}</span>
                       </button>
-                      <div className="text-xs text-center text-gray-400 mt-2">
-                        Choose your coin • Earn points • Boost visibility
+                      <div className="text-xs text-center text-gray-400 mt-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                        {t.buttonSubtext}
                       </div>
                     </div>
                   </div>
@@ -705,47 +520,54 @@ export default function PricingPage() {
           <section id="boost-packs" aria-labelledby="boost-packs-title" className="mt-16">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 id="boost-packs-title" className="text-2xl font-bold text-white">
-                  Boost Packs
+                <h2 id="boost-packs-title" className="text-2xl font-bold text-white" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                  {content?.boostPacks?.sectionTitle}
                 </h2>
-                <p className="text-gray-300 mt-2">
-                  Projects can purchase Boost Packs to climb the board.
+                <p className="text-gray-300 mt-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                  {content?.boostPacks?.description}
                 </p>
-                <p className="text-sm text-cyan-400 mt-1">
-                  (Pay in ETH, USDC, or NYAX for bonus points.)
+                <p className="text-sm text-cyan-400 mt-1" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                  {content?.boostPacks?.subDescription}
                 </p>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {BOOST_PACKS.map((pack, idx) => {
+              {content?.boostPacks?.packs?.map((pack: any, idx: number) => {
                 const ethAmt = ethPrice ? computeEthAmount(pack.priceUSD) : null;
                 const nyaxAmount = computeNyaxAmount(pack.priceUSD);
-                const nyaxUSD = pack.priceUSD * 0.8; // 20% discount for NYAX
+                const nyaxUSD = pack.priceUSD * 0.8;
                 return (
                   <div
                     key={pack.id}
                     className={`group relative border border-white/10 rounded-2xl p-5 bg-gradient-to-b from-white/5 to-white/[0.03] backdrop-blur-md flex flex-col min-h-[380px] transition-all duration-500 ease-out hover:-translate-y-1 hover:shadow-[0_0_40px_-10px_rgba(34,197,94,0.4)] ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}
                     style={{ transitionDelay: mounted ? (`${idx * 100}ms` as any) : undefined }}
                   >
-                    {/* Popular badge for Growth Boost */}
-                    {pack.id === 'growth' && (
+                    {pack.isPopular && (
                       <span className="absolute -top-2 right-4 text-[10px] uppercase tracking-wider px-2 py-1 rounded-full bg-emerald-600 text-black font-bold shadow shadow-emerald-500/30">
-                        Popular
+                        {pack.popularBadge}
                       </span>
                     )}
 
                     <div className="flex items-center gap-2 mb-2">
                       <span className="text-2xl">{pack.icon}</span>
-                      <h3 className="text-lg font-semibold">{pack.name}</h3>
+                      <h3 className="text-lg font-semibold" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                        {pack.name}
+                      </h3>
                     </div>
 
                     <div className="mb-4">
-                      <div className="text-2xl font-bold text-emerald-400">{pack.points} pts</div>
-                      <div className="text-3xl font-bold">${pack.priceUSD.toLocaleString()}</div>
+                      <div className="text-2xl font-bold text-emerald-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                        {pack.points} pts
+                      </div>
+                      <div className="text-3xl font-bold" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                        ${pack.priceUSD.toLocaleString()}
+                      </div>
                     </div>
 
-                    <p className="text-gray-300 text-sm mb-4 flex-grow">{pack.description}</p>
+                    <p className="text-gray-300 text-sm mb-4 flex-grow" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                      {pack.description}
+                    </p>
 
                     <div className="mb-4 text-xs text-gray-400 space-y-1">
                       <div className="flex items-center gap-2">
@@ -753,23 +575,11 @@ export default function PricingPage() {
                         <span>ETH: {ethAmt ? `${ethAmt.toFixed(5)} ETH` : '—'}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Image
-                          src="/crypto-icons/color/usdt.svg"
-                          alt="USDC"
-                          width={16}
-                          height={16}
-                          className="opacity-60"
-                        />
+                        <Image src="/crypto-icons/color/usdt.svg" alt="USDC" width={16} height={16} className="opacity-60" />
                         <span>USDC: ${pack.priceUSD.toFixed(2)}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Image
-                          src="/logo.png"
-                          alt="NYAX"
-                          width={16}
-                          height={16}
-                          className="opacity-60"
-                        />
+                        <Image src="/logo.png" alt="NYAX" width={16} height={16} className="opacity-60" />
                         <span>NYAX: {nyaxAmount ? `${nyaxAmount.toFixed(2)} NYAX` : `${nyaxUSD.toFixed(2)} USD`} + bonus pts</span>
                       </div>
                     </div>
@@ -779,12 +589,13 @@ export default function PricingPage() {
                         disabled={busy !== null}
                         onClick={() => router.push(`/pricing/boost-pack/${pack.id}`)}
                         className="w-full py-2 rounded-lg bg-emerald-600 text-white font-medium hover:bg-emerald-700 disabled:opacity-50 transition-colors"
+                        style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                       >
-                        Select Tokens & Purchase
+                        {pack.buttonText}
                       </button>
 
-                      <div className="text-center text-xs text-gray-400">
-                        Choose tokens to boost • Multiple payment options
+                      <div className="text-center text-xs text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                        {pack.buttonSubtext}
                       </div>
                     </div>
                   </div>
@@ -793,22 +604,25 @@ export default function PricingPage() {
             </div>
           </section>
 
-          <div className="mt-10 text-sm text-gray-400">
-            <p>Accepted payment methods: PayPal, ETH, SOL, or NYAX token (with 20% discount).</p>
-            <p className="mt-1">
-              On-chain payments are sent to {RECEIVER}. Default NYAX token: {NYAX_TOKEN}. You can
-              override via env vars.
-            </p>
-            <p className="mt-1">
-              Note: Network fees apply to on-chain payments. Ensure you are on the correct chain.
-              Configure receiver address, tokens, and chain via env.
-            </p>
-            <p className="mt-1">
-              PayPal payments are processed securely through PayPal's payment system.
-            </p>
+          {/* Footer */}
+          <div className="mt-10 text-sm text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+            <p>{content?.footer?.paymentMethods}</p>
+            <p className="mt-1">{content?.footer?.technicalNote}</p>
+            <p className="mt-1">{content?.footer?.networkFees}</p>
+            <p className="mt-1">{content?.footer?.paypalNote}</p>
           </div>
         </div>
       </div>
     </>
   );
+}
+
+// Server-side data fetching for Tina
+export async function getStaticProps() {
+  const tinaProps = await client.queries.pricing({ relativePath: 'pricing.json' });
+  return {
+    props: {
+      ...tinaProps,
+    },
+  };
 }
