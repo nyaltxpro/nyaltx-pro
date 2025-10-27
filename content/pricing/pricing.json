@@ -155,7 +155,7 @@
     ]
   },
   "footer": {
-    "paymentMethods": "Accepted payment methods: PayPal, ETH, SOL, or NYAX token (with 20% discount).",
+    "paymentMethods": "Accepted payment methods: PayPal, ETH, SOL, or NYAX token (with 30% discount).",
     "technicalNote": "On-chain payments are sent to the configured receiver address. Default NYAX token address is used. You can override via environment variables.",
     "networkFees": "Note: Network fees apply to on-chain payments. Ensure you are on the correct chain. Configure receiver address, tokens, and chain via environment variables.",
     "paypalNote": "PayPal payments are processed securely through PayPal's payment system."
