@@ -46,11 +46,6 @@
           "enabled": true
         },
         {
-          "label": "Help & Support",
-          "href": "/contact",
-          "enabled": true
-        },
-        {
           "label": "Our News",
           "href": "/news",
           "enabled": true
