@@ -98,6 +98,27 @@ export interface FooterSection {
   items: FooterLink[];
 }
 
+export interface NavigationLink {
+  label: string;
+  href: string;
+  enabled?: boolean;
+}
+
+export interface NavigationDropdownMenu {
+  label: string;
+  enabled?: boolean;
+  links?: NavigationLink[];
+}
+
+export interface PublicNavigationContent {
+  brand?: {
+    label?: string;
+    href?: string;
+  };
+  primaryLinks?: NavigationLink[];
+  dropdownMenus?: NavigationDropdownMenu[];
+}
+
 export interface FooterBranding {
   title: string;
   subtitle: string;
@@ -701,6 +722,44 @@ export const useContactContent = () => {
         setContent(data);
       } catch (err) {
         console.error('Error fetching contact content:', err);
+        setError(err instanceof Error ? err.message : 'Unknown error');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchContent();
+  }, []);
+
+  return { content, loading, error };
+};
+
+export const usePublicNavigation = () => {
+  const [content, setContent] = useState<PublicNavigationContent | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchContent = async () => {
+      try {
+        setLoading(true);
+
+        const response = await fetch('/api/tina/navigation/public-header');
+
+        if (!response.ok) {
+          const fallbackResponse = await fetch('/content/navigation/public-header.json');
+          if (!fallbackResponse.ok) {
+            throw new Error('Failed to fetch navigation content');
+          }
+          const fallbackData = await fallbackResponse.json();
+          setContent(fallbackData);
+          return;
+        }
+
+        const data = await response.json();
+        setContent(data);
+      } catch (err) {
+        console.error('Error fetching navigation content:', err);
         setError(err instanceof Error ? err.message : 'Unknown error');
       } finally {
         setLoading(false);

@@ -1,0 +1,61 @@
+{
+  "brand": {
+    "label": "NYALTX",
+    "href": "/"
+  },
+  "primaryLinks": [
+    {
+      "label": "Dashboard",
+      "href": "/dashboard",
+      "enabled": true
+    },
+    {
+      "label": "Pricing",
+      "href": "/pricing",
+      "enabled": true
+    },
+    {
+      "label": "Contact us",
+      "href": "/contact",
+      "enabled": true
+    }
+  ],
+  "dropdownMenus": [
+    {
+      "label": "More",
+      "enabled": true,
+      "links": [
+        {
+          "label": "About Us",
+          "href": "/about-us",
+          "enabled": true
+        },
+        {
+          "label": "Venture Group",
+          "href": "/venture-group",
+          "enabled": true
+        },
+        {
+          "label": "Podcast",
+          "href": "/podcast",
+          "enabled": true
+        },
+        {
+          "label": "Team",
+          "href": "/team",
+          "enabled": true
+        },
+        {
+          "label": "Help & Support",
+          "href": "/contact",
+          "enabled": true
+        },
+        {
+          "label": "Our News",
+          "href": "/news",
+          "enabled": true
+        }
+      ]
+    }
+  ]
+}

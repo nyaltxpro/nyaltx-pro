@@ -42,6 +42,133 @@ export default defineConfig({
       podcast,
       tradeVideos,
       {
+        name: "navigation",
+        label: "Navigation",
+        path: "content/navigation",
+        format: "json",
+        ui: {
+          allowedActions: {
+            create: false,
+            delete: false,
+          },
+        },
+        fields: [
+          {
+            type: "object",
+            name: "brand",
+            label: "Brand",
+            fields: [
+              {
+                type: "string",
+                name: "label",
+                label: "Brand Label",
+              },
+              {
+                type: "string",
+                name: "href",
+                label: "Brand Link",
+                ui: {
+                  validate: (value) => (value ? undefined : "Brand link is required"),
+                },
+              },
+            ],
+          },
+          {
+            type: "object",
+            name: "primaryLinks",
+            label: "Primary Links",
+            list: true,
+            ui: {
+              itemProps: (item) => ({
+                label: item?.label || "New Link",
+              }),
+            },
+            fields: [
+              {
+                type: "string",
+                name: "label",
+                label: "Link Label",
+                required: true,
+              },
+              {
+                type: "string",
+                name: "href",
+                label: "Link URL",
+                required: true,
+              },
+              {
+                type: "boolean",
+                name: "enabled",
+                label: "Enabled",
+                ui: {
+                  defaultValue: true,
+                },
+              },
+            ],
+          },
+          {
+            type: "object",
+            name: "dropdownMenus",
+            label: "Dropdown Menus",
+            list: true,
+            ui: {
+              itemProps: (item) => ({
+                label: item?.label || "Dropdown",
+              }),
+            },
+            fields: [
+              {
+                type: "string",
+                name: "label",
+                label: "Dropdown Label",
+                required: true,
+              },
+              {
+                type: "boolean",
+                name: "enabled",
+                label: "Enabled",
+                ui: {
+                  defaultValue: true,
+                },
+              },
+              {
+                type: "object",
+                name: "links",
+                label: "Dropdown Links",
+                list: true,
+                ui: {
+                  itemProps: (item) => ({
+                    label: item?.label || "Dropdown Link",
+                  }),
+                },
+                fields: [
+                  {
+                    type: "string",
+                    name: "label",
+                    label: "Link Label",
+                    required: true,
+                  },
+                  {
+                    type: "string",
+                    name: "href",
+                    label: "Link URL",
+                    required: true,
+                  },
+                  {
+                    type: "boolean",
+                    name: "enabled",
+                    label: "Enabled",
+                    ui: {
+                      defaultValue: true,
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      {
         name: "landing",
         label: "Landing Page",
         path: "content/landing",
