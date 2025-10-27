@@ -54,6 +54,11 @@
           "label": "Our News",
           "href": "/news",
           "enabled": true
+        },
+        {
+          "label": "Pricing",
+          "href": "/pricing",
+          "enabled": true
         }
       ]
     }
