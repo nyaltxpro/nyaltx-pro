@@ -5,10 +5,6 @@ const Pricing = async () => {
   const tinaData = await tinaClient.queries.pricing({
     relativePath: 'pricing.json',
   });
-
-
-
-
   return <PricingPage tinaData={tinaData} />;
 };
 

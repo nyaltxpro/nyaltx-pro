@@ -2,11 +2,11 @@ import { defineConfig } from "tinacms";
 import { aboutUs } from './schema/aboutus';
 import generalStatement from "./schema/generalstatment";
 import { legalAdvice } from "./schema/legalAdvice";
-import { privacyPolicy } from "./schema/privacyPolicy";
-import ventureGroup from "./schema/ventureGroup";
 import podcast from "./schema/podcast";
-import tradeVideos from "./schema/tradeVideos";
 import pricing from "./schema/pricing";
+import { privacyPolicy } from "./schema/privacyPolicy";
+import tradeVideos from "./schema/tradeVideos";
+import ventureGroup from "./schema/ventureGroup";
 // Your hosting provider likely exposes this as an environment variable
 const branch =
   process.env.GITHUB_BRANCH ||
