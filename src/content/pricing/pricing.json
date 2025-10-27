@@ -1,0 +1,163 @@
+{
+  "hero": {
+    "title": "Pricing",
+    "description": "Start with **NyaltxPro** to unlock your project profile and media. Then upgrade to the **Race to Liberty** campaign for broader visibility."
+  },
+  "nyaltxPro": {
+    "sectionTitle": "NyaltxPro",
+    "badge": "Start Here",
+    "title": "NyaltxPro Membership",
+    "description": "Unlock your project profile on NYALTX.",
+    "price": 199,
+    "features": [
+      {
+        "text": "Dedicated project profile page"
+      },
+      {
+        "text": "Social media links (Twitter/X, Telegram, Website, etc.)"
+      },
+      {
+        "text": "Embedded project video — default video provided if none purchased"
+      },
+      {
+        "text": "Valid for 1 year"
+      }
+    ],
+    "bannerTitle": "Race to Liberty",
+    "bannerDescription": "After NyaltxPro, boost your exposure with our Statue of Liberty–themed campaign.",
+    "proMessage": "✅ You have NyaltxPro! Ready to gain more visibility? Upgrade to Race to Liberty."
+  },
+  "raceToLiberty": {
+    "sectionTitle": "Race to Liberty",
+    "tiers": [
+      {
+        "id": "speedboat",
+        "name": "Speed Boat",
+        "description": "1 week on Recently Updated.",
+        "priceUSD": 199,
+        "isPopular": false,
+        "features": [
+          {
+            "text": "Placement on Recently Updated for 1 week"
+          },
+          {
+            "text": "Eligible for Off Road podcast mention"
+          },
+          {
+            "text": "Project logo showcased in Race to Liberty rollup"
+          },
+          {
+            "text": "Basic socials link-out"
+          }
+        ],
+        "buttonText": "🏆 Select Coin & Enter Race",
+        "buttonSubtext": "Choose your coin • Earn points • Boost visibility"
+      },
+      {
+        "id": "helicopter",
+        "name": "Helicopter",
+        "description": "1 month placement.",
+        "priceUSD": 349,
+        "isPopular": true,
+        "popularBadge": "Most Popular",
+        "features": [
+          {
+            "text": "Homepage placement for 1 month"
+          },
+          {
+            "text": "Priority slot in Race to Liberty carousel"
+          },
+          {
+            "text": "Podcast Off Road shout-out (scheduled)"
+          },
+          {
+            "text": "Enhanced socials and website spotlight"
+          }
+        ],
+        "buttonText": "🏆 Select Coin & Enter Race",
+        "buttonSubtext": "Choose your coin • Earn points • Boost visibility"
+      },
+      {
+        "id": "submarine",
+        "name": "Submarine",
+        "description": "3 months placement.",
+        "priceUSD": 599,
+        "isPopular": false,
+        "features": [
+          {
+            "text": "Premium placement for 3 months"
+          },
+          {
+            "text": "Featured in Race to Liberty highlights"
+          },
+          {
+            "text": "Podcast Off Road guest eligibility"
+          },
+          {
+            "text": "Priority support and promo coordination"
+          }
+        ],
+        "buttonText": "🏆 Select Coin & Enter Race",
+        "buttonSubtext": "Choose your coin • Earn points • Boost visibility"
+      }
+    ]
+  },
+  "boostPacks": {
+    "sectionTitle": "Boost Packs",
+    "description": "Projects can purchase Boost Packs to climb the board.",
+    "subDescription": "(Pay in ETH, USDC, or NYAX for bonus points.)",
+    "packs": [
+      {
+        "id": "starter",
+        "name": "Starter Boost",
+        "points": 250,
+        "priceUSD": 199,
+        "description": "Gain entry into the Boosted Zone",
+        "icon": "🔹",
+        "isPopular": false,
+        "buttonText": "Select Tokens & Purchase",
+        "buttonSubtext": "Choose tokens to boost • Multiple payment options"
+      },
+      {
+        "id": "growth",
+        "name": "Growth Boost",
+        "points": 750,
+        "priceUSD": 399,
+        "description": "Highlighted in daily \"Top Movers\" feed",
+        "icon": "🔹",
+        "isPopular": true,
+        "popularBadge": "Popular",
+        "buttonText": "Select Tokens & Purchase",
+        "buttonSubtext": "Choose tokens to boost • Multiple payment options"
+      },
+      {
+        "id": "pro",
+        "name": "Pro Boost",
+        "points": 1500,
+        "priceUSD": 599,
+        "description": "Unlocks \"Featured\" placement (color frames, 48h push)",
+        "icon": "🔹",
+        "isPopular": false,
+        "buttonText": "Select Tokens & Purchase",
+        "buttonSubtext": "Choose tokens to boost • Multiple payment options"
+      },
+      {
+        "id": "elite",
+        "name": "Elite Boost",
+        "points": 7500,
+        "priceUSD": 2999,
+        "description": "Premium: Top of board + Featured Video slot + Podcast appearance",
+        "icon": "🔹",
+        "isPopular": false,
+        "buttonText": "Select Tokens & Purchase",
+        "buttonSubtext": "Choose tokens to boost • Multiple payment options"
+      }
+    ]
+  },
+  "footer": {
+    "paymentMethods": "Accepted payment methods: PayPal, ETH, SOL, or NYAX token (with 20% discount).",
+    "technicalNote": "On-chain payments are sent to the configured receiver address. Default NYAX token address is used. You can override via environment variables.",
+    "networkFees": "Note: Network fees apply to on-chain payments. Ensure you are on the correct chain. Configure receiver address, tokens, and chain via environment variables.",
+    "paypalNote": "PayPal payments are processed securely through PayPal's payment system."
+  }
+}
