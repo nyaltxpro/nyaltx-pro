@@ -2,7 +2,7 @@ import { Collection } from "tinacms";
 
 export const pricing: Collection = {
   name: "pricing",
-  label: "Pricing Content",
+  label: "Pricing",
   path: "content/pricing",
   format: "json",
   fields: [
