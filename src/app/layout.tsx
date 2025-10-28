@@ -43,6 +43,9 @@ export const metadata: Metadata = {
   },
   manifest: '/manifest.json',
   themeColor: '#06b6d4',
+  other: {
+    'og:logo': `${baseUrl}/logo.png`,
+  },
 };
 
 export const viewport = 'width=device-width, initial-scale=1';
