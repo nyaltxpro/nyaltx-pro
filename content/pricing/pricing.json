@@ -33,12 +33,12 @@
       {
         "id": "speedboat",
         "name": "Speed Boat",
-        "description": "1 week on Recently Updated.",
+        "description": "1 month on Recently Updated.",
         "priceUSD": 199,
         "isPopular": false,
         "features": [
           {
-            "text": "Placement on Recently Updated for 1 week"
+            "text": "Placement on Recently Updated for 1 month"
           },
           {
             "text": "Eligible for Off Road podcast mention"
@@ -56,13 +56,13 @@
       {
         "id": "helicopter",
         "name": "Helicopter",
-        "description": "1 month placement.",
+        "description": "6 month placement.",
         "priceUSD": 349,
         "isPopular": true,
         "popularBadge": "Most Popular",
         "features": [
           {
-            "text": "Homepage placement for 1 month"
+            "text": "Homepage placement for 6 months"
           },
           {
             "text": "Priority slot in Race to Liberty carousel"
@@ -80,12 +80,12 @@
       {
         "id": "submarine",
         "name": "Submarine",
-        "description": "3 months placement.",
+        "description": "1 year placement.",
         "priceUSD": 599,
         "isPopular": false,
         "features": [
           {
-            "text": "Premium placement for 3 months"
+            "text": "Premium placement for 1 year"
           },
           {
             "text": "Featured in Race to Liberty highlights"
@@ -155,7 +155,7 @@
     ]
   },
   "footer": {
-    "paymentMethods": "Accepted payment methods: PayPal, ETH, SOL, or NYAX token (with 20% discount).",
+    "paymentMethods": "Accepted payment methods: PayPal, ETH, SOL, or NYAX token (with 30% discount).",
     "technicalNote": "On-chain payments are sent to the configured receiver address. Default NYAX token address is used. You can override via environment variables.",
     "networkFees": "Note: Network fees apply to on-chain payments. Ensure you are on the correct chain. Configure receiver address, tokens, and chain via environment variables.",
     "paypalNote": "PayPal payments are processed securely through PayPal's payment system."

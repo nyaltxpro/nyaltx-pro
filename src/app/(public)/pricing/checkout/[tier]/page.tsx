@@ -1,5 +1,6 @@
 import PublicHeader from '@/components/PublicHeader';
 import Web3Checkout from '@/components/Web3Checkout';
+import { tinaClient } from '@/lib/tinaClient';
 
 export default async function CheckoutPage({
   params,
@@ -10,6 +11,10 @@ export default async function CheckoutPage({
 }) {
   const { tier } = await params;
   const { method } = await searchParams;
+  const tinaData = await tinaClient.queries.pricing({
+    relativePath: 'pricing.json',
+  });
+
 
   return (
     <div className="min-h-screen  text-white">
@@ -27,7 +32,7 @@ export default async function CheckoutPage({
           )}
         </div>
 
-        <Web3Checkout selectedTier={tier} paymentMethod={method} />
+        <Web3Checkout selectedTier={tier} paymentMethod={method} tinaData={tinaData} />
       </main>
     </div>
   );
