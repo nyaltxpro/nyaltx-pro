@@ -6,6 +6,7 @@ import { useAppKit } from '@reown/appkit/react';
 import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
 import { FaCheckCircle, FaInfoCircle, FaShieldAlt, FaWallet } from 'react-icons/fa';
+import { useTina } from 'tinacms/dist/react';
 import { erc20Abi, parseEther, parseUnits } from 'viem';
 import { useAccount, useSendTransaction, useSwitchChain, useWriteContract } from 'wagmi';
 
@@ -22,18 +23,23 @@ type Product = {
 export default function Web3Checkout({
   selectedTier,
   paymentMethod,
+  tinaData
 }: {
   selectedTier?: string;
   paymentMethod?: string;
+  tinaData?: any
 }) {
   // Products for pricing flow
+  const { data }: any = useTina(tinaData);
+
+  const content = data?.pricing
   const baseProducts: Record<string, Product[]> = {
     nyaltxpro: [
       {
         id: 1,
         name: 'NyaltxPro Membership',
         desc: 'Project profile + socials + video',
-        priceUsd: 199,
+        priceUsd: content?.nyaltxPro?.price,
         image: '/logo.png',
         qty: 1,
       },
@@ -850,11 +856,10 @@ export default function Web3Checkout({
                   onChange={e => handleEmailChange(e.target.value)}
                   placeholder="you@example.com"
                   required
-                  className={`w-full px-3 py-2 bg-[#1a2932] border rounded-md text-white focus:outline-none focus:ring-1 ${
-                    emailError 
-                      ? 'border-red-500 focus:ring-red-500' 
-                      : 'border-gray-700 focus:ring-[#00b8d8]'
-                  }`}
+                  className={`w-full px-3 py-2 bg-[#1a2932] border rounded-md text-white focus:outline-none focus:ring-1 ${emailError
+                    ? 'border-red-500 focus:ring-red-500'
+                    : 'border-gray-700 focus:ring-[#00b8d8]'
+                    }`}
                 />
                 {emailError && (
                   <p className="mt-1 text-sm text-red-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
