@@ -7,7 +7,7 @@ import { Toaster } from 'react-hot-toast';
 import "./globals.css";
 import Providers from './providers';
 
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://nyaltx.com';
+const baseUrl = 'https://nyaltxpro.com';
 export const metadata: Metadata = {
   title: 'NYALTX | Crypto Token Tracker & DeFi Platform',
   description: 'Track meme tokens, view real-time charts, participate in Race to Liberty gamification, and discover trending cryptocurrencies across multiple blockchains.',
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     description: 'Track meme tokens, view real-time charts, participate in Race to Liberty gamification, and discover trending cryptocurrencies across multiple blockchains.',
     images: [
       {
-        url: `nyaltx.pro/og-image.png`,
+        url: `/og-image.png`,
         width: 1200,
         height: 630,
         alt: 'NYALTX - Crypto Token Tracker',
