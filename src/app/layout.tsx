@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     images: [
       {
         url: `/og-image.png`,
-        width: 1200,
+        width: 630,
         height: 630,
         alt: 'NYALTX - Crypto Token Tracker',
       },
