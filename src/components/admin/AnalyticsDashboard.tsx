@@ -31,6 +31,13 @@ interface AnalyticsData {
     visits: number;
     uniqueVisitors: number;
   }>;
+  topCities: Array<{
+    city: string;
+    country: string;
+    countryCode: string;
+    visits: number;
+    uniqueVisitors: number;
+  }>;
   browserStats: Array<{
     browser: string;
     visits: number;
@@ -249,7 +256,7 @@ export default function AnalyticsDashboard() {
         <div className="p-6 border-b border-gray-700/20">
           <h3 className="font-semibold text-white flex items-center gap-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
             <FaClock className="text-blue-400" />
-            Recent Visitors (Last 24 Hours)
+            Recent Visitors (Last 7 Days)
           </h3>
         </div>
         <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 overflow-hidden">
@@ -278,7 +285,7 @@ export default function AnalyticsDashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-700/20">
-                {analytics.recentVisitors.slice(0, 10).map((visitor, index) => (
+                {analytics.recentVisitors.slice(0, 20).map((visitor, index) => (
                   <tr key={visitor.sessionId} className="hover:bg-gray-700/20 transition-colors duration-200">
                     <td className="px-4 py-3 text-sm border-r border-gray-700/20">
                       <div className="flex items-center gap-3">
@@ -427,6 +434,58 @@ export default function AnalyticsDashboard() {
                 </div>
               ))}
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Top Cities */}
+      <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl shadow-xl">
+        <div className="p-6 border-b border-gray-700/20">
+          <h3 className="font-semibold text-white flex items-center gap-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+            <FaMapMarkerAlt className="text-cyan-400" />
+            Top Cities (Last 7 Days)
+          </h3>
+        </div>
+        <div className="p-6">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {analytics.topCities?.map((city, index) => (
+              <div key={`${city.city}-${city.country}`} className="flex items-center justify-between p-4 bg-gray-700/30 border border-gray-600/30 rounded-lg hover:bg-gray-700/40 transition-all duration-200">
+                <div className="flex items-center gap-3">
+                  <div className="flex flex-col items-center">
+                    <span className="text-2xl">{getCountryFlag(city.countryCode)}</span>
+                    <span className="text-xs text-gray-500 mt-1">#{index + 1}</span>
+                  </div>
+                  <div>
+                    <div className="font-medium text-white text-sm" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                      {city.city}
+                    </div>
+                    <div className="text-xs text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                      {city.country}
+                    </div>
+                    <div className="text-xs text-gray-500" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                      {city.uniqueVisitors} unique visitors
+                    </div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="font-bold text-cyan-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                    {city.visits}
+                  </div>
+                  <div className="text-xs text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                    visits
+                  </div>
+                </div>
+              </div>
+            )) || (
+              <div className="col-span-full text-center py-8">
+                <div className="w-16 h-16 bg-gray-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <FaMapMarkerAlt className="w-8 h-8 text-gray-400" />
+                </div>
+                <p className="text-gray-400 font-medium" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                  No city data available
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>

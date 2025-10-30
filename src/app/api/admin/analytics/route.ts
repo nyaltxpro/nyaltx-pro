@@ -23,6 +23,7 @@ export async function GET() {
           onlineUsers: 0,
           recentVisitors: [],
           trafficByCountry: [],
+          topCities: [],
           browserStats: [],
           deviceStats: [],
           pageViews: { today: 0, thisWeek: 0, thisMonth: 0 },
@@ -51,12 +52,12 @@ export async function GET() {
       console.warn('Error fetching online users:', error);
     }
 
-    // Recent visitors (last 24 hours) with enhanced data
+    // Recent visitors (last 7 days) with enhanced data
     let recentVisitors: any[] = [];
     try {
       recentVisitors = await db.collection('user_sessions').find({
-        createdAt: { $gte: oneDayAgo }
-      }).sort({ createdAt: -1 }).limit(50).toArray();
+        createdAt: { $gte: oneWeekAgo }
+      }).sort({ createdAt: -1 }).limit(100).toArray();
     } catch (error) {
       console.warn('Error fetching recent visitors:', error);
     }
@@ -122,6 +123,40 @@ export async function GET() {
       ]).toArray();
     } catch (error) {
       console.warn('Error fetching traffic by country:', error);
+    }
+
+    // Top cities (last 7 days)
+    let topCities: any[] = [];
+    try {
+      topCities = await db.collection('page_visits').aggregate([
+      {
+        $match: {
+          timestamp: { $gte: oneWeekAgo },
+          city: { $ne: 'Unknown' },
+          city: { $exists: true, $ne: null, $ne: '' }
+        }
+      },
+      {
+        $group: {
+          _id: { city: '$city', country: '$country', countryCode: '$countryCode' },
+          visits: { $sum: 1 },
+          uniqueIPs: { $addToSet: '$ipAddress' }
+        }
+      },
+      {
+        $project: {
+          city: '$_id.city',
+          country: '$_id.country',
+          countryCode: '$_id.countryCode',
+          visits: 1,
+          uniqueVisitors: { $size: '$uniqueIPs' }
+        }
+      },
+      { $sort: { visits: -1 } },
+      { $limit: 15 }
+      ]).toArray();
+    } catch (error) {
+      console.warn('Error fetching top cities:', error);
     }
 
     // Browser statistics (last 7 days)
@@ -306,6 +341,7 @@ export async function GET() {
         language: visitor.language || 'unknown'
       })),
       trafficByCountry,
+      topCities,
       browserStats,
       pageViews,
       uniqueVisitors,

@@ -14,14 +14,13 @@ The email system sends notifications for:
 Add these variables to your `.env.local` file:
 
 ```env
-# Email Service Configuration
-EMAIL_PROVIDER=smtp  # Options: smtp, gmail, sendgrid
-SMTP_HOST=smtp.gmail.com
+# Email Service Configuration (Namecheap)
+SMTP_HOST=mail.privateemail.com
 SMTP_PORT=587
-SMTP_SECURE=false
-SMTP_USER=your-email@gmail.com
-SMTP_PASSWORD=your-app-password
-SMTP_FROM=noreply@nyaltx.com
+SMTP_SECURE=false  # false for port 587, true for port 465
+SMTP_USER=your-email@yourdomain.com
+SMTP_PASS=your-email-password
+FROM_EMAIL=noreply@yourdomain.com
 
 # Admin Email Addresses (comma-separated)
 ADMIN_EMAIL_ADDRESSES=admin@nyaltx.com,support@nyaltx.com
@@ -32,7 +31,41 @@ NEXT_PUBLIC_BASE_URL=https://nyaltx.com
 
 ## Email Provider Setup
 
-### Option 1: Gmail (Recommended for Development)
+### Namecheap Private Email (Current Configuration)
+
+1. **Purchase Namecheap Private Email** at [namecheap.com](https://namecheap.com)
+2. **Create Email Account**:
+   - Go to cPanel → Email Accounts
+   - Create email address (e.g., noreply@yourdomain.com)
+   - Set a strong password
+3. **Configure Environment Variables**:
+   ```env
+   SMTP_HOST=mail.privateemail.com
+   SMTP_PORT=587
+   SMTP_SECURE=false
+   SMTP_USER=noreply@yourdomain.com
+   SMTP_PASS=your-email-password
+   FROM_EMAIL=noreply@yourdomain.com
+   ```
+
+#### Important Namecheap Settings:
+- **Server**: mail.privateemail.com
+- **Port 587**: STARTTLS (recommended) - set `SMTP_SECURE=false`
+- **Port 465**: SSL/TLS - set `SMTP_SECURE=true`
+- **Authentication**: Required
+- **Sending Limits**: 500 emails per day per mailbox (Business plan)
+
+### Alternative: SendGrid (For High Volume)
+
+1. **Create SendGrid Account** at [sendgrid.com](https://sendgrid.com)
+2. **Generate API Key**:
+   - Go to Settings → API Keys
+   - Create API Key with "Mail Send" permissions
+3. **Note**: Requires code changes to use SendGrid API instead of SMTP
+
+### Alternative: Gmail (Development Only)
+
+**Not Recommended for Production** - Daily sending limits (500/day)
 
 1. **Enable 2-Factor Authentication** on your Gmail account
 2. **Generate App Password**:
@@ -41,34 +74,11 @@ NEXT_PUBLIC_BASE_URL=https://nyaltx.com
    - Generate password for "Mail"
 3. **Configure Environment Variables**:
    ```env
-   EMAIL_PROVIDER=gmail
-   SMTP_USER=your-gmail@gmail.com
-   SMTP_PASSWORD=your-16-char-app-password
-   ```
-
-### Option 2: SendGrid (Recommended for Production)
-
-1. **Create SendGrid Account** at [sendgrid.com](https://sendgrid.com)
-2. **Generate API Key**:
-   - Go to Settings → API Keys
-   - Create API Key with "Mail Send" permissions
-3. **Configure Environment Variables**:
-   ```env
-   EMAIL_PROVIDER=sendgrid
-   SENDGRID_API_KEY=your-sendgrid-api-key
-   ```
-
-### Option 3: Custom SMTP
-
-1. **Get SMTP Credentials** from your email provider
-2. **Configure Environment Variables**:
-   ```env
-   EMAIL_PROVIDER=smtp
-   SMTP_HOST=mail.your-domain.com
+   SMTP_HOST=smtp.gmail.com
    SMTP_PORT=587
    SMTP_SECURE=false
-   SMTP_USER=noreply@your-domain.com
-   SMTP_PASSWORD=your-smtp-password
+   SMTP_USER=your-gmail@gmail.com
+   SMTP_PASS=your-16-char-app-password
    ```
 
 ## Email Templates
@@ -264,12 +274,14 @@ console.error(`Failed to send email to ${email}:`, error);
    - Verify email configuration
    - Check server logs for errors
 
-2. **Gmail authentication issues**:
-   - Enable 2-Factor Authentication
-   - Generate new App Password
-   - Use exact 16-character password
+2. **Namecheap authentication issues**:
+   - Verify email account exists in cPanel
+   - Check password is correct
+   - Ensure SMTP server is mail.privateemail.com
+   - Try port 465 with SMTP_SECURE=true if 587 fails
+   - Check daily sending limits (500 per mailbox)
 
-3. **SendGrid delivery issues**:
+3. **SendGrid delivery issues** (if using):
    - Verify domain authentication
    - Check sender reputation
    - Review SendGrid activity logs

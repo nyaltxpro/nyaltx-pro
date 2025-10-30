@@ -8,14 +8,19 @@ interface EmailRequest {
   text?: string;
 }
 
-// Create Gmail transporter
+// Create Namecheap email transporter
 const createTransporter = () => {
   return nodemailer.createTransport({
-    service: 'gmail',
+    host: process.env.SMTP_HOST || 'mail.privateemail.com',
+    port: parseInt(process.env.SMTP_PORT || '587'),
+    secure: process.env.SMTP_SECURE === 'true', // true for 465, false for 587
     auth: {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS,
     },
+    tls: {
+      rejectUnauthorized: false // Allow self-signed certificates
+    }
   });
 };
 
@@ -38,14 +43,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if Gmail is configured
-    const requiredEnvVars = ['SMTP_USER', 'SMTP_PASS'];
+    // Check if Namecheap email is configured
+    const requiredEnvVars = ['SMTP_USER', 'SMTP_PASS', 'SMTP_HOST'];
     const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
     
     if (missingVars.length > 0) {
-      console.warn('Gmail service not configured. Missing:', missingVars.join(', '));
+      console.warn('Namecheap email service not configured. Missing:', missingVars.join(', '));
       return NextResponse.json(
-        { error: 'Gmail service not configured. Please set SMTP_USER and SMTP_PASS environment variables.' },
+        { error: 'Email service not configured. Please set SMTP_USER, SMTP_PASS, and SMTP_HOST environment variables.' },
         { status: 503 }
       );
     }

@@ -37,6 +37,8 @@
     "@radix-ui/react-tabs": "^1.1.13",
     "@radix-ui/react-tooltip": "^1.2.8",
     "@radix-ui/themes": "^3.2.1",
+    "@react-email/components": "^0.5.7",
+    "@react-email/render": "^1.4.0",
     "@reduxjs/toolkit": "^2.9.0",
     "@reown/appkit": "^1.8.9",
     "@reown/appkit-adapter-solana": "^1.8.9",
