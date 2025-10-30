@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Render admin email template
-    const adminHtml = render(ContactFormAdmin({ name, email, subject, message }));
+    const adminHtml = await render(ContactFormAdmin({ name, email, subject, message }));
     
     // Email content for the admin
     const adminMailOptions = {
@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     };
 
     // Render user reply email template
-    const userHtml = render(ContactFormReply({ name, subject, message }));
+    const userHtml = await render(ContactFormReply({ name, subject, message }));
     
     // Auto-reply email for the user
     const userMailOptions = {

@@ -1,15 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
+import { render } from '@react-email/render';
+import NewsletterWelcome from '@/emails/NewsletterWelcome';
+import NewsletterAdminNotification from '@/emails/NewsletterAdminNotification';
 
-// Email configuration
+// Email configuration (Namecheap)
 const EMAIL_CONFIG = {
-  host: process.env.SMTP_HOST || 'smtp.gmail.com',
+  host: process.env.SMTP_HOST || 'mail.privateemail.com',
   port: parseInt(process.env.SMTP_PORT || '587'),
-  secure: false, // true for 465, false for other ports
+  secure: process.env.SMTP_SECURE === 'true', // true for 465, false for 587
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   },
+  tls: {
+    rejectUnauthorized: false // Allow self-signed certificates
+  }
 };
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@nyaltx.io';
@@ -36,8 +42,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if required environment variables are set
-    if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-      console.error('❌ SMTP credentials not configured');
+    if (!process.env.SMTP_USER || !process.env.SMTP_PASS || !process.env.SMTP_HOST) {
+      console.error('❌ Namecheap email credentials not configured');
       return NextResponse.json({ error: 'Email service not configured' }, { status: 500 });
     }
 
@@ -52,63 +58,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Email service unavailable' }, { status: 500 });
     }
 
-    // Send welcome email to subscriber
-    const welcomeEmailHtml = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <meta charset="utf-8">
-          <title>Welcome to NYALTX Community</title>
-          <style>
-            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: linear-gradient(135deg, #06b6d4, #3b82f6); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-            .content { background: #f8fafc; padding: 30px; border-radius: 0 0 10px 10px; }
-            .button { display: inline-block; background: linear-gradient(135deg, #06b6d4, #3b82f6); color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 20px 0; }
-            .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <div class="header">
-              <h1>Welcome to NYALTX!</h1>
-              <p>Your gateway to the crypto world</p>
-            </div>
-            <div class="content">
-              <h2>Thank you for joining our community! 🚀</h2>
-              <p>Hi ${name || 'Crypto Enthusiast'},</p>
-              <p>Welcome to the NYALTX Venture Access Network! You're now part of an exclusive community of crypto traders, investors, and innovators.</p>
-              
-              <h3>What you can expect:</h3>
-              <ul>
-                <li>📈 Daily crypto market insights and analysis</li>
-                <li>🤝 Networking events and community meetups</li>
-                <li>🔥 Early access to new features and tools</li>
-                <li>💎 Premium trading signals and strategies</li>
-              </ul>
-              
-              <p>Ready to explore? Check out our platform and start your crypto journey:</p>
-              <a href="https://nyaltx.io/dashboard" class="button">Explore Dashboard</a>
-              
-              <p>Follow us on social media for real-time updates:</p>
-              <p>
-                <a href="https://x.com/nyaltx">Twitter</a> | 
-                <a href="https://t.me/nyaltx">Telegram</a> | 
-                <a href="https://www.youtube.com/c/Nyaltx">YouTube</a>
-              </p>
-              
-              <p>Best regards,<br>The NYALTX Team</p>
-            </div>
-            <div class="footer">
-              <p>© 2025 NYALTX. All rights reserved.</p>
-              <p>If you no longer wish to receive these emails, you can <a href="https://nyaltx.io/unsubscribe">unsubscribe here</a>.</p>
-            </div>
-          </div>
-        </body>
-      </html>
-    `;
+    // Render React Email templates
+    const ipAddress = request.headers.get('x-forwarded-for') || 'Unknown';
+    const timestamp = new Date().toISOString();
+    
+    const welcomeEmailHtml = await render(NewsletterWelcome({ name, email }));
+    const adminNotificationHtml = await render(
+      NewsletterAdminNotification({ email, name, ipAddress, timestamp })
+    );
 
-    // Send welcome email
+    // Send welcome email to subscriber
     await transporter.sendMail({
       from: `"NYALTX Community" <${FROM_EMAIL}>`,
       to: email,
@@ -116,15 +75,7 @@ export async function POST(request: NextRequest) {
       html: welcomeEmailHtml,
     });
 
-    // Send notification to admin
-    const adminNotificationHtml = `
-      <h2>New Newsletter Subscription</h2>
-      <p><strong>Email:</strong> ${email}</p>
-      <p><strong>Name:</strong> ${name || 'Not provided'}</p>
-      <p><strong>Timestamp:</strong> ${new Date().toISOString()}</p>
-      <p><strong>IP:</strong> ${request.headers.get('x-forwarded-for') || 'Unknown'}</p>
-    `;
-
+    // Send notification to admin (optional - uncomment to enable)
     // await transporter.sendMail({
     //   from: `"NYALTX System" <${FROM_EMAIL}>`,
     //   to: ADMIN_EMAIL,
