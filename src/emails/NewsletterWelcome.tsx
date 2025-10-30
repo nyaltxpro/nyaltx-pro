@@ -156,7 +156,7 @@ const text = {
 };
 
 const headerSection = {
-  backgroundColor: '#eee',
+  backgroundColor: '#252f3d',
   padding: '30px',
   textAlign: 'center' as const,
 };
@@ -273,7 +273,7 @@ const buttonContainer = {
 const button = {
   display: 'inline-block',
   padding: '14px 32px',
-  backgroundColor: '#eee',
+  backgroundColor: '#252f3d',
   color: '#ffffff',
   textDecoration: 'none',
   fontWeight: 'bold',
