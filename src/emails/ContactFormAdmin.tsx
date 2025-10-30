@@ -144,7 +144,7 @@ const text = {
 };
 
 const headerSection = {
-  background: '#eee',
+  backgroundColor: '#252f3d',
   padding: '30px',
   textAlign: 'center' as const,
 
@@ -208,7 +208,6 @@ const cautionText = {
 const infoBox = {
   backgroundColor: '#f8fafc',
   padding: '20px',
-  borderRadius: '8px',
   border: '1px solid #e2e8f0',
   marginBottom: '24px',
 };
@@ -243,7 +242,6 @@ const infoValue = {
 const messagePreview = {
   backgroundColor: '#ffffff',
   padding: '15px',
-  borderRadius: '6px',
   border: '1px solid #e2e8f0',
   borderLeft: '4px solid #0ea5e9',
 };

@@ -49,35 +49,35 @@ export default function NewsletterAdminNotification({
               <Text style={mainText}>
                 A new user has subscribed to the NYALTX newsletter.
               </Text>
-              
+
               <Section style={infoBox}>
                 <Section style={infoRow}>
                   <Text style={infoLabel}>Email:</Text>
                   <Text style={infoValue}>{email}</Text>
                 </Section>
-                
+
                 <Section style={infoRow}>
                   <Text style={infoLabel}>Name:</Text>
                   <Text style={infoValue}>{name || 'Not provided'}</Text>
                 </Section>
-                
+
                 <Section style={infoRow}>
                   <Text style={infoLabel}>IP Address:</Text>
                   <Text style={infoValue}>{ipAddress || 'Unknown'}</Text>
                 </Section>
-                
+
                 <Section style={infoRow}>
                   <Text style={infoLabel}>Timestamp:</Text>
                   <Text style={infoValue}>{timestamp}</Text>
                 </Section>
               </Section>
-              
+
               <Section style={actionSection}>
                 <Link href={`${baseUrl}/admin`} style={button}>
                   View Admin Dashboard
                 </Link>
               </Section>
-              
+
               <Text style={noteText}>
                 The subscriber has been sent a welcome email and their information has been logged.
               </Text>
@@ -143,10 +143,9 @@ const text = {
 };
 
 const headerSection = {
-  background: 'linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%)',
+  backgroundColor: '#252f3d',
   padding: '30px',
   textAlign: 'center' as const,
-  borderRadius: '10px 10px 0 0',
 };
 
 const logoText = {
@@ -164,17 +163,16 @@ const headerSubtext = {
   opacity: 0.9,
 };
 
-const coverSection = { 
+const coverSection = {
   backgroundColor: '#fff',
-  borderRadius: '10px',
   overflow: 'hidden',
 };
 
-const upperSection = { 
+const upperSection = {
   padding: '30px 35px',
 };
 
-const lowerSection = { 
+const lowerSection = {
   padding: '25px 35px',
   backgroundColor: '#f8fafc',
 };
@@ -192,8 +190,8 @@ const footerText = {
   marginTop: '20px',
 };
 
-const mainText = { 
-  ...text, 
+const mainText = {
+  ...text,
   marginBottom: '24px',
 };
 
@@ -205,8 +203,8 @@ const noteText = {
   fontStyle: 'italic',
 };
 
-const cautionText = { 
-  ...text, 
+const cautionText = {
+  ...text,
   margin: '0',
   fontSize: '13px',
   color: '#64748b',
@@ -215,7 +213,6 @@ const cautionText = {
 const infoBox = {
   backgroundColor: '#f8fafc',
   padding: '24px',
-  borderRadius: '8px',
   border: '1px solid #e2e8f0',
   marginBottom: '24px',
 };
@@ -248,10 +245,9 @@ const actionSection = {
 const button = {
   display: 'inline-block',
   padding: '12px 28px',
-  background: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)',
+  backgroundColor: '#eee',
   color: '#ffffff',
   textDecoration: 'none',
-  borderRadius: '6px',
   fontWeight: 'bold',
   fontSize: '14px',
 };

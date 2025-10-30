@@ -172,10 +172,9 @@ const text = {
 };
 
 const headerSection = {
-  background: '#eee',
+  background: '#252f3d',
   padding: '30px',
   textAlign: 'center' as const,
-  borderRadius: '10px 10px 0 0',
 };
 
 const logoText = {
@@ -195,7 +194,6 @@ const headerSubtext = {
 
 const coverSection = {
   backgroundColor: '#fff',
-  borderRadius: '10px',
   overflow: 'hidden',
 };
 
@@ -268,7 +266,6 @@ const contactInfo = {
 const infoBox = {
   backgroundColor: '#f8fafc',
   padding: '20px',
-  borderRadius: '8px',
   border: '1px solid #e2e8f0',
   marginBottom: '24px',
 };
