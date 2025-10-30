@@ -1,8 +1,8 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/mongodb';
 import { getAdminFromRequest } from '@/lib/adminAuth';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const admin = await getAdminFromRequest();
     if (!admin) {
@@ -36,12 +36,31 @@ export async function GET() {
       });
     }
     const now = new Date();
+    const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
     const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
     const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
+    // Get time range from query params (default: 7 days)
+    const { searchParams } = new URL(request.url);
+    const visitorRange = searchParams.get('visitorRange') || '7'; // 1, 7, or 30 days
+
+    // Determine visitor time range based on parameter
+    let visitorTimeRange: Date;
+    switch (visitorRange) {
+      case '1':
+        visitorTimeRange = oneDayAgo;
+        break;
+      case '30':
+        visitorTimeRange = oneMonthAgo;
+        break;
+      case '7':
+      default:
+        visitorTimeRange = oneWeekAgo;
+        break;
+    }
+
     // Online users (active in last 5 minutes)
-    const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
     let onlineUsers = 0;
     try {
       onlineUsers = await db.collection('user_sessions').countDocuments({
@@ -52,12 +71,13 @@ export async function GET() {
       console.warn('Error fetching online users:', error);
     }
 
-    // Recent visitors (last 7 days) with enhanced data
+    // Recent visitors (based on selected time range) with enhanced data
     let recentVisitors: any[] = [];
     try {
+      const limit = visitorRange === '1' ? 50 : visitorRange === '7' ? 100 : 200;
       recentVisitors = await db.collection('user_sessions').find({
-        createdAt: { $gte: oneWeekAgo }
-      }).sort({ createdAt: -1 }).limit(100).toArray();
+        createdAt: { $gte: visitorTimeRange }
+      }).sort({ createdAt: -1 }).limit(limit).toArray();
     } catch (error) {
       console.warn('Error fetching recent visitors:', error);
     }

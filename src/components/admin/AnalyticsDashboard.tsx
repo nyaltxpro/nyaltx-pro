@@ -81,11 +81,12 @@ export default function AnalyticsDashboard() {
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [visitorRange, setVisitorRange] = useState<'1' | '7' | '30'>('7');
 
   useEffect(() => {
     const fetchAnalytics = async () => {
       try {
-        const response = await fetch('/api/admin/analytics');
+        const response = await fetch(`/api/admin/analytics?visitorRange=${visitorRange}`);
         if (!response.ok) throw new Error('Failed to fetch analytics');
         const data = await response.json();
         setAnalytics(data.data);
@@ -101,7 +102,7 @@ export default function AnalyticsDashboard() {
     // Refresh every 30 seconds
     const interval = setInterval(fetchAnalytics, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [visitorRange]);
 
   const formatTime = (dateString: string) => {
     return new Date(dateString).toLocaleString();
@@ -254,10 +255,47 @@ export default function AnalyticsDashboard() {
       {/* Recent Visitors */}
       <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl shadow-xl">
         <div className="p-6 border-b border-gray-700/20">
-          <h3 className="font-semibold text-white flex items-center gap-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-            <FaClock className="text-blue-400" />
-            Recent Visitors (Last 7 Days)
-          </h3>
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <h3 className="font-semibold text-white flex items-center gap-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+              <FaClock className="text-blue-400" />
+              Recent Visitors
+            </h3>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setVisitorRange('1')}
+                className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 ${
+                  visitorRange === '1'
+                    ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-500/50'
+                    : 'bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-gray-600/30'
+                }`}
+                style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+              >
+                1 Day
+              </button>
+              <button
+                onClick={() => setVisitorRange('7')}
+                className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 ${
+                  visitorRange === '7'
+                    ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-500/50'
+                    : 'bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-gray-600/30'
+                }`}
+                style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+              >
+                7 Days
+              </button>
+              <button
+                onClick={() => setVisitorRange('30')}
+                className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 ${
+                  visitorRange === '30'
+                    ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-500/50'
+                    : 'bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-gray-600/30'
+                }`}
+                style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+              >
+                1 Month
+              </button>
+            </div>
+          </div>
         </div>
         <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 overflow-hidden">
           <div className="overflow-x-auto">
