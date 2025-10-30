@@ -86,10 +86,12 @@ export default function AnalyticsDashboard() {
   useEffect(() => {
     const fetchAnalytics = async () => {
       try {
+        setLoading(true);
         const response = await fetch(`/api/admin/analytics?visitorRange=${visitorRange}`);
         if (!response.ok) throw new Error('Failed to fetch analytics');
         const data = await response.json();
         setAnalytics(data.data);
+        setError(null);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Unknown error');
       } finally {
@@ -263,35 +265,47 @@ export default function AnalyticsDashboard() {
             <div className="flex gap-2">
               <button
                 onClick={() => setVisitorRange('1')}
-                className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 ${
+                disabled={loading}
+                className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 flex items-center gap-2 ${
                   visitorRange === '1'
                     ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-500/50'
                     : 'bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-gray-600/30'
-                }`}
+                } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                 style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
               >
+                {loading && visitorRange === '1' && (
+                  <span className="animate-spin">⟳</span>
+                )}
                 1 Day
               </button>
               <button
                 onClick={() => setVisitorRange('7')}
-                className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 ${
+                disabled={loading}
+                className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 flex items-center gap-2 ${
                   visitorRange === '7'
                     ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-500/50'
                     : 'bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-gray-600/30'
-                }`}
+                } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                 style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
               >
+                {loading && visitorRange === '7' && (
+                  <span className="animate-spin">⟳</span>
+                )}
                 7 Days
               </button>
               <button
                 onClick={() => setVisitorRange('30')}
-                className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 ${
+                disabled={loading}
+                className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 flex items-center gap-2 ${
                   visitorRange === '30'
                     ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-500/50'
                     : 'bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-gray-600/30'
-                }`}
+                } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                 style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
               >
+                {loading && visitorRange === '30' && (
+                  <span className="animate-spin">⟳</span>
+                )}
                 1 Month
               </button>
             </div>

@@ -44,19 +44,23 @@ export async function GET(request: NextRequest) {
     // Get time range from query params (default: 7 days)
     const { searchParams } = new URL(request.url);
     const visitorRange = searchParams.get('visitorRange') || '7'; // 1, 7, or 30 days
+    console.log(`Analytics API: Visitor range requested: ${visitorRange} days`);
 
     // Determine visitor time range based on parameter
     let visitorTimeRange: Date;
     switch (visitorRange) {
       case '1':
         visitorTimeRange = oneDayAgo;
+        console.log(`Analytics API: Using 1 day range - from ${oneDayAgo.toISOString()}`);
         break;
       case '30':
         visitorTimeRange = oneMonthAgo;
+        console.log(`Analytics API: Using 30 day range - from ${oneMonthAgo.toISOString()}`);
         break;
       case '7':
       default:
         visitorTimeRange = oneWeekAgo;
+        console.log(`Analytics API: Using 7 day range - from ${oneWeekAgo.toISOString()}`);
         break;
     }
 
@@ -75,9 +79,11 @@ export async function GET(request: NextRequest) {
     let recentVisitors: any[] = [];
     try {
       const limit = visitorRange === '1' ? 50 : visitorRange === '7' ? 100 : 200;
+      console.log(`Analytics API: Fetching visitors with limit ${limit} from ${visitorTimeRange.toISOString()}`);
       recentVisitors = await db.collection('user_sessions').find({
         createdAt: { $gte: visitorTimeRange }
       }).sort({ createdAt: -1 }).limit(limit).toArray();
+      console.log(`Analytics API: Found ${recentVisitors.length} visitors for ${visitorRange} day range`);
     } catch (error) {
       console.warn('Error fetching recent visitors:', error);
     }
