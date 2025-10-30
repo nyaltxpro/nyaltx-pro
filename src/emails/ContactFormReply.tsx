@@ -32,6 +32,13 @@ export default function ContactFormReply({
         <Container style={container}>
           <Section style={coverSection}>
             <Section style={headerSection}>
+              <img
+                src={`${baseUrl}/logo.png`}
+                alt="NYALTX Logo"
+                width="120"
+                height="120"
+                style={{ margin: '0 auto 10px', display: 'block' }}
+              />
               <Heading style={logoText}>NYALTX</Heading>
               <Text style={headerSubtext}>Thank You for Reaching Out</Text>
             </Section>

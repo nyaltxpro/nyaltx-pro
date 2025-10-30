@@ -1,8 +1,8 @@
+import NewsletterAdminNotification from '@/emails/NewsletterAdminNotification';
+import NewsletterWelcome from '@/emails/NewsletterWelcome';
+import { render } from '@react-email/render';
 import { NextRequest, NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
-import { render } from '@react-email/render';
-import NewsletterWelcome from '@/emails/NewsletterWelcome';
-import NewsletterAdminNotification from '@/emails/NewsletterAdminNotification';
 
 // Email configuration (Namecheap)
 const EMAIL_CONFIG = {
@@ -19,7 +19,8 @@ const EMAIL_CONFIG = {
 };
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@nyaltx.io';
-const FROM_EMAIL = process.env.FROM_EMAIL || 'noreply@nyaltx.io';
+// Use SMTP_USER as FROM_EMAIL if FROM_EMAIL is not set or doesn't match SMTP domain
+const FROM_EMAIL =  process.env.SMTP_USER || 'noreply@nyaltx.io';
 
 // Create transporter
 const createTransporter = () => {

@@ -23,7 +23,7 @@ export default function NewsletterWelcome({
   email,
 }: NewsletterWelcomeProps) {
   const displayName = name || 'Crypto Enthusiast';
-  
+
   return (
     <Html>
       <Head />
@@ -41,10 +41,10 @@ export default function NewsletterWelcome({
                 Hi {displayName},
               </Text>
               <Text style={mainText}>
-                Welcome to the <strong>NYALTX Venture Access Network</strong>! You're now part of an 
+                Welcome to the <strong>NYALTX Venture Access Network</strong>! You're now part of an
                 exclusive community of crypto traders, investors, and innovators.
               </Text>
-              
+
               <Section style={benefitsSection}>
                 <Text style={benefitsTitle}>What you can expect:</Text>
                 <Section style={benefitsList}>
@@ -54,19 +54,19 @@ export default function NewsletterWelcome({
                   <Text style={benefitItem}>💎 Premium trading signals and strategies</Text>
                 </Section>
               </Section>
-              
+
               <Text style={ctaText}>
                 Ready to explore? Check out our platform and start your crypto journey:
               </Text>
-              
+
               <Section style={buttonContainer}>
                 <Link href={`${baseUrl}/dashboard`} style={button}>
                   Explore Dashboard
                 </Link>
               </Section>
-              
+
               <Hr style={divider} />
-              
+
               <Section style={socialSection}>
                 <Text style={socialTitle}>Follow us for real-time updates:</Text>
                 <Section style={socialLinks}>
@@ -83,7 +83,7 @@ export default function NewsletterWelcome({
                   </Link>
                 </Section>
               </Section>
-              
+
               <Text style={signatureText}>
                 Best regards,<br />
                 <strong>The NYALTX Team</strong>
@@ -130,7 +130,7 @@ const container = {
 
 const h1 = {
   color: '#1e293b',
-  fontSize: '28px',
+  fontSize: '24px',
   fontWeight: 'bold',
   marginBottom: '15px',
   marginTop: '0',
@@ -149,42 +149,40 @@ const text = {
 };
 
 const headerSection = {
-  background: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)',
-  padding: '40px 30px',
+  background: 'linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%)',
+  padding: '30px',
   textAlign: 'center' as const,
   borderRadius: '10px 10px 0 0',
 };
 
 const logoText = {
   color: '#ffffff',
-  fontSize: '36px',
+  fontSize: '32px',
   fontWeight: 'bold',
   margin: '0 0 10px 0',
-  letterSpacing: '3px',
+  letterSpacing: '2px',
 };
 
 const headerSubtext = {
   color: '#ffffff',
-  fontSize: '16px',
+  fontSize: '14px',
   margin: '0',
-  opacity: 0.95,
+  opacity: 0.9,
 };
 
-const coverSection = { 
+const coverSection = {
   backgroundColor: '#fff',
   borderRadius: '10px',
   overflow: 'hidden',
-  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
 };
 
-const upperSection = { 
-  padding: '40px 35px',
-};
-
-const lowerSection = { 
+const upperSection = {
   padding: '30px 35px',
+};
+
+const lowerSection = {
+  padding: '25px 35px',
   backgroundColor: '#f8fafc',
-  textAlign: 'center' as const,
 };
 
 const hr = {
@@ -199,34 +197,33 @@ const divider = {
 
 const greetingText = {
   ...text,
-  fontSize: '16px',
+  fontSize: '15px',
   marginBottom: '8px',
 };
 
-const mainText = { 
-  ...text, 
+const mainText = {
+  ...text,
   marginBottom: '24px',
-  fontSize: '15px',
 };
 
 const ctaText = {
   ...text,
-  fontSize: '15px',
   marginTop: '24px',
   marginBottom: '16px',
 };
 
 const signatureText = {
   ...text,
-  margin: '32px 0 0 0',
+  margin: '0 0 16px 0',
   lineHeight: '1.8',
 };
 
 const footerText = {
   ...text,
   fontSize: '12px',
+  textAlign: 'center' as const,
   color: '#64748b',
-  margin: '0 0 8px 0',
+  marginTop: '20px',
 };
 
 const unsubscribeText = {

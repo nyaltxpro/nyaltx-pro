@@ -34,6 +34,13 @@ export default function ContactFormAdmin({
         <Container style={container}>
           <Section style={coverSection}>
             <Section style={headerSection}>
+              <img
+                src={`${baseUrl}/logo.png`}
+                alt="NYALTX Logo"
+                width="120"
+                height="120"
+                style={{ margin: '0 auto 10px', display: 'block' }}
+              />
               <Heading style={logoText}>NYALTX</Heading>
               <Text style={headerSubtext}>New Contact Form Submission</Text>
             </Section>
@@ -43,33 +50,32 @@ export default function ContactFormAdmin({
                 You have received a new message from the NYALTX contact form.
                 Please review the details below and respond accordingly.
               </Text>
-              
-              <Section style={infoSection}>
-                <Text style={infoLabel}>From:</Text>
-                <Text style={infoValue}>{name}</Text>
-              </Section>
-              
-              <Section style={infoSection}>
-                <Text style={infoLabel}>Email:</Text>
-                <Text style={infoValue}>{email}</Text>
-              </Section>
-              
-              <Section style={infoSection}>
-                <Text style={infoLabel}>Subject:</Text>
-                <Text style={infoValue}>{subject}</Text>
-              </Section>
-              
-              <Section style={messageSection}>
-                <Text style={messageLabel}>Message:</Text>
-                <Section style={messageBox}>
-                  <Text style={messageText}>{message}</Text>
+
+              <Section style={infoBox}>
+                <Text style={infoBoxTitle}>📋 Submission Details</Text>
+                <Section style={infoRow}>
+                  <Text style={infoLabel}>From:</Text>
+                  <Text style={infoValue}>{name}</Text>
+                </Section>
+                <Section style={infoRow}>
+                  <Text style={infoLabel}>Email:</Text>
+                  <Text style={infoValue}>{email}</Text>
+                </Section>
+                <Section style={infoRow}>
+                  <Text style={infoLabel}>Subject:</Text>
+                  <Text style={infoValue}>{subject}</Text>
+                </Section>
+                <Section style={infoRow}>
+                  <Text style={infoLabel}>Submitted:</Text>
+                  <Text style={infoValue}>{new Date().toLocaleString()}</Text>
                 </Section>
               </Section>
-              
-              <Section style={timestampSection}>
-                <Text style={timestampText}>
-                  Submitted on: {new Date().toLocaleString()}
-                </Text>
+
+              <Section style={infoBox}>
+                <Text style={infoBoxTitle}>💬 Message</Text>
+                <Section style={messagePreview}>
+                  <Text style={messagePreviewText}>{message}</Text>
+                </Section>
               </Section>
             </Section>
             <Hr style={hr} />
@@ -159,17 +165,17 @@ const headerSubtext = {
   opacity: 0.9,
 };
 
-const coverSection = { 
+const coverSection = {
   backgroundColor: '#fff',
   borderRadius: '10px',
   overflow: 'hidden',
 };
 
-const upperSection = { 
+const upperSection = {
   padding: '30px 35px',
 };
 
-const lowerSection = { 
+const lowerSection = {
   padding: '25px 35px',
   backgroundColor: '#f8fafc',
 };
@@ -187,20 +193,35 @@ const footerText = {
   marginTop: '20px',
 };
 
-const mainText = { 
-  ...text, 
+const mainText = {
+  ...text,
   marginBottom: '24px',
 };
 
-const cautionText = { 
-  ...text, 
+const cautionText = {
+  ...text,
   margin: '0',
   fontSize: '13px',
   color: '#64748b',
 };
 
-const infoSection = {
-  marginBottom: '16px',
+const infoBox = {
+  backgroundColor: '#f8fafc',
+  padding: '20px',
+  borderRadius: '8px',
+  border: '1px solid #e2e8f0',
+  marginBottom: '24px',
+};
+
+const infoBoxTitle = {
+  fontSize: '14px',
+  fontWeight: 'bold',
+  color: '#1e293b',
+  margin: '0 0 16px 0',
+};
+
+const infoRow = {
+  marginBottom: '12px',
 };
 
 const infoLabel = {
@@ -219,45 +240,19 @@ const infoValue = {
   fontWeight: '500',
 };
 
-const messageSection = {
-  marginTop: '24px',
-};
-
-const messageLabel = {
-  fontSize: '12px',
-  fontWeight: 'bold',
-  color: '#64748b',
-  margin: '0 0 8px 0',
-  textTransform: 'uppercase' as const,
-  letterSpacing: '0.5px',
-};
-
-const messageBox = {
-  backgroundColor: '#f8fafc',
-  padding: '20px',
-  borderRadius: '8px',
+const messagePreview = {
+  backgroundColor: '#ffffff',
+  padding: '15px',
+  borderRadius: '6px',
   border: '1px solid #e2e8f0',
   borderLeft: '4px solid #0ea5e9',
 };
 
-const messageText = {
-  fontSize: '14px',
-  color: '#1e293b',
+const messagePreviewText = {
+  fontSize: '13px',
+  color: '#475569',
   lineHeight: '1.7',
   margin: '0',
   whiteSpace: 'pre-wrap' as const,
   wordWrap: 'break-word' as const,
-};
-
-const timestampSection = {
-  marginTop: '24px',
-  paddingTop: '16px',
-  borderTop: '1px solid #e2e8f0',
-};
-
-const timestampText = {
-  fontSize: '12px',
-  color: '#94a3b8',
-  margin: '0',
-  fontStyle: 'italic',
 };

@@ -34,6 +34,13 @@ export default function NewsletterAdminNotification({
         <Container style={container}>
           <Section style={coverSection}>
             <Section style={headerSection}>
+              <img
+                src={`${baseUrl}/logo.png`}
+                alt="NYALTX Logo"
+                width="120"
+                height="120"
+                style={{ margin: '0 auto 10px', display: 'block' }}
+              />
               <Heading style={logoText}>NYALTX</Heading>
               <Text style={headerSubtext}>Newsletter Subscription Alert</Text>
             </Section>
@@ -136,7 +143,7 @@ const text = {
 };
 
 const headerSection = {
-  background: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)',
+  background: 'linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%)',
   padding: '30px',
   textAlign: 'center' as const,
   borderRadius: '10px 10px 0 0',
