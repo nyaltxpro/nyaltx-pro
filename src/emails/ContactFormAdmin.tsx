@@ -144,10 +144,10 @@ const text = {
 };
 
 const headerSection = {
-  background: 'linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%)',
+  background: '#eee',
   padding: '30px',
   textAlign: 'center' as const,
-  borderRadius: '10px 10px 0 0',
+
 };
 
 const logoText = {
@@ -167,7 +167,7 @@ const headerSubtext = {
 
 const coverSection = {
   backgroundColor: '#fff',
-  borderRadius: '10px',
+
   overflow: 'hidden',
 };
 

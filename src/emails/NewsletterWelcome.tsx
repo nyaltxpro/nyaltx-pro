@@ -32,6 +32,13 @@ export default function NewsletterWelcome({
         <Container style={container}>
           <Section style={coverSection}>
             <Section style={headerSection}>
+              <img
+                src={`${baseUrl}/logo.png`}
+                alt="NYALTX Logo"
+                width="120"
+                height="120"
+                style={{ margin: '0 auto 10px', display: 'block' }}
+              />
               <Heading style={logoText}>NYALTX</Heading>
               <Text style={headerSubtext}>Your Gateway to the Crypto World</Text>
             </Section>
@@ -149,10 +156,9 @@ const text = {
 };
 
 const headerSection = {
-  background: 'linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%)',
+  backgroundColor: '#eee',
   padding: '30px',
   textAlign: 'center' as const,
-  borderRadius: '10px 10px 0 0',
 };
 
 const logoText = {
@@ -172,7 +178,6 @@ const headerSubtext = {
 
 const coverSection = {
   backgroundColor: '#fff',
-  borderRadius: '10px',
   overflow: 'hidden',
 };
 
@@ -236,7 +241,6 @@ const unsubscribeText = {
 const benefitsSection = {
   backgroundColor: '#f8fafc',
   padding: '24px',
-  borderRadius: '8px',
   border: '1px solid #e2e8f0',
   marginBottom: '24px',
 };
@@ -269,10 +273,9 @@ const buttonContainer = {
 const button = {
   display: 'inline-block',
   padding: '14px 32px',
-  background: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)',
+  backgroundColor: '#eee',
   color: '#ffffff',
   textDecoration: 'none',
-  borderRadius: '8px',
   fontWeight: 'bold',
   fontSize: '15px',
 };

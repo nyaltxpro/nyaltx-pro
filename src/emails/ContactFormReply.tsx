@@ -51,21 +51,21 @@ export default function ContactFormReply({
                 Thank you for contacting NYALTX. We have received your message regarding{' '}
                 <strong>"{subject}"</strong> and will get back to you as soon as possible.
               </Text>
-              
+
               <Section style={infoBox}>
                 <Text style={infoBoxTitle}>📋 Your Message Summary</Text>
                 <Section style={messagePreview}>
                   <Text style={messagePreviewText}>{message}</Text>
                 </Section>
               </Section>
-              
+
               <Text style={responseText}>
                 Our team typically responds within 24-48 hours during business days.
                 If your inquiry is urgent, please mention it in your follow-up message.
               </Text>
-              
+
               <Hr style={divider} />
-              
+
               <Section style={linksSection}>
                 <Text style={linksTitle}>While you wait, explore NYALTX:</Text>
                 <Section style={linksList}>
@@ -95,7 +95,7 @@ export default function ContactFormReply({
                   </Text>
                 </Section>
               </Section>
-              
+
               <Text style={cautionText}>
                 If you have any questions, please don't hesitate to contact our support team.
               </Text>
@@ -147,7 +147,7 @@ const main = {
 const container = {
   padding: '20px',
   margin: '0 auto',
-  backgroundColor: '#f5f5f5',
+  backgroundColor: '#eee',
   maxWidth: '600px',
 };
 
@@ -172,7 +172,7 @@ const text = {
 };
 
 const headerSection = {
-  background: 'linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%)',
+  background: '#eee',
   padding: '30px',
   textAlign: 'center' as const,
   borderRadius: '10px 10px 0 0',
@@ -193,17 +193,17 @@ const headerSubtext = {
   opacity: 0.9,
 };
 
-const coverSection = { 
+const coverSection = {
   backgroundColor: '#fff',
   borderRadius: '10px',
   overflow: 'hidden',
 };
 
-const upperSection = { 
+const upperSection = {
   padding: '30px 35px',
 };
 
-const lowerSection = { 
+const lowerSection = {
   padding: '25px 35px',
   backgroundColor: '#f8fafc',
 };
@@ -232,8 +232,8 @@ const greetingText = {
   marginBottom: '8px',
 };
 
-const mainText = { 
-  ...text, 
+const mainText = {
+  ...text,
   marginBottom: '24px',
 };
 
@@ -244,8 +244,8 @@ const responseText = {
   marginTop: '20px',
 };
 
-const cautionText = { 
-  ...text, 
+const cautionText = {
+  ...text,
   margin: '24px 0 0 0',
   fontSize: '13px',
   color: '#64748b',
