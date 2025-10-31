@@ -4,8 +4,8 @@ import PublicHeader from '@/components/PublicHeader';
 import { useTeamContent } from '@/hooks/useTinaContent';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
+import { useState } from 'react';
 import { FiLinkedin, FiSend, FiTwitter } from 'react-icons/fi';
-import { useMemo, useState } from 'react';
 
 export default function TeamPage() {
   const { content, loading } = useTeamContent();
