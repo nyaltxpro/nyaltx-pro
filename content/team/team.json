@@ -26,6 +26,17 @@
         "linkedin": "https://www.linkedin.com/in/andreacataneo/",
         "telegram": ""
       }
+    },
+    {
+      "name": "John",
+      "role": "CMO",
+      "description": "Im CMO",
+      "image": "/og-image.png",
+      "socials": {
+        "twitter": "",
+        "linkedin": "",
+        "telegram": ""
+      }
     }
   ],
   "seo": {
