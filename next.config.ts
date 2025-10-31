@@ -167,6 +167,11 @@ const nextConfig: NextConfig = {
         hostname: "assets.tina.io", // ✅ Added TinaCMS remote pattern
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "nyaltx.pro ", // ✅ Added TinaCMS remote pattern
+        pathname: "/**",
+      },
     ],
   },
 };
