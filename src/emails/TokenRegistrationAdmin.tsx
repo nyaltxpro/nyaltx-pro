@@ -23,7 +23,7 @@ interface TokenRegistrationAdminProps {
   twitter?: string;
 }
 
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://nyaltx.com';
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://nyaltx.pro';
 
 export default function TokenRegistrationAdmin({
   tokenName,
@@ -44,6 +44,13 @@ export default function TokenRegistrationAdmin({
         <Container style={container}>
           <Section style={coverSection}>
             <Section style={headerSection}>
+              <img
+                src={`${baseUrl}/logo.png`}
+                alt="NYALTX Logo"
+                width="120"
+                height="120"
+                style={{ margin: '0 auto 10px', display: 'block' }}
+              />
               <Heading style={logoText}>🔔 NYALTX Admin</Heading>
               <Text style={headerSubtext}>New Token Registration</Text>
             </Section>
@@ -173,13 +180,12 @@ const container = {
 
 const coverSection = {
   backgroundColor: '#fff',
-  borderRadius: '12px',
   overflow: 'hidden',
   boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
 };
 
 const headerSection = {
-  backgroundColor: '#dc3545',
+  backgroundColor: '#252f3d',
   padding: '30px',
   textAlign: 'center' as const,
   borderBottom: '2px solid #c82333',
@@ -213,7 +219,6 @@ const lowerSection = {
 const alertBox = {
   backgroundColor: '#fff3cd',
   border: '1px solid #ffeaa7',
-  borderRadius: '8px',
   padding: '15px',
   margin: '0 0 24px 0',
 };
@@ -226,7 +231,6 @@ const alertText = {
 
 const tokenInfoSection = {
   backgroundColor: '#f8f9fa',
-  borderRadius: '8px',
   padding: '20px',
   margin: '24px 0',
 };
@@ -300,7 +304,6 @@ const buttonReview = {
   backgroundColor: '#007bff',
   color: '#ffffff',
   textDecoration: 'none',
-  borderRadius: '6px',
   fontWeight: '600',
   fontSize: '14px',
   margin: '5px',
@@ -312,7 +315,6 @@ const buttonApprove = {
   backgroundColor: '#28a745',
   color: '#ffffff',
   textDecoration: 'none',
-  borderRadius: '6px',
   fontWeight: '600',
   fontSize: '14px',
   margin: '5px',
@@ -324,7 +326,6 @@ const buttonReject = {
   backgroundColor: '#dc3545',
   color: '#ffffff',
   textDecoration: 'none',
-  borderRadius: '6px',
   fontWeight: '600',
   fontSize: '14px',
   margin: '5px',
@@ -333,7 +334,6 @@ const buttonReject = {
 const checklistSection = {
   backgroundColor: '#f8f9fa',
   padding: '20px',
-  borderRadius: '8px',
   margin: '24px 0 0 0',
 };
 

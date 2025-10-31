@@ -19,7 +19,7 @@ interface TokenApprovalProps {
   approved: boolean;
 }
 
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://nyaltx.com';
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://nyaltx.pro';
 
 export default function TokenApproval({
   tokenName,
@@ -44,6 +44,14 @@ export default function TokenApproval({
               backgroundColor: statusColor,
               borderBottom: `2px solid ${approved ? '#218838' : '#c82333'}`,
             }}>
+              <img
+                src={`${baseUrl}/logo.png`}
+                alt="NYALTX Logo"
+                width="120"
+                height="120"
+                style={{ margin: '0 auto 10px', display: 'block' }}
+              />
+
               <Heading style={logoText}>{statusIcon} NYALTX</Heading>
               <Text style={headerSubtext}>Token Registration {statusText}</Text>
             </Section>
@@ -168,7 +176,6 @@ const container = {
 
 const coverSection = {
   backgroundColor: '#fff',
-  borderRadius: '12px',
   overflow: 'hidden',
   boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
 };
@@ -176,6 +183,7 @@ const coverSection = {
 const headerSection = {
   padding: '30px',
   textAlign: 'center' as const,
+  backgroundColor: '#252f3d',
 };
 
 const logoText = {
@@ -204,7 +212,6 @@ const lowerSection = {
 };
 
 const statusBanner = {
-  borderRadius: '8px',
   padding: '20px',
   textAlign: 'center' as const,
   margin: '0 0 24px 0',
@@ -218,7 +225,6 @@ const statusBannerText = {
 
 const tokenInfoSection = {
   backgroundColor: '#f8f9fa',
-  borderRadius: '8px',
   padding: '20px',
   margin: '24px 0',
 };
@@ -296,9 +302,9 @@ const button = {
   padding: '12px 24px',
   color: '#ffffff',
   textDecoration: 'none',
-  borderRadius: '6px',
   fontWeight: '600',
   fontSize: '15px',
+  backgroundColor: '#252f3d',
 };
 
 const hr = {

@@ -21,7 +21,7 @@ interface TokenRegistrationUserProps {
   createdAt: string;
 }
 
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://nyaltx.com';
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://nyaltx.pro';
 
 export default function TokenRegistrationUser({
   tokenName,
@@ -40,6 +40,13 @@ export default function TokenRegistrationUser({
         <Container style={container}>
           <Section style={coverSection}>
             <Section style={headerSection}>
+              <img
+                src={`${baseUrl}/logo.png`}
+                alt="NYALTX Logo"
+                width="120"
+                height="120"
+                style={{ margin: '0 auto 10px', display: 'block' }}
+              />
               <Heading style={logoText}>🚀 NYALTX</Heading>
               <Text style={headerSubtext}>Token Registration Confirmation</Text>
             </Section>
@@ -142,13 +149,12 @@ const container = {
 
 const coverSection = {
   backgroundColor: '#fff',
-  borderRadius: '12px',
   overflow: 'hidden',
   boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
 };
 
 const headerSection = {
-  backgroundColor: '#00b8d8',
+  backgroundColor: '#252f3d',
   padding: '30px',
   textAlign: 'center' as const,
   borderBottom: '2px solid #0097b8',
@@ -196,7 +202,6 @@ const mainText = {
 
 const tokenInfoSection = {
   backgroundColor: '#f8f9fa',
-  borderRadius: '8px',
   padding: '20px',
   margin: '24px 0',
 };
@@ -242,7 +247,6 @@ const infoValueSmall = {
 const statusBadge = {
   display: 'inline-block',
   padding: '4px 12px',
-  borderRadius: '20px',
   fontSize: '12px',
   fontWeight: '600',
   textTransform: 'uppercase' as const,
@@ -280,10 +284,9 @@ const buttonContainer = {
 const button = {
   display: 'inline-block',
   padding: '12px 24px',
-  backgroundColor: '#00b8d8',
+  backgroundColor: '#252f3d',
   color: '#ffffff',
   textDecoration: 'none',
-  borderRadius: '6px',
   fontWeight: '600',
   fontSize: '15px',
 };
