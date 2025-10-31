@@ -120,7 +120,7 @@ export default function TeamPage() {
                     className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur transition-all duration-300 hover:-translate-y-1 hover:border-cyan-500/40"
                   >
                     <div className="relative h-52 bg-gradient-to-br from-gray-900 to-gray-800">
-                      {member.image && !hasError ? (
+                      {member.image ? (
                         <Image
                           src={member.image}
                           alt={member.name}
