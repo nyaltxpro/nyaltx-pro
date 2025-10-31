@@ -1,75 +1,97 @@
 import { getCollection } from '@/lib/mongodb';
-import { createAdminTokenRegistrationEmail, createUserTokenRegistrationEmail } from '@/utils/emailTemplates';
+import TokenRegistrationAdmin from '@/emails/TokenRegistrationAdmin';
+import TokenRegistrationUser from '@/emails/TokenRegistrationUser';
+import { render } from '@react-email/render';
 import { NextRequest, NextResponse } from 'next/server';
+import nodemailer from 'nodemailer';
 
-// Function to send email notifications
+// Create transporter for Namecheap email (same as contact/newsletter)
+const createTransporter = () => {
+  return nodemailer.createTransport({
+    host: process.env.SMTP_HOST || 'mail.privateemail.com',
+    port: parseInt(process.env.SMTP_PORT || '587'),
+    secure: process.env.SMTP_SECURE === 'true',
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+    },
+    tls: {
+      rejectUnauthorized: false
+    }
+  });
+};
+
+// Function to send email notifications (using nodemailer directly like contact/newsletter)
 async function sendTokenRegistrationEmails(tokenData: TokenRegistration) {
-  const baseUrl = 'https://nyaltx.pro';
+  // Check if email is configured
+  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+    console.warn('⚠️ Email service not configured - skipping email notifications');
+    return;
+  }
+
+  const transporter = createTransporter();
+  const fromEmail = process.env.FROM_EMAIL || process.env.SMTP_USER;
   
   // Send user confirmation email (if we have user email)
   if (tokenData.userEmail) {
     try {
-      const { subject, html } = createUserTokenRegistrationEmail(tokenData);
+      console.log(`📧 Sending user confirmation email to: ${tokenData.userEmail}`);
       
-      const response = await fetch(`/api/email/send`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          to: tokenData.userEmail,
-          subject,
-          html,
-        }),
+      const userHtml = await render(
+        TokenRegistrationUser({
+          tokenName: tokenData.tokenName,
+          tokenSymbol: tokenData.tokenSymbol,
+          blockchain: tokenData.blockchain,
+          contractAddress: tokenData.contractAddress,
+          status: tokenData.status,
+          registrationId: tokenData.id,
+          createdAt: tokenData.createdAt,
+        })
+      );
+
+      await transporter.sendMail({
+        from: `"NYALTX" <${fromEmail}>`,
+        to: tokenData.userEmail,
+        subject: `Token Registration Submitted: ${tokenData.tokenName} (${tokenData.tokenSymbol})`,
+        html: userHtml,
       });
 
-      if (!response.ok) {
-        console.error(`Failed to send user confirmation email to ${tokenData.userEmail}:`, await response.text());
-      } else {
-        console.log(`✅ User confirmation email sent successfully to ${tokenData.userEmail} for token ${tokenData.tokenSymbol}`);
-        // Also log to frontend console if in development
-        if (process.env.NODE_ENV === 'development') {
-          console.log(`[EMAIL SUCCESS] User notification sent to: ${tokenData.userEmail}`);
-        }
-      }
-    } catch (error) {
-      console.error(`Error sending user confirmation email:`, error);
+      console.log(`✅ User confirmation email sent successfully to ${tokenData.userEmail} for token ${tokenData.tokenSymbol}`);
+    } catch (error: any) {
+      console.error(`❌ Error sending user confirmation email:`, error.message);
     }
   }
   
   // Send admin notification email
-  const adminEmails = process.env.ADMIN_EMAIL ? [process.env.ADMIN_EMAIL] : ['admin@nyaltx.pro'];
+  const adminEmail = process.env.ADMIN_EMAIL || 'admin@nyaltx.pro';
   
-  for (const adminEmail of adminEmails) {
-    if (adminEmail.trim()) {
-      try {
-        const { subject, html } = createAdminTokenRegistrationEmail(tokenData);
-        
-        const response = await fetch(`${baseUrl}/api/email/send`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            to: adminEmail.trim(),
-            subject,
-            html,
-          }),
-        });
+  try {
+    console.log(`📧 Sending admin notification email to: ${adminEmail}`);
+    
+    const adminHtml = await render(
+      TokenRegistrationAdmin({
+        tokenName: tokenData.tokenName,
+        tokenSymbol: tokenData.tokenSymbol,
+        blockchain: tokenData.blockchain,
+        contractAddress: tokenData.contractAddress,
+        submittedByAddress: tokenData.submittedByAddress,
+        registrationId: tokenData.id,
+        createdAt: tokenData.createdAt,
+        website: tokenData.website,
+        twitter: tokenData.twitter,
+      })
+    );
 
-        if (!response.ok) {
-          console.error(`Failed to send admin email to ${adminEmail}:`, await response.text());
-        } else {
-          console.log(`✅ Admin notification email sent successfully to ${adminEmail} for token ${tokenData.tokenSymbol}`);
-          // Also log to frontend console if in development
-          if (process.env.NODE_ENV === 'development') {
-            console.log(`[EMAIL SUCCESS] Admin notification sent to: ${adminEmail}`);
-          }
-        }
-      } catch (error) {
-        console.error(`Error sending admin email to ${adminEmail}:`, error);
-      }
-    }
+    await transporter.sendMail({
+      from: `"NYALTX System" <${fromEmail}>`,
+      to: adminEmail,
+      subject: `New Token Registration: ${tokenData.tokenName} (${tokenData.tokenSymbol})`,
+      html: adminHtml,
+    });
+
+    console.log(`✅ Admin notification email sent successfully to ${adminEmail} for token ${tokenData.tokenSymbol}`);
+  } catch (error: any) {
+    console.error(`❌ Error sending admin email:`, error.message);
   }
 }
 
