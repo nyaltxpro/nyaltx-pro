@@ -10,7 +10,7 @@ import { FiLinkedin, FiSend, FiTwitter } from 'react-icons/fi';
 export default function TeamPage() {
   const { content, loading } = useTeamContent();
   const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({});
-  
+
   // Force use static content for debugging
   const [useStatic, setUseStatic] = useState(false);
 
@@ -118,12 +118,12 @@ export default function TeamPage() {
                   {hero?.title}
                 </span>
               </h1>
-              <button 
+              {/* <button 
                 onClick={() => setUseStatic(!useStatic)}
                 className="mt-4 px-4 py-2 bg-cyan-500 text-white rounded-md text-sm"
               >
                 {useStatic ? 'Use API Content' : 'Use Static Content'} (Debug)
-              </button>
+              </button> */}
               {hero?.subtitle && (
                 <p className="mt-4 text-lg text-white/70">{hero.subtitle}</p>
               )}
