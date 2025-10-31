@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl =  'https://nyaltx.pro';
+  const baseUrl =  'https://www.nyaltx.pro';
 
   return [
     // Main Pages
