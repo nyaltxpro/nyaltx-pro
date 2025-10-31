@@ -1,8 +1,8 @@
 'use client';
 import CryptocurrencyIcon from '@/components/CryptocurrencyIcon';
+import TokenAvatar from '@/components/TokenAvatar';
 import { ActivityLogIcon, ExternalLinkIcon, RocketIcon } from '@radix-ui/react-icons';
 import * as Tooltip from '@radix-ui/react-tooltip';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useRef, useState } from 'react';
 // import NetworkWeb3Icon from '@/utils/networkIcon'
@@ -397,21 +397,15 @@ const LivePriceTicker: React.FC = () => {
                   <div className="flex items-center gap-3">
                     {/* Token Logo */}
                     <div className="relative">
-                      <div className="w-8 h-8 relative">
-                        <Image
-                          src={token.icon}
-                          alt={token.tokenAddress.slice(0, 6)}
-                          width={32}
-                          height={32}
-                          className="rounded-full ring-2 ring-gray-600/50"
-                          onError={e => {
-                            (e.target as HTMLImageElement).src = '/crypto-icons/color/generic.svg';
-                          }}
-                        />
-                      </div>
+                      <TokenAvatar
+                        src={token.icon}
+                        symbol={token.insights?.symbol || token.tokenAddress.slice(0, 6)}
+                        name={token.insights?.name}
+                        size={32}
+                        className="ring-2 ring-gray-600/50"
+                      />
                       {/* Chain badge */}
                       <div className="absolute -bottom-1 -right-1 w-4 h-4 flex items-center justify-center">
-
                         <CryptocurrencyIcon name={token.chainId ? token.chainId : 'solana' as any} />
                       </div>
                     </div>
@@ -518,18 +512,13 @@ const LivePriceTicker: React.FC = () => {
                   <div className="flex items-center gap-3">
                     {/* Token Logo */}
                     <div className="relative">
-                      <div className="w-8 h-8 relative">
-                        <Image
-                          src={token.logo || '/crypto-icons/color/generic.svg'}
-                          alt={token.symbol}
-                          width={32}
-                          height={32}
-                          className="rounded-full ring-2 ring-gray-600/50"
-                          onError={e => {
-                            (e.target as HTMLImageElement).src = '/crypto-icons/color/generic.svg';
-                          }}
-                        />
-                      </div>
+                      <TokenAvatar
+                        src={token.logo}
+                        symbol={token.symbol}
+                        name={token.name}
+                        size={32}
+                        className="ring-2 ring-gray-600/50"
+                      />
                       {/* Pump.fun badge */}
                       <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
                         <RocketIcon className="w-2 h-2 text-white" />
