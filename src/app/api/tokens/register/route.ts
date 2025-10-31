@@ -11,7 +11,7 @@ async function sendTokenRegistrationEmails(tokenData: TokenRegistration) {
     try {
       const { subject, html } = createUserTokenRegistrationEmail(tokenData);
       
-      const response = await fetch(`${baseUrl}/api/email/send`, {
+      const response = await fetch(`/api/email/send`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -38,7 +38,7 @@ async function sendTokenRegistrationEmails(tokenData: TokenRegistration) {
   }
   
   // Send admin notification email
-  const adminEmails = process.env.ADMIN_EMAIL ? [process.env.ADMIN_EMAIL] : ['nyaltxpro@gmail.com.com'];
+  const adminEmails = process.env.ADMIN_EMAIL ? [process.env.ADMIN_EMAIL] : ['admin@nyaltx.pro'];
   
   for (const adminEmail of adminEmails) {
     if (adminEmail.trim()) {

@@ -64,6 +64,7 @@ export async function POST(request: NextRequest) {
       console.error('Email transporter verification failed:', error);
       return NextResponse.json(
         { error: 'Email service configuration error' },
+        { status: 500 }
       );
     }
 

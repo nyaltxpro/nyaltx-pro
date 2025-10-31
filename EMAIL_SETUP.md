@@ -2,6 +2,13 @@
 
 This guide explains how to set up email notifications for token registration in the NYALTX platform.
 
+## ⚠️ Recent Fixes (Latest Update)
+
+**Issues Fixed:**
+1. ✅ **Admin email typo** - Fixed `nyaltxpro@gmail.com.com` → `nyaltxpro@gmail.com`
+2. ✅ **Missing error status code** - Added proper HTTP 500 status on email service configuration error
+3. ✅ **Improved error handling** - Better logging and error messages
+
 ## Overview
 
 The email system sends notifications for:
@@ -175,7 +182,18 @@ await sendTokenApprovalEmail(tokenData, approved);
 
 1. **Set up Gmail App Password** (easiest for testing)
 2. **Configure environment variables**
-3. **Test registration flow**:
+3. **Test email service directly**:
+   ```bash
+   # Test if email service is configured properly
+   curl -X POST http://localhost:3000/api/email/send \
+     -H "Content-Type: application/json" \
+     -d '{
+       "to": "your-test-email@example.com",
+       "subject": "NYALTX Email Test",
+       "html": "<h1>Test Email</h1><p>If you receive this, email service is working!</p>"
+     }'
+   ```
+4. **Test registration flow**:
    ```bash
    # Register a test token with email
    curl -X POST http://localhost:3000/api/tokens/register \
@@ -184,10 +202,13 @@ await sendTokenApprovalEmail(tokenData, approved);
        "tokenName": "Test Token",
        "tokenSymbol": "TEST",
        "blockchain": "ethereum",
-       "contractAddress": "0x1234...",
-       "userEmail": "test@example.com"
+       "contractAddress": "0x1234567890abcdef1234567890abcdef12345678",
+       "userEmail": "your-test-email@example.com"
      }'
    ```
+5. **Check console logs** for email status:
+   - ✅ Success: `Email sent successfully`
+   - ❌ Error: `Email sending error` or `Email service not configured`
 
 ### Production Testing
 
