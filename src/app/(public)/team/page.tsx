@@ -10,6 +10,9 @@ import { FiLinkedin, FiSend, FiTwitter } from 'react-icons/fi';
 export default function TeamPage() {
   const { content, loading } = useTeamContent();
   const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({});
+  
+  // Force use static content for debugging
+  const [useStatic, setUseStatic] = useState(false);
 
   const fallbackContent = {
     hero: {
@@ -23,19 +26,50 @@ export default function TeamPage() {
         name: 'Frank Ferraro',
         role: 'Founder & Host',
         description:
-          'Veteran broadcaster and crypto advocate leading strategic partnerships and community storytelling.',
-        image: '/images/team/frank-ferraro.jpg',
+          'Seasoned market maker and blockchain strategist driving partnerships and media innovation across the Web3 landscape.',
+        image: '/IMG_0374.png',
         socials: {
-          twitter: 'https://twitter.com/frankferraro',
-          linkedin: 'https://www.linkedin.com/in/frankferraro/',
+          twitter: 'https://x.com/nyaltx',
+          linkedin: 'https://www.linkedin.com/in/ferrarofrank/',
+          telegram: 'https://t.me/newyorkaltexchangegroup'
+        },
+      },
+      {
+        name: 'Andrea Cataneo',
+        role: 'General Counsel',
+        description:
+          'Seasoned securities attorney and capital markets strategist, guiding companies through public offerings, compliance, and Web3 expansion.',
+        image: '/img.png',
+        socials: {
+          twitter: '',
+          linkedin: 'https://www.linkedin.com/in/andreacataneo/',
+          telegram: ''
+        },
+      },
+      {
+        name: 'John',
+        role: 'CMO',
+        description:
+          'Im CMO',
+        image: '/IMG_1273.png',
+        socials: {
+          twitter: '',
+          linkedin: '',
+          telegram: ''
         },
       },
     ],
   };
 
-  const teamContent = content ?? fallbackContent;
+  const teamContent = useStatic ? fallbackContent : (content ?? fallbackContent);
   const hero = teamContent.hero ?? fallbackContent.hero;
   const members = teamContent.members ?? fallbackContent.members;
+
+  // Debug logging
+  console.log('Team content loaded:', { content, loading, useStatic });
+  console.log('Members data:', members);
+  console.log('Image errors state:', imgErrors);
+  console.log('Content source:', useStatic ? 'Static fallback' : (content ? 'API' : 'Fallback'));
 
   const socialIcon = (platform: string) => {
     if (platform === 'twitter' || platform === 'x') {
@@ -65,6 +99,7 @@ export default function TeamPage() {
                 alt="Team background"
                 fill
                 className="object-cover opacity-10"
+                unoptimized
                 priority
               />
             </div>
@@ -83,6 +118,12 @@ export default function TeamPage() {
                   {hero?.title}
                 </span>
               </h1>
+              <button 
+                onClick={() => setUseStatic(!useStatic)}
+                className="mt-4 px-4 py-2 bg-cyan-500 text-white rounded-md text-sm"
+              >
+                {useStatic ? 'Use API Content' : 'Use Static Content'} (Debug)
+              </button>
               {hero?.subtitle && (
                 <p className="mt-4 text-lg text-white/70">{hero.subtitle}</p>
               )}
@@ -126,14 +167,27 @@ export default function TeamPage() {
                           alt={member.name}
                           fill
                           className="object-cover"
-                          onError={() => setImgErrors(prev => ({ ...prev, [keyName]: true }))}
+                          unoptimized
+                          onError={(e) => {
+                            console.error(`Failed to load image for ${member.name}:`, member.image, e);
+                            setImgErrors(prev => ({ ...prev, [keyName]: true }));
+                          }}
+                          onLoad={() => console.log(`Successfully loaded image for ${member.name}:`, member.image)}
                         />
                       ) : (
-                        <div className="absolute inset-0 flex items-center justify-center text-4xl font-semibold text-white/60">
-                          {member.name
-                            .split(' ')
-                            .map(part => part.charAt(0))
-                            .join('')}
+                        <div className="absolute inset-0 flex flex-col items-center justify-center text-white/60">
+                          <div className="text-4xl font-semibold">
+                            {member.name
+                              .split(' ')
+                              .map(part => part.charAt(0))
+                              .join('')}
+                          </div>
+                          <div className="text-xs mt-2 text-red-400">
+                            {hasError ? 'Image failed to load' : 'No image'}
+                          </div>
+                          <div className="text-xs text-gray-400">
+                            {member.image}
+                          </div>
                         </div>
                       )}
                     </div>

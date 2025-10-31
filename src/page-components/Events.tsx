@@ -7,7 +7,6 @@ import {
     Cross2Icon,
     ExternalLinkIcon,
     EyeOpenIcon,
-    ImageIcon,
     TokensIcon
 } from '@radix-ui/react-icons';
 import Image from 'next/image';
