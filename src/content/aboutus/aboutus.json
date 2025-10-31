@@ -48,7 +48,7 @@
         "contactInfo": [
           {
             "label": "Email",
-            "value": "info@nyaltx.com"
+            "value": "info@nyaltx.pro"
           }
         ]
       }
@@ -58,6 +58,6 @@
     "metaTitle": "About Us - NYALTX | Building the Future of DeFi",
     "metaDescription": "Learn about NYALTX's mission to make cryptocurrency trading accessible, transparent, and efficient through data-driven aggregation.",
     "keywords": "about NYALTX, DeFi platform, cryptocurrency trading, blockchain technology, DEX aggregator",
-    "canonical": "https://nyaltx.com/about-us"
+    "canonical": "https://nyaltx.pro/about-us"
   }
 }

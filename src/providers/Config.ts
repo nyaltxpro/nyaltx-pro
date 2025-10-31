@@ -1,5 +1,5 @@
 // perhaps in a client-only module
-import { arbitrum, mainnet, base, polygon, scroll } from '@reown/appkit/networks';
+import { arbitrum, base, mainnet, polygon, scroll } from '@reown/appkit/networks';
 import { createAppKit } from '@reown/appkit/react';
 import { projectId, wagmiAdapter } from '../lib/web3modal';
 

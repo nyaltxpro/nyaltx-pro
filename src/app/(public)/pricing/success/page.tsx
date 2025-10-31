@@ -153,7 +153,7 @@ export default function PaymentSuccessPage({
           <div className="mt-12 text-center">
             <p className="text-gray-400 text-sm">
               Need help? Contact our support team at{' '}
-              <a href="mailto:support@nyaltx.com" className="text-cyan-400 hover:underline">
+              <a href="mailto:support@nyaltx.pro" className="text-cyan-400 hover:underline">
                 nyaltxpro@gmail.com
               </a>
             </p>

@@ -216,7 +216,7 @@ function CheckoutSuccessContent() {
             Need help? Contact our support team
           </p>
           <Link
-            href="mailto:support@nyaltx.com"
+            href="mailto:support@nyaltx.pro"
             className="text-[#00b8d8] hover:text-[#0099b8] text-sm underline"
           >
             nyaltxpro@gmail.com

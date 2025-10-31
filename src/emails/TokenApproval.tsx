@@ -137,8 +137,8 @@ export default function TokenApproval({
             <Section style={lowerSection}>
               <Text style={footerText}>
                 Need help? Contact us at{' '}
-                <Link href="mailto:support@nyaltx.com" style={link}>
-                  support@nyaltx.com
+                <Link href="mailto:support@nyaltx.pro" style={link}>
+                  support@nyaltx.pro
                 </Link>
               </Text>
               <Text style={copyrightText}>

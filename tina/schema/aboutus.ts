@@ -154,7 +154,7 @@ export const aboutUs: Collection = {
                   name: "value",
                   label: "Value",
                   type: "string",
-                  description: "e.g., 'info@nyaltx.com', '@nyaltx'"
+                  description: "e.g., 'info@nyaltx.pro', '@nyaltx'"
                 }
               ]
             }

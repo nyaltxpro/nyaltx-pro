@@ -178,7 +178,7 @@ export default function AdminLoginComponent() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-3 bg-gray-700/30 border border-gray-600/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00b8d8] focus:border-[#00b8d8] backdrop-blur-sm transition-all duration-200"
-              placeholder="admin@nyaltx.com"
+              placeholder="admin@nyaltx.pro"
               style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
               required
             />

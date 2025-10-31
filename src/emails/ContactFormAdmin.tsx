@@ -89,7 +89,7 @@ export default function ContactFormAdmin({
           <Text style={footerText}>
             © {new Date().getFullYear()} NYALTX. All rights reserved. |{' '}
             <Link href={`${baseUrl}`} target="_blank" style={link}>
-              nyaltx.com
+              nyaltx.pro
             </Link>
             {' | '}
             <Link href={`${baseUrl}/admin`} target="_blank" style={link}>

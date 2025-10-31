@@ -1,6 +1,6 @@
 import { DefaultSeoProps } from 'next-seo';
 
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://nyaltx.com';
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://nyaltx.pro';
 
 export const defaultSEO: DefaultSeoProps = {
   title: 'NYALTX | Crypto Token Tracker & DeFi Platform',
@@ -101,7 +101,7 @@ export const defaultSEO: DefaultSeoProps = {
     },
     {
       name: 'twitter:domain',
-      content: 'nyaltx.com',
+      content: 'nyaltx.pro',
     },
     {
       name: 'google-site-verification',
