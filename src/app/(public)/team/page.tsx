@@ -5,9 +5,11 @@ import { useTeamContent } from '@/hooks/useTinaContent';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { FiLinkedin, FiSend, FiTwitter } from 'react-icons/fi';
+import { useMemo, useState } from 'react';
 
 export default function TeamPage() {
   const { content, loading } = useTeamContent();
+  const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({});
 
   const fallbackContent = {
     hero: {
@@ -109,19 +111,22 @@ export default function TeamPage() {
                 const socialEntries = Object.entries(member.socials ?? {}).filter(
                   ([, url]) => typeof url === 'string' && url.length > 0
                 );
+                const keyName = `${member.name}-${member.role ?? 'member'}`;
+                const hasError = imgErrors[keyName];
 
                 return (
                   <div
-                    key={`${member.name}-${member.role ?? 'member'}`}
+                    key={keyName}
                     className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur transition-all duration-300 hover:-translate-y-1 hover:border-cyan-500/40"
                   >
                     <div className="relative h-52 bg-gradient-to-br from-gray-900 to-gray-800">
-                      {member.image ? (
+                      {member.image && !hasError ? (
                         <Image
                           src={member.image}
                           alt={member.name}
                           fill
                           className="object-cover"
+                          onError={() => setImgErrors(prev => ({ ...prev, [keyName]: true }))}
                         />
                       ) : (
                         <div className="absolute inset-0 flex items-center justify-center text-4xl font-semibold text-white/60">

@@ -7,6 +7,7 @@ import {
     Cross2Icon,
     ExternalLinkIcon,
     EyeOpenIcon,
+    ImageIcon,
     TokensIcon
 } from '@radix-ui/react-icons';
 import Image from 'next/image';
@@ -56,6 +57,8 @@ export default function EventsPage() {
     const [totalPages, setTotalPages] = useState(1);
     const [filter, setFilter] = useState<'all' | 'important' | 'today'>('all');
     const [selectedImage, setSelectedImage] = useState<{ src: string; title: string } | null>(null);
+    const [imageErrors, setImageErrors] = useState<Record<number, boolean>>({});
+    const [modalImageError, setModalImageError] = useState(false);
 
     const fetchEvents = async (pageNum: number = 1) => {
         try {
@@ -81,6 +84,10 @@ export default function EventsPage() {
     useEffect(() => {
         fetchEvents(1);
     }, []);
+
+    useEffect(() => {
+        setModalImageError(false);
+    }, [selectedImage]);
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
@@ -230,51 +237,63 @@ export default function EventsPage() {
                             <div className="absolute -inset-0.5 bg-gradient-to-r from-[#00c3ff]/20 via-[#7c3aed]/20 to-[#f59e0b]/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
 
                             <div className="relative bg-black/60 backdrop-blur-sm border border-gray-800/50 rounded-2xl overflow-hidden hover:border-gray-700/50 transition-all duration-300 group-hover:transform group-hover:scale-[1.02]">
-                                {/* Event Image */}
-                                {event.proof && (
-                                    <div
-                                        className="relative h-48 overflow-hidden cursor-pointer group/image"
-                                        onClick={() =>
-                                            setSelectedImage({ src: getProxiedImageUrl(event.proof), title: event.title.en })
-                                        }
-                                    >
+                                {/* Event Image with fallback */}
+                                <div
+                                    className="relative h-48 overflow-hidden cursor-pointer group/image"
+                                    onClick={() =>
+                                        event.proof && setSelectedImage({ src: getProxiedImageUrl(event.proof), title: event.title.en })
+                                    }
+                                >
+                                    {event.proof && !imageErrors[event.id] ? (
                                         <Image
                                             src={getProxiedImageUrl(event.proof)}
                                             alt={event.title.en}
                                             fill
                                             className="object-cover transition-transform duration-300 group-hover:scale-105"
-                                            onError={e => {
-                                                (e.target as HTMLImageElement).style.display = 'none';
+                                            onError={() => {
+                                                setImageErrors(prev => ({ ...prev, [event.id]: true }));
                                             }}
                                         />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                                    ) : (
+                                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
+                                            <div className="w-14 h-14 rounded-full bg-gray-700 flex items-center justify-center">
+                                                <ImageIcon className="w-7 h-7 text-gray-400" />
+                                            </div>
+                                            <span className="mt-2 max-w-[90%] truncate text-xs text-gray-400 px-2 text-center">
+                                                {event.title.en}
+                                            </span>
+                                        </div>
+                                    )}
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
-                                        {/* View Image Overlay */}
+                                    {/* View Image Overlay */}
+                                    {event.proof && !imageErrors[event.id] && (
                                         <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/image:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                                             <div className="bg-white/20 backdrop-blur-sm rounded-full p-3 border border-white/30">
                                                 <EyeOpenIcon className="w-5 h-5 text-white" />
                                             </div>
                                         </div>
+                                    )}
 
-                                        {/* Event Type Badge */}
-                                        {event.categories && event.categories.length > 0 && (
-                                            <div className="absolute top-3 left-3">
-                                                <span className="bg-black/70 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-medium border border-white/20">
-                                                    {event.categories[0].name}
-                                                </span>
-                                            </div>
-                                        )}
+                                    {/* Event Type Badge */}
+                                    {event.categories && event.categories.length > 0 && (
+                                        <div className="absolute top-3 left-3">
+                                            <span className="bg-black/70 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-medium border border-white/20">
+                                                {event.categories[0].name}
+                                            </span>
+                                        </div>
+                                    )}
 
-                                        {/* Important Badge */}
-                                        {event.important && (
-                                            <div className="absolute top-3 right-3">
-                                                <div className="bg-yellow-500/90 backdrop-blur-sm text-black px-3 py-1 rounded-full text-xs font-bold">
-                                                    ⭐ Important
-                                                </div>
+                                    {/* Important Badge */}
+                                    {event.important && (
+        
+                                        <div className="absolute top-3 right-3">
+                                            <div className="bg-yellow-500/90 backdrop-blur-sm text-black px-3 py-1 rounded-full text-xs font-bold">
+                                                ⭐ Important
                                             </div>
-                                        )}
-                                    </div>
-                                )}
+                                        </div>
+                                    )}
+                                </div>
 
                                 <div className="p-6">
                                     <div className="flex items-center justify-between mb-3">
@@ -446,18 +465,27 @@ export default function EventsPage() {
                             </button>
                         </div>
 
-                        {/* Modal Image */}
+                        {/* Modal Image with fallback */}
                         <div className="relative flex-1 bg-black/30 backdrop-blur-sm rounded-b-lg overflow-hidden">
-                            <Image
-                                src={selectedImage.src}
-                                alt={selectedImage.title}
-                                fill
-                                className="object-contain"
-                                onClick={e => e.stopPropagation()}
-                                onError={e => {
-                                    console.error('Failed to load image:', selectedImage.src);
-                                }}
-                            />
+                            {!modalImageError ? (
+                                <Image
+                                    src={selectedImage.src}
+                                    alt={selectedImage.title}
+                                    fill
+                                    className="object-contain"
+                                    onClick={e => e.stopPropagation()}
+                                    onError={() => setModalImageError(true)}
+                                />
+                            ) : (
+                                <div className="w-full h-full flex items-center justify-center" onClick={e => e.stopPropagation()}>
+                                    <div className="flex flex-col items-center text-gray-400">
+                                        <div className="w-20 h-20 rounded-full bg-gray-700 flex items-center justify-center">
+                                            <ImageIcon className="w-10 h-10 text-gray-400" />
+                                        </div>
+                                        <span className="mt-3 text-sm">Image unavailable</span>
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         {/* Action Buttons */}
