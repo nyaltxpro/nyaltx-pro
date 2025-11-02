@@ -1,16 +1,11 @@
 'use client';
 
-import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import {
-    FiDownload,
     FiExternalLink,
-    FiHome,
     FiMail,
-    FiMenu,
     FiSend,
-    FiTwitter,
-    FiX
+    FiTwitter
 } from 'react-icons/fi';
 import PublicHeader from '../../../components/PublicHeader';
 
@@ -83,41 +78,9 @@ export default function WhitepaperPage() {
         <div className="min-h-screen bg-inherit text-white">
             {/* Public Header */}
             <PublicHeader />
-            
+
             {/* GitBook-style Header */}
-            <header className="sticky top-16 z-40 bg-gray-900 border-b border-gray-700 shadow-sm">
-                <div className="flex items-center justify-between px-4 h-16">
-                    <div className="flex items-center gap-4">
-                        <button
-                            onClick={() => setSidebarOpen(!sidebarOpen)}
-                            className="lg:hidden p-2 hover:bg-gray-800 rounded-md transition-colors"
-                        >
-                            {sidebarOpen ? <FiX className="h-5 w-5 text-white" /> : <FiMenu className="h-5 w-5 text-white" />}
-                        </button>
-                        <Link href="/" className="flex items-center gap-2 text-white hover:text-blue-600">
-                            <FiHome className="h-5 w-5" />
-                            <div className="flex items-center gap-2 text-sm text-gray-400">
-                                <span>NYALTX</span>
-                                <span>/</span>
-                                <span className="text-white font-medium">Whitepaper</span>
-                            </div>
-                        </Link>
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <button className="hidden sm:block px-4 py-2 bg-linear-to-r from-cyan-500 to-blue-600 text-white rounded-lg hover:from-cyan-600 hover:to-blue-700 transition-all">
-                            Download PDF
-                        </button>
-                        <a 
-                            href="https://nyaltx.com" 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="px-3 py-2 sm:px-4 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-800 hover:text-white transition-colors text-sm sm:text-base"
-                        >
-                            Visit Platform
-                        </a>
-                    </div>
-                </div>
-            </header>
+
 
             <div className="flex">
                 {/* GitBook-style Sidebar */}
@@ -139,8 +102,8 @@ export default function WhitepaperPage() {
                                     onClick={() => scrollToSection(section.id)}
                                     className={`
                                         block w-full text-left px-3 py-2 rounded-md text-sm transition-colors cursor-pointer
-                                        ${activeSection === section.id 
-                                            ? 'bg-linear-to-r from-cyan-500/20 to-blue-600/20 text-cyan-300 font-medium border-l-2 border-cyan-400' 
+                                        ${activeSection === section.id
+                                            ? 'bg-linear-to-r from-cyan-500/20 to-blue-600/20 text-cyan-300 font-medium border-l-2 border-cyan-400'
                                             : 'text-gray-400 hover:text-white hover:bg-gray-800'
                                         }
                                         ${section.level === 1 ? 'ml-4 text-xs' : ''}
@@ -162,7 +125,7 @@ export default function WhitepaperPage() {
                 )}
 
                 {/* Main Content */}
-                <main className="flex-1 lg:ml-80 min-h-screen">
+                <main className="flex-1  min-h-screen">
                     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
                         <article className="max-w-none">
 
@@ -173,7 +136,7 @@ export default function WhitepaperPage() {
                                     New York Alt Exchange - Powered by the NYAX Token
                                 </p>
                                 <p className="text-gray-300 leading-relaxed text-sm sm:text-base">
-                                    Welcome to the comprehensive technical documentation for NYALTX, a revolutionary decentralized finance (DeFi) platform 
+                                    Welcome to the comprehensive technical documentation for NYALTX, a revolutionary decentralized finance (DeFi) platform
                                     designed to transform how crypto projects gain visibility, liquidity, and growth opportunities in the Web3 ecosystem.
                                 </p>
                             </section>
@@ -183,7 +146,7 @@ export default function WhitepaperPage() {
                                 <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6">Executive Summary</h2>
                                 <div className="bg-linear-to-r from-cyan-500/10 to-blue-600/10 border-l-4 border-cyan-400 p-6 mb-6 rounded-r-lg">
                                     <p className="text-cyan-300 font-medium">
-                                        NYALTX represents the next evolution in decentralized finance infrastructure, 
+                                        NYALTX represents the next evolution in decentralized finance infrastructure,
                                         combining traditional financial tools with cutting-edge blockchain technology.
                                     </p>
                                 </div>
@@ -249,7 +212,7 @@ export default function WhitepaperPage() {
                             {/* Platform Overview */}
                             <section id="platform-overview" className="mb-8 sm:mb-12 scroll-mt-32">
                                 <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6">Platform Overview</h2>
-                
+
                                 <div id="crypto-profiles" className="mb-8">
                                     <h3 className="text-2xl font-semibold text-gray-200 mb-4">Crypto Profiles</h3>
                                     <p className="text-gray-300 mb-4">
@@ -290,7 +253,7 @@ export default function WhitepaperPage() {
                             {/* The NYAX Token */}
                             <section id="nyax-token" className="mb-8 sm:mb-12 scroll-mt-32">
                                 <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6">The NYAX Token</h2>
-                                
+
                                 <div id="payment-token" className="mb-8">
                                     <h3 className="text-2xl font-semibold text-gray-200 mb-4">Payment Token</h3>
                                     <p className="text-gray-300 mb-4">
@@ -316,7 +279,7 @@ export default function WhitepaperPage() {
                             {/* Tokenomics */}
                             <section id="tokenomics" className="mb-8 sm:mb-12 scroll-mt-32">
                                 <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6">Tokenomics</h2>
-                                
+
                                 <div id="token-details" className="mb-8">
                                     <h3 className="text-2xl font-semibold text-gray-200 mb-4">Token Details</h3>
                                     <div className="bg-gray-800 border border-gray-700 p-6 rounded-lg">
@@ -397,7 +360,7 @@ export default function WhitepaperPage() {
                             {/* Roadmap */}
                             <section id="roadmap" className="mb-8 sm:mb-12 scroll-mt-32">
                                 <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6">Roadmap</h2>
-                
+
                                 <div id="phase-1" className="mb-8">
                                     <h3 className="text-2xl font-semibold text-gray-200 mb-4">Phase 1 - Launch (2025)</h3>
                                     <ul className="space-y-2 text-gray-300 ml-6">
@@ -440,12 +403,12 @@ export default function WhitepaperPage() {
                                 <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6">Conclusion</h2>
                                 <div className="bg-gray-800 border border-gray-700 p-8 rounded-lg">
                                     <p className="text-gray-300 text-lg leading-relaxed mb-4">
-                                        NYALTX represents a paradigm shift in how crypto projects approach marketing, community building, and investor relations. 
-                                        By combining DeFi infrastructure with social engagement tools and real-world networking opportunities, we're creating 
+                                        NYALTX represents a paradigm shift in how crypto projects approach marketing, community building, and investor relations.
+                                        By combining DeFi infrastructure with social engagement tools and real-world networking opportunities, we're creating
                                         a comprehensive ecosystem that serves the entire crypto project lifecycle.
                                     </p>
                                     <p className="text-gray-300 leading-relaxed">
-                                        The NYAX token serves as the foundation of this ecosystem, incentivizing participation, governance, and long-term 
+                                        The NYAX token serves as the foundation of this ecosystem, incentivizing participation, governance, and long-term
                                         platform growth. Join us in building the future of decentralized project marketing and community engagement.
                                     </p>
                                 </div>
