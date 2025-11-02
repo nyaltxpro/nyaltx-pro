@@ -12,6 +12,7 @@ import {
     FiTwitter,
     FiX
 } from 'react-icons/fi';
+import PublicHeader from '../../../components/PublicHeader';
 
 export default function WhitepaperPage() {
     const [activeSection, setActiveSection] = useState('introduction');
@@ -80,8 +81,11 @@ export default function WhitepaperPage() {
 
     return (
         <div className="min-h-screen bg-inherit text-white">
+            {/* Public Header */}
+            <PublicHeader />
+            
             {/* GitBook-style Header */}
-            <header className="sticky top-0 z-50 bg-gray-900 border-b border-gray-700 shadow-sm">
+            <header className="sticky top-16 z-40 bg-gray-900 border-b border-gray-700 shadow-sm">
                 <div className="flex items-center justify-between px-4 h-16">
                     <div className="flex items-center gap-4">
                         <button
@@ -118,28 +122,28 @@ export default function WhitepaperPage() {
             <div className="flex">
                 {/* GitBook-style Sidebar */}
                 <aside className={`
-                    fixed top-16 left-0 z-40 w-80 h-[calc(100vh-4rem)] bg-gray-900 border-r border-gray-700 
+                    fixed top-32 left-0 z-30 w-80 h-[calc(100vh-8rem)] bg-gray-900 border-r border-gray-700 
                     transform transition-transform duration-300 ease-in-out overflow-y-auto
                     ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-                    lg:translate-x-0 lg:static lg:z-0 lg:h-[calc(100vh-4rem)]
+                    lg:translate-x-0 lg:static lg:z-0 lg:h-[calc(100vh-8rem)]
                 `}>
                     <div className="p-6">
                         <div className="mb-6">
                             <h2 className="text-lg font-semibold text-white mb-4">Table of Contents</h2>
                         </div>
 
-                        <nav className="space-y-1">
+                        <nav className="space-y-0.5">
                             {sections.map((section) => (
                                 <button
                                     key={section.id}
                                     onClick={() => scrollToSection(section.id)}
                                     className={`
-                                        block px-3 py-2 rounded-md text-sm transition-colors cursor-pointer
+                                        block w-full text-left px-3 py-2 rounded-md text-sm transition-colors cursor-pointer
                                         ${activeSection === section.id 
                                             ? 'bg-linear-to-r from-cyan-500/20 to-blue-600/20 text-cyan-300 font-medium border-l-2 border-cyan-400' 
                                             : 'text-gray-400 hover:text-white hover:bg-gray-800'
                                         }
-                                        ${section.level === 2 ? 'ml-4' : ''}
+                                        ${section.level === 1 ? 'ml-4 text-xs' : ''}
                                     `}
                                 >
                                     {section.title}
@@ -152,7 +156,7 @@ export default function WhitepaperPage() {
                 {/* Overlay for mobile */}
                 {sidebarOpen && (
                     <div
-                        className="lg:hidden fixed inset-0 top-16 bg-black bg-opacity-50 z-30"
+                        className="lg:hidden fixed inset-0 top-32 bg-black bg-opacity-50 z-20"
                         onClick={() => setSidebarOpen(false)}
                     />
                 )}
@@ -163,7 +167,7 @@ export default function WhitepaperPage() {
                         <article className="max-w-none">
 
                             {/* Introduction */}
-                            <section id="introduction" className="mb-12 sm:mb-16">
+                            <section id="introduction" className="mb-8 sm:mb-12 scroll-mt-32">
                                 <h1 className="text-3xl sm:text-4xl font-bold text-white mb-4 sm:mb-6">NYALTX Whitepaper</h1>
                                 <p className="text-lg sm:text-xl text-gray-300 mb-6 sm:mb-8">
                                     New York Alt Exchange - Powered by the NYAX Token
@@ -175,7 +179,7 @@ export default function WhitepaperPage() {
                             </section>
 
                             {/* Executive Summary */}
-                            <section id="executive-summary" className="mb-12 sm:mb-16">
+                            <section id="executive-summary" className="mb-8 sm:mb-12 scroll-mt-32">
                                 <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6">Executive Summary</h2>
                                 <div className="bg-linear-to-r from-cyan-500/10 to-blue-600/10 border-l-4 border-cyan-400 p-6 mb-6 rounded-r-lg">
                                     <p className="text-cyan-300 font-medium">
@@ -200,7 +204,7 @@ export default function WhitepaperPage() {
                             </section>
 
                             {/* Vision & Mission */}
-                            <section id="vision-mission" className="mb-12 sm:mb-16">
+                            <section id="vision-mission" className="mb-8 sm:mb-12 scroll-mt-32">
                                 <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6">Vision & Mission</h2>
                                 <div id="vision" className="mb-8">
                                     <h3 className="text-2xl font-semibold text-gray-200 mb-4">Vision</h3>
@@ -222,7 +226,7 @@ export default function WhitepaperPage() {
                             </section>
 
                             {/* Market Opportunity */}
-                            <section id="market-opportunity" className="mb-12 sm:mb-16">
+                            <section id="market-opportunity" className="mb-8 sm:mb-12 scroll-mt-32">
                                 <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6">Market Opportunity</h2>
                                 <div className="grid sm:grid-cols-2 gap-6 sm:gap-8 mb-6">
                                     <div className="bg-gray-800 border border-gray-700 p-6 rounded-lg">
@@ -243,7 +247,7 @@ export default function WhitepaperPage() {
                             </section>
 
                             {/* Platform Overview */}
-                            <section id="platform-overview" className="mb-12 sm:mb-16">
+                            <section id="platform-overview" className="mb-8 sm:mb-12 scroll-mt-32">
                                 <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6">Platform Overview</h2>
                 
                                 <div id="crypto-profiles" className="mb-8">
@@ -284,7 +288,7 @@ export default function WhitepaperPage() {
                             </section>
 
                             {/* The NYAX Token */}
-                            <section id="nyax-token" className="mb-12 sm:mb-16">
+                            <section id="nyax-token" className="mb-8 sm:mb-12 scroll-mt-32">
                                 <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6">The NYAX Token</h2>
                                 
                                 <div id="payment-token" className="mb-8">
@@ -310,7 +314,7 @@ export default function WhitepaperPage() {
                             </section>
 
                             {/* Tokenomics */}
-                            <section id="tokenomics" className="mb-12 sm:mb-16">
+                            <section id="tokenomics" className="mb-8 sm:mb-12 scroll-mt-32">
                                 <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6">Tokenomics</h2>
                                 
                                 <div id="token-details" className="mb-8">
@@ -367,7 +371,7 @@ export default function WhitepaperPage() {
                             </section>
 
                             {/* Competitive Advantage */}
-                            <section id="competitive-advantage" className="mb-12 sm:mb-16">
+                            <section id="competitive-advantage" className="mb-8 sm:mb-12 scroll-mt-32">
                                 <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6">Competitive Advantage</h2>
                                 <div className="bg-linear-to-r from-indigo-500/10 to-purple-600/10 border-l-4 border-indigo-400 p-6 mb-6 rounded-r-lg">
                                     <p className="text-indigo-300 font-medium">
@@ -391,7 +395,7 @@ export default function WhitepaperPage() {
                             </section>
 
                             {/* Roadmap */}
-                            <section id="roadmap" className="mb-12 sm:mb-16">
+                            <section id="roadmap" className="mb-8 sm:mb-12 scroll-mt-32">
                                 <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6">Roadmap</h2>
                 
                                 <div id="phase-1" className="mb-8">
@@ -432,7 +436,7 @@ export default function WhitepaperPage() {
                             </section>
 
                             {/* Conclusion */}
-                            <section id="conclusion" className="mb-12 sm:mb-16">
+                            <section id="conclusion" className="mb-8 sm:mb-12 scroll-mt-32">
                                 <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6">Conclusion</h2>
                                 <div className="bg-gray-800 border border-gray-700 p-8 rounded-lg">
                                     <p className="text-gray-300 text-lg leading-relaxed mb-4">
@@ -448,7 +452,7 @@ export default function WhitepaperPage() {
                             </section>
 
                             {/* Contact Information */}
-                            <section id="contact" className="mb-12 sm:mb-16">
+                            <section id="contact" className="mb-8 sm:mb-12 scroll-mt-32">
                                 <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6">Contact Information</h2>
                                 <div className="grid sm:grid-cols-2 gap-6 sm:gap-8">
                                     <div>
