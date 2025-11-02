@@ -28,6 +28,7 @@ export default function PublicHeader() {
         { label: 'Venture Group', href: '/venture-group', enabled: true },
         { label: 'Podcast', href: '/podcast', enabled: true },
         { label: 'Team', href: '/team', enabled: true },
+        { label: 'Whitepaper', href: '/whitepaper', enabled: true },
         { label: 'Help & Support', href: '/contact', enabled: true },
         { label: 'Our News', href: '/news', enabled: true },
       ],
