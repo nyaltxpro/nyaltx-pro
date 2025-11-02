@@ -1,12 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import {
-    FiExternalLink,
-    FiMail,
-    FiSend,
-    FiTwitter
-} from 'react-icons/fi';
 import PublicHeader from '../../../components/PublicHeader';
 
 export default function WhitepaperPage() {
@@ -415,45 +409,7 @@ export default function WhitepaperPage() {
                             </section>
 
                             {/* Contact Information */}
-                            <section id="contact" className="mb-8 sm:mb-12 scroll-mt-32">
-                                <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6">Contact Information</h2>
-                                <div className="grid sm:grid-cols-2 gap-6 sm:gap-8">
-                                    <div>
-                                        <h3 className="text-xl font-semibold text-gray-200 mb-4">Get in Touch</h3>
-                                        <div className="space-y-3">
-                                            <div className="flex items-center gap-3">
-                                                <FiMail className="h-5 w-5 text-cyan-400" />
-                                                <a href="mailto:info@nyaltx.com" className="text-cyan-400 hover:text-cyan-300 hover:underline">
-                                                    info@nyaltx.com
-                                                </a>
-                                            </div>
-                                            <div className="flex items-center gap-3">
-                                                <FiExternalLink className="h-5 w-5 text-cyan-400" />
-                                                <a href="https://nyaltx.com" target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:text-cyan-300 hover:underline">
-                                                    https://nyaltx.com
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <h3 className="text-xl font-semibold text-gray-200 mb-4">Follow Us</h3>
-                                        <div className="space-y-3">
-                                            <div className="flex items-center gap-3">
-                                                <FiTwitter className="h-5 w-5 text-cyan-400" />
-                                                <a href="https://x.com/nyaltx" target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:text-cyan-300 hover:underline">
-                                                    @nyaltx
-                                                </a>
-                                            </div>
-                                            <div className="flex items-center gap-3">
-                                                <FiSend className="h-5 w-5 text-cyan-400" />
-                                                <a href="https://t.me/nyaltx" target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:text-cyan-300 hover:underline">
-                                                    Telegram
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </section>
+
 
                         </article>
                     </div>
