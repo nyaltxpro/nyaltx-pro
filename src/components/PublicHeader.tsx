@@ -4,8 +4,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { FaChevronDown } from 'react-icons/fa';
-import SimpleUnifiedWalletButton from './SimpleUnifiedWalletButton';
 import { usePublicNavigation } from '../hooks/useTinaContent';
+import SimpleUnifiedWalletButton from './SimpleUnifiedWalletButton';
 
 export default function PublicHeader() {
   const pathname = usePathname();
@@ -28,9 +28,8 @@ export default function PublicHeader() {
         { label: 'Venture Group', href: '/venture-group', enabled: true },
         { label: 'Podcast', href: '/podcast', enabled: true },
         { label: 'Team', href: '/team', enabled: true },
-        { label: 'Whitepaper', href: '/whitepaper', enabled: true },
-        { label: 'Help & Support', href: '/contact', enabled: true },
         { label: 'Our News', href: '/news', enabled: true },
+        { label: 'Whitepaper', href: '/whitepaper', enabled: true },
       ],
     },
   ];

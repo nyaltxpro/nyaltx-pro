@@ -81,14 +81,14 @@ export default function WhitepaperPage() {
     return (
         <div className="min-h-screen bg-inherit text-white">
             {/* GitBook-style Header */}
-            <header className="sticky top-0 z-50 bg-inherit   shadow-sm">
+            <header className="sticky top-0 z-50 bg-gray-900 border-b border-gray-700 shadow-sm">
                 <div className="flex items-center justify-between px-4 h-16">
                     <div className="flex items-center gap-4">
                         <button
                             onClick={() => setSidebarOpen(!sidebarOpen)}
-                            className="lg:hidden p-2 rounded-md"
+                            className="lg:hidden p-2 hover:bg-gray-800 rounded-md transition-colors"
                         >
-                            {sidebarOpen ? <FiX className="h-5 w-5" /> : <FiMenu className="h-5 w-5" />}
+                            {sidebarOpen ? <FiX className="h-5 w-5 text-white" /> : <FiMenu className="h-5 w-5 text-white" />}
                         </button>
                         <Link href="/" className="flex items-center gap-2 text-white hover:text-blue-600">
                             <FiHome className="h-5 w-5" />
@@ -100,14 +100,14 @@ export default function WhitepaperPage() {
                         </Link>
                     </div>
                     <div className="flex items-center gap-3">
-                        <button className="px-4 py-2 bg-linear-to-r from-cyan-500 to-blue-600 text-white rounded-lg hover:from-cyan-600 hover:to-blue-700 transition-all">
+                        <button className="hidden sm:block px-4 py-2 bg-linear-to-r from-cyan-500 to-blue-600 text-white rounded-lg hover:from-cyan-600 hover:to-blue-700 transition-all">
                             Download PDF
                         </button>
                         <a 
                             href="https://nyaltx.com" 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-800 hover:text-white transition-colors"
+                            className="px-3 py-2 sm:px-4 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-800 hover:text-white transition-colors text-sm sm:text-base"
                         >
                             Visit Platform
                         </a>
@@ -121,12 +121,11 @@ export default function WhitepaperPage() {
                     fixed top-16 left-0 z-40 w-80 h-[calc(100vh-4rem)] bg-gray-900 border-r border-gray-700 
                     transform transition-transform duration-300 ease-in-out overflow-y-auto
                     ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-                    lg:translate-x-0 lg:static lg:z-0
+                    lg:translate-x-0 lg:static lg:z-0 lg:h-[calc(100vh-4rem)]
                 `}>
                     <div className="p-6">
                         <div className="mb-6">
-                            <h1 className="text-xl font-bold text-white mb-2">NYALTX Whitepaper</h1>
-                            <p className="text-sm text-gray-400">Powered by the NYAX Token</p>
+                            <h2 className="text-lg font-semibold text-white mb-4">Table of Contents</h2>
                         </div>
 
                         <nav className="space-y-1">
@@ -159,25 +158,25 @@ export default function WhitepaperPage() {
                 )}
 
                 {/* Main Content */}
-                <main className="flex-1 lg:ml-80">
-                    <div className="max-w-4xl mx-auto px-6 py-8">
+                <main className="flex-1 lg:ml-80 min-h-screen">
+                    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
                         <article className="max-w-none">
 
                             {/* Introduction */}
-                            <section id="introduction" className="mb-16">
-                                <h1 className="text-4xl font-bold text-white mb-6">NYALTX Whitepaper</h1>
-                                <p className="text-xl text-gray-300 mb-8">
+                            <section id="introduction" className="mb-12 sm:mb-16">
+                                <h1 className="text-3xl sm:text-4xl font-bold text-white mb-4 sm:mb-6">NYALTX Whitepaper</h1>
+                                <p className="text-lg sm:text-xl text-gray-300 mb-6 sm:mb-8">
                                     New York Alt Exchange - Powered by the NYAX Token
                                 </p>
-                                <p className="text-gray-300 leading-relaxed">
+                                <p className="text-gray-300 leading-relaxed text-sm sm:text-base">
                                     Welcome to the comprehensive technical documentation for NYALTX, a revolutionary decentralized finance (DeFi) platform 
                                     designed to transform how crypto projects gain visibility, liquidity, and growth opportunities in the Web3 ecosystem.
                                 </p>
                             </section>
 
                             {/* Executive Summary */}
-                            <section id="executive-summary" className="mb-16">
-                                <h2 className="text-3xl font-bold text-white mb-6">Executive Summary</h2>
+                            <section id="executive-summary" className="mb-12 sm:mb-16">
+                                <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6">Executive Summary</h2>
                                 <div className="bg-linear-to-r from-cyan-500/10 to-blue-600/10 border-l-4 border-cyan-400 p-6 mb-6 rounded-r-lg">
                                     <p className="text-cyan-300 font-medium">
                                         NYALTX represents the next evolution in decentralized finance infrastructure, 
@@ -201,8 +200,8 @@ export default function WhitepaperPage() {
                             </section>
 
                             {/* Vision & Mission */}
-                            <section id="vision-mission" className="mb-16">
-                                <h2 className="text-3xl font-bold text-white mb-6">Vision & Mission</h2>
+                            <section id="vision-mission" className="mb-12 sm:mb-16">
+                                <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6">Vision & Mission</h2>
                                 <div id="vision" className="mb-8">
                                     <h3 className="text-2xl font-semibold text-gray-200 mb-4">Vision</h3>
                                     <div className="bg-linear-to-r from-green-500/10 to-emerald-600/10 border-l-4 border-green-400 p-6 rounded-r-lg">
@@ -223,9 +222,9 @@ export default function WhitepaperPage() {
                             </section>
 
                             {/* Market Opportunity */}
-                            <section id="market-opportunity" className="mb-16">
-                                <h2 className="text-3xl font-bold text-white mb-6">Market Opportunity</h2>
-                                <div className="grid md:grid-cols-2 gap-8 mb-6">
+                            <section id="market-opportunity" className="mb-12 sm:mb-16">
+                                <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6">Market Opportunity</h2>
+                                <div className="grid sm:grid-cols-2 gap-6 sm:gap-8 mb-6">
                                     <div className="bg-gray-800 border border-gray-700 p-6 rounded-lg">
                                         <div className="text-3xl font-bold text-cyan-400 mb-2">18,000+</div>
                                         <p className="text-gray-300">Active tokens competing for visibility across fragmented markets</p>
@@ -244,8 +243,8 @@ export default function WhitepaperPage() {
                             </section>
 
                             {/* Platform Overview */}
-                            <section id="platform-overview" className="mb-16">
-                                <h2 className="text-3xl font-bold text-white mb-6">Platform Overview</h2>
+                            <section id="platform-overview" className="mb-12 sm:mb-16">
+                                <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6">Platform Overview</h2>
                 
                                 <div id="crypto-profiles" className="mb-8">
                                     <h3 className="text-2xl font-semibold text-gray-200 mb-4">Crypto Profiles</h3>
@@ -268,7 +267,7 @@ export default function WhitepaperPage() {
                                     </p>
                                 </div>
 
-                                <div className="grid md:grid-cols-3 gap-6">
+                                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                                     <div className="bg-linear-to-br from-blue-500/10 to-cyan-600/10 border border-blue-500/20 p-6 rounded-lg">
                                         <h4 className="font-semibold text-blue-300 mb-2">Profile Upgrades</h4>
                                         <p className="text-gray-300 text-sm">Paid in NYAX/ETH for boosted visibility</p>
@@ -285,8 +284,8 @@ export default function WhitepaperPage() {
                             </section>
 
                             {/* The NYAX Token */}
-                            <section id="nyax-token" className="mb-16">
-                                <h2 className="text-3xl font-bold text-white mb-6">The NYAX Token</h2>
+                            <section id="nyax-token" className="mb-12 sm:mb-16">
+                                <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6">The NYAX Token</h2>
                                 
                                 <div id="payment-token" className="mb-8">
                                     <h3 className="text-2xl font-semibold text-gray-200 mb-4">Payment Token</h3>
@@ -311,8 +310,8 @@ export default function WhitepaperPage() {
                             </section>
 
                             {/* Tokenomics */}
-                            <section id="tokenomics" className="mb-16">
-                                <h2 className="text-3xl font-bold text-white mb-6">Tokenomics</h2>
+                            <section id="tokenomics" className="mb-12 sm:mb-16">
+                                <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6">Tokenomics</h2>
                                 
                                 <div id="token-details" className="mb-8">
                                     <h3 className="text-2xl font-semibold text-gray-200 mb-4">Token Details</h3>
@@ -328,7 +327,7 @@ export default function WhitepaperPage() {
 
                                 <div id="allocation" className="mb-8">
                                     <h3 className="text-2xl font-semibold text-gray-200 mb-4">Allocation</h3>
-                                    <div className="grid md:grid-cols-2 gap-6">
+                                    <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
                                         <div className="bg-linear-to-br from-blue-500/10 to-cyan-600/10 border border-blue-500/20 p-4 rounded-lg">
                                             <div className="text-2xl font-bold text-blue-400">40%</div>
                                             <p className="text-blue-300">Community & Ecosystem</p>
@@ -368,8 +367,8 @@ export default function WhitepaperPage() {
                             </section>
 
                             {/* Competitive Advantage */}
-                            <section id="competitive-advantage" className="mb-16">
-                                <h2 className="text-3xl font-bold text-white mb-6">Competitive Advantage</h2>
+                            <section id="competitive-advantage" className="mb-12 sm:mb-16">
+                                <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6">Competitive Advantage</h2>
                                 <div className="bg-linear-to-r from-indigo-500/10 to-purple-600/10 border-l-4 border-indigo-400 p-6 mb-6 rounded-r-lg">
                                     <p className="text-indigo-300 font-medium">
                                         NYALTX combines the best of DeFi trading, social media marketing, and venture networking in one integrated platform.
@@ -392,8 +391,8 @@ export default function WhitepaperPage() {
                             </section>
 
                             {/* Roadmap */}
-                            <section id="roadmap" className="mb-16">
-                                <h2 className="text-3xl font-bold text-white mb-6">Roadmap</h2>
+                            <section id="roadmap" className="mb-12 sm:mb-16">
+                                <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6">Roadmap</h2>
                 
                                 <div id="phase-1" className="mb-8">
                                     <h3 className="text-2xl font-semibold text-gray-200 mb-4">Phase 1 - Launch (2025)</h3>
@@ -433,8 +432,8 @@ export default function WhitepaperPage() {
                             </section>
 
                             {/* Conclusion */}
-                            <section id="conclusion" className="mb-16">
-                                <h2 className="text-3xl font-bold text-white mb-6">Conclusion</h2>
+                            <section id="conclusion" className="mb-12 sm:mb-16">
+                                <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6">Conclusion</h2>
                                 <div className="bg-gray-800 border border-gray-700 p-8 rounded-lg">
                                     <p className="text-gray-300 text-lg leading-relaxed mb-4">
                                         NYALTX represents a paradigm shift in how crypto projects approach marketing, community building, and investor relations. 
@@ -449,9 +448,9 @@ export default function WhitepaperPage() {
                             </section>
 
                             {/* Contact Information */}
-                            <section id="contact" className="mb-16">
-                                <h2 className="text-3xl font-bold text-white mb-6">Contact Information</h2>
-                                <div className="grid md:grid-cols-2 gap-8">
+                            <section id="contact" className="mb-12 sm:mb-16">
+                                <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6">Contact Information</h2>
+                                <div className="grid sm:grid-cols-2 gap-6 sm:gap-8">
                                     <div>
                                         <h3 className="text-xl font-semibold text-gray-200 mb-4">Get in Touch</h3>
                                         <div className="space-y-3">
