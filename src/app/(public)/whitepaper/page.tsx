@@ -408,7 +408,6 @@ export default function WhitepaperPage() {
                                 </div>
                             </section>
 
-                            {/* Contact Information */}
 
 
                         </article>
