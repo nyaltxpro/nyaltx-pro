@@ -14,11 +14,24 @@ interface TinaRichTextNode {
 }
 
 interface TinaRichTextProps {
-  content: TinaRichTextNode;
+  content: TinaRichTextNode | string | null | undefined;
   className?: string;
 }
 
 const TinaRichText: React.FC<TinaRichTextProps> = ({ content, className }) => {
+  if (!content) {
+    return null;
+  }
+
+  if (typeof content === "string") {
+    return (
+      <div
+        className={className}
+        dangerouslySetInnerHTML={{ __html: content }}
+      />
+    );
+  }
+
   const renderNode = (node: TinaRichTextNode, index: number = 0): React.ReactNode => {
     if (node.type === 'text') {
       return node.text;

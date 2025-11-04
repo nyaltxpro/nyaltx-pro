@@ -24,6 +24,7 @@ export default function PublicHeader() {
       label: 'More',
       enabled: true,
       links: [
+        { label: 'Blog', href: '/blog', enabled: true },
         { label: 'About Us', href: '/about-us', enabled: true },
         { label: 'Venture Group', href: '/venture-group', enabled: true },
         { label: 'Podcast', href: '/podcast', enabled: true },

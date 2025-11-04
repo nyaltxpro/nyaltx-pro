@@ -1,14 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { FaClock, FaUser, FaEye, FaTags, FaArrowLeft, FaShare, FaTwitter, FaLinkedin, FaCopy } from 'react-icons/fa';
+import TinaRichText from './TinaRichText';
 
 interface NewsData {
   _id: string;
   title: string;
-  content: string;
+  content: string | { content: any };
   excerpt: string;
   featuredImage?: string;
   publishedAt: string;
@@ -25,6 +26,22 @@ interface NewsArticleProps {
 function NewsArticle({ article }: NewsArticleProps) {
   const [copied, setCopied] = useState(false);
   const [imageError, setImageError] = useState(false);
+
+  const articleContent = useMemo(() => {
+    if (!article.content) return null;
+    if (typeof article.content === 'string') {
+      try {
+        const parsed = JSON.parse(article.content);
+        if (parsed && typeof parsed === 'object') {
+          return parsed;
+        }
+      } catch (error) {
+        return article.content;
+      }
+      return article.content;
+    }
+    return article.content;
+  }, [article.content]);
 
   // Helper function to convert Pinata gateway URLs to ipfs.io
   const convertToWorkingIPFSUrl = (url: string): string => {
@@ -123,7 +140,7 @@ function NewsArticle({ article }: NewsArticleProps) {
           )}
 
           {/* Title */}
-          <h1 className="text-3xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-indigo-400 mb-6 leading-tight">
+          <h1 className="text-3xl md:text-5xl font-bold bg-clip-text text-transparent bg-linear-to-r from-cyan-400 to-indigo-400 mb-6 leading-tight">
             {article.title}
           </h1>
 
@@ -217,12 +234,9 @@ function NewsArticle({ article }: NewsArticleProps) {
 
         {/* Article Content */}
         <article className="prose prose-lg prose-invert max-w-none">
-          <div 
-            className="text-gray-300 leading-relaxed space-y-6 article-content"
-            dangerouslySetInnerHTML={{ 
-              __html: article.content.replace(/\n/g, '<br />') 
-            }}
-          />
+          <div className="text-gray-300 leading-relaxed space-y-6 article-content">
+            <TinaRichText content={articleContent} />
+          </div>
         </article>
 
         {/* Custom styles for article images */}
@@ -307,7 +321,7 @@ function NewsArticle({ article }: NewsArticleProps) {
           </p>
           <Link
             href="/news"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cyan-500 to-indigo-500 hover:from-cyan-600 hover:to-indigo-600 text-white font-medium rounded-lg transition-all duration-200"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-linear-to-r from-cyan-500 to-indigo-500 hover:from-cyan-600 hover:to-indigo-600 text-white font-medium rounded-lg transition-all duration-200"
           >
             <FaTags className="w-4 h-4" />
             View All News
