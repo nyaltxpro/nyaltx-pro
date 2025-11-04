@@ -1,78 +1,23 @@
 {
+  "title": "Welcome to the NYALTX",
   "slug": "welcome-to-nyaltx-blog",
-  "title": "Welcome to the NYALTX Blog",
+  "publishedAt": "2025-02-01T12:00:00.000Z",
   "author": "NYALTX Editorial Team",
   "excerpt": "Discover platform updates, trading insights, and community stories powered by Tina CMS.",
-  "content": {
-    "type": "doc",
-    "content": [
-      {
-        "type": "heading",
-        "attrs": { "level": 2 },
-        "content": [
-          { "type": "text", "text": "A New Home for NYALTX Insights" }
-        ]
-      },
-      {
-        "type": "paragraph",
-        "content": [
-          {
-            "type": "text",
-            "text": "We built this blog to share platform updates, trading education, and stories from our community. Everything you see here is powered by Tina CMS — so the team can publish without touching code."
-          }
-        ]
-      },
-      {
-        "type": "paragraph",
-        "content": [
-          {
-            "type": "text",
-            "text": "Expect regular spotlights on feature releases, deep-dives into the Race to Liberty gamification system, interviews with builders in the NYALTX ecosystem, and curated resources to help traders and issuers grow." }
-        ]
-      },
-      {
-        "type": "bulletList",
-        "content": [
-          {
-            "type": "listItem",
-            "content": [
-              {
-                "type": "paragraph",
-                "content": [{ "type": "text", "text": "Release notes for major product launches" }]
-              }
-            ]
-          },
-          {
-            "type": "listItem",
-            "content": [
-              {
-                "type": "paragraph",
-                "content": [{ "type": "text", "text": "Token economy breakdowns and trading strategies" }]
-              }
-            ]
-          },
-          {
-            "type": "listItem",
-            "content": [
-              {
-                "type": "paragraph",
-                "content": [{ "type": "text", "text": "Behind-the-scenes looks at NYALTX events and community wins" }]
-              }
-            ]
-          }
-        ]
-      }
-    ]
-  },
-  "tags": ["announcement", "platform"],
-  "categories": ["Updates"],
-  "status": "published",
-  "publishedAt": "2025-02-01T12:00:00.000Z",
   "featuredImage": "",
+  "status": "published",
   "readingTime": "4 min read",
+  "categories": [
+    "Updates"
+  ],
+  "tags": [
+    "announcement",
+    "platform"
+  ],
   "seo": {
     "metaTitle": "Welcome to the NYALTX Blog",
     "metaDescription": "Explore the new NYALTX blog for platform updates, trading education, and community highlights.",
     "keywords": "nyaltx blog, defi updates, crypto trading"
-  }
+  },
+  "content": "\\[object Object]\n"
 }
