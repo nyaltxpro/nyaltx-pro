@@ -54,6 +54,10 @@
           "label": "Whitepaper",
           "href": "/whitepaper",
           "enabled": true
+        },
+        {
+          "label": "Blog",
+          "href": "/blog"
         }
       ]
     }
