@@ -80,6 +80,7 @@
     "react-hot-toast": "^2.6.0",
     "react-icons": "^5.5.0",
     "react-redux": "^9.2.0",
+    "quill": "2.0.3",
     "react-ts-tradingview-widgets": "^1.2.8",
     "simple-peer": "^9.11.1",
     "socket.io": "^4.8.1",

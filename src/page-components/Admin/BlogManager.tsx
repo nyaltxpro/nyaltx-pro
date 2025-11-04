@@ -1,7 +1,9 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import dynamic from 'next/dynamic';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import 'quill/dist/quill.snow.css';
+import Quill from 'quill';
+import type { QuillOptions } from 'quill';
 import {
   FaEdit,
   FaNewspaper,
@@ -57,6 +59,45 @@ const initialFormState: BlogFormState = {
   seoOgImage: '',
 };
 
+const quillModules: NonNullable<QuillOptions['modules']> = {
+  toolbar: [
+    [{ header: [1, 2, 3, false] }],
+    ['bold', 'italic', 'underline', 'strike'],
+    [{ list: 'ordered' }, { list: 'bullet' }],
+    [{ script: 'sub' }, { script: 'super' }],
+    [{ indent: '-1' }, { indent: '+1' }],
+    [{ color: [] }, { background: [] }],
+    [{ align: [] }],
+    ['link', 'blockquote', 'code-block'],
+    ['clean'],
+  ],
+};
+
+const quillFormats = [
+  'header',
+  'bold',
+  'italic',
+  'underline',
+  'strike',
+  'blockquote',
+  'code-block',
+  'list',
+  'bullet',
+  'indent',
+  'script',
+  'align',
+  'link',
+  'color',
+  'background',
+];
+
+const normalizeQuillHtml = (value?: string | null) => {
+  if (!value) return '';
+  const trimmed = value.replace(/\s+$/, '');
+  if (trimmed === '<p><br></p>') return '';
+  return trimmed;
+};
+
 const AdminBlogManagerComponent = () => {
   const [posts, setPosts] = useState<SerializedBlogPost[]>([]);
   const [form, setForm] = useState<BlogFormState>(initialFormState);
@@ -66,6 +107,71 @@ const AdminBlogManagerComponent = () => {
   const [activeFilter, setActiveFilter] = useState<'all' | 'published' | 'draft'>('all');
   const [isUploadingToIPFS, setIsUploadingToIPFS] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const quillContainerRef = useRef<HTMLDivElement | null>(null);
+  const quillInstanceRef = useRef<Quill | null>(null);
+  const quillChangeHandlerRef = useRef<((delta: unknown, oldDelta: unknown, source: string) => void) | null>(null);
+  const suppressQuillChangeRef = useRef(false);
+
+  useEffect(() => {
+    if (!isFormOpen) {
+      const existing = quillInstanceRef.current;
+      if (existing && quillChangeHandlerRef.current) {
+        existing.off('text-change', quillChangeHandlerRef.current);
+      }
+      quillInstanceRef.current = null;
+      quillChangeHandlerRef.current = null;
+      return;
+    }
+
+    const container = quillContainerRef.current;
+    if (!container) {
+      return;
+    }
+
+    const quill = new Quill(container, {
+      theme: 'snow',
+      modules: quillModules,
+      formats: quillFormats,
+    });
+
+    quillInstanceRef.current = quill;
+
+    const handler = (delta: unknown, oldDelta: unknown, source: string) => {
+      if (suppressQuillChangeRef.current || source !== 'user') return;
+      const html = normalizeQuillHtml(quill.root.innerHTML);
+      setForm((prev) => (prev.content === html ? prev : { ...prev, content: html }));
+    };
+
+    quillChangeHandlerRef.current = handler;
+    quill.on('text-change', handler);
+
+    suppressQuillChangeRef.current = true;
+    quill.clipboard.dangerouslyPasteHTML(form.content || '');
+    quill.history.clear();
+    suppressQuillChangeRef.current = false;
+
+    return () => {
+      quill.off('text-change', handler);
+      quillInstanceRef.current = null;
+      quillChangeHandlerRef.current = null;
+    };
+  }, [isFormOpen]);
+
+  useEffect(() => {
+    if (!isFormOpen) return;
+    const quill = quillInstanceRef.current;
+    if (!quill) return;
+
+    const desired = normalizeQuillHtml(form.content);
+    const current = normalizeQuillHtml(quill.root.innerHTML);
+
+    if (desired === current) return;
+
+    suppressQuillChangeRef.current = true;
+    quill.clipboard.dangerouslyPasteHTML(desired);
+    quill.history.clear();
+    suppressQuillChangeRef.current = false;
+  }, [form.content, isFormOpen]);
 
   const loadPosts = async (status: 'all' | 'published' | 'draft' = 'all') => {
     try {
@@ -106,13 +212,24 @@ const AdminBlogManagerComponent = () => {
   };
 
   const handleEdit = (post: SerializedBlogPost) => {
+    const contentString = (() => {
+      if (typeof post.content === 'string') return post.content;
+      if (!post.content) return '';
+      try {
+        return JSON.stringify(post.content);
+      } catch (error) {
+        console.warn('Failed to stringify blog content', error);
+        return '';
+      }
+    })();
+
     setForm({
       id: post._id,
       title: post.title ?? '',
       slug: post.slug ?? '',
       author: post.author ?? 'NYALTX Team',
       excerpt: post.excerpt ?? '',
-      content: typeof post.content === 'string' ? post.content : JSON.stringify(post.content, null, 2),
+      content: contentString,
       featuredImage: post.featuredImage ?? '',
       readingTime: post.readingTime ?? '',
       categories: (post.categories ?? []).join(', '),
@@ -545,13 +662,13 @@ const AdminBlogManagerComponent = () => {
 
           <label className="mt-4 block text-sm text-white/70">
             Content
-            <textarea
-              value={form.content}
-              onChange={(event) => setForm((prev) => ({ ...prev, content: event.target.value }))}
-              rows={10}
-              className="mt-1 w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white focus:border-cyan-500/60 focus:outline-none"
-              placeholder="Write your article content (HTML supported)"
-            />
+            <div className="mt-2 rounded-lg border border-white/10 bg-black/10">
+              <div
+                ref={quillContainerRef}
+                className="quill-editor"
+                style={{ minHeight: '320px' }}
+              />
+            </div>
           </label>
 
           <div className="mt-6 rounded-xl border border-white/10 bg-black/20 p-4">
@@ -618,13 +735,4 @@ const AdminBlogManagerComponent = () => {
   );
 };
 
-const AdminBlogManager = dynamic(async () => AdminBlogManagerComponent, {
-  ssr: false,
-  loading: () => (
-    <div className="rounded-xl border border-white/10 bg-white/5 p-10 text-center text-white/70">
-      <FaSpinner className="mx-auto mb-3 h-5 w-5 animate-spin" /> Loading blog manager...
-    </div>
-  ),
-});
-
-export default AdminBlogManager;
+export default AdminBlogManagerComponent;
