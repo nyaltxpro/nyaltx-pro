@@ -41,7 +41,7 @@ const BlogPage = () => {
                         </h1>
                         <p className="mt-6 text-lg text-white/70">
                             Feature releases, trading education, and community stories — published directly by the
-                            NYALTX team through Tina CMS.
+                            NYALTX team
                         </p>
                     </div>
                 </div>
