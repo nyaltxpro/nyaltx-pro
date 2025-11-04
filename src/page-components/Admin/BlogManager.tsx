@@ -10,6 +10,7 @@ import {
   FaSpinner,
   FaTag,
   FaTrash,
+  FaUpload,
 } from 'react-icons/fa';
 import type { SerializedBlogPost } from '@/lib/blogServer';
 
@@ -63,6 +64,8 @@ const AdminBlogManagerComponent = () => {
   const [state, setState] = useState<FetchState>({ loading: false, error: null, success: null });
   const [isListLoading, setIsListLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState<'all' | 'published' | 'draft'>('all');
+  const [isUploadingToIPFS, setIsUploadingToIPFS] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const loadPosts = async (status: 'all' | 'published' | 'draft' = 'all') => {
     try {
@@ -92,6 +95,8 @@ const AdminBlogManagerComponent = () => {
   const resetForm = () => {
     setForm(initialFormState);
     setIsFormOpen(false);
+    setSelectedFile(null);
+    setIsUploadingToIPFS(false);
   };
 
   const handleCreate = () => {
@@ -202,6 +207,90 @@ const AdminBlogManagerComponent = () => {
     if (activeFilter === 'all') return posts;
     return posts.filter((post) => post.status === activeFilter);
   }, [posts, activeFilter]);
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!event.target.files?.length) {
+      setSelectedFile(null);
+      return;
+    }
+
+    const file = event.target.files[0];
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      setSelectedFile(null);
+      setState((prev) => ({ ...prev, error: 'Please choose a JPEG, PNG, GIF, or WebP image for the featured image.', success: null }));
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      setSelectedFile(null);
+      setState((prev) => ({ ...prev, error: 'Image must be 10MB or smaller.', success: null }));
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(file);
+    const image = new Image();
+    image.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      if (image.width < 400 || image.height < 200) {
+        setSelectedFile(null);
+        setState((prev) => ({ ...prev, error: 'Image dimensions must be at least 400x200 pixels.', success: null }));
+        const element = document.getElementById('blog-ipfs-file') as HTMLInputElement | null;
+        if (element) element.value = '';
+        return;
+      }
+
+      setSelectedFile(file);
+      setState((prev) => ({ ...prev, error: null }));
+    };
+    image.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      setSelectedFile(null);
+      setState((prev) => ({ ...prev, error: 'Unable to read image file. Please try another.', success: null }));
+      const element = document.getElementById('blog-ipfs-file') as HTMLInputElement | null;
+      if (element) element.value = '';
+    };
+    image.src = objectUrl;
+  };
+
+  const uploadToIPFS = async () => {
+    if (!selectedFile) {
+      setState((prev) => ({ ...prev, error: 'Select an image before uploading.', success: null }));
+      return;
+    }
+
+    try {
+      setIsUploadingToIPFS(true);
+      setState((prev) => ({ ...prev, error: null, success: null }));
+
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+
+      const response = await fetch('/api/upload/ipfs', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || 'Failed to upload image to IPFS');
+      }
+
+      const data = await response.json();
+      const ipfsUrl = `https://ipfs.io/ipfs/${data.hash}`;
+      setForm((prev) => ({ ...prev, featuredImage: ipfsUrl }));
+      setSelectedFile(null);
+      const element = document.getElementById('blog-ipfs-file') as HTMLInputElement | null;
+      if (element) element.value = '';
+
+      setState((prev) => ({ ...prev, success: 'Image uploaded to IPFS successfully.', error: null }));
+    } catch (error: any) {
+      setState((prev) => ({ ...prev, error: error.message ?? 'Failed to upload image to IPFS', success: null }));
+    } finally {
+      setIsUploadingToIPFS(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -352,8 +441,43 @@ const AdminBlogManagerComponent = () => {
                   value={form.featuredImage}
                   onChange={(event) => setForm((prev) => ({ ...prev, featuredImage: event.target.value }))}
                   className="mt-1 w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white focus:border-cyan-500/60 focus:outline-none"
+                  placeholder="https://ipfs.io/ipfs/..."
                 />
               </label>
+              <div className="rounded-lg border border-white/10 bg-black/20 p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/40">Upload to IPFS</p>
+                <p className="mt-2 text-sm text-white/60">
+                  Select an image to upload via the existing IPFS uploader. When the upload finishes, the image URL will be added automatically.
+                </p>
+                <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center">
+                  <input
+                    id="blog-ipfs-file"
+                    type="file"
+                    accept="image/jpeg,image/png,image/gif,image/webp"
+                    onChange={handleFileSelect}
+                    className="text-sm text-white/70 file:mr-3 file:rounded-md file:border-0 file:bg-cyan-500/20 file:px-3 file:py-2 file:text-sm file:font-medium file:text-cyan-100 hover:file:bg-cyan-500/30"
+                  />
+                  <button
+                    type="button"
+                    onClick={uploadToIPFS}
+                    disabled={isUploadingToIPFS || !selectedFile}
+                    className="inline-flex items-center gap-2 rounded-lg border border-cyan-500/40 bg-cyan-500/20 px-3 py-2 text-xs font-semibold text-cyan-100 transition hover:bg-cyan-500/30 disabled:opacity-60"
+                  >
+                    {isUploadingToIPFS ? <FaSpinner className="h-4 w-4 animate-spin" /> : <FaUpload className="h-4 w-4" />}
+                    Upload to IPFS
+                  </button>
+                </div>
+                {selectedFile ? (
+                  <p className="mt-2 text-xs text-white/50">
+                    Selected file: <span className="font-medium text-white">{selectedFile.name}</span>
+                  </p>
+                ) : null}
+                {form.featuredImage ? (
+                  <p className="mt-2 text-xs text-white/50 break-all">
+                    Current image: <span className="font-medium text-white/80">{form.featuredImage}</span>
+                  </p>
+                ) : null}
+              </div>
             </div>
 
             <div className="space-y-4">
