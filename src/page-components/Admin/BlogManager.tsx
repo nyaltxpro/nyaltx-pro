@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import 'quill/dist/quill.snow.css';
-import Quill from 'quill';
+import type QuillType from 'quill';
 import type { QuillOptions } from 'quill';
 import {
   FaEdit,
@@ -107,53 +107,71 @@ const AdminBlogManagerComponent = () => {
   const [activeFilter, setActiveFilter] = useState<'all' | 'published' | 'draft'>('all');
   const [isUploadingToIPFS, setIsUploadingToIPFS] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-    const quillContainerRef = useRef<HTMLDivElement | null>(null);
-  const quillInstanceRef = useRef<Quill | null>(null);
+  const quillContainerRef = useRef<HTMLDivElement | null>(null);
+  const quillInstanceRef = useRef<QuillType | null>(null);
   const quillChangeHandlerRef = useRef<((delta: unknown, oldDelta: unknown, source: string) => void) | null>(null);
   const suppressQuillChangeRef = useRef(false);
 
   useEffect(() => {
-    if (!isFormOpen) {
+    const teardown = () => {
       const existing = quillInstanceRef.current;
       if (existing && quillChangeHandlerRef.current) {
         existing.off('text-change', quillChangeHandlerRef.current);
       }
       quillInstanceRef.current = null;
       quillChangeHandlerRef.current = null;
-      return;
-    }
-
-    const container = quillContainerRef.current;
-    if (!container) {
-      return;
-    }
-
-    const quill = new Quill(container, {
-      theme: 'snow',
-      modules: quillModules,
-      formats: quillFormats,
-    });
-
-    quillInstanceRef.current = quill;
-
-    const handler = (delta: unknown, oldDelta: unknown, source: string) => {
-      if (suppressQuillChangeRef.current || source !== 'user') return;
-      const html = normalizeQuillHtml(quill.root.innerHTML);
-      setForm((prev) => (prev.content === html ? prev : { ...prev, content: html }));
     };
 
-    quillChangeHandlerRef.current = handler;
-    quill.on('text-change', handler);
+    if (!isFormOpen) {
+      teardown();
+      return teardown;
+    }
 
-    suppressQuillChangeRef.current = true;
-    quill.clipboard.dangerouslyPasteHTML(form.content || '');
-    quill.history.clear();
-    suppressQuillChangeRef.current = false;
+    let isCancelled = false;
+
+    const initialize = async () => {
+      const container = quillContainerRef.current;
+      if (!container) return;
+      if (quillInstanceRef.current) return;
+
+      const { default: Quill } = await import('quill');
+      if (isCancelled) return;
+
+      const quill = new Quill(container, {
+        theme: 'snow',
+        modules: quillModules,
+        formats: quillFormats,
+      });
+
+      quillInstanceRef.current = quill;
+
+      if (!form.content) {
+        suppressQuillChangeRef.current = true;
+        quill.setText('');
+        quill.history.clear();
+        suppressQuillChangeRef.current = false;
+      }
+
+      const handler = (_delta: unknown, _oldDelta: unknown, source: string) => {
+        if (suppressQuillChangeRef.current || source !== 'user') return;
+        const html = normalizeQuillHtml(quill.root.innerHTML);
+        setForm((prev) => (prev.content === html ? prev : { ...prev, content: html }));
+      };
+
+      quillChangeHandlerRef.current = handler;
+      quill.on('text-change', handler);
+
+      suppressQuillChangeRef.current = true;
+      quill.clipboard.dangerouslyPasteHTML(form.content || '');
+      quill.history.clear();
+      suppressQuillChangeRef.current = false;
+    };
+
+    void initialize();
 
     return () => {
-      quill.off('text-change', handler);
-      quillInstanceRef.current = null;
-      quillChangeHandlerRef.current = null;
+      isCancelled = true;
+      teardown();
     };
   }, [isFormOpen]);
 
