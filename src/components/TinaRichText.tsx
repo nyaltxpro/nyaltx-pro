@@ -13,12 +13,12 @@ interface TinaRichTextNode {
   content?: TinaRichTextNode[];
 }
 
-interface TinaRichTextProps {
+interface RichTextRendererProps {
   content: TinaRichTextNode | string | null | undefined;
   className?: string;
 }
 
-const TinaRichText: React.FC<TinaRichTextProps> = ({ content, className }) => {
+const RichTextRenderer: React.FC<RichTextRendererProps> = ({ content, className }) => {
   if (!content) {
     return null;
   }
@@ -178,4 +178,4 @@ const TinaRichText: React.FC<TinaRichTextProps> = ({ content, className }) => {
   return <>{renderNode(content)}</>;
 };
 
-export default TinaRichText;
+export default RichTextRenderer;

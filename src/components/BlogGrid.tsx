@@ -3,23 +3,10 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import type { BlogPost } from "@/lib/blog";
-
-type BlogSummary = Pick<
-  BlogPost,
-  | "slug"
-  | "title"
-  | "excerpt"
-  | "author"
-  | "featuredImage"
-  | "publishedAt"
-  | "readingTime"
-  | "categories"
-  | "tags"
->;
+import type { SerializedBlogPost } from "@/lib/blogServer";
 
 interface BlogResponse {
-  posts: BlogSummary[];
+  posts: SerializedBlogPost[];
 }
 
 const formatPublishedDate = (dateString?: string) => {
@@ -36,7 +23,7 @@ const formatPublishedDate = (dateString?: string) => {
   }
 };
 
-const convertToWorkingIPFSUrl = (url?: string) => {
+const convertToWorkingIPFSUrl = (url?: string | null) => {
   if (!url) return undefined;
 
   if (url.includes("gateway.pinata.cloud/ipfs/")) {
@@ -48,7 +35,7 @@ const convertToWorkingIPFSUrl = (url?: string) => {
 };
 
 const BlogGrid = () => {
-  const [posts, setPosts] = useState<BlogSummary[]>([]);
+  const [posts, setPosts] = useState<SerializedBlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
@@ -59,7 +46,7 @@ const BlogGrid = () => {
         setLoading(true);
         setError(null);
 
-        const response = await fetch("/api/tina/blog", { cache: "no-store" });
+        const response = await fetch("/api/blog?limit=60", { cache: "no-store" });
 
         if (!response.ok) {
           throw new Error(`Failed to load blog posts (${response.status})`);
@@ -155,7 +142,7 @@ const BlogGrid = () => {
 
       <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
         {filteredPosts.map((post) => {
-          const publishedAt = formatPublishedDate(post.publishedAt);
+          const publishedAt = formatPublishedDate(post.publishedAt ?? undefined);
           const image = convertToWorkingIPFSUrl(post.featuredImage);
 
           return (

@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import PublicHeader from "@/components/PublicHeader";
 import BlogArticle from "@/components/BlogArticle";
-import { getAllBlogPosts, getBlogPostBySlug } from "@/lib/blog";
+import { getBlogPostBySlug, getPublishedBlogPosts } from "@/lib/blogServer";
 
 export const revalidate = 300;
 
@@ -10,18 +10,10 @@ type PageParams = {
   slug: string;
 };
 
-const fetchPost = (slug: string) => {
-  try {
-    return getBlogPostBySlug(slug);
-  } catch (error) {
-    console.error("Failed to fetch blog post", error);
-    return null;
-  }
-};
-
 export async function generateStaticParams() {
   try {
-    return getAllBlogPosts().map((post) => ({ slug: post.slug }));
+    const posts = await getPublishedBlogPosts(100);
+    return posts.map((post) => ({ slug: post.slug }));
   } catch (error) {
     console.error("Failed to generate blog params", error);
     return [];
@@ -29,7 +21,7 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: { params: PageParams }): Promise<Metadata> {
-  const post = fetchPost(params.slug);
+  const post = await getBlogPostBySlug(params.slug);
 
   if (!post) {
     return {
@@ -50,7 +42,7 @@ export async function generateMetadata({ params }: { params: PageParams }): Prom
       title: post.seo?.metaTitle ?? fallbackTitle,
       description: post.seo?.metaDescription ?? fallbackDescription,
       type: "article",
-      publishedTime: post.publishedAt,
+      publishedTime: post.publishedAt ?? undefined,
       authors: post.author ? [post.author] : undefined,
       tags: post.tags,
       images: ogImage
@@ -72,7 +64,7 @@ export async function generateMetadata({ params }: { params: PageParams }): Prom
 }
 
 const BlogPostPage = async ({ params }: { params: PageParams }) => {
-  const post = fetchPost(params.slug);
+  const post = await getBlogPostBySlug(params.slug);
 
   if (!post) {
     notFound();

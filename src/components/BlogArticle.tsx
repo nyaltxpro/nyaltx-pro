@@ -12,11 +12,11 @@ import {
   FaUser,
   FaTag,
 } from 'react-icons/fa';
-import TinaRichText from '@/components/TinaRichText';
-import type { BlogPost } from '@/lib/blog';
+import RichTextRenderer from '@/components/TinaRichText';
+import type { SerializedBlogPost } from '@/lib/blogServer';
 
 interface BlogArticleProps {
-  post: BlogPost;
+  post: SerializedBlogPost;
 }
 
 const formatPublishedDateTime = (dateString?: string) => {
@@ -34,7 +34,7 @@ const formatPublishedDateTime = (dateString?: string) => {
   }
 };
 
-const convertToWorkingIPFSUrl = (url?: string) => {
+const convertToWorkingIPFSUrl = (url?: string | null) => {
   if (!url) return undefined;
   if (url.includes('gateway.pinata.cloud/ipfs/')) {
     const hash = url.split('gateway.pinata.cloud/ipfs/')[1];
@@ -48,8 +48,22 @@ const BlogArticle = ({ post }: BlogArticleProps) => {
   const shareUrl = useMemo(() => (typeof window !== 'undefined' ? window.location.href : ''), []);
 
   const workingImageUrl = useMemo(() => convertToWorkingIPFSUrl(post.featuredImage), [post.featuredImage]);
-  const published = formatPublishedDateTime(post.publishedAt);
-  const readingTime = post.readingTime ?? (post.content?.content?.length ? `${Math.max(3, Math.round((post.content.content.length * 150) / 600))} min read` : undefined);
+  const published = formatPublishedDateTime(post.publishedAt ?? undefined);
+  const readingTime = useMemo(() => {
+    if (post.readingTime) return post.readingTime;
+    if (!post.content) return undefined;
+    if (typeof post.content === 'string') {
+      const words = post.content.split(/\s+/).filter(Boolean).length;
+      const minutes = Math.max(3, Math.round(words / 200));
+      return `${minutes} min read`;
+    }
+    if (typeof post.content === 'object' && Array.isArray((post.content as any).content)) {
+      const length = JSON.stringify(post.content).length;
+      const minutes = Math.max(3, Math.round(length / 1200));
+      return `${minutes} min read`;
+    }
+    return undefined;
+  }, [post.content, post.readingTime]);
 
   const handleShare = (platform: 'twitter' | 'linkedin') => {
     const encodedUrl = encodeURIComponent(shareUrl);
@@ -176,7 +190,7 @@ const BlogArticle = ({ post }: BlogArticleProps) => {
 
         <article className="prose prose-invert prose-lg max-w-none">
           {post.content ? (
-            <TinaRichText content={post.content} className="prose prose-invert prose-lg max-w-none" />
+            <RichTextRenderer content={post.content} className="prose prose-invert prose-lg max-w-none" />
           ) : null}
         </article>
 

@@ -5,7 +5,6 @@ import { legalAdvice } from "./schema/legalAdvice";
 import podcast from "./schema/podcast";
 import pricing from "./schema/pricing";
 import { privacyPolicy } from "./schema/privacyPolicy";
-import blog from "./schema/blog";
 import tradeVideos from "./schema/tradeVideos";
 import ventureGroup from "./schema/ventureGroup";
 // Your hosting provider likely exposes this as an environment variable
@@ -44,7 +43,6 @@ export default defineConfig({
       podcast,
       tradeVideos,
       pricing,
-      blog,
       {
         name: "navigation",
         label: "Navigation",

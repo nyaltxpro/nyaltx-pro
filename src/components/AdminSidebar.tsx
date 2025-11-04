@@ -43,7 +43,7 @@ const SidebarItem = ({ icon, text, href, isActive, isExpanded }: SidebarItemProp
       <Link
         href={href}
         className={`group flex items-center py-3 px-3 mb-2 rounded-lg transition-all duration-200 ${isActive
-          ? 'bg-gradient-to-r from-[#00b8d8]/20 to-[#00b8d8]/10 text-[#00b8d8] border border-[#00b8d8]/30 shadow-lg backdrop-blur-sm'
+          ? 'bg-linear-to-r from-[#00b8d8]/20 to-[#00b8d8]/10 text-[#00b8d8] border border-[#00b8d8]/30 shadow-lg backdrop-blur-sm'
           : 'text-gray-300 hover:bg-gray-700/30 hover:text-white hover:border hover:border-gray-600/30 hover:shadow-md hover:backdrop-blur-sm'
           }`}
         style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
@@ -169,6 +169,15 @@ export default function AdminSidebar({ isMobileMenuOpen, toggleMobileMenu }: Adm
   }, []);
 
   const navItems = [
+    { icon: <FaCoins />, text: 'Tokens', href: '/adminpanel/tokens' },
+    { icon: <FaPlusCircle />, text: 'Register Token', href: '/adminpanel/tokens/register' },
+    { icon: <FaShoppingCart />, text: 'Orders', href: '/adminpanel/orders' },
+    { icon: <FaUserFriends />, text: 'Users', href: '/adminpanel/users' },
+    // { icon: <FaUsers />, text: 'Profiles', href: '/admin/profiles' },
+    { icon: <FaChartPie />, text: 'Analytics', href: '/adminpanel/statistics' },
+    // { icon: <FaChartLine />, text: 'Stats', href: '/admin/stats' },
+    { icon: <FaGift />, text: 'Token Points', href: '/adminpanel/points' },
+    { icon: <FaEnvelope />, text: 'Email Management', href: '/adminpanel/email-management' },
     { icon: <FaHome />, text: 'Dashboard', href: '/adminpanel' },
     { icon: <FaCoins />, text: 'Tokens', href: '/adminpanel/tokens' },
     { icon: <FaPlusCircle />, text: 'Register Token', href: '/adminpanel/tokens/register' },
@@ -179,6 +188,7 @@ export default function AdminSidebar({ isMobileMenuOpen, toggleMobileMenu }: Adm
     // { icon: <FaChartLine />, text: 'Stats', href: '/admin/stats' },
     { icon: <FaGift />, text: 'Token Points', href: '/adminpanel/points' },
     { icon: <FaEnvelope />, text: 'Email Management', href: '/adminpanel/email-management' },
+    { icon: <FaNewspaper />, text: 'Blog Posts', href: '/adminpanel/blog' },
     { icon: <FaNewspaper />, text: 'Corporate News', href: '/adminpanel/news' },
     { icon: <FaImage />, text: 'Banners', href: '/adminpanel/banners' },
     { icon: <FaYoutube />, text: 'Trade Videos', href: '/adminpanel/trade-videos' },
@@ -194,7 +204,7 @@ export default function AdminSidebar({ isMobileMenuOpen, toggleMobileMenu }: Adm
         <div className="fixed inset-0 bg-black bg-opacity-50 z-40" onClick={toggleMobileMenu} />
       )}
       <motion.div
-        className={`fixed left-0 top-0 h-full bg-gradient-to-b from-[#0f1923] via-[#1a2932] to-[#0f1923] backdrop-blur-xl border-r border-gray-700/20 shadow-2xl z-50 flex flex-col ${!isDesktop && (isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full')
+        className={`fixed left-0 top-0 h-full bg-linear-to-b from-[#0f1923] via-[#1a2932] to-[#0f1923] backdrop-blur-xl border-r border-gray-700/20 shadow-2xl z-50 flex flex-col ${!isDesktop && (isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full')
           }`}
         initial={false}
         animate={{
@@ -215,7 +225,7 @@ export default function AdminSidebar({ isMobileMenuOpen, toggleMobileMenu }: Adm
             <motion.div
               animate={{ rotate: isExpanded ? 360 : 0 }}
               transition={{ duration: 0.5 }}
-              className="w-8 h-8 bg-gradient-to-br from-[#00b8d8] to-[#0099b8] rounded-lg flex items-center justify-center shadow-lg"
+              className="w-8 h-8 bg-linear-to-br from-[#00b8d8] to-[#0099b8] rounded-lg flex items-center justify-center shadow-lg"
             >
               <Image src="/logo.png" alt="Logo" width={20} height={20} className="brightness-0 invert" />
             </motion.div>
