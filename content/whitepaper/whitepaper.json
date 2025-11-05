@@ -157,7 +157,7 @@
       },
       "listItems": [
         {
-          "content": "\\[object Object]\n"
+          "content": "```htmlbars\n  <span><strong className=\"text-white\">NYALT Exchange (NYALTX.com)</strong> is a decentralized finance (DeFi) hub designed to give crypto projects visibility, liquidity, and growth opportunities.</span>\n```\n"
         },
         {
           "content": "\\[object Object]\n"
