@@ -1,6 +1,6 @@
 'use client';
 
-import { CoinGeckoMarketData, coinGeckoService } from '@/api/coingecko/trending';
+
 import catalog from '@/data/tokens.json';
 import { useTrendingCoins } from '@/hooks/useTrendingCoins';
 import * as Tooltip from '@radix-ui/react-tooltip';

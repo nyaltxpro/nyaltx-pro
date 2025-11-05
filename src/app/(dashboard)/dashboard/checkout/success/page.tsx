@@ -219,7 +219,7 @@ function CheckoutSuccessContent() {
             href="mailto:support@nyaltx.pro"
             className="text-[#00b8d8] hover:text-[#0099b8] text-sm underline"
           >
-            nyaltxpro@gmail.com
+            admin@nyaltx.pro
           </Link>
         </div>
       </div>

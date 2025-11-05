@@ -154,7 +154,7 @@ export default function PaymentSuccessPage({
             <p className="text-gray-400 text-sm">
               Need help? Contact our support team at{' '}
               <a href="mailto:support@nyaltx.pro" className="text-cyan-400 hover:underline">
-                nyaltxpro@gmail.com
+                admin@nyaltx.pro
               </a>
             </p>
           </div>
