@@ -16,6 +16,11 @@ export const metadata: Metadata = {
   creator: 'NYALTX Team',
   publisher: 'NYALTX',
   robots: 'index, follow',
+  icons: {
+    icon: "/og-image.png",
+    shortcut: "/og-image.png",
+    apple: "/og-image.png",
+  },
   openGraph: {
     type: 'website',
     locale: 'en_US',
@@ -37,10 +42,7 @@ export const metadata: Metadata = {
     site: '@nyaltx',
     creator: '@nyaltx',
   },
-  icons: {
-    icon: '/logo.png',
-    apple: '/logo.png',
-  },
+
   manifest: '/manifest.json',
   themeColor: '#06b6d4',
   other: {
