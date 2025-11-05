@@ -6,6 +6,7 @@ import { useTrendingCoins } from '@/hooks/useTrendingCoins';
 import { CachedTrendingCoin } from '@/store/slices/searchCacheSlice';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import CryptocurrencyIcon from './CryptocurrencyIcon';
 
 export default function TrendingCoins() {
   const { trendingCoins, loading, error, refreshTrendingCoins, hasCachedData } = useTrendingCoins();
@@ -204,7 +205,11 @@ export default function TrendingCoins() {
                       className="rounded-full object-cover"
                       unoptimized
                     />
+                    <div className="absolute -bottom-1 -right-1 w-4 h-4 flex items-center justify-center">
+                      <CryptocurrencyIcon name={coin.primaryChain ? coin.primaryChain : 'solana' as any} />
+                    </div>
                   </div>
+
                   <div>
                     <div className="font-medium">{coin.name}</div>
                     <div className="text-gray-400 text-xs flex items-center gap-2">

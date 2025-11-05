@@ -211,7 +211,7 @@ export default function RecentlyAddedCoins() {
               onClick={() => handleNavigate(coin)}
             >
               <div className="flex items-center">
-                <div className="mr-3">
+                <div className=" relative mr-3">
                   <TokenAvatar
                     src={coin.image}
                     symbol={coin.symbol}
@@ -219,9 +219,12 @@ export default function RecentlyAddedCoins() {
                     size={32}
                     className="flex-shrink-0"
                   />
+                  <div className="absolute -bottom-1 -right-1 w-4 h-4 flex items-center justify-center">
+                    <CryptocurrencyIcon name={coin.primaryChain ? coin.primaryChain : 'solana' as any} />
+                  </div>
                 </div>
                 <div>
-                  <div className="flex items-center font-medium">{coin.name} <CryptocurrencyIcon className='h-4 w-4 mx-4' name={coin.primaryChain || 'solana'} /></div>
+                  {/* <div className="flex items-center font-medium">{coin.name} <CryptocurrencyIcon className='h-4 w-4 mx-4' name={coin.primaryChain || 'solana'} /></div> */}
                   <div className="text-gray-400 text-xs">{coin.symbol.toUpperCase()}</div>
                 </div>
               </div>
