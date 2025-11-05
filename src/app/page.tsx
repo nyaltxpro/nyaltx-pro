@@ -86,7 +86,7 @@ export default function Page() {
               <div className="mt-6 flex flex-wrap gap-3">
                 <Link
                   href={landingContent?.hero?.ctaLink || "/dashboard"}
-                  className="rounded-full bg-cyan-500/90 px-5 py-2.5 font-medium text-black hover:bg-cyan-400 transition-colors"
+                  className="rounded-full bg-cyan-500/90 px-5 py-2.5 font-medium text-white hover:bg-cyan-400 transition-colors"
                 >
                   {landingContent?.hero?.ctaText || "Explore Dashboard"}
                 </Link>
