@@ -32,12 +32,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.9,
     },
     {
-      url: `${baseUrl}/pro-signup`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.8,
-    },
-    {
       url: `${baseUrl}/race-to-liberty`,
       lastModified: new Date(),
       changeFrequency: 'daily',
@@ -47,12 +41,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // Legal Pages
     {
       url: `${baseUrl}/privacy-policy`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.5,
-    },
-    {
-      url: `${baseUrl}/legal-notice`,
       lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.5,
@@ -92,11 +80,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'weekly',
       priority: 0.8,
     },
-
+   {
+      url: `${baseUrl}/whitepaper`,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.8,
+    },
 
     // Gamification & Events
     {
-      url: `${baseUrl}/dashboard/gamification`,
+      url: `${baseUrl}/blogs`,
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 0.8,
@@ -107,42 +100,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'daily',
       priority: 0.7,
     },
-    {
-      url: `${baseUrl}/events`,
-      lastModified: new Date(),
-      changeFrequency: 'daily',
-      priority: 0.7,
-    },
 
     // Live Streaming & Social
     {
-      url: `${baseUrl}/dashboard/live-stream`,
+      url: `${baseUrl}/blog`,
       lastModified: new Date(),
       changeFrequency: 'hourly',
       priority: 0.8,
     },
-
-
     // Pricing & Checkout Pages
-    {
-      url: `${baseUrl}/pricing/race-to-liberty`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/pricing/race-to-liberty/helicopter`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.7,
-    },
-
-    // Boost Pack Pricing
-    {
-      url: `${baseUrl}/pricing/boost-pack/kayak`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.7,
-    },
   ];
 }
