@@ -15,7 +15,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { BiSearch } from 'react-icons/bi';
 import { IoMdClose } from 'react-icons/io';
 import nyaxLogoMappings from '../../nyax-logo-mappings.json';
@@ -25,6 +25,32 @@ import { PumpFunToken, SearchResult, TokenPair } from '../types/token';
 import { commonCryptoSymbols, getCryptoIconUrl } from '../utils/cryptoIcons';
 import { getCryptoName } from '../utils/cryptoNames';
 import TokenAvatar from './TokenAvatar';
+
+const NETWORK_MAPPING: Record<string, string> = {
+  ethereum: 'ethereum',
+  eth: 'ethereum',
+  'eth-mainnet': 'ethereum',
+  bsc: 'binance',
+  binance: 'binance',
+  'binance smart chain': 'binance',
+  polygon: 'polygon',
+  matic: 'polygon',
+  avalanche: 'avalanche',
+  avax: 'avalanche',
+  arbitrum: 'arbitrum',
+  'arbitrum one': 'arbitrum',
+  optimism: 'optimism',
+  base: 'base',
+  fantom: 'fantom',
+  solana: 'solana',
+  xdai: 'gnosis',
+  harmony: 'harmony',
+};
+
+export const mapNetworkToChain = (network: string | null | undefined): string | undefined => {
+  if (!network) return undefined;
+  return NETWORK_MAPPING[network.toLowerCase()] || undefined;
+};
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -41,7 +67,7 @@ interface NyaxToken {
   logo: string | null;
 }
 
-interface UnifiedToken {
+export interface UnifiedToken {
   id?: string;
   symbol: string;
   name: string;
@@ -53,6 +79,43 @@ interface UnifiedToken {
   priceUsd?: number; // Handle both field names
   market_cap?: number;
 }
+
+export const buildUnifiedTokenTradeUrl = (token: UnifiedToken): string => {
+  const params = new URLSearchParams();
+
+  if (token.symbol) params.set('base', token.symbol);
+  if (token.name) params.set('name', token.name);
+  if (token.chain) params.set('chain', token.chain);
+  if (token.address && token.address !== 'N/A') params.set('address', token.address);
+  if (token.logo) params.set('imageUri', token.logo);
+  if (token.source) params.set('source', token.source);
+  if (token.priceUsd !== undefined && token.priceUsd !== null) {
+    params.set('priceUsd', String(token.priceUsd));
+  }
+  const price = token.price ?? token.priceUsd;
+  if (price !== undefined && price !== null) {
+    params.set('price', String(price));
+  }
+
+  return `/dashboard/trade?${params.toString()}`;
+};
+
+export const fetchUnifiedTokens = async (query: string, limit = 10): Promise<UnifiedToken[]> => {
+  if (!query || query.trim().length < 2) {
+    return [];
+  }
+
+  const apiUrl = `/api/tokens?query=${encodeURIComponent(query)}&source=all&limit=${limit}`;
+  const response = await fetch(apiUrl);
+
+  if (!response.ok) {
+    const errorText = await response.text().catch(() => '');
+    throw new Error(`Unified token search failed (${response.status}): ${errorText}`);
+  }
+
+  const data = await response.json();
+  return data.tokens || [];
+};
 
 interface CoinGeckoCoin {
   id: string;
@@ -106,37 +169,13 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
     isSearching: isSearchingCoinGecko,
   } = useCoinGeckoSearch();
 
-  // Map NYAX network labels to our chain slugs
-  const mapNetworkToChain = (network: string | null | undefined): string | undefined => {
-    if (!network) return undefined;
-    const key = network.toLowerCase();
-    const mapping: Record<string, string> = {
-      ethereum: 'ethereum',
-      eth: 'ethereum',
-      bsc: 'binance',
-      binance: 'binance',
-      'binance smart chain': 'binance',
-      polygon: 'polygon',
-      matic: 'polygon',
-      avalanche: 'avalanche',
-      avax: 'avalanche',
-      arbitrum: 'arbitrum',
-      'arbitrum one': 'arbitrum',
-      optimism: 'optimism',
-      base: 'base',
-      fantom: 'fantom',
-      solana: 'solana',
-    };
-    return mapping[key];
-  };
-
   // Function to get logo URL from mappings
   const getNyaxLogoUrl = (logoId: string): string | null => {
     return nyaxLogoMappings[logoId as keyof typeof nyaxLogoMappings] || null;
   };
 
   // Unified token search function
-  const searchUnifiedTokens = async (query: string) => {
+  const searchUnifiedTokens = useCallback(async (query: string) => {
     if (!query || query.trim().length < 2) {
       setUnifiedTokens([]);
       return;
@@ -146,50 +185,22 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
     setUnifiedTokensLoading(true);
 
     try {
-      const apiUrl = `/api/tokens?query=${encodeURIComponent(query)}&source=all&limit=10`;
-      console.log('📡 SearchModal: Calling API:', apiUrl);
-
-      const response = await fetch(apiUrl);
-      console.log('📊 SearchModal: Response status:', response.status);
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('❌ SearchModal: API Error:', response.status, errorText);
-        throw new Error('Failed to fetch unified tokens');
-      }
-
-      const data = await response.json();
-      console.log('✅ SearchModal: Response data:', data);
-      console.log('🎯 SearchModal: Tokens array:', data.tokens);
-      console.log('📊 SearchModal: Token count:', data.tokens?.length || 0);
-
-      setUnifiedTokens(data.tokens || []);
+      const tokens = await fetchUnifiedTokens(query, 10);
+      console.log('✅ SearchModal: Unified token count:', tokens.length);
+      setUnifiedTokens(tokens);
     } catch (error) {
       console.error('💥 SearchModal: Search failed:', error);
       setUnifiedTokens([]);
     } finally {
       setUnifiedTokensLoading(false);
     }
-  };
+  }, []);
 
   // Navigation function for unified tokens
   const navigateToUnifiedToken = (token: UnifiedToken) => {
-    const params = new URLSearchParams();
-
     console.log('Navigating to token:', token);
 
-    if (token.symbol) params.set('base', token.symbol);
-    if (token.name) params.set('name', token.name);
-    if (token.chain) params.set('chain', token.chain);
-    if (token.address && token.address !== 'N/A') params.set('address', token.address);
-    if (token.logo) params.set('imageUri', token.logo);
-    if (token.source) params.set('source', token.source);
-    if (token.price) params.set('priceUsd', String(token.price));
-    // Handle both price and priceUsd field names
-    const price = token.price ?? token.priceUsd;
-    if (price !== undefined && price !== null) params.set('price', String(price));
-
-    const tradeUrl = `/dashboard/trade?${params.toString()}`;
+    const tradeUrl = buildUnifiedTokenTradeUrl(token);
     router.push(tradeUrl);
     onClose();
   };
