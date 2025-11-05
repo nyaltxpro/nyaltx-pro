@@ -129,11 +129,11 @@ export default function Banner() {
   };
 
   return (
-    <div className="relative w-full cursor-pointer max-w-5xl mx-auto py-4 px-4 select-none"
+    <div className="relative w-full hover:cursor-pointer max-w-5xl mx-auto py-4 px-4 select-none"
       onClick={handleBannerClick}
     >
       {/* Enhanced Banner Container */}
-      <div className="relative group">
+      <div className="relative group hover:cursor-pointer">
         {/* Navigation Arrows */}
         {images.length > 1 && (
           <>
@@ -165,13 +165,13 @@ export default function Banner() {
         {/* Animated background glow */}
 
         {/* Main banner container */}
-        <div className="relative overflow-hidden rounded-2xl  bg-black/20 backdrop-blur-xl shadow-2xl group-hover:border-[#00d4aa]/40 transition-all duration-500">
+        <div className="relative overflow-hidden rounded-2xl  bg-black/20 backdrop-blur-xl shadow-2xl group-hover:border-[#00d4aa]/40 transition-all duration-500 hover:cursor-pointer">
           {/* Inner glow overlay */}
-          <div className="absolute inset-0 bg-gradient-to-r from-[#00d4aa]/5 via-transparent to-[#3b82f6]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-[#00d4aa]/5 via-transparent to-[#3b82f6]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10 pointer-events-none"></div>
 
           {/* Banner Link */}
           <div
-            className="block relative overflow-hidden cursor-pointer"
+            className="block relative overflow-hidden hover:cursor-pointer"
             onClick={handleBannerClick}
             role="button"
             tabIndex={0}
@@ -202,7 +202,7 @@ export default function Banner() {
             />
 
             {/* Gradient overlay for better text readability */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-black/10"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-black/10 pointer-events-none"></div>
           </div>
 
 
@@ -236,7 +236,7 @@ export default function Banner() {
         )}
 
         {/* Banner Info Overlay */}
-        <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
           <div className="bg-black/60 backdrop-blur-sm rounded-lg px-3 py-2 border border-gray-700/50">
             <p className="text-white text-sm font-medium">
               {getCurrentBannerInfo().title}
