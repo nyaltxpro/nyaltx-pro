@@ -30,9 +30,6 @@ const whitepaper: Collection = {
       type: "string",
       name: "description",
       label: "Page Description",
-      ui: {
-        component: "textarea",
-      },
     },
     {
       type: "object",
@@ -49,9 +46,6 @@ const whitepaper: Collection = {
           type: "string",
           name: "subtitle",
           label: "Hero Subtitle",
-          ui: {
-            component: "textarea",
-          },
         },
         {
           type: "string",
@@ -127,9 +121,9 @@ const whitepaper: Collection = {
           ],
         },
         {
-          type: "rich-text",
+          type: "string",
           name: "content",
-          label: "Rich Content",
+          label: "Section Content",
         },
         {
           type: "object",
@@ -149,7 +143,7 @@ const whitepaper: Collection = {
               ],
             },
             {
-              type: "rich-text",
+              type: "string",
               name: "content",
               label: "Highlight Content",
             },
@@ -162,7 +156,7 @@ const whitepaper: Collection = {
           list: true,
           fields: [
             {
-              type: "rich-text",
+              type: "string",
               name: "content",
               label: "Item Content",
             },
@@ -184,9 +178,6 @@ const whitepaper: Collection = {
               type: "string",
               name: "description",
               label: "Description",
-              ui: {
-                component: "textarea",
-              },
             },
             {
               type: "string",
@@ -218,9 +209,6 @@ const whitepaper: Collection = {
               type: "string",
               name: "description",
               label: "Description",
-              ui: {
-                component: "textarea",
-              },
             },
             {
               type: "string",
@@ -281,7 +269,7 @@ const whitepaper: Collection = {
               required: true,
             },
             {
-              type: "rich-text",
+              type: "string",
               name: "content",
               label: "Content",
             },
@@ -303,7 +291,7 @@ const whitepaper: Collection = {
                   ],
                 },
                 {
-                  type: "rich-text",
+                  type: "string",
                   name: "content",
                   label: "Highlight Content",
                 },
@@ -316,7 +304,7 @@ const whitepaper: Collection = {
               list: true,
               fields: [
                 {
-                  type: "rich-text",
+                  type: "string",
                   name: "content",
                   label: "Item Content",
                 },
@@ -369,9 +357,6 @@ const whitepaper: Collection = {
                   type: "string",
                   name: "text",
                   label: "Item",
-                  ui: {
-                    component: "textarea",
-                  },
                 },
               ],
             },
@@ -393,9 +378,6 @@ const whitepaper: Collection = {
           type: "string",
           name: "metaDescription",
           label: "Meta Description",
-          ui: {
-            component: "textarea",
-          },
         },
         {
           type: "string",
