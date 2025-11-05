@@ -211,7 +211,7 @@ export default function PublicHeader() {
         </nav>
 
         {/* Connect Wallet - Right */}
-        <div className="shrink-0 flex items-center gap-2">
+        <div className="shrink-0 hidden md:flex  items-center gap-2">
           {/* <ConnectWalletButton /> */}
           <SimpleUnifiedWalletButton />
         </div>
@@ -229,72 +229,74 @@ export default function PublicHeader() {
         </div>
       </div>
 
-      {mobileMenuOpen && (
-        <div className="md:hidden">
-          <div
-            className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
-            onClick={() => setMobileMenuOpen(false)}
-          ></div>
-          <aside className="fixed inset-y-0 left-0 z-50 flex h-full w-72 max-w-[80vw] flex-col border-r border-gray-800 bg-[#050505] shadow-2xl">
-            <div className="flex items-center justify-between px-4 py-4 border-b border-gray-800">
-              <Link
-                href={brandHref}
-                className="flex items-center gap-2 text-lg font-semibold tracking-tight"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                {brandLabel}
-              </Link>
-              <button
-                type="button"
-                aria-label="Close menu"
-                onClick={() => setMobileMenuOpen(false)}
-                className="rounded-md border border-gray-800 p-2 text-gray-300 hover:bg-gray-900 hover:text-white transition-colors"
-              >
-                <FaTimes className="h-4 w-4" />
-              </button>
+      <div className="md:hidden">
+        <div
+          className={`fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition-opacity duration-300 ${mobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+            }`}
+          onClick={() => setMobileMenuOpen(false)}
+        ></div>
+        <aside
+          className={`fixed inset-y-0 left-0 z-50 flex h-full w-72 max-w-[80vw] flex-col border-r border-gray-800 bg-[#050505] shadow-2xl transform transition-transform duration-300 ease-in-out ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full pointer-events-none'
+            }`}
+        >
+          <div className="flex items-center justify-between px-4 py-4 border-b border-gray-800">
+            <Link
+              href={brandHref}
+              className="flex items-center gap-2 text-lg font-semibold tracking-tight"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              {brandLabel}
+            </Link>
+            <button
+              type="button"
+              aria-label="Close menu"
+              onClick={() => setMobileMenuOpen(false)}
+              className="rounded-md border border-gray-800 p-2 text-gray-300 hover:bg-gray-900 hover:text-white transition-colors"
+            >
+              <FaTimes className="h-4 w-4" />
+            </button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6">
+            <div className="space-y-2">
+              {primaryLinks.map((link) => (
+                <NavLink
+                  key={`mobile-${link.href}`}
+                  href={link.href}
+                  label={link.label}
+                  onClick={() => setMobileMenuOpen(false)}
+                  variant="mobile"
+                />
+              ))}
             </div>
 
-            <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6">
-              <div className="space-y-2">
-                {primaryLinks.map((link) => (
-                  <NavLink
-                    key={`mobile-${link.href}`}
-                    href={link.href}
-                    label={link.label}
-                    onClick={() => setMobileMenuOpen(false)}
-                    variant="mobile"
-                  />
+            {dropdownMenus.length > 0 && (
+              <div className="space-y-5">
+                {dropdownMenus.map((menu) => (
+                  <div key={`mobile-${menu.label}`} className="space-y-3">
+                    <p className="text-xs uppercase tracking-wide text-gray-500">{menu.label}</p>
+                    <div className="space-y-2">
+                      {menu.links?.map((link) => (
+                        <NavLink
+                          key={`mobile-${menu.label}-${link.href}`}
+                          href={link.href}
+                          label={link.label}
+                          onClick={() => setMobileMenuOpen(false)}
+                          variant="mobile"
+                        />
+                      ))}
+                    </div>
+                  </div>
                 ))}
               </div>
+            )}
+          </div>
 
-              {dropdownMenus.length > 0 && (
-                <div className="space-y-5">
-                  {dropdownMenus.map((menu) => (
-                    <div key={`mobile-${menu.label}`} className="space-y-3">
-                      <p className="text-xs uppercase tracking-wide text-gray-500">{menu.label}</p>
-                      <div className="space-y-2">
-                        {menu.links?.map((link) => (
-                          <NavLink
-                            key={`mobile-${menu.label}-${link.href}`}
-                            href={link.href}
-                            label={link.label}
-                            onClick={() => setMobileMenuOpen(false)}
-                            variant="mobile"
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className="border-t border-gray-800 px-4 py-4">
-              <SimpleUnifiedWalletButton className="w-full justify-center" />
-            </div>
-          </aside>
-        </div>
-      )}
+          <div className="border-t border-gray-800 px-4 py-4">
+            <SimpleUnifiedWalletButton className="w-full justify-center" />
+          </div>
+        </aside>
+      </div>
     </header>
   );
 }
