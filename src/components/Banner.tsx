@@ -188,7 +188,7 @@ export default function Banner() {
               alt="NYALTX Banner"
               width={1600}
               height={200}
-              className="w-full h-[120px] md:h-[160px] lg:h-[180px] object-contain transition-all duration-700 group-hover:scale-105"
+              className="w-full h-[120px] md:h-[160px] cursor-pointer lg:h-[180px] object-contain transition-all duration-700 group-hover:scale-105"
               priority
               unoptimized={uploadedBanners.length > 0}
               style={{ objectFit: 'contain' }}
