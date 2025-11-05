@@ -15,7 +15,7 @@ type HighlightStyle = 'cyan' | 'green' | 'purple' | 'indigo' | 'orange' | 'teal'
 type Section = {
   id?: string;
   title?: string;
-  level?: number;
+  level?: number | string;
   content?: any;
   highlight?: {
     style?: HighlightStyle;
@@ -93,16 +93,24 @@ const normalizeContent = (value: any) => {
   return value;
 };
 
+const normalizeLevel = (value: Section['level']) => {
+  if (value === undefined || value === null) return undefined;
+  const numeric = typeof value === 'string' ? parseInt(value, 10) : value;
+  return Number.isNaN(numeric as number) ? undefined : numeric;
+};
+
 const SectionRenderer: React.FC<{ section: Section; isNested?: boolean }> = ({ section, isNested }) => {
   if (!section?.id && !section?.title) return null;
 
-  const HeadingTag = (section.level && section.level > 0 ? 'h3' : 'h2') as React.ElementType;
+  const sectionLevel = normalizeLevel(section.level) ?? 0;
+  const HeadingTag = (sectionLevel > 0 ? 'h3' : 'h2') as React.ElementType;
 
   const highlight = section.highlight?.style
     ? highlightStyleMap[section.highlight.style as HighlightStyle] ?? highlightStyleMap.cyan
     : null;
 
-  const titleClass = section.level && section.level > 0 ? 'text-2xl font-semibold text-gray-200 mb-4' : 'text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6';
+  const titleClass = sectionLevel > 0 ? 'text-2xl font-semibold text-gray-200 mb-4' : 'text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6';
+  const highlightContent = normalizeContent(section.highlight?.content);
 
   return (
     <section
@@ -113,7 +121,7 @@ const SectionRenderer: React.FC<{ section: Section; isNested?: boolean }> = ({ s
         <HeadingTag className={titleClass}>{section.title}</HeadingTag>
       )}
 
-      {highlight?.container && section.highlight?.content && (
+      {highlight?.container && highlightContent && (
         <div
           className={clsx(
             'bg-linear-to-r border-l-4 p-6 mb-6 rounded-r-lg',
@@ -121,7 +129,7 @@ const SectionRenderer: React.FC<{ section: Section; isNested?: boolean }> = ({ s
           )}
         >
           <div className={highlight.text}>
-            <TinaMarkdown content={section.highlight.content} />
+            <TinaMarkdown content={highlightContent} />
           </div>
         </div>
       )}
@@ -234,8 +242,23 @@ const WhitepaperPage: React.FC<WhitepaperPageProps> = ({ data }) => {
   const { data: tinaData } = useTina(data) as { data: any };
   const pageData = tinaData?.whitepaper ?? tinaData ?? {};
 
-  const sections: Section[] = useMemo(() => (Array.isArray(pageData.sections) ? pageData.sections : []), [pageData.sections]);
-  const toc = useMemo(() => (Array.isArray(pageData.toc) ? pageData.toc : []), [pageData.toc]) as Array<{
+  const sections: Section[] = useMemo(
+    () => (Array.isArray(pageData.sections) ? (pageData.sections as Section[]) : []),
+    [pageData.sections],
+  );
+  const toc = useMemo(
+    () =>
+      Array.isArray(pageData.toc)
+        ? pageData.toc.map((item: any) => {
+            const normalizedLevel = normalizeLevel(item?.level);
+            return {
+              ...item,
+              level: normalizedLevel,
+            };
+          })
+        : [],
+    [pageData.toc],
+  ) as Array<{
     id: string;
     title: string;
     level?: number;
