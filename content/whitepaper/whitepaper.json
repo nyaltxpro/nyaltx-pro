@@ -8,38 +8,38 @@
     "tagline": "Transforming crypto marketing, trading, and community engagement"
   },
   "toc": [
-    { "id": "introduction", "title": "Introduction", "level": 0 },
-    { "id": "executive-summary", "title": "Executive Summary", "level": 0 },
-    { "id": "vision-mission", "title": "Vision & Mission", "level": 0 },
-    { "id": "vision", "title": "Vision", "level": 1 },
-    { "id": "mission", "title": "Mission", "level": 1 },
-    { "id": "market-opportunity", "title": "Market Opportunity", "level": 0 },
-    { "id": "platform-overview", "title": "Platform Overview", "level": 0 },
-    { "id": "crypto-profiles", "title": "Crypto Profiles", "level": 1 },
-    { "id": "embedded-trading", "title": "Embedded Trading", "level": 1 },
-    { "id": "token-generator", "title": "Token Generator", "level": 1 },
-    { "id": "nyax-token", "title": "The NYAX Token", "level": 0 },
-    { "id": "payment-token", "title": "Payment Token", "level": 1 },
-    { "id": "governance", "title": "Governance", "level": 1 },
-    { "id": "staking-rewards", "title": "Staking & Rewards", "level": 1 },
-    { "id": "tokenomics", "title": "Tokenomics", "level": 0 },
-    { "id": "token-details", "title": "Token Details", "level": 1 },
-    { "id": "allocation", "title": "Allocation", "level": 1 },
-    { "id": "revenue-model", "title": "Revenue Model", "level": 1 },
-    { "id": "competitive-advantage", "title": "Competitive Advantage", "level": 0 },
-    { "id": "roadmap", "title": "Roadmap", "level": 0 },
-    { "id": "phase-1", "title": "Phase 1 - Launch (2025)", "level": 1 },
-    { "id": "phase-2", "title": "Phase 2 - Growth (2025)", "level": 1 },
-    { "id": "phase-3", "title": "Phase 3 - Expansion (2026)", "level": 1 },
-    { "id": "phase-4", "title": "Phase 4 - Scaling (2026+)", "level": 1 },
-    { "id": "conclusion", "title": "Conclusion", "level": 0 },
-    { "id": "contact", "title": "Contact Information", "level": 0 }
+    { "id": "introduction", "title": "Introduction", "level": "0" },
+    { "id": "executive-summary", "title": "Executive Summary", "level": "0" },
+    { "id": "vision-mission", "title": "Vision & Mission", "level": "0" },
+    { "id": "vision", "title": "Vision", "level": "1" },
+    { "id": "mission", "title": "Mission", "level": "1" },
+    { "id": "market-opportunity", "title": "Market Opportunity", "level": "0" },
+    { "id": "platform-overview", "title": "Platform Overview", "level": "0" },
+    { "id": "crypto-profiles", "title": "Crypto Profiles", "level": "1" },
+    { "id": "embedded-trading", "title": "Embedded Trading", "level": "1" },
+    { "id": "token-generator", "title": "Token Generator", "level": "1" },
+    { "id": "nyax-token", "title": "The NYAX Token", "level": "0" },
+    { "id": "payment-token", "title": "Payment Token", "level": "1" },
+    { "id": "governance", "title": "Governance", "level": "1" },
+    { "id": "staking-rewards", "title": "Staking & Rewards", "level": "1" },
+    { "id": "tokenomics", "title": "Tokenomics", "level": "0" },
+    { "id": "token-details", "title": "Token Details", "level": "1" },
+    { "id": "allocation", "title": "Allocation", "level": "1" },
+    { "id": "revenue-model", "title": "Revenue Model", "level": "1" },
+    { "id": "competitive-advantage", "title": "Competitive Advantage", "level": "0" },
+    { "id": "roadmap", "title": "Roadmap", "level": "0" },
+    { "id": "phase-1", "title": "Phase 1 - Launch (2025)", "level": "1" },
+    { "id": "phase-2", "title": "Phase 2 - Growth (2025)", "level": "1" },
+    { "id": "phase-3", "title": "Phase 3 - Expansion (2026)", "level": "1" },
+    { "id": "phase-4", "title": "Phase 4 - Scaling (2026+)", "level": "1" },
+    { "id": "conclusion", "title": "Conclusion", "level": "0" },
+    { "id": "contact", "title": "Contact Information", "level": "0" }
   ],
   "sections": [
     {
       "id": "introduction",
       "title": "Introduction",
-      "level": 0,
+      "level": "0",
       "content": {
         "type": "root",
         "children": [
@@ -59,7 +59,7 @@
     {
       "id": "executive-summary",
       "title": "Executive Summary",
-      "level": 0,
+      "level": "0",
       "highlight": {
         "style": "cyan",
         "content": {
@@ -135,7 +135,7 @@
     {
       "id": "vision",
       "title": "Vision",
-      "level": 1,
+      "level": "1",
       "highlight": {
         "style": "green",
         "content": {
@@ -158,7 +158,7 @@
     {
       "id": "mission",
       "title": "Mission",
-      "level": 1,
+      "level": "1",
       "highlight": {
         "style": "purple",
         "content": {
@@ -181,7 +181,7 @@
     {
       "id": "market-opportunity",
       "title": "Market Opportunity",
-      "level": 0,
+      "level": "0",
       "stats": [
         {
           "value": "18,000+",
@@ -213,7 +213,7 @@
     {
       "id": "platform-overview",
       "title": "Platform Overview",
-      "level": 0,
+      "level": "0",
       "subsections": [
         {
           "id": "crypto-profiles",
@@ -294,7 +294,7 @@
     {
       "id": "nyax-token",
       "title": "The NYAX Token",
-      "level": 0,
+      "level": "0",
       "subsections": [
         {
           "id": "payment-token",
@@ -358,7 +358,7 @@
     {
       "id": "tokenomics",
       "title": "Tokenomics",
-      "level": 0,
+      "level": "0",
       "subsections": [
         {
           "id": "token-details",
