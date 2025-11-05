@@ -242,12 +242,12 @@ const WhitepaperPage: React.FC<WhitepaperPageProps> = ({ data }) => {
     () =>
       Array.isArray(pageData.toc)
         ? pageData.toc.map((item: any) => {
-            const normalizedLevel = normalizeLevel(item?.level);
-            return {
-              ...item,
-              level: normalizedLevel,
-            };
-          })
+          const normalizedLevel = normalizeLevel(item?.level);
+          return {
+            ...item,
+            level: normalizedLevel,
+          };
+        })
         : [],
     [pageData.toc],
   ) as Array<{
@@ -298,7 +298,7 @@ const WhitepaperPage: React.FC<WhitepaperPageProps> = ({ data }) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#06090f] text-white">
+    <div className="min-h-screen  text-white">
       <PublicHeader />
 
       <div className="z-40 sticky top-16 flex items-center justify-between border-b border-white/10 bg-[#0b1217]/95 px-4 py-4 lg:hidden">

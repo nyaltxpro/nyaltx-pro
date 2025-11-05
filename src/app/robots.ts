@@ -24,7 +24,7 @@ export default function robots(): MetadataRoute.Robots {
         disallow: [
           // Admin routes - keep private
           '/admin/*',
-          '/dashboard/admin/*',
+     
 
           // API routes - no indexing needed
           '/api/*',
@@ -38,9 +38,6 @@ export default function robots(): MetadataRoute.Robots {
           '/test-email',
           '/websockets',
           // Dynamic routes that might contain sensitive data
-          '/dashboard/ad/*',
-          '/dashboard/nfts/*',
-          '/nyax-token-details/*',
           // Checkout pages - no indexing needed
           '/pricing/checkout/*',
           '/pricing/race-to-liberty/*/checkout',

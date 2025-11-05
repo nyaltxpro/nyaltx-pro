@@ -16,6 +16,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type') || 'gainers'; // gainers, losers, or volume
     const limit = parseInt(searchParams.get('limit') || '10');
+    const perPage = Math.min(Math.max(limit * 3, 50), 250);
 
     // Determine sorting parameter based on type
     let orderParam = 'market_cap_desc';
@@ -29,7 +30,7 @@ export async function GET(request: NextRequest) {
 
     // Fetch market data from CoinGecko
     const response = await fetch(
-      `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=${orderParam}&per_page=${Math.min(limit * 2, 50)}&page=1&sparkline=false&price_change_percentage=24h`,
+      `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=${orderParam}&per_page=${perPage}&page=1&sparkline=false&price_change_percentage=24h`,
       {
         headers: {
           Accept: 'application/json',
@@ -53,7 +54,8 @@ export async function GET(request: NextRequest) {
       filteredCoins = marketData.filter((coin: any) => coin.price_change_percentage_24h < 0);
     }
 
-    const topCoins = filteredCoins.slice(0, Math.min(limit, 20)); // Limit to 20 for better performance
+    const detailFetchSize = Math.min(filteredCoins.length, Math.max(limit * 2, limit + 10));
+    const topCoins = filteredCoins.slice(0, detailFetchSize);
 
     // Helper function to fetch coin details with retry logic
     const fetchCoinDetails = async (coin: any, retries = 2): Promise<any> => {
@@ -187,15 +189,24 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Filter out coins with no chain information (no contract addresses)
-    const coinsWithChain = coinsWithDetails.filter(coin => {
+    const coinsWithContract = coinsWithDetails.filter(coin => {
       return coin.contractAddresses && Object.keys(coin.contractAddresses).length > 0;
     });
 
+    let finalCoins = coinsWithContract.slice(0, limit);
+
+    if (finalCoins.length < limit) {
+      const contractIds = new Set(finalCoins.map(coin => coin.id));
+      const fallbackCoins = coinsWithDetails
+        .filter(coin => !contractIds.has(coin.id))
+        .slice(0, limit - finalCoins.length);
+      finalCoins = [...finalCoins, ...fallbackCoins];
+    }
+
     return NextResponse.json({
-      coins: coinsWithChain,
+      coins: finalCoins,
       type,
-      total: coinsWithChain.length,
+      total: finalCoins.length,
     });
   } catch (error) {
     console.error('Market movers error:', error);
