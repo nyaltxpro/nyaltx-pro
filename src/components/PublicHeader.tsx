@@ -80,6 +80,41 @@ export default function PublicHeader() {
     setMobileMenuOpen(false);
   }, [pathname]);
 
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      const existingOverflow = document.body.style.overflow;
+      document.body.dataset.prevOverflow = existingOverflow;
+      document.body.style.overflow = 'hidden';
+
+      const handleKeyDown = (event: KeyboardEvent) => {
+        if (event.key === 'Escape') {
+          setMobileMenuOpen(false);
+        }
+      };
+
+      window.addEventListener('keydown', handleKeyDown);
+      return () => {
+        window.removeEventListener('keydown', handleKeyDown);
+        const previous = document.body.dataset.prevOverflow ?? '';
+        if (previous) {
+          document.body.style.overflow = previous;
+        } else {
+          document.body.style.removeProperty('overflow');
+        }
+        delete document.body.dataset.prevOverflow;
+      };
+    }
+
+    const previous = document.body.dataset.prevOverflow ?? '';
+    if (previous) {
+      document.body.style.overflow = previous;
+    } else {
+      document.body.style.removeProperty('overflow');
+    }
+    delete document.body.dataset.prevOverflow;
+    return undefined;
+  }, [mobileMenuOpen]);
+
   const NavLink = ({
     href,
     label,
@@ -195,45 +230,69 @@ export default function PublicHeader() {
       </div>
 
       {mobileMenuOpen && (
-        <div className="md:hidden absolute inset-x-0 top-20 border-t border-gray-800 bg-[#050505]/95 backdrop-blur-sm">
-          <div className="px-4 pb-6 pt-4 space-y-4">
-            <div className="space-y-2">
-              {primaryLinks.map((link) => (
-                <NavLink
-                  key={`mobile-${link.href}`}
-                  href={link.href}
-                  label={link.label}
-                  onClick={() => setMobileMenuOpen(false)}
-                  variant="mobile"
-                />
-              ))}
+        <div className="md:hidden">
+          <div
+            className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
+            onClick={() => setMobileMenuOpen(false)}
+          ></div>
+          <aside className="fixed inset-y-0 left-0 z-50 flex h-full w-72 max-w-[80vw] flex-col border-r border-gray-800 bg-[#050505] shadow-2xl">
+            <div className="flex items-center justify-between px-4 py-4 border-b border-gray-800">
+              <Link
+                href={brandHref}
+                className="flex items-center gap-2 text-lg font-semibold tracking-tight"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {brandLabel}
+              </Link>
+              <button
+                type="button"
+                aria-label="Close menu"
+                onClick={() => setMobileMenuOpen(false)}
+                className="rounded-md border border-gray-800 p-2 text-gray-300 hover:bg-gray-900 hover:text-white transition-colors"
+              >
+                <FaTimes className="h-4 w-4" />
+              </button>
             </div>
 
-            {dropdownMenus.length > 0 && (
-              <div className="space-y-4">
-                {dropdownMenus.map((menu) => (
-                  <div key={`mobile-${menu.label}`} className="space-y-2">
-                    <p className="text-xs uppercase tracking-wide text-gray-500">{menu.label}</p>
-                    <div className="space-y-2 pl-2">
-                      {menu.links?.map((link) => (
-                        <NavLink
-                          key={`mobile-${menu.label}-${link.href}`}
-                          href={link.href}
-                          label={link.label}
-                          onClick={() => setMobileMenuOpen(false)}
-                          variant="mobile"
-                        />
-                      ))}
-                    </div>
-                  </div>
+            <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6">
+              <div className="space-y-2">
+                {primaryLinks.map((link) => (
+                  <NavLink
+                    key={`mobile-${link.href}`}
+                    href={link.href}
+                    label={link.label}
+                    onClick={() => setMobileMenuOpen(false)}
+                    variant="mobile"
+                  />
                 ))}
               </div>
-            )}
 
-            <div className="pt-4 border-t border-gray-800">
+              {dropdownMenus.length > 0 && (
+                <div className="space-y-5">
+                  {dropdownMenus.map((menu) => (
+                    <div key={`mobile-${menu.label}`} className="space-y-3">
+                      <p className="text-xs uppercase tracking-wide text-gray-500">{menu.label}</p>
+                      <div className="space-y-2">
+                        {menu.links?.map((link) => (
+                          <NavLink
+                            key={`mobile-${menu.label}-${link.href}`}
+                            href={link.href}
+                            label={link.label}
+                            onClick={() => setMobileMenuOpen(false)}
+                            variant="mobile"
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="border-t border-gray-800 px-4 py-4">
               <SimpleUnifiedWalletButton className="w-full justify-center" />
             </div>
-          </div>
+          </aside>
         </div>
       )}
     </header>
