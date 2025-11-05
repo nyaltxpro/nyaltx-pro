@@ -143,7 +143,7 @@ export default function Banner() {
                 e.stopPropagation();
                 prev();
               }}
-              className="absolute left-4 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center transition-all duration-200 hover:scale-110 backdrop-blur-sm opacity-0 group-hover:opacity-100"
+              className="absolute cursor-pointer left-4 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center transition-all duration-200 hover:scale-110 backdrop-blur-sm opacity-0 group-hover:opacity-100"
               aria-label="Previous banner"
             >
               <ChevronLeftIcon className="w-6 h-6 text-white" />
@@ -154,7 +154,7 @@ export default function Banner() {
                 e.stopPropagation();
                 next();
               }}
-              className="absolute right-4 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center transition-all duration-200 hover:scale-110 backdrop-blur-sm opacity-0 group-hover:opacity-100"
+              className="absolute  cursor-pointer right-4 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center transition-all duration-200 hover:scale-110 backdrop-blur-sm opacity-0 group-hover:opacity-100"
               aria-label="Next banner"
             >
               <ChevronRightIcon className="w-6 h-6 text-white" />
