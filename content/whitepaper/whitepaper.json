@@ -150,7 +150,7 @@
       "id": "executive-summary",
       "title": "Executive Summary",
       "level": "0",
-      "content": "```typescriptreact\n NYALTX represents the next evolution in decentralized finance infrastructure ,combining traditional financial tools with cutting-edge blockchain technology.\n```\n",
+      "content": "NYALTX represents the next evolution in decentralized finance infrastructure,\n\ncombining traditional financial tools with cutting-edge blockchain technology.\n",
       "highlight": {
         "style": "cyan",
         "content": "\\[object Object]\n"
