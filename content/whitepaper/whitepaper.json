@@ -442,7 +442,7 @@
     {
       "id": "competitive-advantage",
       "title": "Competitive Advantage",
-      "level": 0,
+      "level": "0",
       "highlight": {
         "style": "indigo",
         "content": {
@@ -518,7 +518,7 @@
     {
       "id": "roadmap",
       "title": "Roadmap",
-      "level": 0,
+      "level": "0",
       "timeline": [
         {
           "id": "phase-1",
@@ -565,7 +565,7 @@
     {
       "id": "conclusion",
       "title": "Conclusion",
-      "level": 0,
+      "level": "0",
       "content": {
         "type": "root",
         "children": [
@@ -595,7 +595,7 @@
     {
       "id": "contact",
       "title": "Contact Information",
-      "level": 0,
+      "level": "0",
       "content": {
         "type": "root",
         "children": [
