@@ -3,8 +3,8 @@
 import PublicHeader from '@/components/PublicHeader';
 import clsx from 'clsx';
 import { useEffect, useMemo, useState } from 'react';
-import { TinaMarkdown } from 'tinacms/dist/rich-text';
 import { useTina } from 'tinacms/dist/react';
+import { TinaMarkdown } from 'tinacms/dist/rich-text';
 
 interface WhitepaperPageProps {
   data: any;
@@ -316,7 +316,7 @@ const WhitepaperPage: React.FC<WhitepaperPageProps> = ({ data }) => {
           />
         )}
 
-        <main className="flex-1 min-h-screen lg:ml-80">
+        <main className="flex-1 min-h-screen ">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
             <article className="max-w-none">
               <section id={pageData.hero?.id ?? 'introduction'} className="mb-8 sm:mb-12 scroll-mt-32">
