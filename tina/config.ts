@@ -4,6 +4,7 @@ import generalStatement from "./schema/generalstatment";
 import { legalAdvice } from "./schema/legalAdvice";
 import podcast from "./schema/podcast";
 import pricing from "./schema/pricing";
+import whitepaper from "./schema/whitepaper";
 import { privacyPolicy } from "./schema/privacyPolicy";
 import tradeVideos from "./schema/tradeVideos";
 import ventureGroup from "./schema/ventureGroup";
@@ -43,6 +44,7 @@ export default defineConfig({
       podcast,
       tradeVideos,
       pricing,
+      whitepaper,
       {
         name: "navigation",
         label: "Navigation",
