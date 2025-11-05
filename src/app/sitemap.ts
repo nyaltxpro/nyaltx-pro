@@ -4,15 +4,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl =  'https://www.nyaltx.pro';
 
   return [
-    // Main Pages
     {
       url: baseUrl,
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 1,
     },
-
-    // Public Pages
+    {
+      url: `${baseUrl}/dashboard`,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.9,
+    },
     {
       url: `${baseUrl}/about-us`,
       lastModified: new Date(),
@@ -31,7 +34,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'weekly',
       priority: 0.9,
     },
-    // Legal Pages
     {
       url: `${baseUrl}/privacy-policy`,
       lastModified: new Date(),
@@ -44,21 +46,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly',
       priority: 0.5,
     },
-    // Dashboard Pages (Main Features)
-    {
-      url: `${baseUrl}/dashboard`,
-      lastModified: new Date(),
-      changeFrequency: 'daily',
-      priority: 0.9,
-    },
-
     {
       url: `${baseUrl}/podcast`,
       lastModified: new Date(),
       changeFrequency: 'hourly',
       priority: 0.8,
     },
-   
     {
       url: `${baseUrl}/dashboard/register-token`,
       lastModified: new Date(),
@@ -83,14 +76,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'daily',
       priority: 0.7,
     },
-
-    // Live Streaming & Social
     {
       url: `${baseUrl}/blog`,
       lastModified: new Date(),
       changeFrequency: 'hourly',
       priority: 0.8,
     },
-    // Pricing & Checkout Pages
   ];
 }
