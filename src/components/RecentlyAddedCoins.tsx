@@ -224,7 +224,7 @@ export default function RecentlyAddedCoins() {
                   </div>
                 </div>
                 <div>
-                  {/* <div className="flex items-center font-medium">{coin.name} <CryptocurrencyIcon className='h-4 w-4 mx-4' name={coin.primaryChain || 'solana'} /></div> */}
+                  <div className="flex items-center font-medium">{coin.name} </div>
                   <div className="text-gray-400 text-xs">{coin.symbol.toUpperCase()}</div>
                 </div>
               </div>
