@@ -3,13 +3,14 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
-import { FaChevronDown } from 'react-icons/fa';
+import { FaBars, FaChevronDown, FaTimes } from 'react-icons/fa';
 import { usePublicNavigation } from '../hooks/useTinaContent';
 import SimpleUnifiedWalletButton from './SimpleUnifiedWalletButton';
 
 export default function PublicHeader() {
   const pathname = usePathname();
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const dropdownRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const { content } = usePublicNavigation();
 
@@ -69,16 +70,40 @@ export default function PublicHeader() {
     };
   }, []);
 
-  const NavLink = ({ href, label, onClick }: { href: string; label: string; onClick?: () => void }) => {
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      setOpenDropdown(null);
+    }
+  }, [mobileMenuOpen]);
+
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
+
+  const NavLink = ({
+    href,
+    label,
+    onClick,
+    variant = 'desktop',
+  }: {
+    href: string;
+    label: string;
+    onClick?: () => void;
+    variant?: 'desktop' | 'mobile';
+  }) => {
     const active = pathname === href || (href !== '/' && pathname?.startsWith(href));
+    const classes =
+      variant === 'desktop'
+        ? active
+          ? 'px-3 py-2 text-sm text-cyan-300'
+          : 'px-3 py-2 text-sm text-gray-300 hover:text-white'
+        : active
+          ? 'block w-full rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white'
+          : 'block w-full rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-white';
     return (
       <Link
         href={href}
-        className={
-          active
-            ? 'px-3 py-2 text-sm text-cyan-300'
-            : 'px-3 py-2 text-sm text-gray-300 hover:text-white'
-        }
+        className={classes}
         onClick={onClick}
       >
         {label}
@@ -104,7 +129,7 @@ export default function PublicHeader() {
   };
 
   return (
-    <header className="z-40 bg-transparent">
+    <header className="relative z-40 bg-transparent">
       <div className="mx-auto max-w-7xl px-4 h-20 py-4 flex items-center justify-between gap-4">
         {/* Logo - Left */}
         <div className="flex items-center shrink-0">
@@ -155,7 +180,62 @@ export default function PublicHeader() {
           {/* <ConnectWalletButton /> */}
           <SimpleUnifiedWalletButton />
         </div>
+
+        {/* Mobile Menu Toggle */}
+        <div className="md:hidden flex items-center">
+          <button
+            type="button"
+            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+            onClick={() => setMobileMenuOpen((prev) => !prev)}
+            className="inline-flex items-center justify-center rounded-md border border-gray-800 p-2 text-gray-300 hover:bg-gray-900 hover:text-white transition-colors"
+          >
+            {mobileMenuOpen ? <FaTimes className="h-4 w-4" /> : <FaBars className="h-4 w-4" />}
+          </button>
+        </div>
       </div>
+
+      {mobileMenuOpen && (
+        <div className="md:hidden absolute inset-x-0 top-20 border-t border-gray-800 bg-[#050505]/95 backdrop-blur-sm">
+          <div className="px-4 pb-6 pt-4 space-y-4">
+            <div className="space-y-2">
+              {primaryLinks.map((link) => (
+                <NavLink
+                  key={`mobile-${link.href}`}
+                  href={link.href}
+                  label={link.label}
+                  onClick={() => setMobileMenuOpen(false)}
+                  variant="mobile"
+                />
+              ))}
+            </div>
+
+            {dropdownMenus.length > 0 && (
+              <div className="space-y-4">
+                {dropdownMenus.map((menu) => (
+                  <div key={`mobile-${menu.label}`} className="space-y-2">
+                    <p className="text-xs uppercase tracking-wide text-gray-500">{menu.label}</p>
+                    <div className="space-y-2 pl-2">
+                      {menu.links?.map((link) => (
+                        <NavLink
+                          key={`mobile-${menu.label}-${link.href}`}
+                          href={link.href}
+                          label={link.label}
+                          onClick={() => setMobileMenuOpen(false)}
+                          variant="mobile"
+                        />
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="pt-4 border-t border-gray-800">
+              <SimpleUnifiedWalletButton className="w-full justify-center" />
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
