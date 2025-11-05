@@ -76,6 +76,23 @@ const cardStyleMap: Record<HighlightStyle, string> = {
   blue: 'from-blue-500/10 to-sky-600/10 border-blue-500/20 text-blue-200',
 };
 
+const normalizeContent = (value: any) => {
+  if (!value) return undefined;
+  if (typeof value === 'string') {
+    return {
+      type: 'root',
+      children: [
+        {
+          type: 'element',
+          name: 'p',
+          children: [{ type: 'text', text: value }],
+        },
+      ],
+    };
+  }
+  return value;
+};
+
 const SectionRenderer: React.FC<{ section: Section; isNested?: boolean }> = ({ section, isNested }) => {
   if (!section?.id && !section?.title) return null;
 
@@ -111,7 +128,7 @@ const SectionRenderer: React.FC<{ section: Section; isNested?: boolean }> = ({ s
 
       {section.content && (
         <div className="text-gray-300 space-y-4">
-          <TinaMarkdown content={section.content} />
+          <TinaMarkdown content={normalizeContent(section.content)} />
         </div>
       )}
 
@@ -138,7 +155,7 @@ const SectionRenderer: React.FC<{ section: Section; isNested?: boolean }> = ({ s
             <li key={`${section.id}-list-${index}`} className="flex items-start gap-3">
               <div className="w-2 h-2 rounded-full bg-cyan-400 mt-2 shrink-0"></div>
               <div className="space-y-2">
-                {item?.content ? <TinaMarkdown content={item.content} /> : null}
+                {item?.content ? <TinaMarkdown content={normalizeContent(item.content)} /> : null}
               </div>
             </li>
           ))}
