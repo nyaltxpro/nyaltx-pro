@@ -31,13 +31,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'weekly',
       priority: 0.9,
     },
-    {
-      url: `${baseUrl}/race-to-liberty`,
-      lastModified: new Date(),
-      changeFrequency: 'daily',
-      priority: 0.9,
-    },
-
     // Legal Pages
     {
       url: `${baseUrl}/privacy-policy`,
@@ -51,8 +44,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly',
       priority: 0.5,
     },
-
-
     // Dashboard Pages (Main Features)
     {
       url: `${baseUrl}/dashboard`,
@@ -62,7 +53,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
 
     {
-      url: `${baseUrl}/dashboard/trending`,
+      url: `${baseUrl}/podcast`,
       lastModified: new Date(),
       changeFrequency: 'hourly',
       priority: 0.8,
@@ -82,14 +73,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
    {
       url: `${baseUrl}/whitepaper`,
-      lastModified: new Date(),
-      changeFrequency: 'daily',
-      priority: 0.8,
-    },
-
-    // Gamification & Events
-    {
-      url: `${baseUrl}/blogs`,
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 0.8,
