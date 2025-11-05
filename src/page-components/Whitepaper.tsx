@@ -76,21 +76,20 @@ const cardStyleMap: Record<HighlightStyle, string> = {
   blue: 'from-blue-500/10 to-sky-600/10 border-blue-500/20 text-blue-200',
 };
 
-const normalizeContent = (value: any) => {
-  if (!value) return undefined;
+const renderContent = (value: any) => {
+  if (!value) return null;
   if (typeof value === 'string') {
-    return {
-      type: 'root',
-      children: [
-        {
-          type: 'element',
-          name: 'p',
-          children: [{ type: 'text', text: value }],
-        },
-      ],
-    };
+    const paragraphs = value
+      .split(/\n{2,}/)
+      .map((paragraph, index) => (
+        <p key={index} className="leading-relaxed">
+          {paragraph}
+        </p>
+      ));
+    return <>{paragraphs}</>;
   }
-  return value;
+
+  return <TinaMarkdown content={value} />;
 };
 
 const normalizeLevel = (value: Section['level']) => {
@@ -110,7 +109,6 @@ const SectionRenderer: React.FC<{ section: Section; isNested?: boolean }> = ({ s
     : null;
 
   const titleClass = sectionLevel > 0 ? 'text-2xl font-semibold text-gray-200 mb-4' : 'text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6';
-  const highlightContent = normalizeContent(section.highlight?.content);
 
   return (
     <section
@@ -121,23 +119,19 @@ const SectionRenderer: React.FC<{ section: Section; isNested?: boolean }> = ({ s
         <HeadingTag className={titleClass}>{section.title}</HeadingTag>
       )}
 
-      {highlight?.container && highlightContent && (
+      {highlight?.container && section.highlight?.content && (
         <div
           className={clsx(
             'bg-linear-to-r border-l-4 p-6 mb-6 rounded-r-lg',
             highlight.container,
           )}
         >
-          <div className={highlight.text}>
-            <TinaMarkdown content={highlightContent} />
-          </div>
+          <div className={clsx('space-y-3', highlight.text)}>{renderContent(section.highlight.content)}</div>
         </div>
       )}
 
       {section.content && (
-        <div className="text-gray-300 space-y-4">
-          <TinaMarkdown content={normalizeContent(section.content)} />
-        </div>
+        <div className="text-gray-300 space-y-4">{renderContent(section.content)}</div>
       )}
 
       {Array.isArray(section.stats) && section.stats.length > 0 && (
@@ -162,9 +156,7 @@ const SectionRenderer: React.FC<{ section: Section; isNested?: boolean }> = ({ s
           {section.listItems.map((item, index) => (
             <li key={`${section.id}-list-${index}`} className="flex items-start gap-3">
               <div className="w-2 h-2 rounded-full bg-cyan-400 mt-2 shrink-0"></div>
-              <div className="space-y-2">
-                {item?.content ? <TinaMarkdown content={normalizeContent(item.content)} /> : null}
-              </div>
+              <div className="space-y-2">{renderContent(item?.content)}</div>
             </li>
           ))}
         </ul>
@@ -263,6 +255,11 @@ const WhitepaperPage: React.FC<WhitepaperPageProps> = ({ data }) => {
     title: string;
     level?: number;
   }>;
+
+  useEffect(() => {
+    // eslint-disable-next-line no-console
+    console.log('Whitepaper sections', sections);
+  }, [sections]);
 
   const [activeSection, setActiveSection] = useState<string>(toc?.[0]?.id ?? sections?.[0]?.id ?? '');
   const [sidebarOpen, setSidebarOpen] = useState(false);

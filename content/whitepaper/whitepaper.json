@@ -1,7 +1,7 @@
 {
   "slug": "whitepaper",
   "title": "NYALTX Whitepaper",
-  "description": " Welcome to the comprehensive technical documentation for NYALTX, a revolutionary decentralized finance (DeFi) platform designed to transform how crypto projects gain visibility, liquidity, and growth opportunities in the Web3 ecosystem.",
+  "description": "Welcome to the comprehensive technical documentation for NYALTX, a revolutionary decentralized finance (DeFi) platform designed to transform how crypto projects gain visibility, liquidity, and growth opportunities in the Web3 ecosystem.",
   "hero": {
     "title": "NYALTX Whitepaper",
     "subtitle": "New York Alt Exchange - Powered by the NYAX Token",
@@ -167,22 +167,27 @@
       ]
     },
     {
-      "id": "vision",
-      "title": "Vision",
-      "level": "1",
-      "highlight": {
-        "style": "green",
-        "content": "To become the leading Web3 ecosystem where projects gain visibility, investors access transparent data and liquidity, and communities are rewarded for engagement."
-      }
-    },
-    {
-      "id": "mission",
-      "title": "Mission",
-      "level": "1",
-      "highlight": {
-        "style": "purple",
-        "content": "To empower projects and investors with tools that combine DeFi trading, marketing, and social interaction—backed by a sustainable token economy."
-      }
+      "id": "vision-mission",
+      "title": "Vision & Mission",
+      "level": "0",
+      "subsections": [
+        {
+          "id": "vision",
+          "title": "Vision",
+          "highlight": {
+            "style": "green",
+            "content": "To become the leading Web3 ecosystem where projects gain visibility, investors access transparent data and liquidity, and communities are rewarded for engagement."
+          }
+        },
+        {
+          "id": "mission",
+          "title": "Mission",
+          "highlight": {
+            "style": "purple",
+            "content": "To empower projects and investors with tools that combine DeFi trading, marketing, and social interaction—backed by a sustainable token economy."
+          }
+        }
+      ]
     },
     {
       "id": "market-opportunity",
