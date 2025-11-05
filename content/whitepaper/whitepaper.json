@@ -144,26 +144,95 @@
       "id": "introduction",
       "title": "Introduction",
       "level": "0",
-      "content": "\\[object Object]\n"
+      "content": {
+        "type": "root",
+        "children": [
+          {
+            "type": "element",
+            "name": "p",
+            "children": [
+              {
+                "type": "text",
+                "text": "Welcome to the comprehensive technical documentation for NYALTX, a revolutionary decentralized finance (DeFi) platform designed to transform how crypto projects gain visibility, liquidity, and growth opportunities in the Web3 ecosystem."
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "id": "executive-summary",
       "title": "Executive Summary",
       "level": "0",
-      "content": "NYALTX represents the next evolution in decentralized finance infrastructure,\n\ncombining traditional financial tools with cutting-edge blockchain technology.\n",
       "highlight": {
         "style": "cyan",
-        "content": "\\[object Object]\n"
+        "content": {
+          "type": "root",
+          "children": [
+            {
+              "type": "element",
+              "name": "p",
+              "children": [
+                {
+                  "type": "text",
+                  "text": "NYALTX represents the next evolution in decentralized finance infrastructure, combining traditional financial tools with cutting-edge blockchain technology."
+                }
+              ]
+            }
+          ]
+        }
       },
       "listItems": [
         {
-          "content": "```htmlbars\n  <span><strong className=\"text-white\">NYALT Exchange (NYALTX.com)</strong> is a decentralized finance (DeFi) hub designed to give crypto projects visibility, liquidity, and growth opportunities.</span>\n```\n"
+          "content": {
+            "type": "root",
+            "children": [
+              {
+                "type": "element",
+                "name": "p",
+                "children": [
+                  {
+                    "type": "text",
+                    "text": "NYALT Exchange (NYALTX.com) is a decentralized finance (DeFi) hub designed to give crypto projects visibility, liquidity, and growth opportunities."
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
-          "content": "\\[object Object]\n"
+          "content": {
+            "type": "root",
+            "children": [
+              {
+                "type": "element",
+                "name": "p",
+                "children": [
+                  {
+                    "type": "text",
+                    "text": "Unlike traditional data aggregators, NYALT integrates project profiles, embedded trading, token creation, and community engagement tools—all powered by the NYAX token."
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
-          "content": "\\[object Object]\n"
+          "content": {
+            "type": "root",
+            "children": [
+              {
+                "type": "element",
+                "name": "p",
+                "children": [
+                  {
+                    "type": "text",
+                    "text": "NYAX is more than a currency. It is the fuel of the ecosystem, supporting payments, staking rewards, governance, marketing, and real-world access to investor networks."
+                  }
+                ]
+              }
+            ]
+          }
         }
       ]
     },
@@ -171,27 +240,67 @@
       "id": "vision",
       "title": "Vision",
       "level": "1",
-      "content": "",
       "highlight": {
         "style": "green",
-        "content": "\\[object Object]\n"
+        "content": {
+          "type": "root",
+          "children": [
+            {
+              "type": "element",
+              "name": "p",
+              "children": [
+                {
+                  "type": "text",
+                  "text": "To become the leading Web3 ecosystem where projects gain visibility, investors access transparent data and liquidity, and communities are rewarded for engagement."
+                }
+              ]
+            }
+          ]
+        }
       }
     },
     {
       "id": "mission",
       "title": "Mission",
       "level": "1",
-      "content": "",
       "highlight": {
         "style": "purple",
-        "content": "\\[object Object]\n"
+        "content": {
+          "type": "root",
+          "children": [
+            {
+              "type": "element",
+              "name": "p",
+              "children": [
+                {
+                  "type": "text",
+                  "text": "To empower projects and investors with tools that combine DeFi trading, marketing, and social interaction—backed by a sustainable token economy."
+                }
+              ]
+            }
+          ]
+        }
       }
     },
     {
       "id": "market-opportunity",
       "title": "Market Opportunity",
       "level": "0",
-      "content": "\\[object Object]\n",
+      "content": {
+        "type": "root",
+        "children": [
+          {
+            "type": "element",
+            "name": "p",
+            "children": [
+              {
+                "type": "text",
+                "text": "Most platforms offer analytics but do not provide profile-driven, community-first visibility. NYALTX fills this gap with a project and investor marketing ecosystem, monetizing not just trading, but also attention and engagement."
+              }
+            ]
+          }
+        ]
+      },
       "stats": [
         {
           "value": "18,000+",
@@ -209,7 +318,65 @@
       "id": "platform-overview",
       "title": "Platform Overview",
       "level": "0",
-      "content": "",
+      "subsections": [
+        {
+          "id": "crypto-profiles",
+          "title": "Crypto Profiles",
+          "content": {
+            "type": "root",
+            "children": [
+              {
+                "type": "element",
+                "name": "p",
+                "children": [
+                  {
+                    "type": "text",
+                    "text": "Customizable project pages with integrated charts, social links, news feeds, and promotional videos."
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "embedded-trading",
+          "title": "Embedded Trading",
+          "content": {
+            "type": "root",
+            "children": [
+              {
+                "type": "element",
+                "name": "p",
+                "children": [
+                  {
+                    "type": "text",
+                    "text": "Non-custodial swaps via Uniswap integration, allowing seamless trading directly from project profiles."
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "token-generator",
+          "title": "Token Generator",
+          "content": {
+            "type": "root",
+            "children": [
+              {
+                "type": "element",
+                "name": "p",
+                "children": [
+                  {
+                    "type": "text",
+                    "text": "Simple token creation with liquidity fees, making it easy for projects to launch their tokens."
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
       "cards": [
         {
           "title": "Profile Upgrades",
@@ -226,45 +393,69 @@
           "description": "Access to digital and real-world investor meetups",
           "color": "purple"
         }
-      ],
-      "subsections": [
-        {
-          "id": "crypto-profiles",
-          "title": "Crypto Profiles",
-          "content": "\\[object Object]\n"
-        },
-        {
-          "id": "embedded-trading",
-          "title": "Embedded Trading",
-          "content": "\\[object Object]\n"
-        },
-        {
-          "id": "token-generator",
-          "title": "Token Generator",
-          "content": "\\[object Object]\n"
-        }
       ]
     },
     {
       "id": "nyax-token",
       "title": "The NYAX Token",
       "level": "0",
-      "content": "",
       "subsections": [
         {
           "id": "payment-token",
           "title": "Payment Token",
-          "content": "\\[object Object]\n"
+          "content": {
+            "type": "root",
+            "children": [
+              {
+                "type": "element",
+                "name": "p",
+                "children": [
+                  {
+                    "type": "text",
+                    "text": "NYAX serves as the primary payment method for platform services, offering discounts and exclusive features."
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
           "id": "governance",
           "title": "Governance",
-          "content": "\\[object Object]\n"
+          "content": {
+            "type": "root",
+            "children": [
+              {
+                "type": "element",
+                "name": "p",
+                "children": [
+                  {
+                    "type": "text",
+                    "text": "Token holders participate in platform governance, voting on key decisions and feature implementations."
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
           "id": "staking-rewards",
           "title": "Staking & Rewards",
-          "content": "\\[object Object]\n"
+          "content": {
+            "type": "root",
+            "children": [
+              {
+                "type": "element",
+                "name": "p",
+                "children": [
+                  {
+                    "type": "text",
+                    "text": "Stake NYAX tokens to earn rewards and access premium platform features."
+                  }
+                ]
+              }
+            ]
+          }
         }
       ]
     },
@@ -272,31 +463,109 @@
       "id": "tokenomics",
       "title": "Tokenomics",
       "level": "0",
-      "content": "",
       "subsections": [
         {
           "id": "token-details",
           "title": "Token Details",
-          "content": ""
+          "details": [
+            {
+              "label": "Name",
+              "value": "NYAX Token"
+            },
+            {
+              "label": "Symbol",
+              "value": "NYAX"
+            },
+            {
+              "label": "Total Supply",
+              "value": "1,000,000,000 NYAX"
+            },
+            {
+              "label": "Blockchain",
+              "value": "Ethereum (ERC-20)"
+            }
+          ]
         },
         {
           "id": "allocation",
           "title": "Allocation",
-          "content": ""
+          "cards": [
+            {
+              "title": "Community & Ecosystem",
+              "description": "40%",
+              "color": "blue"
+            },
+            {
+              "title": "Team & Development",
+              "description": "25%",
+              "color": "green"
+            },
+            {
+              "title": "Marketing & Partnerships",
+              "description": "20%",
+              "color": "purple"
+            },
+            {
+              "title": "Reserve & Liquidity",
+              "description": "15%",
+              "color": "orange"
+            }
+          ]
         },
         {
           "id": "revenue-model",
           "title": "Revenue Model",
-          "content": "",
           "listItems": [
             {
-              "content": "\\[object Object]\n"
+              "content": {
+                "type": "root",
+                "children": [
+                  {
+                    "type": "element",
+                    "name": "p",
+                    "children": [
+                      {
+                        "type": "text",
+                        "text": "Platform fees from token generation and trading"
+                      }
+                    ]
+                  }
+                ]
+              }
             },
             {
-              "content": "\\[object Object]\n"
+              "content": {
+                "type": "root",
+                "children": [
+                  {
+                    "type": "element",
+                    "name": "p",
+                    "children": [
+                      {
+                        "type": "text",
+                        "text": "Premium profile upgrades and advertising"
+                      }
+                    ]
+                  }
+                ]
+              }
             },
             {
-              "content": "\\[object Object]\n"
+              "content": {
+                "type": "root",
+                "children": [
+                  {
+                    "type": "element",
+                    "name": "p",
+                    "children": [
+                      {
+                        "type": "text",
+                        "text": "Venture network event access fees"
+                      }
+                    ]
+                  }
+                ]
+              }
             }
           ]
         }
@@ -306,20 +575,75 @@
       "id": "competitive-advantage",
       "title": "Competitive Advantage",
       "level": "0",
-      "content": "",
       "highlight": {
         "style": "indigo",
-        "content": "\\[object Object]\n"
+        "content": {
+          "type": "root",
+          "children": [
+            {
+              "type": "element",
+              "name": "p",
+              "children": [
+                {
+                  "type": "text",
+                  "text": "NYALTX combines the best of DeFi trading, social media marketing, and venture networking in one integrated platform."
+                }
+              ]
+            }
+          ]
+        }
       },
       "listItems": [
         {
-          "content": "\\[object Object]\n"
+          "content": {
+            "type": "root",
+            "children": [
+              {
+                "type": "element",
+                "name": "p",
+                "children": [
+                  {
+                    "type": "text",
+                    "text": "Integrated Ecosystem: Unlike competitors who focus on single features, NYALTX provides end-to-end project lifecycle support"
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
-          "content": "\\[object Object]\n"
+          "content": {
+            "type": "root",
+            "children": [
+              {
+                "type": "element",
+                "name": "p",
+                "children": [
+                  {
+                    "type": "text",
+                    "text": "Community-First: Built-in social features and gamification drive organic engagement"
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
-          "content": "\\[object Object]\n"
+          "content": {
+            "type": "root",
+            "children": [
+              {
+                "type": "element",
+                "name": "p",
+                "children": [
+                  {
+                    "type": "text",
+                    "text": "Real-World Connections: Bridge between digital assets and traditional venture networks"
+                  }
+                ]
+              }
+            ]
+          }
         }
       ]
     },
@@ -327,7 +651,6 @@
       "id": "roadmap",
       "title": "Roadmap",
       "level": "0",
-      "content": "",
       "timeline": [
         {
           "id": "phase-1",
@@ -399,13 +722,51 @@
       "id": "conclusion",
       "title": "Conclusion",
       "level": "0",
-      "content": "NYALTX represents a paradigm shift in how crypto projects approach marketing, community building, and investor relations. By combining DeFi infrastructure with social engagement tools and real-world networking opportunities, we're creating a comprehensive ecosystem that serves the entire crypto project lifecycle.\n"
+      "content": {
+        "type": "root",
+        "children": [
+          {
+            "type": "element",
+            "name": "p",
+            "children": [
+              {
+                "type": "text",
+                "text": "NYALTX represents a paradigm shift in how crypto projects approach marketing, community building, and investor relations. By combining DeFi infrastructure with social engagement tools and real-world networking opportunities, we're creating a comprehensive ecosystem that serves the entire crypto project lifecycle."
+              }
+            ]
+          },
+          {
+            "type": "element",
+            "name": "p",
+            "children": [
+              {
+                "type": "text",
+                "text": "The NYAX token serves as the foundation of this ecosystem, incentivizing participation, governance, and long-term platform growth. Join us in building the future of decentralized project marketing and community engagement."
+              }
+            ]
+          }
+        ]
+      }
     },
     {
       "id": "contact",
       "title": "Contact Information",
       "level": "0",
-      "content": "\\[object Object]\n"
+      "content": {
+        "type": "root",
+        "children": [
+          {
+            "type": "element",
+            "name": "p",
+            "children": [
+              {
+                "type": "text",
+                "text": "For partnership opportunities, investor relations, or media inquiries, reach out to team@nyaltx.pro."
+              }
+            ]
+          }
+        ]
+      }
     }
   ],
   "seo": {
