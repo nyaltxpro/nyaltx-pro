@@ -1,9 +1,9 @@
 'use client';
 
+import { ChevronLeftIcon, ChevronRightIcon } from '@radix-ui/react-icons';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
-import { ChevronLeftIcon, ChevronRightIcon } from '@radix-ui/react-icons';
 
 interface BannerFile {
   name: string;
@@ -129,7 +129,7 @@ export default function Banner() {
   };
 
   return (
-    <div className="relative w-full max-w-5xl mx-auto py-4 px-4 select-none"
+    <div className="relative w-full cursor-pointer max-w-5xl mx-auto py-4 px-4 select-none"
       onClick={handleBannerClick}
     >
       {/* Enhanced Banner Container */}
