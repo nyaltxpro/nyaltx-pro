@@ -213,6 +213,10 @@ export default function DailyGainers() {
 
             const entriesToShow = contractEntries.length > 0 ? contractEntries : fallbackEntry;
 
+            if (entriesToShow.length === 0) {
+              return null;
+            }
+
             return (
               <div
                 key={coin.id ?? coin.symbol}
@@ -220,7 +224,7 @@ export default function DailyGainers() {
                 onClick={() => handleNavigate(coin)}
               >
                 <div className="flex items-center">
-                  <div className="relative h-8 w-8 mr-3 flex-shrink-0">
+                  <div className="relative h-8 w-8 mr-3 shrink-0">
                     <Image
                       src={coin.image}
                       alt={coin.name}
@@ -235,20 +239,16 @@ export default function DailyGainers() {
                   </div>
                 </div>
                 <div className="text-right text-xs text-gray-300">
-                  {entriesToShow.length > 0 ? (
-                    <div className="space-y-1">
-                      {entriesToShow.map(([chain, address]) => (
-                        <div key={`${coin.id}-${chain}`} className="flex flex-col sm:items-end">
-                          <span className="uppercase text-gray-400">{chain}</span>
-                          <span className="font-mono text-[11px] sm:text-xs break-all text-gray-200">
-                            {address}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <span className="text-gray-500">No contract data</span>
-                  )}
+                  <div className="space-y-1">
+                    {/* {entriesToShow.map(([chain, address]) => (
+                      <div key={`${coin.id}-${chain}`} className="flex flex-col sm:items-end">
+                        <span className="uppercase text-gray-400">{chain}</span>
+                        <span className="font-mono text-[11px] sm:text-xs break-all text-gray-200">
+                          {address}
+                        </span>
+                      </div>
+                    ))} */}
+                  </div>
                 </div>
               </div>
             );
