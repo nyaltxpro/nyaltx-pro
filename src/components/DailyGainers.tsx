@@ -247,7 +247,7 @@ export default function DailyGainers() {
                           key={`${coin.id}-${chain}`}
                           className="flex flex-col items-center -ml-3 first:ml-0 relative z-[${50-index}]"
                         >
-                          <CryptocurrencyIcon size={20} width={30} name={chain || 'solana' as any} />
+                          <CryptocurrencyIcon size={20} width={25} name={chain || 'solana' as any} />
                         </div>
                       ))}
                     </div>
