@@ -6,7 +6,6 @@ import {
 } from '@/api/coingecko/api';
 import Faq from '@/components/Faq';
 import InfoWidget from '@/components/InfoWidget';
-import SwapPage from '@/components/SwapCard';
 import TokenAvatar from '@/components/TokenAvatar';
 import tokens from '@/data/tokens.json';
 import useMoralisTokenMetadata from '@/hooks/useMoralisTokenMetadata';
@@ -1651,7 +1650,7 @@ function TradingViewWithParams({
                 </div>
 
                 <div className="col-span-1 md:col-span-1 lg:col-span-1 order-3">
-                    <DynamicSwapPage />
+                    {/* <DynamicSwapPage /> */}
                     <div className="bg-[#222227] rounded-xl p-4 mb-4">
                         <div className="flex justify-between items-center mb-4">
                             <div className="flex items-center">
