@@ -24,12 +24,13 @@ async function searchDexscreener(query: string): Promise<EnhancedSearchResult[]>
     console.log(`🔍 Searching Dexscreener for: ${query}`);
 
     const response = await fetch(
-      `https://api.dexscreener.com/latest/dex/search/?q=${encodeURIComponent(query)}`,
+      `https://api.dexscreener.com/latest/dex/search?q=${encodeURIComponent(query)}`,
       {
         headers: {
           Accept: 'application/json',
           'User-Agent': 'NYALTX-Search/1.0',
         },
+        cache: 'no-store',
       }
     );
 
@@ -58,6 +59,7 @@ async function searchDexscreener(query: string): Promise<EnhancedSearchResult[]>
           else if (pair.chainId === 'base') chainName = 'base';
           else if (pair.chainId === 'avalanche') chainName = 'avalanche';
           else if (pair.chainId === 'fantom') chainName = 'fantom';
+          else if (pair.chainId === 'solana') chainName = 'solana';
 
           // Calculate confidence based on liquidity and volume
           let confidence = 50; // base confidence

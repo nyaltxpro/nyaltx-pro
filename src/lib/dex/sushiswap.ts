@@ -3,7 +3,7 @@
  */
 import {
   DexInterface,
-  Token,
+  Token as AppToken,
   PriceQuote,
   SwapRoute,
   DexConfig,
@@ -13,9 +13,17 @@ import {
   SwapParams,
 } from './types';
 import { getCryptoIconUrl } from '../../utils/cryptoIcons';
-// Uncomment when implementing real SDK calls
-// import { Token as SushiToken, Pair, Route, Trade, TokenAmount, TradeType, Percent } from '@sushiswap/sdk';
-// import { getProvider } from '../blockchain/provider';
+import { Token, TradeType, Percent, CurrencyAmount } from '@uniswap/sdk-core';
+import { Pair, Route, Trade, Router } from '@uniswap/v2-sdk';
+import { ethers } from 'ethers';
+import { getProvider } from '../blockchain/provider';
+
+// Uniswap V2 Pair ABI for getReserves
+const PAIR_ABI = [
+  'function getReserves() external view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)',
+  'function token0() external view returns (address)',
+  'function token1() external view returns (address)'
+];
 
 // SushiSwap configuration
 export const SushiSwapConfig: DexConfig = {
@@ -47,46 +55,57 @@ export class SushiSwap implements DexInterface {
 
   async getQuote(params: QuoteParams): Promise<PriceQuote> {
     try {
-      // For now, we'll still use mock data but structure it as if we're using the SDK
-      // In a real implementation, we would use the actual SDK calls
+      // Convert our app's token format to Uniswap SDK token format (SushiSwap is compatible)
+      const fromToken = new Token(
+        params.tokenIn.chainId,
+        params.tokenIn.address,
+        params.tokenIn.decimals,
+        params.tokenIn.symbol,
+        params.tokenIn.name
+      );
 
-      // Convert our app's token format to SushiSwap SDK token format
-      // const sushiFromToken = new SushiToken(
-      //   params.tokenIn.chainId,
-      //   params.tokenIn.address,
-      //   params.tokenIn.decimals,
-      //   params.tokenIn.symbol,
-      //   params.tokenIn.name
-      // );
-      //
-      // const sushiToToken = new SushiToken(
-      //   params.tokenOut.chainId,
-      //   params.tokenOut.address,
-      //   params.tokenOut.decimals,
-      //   params.tokenOut.symbol,
-      //   params.tokenOut.name
-      // );
-      //
-      // // Fetch the pair data
-      // const pair = await Pair.fetchData(sushiFromToken, sushiToToken);
-      //
-      // // Create a route using the pair
-      // const route = new Route([pair], sushiFromToken);
-      //
-      // // Create a trade with the route
-      // const trade = new Trade(
-      //   route,
-      //   new TokenAmount(sushiFromToken, params.amountIn),
-      //   TradeType.EXACT_INPUT
-      // );
+      const toToken = new Token(
+        params.tokenOut.chainId,
+        params.tokenOut.address,
+        params.tokenOut.decimals,
+        params.tokenOut.symbol,
+        params.tokenOut.name
+      );
 
-      // Mock the output that would come from the SDK
-      const outputAmount = (
-        parseFloat(params.amountIn) *
-        1948 *
-        (1 - Math.random() * 0.02)
-      ).toString();
+      // Get provider for the chain
+      const provider = getProvider(params.chainId);
+      if (!provider) {
+        throw new Error(`Provider not available for chain ${params.chainId}`);
+      }
+
+      // Get pair address
+      const pairAddress = Pair.getAddress(fromToken, toToken);
+
+      // Create pair contract
+      const pairContract = new ethers.Contract(pairAddress, PAIR_ABI, provider);
+
+      // Get reserves from contract
+      const reserves = await pairContract.getReserves();
+
+      // Create pair with reserves
+      const pair = new Pair(
+        CurrencyAmount.fromRawAmount(fromToken, reserves[0]),
+        CurrencyAmount.fromRawAmount(toToken, reserves[1])
+      );
+
+      // Create route with input and output tokens
+      const route = new Route([pair], fromToken, toToken);
+
+      // Create a trade with the route
+      const trade = new Trade(
+        route,
+        CurrencyAmount.fromRawAmount(fromToken, params.amountIn),
+        TradeType.EXACT_INPUT
+      );
+
+      const outputAmount = trade.outputAmount.toExact();
       const fee = '0.3'; // 0.3% fee for SushiSwap
+      const priceImpact = trade.priceImpact.toSignificant(3);
 
       const routerAddress = this.config.routerAddress?.[params.chainId] || '';
 
@@ -96,7 +115,7 @@ export class SushiSwap implements DexInterface {
         path: [params.tokenIn, params.tokenOut],
         amountIn: params.amountIn,
         amountOut: outputAmount,
-        priceImpact: (Math.random() * 0.45).toFixed(2),
+        priceImpact,
         fee,
       };
 
@@ -104,10 +123,10 @@ export class SushiSwap implements DexInterface {
         protocol: this.config.name,
         inputAmount: params.amountIn,
         outputAmount,
-        executionPrice: (parseFloat(outputAmount) / parseFloat(params.amountIn)).toString(),
+        executionPrice: trade.executionPrice.toSignificant(6),
         route: swapRoute,
         fee,
-        priceImpact: (Math.random() * 0.45).toFixed(2),
+        priceImpact,
       };
     } catch (error) {
       console.error('Error getting quote from SushiSwap:', error);
@@ -117,61 +136,8 @@ export class SushiSwap implements DexInterface {
 
   async executeSwap(params: SwapParams): Promise<string> {
     try {
-      // In a real implementation, we would:
-      // 1. Create the trade object as in getQuote
-      // 2. Get the swap parameters
-      // 3. Execute the swap transaction
-
-      // const sushiFromToken = new SushiToken(
-      //   params.tokenIn.chainId,
-      //   params.tokenIn.address,
-      //   params.tokenIn.decimals,
-      //   params.tokenIn.symbol,
-      //   params.tokenIn.name
-      // );
-      //
-      // const sushiToToken = new SushiToken(
-      //   params.tokenOut.chainId,
-      //   params.tokenOut.address,
-      //   params.tokenOut.decimals,
-      //   params.tokenOut.symbol,
-      //   params.tokenOut.name
-      // );
-      //
-      // // Fetch the pair data
-      // const pair = await Pair.fetchData(sushiFromToken, sushiToToken);
-      //
-      // // Create a route using the pair
-      // const route = new Route([pair], sushiFromToken);
-      //
-      // // Create a trade with the route
-      // const trade = new Trade(
-      //   route,
-      //   new TokenAmount(sushiFromToken, params.amountIn),
-      //   TradeType.EXACT_INPUT
-      // );
-      //
-      // // Set up slippage tolerance
-      // const slippageTolerance = new Percent(Math.floor(parseFloat(params.slippageTolerance) * 100), 10000); // slippage as percentage
-      //
-      // // Get swap parameters
-      // const swapParams = Router.swapCallParameters(trade, {
-      //   ttl: params.deadline,
-      //   recipient: params.recipient,
-      //   allowedSlippage: slippageTolerance
-      // });
-      //
-      // // Execute the transaction
-      // const provider = getProvider(params.chainId);
-      // const tx = await provider.getSigner().sendTransaction({
-      //   to: this.config.routerAddress?.[params.chainId],
-      //   from: params.recipient,
-      //   data: swapParams.calldata,
-      //   value: swapParams.value
-      // });
-      //
-      // return tx.hash;
-
+      // For now, return a mock transaction hash
+      // In a full implementation, we would build the actual swap transaction
       console.log(`Executing swap on ${this.config.name}:`);
       console.log(`From: ${params.tokenIn.symbol} (${params.tokenIn.address})`);
       console.log(`To: ${params.tokenOut.symbol} (${params.tokenOut.address})`);
@@ -181,7 +147,7 @@ export class SushiSwap implements DexInterface {
       console.log(`Deadline: ${params.deadline}`);
       console.log(`Chain ID: ${params.chainId}`);
 
-      // Return mock transaction hash
+      // Return mock transaction hash for now
       return `0x${Math.random().toString(16).substring(2, 42)}`;
     } catch (error) {
       console.error('Error executing swap on SushiSwap:', error);

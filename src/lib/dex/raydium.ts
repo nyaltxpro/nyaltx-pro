@@ -13,10 +13,23 @@ import {
   SwapParams,
 } from './types';
 import { getCryptoIconUrl } from '../../utils/cryptoIcons';
-// Uncomment when implementing real SDK calls
-// import { Liquidity, Token as RaydiumToken, TokenAmount, Percent } from '@raydium-io/raydium-sdk';
-// import { Connection, PublicKey, Transaction } from '@solana/web3.js';
-// import { getProvider } from '../blockchain/provider';
+import {
+  Liquidity,
+  Token as RaydiumToken,
+  TokenAmount,
+  Percent,
+  ApiPoolInfoV4,
+  LIQUIDITY_STATE_LAYOUT_V4,
+  MARKET_STATE_LAYOUT_V3,
+  TokenAccount,
+  SPL_ACCOUNT_LAYOUT,
+  buildSimpleTransaction,
+  InnerSimpleV0Transaction,
+  LOOKUP_TABLE_CACHE,
+  TxVersion
+} from '@raydium-io/raydium-sdk';
+import { Connection, PublicKey, Transaction, VersionedTransaction, Keypair } from '@solana/web3.js';
+import { getProvider } from '../blockchain/provider';
 
 // Raydium configuration
 export const RaydiumConfig: DexConfig = {
@@ -33,51 +46,47 @@ export const RaydiumConfig: DexConfig = {
 
 export class Raydium implements DexInterface {
   config: DexConfig;
+  private connection: Connection;
 
   constructor() {
     this.config = RaydiumConfig;
+    // Initialize Solana connection
+    this.connection = new Connection('https://api.mainnet-beta.solana.com', 'confirmed');
   }
 
   async getQuote(params: QuoteParams): Promise<PriceQuote> {
     try {
-      // For now, we'll still use mock data but structure it as if we're using the SDK
-      // In a real implementation, we would use the actual SDK calls
+      // For Raydium, we need to fetch pool information first
+      // This is a simplified implementation - in production you'd want to use their API
 
-      // Convert our app's token format to Raydium SDK token format
-      // const raydiumFromToken = new RaydiumToken({
-      //   mint: new PublicKey(params.tokenIn.address),
-      //   decimals: params.tokenIn.decimals,
-      //   symbol: params.tokenIn.symbol,
-      //   name: params.tokenIn.name
-      // });
-      //
-      // const raydiumToToken = new RaydiumToken({
-      //   mint: new PublicKey(params.tokenOut.address),
-      //   decimals: params.tokenOut.decimals,
-      //   symbol: params.tokenOut.symbol,
-      //   name: params.tokenOut.name
-      // });
-      //
-      // // Create a connection to the Solana network
-      // const connection = new Connection('https://api.mainnet-beta.solana.com');
-      //
-      // // Get the pool information
-      // const poolKeys = await Liquidity.fetchPoolKeys(connection, new PublicKey('POOL_ADDRESS'));
-      //
-      // // Calculate the swap amount
-      // const { amountOut, minAmountOut, priceImpact } = Liquidity.computeAmountOut({
-      //   poolKeys,
-      //   amountIn: new TokenAmount(raydiumFromToken, params.amountIn),
-      //   currencyOut: raydiumToToken,
-      //   slippage: new Percent(parseFloat(params.slippageTolerance) * 100, 10000)
-      // });
+      // Create Raydium token objects
+      const raydiumFromToken = new RaydiumToken({
+        mint: new PublicKey(params.tokenIn.address),
+        decimals: params.tokenIn.decimals,
+        symbol: params.tokenIn.symbol,
+        name: params.tokenIn.name
+      });
 
-      // Mock the output that would come from the SDK
-      const outputAmount = (
+      const raydiumToToken = new RaydiumToken({
+        mint: new PublicKey(params.tokenOut.address),
+        decimals: params.tokenOut.decimals,
+        symbol: params.tokenOut.symbol,
+        name: params.tokenOut.name
+      });
+
+      // For now, we'll use a mock implementation since fetching real pool data
+      // requires complex AMM pool discovery and calculations
+      // In a full implementation, you would:
+      // 1. Fetch all Raydium pools
+      // 2. Find the relevant pool for the token pair
+      // 3. Calculate the swap quote
+
+      const mockOutputAmount = (
         parseFloat(params.amountIn) *
         1952 *
         (1 - Math.random() * 0.02)
       ).toString();
+
       const fee = '0.25'; // 0.25% fee for Raydium
 
       const routerAddress = this.config.routerAddress?.[params.chainId] || '';
@@ -87,7 +96,7 @@ export class Raydium implements DexInterface {
         routerAddress,
         path: [params.tokenIn, params.tokenOut],
         amountIn: params.amountIn,
-        amountOut: outputAmount,
+        amountOut: mockOutputAmount,
         priceImpact: (Math.random() * 0.35).toFixed(2),
         fee,
       };
@@ -95,8 +104,8 @@ export class Raydium implements DexInterface {
       return {
         protocol: this.config.name,
         inputAmount: params.amountIn,
-        outputAmount,
-        executionPrice: (parseFloat(outputAmount) / parseFloat(params.amountIn)).toString(),
+        outputAmount: mockOutputAmount,
+        executionPrice: (parseFloat(mockOutputAmount) / parseFloat(params.amountIn)).toString(),
         route: swapRoute,
         fee,
         priceImpact: (Math.random() * 0.35).toFixed(2),
@@ -109,62 +118,12 @@ export class Raydium implements DexInterface {
 
   async executeSwap(params: SwapParams): Promise<string> {
     try {
-      // In a real implementation, we would:
-      // 1. Create the Raydium SDK objects
-      // 2. Build the swap transaction
-      // 3. Execute the transaction
-
-      // const raydiumFromToken = new RaydiumToken({
-      //   mint: new PublicKey(params.tokenIn.address),
-      //   decimals: params.tokenIn.decimals,
-      //   symbol: params.tokenIn.symbol,
-      //   name: params.tokenIn.name
-      // });
-      //
-      // const raydiumToToken = new RaydiumToken({
-      //   mint: new PublicKey(params.tokenOut.address),
-      //   decimals: params.tokenOut.decimals,
-      //   symbol: params.tokenOut.symbol,
-      //   name: params.tokenOut.name
-      // });
-      //
-      // // Create a connection to the Solana network
-      // const connection = new Connection('https://api.mainnet-beta.solana.com');
-      //
-      // // Get the pool information
-      // const poolKeys = await Liquidity.fetchPoolKeys(connection, new PublicKey('POOL_ADDRESS'));
-      //
-      // // Calculate the swap amount
-      // const { amountOut, minAmountOut } = Liquidity.computeAmountOut({
-      //   poolKeys,
-      //   amountIn: new TokenAmount(raydiumFromToken, params.amountIn),
-      //   currencyOut: raydiumToToken,
-      //   slippage: new Percent(parseFloat(params.slippageTolerance) * 100, 10000)
-      // });
-      //
-      // // Create the swap instruction
-      // const swapInstruction = await Liquidity.makeSwapInstruction({
-      //   poolKeys,
-      //   userKeys: {
-      //     tokenAccountIn: new PublicKey('USER_TOKEN_ACCOUNT_IN'),
-      //     tokenAccountOut: new PublicKey('USER_TOKEN_ACCOUNT_OUT'),
-      //     owner: new PublicKey(params.recipient)
-      //   },
-      //   amountIn: new TokenAmount(raydiumFromToken, params.amountIn),
-      //   minAmountOut
-      // });
-      //
-      // // Create and sign the transaction
-      // const transaction = new Transaction().add(swapInstruction);
-      // transaction.recentBlockhash = (await connection.getRecentBlockhash()).blockhash;
-      // transaction.feePayer = new PublicKey(params.recipient);
-      //
-      // // Sign and send the transaction
-      // const provider = getProvider(params.chainId);
-      // const signedTransaction = await provider.signTransaction(transaction);
-      // const txid = await connection.sendRawTransaction(signedTransaction.serialize());
-      //
-      // return txid;
+      // This is a placeholder implementation
+      // In a real implementation, you would:
+      // 1. Find the appropriate AMM pool
+      // 2. Calculate the swap parameters
+      // 3. Build the swap instruction
+      // 4. Create and sign the transaction
 
       console.log(`Executing swap on ${this.config.name}:`);
       console.log(`From: ${params.tokenIn.symbol} (${params.tokenIn.address})`);
@@ -175,7 +134,7 @@ export class Raydium implements DexInterface {
       console.log(`Deadline: ${params.deadline}`);
       console.log(`Chain ID: ${params.chainId}`);
 
-      // Return mock transaction hash - for Solana, transaction IDs are base58 encoded
+      // For Solana, return a mock transaction signature (base58 encoded)
       return (
         Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
       );

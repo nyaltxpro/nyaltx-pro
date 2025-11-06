@@ -441,20 +441,22 @@ export default function SwapPage({ inTradeView = false, baseToken, quoteToken }:
 
   const executeSwap = async () => {
     try {
+      if (!selectedExchange) {
+        toast.error('Please select an exchange.');
+        return;
+      }
+
       if (chainId === CHAIN_IDS.SOLANA) {
         toast.error('Solana swaps are not supported in this widget.');
         return;
       }
-      const routerAddr = getRouterAddress(chainId);
-      if (!routerAddr) {
-        toast.error('Selected network not supported by PancakeSwap in this widget.');
-        return;
-      }
+
       const user = account?.address as Address | undefined;
       if (!user) {
         toast.error('Please connect your wallet first.');
         return;
       }
+
       if (!fromAmount || Number(fromAmount) <= 0) {
         toast.error('Enter a valid amount.');
         return;
@@ -465,90 +467,39 @@ export default function SwapPage({ inTradeView = false, baseToken, quoteToken }:
         await switchChainAsync({ chainId });
       }
 
-      const fromMeta = resolveTokenMeta(fromToken, chainId);
-      const toMeta = resolveTokenMeta(toToken, chainId);
-      if (!fromMeta || !toMeta) {
-        toast.error('Unsupported token on selected network.');
-        return;
-      }
-
-      const amountIn = parseUnits(fromAmount, fromMeta.decimals);
-      const slip = Math.max(0, Math.min(50, parseFloat(slippage || '0.5'))); // clamp 0-50%
-      const deadline = Math.floor(Date.now() / 1000) + 60 * 20; // 20 minutes
-
       setIsSwapping(true);
 
-      // Native -> Token
-      if (fromMeta.isNative && !toMeta.isNative) {
-        const path: Address[] = [WETH_BY_CHAIN[chainId], toMeta.address];
-        let minOut: bigint;
-        try {
-          minOut = await getAmountOutMin(routerAddr, amountIn, path, slip);
-        } catch {
-          minOut = minOutFromUiQuote(toMeta.decimals, slip);
-        }
-        const txHash = await writeContractAsync({
-          address: routerAddr,
-          abi: routerAbi,
-          functionName: 'swapExactETHForTokens',
-          args: [minOut, path, user, BigInt(deadline)],
-          value: amountIn,
-        });
-        await publicClient?.waitForTransactionReceipt({ hash: txHash });
-        toast.success('Swap submitted');
-        return;
-      }
+      // Prepare swap parameters
+      const swapParams = {
+        tokenIn: fromToken,
+        tokenOut: toToken,
+        amountIn: fromAmount,
+        slippageTolerance: slippage,
+        recipient: user,
+        deadline: Math.floor(Date.now() / 1000) + 60 * 20, // 20 minutes
+        chainId: chainId,
+        route: bestQuote?.route || {
+          protocol: selectedExchange.config.name,
+          routerAddress: '',
+          path: [fromToken, toToken],
+          amountIn: fromAmount,
+          amountOut: toAmount,
+          priceImpact: '0',
+          fee: '0',
+        },
+      };
 
-      // Token -> Native
-      if (!fromMeta.isNative && toMeta.isNative) {
-        await approveIfNeeded(fromMeta.address, user, routerAddr, amountIn);
-        const path: Address[] = [fromMeta.address, WETH_BY_CHAIN[chainId]];
-        let minOut: bigint;
-        try {
-          minOut = await getAmountOutMin(routerAddr, amountIn, path, slip);
-        } catch {
-          minOut = minOutFromUiQuote(18, slip);
-        }
-        const txHash = await writeContractAsync({
-          address: routerAddr,
-          abi: routerAbi,
-          functionName: 'swapExactTokensForETH',
-          args: [amountIn, minOut, path, user, BigInt(deadline)],
-        });
-        await publicClient?.waitForTransactionReceipt({ hash: txHash });
-        toast.success('Swap submitted');
-        return;
-      }
+      // Execute the swap using the DEX manager
+      const txHash = await dexManager.executeSwap(selectedExchange.config.name as DEX_PROTOCOL, swapParams);
 
-      // Token -> Token (try direct, fallback via WETH)
-      if (!fromMeta.isNative && !toMeta.isNative) {
-        await approveIfNeeded(fromMeta.address, user, routerAddr, amountIn);
-        let path: Address[] = [fromMeta.address, toMeta.address];
-        let minOut: bigint;
-        try {
-          minOut = await getAmountOutMin(routerAddr, amountIn, path, slip);
-        } catch {
-          path = [fromMeta.address, WETH_BY_CHAIN[chainId], toMeta.address];
-          try {
-            minOut = await getAmountOutMin(routerAddr, amountIn, path, slip);
-          } catch {
-            minOut = minOutFromUiQuote(toMeta.decimals, slip);
-          }
-        }
-        const txHash = await writeContractAsync({
-          address: routerAddr,
-          abi: routerAbi,
-          functionName: 'swapExactTokensForTokens',
-          args: [amountIn, minOut, path, user, BigInt(deadline)],
-        });
-        await publicClient?.waitForTransactionReceipt({ hash: txHash });
-        toast.success('Swap submitted');
-        return;
+      if (txHash) {
+        await publicClient?.waitForTransactionReceipt({ hash: txHash as `0x${string}` });
+        toast.success('Swap submitted successfully!');
+      } else {
+        toast.error('Swap execution failed');
       }
-
-      toast.error('Unsupported swap combination.');
     } catch (err: any) {
-      console.error(err);
+      console.error('Swap execution error:', err);
       toast.error(err?.shortMessage || err?.message || 'Swap failed');
     } finally {
       setIsSwapping(false);
