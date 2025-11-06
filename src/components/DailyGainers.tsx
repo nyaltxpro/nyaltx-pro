@@ -7,6 +7,7 @@ import { CachedMarketMoverCoin } from '@/store/slices/searchCacheSlice';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import CryptocurrencyIcon from './CryptocurrencyIcon';
 
 export default function DailyGainers() {
   const [activeTab, setActiveTab] = useState<'gainers' | 'losers'>('gainers');
@@ -240,14 +241,17 @@ export default function DailyGainers() {
                 </div>
                 <div className="text-right text-xs text-gray-300">
                   <div className="space-y-1">
-                    {/* {entriesToShow.map(([chain, address]) => (
-                      <div key={`${coin.id}-${chain}`} className="flex flex-col sm:items-end">
-                        <span className="uppercase text-gray-400">{chain}</span>
-                        <span className="font-mono text-[11px] sm:text-xs break-all text-gray-200">
-                          {address}
-                        </span>
-                      </div>
-                    ))} */}
+                    <div className="flex items-center">
+                      {entriesToShow.map(([chain, address], index) => (
+                        <div
+                          key={`${coin.id}-${chain}`}
+                          className="flex flex-col items-center -ml-3 first:ml-0 relative z-[${50-index}]"
+                        >
+                          <CryptocurrencyIcon name={chain || 'solana' as any} />
+                        </div>
+                      ))}
+                    </div>
+
                   </div>
                 </div>
               </div>

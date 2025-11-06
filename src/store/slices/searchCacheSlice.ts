@@ -88,9 +88,10 @@ interface SearchCacheState {
 
   // Market movers cache (gainers/losers)
   marketMoversCache: {
-    gainers: CacheEntry<CachedMarketMoverCoin[]> | null;
-    losers: CacheEntry<CachedMarketMoverCoin[]> | null;
+    gainers: CacheEntry<{ coins: CachedMarketMoverCoin[]; limit: number }> | null;
+    losers: CacheEntry<{ coins: CachedMarketMoverCoin[]; limit: number }> | null;
   };
+  marketMoversCacheDuration: number;
 
   // Popular tokens cache
   popularTokensCache: CacheEntry<any[]> | null;
@@ -114,6 +115,7 @@ interface SearchCacheState {
 const SEARCH_CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 const TRENDING_CACHE_DURATION = 30 * 60 * 1000; // 30 minutes
 const RECENTLY_ADDED_CACHE_DURATION = 10 * 60 * 1000; // 10 minutes (DexScreener updates frequently)
+const MARKET_MOVERS_CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 const initialState: SearchCacheState = {
   coinGeckoSearchCache: {},
@@ -123,6 +125,7 @@ const initialState: SearchCacheState = {
     gainers: null,
     losers: null,
   },
+  marketMoversCacheDuration: MARKET_MOVERS_CACHE_DURATION,
   popularTokensCache: null,
   isSearching: false,
   isTrendingLoading: false,
@@ -228,6 +231,28 @@ const searchCacheSlice = createSlice({
       state.isRecentlyAddedLoading = false;
     },
 
+    setMarketMoversData: (
+      state,
+      action: PayloadAction<{ type: 'gainers' | 'losers'; coins: CachedMarketMoverCoin[]; limit: number }>
+    ) => {
+      const { type, coins, limit } = action.payload;
+      const now = Date.now();
+      state.marketMoversCache[type] = {
+        data: {
+          coins,
+          limit,
+        },
+        timestamp: now,
+        expiresAt: now + state.marketMoversCacheDuration,
+      };
+      console.log(`💾 Cached ${coins.length} ${type} (limit ${limit})`);
+    },
+
+    clearMarketMoversCache: state => {
+      state.marketMoversCache = { gainers: null, losers: null };
+      console.log('🗑️ Cleared market movers cache');
+    },
+
     // Cache management actions
     clearSearchCache: state => {
       state.coinGeckoSearchCache = {};
@@ -249,6 +274,7 @@ const searchCacheSlice = createSlice({
       state.trendingCoinsCache = null;
       state.recentlyAddedCoinsCache = null;
       state.popularTokensCache = null;
+      state.marketMoversCache = { gainers: null, losers: null };
       console.log('🗑️ Cleared all search cache');
     },
 
@@ -277,6 +303,15 @@ const searchCacheSlice = createSlice({
         cleanedCount++;
       }
 
+      // Clean expired market movers cache
+      (['gainers', 'losers'] as const).forEach(type => {
+        const entry = state.marketMoversCache[type];
+        if (entry && entry.expiresAt < now) {
+          state.marketMoversCache[type] = null;
+          cleanedCount++;
+        }
+      });
+
       if (cleanedCount > 0) {
         console.log(`🧹 Cleaned ${cleanedCount} expired cache entries`);
       }
@@ -285,7 +320,7 @@ const searchCacheSlice = createSlice({
     // Update cache durations
     updateCacheDurations: (
       state,
-      action: PayloadAction<{ search?: number; trending?: number; recentlyAdded?: number }>
+      action: PayloadAction<{ search?: number; trending?: number; recentlyAdded?: number; marketMovers?: number }>
     ) => {
       if (action.payload.search) {
         state.searchCacheDuration = action.payload.search;
@@ -295,6 +330,9 @@ const searchCacheSlice = createSlice({
       }
       if (action.payload.recentlyAdded) {
         state.recentlyAddedCacheDuration = action.payload.recentlyAdded;
+      }
+      if (action.payload.marketMovers) {
+        state.marketMoversCacheDuration = action.payload.marketMovers;
       }
     },
   },
@@ -310,6 +348,8 @@ export const {
   setRecentlyAddedCoins,
   setRecentlyAddedLoading,
   setRecentlyAddedError,
+  setMarketMoversData,
+  clearMarketMoversCache,
   clearSearchCache,
   clearTrendingCache,
   clearRecentlyAddedCache,
@@ -360,6 +400,23 @@ export const selectRecentlyAddedCoins = (state: { searchCache: SearchCacheState 
   return cacheEntry.data;
 };
 
+export const selectMarketMovers =
+  (type: 'gainers' | 'losers', limit: number) => (state: { searchCache: SearchCacheState }) => {
+    const cacheEntry = state.searchCache.marketMoversCache[type];
+
+    if (!cacheEntry) return null;
+    if (cacheEntry.expiresAt < Date.now()) return null;
+    if (!cacheEntry.data) return null;
+
+    const { coins, limit: cachedLimit } = cacheEntry.data;
+
+    if (limit > cachedLimit) {
+      return null;
+    }
+
+    return coins.slice(0, limit);
+  };
+
 export const selectSearchLoading = (state: { searchCache: SearchCacheState }) =>
   state.searchCache.isSearching;
 
@@ -381,22 +438,35 @@ export const selectRecentlyAddedError = (state: { searchCache: SearchCacheState 
 export const selectCacheStats = (state: { searchCache: SearchCacheState }) => {
   const now = Date.now();
   const searchCacheCount = Object.keys(state.searchCache.coinGeckoSearchCache).length;
-  const validSearchCacheCount = Object.values(state.searchCache.coinGeckoSearchCache).filter(
-    entry => entry.expiresAt > now
-  ).length;
+  const trendingCached = Boolean(state.searchCache.trendingCoinsCache);
+  const recentlyAddedCached = Boolean(state.searchCache.recentlyAddedCoinsCache);
+  const marketMoversGainersCached = Boolean(state.searchCache.marketMoversCache.gainers);
+  const marketMoversLosersCached = Boolean(state.searchCache.marketMoversCache.losers);
 
   return {
-    totalSearchQueries: searchCacheCount,
-    validSearchQueries: validSearchCacheCount,
-    expiredSearchQueries: searchCacheCount - validSearchCacheCount,
-    hasTrendingCache: !!state.searchCache.trendingCoinsCache,
-    trendingCacheValid: state.searchCache.trendingCoinsCache
-      ? state.searchCache.trendingCoinsCache.expiresAt > now
-      : false,
-    hasRecentlyAddedCache: !!state.searchCache.recentlyAddedCoinsCache,
-    recentlyAddedCacheValid: state.searchCache.recentlyAddedCoinsCache
-      ? state.searchCache.recentlyAddedCoinsCache.expiresAt > now
-      : false,
+    searchCacheCount,
+    trendingCached,
+    recentlyAddedCached,
+    marketMovers: {
+      gainers: marketMoversGainersCached,
+      losers: marketMoversLosersCached,
+    },
+    searchCacheExpiresIn:
+      searchCacheCount > 0
+        ? Math.max(
+            ...Object.values(state.searchCache.coinGeckoSearchCache).map(entry =>
+              Math.max(entry.expiresAt - now, 0)
+            )
+          )
+        : 0,
+    marketMoversExpiresIn: {
+      gainers: state.searchCache.marketMoversCache.gainers
+        ? Math.max(state.searchCache.marketMoversCache.gainers.expiresAt - now, 0)
+        : 0,
+      losers: state.searchCache.marketMoversCache.losers
+        ? Math.max(state.searchCache.marketMoversCache.losers.expiresAt - now, 0)
+        : 0,
+    },
   };
 };
 

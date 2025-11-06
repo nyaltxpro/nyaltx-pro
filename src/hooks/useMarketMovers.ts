@@ -1,116 +1,137 @@
-import { useEffect, useCallback, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store';
 import {
   CachedMarketMoverCoin,
+  selectMarketMovers,
+  setMarketMoversData,
 } from '@/store/slices/searchCacheSlice';
 
-// For now, we'll use a simple hook structure similar to useRecentlyAddedCoins
-// This can be enhanced with Redux integration later
-export const useMarketMovers = (type: 'gainers' | 'losers' = 'gainers', limit: number = 5) => {
-  const [coins, setCoins] = useState<CachedMarketMoverCoin[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [initialized, setInitialized] = useState(false);
+interface MarketMoversHookResult {
+  coins: CachedMarketMoverCoin[];
+  loading: boolean;
+  error: string | null;
+  refreshMarketMovers: () => Promise<void>;
+  hasCachedData: boolean;
+}
 
-  console.log('🔍 useMarketMovers - State:', {
-    type,
-    limit,
-    coinsCount: coins.length,
-    loading,
-    error,
-    initialized
+const MARKET_MOVER_TYPES: Array<'gainers' | 'losers'> = ['gainers', 'losers'];
+
+const fetchMarketMoversFromApi = async (type: 'gainers' | 'losers', limit: number) => {
+  const response = await fetch(`/api/coingecko/market-movers?type=${type}&limit=${limit}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
   });
 
-  const fetchMarketMovers = useCallback(async (forceRefresh = false) => {
-    try {
+  if (!response.ok) {
+    throw new Error(`API error: ${response.status} ${response.statusText}`);
+  }
+
+  const data = await response.json();
+
+  if (data && Array.isArray(data.coins)) {
+    return data.coins.map((coin: any) => ({
+      id: coin.id,
+      name: coin.name,
+      symbol: coin.symbol,
+      image: coin.image,
+      current_price: coin.current_price,
+      market_cap: coin.market_cap,
+      total_volume: coin.total_volume,
+      price_change_percentage_24h: coin.price_change_percentage_24h,
+      market_cap_rank: coin.market_cap_rank,
+      contractAddresses: coin.contractAddresses || {},
+      primaryChain: coin.primaryChain || null,
+      primaryAddress: coin.primaryAddress || null,
+    })) as CachedMarketMoverCoin[];
+  }
+
+  throw new Error(`Invalid ${type} data structure from API`);
+};
+
+export const useMarketMovers = (
+  type: 'gainers' | 'losers' = 'gainers',
+  limit: number = 5
+): MarketMoversHookResult => {
+  const dispatch = useAppDispatch();
+  const selectCoins = useMemo(() => selectMarketMovers(type, limit), [type, limit]);
+  const cachedCoins = useAppSelector(selectCoins);
+
+  const [loading, setLoading] = useState(!cachedCoins);
+  const [error, setError] = useState<string | null>(null);
+
+  const hydrateCache = useCallback(
+    async (requestedType: 'gainers' | 'losers', requestedLimit: number, force = false) => {
+      if (!force) {
+        const selector = selectMarketMovers(requestedType, requestedLimit);
+        const state = (await import('@/store')).store.getState();
+        const existing = selector(state as any);
+        if (existing) {
+          return existing;
+        }
+      }
+
+      const coins = await fetchMarketMoversFromApi(requestedType, requestedLimit);
+      dispatch(setMarketMoversData({ type: requestedType, coins, limit: requestedLimit }));
+      return coins;
+    },
+    [dispatch]
+  );
+
+  const prefetchAll = useCallback(
+    async (requestedLimit: number, force = false) => {
+      await Promise.all(
+        MARKET_MOVER_TYPES.map(requestedType => hydrateCache(requestedType, requestedLimit, force))
+      );
+    },
+    [hydrateCache]
+  );
+
+  const initialize = useCallback(
+    async (requestedType: 'gainers' | 'losers', requestedLimit: number) => {
       setLoading(true);
       setError(null);
-      console.log(`🔄 Fetching ${type} market movers from API...`);
 
-      // Use the optimized API endpoint
-      const response = await fetch(`/api/coingecko/market-movers?type=${type}&limit=${limit}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status} ${response.statusText}`);
+      try {
+        await prefetchAll(requestedLimit);
+      } catch (err) {
+        console.error(`❌ Error initializing ${requestedType}:`, err);
+        const message = err instanceof Error ? err.message : `Failed to load ${requestedType}`;
+        setError(message);
+      } finally {
+        setLoading(false);
       }
+    },
+    [prefetchAll]
+  );
 
-      const data = await response.json();
+  useEffect(() => {
+    if (!cachedCoins || cachedCoins.length < limit) {
+      void initialize(type, limit);
+    }
+  }, [initialize, cachedCoins, type, limit]);
 
-      if (data && data.coins) {
-        // The API already returns enhanced coins with contract addresses
-        const enhancedCoins: CachedMarketMoverCoin[] = data.coins.map((coin: any) => ({
-          id: coin.id,
-          name: coin.name,
-          symbol: coin.symbol,
-          image: coin.image,
-          current_price: coin.current_price,
-          market_cap: coin.market_cap,
-          total_volume: coin.total_volume,
-          price_change_percentage_24h: coin.price_change_percentage_24h,
-          market_cap_rank: coin.market_cap_rank,
-          contractAddresses: coin.contractAddresses || {},
-          primaryChain: coin.primaryChain || null,
-          primaryAddress: coin.primaryAddress || null,
-        }));
+  const refreshMarketMovers = useCallback(async () => {
+    setLoading(true);
+    setError(null);
 
-        setCoins(enhancedCoins);
-        setError(null);
-        console.log(
-          `✅ Loaded ${enhancedCoins.length} ${type} with contract addresses from API`
-        );
-        return enhancedCoins;
-      } else {
-        throw new Error(`Invalid ${type} data structure from API`);
-      }
+    try {
+      await prefetchAll(limit, true);
     } catch (err) {
-      console.error(`❌ Error fetching ${type}:`, err);
-      const errorMessage = err instanceof Error ? err.message : `Failed to load ${type}`;
-      setError(errorMessage);
-      throw err;
+      console.error('❌ Error refreshing market movers:', err);
+      const message = err instanceof Error ? err.message : 'Failed to refresh market movers';
+      setError(message);
     } finally {
       setLoading(false);
     }
-  }, [type, limit]);
-
-  const refreshMarketMovers = useCallback(async () => {
-    // Force refresh by clearing cache first
-    setCoins([]);
-    return fetchMarketMovers(true);
-  }, [fetchMarketMovers]);
-
-  // Auto-fetch on mount and when type/limit changes
-  useEffect(() => {
-    const initializeData = async () => {
-      try {
-        // Prevent multiple initializations for the same type/limit
-        if (initialized) return;
-        
-        console.log(`🚀 Initializing ${type} market movers data...`);
-        await fetchMarketMovers();
-        
-        setInitialized(true);
-      } catch (error) {
-        console.error(`❌ Error initializing ${type}:`, error);
-        setInitialized(true);
-      }
-    };
-
-    // Reset initialization when type or limit changes
-    setInitialized(false);
-    initializeData();
-  }, [type, limit]); // Depend on type and limit to refetch when they change
+  }, [prefetchAll, limit]);
 
   return {
-    coins,
+    coins: cachedCoins ?? [],
     loading,
     error,
-    fetchMarketMovers,
     refreshMarketMovers,
-    hasCachedData: coins.length > 0,
+    hasCachedData: Boolean(cachedCoins && cachedCoins.length > 0),
   };
 };
