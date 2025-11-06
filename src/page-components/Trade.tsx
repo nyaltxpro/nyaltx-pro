@@ -44,6 +44,32 @@ import { useAccount } from 'wagmi';
 import nyaxTokensData from '../../nyax-tokens-data.json';
 import CryptocurrencyIcon, { type CryptocurrencyIconName } from '../components/CryptocurrencyIcon';
 
+// Dynamic SwapPage component to reduce bundle size
+const DynamicSwapPage = () => {
+    const [SwapComponent, setSwapComponent] = useState<React.ComponentType | null>(null);
+
+    useEffect(() => {
+        import('@/components/SwapCard').then(mod => {
+            setSwapComponent(() => mod.default);
+        });
+    }, []);
+
+    if (!SwapComponent) {
+        return (
+            <div className="bg-[#222227] rounded-xl p-4 animate-pulse">
+                <div className="h-8 bg-gray-700 rounded mb-4"></div>
+                <div className="space-y-3">
+                    <div className="h-12 bg-gray-700 rounded"></div>
+                    <div className="h-12 bg-gray-700 rounded"></div>
+                    <div className="h-12 bg-gray-700 rounded"></div>
+                </div>
+            </div>
+        );
+    }
+
+    return <SwapComponent />;
+};
+
 // Chain name mapping utility
 const getChainName = (chainId: number): string => {
     const chainNames: { [key: number]: string } = {
@@ -1201,7 +1227,7 @@ function TradingViewWithParams({
                             />
                         )}
                     </div>
-                    <SwapPage />
+                    <DynamicSwapPage />
 
                 </div>
 
@@ -1500,8 +1526,16 @@ function TradingViewWithParams({
                         <div className="w-full h-[300px] sm:h-[400px] lg:h-[500px] rounded-lg relative">
 
                             {chartType === 'moralis' && addressParam && ['solana', 'ethereum', 'bsc', 'polygon', 'arbitrum', 'optimism', 'base'].includes(chainParam || '') ? (
-
-                                <></>) : (
+                                <div className="w-full h-full rounded-lg bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 flex flex-col items-center justify-center p-6">
+                                    <FaChartBar className="text-gray-500 text-5xl mb-3" />
+                                    <h3 className="text-lg font-semibold text-gray-300 mb-2">
+                                        Advanced Chart
+                                    </h3>
+                                    <p className="text-gray-400 text-center text-sm">
+                                        Chart visualization temporarily unavailable.
+                                    </p>
+                                </div>
+                            ) : (
                                 <>
                                     {!dexEmbedUrl || (dexScreenerDataExists === false) || chartIframeError ? (
                                         ['solana', 'ethereum', 'bsc', 'polygon', 'arbitrum', 'optimism', 'base'].includes(chainParam || '') && addressParam ? (
@@ -1519,7 +1553,15 @@ function TradingViewWithParams({
                                                 onError={() => setChartIframeError(true)}
                                             />
                                         ) : (
-                                            <></>
+                                            <div className="w-full h-full rounded-lg bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 flex flex-col items-center justify-center p-6">
+                                                <FaChartBar className="text-gray-500 text-5xl mb-3" />
+                                                <h3 className="text-lg font-semibold text-gray-300 mb-2">
+                                                    Chart Unavailable
+                                                </h3>
+                                                <p className="text-gray-400 text-center text-sm">
+                                                    Chart data not available for this token.
+                                                </p>
+                                            </div>
                                         )
                                     ) : (
                                         <iframe
@@ -1609,6 +1651,7 @@ function TradingViewWithParams({
                 </div>
 
                 <div className="col-span-1 md:col-span-1 lg:col-span-1 order-3">
+                    <DynamicSwapPage />
                     <div className="bg-[#222227] rounded-xl p-4 mb-4">
                         <div className="flex justify-between items-center mb-4">
                             <div className="flex items-center">
