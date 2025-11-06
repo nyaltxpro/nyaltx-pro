@@ -6,7 +6,6 @@ import {
 } from '@/api/coingecko/api';
 import Faq from '@/components/Faq';
 import InfoWidget from '@/components/InfoWidget';
-import LightweightChart from '@/components/LightweightChart';
 import SwapPage from '@/components/SwapCard';
 import TokenAvatar from '@/components/TokenAvatar';
 import tokens from '@/data/tokens.json';
@@ -1501,12 +1500,8 @@ function TradingViewWithParams({
                         <div className="w-full h-[300px] sm:h-[400px] lg:h-[500px] rounded-lg relative">
 
                             {chartType === 'moralis' && addressParam && ['solana', 'ethereum', 'bsc', 'polygon', 'arbitrum', 'optimism', 'base'].includes(chainParam || '') ? (
-                                <LightweightChart
 
-                                    chartDataSolana={solanaChartData}
-
-                                />
-                            ) : (
+                                <></>) : (
                                 <>
                                     {!dexEmbedUrl || (dexScreenerDataExists === false) || chartIframeError ? (
                                         ['solana', 'ethereum', 'bsc', 'polygon', 'arbitrum', 'optimism', 'base'].includes(chainParam || '') && addressParam ? (
@@ -1524,12 +1519,7 @@ function TradingViewWithParams({
                                                 onError={() => setChartIframeError(true)}
                                             />
                                         ) : (
-                                            <LightweightChart
-                                                tokenSymbol={baseToken || 'TOKEN'}
-                                                width="100%"
-                                                height="100%"
-                                                className="w-full h-full"
-                                            />
+                                            <></>
                                         )
                                     ) : (
                                         <iframe
