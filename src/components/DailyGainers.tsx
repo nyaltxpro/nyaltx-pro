@@ -201,40 +201,58 @@ export default function DailyGainers() {
         </div>
       ) : (
         <div className="max-h-[600px] overflow-y-auto custom-scrollbar">
-          {displayData.map((coin, index) => (
-            <div
-              key={coin.id ?? coin.symbol}
-              className="flex justify-between items-center p-2 cursor-pointer hover:bg-gray-800/40"
-              onClick={() => handleNavigate(coin)}
-            >
-              <div className="flex items-center">
-                <div className="relative h-8 w-8 mr-3 flex-shrink-0">
-                  <Image
-                    src={coin.image}
-                    alt={coin.name}
-                    fill
-                    className="rounded-full object-cover"
-                    unoptimized
-                  />
-                </div>
-                <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-                  <div className="token-name font-medium">{coin.name}</div>
-                  <div className="token-chain text-sm text-gray-400">
-                    {formatPrice(coin.current_price)}
+          {displayData.map((coin, index) => {
+            const contractEntries = coin.contractAddresses
+              ? Object.entries(coin.contractAddresses).filter(([, address]) => Boolean(address))
+              : [];
+
+            const fallbackEntry =
+              (!contractEntries || contractEntries.length === 0) && coin.primaryChain && coin.primaryAddress
+                ? [[coin.primaryChain, coin.primaryAddress]]
+                : [];
+
+            const entriesToShow = contractEntries.length > 0 ? contractEntries : fallbackEntry;
+
+            return (
+              <div
+                key={coin.id ?? coin.symbol}
+                className="flex justify-between items-center p-2 cursor-pointer hover:bg-gray-800/40"
+                onClick={() => handleNavigate(coin)}
+              >
+                <div className="flex items-center">
+                  <div className="relative h-8 w-8 mr-3 flex-shrink-0">
+                    <Image
+                      src={coin.image}
+                      alt={coin.name}
+                      fill
+                      className="rounded-full object-cover"
+                      unoptimized
+                    />
+                  </div>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
+                    <div className="token-name font-medium">{coin.name}</div>
+                    <div className="text-xs uppercase text-gray-500">{coin.symbol}</div>
                   </div>
                 </div>
+                <div className="text-right text-xs text-gray-300">
+                  {entriesToShow.length > 0 ? (
+                    <div className="space-y-1">
+                      {entriesToShow.map(([chain, address]) => (
+                        <div key={`${coin.id}-${chain}`} className="flex flex-col sm:items-end">
+                          <span className="uppercase text-gray-400">{chain}</span>
+                          <span className="font-mono text-[11px] sm:text-xs break-all text-gray-200">
+                            {address}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <span className="text-gray-500">No contract data</span>
+                  )}
+                </div>
               </div>
-              <div className="text-right">
-                <p
-                  className={`font-medium ${(coin.price_change_percentage_24h || 0) >= 0 ? 'text-green-500' : 'text-red-500'}`}
-                >
-                  {(coin.price_change_percentage_24h || 0) >= 0 ? '+' : ''}
-                  {(coin.price_change_percentage_24h || 0).toFixed(2)}%
-                </p>
-                <p className="text-sm text-gray-400">Vol: {formatVolume(coin.total_volume)}</p>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </>

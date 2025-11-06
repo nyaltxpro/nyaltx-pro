@@ -673,22 +673,7 @@ export default function Home() {
 
             {/* Token Categories Section */}
             <div className="token-categories flex flex-col mx-3 sm:mx-4 mt-4 sm:mt-6">
-              {/* <div className="flex items-center py-2 rounded-lg card-bg border-gray-700 overflow-x-auto">
-          <div className="flex space-x-4 text-sm font-medium whitespace-nowrap">
-            <button className="py-2 px-4 text-white">Hot Pairs</button>
-            <button className="py-2 px-4 text-gray-400">Token Race</button>
-            <button className="py-2 px-4 text-gray-400">Pairs</button>
-            <button className="py-2 px-4 text-gray-400 bg-opacity-20 rounded-t-md">Meme Board</button>
-            <button className="py-2 px-4 text-gray-400">Token Creator</button>
-            <button className="py-2 px-4 text-gray-400">New Socials</button>
-            <button className="py-2 px-4 text-gray-400">Exchanges</button>
-            <button className="py-2 px-4 text-gray-400">Liquidity Unlocks</button>
-            <button className="py-2 px-4 text-gray-400">Token Unlocks</button>
-          </div>
-          <div className="ml-auto">
 
-          </div>
-        </div> */}
 
               {/* Token section  */}
               <TokenSection />

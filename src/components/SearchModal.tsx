@@ -11,7 +11,6 @@ import {
   generateTradeUrl,
   logContractAddressInfo,
 } from '@/utils/contractAddressUtils';
-import * as Avatar from '@radix-ui/react-avatar';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import Image from 'next/image';
@@ -55,34 +54,6 @@ interface UnifiedToken {
   market_cap?: number;
 }
 
-interface DexScreenerToken {
-  id: string;
-  address: string;
-  name: string;
-  symbol: string;
-  logo?: string;
-  chain: string;
-  price?: number;
-  marketCap?: number;
-  liquidity?: number;
-  createdAt?: string;
-  volume24h?: number;
-  priceChange?: {
-    m5?: number;
-    h1?: number;
-    h6?: number;
-    h24?: number;
-  };
-  socials?: {
-    twitter?: string;
-    website?: string;
-    telegram?: string;
-  };
-  dexId?: string;
-  pairAddress?: string;
-  url?: string;
-}
-
 interface CoinGeckoCoin {
   id: string;
   symbol: string;
@@ -99,7 +70,6 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const unifiedSearchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const dexSearchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
   // State management
@@ -108,9 +78,6 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
   const [localSearchResults, setLocalSearchResults] = useState<LocalSearchResult[]>([]);
   const [unifiedTokens, setUnifiedTokens] = useState<UnifiedToken[]>([]);
   const [unifiedTokensLoading, setUnifiedTokensLoading] = useState(false);
-  const [dexResults, setDexResults] = useState<DexScreenerToken[]>([]);
-  const [dexLoading, setDexLoading] = useState(false);
-  const [dexError, setDexError] = useState<string | null>(null);
 
   // Get cached CoinGecko results from Redux
   const cachedCoinGeckoResults = useAppSelector(selectCoinGeckoSearchResults(searchTerm));
@@ -308,21 +275,11 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
     if (unifiedSearchTimeoutRef.current) {
       clearTimeout(unifiedSearchTimeoutRef.current);
     }
-    if (dexSearchTimeoutRef.current) {
-      clearTimeout(dexSearchTimeoutRef.current);
-    }
 
     if (value.trim() === '') {
       setSearchResults([]);
       setLocalSearchResults([]);
       setUnifiedTokens([]);
-      setDexResults([]);
-      setDexError(null);
-      setDexLoading(false);
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-        abortControllerRef.current = null;
-      }
       return;
     }
 
@@ -340,11 +297,6 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
     // Search unified tokens (registered + Solana) with debounce
     unifiedSearchTimeoutRef.current = setTimeout(async () => {
       await searchUnifiedTokens(value);
-    }, 300);
-
-    // Search DexScreener tokens (external API)
-    dexSearchTimeoutRef.current = setTimeout(async () => {
-      await searchDexScreenerTokens(value);
     }, 300);
 
     const results: SearchResult[] = [];
@@ -460,80 +412,6 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
 
     // Limit results to avoid overwhelming the UI
     setSearchResults(results.slice(0, 10));
-  };
-
-  const searchDexScreenerTokens = async (query: string) => {
-    if (!query || query.trim().length < 2) {
-      setDexResults([]);
-      setDexError(null);
-      return;
-    }
-
-    try {
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-      const controller = new AbortController();
-      abortControllerRef.current = controller;
-
-      setDexLoading(true);
-      setDexError(null);
-
-      const response = await fetch(
-        `https://api.dexscreener.com/latest/dex/search?q=${encodeURIComponent(query)}`,
-        { signal: controller.signal }
-      );
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch data from DexScreener');
-      }
-
-      const data = await response.json();
-
-      if (!data.pairs || data.pairs.length === 0) {
-        setDexResults([]);
-        setDexError('No tokens found');
-        return;
-      }
-
-      const tokens: DexScreenerToken[] = data.pairs.map((pair: any) => ({
-        id: pair.pairAddress || `${pair.chainId}-${pair.baseToken.address}`,
-        address: pair.baseToken.address,
-        name: pair.baseToken.name,
-        symbol: pair.baseToken.symbol,
-        logo: pair.info?.imageUrl,
-        chain: pair.chainId,
-        price: parseFloat(pair.priceUsd) || 0,
-        marketCap: pair.marketCap,
-        liquidity: pair.liquidity?.usd,
-        createdAt: pair.pairCreatedAt ? new Date(pair.pairCreatedAt).toISOString() : undefined,
-        volume24h: pair.volume?.h24,
-        priceChange: {
-          m5: pair.priceChange?.m5,
-          h1: pair.priceChange?.h1,
-          h6: pair.priceChange?.h6,
-          h24: pair.priceChange?.h24,
-        },
-        socials: {
-          twitter: pair.info?.socials?.find((s: any) => s.type === 'twitter')?.url,
-          website: pair.info?.websites?.[0]?.url,
-          telegram: pair.info?.socials?.find((s: any) => s.type === 'telegram')?.url,
-        },
-        dexId: pair.dexId,
-        pairAddress: pair.pairAddress,
-        url: pair.url,
-      }));
-
-      setDexResults(tokens);
-    } catch (err: any) {
-      if (err?.name === 'AbortError') {
-        return;
-      }
-      setDexResults([]);
-      setDexError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
-      setDexLoading(false);
-    }
   };
 
   // Handle clicking on a search result
@@ -683,22 +561,6 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
     if (item.chain) qs.set('chain', (item.chain as string).toLowerCase());
     if ((item as any).address) qs.set('address', ((item as any).address as string).toLowerCase());
     router.push(`/dashboard/trade?${qs.toString()}`);
-    onClose();
-  };
-
-  const handleDexResultClick = (token: DexScreenerToken) => {
-    const params = new URLSearchParams();
-
-    if (token.symbol) params.set('base', token.symbol.toUpperCase());
-    if (token.name) params.set('name', token.name);
-    if (token.chain) params.set('chain', token.chain.toLowerCase());
-    if (token.address) params.set('address', token.address);
-    if (token.logo) params.set('imageUri', token.logo);
-    if (token.price) params.set('price', token.price.toString());
-    if (token.dexId) params.set('dex', token.dexId);
-    if (token.pairAddress) params.set('pairAddress', token.pairAddress);
-
-    router.push(`/dashboard/trade?${params.toString()}`);
     onClose();
   };
 
@@ -930,21 +792,11 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
       if (unifiedSearchTimeoutRef.current) {
         clearTimeout(unifiedSearchTimeoutRef.current);
       }
-      if (dexSearchTimeoutRef.current) {
-        clearTimeout(dexSearchTimeoutRef.current);
-      }
       // Reset search states
       setSearchTerm('');
       setSearchResults([]);
       setLocalSearchResults([]);
       setUnifiedTokens([]);
-      setDexResults([]);
-      setDexError(null);
-      setDexLoading(false);
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-        abortControllerRef.current = null;
-      }
     }
   }, [isOpen]);
 
