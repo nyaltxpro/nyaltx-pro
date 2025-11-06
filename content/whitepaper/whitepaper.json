@@ -1,7 +1,7 @@
 {
   "slug": "whitepaper",
   "title": "NYALTX Whitepaper",
-  "description": "Welcome to the comprehensive technical documentation for NYALTX, a revolutionary decentralized finance (DeFi) platform designed to transform how crypto projects gain visibility, liquidity, and growth opportunities in the Web3 ecosystem.",
+  "description": "Welcome to the comprehensive technical documentation for NYALTX, a revolutionary decentralized finance (DeFi) platform designed to transform how crypto projects gain visibility, liquidity, and growth opportunities in the Web3 ecosystem",
   "hero": {
     "title": "NYALTX Whitepaper",
     "subtitle": "New York Alt Exchange - Powered by the NYAX Token",
@@ -211,23 +211,6 @@
       "id": "platform-overview",
       "title": "Platform Overview",
       "level": "0",
-      "subsections": [
-        {
-          "id": "crypto-profiles",
-          "title": "Crypto Profiles",
-          "content": "Customizable project pages with integrated charts, social links, news feeds, and promotional videos."
-        },
-        {
-          "id": "embedded-trading",
-          "title": "Embedded Trading",
-          "content": "Non-custodial swaps via Uniswap integration, allowing seamless trading directly from project profiles."
-        },
-        {
-          "id": "token-generator",
-          "title": "Token Generator",
-          "content": "Simple token creation with liquidity fees, making it easy for projects to launch their tokens."
-        }
-      ],
       "cards": [
         {
           "title": "Profile Upgrades",
@@ -243,6 +226,23 @@
           "title": "Venture Network Events",
           "description": "Access to digital and real-world investor meetups",
           "color": "purple"
+        }
+      ],
+      "subsections": [
+        {
+          "id": "crypto-profiles",
+          "title": "Crypto Profiles",
+          "content": "Customizable project pages with integrated charts, social links, news feeds, and promotional videos."
+        },
+        {
+          "id": "embedded-trading",
+          "title": "Embedded Trading",
+          "content": "Non-custodial swaps via Uniswap integration, allowing seamless trading directly from project profiles."
+        },
+        {
+          "id": "token-generator",
+          "title": "Token Generator",
+          "content": "Simple token creation with liquidity fees, making it easy for projects to launch their tokens."
         }
       ]
     },
@@ -275,51 +275,11 @@
       "subsections": [
         {
           "id": "token-details",
-          "title": "Token Details",
-          "details": [
-            {
-              "label": "Name",
-              "value": "NYAX Token"
-            },
-            {
-              "label": "Symbol",
-              "value": "NYAX"
-            },
-            {
-              "label": "Total Supply",
-              "value": "1,000,000,000 NYAX"
-            },
-            {
-              "label": "Blockchain",
-              "value": "Ethereum (ERC-20)"
-            }
-          ]
+          "title": "Token Details"
         },
         {
           "id": "allocation",
-          "title": "Allocation",
-          "cards": [
-            {
-              "title": "Community & Ecosystem",
-              "description": "40%",
-              "color": "blue"
-            },
-            {
-              "title": "Team & Development",
-              "description": "25%",
-              "color": "green"
-            },
-            {
-              "title": "Marketing & Partnerships",
-              "description": "20%",
-              "color": "purple"
-            },
-            {
-              "title": "Reserve & Liquidity",
-              "description": "15%",
-              "color": "orange"
-            }
-          ]
+          "title": "Allocation"
         },
         {
           "id": "revenue-model",
