@@ -263,16 +263,34 @@ export default function SwapPage({ inTradeView = false, baseToken, quoteToken }:
 
   // Initialize available exchanges and select default exchange
   useEffect(() => {
-    const exchanges = dexManager.getDexList();
-    setAvailableExchanges(exchanges);
+    const initializeDexes = async () => {
+      try {
+        // For now, we'll initialize some DEXes to show in the list
+        // In production, you might want to initialize all or based on user selection
+        const uniswapV3 = await dexManager.getDex(DEX_PROTOCOL.UNISWAP_V3);
+        const pancakeswap = await dexManager.getDex(DEX_PROTOCOL.PANCAKESWAP);
+        const sushiswap = await dexManager.getDex(DEX_PROTOCOL.SUSHISWAP);
 
-    // Set default exchange to Uniswap V3 if available
-    const defaultExchange = exchanges.find(ex => ex.config.name === DEX_PROTOCOL.UNISWAP_V3);
-    if (defaultExchange) {
-      setSelectedExchange(defaultExchange);
-    } else if (exchanges.length > 0) {
-      setSelectedExchange(exchanges[0]);
-    }
+        const exchanges: DexInterface[] = [];
+        if (uniswapV3) exchanges.push(uniswapV3);
+        if (pancakeswap) exchanges.push(pancakeswap);
+        if (sushiswap) exchanges.push(sushiswap);
+
+        setAvailableExchanges(exchanges);
+
+        // Set default exchange to Uniswap V3 if available
+        if (uniswapV3) {
+          setSelectedExchange(uniswapV3);
+        } else if (exchanges.length > 0) {
+          setSelectedExchange(exchanges[0]);
+        }
+      } catch (error) {
+        console.error('Error initializing DEXes:', error);
+        setAvailableExchanges([]);
+      }
+    };
+
+    initializeDexes();
   }, []);
 
   // Fetch trending coins

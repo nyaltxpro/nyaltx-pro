@@ -1,5 +1,5 @@
 /**
- * DEX Manager - Manages all DEX integrations
+ * DEX Manager - Manages all DEX integrations with dynamic imports
  */
 import {
   DexInterface,
@@ -9,57 +9,125 @@ import {
   DEX_PROTOCOL,
   CHAIN_IDS,
 } from './types';
-import { UniswapV2 } from './uniswapV2';
-import { UniswapV3 } from './uniswapV3';
-import { PancakeSwap } from './pancakeswap';
-import { SushiSwap } from './sushiswap';
-import { Raydium } from './raydium';
+
+// Dynamic import functions for DEX implementations
+const loadUniswapV2 = async () => {
+  const { UniswapV2 } = await import('./uniswapV2');
+  return UniswapV2;
+};
+
+const loadUniswapV3 = async () => {
+  const { UniswapV3 } = await import('./uniswapV3');
+  return UniswapV3;
+};
+
+const loadPancakeSwap = async () => {
+  const { PancakeSwap } = await import('./pancakeswap');
+  return PancakeSwap;
+};
+
+const loadSushiSwap = async () => {
+  const { SushiSwap } = await import('./sushiswap');
+  return SushiSwap;
+};
+
+const loadRaydium = async () => {
+  const { Raydium } = await import('./raydium');
+  return Raydium;
+};
 
 export class DexManager {
   private dexes: Map<DEX_PROTOCOL, DexInterface>;
+  private dexConstructors: Map<DEX_PROTOCOL, () => Promise<any>>;
 
   constructor() {
     this.dexes = new Map();
-    this.initializeDexes();
+    this.dexConstructors = new Map();
+    this.initializeDexConstructors();
   }
 
-  private initializeDexes(): void {
-    this.dexes.set(DEX_PROTOCOL.UNISWAP_V2, new UniswapV2());
-    this.dexes.set(DEX_PROTOCOL.UNISWAP_V3, new UniswapV3());
-    this.dexes.set(DEX_PROTOCOL.PANCAKESWAP, new PancakeSwap());
-    this.dexes.set(DEX_PROTOCOL.SUSHISWAP, new SushiSwap());
-    this.dexes.set(DEX_PROTOCOL.RAYDIUM, new Raydium());
+  private initializeDexConstructors(): void {
+    this.dexConstructors.set(DEX_PROTOCOL.UNISWAP_V2, loadUniswapV2);
+    this.dexConstructors.set(DEX_PROTOCOL.UNISWAP_V3, loadUniswapV3);
+    this.dexConstructors.set(DEX_PROTOCOL.PANCAKESWAP, loadPancakeSwap);
+    this.dexConstructors.set(DEX_PROTOCOL.SUSHISWAP, loadSushiSwap);
+    this.dexConstructors.set(DEX_PROTOCOL.RAYDIUM, loadRaydium);
+  }
+
+  private async getDexInstance(protocol: DEX_PROTOCOL): Promise<DexInterface | undefined> {
+    // Check if already loaded
+    if (this.dexes.has(protocol)) {
+      return this.dexes.get(protocol);
+    }
+
+    // Load dynamically if available
+    const constructor = this.dexConstructors.get(protocol);
+    if (constructor) {
+      try {
+        const DexClass = await constructor();
+        const instance = new DexClass();
+        this.dexes.set(protocol, instance);
+        return instance;
+      } catch (error) {
+        console.error(`Failed to load DEX ${protocol}:`, error);
+        return undefined;
+      }
+    }
+
+    return undefined;
   }
 
   public getDexList(): DexInterface[] {
     return Array.from(this.dexes.values());
   }
 
-  public getDex(protocol: DEX_PROTOCOL): DexInterface | undefined {
-    return this.dexes.get(protocol);
+  public async getDex(protocol: DEX_PROTOCOL): Promise<DexInterface | undefined> {
+    return this.getDexInstance(protocol);
   }
 
   public async getBestQuote(params: QuoteParams): Promise<PriceQuote | null> {
     const { chainId } = params;
-    const compatibleDexes = this.getDexList().filter(dex => dex.isChainSupported(chainId));
 
-    if (compatibleDexes.length === 0) {
+    // Get all available DEX protocols and check which ones support the chain
+    const availableProtocols: DEX_PROTOCOL[] = [];
+    for (const protocol of this.dexConstructors.keys()) {
+      const dex = await this.getDexInstance(protocol);
+      if (dex?.isChainSupported(chainId)) {
+        availableProtocols.push(protocol);
+      }
+    }
+
+    if (availableProtocols.length === 0) {
       return null;
     }
 
     try {
-      const quotes = await Promise.all(compatibleDexes.map(dex => dex.getQuote(params)));
+      const quotes = await Promise.all(
+        availableProtocols.map(async (protocol) => {
+          try {
+            const dex = await this.getDexInstance(protocol);
+            if (dex) {
+              return await dex.getQuote(params);
+            }
+          } catch (error) {
+            console.error(`Error getting quote from ${protocol}:`, error);
+          }
+          return null;
+        })
+      );
 
       // Find the quote with the best output amount
-      return quotes.reduce(
-        (best, current) => {
-          if (!best || parseFloat(current.outputAmount) > parseFloat(best.outputAmount)) {
-            return current;
-          }
-          return best;
-        },
-        null as PriceQuote | null
-      );
+      return quotes
+        .filter(quote => quote !== null)
+        .reduce(
+          (best, current) => {
+            if (!best || parseFloat(current!.outputAmount) > parseFloat(best.outputAmount)) {
+              return current!;
+            }
+            return best;
+          },
+          null as PriceQuote | null
+        );
     } catch (error) {
       console.error('Error getting best quote:', error);
       return null;
@@ -68,17 +136,22 @@ export class DexManager {
 
   public async getAllQuotes(params: QuoteParams): Promise<PriceQuote[]> {
     const { chainId } = params;
-    const compatibleDexes = this.getDexList().filter(dex => dex.isChainSupported(chainId));
+
+    // Get all available DEX protocols for this chain
+    const availableProtocols = Array.from(this.dexConstructors.keys());
 
     try {
       const quotes = await Promise.all(
-        compatibleDexes.map(async dex => {
+        availableProtocols.map(async (protocol) => {
           try {
-            return await dex.getQuote(params);
+            const dex = await this.getDexInstance(protocol);
+            if (dex && dex.isChainSupported(chainId)) {
+              return await dex.getQuote(params);
+            }
           } catch (error) {
-            console.error(`Error getting quote from ${dex.config.name}:`, error);
-            return null;
+            console.error(`Error getting quote from ${protocol}:`, error);
           }
+          return null;
         })
       );
 
@@ -90,7 +163,7 @@ export class DexManager {
   }
 
   public async executeSwap(protocol: DEX_PROTOCOL, params: SwapParams): Promise<string | null> {
-    const dex = this.getDex(protocol);
+    const dex = await this.getDexInstance(protocol);
 
     if (!dex) {
       console.error(`DEX protocol ${protocol} not found`);
