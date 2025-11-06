@@ -7,11 +7,10 @@ import {
   FaChevronDown,
   FaCog,
   FaExchangeAlt,
-  FaFire,
   FaInfoCircle,
   FaSearch,
   FaSync,
-  FaTimes,
+  FaTimes
 } from 'react-icons/fa';
 
 import { getTrendingCoins } from '@/api/coingecko/client';
@@ -340,6 +339,7 @@ export default function SwapPage({ inTradeView = false, baseToken, quoteToken }:
           chainId: chainId,
         });
 
+        console.log('Fetched quotes:', allQuotes); // Debug log
         setQuotes(allQuotes);
 
         // Find best quote
@@ -353,17 +353,24 @@ export default function SwapPage({ inTradeView = false, baseToken, quoteToken }:
           null as PriceQuote | null
         );
 
+        console.log('Best quote:', best); // Debug log
         setBestQuote(best);
 
-        // Update to amount based on selected exchange
+        // Update to amount based on selected exchange or best quote
         if (selectedExchange) {
           const selectedQuote = allQuotes.find(q => q.protocol === selectedExchange.config.name);
           if (selectedQuote) {
             setToAmount(selectedQuote.outputAmount);
           }
+        } else if (best) {
+          // If no exchange selected, use the best quote
+          setToAmount(best.outputAmount);
         }
       } catch (error) {
         console.error('Error getting quotes:', error);
+        toast.error('Failed to get swap quotes. Please try again.');
+        setQuotes([]);
+        setBestQuote(null);
       } finally {
         setIsLoadingQuotes(false);
       }
@@ -375,14 +382,18 @@ export default function SwapPage({ inTradeView = false, baseToken, quoteToken }:
   // Handle input changes
   const handleFromAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    setFromAmount(value);
-    // To amount will be updated by the useEffect that fetches quotes
+    // Allow empty string or valid numbers
+    if (value === '' || /^\d*\.?\d*$/.test(value)) {
+      setFromAmount(value);
+    }
   };
 
   const handleToAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    setToAmount(value);
-    // This is just for UI feedback, actual swaps are always based on exact input
+    // Allow empty string or valid numbers
+    if (value === '' || /^\d*\.?\d*$/.test(value)) {
+      setToAmount(value);
+    }
   };
 
   // --- Swap helpers (Pancake style) ---
@@ -735,6 +746,7 @@ export default function SwapPage({ inTradeView = false, baseToken, quoteToken }:
                     value={toAmount}
                     onChange={handleToAmountChange}
                     className="bg-transparent text-2xl w-full focus:outline-none"
+                    disabled={isLoadingQuotes}
                   />
                   <button
                     className="flex items-center bg-gray-700 hover:bg-gray-600 rounded-lg px-3 py-2 transition-colors"
@@ -752,18 +764,30 @@ export default function SwapPage({ inTradeView = false, baseToken, quoteToken }:
                     <FaChevronDown className="ml-2 text-sm" />
                   </button>
                 </div>
+                {isLoadingQuotes && (
+                  <div className="flex items-center mt-2 text-sm text-gray-400">
+                    <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-blue-500 mr-2"></div>
+                    Getting best quotes...
+                  </div>
+                )}
               </div>
             </div>
 
             {/* Price Info */}
-            {fromAmount && toAmount && (
+            {fromAmount && toAmount && fromToken && toToken && (
               <div className="bg-[#111116] rounded-lg p-3 mb-4 text-sm">
                 <div className="flex justify-between items-center">
                   <span className="text-gray-400">Price</span>
                   <span>
-                    1 {fromToken.symbol} = 1950 {toToken.symbol || '...'}
+                    1 {fromToken.symbol} = {(parseFloat(toAmount) / parseFloat(fromAmount)).toFixed(6)} {toToken.symbol || '...'}
                   </span>
                 </div>
+                {bestQuote && (
+                  <div className="flex justify-between items-center mt-1 text-xs text-gray-500">
+                    <span>Price Impact</span>
+                    <span>{bestQuote.priceImpact}%</span>
+                  </div>
+                )}
               </div>
             )}
 
@@ -786,69 +810,27 @@ export default function SwapPage({ inTradeView = false, baseToken, quoteToken }:
             {/* Primary Action Button (keeps same design/label) */}
             <button
               onClick={handlePrimaryAction}
-              disabled={isSwapping}
-              className="w-full bg-[#fffff1]/40 text-white font-medium py-3 px-4 rounded-lg transition-colors disabled:opacity-60"
+              disabled={
+                isSwapping ||
+                !account?.address ||
+                !fromAmount ||
+                !toAmount ||
+                parseFloat(fromAmount) <= 0 ||
+                parseFloat(toAmount) <= 0 ||
+                isLoadingQuotes ||
+                quotes.length === 0
+              }
+              className="w-full bg-[#fffff1]/40 text-white font-medium py-3 px-4 rounded-lg transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              Connect wallet
+              {isSwapping ? 'Swapping...' :
+                !account?.address ? 'Connect Wallet' :
+                  !fromAmount || !toAmount ? 'Enter Amount' :
+                    quotes.length === 0 ? 'Getting Quotes...' :
+                      isLoadingQuotes ? 'Getting Quotes...' :
+                        `Swap ${fromToken.symbol} to ${toToken.symbol}`}
             </button>
 
-            {/* Trending Coins Section */}
-            <div className="mt-6">
-              <div className="flex items-center mb-3">
-                <FaFire className="text-orange-500 mr-2" />
-                <h3 className="text-md font-medium">Trending Coins</h3>
-              </div>
 
-              {isLoadingTrending ? (
-                <div className="flex justify-center py-4">
-                  <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-500"></div>
-                </div>
-              ) : trendingError ? (
-                <div className="text-red-500 text-center py-2 text-sm">{trendingError}</div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <div className="flex space-x-2 pb-2">
-                    {trendingCoins.map((coin, index) => (
-                      <div
-                        key={coin.item.id}
-                        onClick={() => handleTrendingCoinClick(coin)}
-                        className="flex-shrink-0 bg-[#111116] hover:bg-gray-700 rounded-lg p-2 cursor-pointer transition-colors"
-                      >
-                        <div className="flex items-center space-x-2">
-                          <div className="relative">
-                            <div className="w-8 h-8 rounded-full overflow-hidden">
-                              <Image
-                                src={
-                                  coin.item.small ||
-                                  getCryptoIconUrl(coin.item.symbol.toLowerCase())
-                                }
-                                alt={coin.item.name}
-                                width={32}
-                                height={32}
-                                unoptimized
-                              />
-                            </div>
-                            <div className="absolute -top-1 -right-1 bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center">
-                              {index + 1}
-                            </div>
-                          </div>
-                          <div>
-                            <div className="font-medium text-sm">
-                              {coin.item.symbol.toUpperCase()}
-                            </div>
-                            <div className="text-xs text-gray-400">
-                              {coin.item.name.length > 10
-                                ? coin.item.name.substring(0, 10) + '...'
-                                : coin.item.name}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
 
             {/* Exchange Selector */}
             {(!inTradeView || true) && (
@@ -910,6 +892,16 @@ export default function SwapPage({ inTradeView = false, baseToken, quoteToken }:
                     </div>
                   );
                 })}
+              </div>
+            )}
+
+            {/* No Quotes Available */}
+            {fromAmount && toAmount && fromToken && toToken && !isLoadingQuotes && quotes.length === 0 && (
+              <div className="mt-4 mb-4 bg-red-900/20 border border-red-800 rounded-lg p-3">
+                <div className="flex items-center text-red-400">
+                  <FaTimes className="mr-2" />
+                  <span className="text-sm">No swap routes available for this token pair</span>
+                </div>
               </div>
             )}
 
