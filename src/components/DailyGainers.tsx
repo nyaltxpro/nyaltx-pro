@@ -245,9 +245,9 @@ export default function DailyGainers() {
                       {entriesToShow.map(([chain, address], index) => (
                         <div
                           key={`${coin.id}-${chain}`}
-                          className="flex flex-col items-center -ml-2 first:ml-0 relative z-[${50-index}]"
+                          className="flex flex-col items-center -ml-1 first:ml-0 relative z-[${50-index}]"
                         >
-                          <CryptocurrencyIcon size={20} width={25} name={chain || 'solana' as any} />
+                          <CryptocurrencyIcon size={20} width={20} name={chain || 'solana' as any} />
                         </div>
                       ))}
                     </div>
