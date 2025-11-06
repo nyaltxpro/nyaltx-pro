@@ -221,7 +221,7 @@ export default function DailyGainers() {
             return (
               <div
                 key={coin.id ?? coin.symbol}
-                className="flex justify-between items-center p-2 cursor-pointer hover:bg-gray-800/40"
+                className="flex justify-between items-center p-3 cursor-pointer hover:bg-gray-800/40"
                 onClick={() => handleNavigate(coin)}
               >
                 <div className="flex items-center">
