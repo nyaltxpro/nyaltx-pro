@@ -282,7 +282,12 @@
         {
           "id": "token-details",
           "title": "Token Details",
-          "content": "Token Name: NYAX Token (the native token of the NYALTX platform) Symbol: NYAX Total Supply: 10,000,000,000 (10 billion) NYAX tokens. Blockchain: Ethereum (ERC-20) standard."
+          "content": " Symbol: NYAX Total Supply: 10,000,000,000 (10 billion) NYAX tokens. Blockchain: Ethereum (ERC-20) standard.",
+          "listItems": [
+            {
+              "content": "Token Name: NYAX Token (the native token of the NYALTX platform)"
+            }
+          ]
         },
         {
           "id": "allocation",
