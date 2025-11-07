@@ -102,8 +102,7 @@ function AdminCorporateNewsComponent() {
     // Quill editor state
     const quillContainerRef = useRef<HTMLDivElement | null>(null);
     const quillInstanceRef = useRef<QuillType | null>(null);
-    const quillChangeHandlerRef = useRef<((delta: unknown, oldDelta: unknown, source: string) => void) | null>(null);
-    const suppressQuillChangeRef = useRef(false);
+    const [isQuillLoading, setIsQuillLoading] = useState(false);
 
     // Helper function to convert Pinata gateway URLs to ipfs.io
     const convertToWorkingIPFSUrl = (url: string): string => {
@@ -115,83 +114,71 @@ function AdminCorporateNewsComponent() {
     };
 
     useEffect(() => {
-        const teardown = () => {
-            const existing = quillInstanceRef.current;
-            if (existing && quillChangeHandlerRef.current) {
-                existing.off('text-change', quillChangeHandlerRef.current);
-            }
-            quillInstanceRef.current = null;
-            quillChangeHandlerRef.current = null;
-        };
-
-        if (!isCreating || newsForm.editorType !== 'quill') {
-            teardown();
-            return teardown;
-        }
-
-        let isCancelled = false;
-
-        const initialize = async () => {
-            const container = quillContainerRef.current;
-            if (!container) return;
-            if (quillInstanceRef.current) return;
-
-            const { default: Quill } = await import('quill');
-            if (isCancelled) return;
-
-            const quill = new Quill(container, {
-                theme: 'snow',
-                modules: quillModules,
-                formats: quillFormats,
-            });
-
-            quillInstanceRef.current = quill;
-
-            if (!newsForm.content) {
-                suppressQuillChangeRef.current = true;
-                quill.setText('');
-                quill.history.clear();
-                suppressQuillChangeRef.current = false;
+        const initializeQuill = async () => {
+            if (!isCreating || newsForm.editorType !== 'quill' || !quillContainerRef.current) {
+                return;
             }
 
-            const handler = (_delta: unknown, _oldDelta: unknown, source: string) => {
-                if (suppressQuillChangeRef.current || source !== 'user') return;
-                const html = normalizeQuillHtml(quill.root.innerHTML);
-                setNewsForm((prev) => (prev.content === html ? prev : { ...prev, content: html }));
-            };
+            try {
+                setIsQuillLoading(true);
 
-            quillChangeHandlerRef.current = handler;
-            quill.on('text-change', handler);
+                // Clear any existing Quill instance
+                if (quillInstanceRef.current) {
+                    quillInstanceRef.current = null;
+                }
 
-            suppressQuillChangeRef.current = true;
-            quill.clipboard.dangerouslyPasteHTML(newsForm.content || '');
-            quill.history.clear();
-            suppressQuillChangeRef.current = false;
+                // Import Quill dynamically
+                const Quill = (await import('quill')).default;
+
+                // Create new Quill instance
+                const quill = new Quill(quillContainerRef.current, {
+                    theme: 'snow',
+                    modules: quillModules,
+                    formats: quillFormats,
+                    placeholder: 'Write your news article content here...'
+                });
+
+                quillInstanceRef.current = quill;
+
+                // Set initial content if editing
+                if (editingNews && editingNews.content) {
+                    quill.root.innerHTML = editingNews.content;
+                }
+
+                // Handle content changes
+                const handleChange = () => {
+                    const html = quill.root.innerHTML;
+                    if (html !== newsForm.content) {
+                        setNewsForm(prev => ({ ...prev, content: html }));
+                    }
+                };
+
+                quill.on('text-change', handleChange);
+
+                setIsQuillLoading(false);
+
+                // Store cleanup function
+                return () => {
+                    quill.off('text-change', handleChange);
+                    quillInstanceRef.current = null;
+                };
+            } catch (error) {
+                console.error('Failed to initialize Quill:', error);
+                setError('Failed to load rich text editor. Please try using simple text editor.');
+                setIsQuillLoading(false);
+            }
         };
 
-        void initialize();
+        const cleanup = initializeQuill();
 
         return () => {
-            isCancelled = true;
-            teardown();
+            cleanup?.then(cleanupFn => cleanupFn?.());
         };
-    }, [isCreating, newsForm.editorType]);
+    }, [isCreating, newsForm.editorType, editingNews]);
 
     useEffect(() => {
-        if (!isCreating || newsForm.editorType !== 'quill') return;
-        const quill = quillInstanceRef.current;
-        if (!quill) return;
-
-        const desired = normalizeQuillHtml(newsForm.content);
-        const current = normalizeQuillHtml(quill.root.innerHTML);
-
-        if (desired === current) return;
-
-        suppressQuillChangeRef.current = true;
-        quill.clipboard.dangerouslyPasteHTML(desired);
-        quill.history.clear();
-        suppressQuillChangeRef.current = false;
-    }, [newsForm.content, isCreating, newsForm.editorType]);
+        loadNews();
+    }, []);
 
     const loadNews = async () => {
         try {
@@ -534,11 +521,20 @@ function AdminCorporateNewsComponent() {
                             />
                         ) : (
                             <div className="rounded-lg border border-gray-600/50 bg-gray-700/30">
-                                <div
-                                    ref={quillContainerRef}
-                                    className="quill-editor"
-                                    style={{ minHeight: '320px' }}
-                                />
+                                {isQuillLoading ? (
+                                    <div className="flex items-center justify-center py-12">
+                                        <div className="text-center">
+                                            <FaSpinner className="w-8 h-8 text-cyan-400 animate-spin mx-auto mb-4" />
+                                            <p className="text-gray-400">Loading rich text editor...</p>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div
+                                        ref={quillContainerRef}
+                                        className="quill-editor"
+                                        style={{ minHeight: '320px' }}
+                                    />
+                                )}
                             </div>
                         )}
                     </div>
