@@ -137,7 +137,8 @@
       "id": "contact",
       "title": "Contact Information",
       "level": "0"
-    }
+    },
+    {}
   ],
   "sections": [
     {
@@ -400,6 +401,11 @@
       "title": "Contact Information",
       "level": "0",
       "content": "For partnership opportunities, investor relations, or media inquiries, reach out to team@nyaltx.pro."
+    },
+    {
+      "id": "authentication-and-security",
+      "title": "Authentication and Security Framework",
+      "content": "NYALTX.Pro uses a decentralized authentication model that replaces traditional logins with Web3 wallet verification through MetaMask, Phantom, and WalletConnect. Each user session is validated by cryptographic signature, ensuring identity without storing personal data or private keys.    All listed tokens are authenticated via verified smart-contract data from supported blockchains, confirming contract integrity, liquidity, and trading activity in real time. This is reinforced by NYALTX.Pro’s legitimacy layer, which includes metadata verification and optional KYC/KYB for regulated issuers. The result is a secure, transparent authentication framework that unites the trust of blockchain with the compliance standards of traditional finance."
     }
   ],
   "seo": {
