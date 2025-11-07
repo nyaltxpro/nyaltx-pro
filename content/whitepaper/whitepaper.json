@@ -243,14 +243,7 @@
         {
           "id": "embedded-trading",
           "title": "Embedded Trading",
-          "content": "Non-custodial swaps via Uniswap integration, allowing seamless trading directly from project profiles.",
-          "subsections": [
-            {
-              "id": "authentication-and-security",
-              "title": "Authentication and Security Framework",
-              "content": "NYALTX.Pro uses a decentralized authentication model that replaces traditional logins with Web3 wallet verification through MetaMask, Phantom, and WalletConnect. Each user session is validated by cryptographic signature, ensuring identity without storing personal data or private keys.\n\nAll listed tokens are authenticated via verified smart-contract data from supported blockchains, confirming contract integrity, liquidity, and trading activity in real time. This is reinforced by NYALTX.Pro's legitimacy layer, which includes metadata verification. The result is a secure, transparent authentication framework that unites the trust of blockchain with the compliance standards of traditional finance."
-            }
-          ]
+          "content": "Non-custodial swaps via Uniswap integration, allowing seamless trading directly from project profiles."
         },
         {
           "id": "token-generator",
@@ -288,7 +281,8 @@
       "subsections": [
         {
           "id": "token-details",
-          "title": "Token Details"
+          "title": "Token Details",
+          "content": "Token Name: NYAX Token (the native token of the NYALTX platform) Symbol: NYAX Total Supply: 10,000,000,000 (10 billion) NYAX tokens. Blockchain: Ethereum (ERC-20) standard."
         },
         {
           "id": "allocation",
