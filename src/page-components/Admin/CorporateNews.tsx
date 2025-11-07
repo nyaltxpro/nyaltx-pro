@@ -164,7 +164,7 @@ function AdminCorporateNewsComponent() {
             quillChangeHandlerRef.current = handler;
             quill.on('text-change', handler);
 
-            const startingContent = normalizeQuillHtml(newsForm.content || editingNews?.content || '');
+            const startingContent = normalizeQuillHtml(newsForm.content || '');
             suppressQuillChangeRef.current = true;
             quill.clipboard.dangerouslyPasteHTML(startingContent);
             quill.history.clear();
@@ -179,14 +179,14 @@ function AdminCorporateNewsComponent() {
             isCancelled = true;
             teardown();
         };
-    }, [isCreating, newsForm.editorType, editingNews, newsForm.content]);
+    }, [isCreating, newsForm.editorType]);
 
     useEffect(() => {
         if (!isCreating || newsForm.editorType !== 'quill') return;
         const quill = quillInstanceRef.current;
         if (!quill) return;
 
-        const desired = normalizeQuillHtml(newsForm.content || editingNews?.content || '');
+        const desired = normalizeQuillHtml(newsForm.content || '');
         const current = normalizeQuillHtml(quill.root.innerHTML);
 
         if (desired === current) return;
@@ -195,7 +195,7 @@ function AdminCorporateNewsComponent() {
         quill.clipboard.dangerouslyPasteHTML(desired);
         quill.history.clear();
         suppressQuillChangeRef.current = false;
-    }, [isCreating, newsForm.editorType, newsForm.content, editingNews]);
+    }, [newsForm.content, isCreating, newsForm.editorType]);
 
     useEffect(() => {
         loadNews();
@@ -551,21 +551,20 @@ function AdminCorporateNewsComponent() {
                                 placeholder="Write your news article content here..."
                             />
                         ) : (
-                            <div className="rounded-lg border border-gray-600/50 bg-gray-700/30">
-                                {isQuillLoading ? (
-                                    <div className="flex items-center justify-center py-12">
+                            <div className="relative rounded-lg border border-gray-600/50 bg-gray-700/30">
+                                {isQuillLoading && (
+                                    <div className="absolute inset-0 z-10 flex items-center justify-center bg-gray-900/60 backdrop-blur-sm">
                                         <div className="text-center">
                                             <FaSpinner className="w-8 h-8 text-cyan-400 animate-spin mx-auto mb-4" />
-                                            <p className="text-gray-400">Loading rich text editor...</p>
+                                            <p className="text-gray-300">Loading rich text editor...</p>
                                         </div>
                                     </div>
-                                ) : (
-                                    <div
-                                        ref={quillContainerRef}
-                                        className="quill-editor"
-                                        style={{ minHeight: '320px' }}
-                                    />
                                 )}
+                                <div
+                                    ref={quillContainerRef}
+                                    className={`quill-editor ${isQuillLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-200`}
+                                    style={{ minHeight: '320px' }}
+                                />
                             </div>
                         )}
                     </div>
