@@ -2,8 +2,11 @@
 
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { FaClock, FaEdit, FaEye, FaNewspaper, FaPlus, FaSpinner, FaTags, FaTrash, FaUpload, FaUser } from 'react-icons/fa';
+import 'quill/dist/quill.snow.css';
+import type QuillType from 'quill';
+import type { QuillOptions } from 'quill';
 
 const AdminCorporateNewsClient = dynamic(() => Promise.resolve(AdminCorporateNewsComponent), {
     ssr: false,
@@ -18,6 +21,45 @@ const AdminCorporateNewsClient = dynamic(() => Promise.resolve(AdminCorporateNew
         </div>
     )
 });
+
+const quillModules: NonNullable<QuillOptions['modules']> = {
+  toolbar: [
+    [{ header: [1, 2, 3, false] }],
+    ['bold', 'italic', 'underline', 'strike'],
+    [{ list: 'ordered' }, { list: 'bullet' }],
+    [{ script: 'sub' }, { script: 'super' }],
+    [{ indent: '-1' }, { indent: '+1' }],
+    [{ color: [] }, { background: [] }],
+    [{ align: [] }],
+    ['link', 'blockquote', 'code-block'],
+    ['clean'],
+  ],
+};
+
+const quillFormats = [
+  'header',
+  'bold',
+  'italic',
+  'underline',
+  'strike',
+  'blockquote',
+  'code-block',
+  'list',
+  'bullet',
+  'indent',
+  'script',
+  'align',
+  'link',
+  'color',
+  'background',
+];
+
+const normalizeQuillHtml = (value?: string | null) => {
+  if (!value) return '';
+  const trimmed = value.replace(/\s+$/, '');
+  if (trimmed === '<p><br></p>') return '';
+  return trimmed;
+};
 
 interface NewsArticle {
     _id: string;
@@ -49,12 +91,19 @@ function AdminCorporateNewsComponent() {
         featuredImage: '',
         status: 'draft' as 'published' | 'draft',
         tags: '',
-        author: 'NYALTX Team'
+        author: 'NYALTX Team',
+        editorType: 'quill' as 'simple' | 'quill'
     });
 
     // IPFS upload state
     const [isUploadingToIPFS, setIsUploadingToIPFS] = useState(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+    // Quill editor state
+    const quillContainerRef = useRef<HTMLDivElement | null>(null);
+    const quillInstanceRef = useRef<QuillType | null>(null);
+    const quillChangeHandlerRef = useRef<((delta: unknown, oldDelta: unknown, source: string) => void) | null>(null);
+    const suppressQuillChangeRef = useRef(false);
 
     // Helper function to convert Pinata gateway URLs to ipfs.io
     const convertToWorkingIPFSUrl = (url: string): string => {
@@ -66,8 +115,83 @@ function AdminCorporateNewsComponent() {
     };
 
     useEffect(() => {
-        loadNews();
-    }, []);
+        const teardown = () => {
+            const existing = quillInstanceRef.current;
+            if (existing && quillChangeHandlerRef.current) {
+                existing.off('text-change', quillChangeHandlerRef.current);
+            }
+            quillInstanceRef.current = null;
+            quillChangeHandlerRef.current = null;
+        };
+
+        if (!isCreating || newsForm.editorType !== 'quill') {
+            teardown();
+            return teardown;
+        }
+
+        let isCancelled = false;
+
+        const initialize = async () => {
+            const container = quillContainerRef.current;
+            if (!container) return;
+            if (quillInstanceRef.current) return;
+
+            const { default: Quill } = await import('quill');
+            if (isCancelled) return;
+
+            const quill = new Quill(container, {
+                theme: 'snow',
+                modules: quillModules,
+                formats: quillFormats,
+            });
+
+            quillInstanceRef.current = quill;
+
+            if (!newsForm.content) {
+                suppressQuillChangeRef.current = true;
+                quill.setText('');
+                quill.history.clear();
+                suppressQuillChangeRef.current = false;
+            }
+
+            const handler = (_delta: unknown, _oldDelta: unknown, source: string) => {
+                if (suppressQuillChangeRef.current || source !== 'user') return;
+                const html = normalizeQuillHtml(quill.root.innerHTML);
+                setNewsForm((prev) => (prev.content === html ? prev : { ...prev, content: html }));
+            };
+
+            quillChangeHandlerRef.current = handler;
+            quill.on('text-change', handler);
+
+            suppressQuillChangeRef.current = true;
+            quill.clipboard.dangerouslyPasteHTML(newsForm.content || '');
+            quill.history.clear();
+            suppressQuillChangeRef.current = false;
+        };
+
+        void initialize();
+
+        return () => {
+            isCancelled = true;
+            teardown();
+        };
+    }, [isCreating, newsForm.editorType]);
+
+    useEffect(() => {
+        if (!isCreating || newsForm.editorType !== 'quill') return;
+        const quill = quillInstanceRef.current;
+        if (!quill) return;
+
+        const desired = normalizeQuillHtml(newsForm.content);
+        const current = normalizeQuillHtml(quill.root.innerHTML);
+
+        if (desired === current) return;
+
+        suppressQuillChangeRef.current = true;
+        quill.clipboard.dangerouslyPasteHTML(desired);
+        quill.history.clear();
+        suppressQuillChangeRef.current = false;
+    }, [newsForm.content, isCreating, newsForm.editorType]);
 
     const loadNews = async () => {
         try {
@@ -93,7 +217,8 @@ function AdminCorporateNewsComponent() {
             featuredImage: '',
             status: 'draft',
             tags: '',
-            author: 'NYALTX Team'
+            author: 'NYALTX Team',
+            editorType: 'quill'
         });
     };
 
@@ -107,7 +232,8 @@ function AdminCorporateNewsComponent() {
             featuredImage: article.featuredImage || '',
             status: article.status,
             tags: article.tags.join(', '),
-            author: article.author
+            author: article.author,
+            editorType: 'quill' // Default to quill for existing articles
         });
     };
 
@@ -279,7 +405,8 @@ function AdminCorporateNewsComponent() {
             featuredImage: '',
             status: 'draft',
             tags: '',
-            author: 'NYALTX Team'
+            author: 'NYALTX Team',
+            editorType: 'quill'
         });
     };
 
@@ -384,14 +511,36 @@ function AdminCorporateNewsComponent() {
                     </div>
 
                     <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Editor Type</label>
+                        <select
+                            value={newsForm.editorType}
+                            onChange={(e) => setNewsForm(prev => ({ ...prev, editorType: e.target.value as 'simple' | 'quill' }))}
+                            className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600/50 rounded-lg text-white focus:outline-none focus:border-blue-500/50"
+                        >
+                            <option value="simple">Simple Text</option>
+                            <option value="quill">Rich Text (Quill)</option>
+                        </select>
+                    </div>
+
+                    <div className="mb-4">
                         <label className="block text-sm font-medium text-gray-300 mb-2">Content *</label>
-                        <textarea
-                            value={newsForm.content}
-                            onChange={(e) => setNewsForm(prev => ({ ...prev, content: e.target.value }))}
-                            rows={8}
-                            className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500/50"
-                            placeholder="Write your news article content here..."
-                        />
+                        {newsForm.editorType === 'simple' ? (
+                            <textarea
+                                value={newsForm.content}
+                                onChange={(e) => setNewsForm(prev => ({ ...prev, content: e.target.value }))}
+                                rows={8}
+                                className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500/50"
+                                placeholder="Write your news article content here..."
+                            />
+                        ) : (
+                            <div className="rounded-lg border border-gray-600/50 bg-gray-700/30">
+                                <div
+                                    ref={quillContainerRef}
+                                    className="quill-editor"
+                                    style={{ minHeight: '320px' }}
+                                />
+                            </div>
+                        )}
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
