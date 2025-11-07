@@ -122,10 +122,6 @@ const AdminBlogManagerComponent = () => {
       }
       quillInstanceRef.current = null;
       quillChangeHandlerRef.current = null;
-      // Clear the container when tearing down
-      if (quillContainerRef.current) {
-        quillContainerRef.current.innerHTML = '';
-      }
     };
 
     if (!isFormOpen || form.editorType !== 'quill') {
@@ -196,22 +192,6 @@ const AdminBlogManagerComponent = () => {
     quill.history.clear();
     suppressQuillChangeRef.current = false;
   }, [form.content, isFormOpen, form.editorType]);
-
-  // Separate effect to handle editor type changes
-  useEffect(() => {
-    if (form.editorType === 'simple' && quillInstanceRef.current) {
-      // Clean up Quill when switching to simple text
-      const existing = quillInstanceRef.current;
-      if (existing && quillChangeHandlerRef.current) {
-        existing.off('text-change', quillChangeHandlerRef.current);
-      }
-      quillInstanceRef.current = null;
-      quillChangeHandlerRef.current = null;
-      if (quillContainerRef.current) {
-        quillContainerRef.current.innerHTML = '';
-      }
-    }
-  }, [form.editorType]);
 
   const loadPosts = async (status: 'all' | 'published' | 'draft' = 'all') => {
     try {
@@ -706,18 +686,7 @@ const AdminBlogManagerComponent = () => {
               Editor Type
               <select
                 value={form.editorType}
-                onChange={(event) => {
-                  const newEditorType = event.target.value as 'simple' | 'quill';
-
-                  // Sync content from Quill to form before switching
-                  if (newEditorType === 'simple' && quillInstanceRef.current) {
-                    const html = quillInstanceRef.current.root.innerHTML;
-                    const normalizedHtml = normalizeQuillHtml(html);
-                    setForm((prev) => ({ ...prev, content: normalizedHtml, editorType: newEditorType }));
-                  } else {
-                    setForm((prev) => ({ ...prev, editorType: newEditorType }));
-                  }
-                }}
+                onChange={(event) => setForm((prev) => ({ ...prev, editorType: event.target.value as 'simple' | 'quill' }))}
                 className="mt-1 w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white focus:border-cyan-500/60 focus:outline-none"
               >
                 <option value="simple">Simple Text</option>

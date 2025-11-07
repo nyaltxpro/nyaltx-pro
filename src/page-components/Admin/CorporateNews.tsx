@@ -102,6 +102,8 @@ function AdminCorporateNewsComponent() {
     // Quill editor state
     const quillContainerRef = useRef<HTMLDivElement | null>(null);
     const quillInstanceRef = useRef<QuillType | null>(null);
+    const quillChangeHandlerRef = useRef<((delta: unknown, oldDelta: unknown, source: string) => void) | null>(null);
+    const suppressQuillChangeRef = useRef(false);
     const [isQuillLoading, setIsQuillLoading] = useState(false);
 
     // Helper function to convert Pinata gateway URLs to ipfs.io
@@ -114,85 +116,86 @@ function AdminCorporateNewsComponent() {
     };
 
     useEffect(() => {
-        const initializeQuill = async () => {
-            if (!isCreating || newsForm.editorType !== 'quill' || !quillContainerRef.current) {
-                return;
+        const teardown = () => {
+            const existing = quillInstanceRef.current;
+            if (existing && quillChangeHandlerRef.current) {
+                existing.off('text-change', quillChangeHandlerRef.current);
             }
-
-            try {
-                setIsQuillLoading(true);
-
-                // Clear any existing Quill instance
-                if (quillInstanceRef.current) {
-                    quillInstanceRef.current = null;
-                }
-
-                // Clear the container
-                if (quillContainerRef.current) {
-                    quillContainerRef.current.innerHTML = '';
-                }
-
-                // Import Quill dynamically
-                const Quill = (await import('quill')).default;
-
-                // Create new Quill instance
-                const quill = new Quill(quillContainerRef.current, {
-                    theme: 'snow',
-                    modules: quillModules,
-                    formats: quillFormats,
-                    placeholder: 'Write your news article content here...'
-                });
-
-                quillInstanceRef.current = quill;
-
-                // Set initial content if editing or if content exists in form
-                const initialContent = (editingNews && editingNews.content) || newsForm.content || '';
-                if (initialContent) {
-                    quill.root.innerHTML = initialContent;
-                }
-
-                // Handle content changes
-                const handleChange = () => {
-                    const html = quill.root.innerHTML;
-                    if (html !== newsForm.content) {
-                        setNewsForm(prev => ({ ...prev, content: html }));
-                    }
-                };
-
-                quill.on('text-change', handleChange);
-
-                setIsQuillLoading(false);
-
-                // Store cleanup function
-                return () => {
-                    quill.off('text-change', handleChange);
-                    quillInstanceRef.current = null;
-                };
-            } catch (error) {
-                console.error('Failed to initialize Quill:', error);
-                setIsQuillLoading(false);
-            }
+            quillInstanceRef.current = null;
+            quillChangeHandlerRef.current = null;
+            suppressQuillChangeRef.current = false;
+            setIsQuillLoading(false);
         };
 
-        const cleanup = initializeQuill();
+        if (!isCreating || newsForm.editorType !== 'quill') {
+            teardown();
+            return teardown;
+        }
+
+        let isCancelled = false;
+
+        const initializeQuill = async () => {
+            const container = quillContainerRef.current;
+            if (!container) return;
+            if (quillInstanceRef.current) return;
+
+            setIsQuillLoading(true);
+
+            container.innerHTML = '';
+
+            const { default: Quill } = await import('quill');
+            if (isCancelled) return;
+
+            const quill = new Quill(container, {
+                theme: 'snow',
+                modules: quillModules,
+                formats: quillFormats,
+                placeholder: 'Write your news article content here...'
+            });
+
+            quillInstanceRef.current = quill;
+
+            const handler = (_delta: unknown, _oldDelta: unknown, source: string) => {
+                if (suppressQuillChangeRef.current || source !== 'user') return;
+                const html = normalizeQuillHtml(quill.root.innerHTML);
+                setNewsForm(prev => (prev.content === html ? prev : { ...prev, content: html }));
+            };
+
+            quillChangeHandlerRef.current = handler;
+            quill.on('text-change', handler);
+
+            const startingContent = normalizeQuillHtml(newsForm.content || editingNews?.content || '');
+            suppressQuillChangeRef.current = true;
+            quill.clipboard.dangerouslyPasteHTML(startingContent);
+            quill.history.clear();
+            suppressQuillChangeRef.current = false;
+
+            setIsQuillLoading(false);
+        };
+
+        void initializeQuill();
 
         return () => {
-            cleanup?.then(cleanupFn => cleanupFn?.());
+            isCancelled = true;
+            teardown();
         };
-    }, [isCreating, newsForm.editorType, editingNews]);
+    }, [isCreating, newsForm.editorType, editingNews, newsForm.content]);
 
-    // Separate effect to handle editor type changes
     useEffect(() => {
-        if (newsForm.editorType === 'simple' && quillInstanceRef.current) {
-            // Clean up Quill when switching to simple text
-            if (quillInstanceRef.current) {
-                quillInstanceRef.current = null;
-            }
-            if (quillContainerRef.current) {
-                quillContainerRef.current.innerHTML = '';
-            }
-        }
-    }, [newsForm.editorType]);
+        if (!isCreating || newsForm.editorType !== 'quill') return;
+        const quill = quillInstanceRef.current;
+        if (!quill) return;
+
+        const desired = normalizeQuillHtml(newsForm.content || editingNews?.content || '');
+        const current = normalizeQuillHtml(quill.root.innerHTML);
+
+        if (desired === current) return;
+
+        suppressQuillChangeRef.current = true;
+        quill.clipboard.dangerouslyPasteHTML(desired);
+        quill.history.clear();
+        suppressQuillChangeRef.current = false;
+    }, [isCreating, newsForm.editorType, newsForm.content, editingNews]);
 
     useEffect(() => {
         loadNews();
@@ -521,10 +524,10 @@ function AdminCorporateNewsComponent() {
                             value={newsForm.editorType}
                             onChange={(e) => {
                                 const newEditorType = e.target.value as 'simple' | 'quill';
+                                if (newEditorType === newsForm.editorType) return;
 
-                                // Sync content from Quill to form before switching
-                                if (newEditorType === 'simple' && quillInstanceRef.current) {
-                                    const html = quillInstanceRef.current.root.innerHTML;
+                                if (quillInstanceRef.current && newsForm.editorType === 'quill') {
+                                    const html = normalizeQuillHtml(quillInstanceRef.current.root.innerHTML);
                                     setNewsForm(prev => ({ ...prev, content: html, editorType: newEditorType }));
                                 } else {
                                     setNewsForm(prev => ({ ...prev, editorType: newEditorType }));
