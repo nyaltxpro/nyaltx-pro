@@ -127,6 +127,11 @@ function AdminCorporateNewsComponent() {
                     quillInstanceRef.current = null;
                 }
 
+                // Clear the container
+                if (quillContainerRef.current) {
+                    quillContainerRef.current.innerHTML = '';
+                }
+
                 // Import Quill dynamically
                 const Quill = (await import('quill')).default;
 
@@ -140,9 +145,10 @@ function AdminCorporateNewsComponent() {
 
                 quillInstanceRef.current = quill;
 
-                // Set initial content if editing
-                if (editingNews && editingNews.content) {
-                    quill.root.innerHTML = editingNews.content;
+                // Set initial content if editing or if content exists in form
+                const initialContent = (editingNews && editingNews.content) || newsForm.content || '';
+                if (initialContent) {
+                    quill.root.innerHTML = initialContent;
                 }
 
                 // Handle content changes
@@ -164,7 +170,6 @@ function AdminCorporateNewsComponent() {
                 };
             } catch (error) {
                 console.error('Failed to initialize Quill:', error);
-                // setError('Failed to load rich text editor. Please try using simple text editor.');
                 setIsQuillLoading(false);
             }
         };
@@ -175,6 +180,19 @@ function AdminCorporateNewsComponent() {
             cleanup?.then(cleanupFn => cleanupFn?.());
         };
     }, [isCreating, newsForm.editorType, editingNews]);
+
+    // Separate effect to handle editor type changes
+    useEffect(() => {
+        if (newsForm.editorType === 'simple' && quillInstanceRef.current) {
+            // Clean up Quill when switching to simple text
+            if (quillInstanceRef.current) {
+                quillInstanceRef.current = null;
+            }
+            if (quillContainerRef.current) {
+                quillContainerRef.current.innerHTML = '';
+            }
+        }
+    }, [newsForm.editorType]);
 
     useEffect(() => {
         loadNews();
@@ -501,7 +519,17 @@ function AdminCorporateNewsComponent() {
                         <label className="block text-sm font-medium text-gray-300 mb-2">Editor Type</label>
                         <select
                             value={newsForm.editorType}
-                            onChange={(e) => setNewsForm(prev => ({ ...prev, editorType: e.target.value as 'simple' | 'quill' }))}
+                            onChange={(e) => {
+                                const newEditorType = e.target.value as 'simple' | 'quill';
+
+                                // Sync content from Quill to form before switching
+                                if (newEditorType === 'simple' && quillInstanceRef.current) {
+                                    const html = quillInstanceRef.current.root.innerHTML;
+                                    setNewsForm(prev => ({ ...prev, content: html, editorType: newEditorType }));
+                                } else {
+                                    setNewsForm(prev => ({ ...prev, editorType: newEditorType }));
+                                }
+                            }}
                             className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600/50 rounded-lg text-white focus:outline-none focus:border-blue-500/50"
                         >
                             <option value="simple">Simple Text</option>
