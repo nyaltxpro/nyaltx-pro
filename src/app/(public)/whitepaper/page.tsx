@@ -18,22 +18,29 @@ export default async function WhitepaperPage() {
     try {
       const filePath = path.join(process.cwd(), 'content', 'whitepaper', 'whitepaper.json');
       const fileContents = await fs.readFile(filePath, 'utf8');
+      const jsonData = JSON.parse(fileContents);
+
+      // Format to match TinaCMS data structure
       tinaData = {
-        whitepaper: JSON.parse(fileContents)
+        data: {
+          whitepaper: jsonData
+        }
       };
     } catch (fallbackError) {
       // If both TinaCMS and static file fail, provide minimal fallback data
       tinaData = {
-        whitepaper: {
-          title: "NYALTX Whitepaper",
-          description: "Welcome to the comprehensive technical documentation for NYALTX.",
-          hero: {
+        data: {
+          whitepaper: {
             title: "NYALTX Whitepaper",
-            subtitle: "New York Alt Exchange - Powered by the NYAX Token",
-            tagline: "Transforming crypto marketing, trading, and community engagement"
-          },
-          toc: [],
-          sections: []
+            description: "Welcome to the comprehensive technical documentation for NYALTX.",
+            hero: {
+              title: "NYALTX Whitepaper",
+              subtitle: "New York Alt Exchange - Powered by the NYAX Token",
+              tagline: "Transforming crypto marketing, trading, and community engagement"
+            },
+            toc: [],
+            sections: []
+          }
         }
       };
     }
