@@ -164,7 +164,7 @@ function AdminCorporateNewsComponent() {
                 };
             } catch (error) {
                 console.error('Failed to initialize Quill:', error);
-                setError('Failed to load rich text editor. Please try using simple text editor.');
+                // setError('Failed to load rich text editor. Please try using simple text editor.');
                 setIsQuillLoading(false);
             }
         };
