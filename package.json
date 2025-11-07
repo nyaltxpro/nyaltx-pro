@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "tinacms dev -c \"next dev --turbopack\"",
-    "build": "tinacms build && NODE_OPTIONS=--max-old-space-size=4096 next build --turbopack",
+    "build": "if [ \"$TINA_CLOUD_ENABLED\" = \"true\" ]; then tinacms build && NODE_OPTIONS=--max-old-space-size=4096 next build --turbopack; else echo 'Skipping Tina build (TINA_CLOUD_ENABLED not true)' && NODE_OPTIONS=--max-old-space-size=4096 next build --turbopack; fi",
     "prebuild": "if [ \"$TINA_CLOUD_ENABLED\" = \"true\" ]; then tinacms build; else echo 'Skipping Tina build (TINA_CLOUD_ENABLED not true)'; fi",
     "build:tina": "echo 'Skipping Tina build for local development - using static content files'",
     "build:cloud": "tinacms build && NODE_OPTIONS=--max-old-space-size=4096 next build --turbopack",
