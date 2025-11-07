@@ -1,6 +1,7 @@
 // app/api/tokens/route.ts - Main tokens API endpoint
 import { getCollection } from '@/lib/mongodb';
 import { NextRequest, NextResponse } from 'next/server';
+import { getCryptoIconUrl } from '@/utils/cryptoIcons';
 
 interface TokenSearchParams {
   query?: string;
@@ -187,23 +188,36 @@ async function fetchLocalTokens(params: TokenSearchParams): Promise<NormalizedTo
       .sort({ createdAt: -1 })
       .toArray();
 
-    const mappedTokens = tokens.map((token: any) => ({
-      id: `local-${token.contractAddress || token.tokenSymbol}`,
-      address: token.contractAddress || '',
-      name: token.tokenName || token.name || 'Unknown',
-      symbol: token.tokenSymbol || token.symbol || '',
-      price: token.price || token.priceUsd || undefined,
-      logo: token.imageUri || token.logo,
-      chain: token.blockchain || 'ethereum',
-      createdAt: token.createdAt || new Date().toISOString(),
-      source: 'local' as const,
-      status: token.status || 'pending',
-      socials: {
+    const mappedTokens = tokens.map((token: any) => {
+      const mappedToken = {
+        id: `local-${token.contractAddress || token.tokenSymbol}`,
+        address: token.contractAddress || '',
+        name: token.tokenName || token.name || 'Unknown',
+        symbol: token.tokenSymbol || token.symbol || '',
+        price: token.price || token.priceUsd || undefined,
+        logo: token.imageUri || token.logo,
+        chain: token.blockchain || 'ethereum',
+        createdAt: token.createdAt || new Date().toISOString(),
+        source: 'local' as const,
+        status: token.status || 'pending',
+      };
+
+      // Debug logging for logo field
+      if (mappedToken.logo) {
+        console.log(`🖼️ Token ${mappedToken.symbol} has logo:`, mappedToken.logo);
+      } else {
+        // Use crypto icon as fallback
+        const cryptoIconUrl = getCryptoIconUrl(mappedToken.symbol);
+        mappedToken.logo = cryptoIconUrl;
+        console.log(`🔄 Token ${mappedToken.symbol} using crypto icon fallback:`, cryptoIconUrl);
+      }
+
+      return { ...mappedToken, socials: {
         website: token.website,
         twitter: token.twitter,
         telegram: token.telegram
-      }
-    }));
+      } };
+    });
 
     console.log('🏪 Local tokens mapped:', mappedTokens.map(t => ({ name: t.name, symbol: t.symbol, address: t.address })));
     return mappedTokens;
@@ -255,25 +269,28 @@ async function fetchSolanaTokens(params: TokenSearchParams): Promise<{ tokens: N
     });
     
     // The solanatokens endpoint returns { tokens: [...], pagination: {...} }
-    const normalizedTokens: NormalizedToken[] = (data.tokens || []).map((token: any) => ({
-      id: `solana-${token.address}`,
-      address: token.address || '',
-      name: token.name || 'Unknown',
-      symbol: token.symbol || '',
-      logo: token.logo,
-      chain: 'solana',
-      price: token.price,
-      marketCap: token.marketCap,
-      liquidity: token.liquidity,
-      createdAt: token.createdAt,
-      source: 'solana' as const,
-      status: 'active',
-      volume: token.volume,
-      volume24h: token.volume24h,
-      holders: token.holders,
-      transactions: token.transactions,
-      socials: token.socials
-    }));
+    const normalizedTokens: NormalizedToken[] = (data.tokens || []).map((token: any) => {
+      const logo = token.logo || getCryptoIconUrl(token.symbol);
+      return {
+        id: `solana-${token.address}`,
+        address: token.address || '',
+        name: token.name || 'Unknown',
+        symbol: token.symbol || '',
+        logo,
+        chain: 'solana',
+        price: token.price,
+        marketCap: token.marketCap,
+        liquidity: token.liquidity,
+        createdAt: token.createdAt,
+        source: 'solana' as const,
+        status: 'active',
+        volume: token.volume,
+        volume24h: token.volume24h,
+        holders: token.holders,
+        transactions: token.transactions,
+        socials: token.socials
+      };
+    });
 
     return {
       tokens: normalizedTokens,
@@ -325,25 +342,28 @@ async function fetchSolanaTokensDirect(params: TokenSearchParams): Promise<{ tok
     });
 
     // Normalize the data to match our expected format
-    const normalizedTokens: NormalizedToken[] = (apiData.data || []).map((token: any) => ({
-      id: `solana-${token.mint || token.poolAddress}`,
-      address: token.mint || token.poolAddress || '',
-      name: token.name || 'Unknown',
-      symbol: token.symbol || '',
-      logo: token.image,
-      chain: 'solana',
-      price: token.priceUsd,
-      marketCap: token.marketCapUsd,
-      liquidity: token.liquidityUsd,
-      createdAt: token.createdAt ? new Date(token.createdAt).toISOString() : new Date().toISOString(),
-      source: 'solana' as const,
-      status: 'active',
-      volume: token.volume,
-      volume24h: token.volume_24h,
-      holders: token.holders,
-      transactions: token.totalTransactions,
-      socials: token.socials
-    }));
+    const normalizedTokens: NormalizedToken[] = (apiData.data || []).map((token: any) => {
+      const logo = token.image || getCryptoIconUrl(token.symbol);
+      return {
+        id: `solana-${token.mint || token.poolAddress}`,
+        address: token.mint || token.poolAddress || '',
+        name: token.name || 'Unknown',
+        symbol: token.symbol || '',
+        logo,
+        chain: 'solana',
+        price: token.priceUsd,
+        marketCap: token.marketCapUsd,
+        liquidity: token.liquidityUsd,
+        createdAt: token.createdAt ? new Date(token.createdAt).toISOString() : new Date().toISOString(),
+        source: 'solana' as const,
+        status: 'active',
+        volume: token.volume,
+        volume24h: token.volume_24h,
+        holders: token.holders,
+        transactions: token.totalTransactions,
+        socials: token.socials
+      };
+    });
 
     return {
       tokens: normalizedTokens,

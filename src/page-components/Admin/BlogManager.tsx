@@ -33,6 +33,7 @@ interface BlogFormState {
   seoMetaDescription: string;
   seoKeywords: string;
   seoOgImage: string;
+  editorType: 'simple' | 'quill';
 }
 
 interface FetchState {
@@ -57,6 +58,7 @@ const initialFormState: BlogFormState = {
   seoMetaDescription: '',
   seoKeywords: '',
   seoOgImage: '',
+  editorType: 'quill',
 };
 
 const quillModules: NonNullable<QuillOptions['modules']> = {
@@ -122,7 +124,7 @@ const AdminBlogManagerComponent = () => {
       quillChangeHandlerRef.current = null;
     };
 
-    if (!isFormOpen) {
+    if (!isFormOpen || form.editorType !== 'quill') {
       teardown();
       return teardown;
     }
@@ -173,10 +175,10 @@ const AdminBlogManagerComponent = () => {
       isCancelled = true;
       teardown();
     };
-  }, [isFormOpen]);
+  }, [isFormOpen, form.editorType]);
 
   useEffect(() => {
-    if (!isFormOpen) return;
+    if (!isFormOpen || form.editorType !== 'quill') return;
     const quill = quillInstanceRef.current;
     if (!quill) return;
 
@@ -189,7 +191,7 @@ const AdminBlogManagerComponent = () => {
     quill.clipboard.dangerouslyPasteHTML(desired);
     quill.history.clear();
     suppressQuillChangeRef.current = false;
-  }, [form.content, isFormOpen]);
+  }, [form.content, isFormOpen, form.editorType]);
 
   const loadPosts = async (status: 'all' | 'published' | 'draft' = 'all') => {
     try {
@@ -258,6 +260,7 @@ const AdminBlogManagerComponent = () => {
       seoMetaDescription: post.seo?.metaDescription ?? '',
       seoKeywords: post.seo?.keywords ?? '',
       seoOgImage: post.seo?.ogImage ?? '',
+      editorType: 'quill', // Default to quill for existing posts
     });
     setIsFormOpen(true);
     setState({ loading: false, error: null, success: null });
@@ -678,15 +681,39 @@ const AdminBlogManagerComponent = () => {
             />
           </label>
 
+          <div className="mt-4 flex items-center gap-4">
+            <label className="block text-sm text-white/70">
+              Editor Type
+              <select
+                value={form.editorType}
+                onChange={(event) => setForm((prev) => ({ ...prev, editorType: event.target.value as 'simple' | 'quill' }))}
+                className="mt-1 w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white focus:border-cyan-500/60 focus:outline-none"
+              >
+                <option value="simple">Simple Text</option>
+                <option value="quill">Rich Text (Quill)</option>
+              </select>
+            </label>
+          </div>
+
           <label className="mt-4 block text-sm text-white/70">
             Content
-            <div className="mt-2 rounded-lg border border-white/10 bg-black/10">
-              <div
-                ref={quillContainerRef}
-                className="quill-editor"
-                style={{ minHeight: '320px' }}
+            {form.editorType === 'simple' ? (
+              <textarea
+                value={form.content}
+                onChange={(event) => setForm((prev) => ({ ...prev, content: event.target.value }))}
+                rows={12}
+                className="mt-2 w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white focus:border-cyan-500/60 focus:outline-none"
+                placeholder="Write your blog post content here..."
               />
-            </div>
+            ) : (
+              <div className="mt-2 rounded-lg border border-white/10 bg-black/10">
+                <div
+                  ref={quillContainerRef}
+                  className="quill-editor"
+                  style={{ minHeight: '320px' }}
+                />
+              </div>
+            )}
           </label>
 
           <div className="mt-6 rounded-xl border border-white/10 bg-black/20 p-4">
