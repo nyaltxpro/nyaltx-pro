@@ -91,8 +91,7 @@ function AdminCorporateNewsComponent() {
         featuredImage: '',
         status: 'draft' as 'published' | 'draft',
         tags: '',
-        author: 'NYALTX Team',
-        editorType: 'quill' as 'simple' | 'quill'
+        author: 'NYALTX Team'
     });
 
     // IPFS upload state
@@ -115,7 +114,7 @@ function AdminCorporateNewsComponent() {
 
     useEffect(() => {
         const initializeQuill = async () => {
-            if (!isCreating || newsForm.editorType !== 'quill' || !quillContainerRef.current) {
+            if (!isCreating || !quillContainerRef.current) {
                 return;
             }
 
@@ -174,7 +173,7 @@ function AdminCorporateNewsComponent() {
         return () => {
             cleanup?.then(cleanupFn => cleanupFn?.());
         };
-    }, [isCreating, newsForm.editorType, editingNews]);
+    }, [isCreating]);
 
     useEffect(() => {
         loadNews();
@@ -204,8 +203,7 @@ function AdminCorporateNewsComponent() {
             featuredImage: '',
             status: 'draft',
             tags: '',
-            author: 'NYALTX Team',
-            editorType: 'quill'
+            author: 'NYALTX Team'
         });
     };
 
@@ -219,8 +217,7 @@ function AdminCorporateNewsComponent() {
             featuredImage: article.featuredImage || '',
             status: article.status,
             tags: article.tags.join(', '),
-            author: article.author,
-            editorType: 'quill' // Default to quill for existing articles
+            author: article.author
         });
     };
 
@@ -392,8 +389,7 @@ function AdminCorporateNewsComponent() {
             featuredImage: '',
             status: 'draft',
             tags: '',
-            author: 'NYALTX Team',
-            editorType: 'quill'
+            author: 'NYALTX Team'
         });
     };
 
@@ -498,45 +494,23 @@ function AdminCorporateNewsComponent() {
                     </div>
 
                     <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-300 mb-2">Editor Type</label>
-                        <select
-                            value={newsForm.editorType}
-                            onChange={(e) => setNewsForm(prev => ({ ...prev, editorType: e.target.value as 'simple' | 'quill' }))}
-                            className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600/50 rounded-lg text-white focus:outline-none focus:border-blue-500/50"
-                        >
-                            <option value="simple">Simple Text</option>
-                            <option value="quill">Rich Text (Quill)</option>
-                        </select>
-                    </div>
-
-                    <div className="mb-4">
                         <label className="block text-sm font-medium text-gray-300 mb-2">Content *</label>
-                        {newsForm.editorType === 'simple' ? (
-                            <textarea
-                                value={newsForm.content}
-                                onChange={(e) => setNewsForm(prev => ({ ...prev, content: e.target.value }))}
-                                rows={8}
-                                className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500/50"
-                                placeholder="Write your news article content here..."
-                            />
-                        ) : (
-                            <div className="rounded-lg border border-gray-600/50 bg-gray-700/30">
-                                {isQuillLoading ? (
-                                    <div className="flex items-center justify-center py-12">
-                                        <div className="text-center">
-                                            <FaSpinner className="w-8 h-8 text-cyan-400 animate-spin mx-auto mb-4" />
-                                            <p className="text-gray-400">Loading rich text editor...</p>
-                                        </div>
+                        <div className="rounded-lg border border-gray-600/50 bg-gray-700/30">
+                            {isQuillLoading ? (
+                                <div className="flex items-center justify-center py-12">
+                                    <div className="text-center">
+                                        <FaSpinner className="w-8 h-8 text-cyan-400 animate-spin mx-auto mb-4" />
+                                        <p className="text-gray-400">Loading rich text editor...</p>
                                     </div>
-                                ) : (
-                                    <div
-                                        ref={quillContainerRef}
-                                        className="quill-editor"
-                                        style={{ minHeight: '320px' }}
-                                    />
-                                )}
-                            </div>
-                        )}
+                                </div>
+                            ) : (
+                                <div
+                                    ref={quillContainerRef}
+                                    className="quill-editor"
+                                    style={{ minHeight: '320px' }}
+                                />
+                            )}
+                        </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">

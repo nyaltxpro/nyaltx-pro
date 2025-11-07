@@ -4,7 +4,6 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { FaClock, FaUser, FaEye, FaTags, FaArrowLeft, FaShare, FaTwitter, FaLinkedin, FaCopy } from 'react-icons/fa';
-import TinaRichText from './TinaRichText';
 
 interface NewsData {
   _id: string;
@@ -28,19 +27,16 @@ function NewsArticle({ article }: NewsArticleProps) {
   const [imageError, setImageError] = useState(false);
 
   const articleContent = useMemo(() => {
-    if (!article.content) return null;
+    if (!article.content) return '';
+    // For news articles, content should be HTML from Quill editor
     if (typeof article.content === 'string') {
-      try {
-        const parsed = JSON.parse(article.content);
-        if (parsed && typeof parsed === 'object') {
-          return parsed;
-        }
-      } catch (error) {
-        return article.content;
-      }
       return article.content;
     }
-    return article.content;
+    // If it's an object, try to extract content or stringify it
+    if (typeof article.content === 'object' && article.content.content) {
+      return String(article.content.content);
+    }
+    return String(article.content);
   }, [article.content]);
 
   // Helper function to convert Pinata gateway URLs to ipfs.io
@@ -235,7 +231,7 @@ function NewsArticle({ article }: NewsArticleProps) {
         {/* Article Content */}
         <article className="prose prose-lg prose-invert max-w-none">
           <div className="text-gray-300 leading-relaxed space-y-6 article-content">
-            <TinaRichText content={articleContent} />
+            <div dangerouslySetInnerHTML={{ __html: articleContent }} />
           </div>
         </article>
 
