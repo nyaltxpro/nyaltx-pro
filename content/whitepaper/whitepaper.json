@@ -256,7 +256,7 @@
       "id": "authentication-and-security",
       "title": "Authentication & Security ",
       "level": "0",
-      "content": "NYALTX.Pro uses non-custodial Web3 authentication, allowing users to connect through wallets such as MetaMask, Phantom, or WalletConnect. Access is verified via cryptographic signatures, not usernames or passwords, ensuring users retain full control of their assets. Smart-contract addresses are cross-checked against verified sources to prevent spoofing and maintain transparency.  \n\nSecurity & Data Integrity The platform employs encrypted connections, smart-contract verification, and multi-chain monitoring to safeguard user activity. \n\nAll interactions occur through secure blockchain protocols, ensuring transparency and immutability. No private keys or personal information are stored, maintaining full user ownership and trustless integrity.  Compliance & Transparency NYALTX.Pro is built with a forward-looking approach to regulatory alignment under emerging Web3 standards. The platform maintains transaction auditability, project verification, and public reporting of listed contracts. \n\nThis ensures that every project meets NYALTX.Pro’s internal standards for disclosure, legitimacy, and ethical engagement within decentralized finance.",
+      "content": "",
       "subsections": [
         {
           "id": "authentication",
