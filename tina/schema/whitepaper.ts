@@ -272,6 +272,7 @@ const whitepaper: Collection = {
               type: "string",
               name: "content",
               label: "Content",
+              ui: { component: "textarea" }
             },
             {
               type: "object",
