@@ -418,6 +418,10 @@
       "title": "Contact Information",
       "level": "0",
       "content": "For partnership opportunities, investor relations, or media inquiries, reach out to team@nyaltx.pro."
+    },
+    {
+      "id": "authentication-and-security",
+      "title": "Authentication and Security Framework"
     }
   ],
   "seo": {
