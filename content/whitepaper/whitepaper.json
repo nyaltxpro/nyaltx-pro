@@ -254,7 +254,8 @@
     },
     {
       "id": "authentication-and-security",
-      "title": "Authentication and Security Framework"
+      "title": "Authentication and Security Framework",
+      "level": "0"
     },
     {
       "id": "nyax-token",
