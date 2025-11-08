@@ -267,6 +267,11 @@
           "id": "security-and-data-integrity",
           "title": "Security & Data Integrity",
           "content": "The platform employs encrypted connections, smart-contract verification, and multi-chain monitoring to safeguard user activity. All interactions occur through secure blockchain protocols, ensuring transparency and immutability. No private keys or personal information are stored, maintaining full user ownership and trustless integrity."
+        },
+        {
+          "id": "compliance-and-transparency",
+          "title": "Compliance & Transparency",
+          "content": "NYALTX.Pro is built with a forward-looking approach to regulatory alignment under emerging Web3 standards. The platform maintains transaction auditability, project verification, and public reporting of listed contracts. This ensures that every project meets NYALTX.Pro’s internal standards for disclosure, legitimacy, and ethical engagement within decentralized finance."
         }
       ]
     },
@@ -274,7 +279,6 @@
       "id": "nyax-token",
       "title": "The NYAX Token",
       "level": "0",
-      "content": "The NYAX Token is the native utility asset of the NYALTX.Pro ecosystem, designed to power engagement, visibility, and growth across the platform. Holders can use NYAX to access premium listing features, participate in community governance, and unlock promotional and media packages that connect Web3 projects with global audiences. NYAX also serves as the conversion bridge between tokenized listings and Corporate Roadshow’s traditional investor network, aligning DeFi innovation with real-world market visibility.",
       "subsections": [
         {
           "id": "payment-token",
