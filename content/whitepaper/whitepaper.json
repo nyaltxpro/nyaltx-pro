@@ -243,7 +243,7 @@
         {
           "id": "embedded-trading",
           "title": "Embedded Trading",
-          "content": "Non-custodial swaps via Uniswap integration, allowing seamless trading directly from project profiles."
+          "content": "NYALTX.Pro integrates with leading decentralized exchanges—Uniswap, PancakeSwap, SushiSwap, and others—to enable non-custodial, on-chain swaps directly within project pages. Through this multi-swap framework, users maintain full wallet ownership while accessing cross-chain liquidity for optimal pricing and execution. The result is a unified interface that connects token discovery, analytics, and trading into a single decentralized environment."
         },
         {
           "id": "token-generator",
