@@ -1,7 +1,7 @@
 {
   "slug": "whitepaper",
   "title": "NYALTX Whitepaper",
-  "description": "Welcome to the comprehensive technical documentation for NYALTX, a revolutionary decentralized finance (DeFi) platform designed to transform how crypto projects gain visibility, liquidity, and growth opportunities in the Web3 ecosystem",
+  "description": "Welcome to the comprehensive technical documentation for New York Alt Exchange (NYALTX), a revolutionary decentralized finance (DeFi) platform designed to transform how crypto projects gain visibility, liquidity, and growth opportunities in the Web3 ecosystem",
   "hero": {
     "title": "NYALTX Whitepaper",
     "subtitle": "New York Alt Exchange - Powered by the NYAX Token",
@@ -150,7 +150,7 @@
       "id": "introduction",
       "title": "Introduction",
       "level": "0",
-      "content": "Welcome to the comprehensive technical documentation for NYALTX, a revolutionary decentralized finance (DeFi) platform designed to transform how crypto projects gain visibility, liquidity, and growth opportunities in the Web3 ecosystem"
+      "content": "The NYALTX ecosystem, where the next generation of DeFi meets real-world investor engagement. Built to elevate crypto projects beyond mere token listings, NYALTX offers an integrated platform combining visible project profiles, seamless embedded trading, and a robust utility token model. With our native token at the core and a user-centric architecture front and center, NYALTX empowers projects, investors, and community participants alike—creating a transparent path to liquidity, discovery, and meaningful growth."
     },
     {
       "id": "executive-summary",
@@ -158,14 +158,14 @@
       "level": "0",
       "highlight": {
         "style": "cyan",
-        "content": "NYALTX represents the next evolution in decentralized finance infrastructure, combining traditional financial tools with cutting-edge blockchain technology."
+        "content": "NYALTX.Pro represents the next evolution of decentralized finance infrastructure, merging traditional financial intelligence with blockchain innovation and media connectivity. The platform unites trading, analytics, and content under one ecosystem—empowering projects to gain exposure, investors to access transparent data, and communities to engage through real-time storytelling. By integrating DeFi and media, NYALTX.Pro redefines how visibility, credibility, and liquidity converge in the digital economy."
       },
       "listItems": [
         {
-          "content": "NYALT Exchange (NYALTX.com) is a decentralized finance (DeFi) hub designed to give crypto projects visibility, liquidity, and growth opportunities."
+          "content": "NYALTX Exchange (NYALTX.com) is a decentralized finance (DeFi) hub designed to give crypto projects visibility, liquidity, and growth opportunities."
         },
         {
-          "content": "Unlike traditional data aggregators, NYALT integrates project profiles, embedded trading, token creation, and community engagement tools—all powered by the NYAX token."
+          "content": "Unlike traditional data aggregators, NYALTX integrates project profiles, embedded trading, token creation, and community engagement tools—all powered by the NYAX token."
         },
         {
           "content": "NYAX is more than a currency. It is the fuel of the ecosystem, supporting payments, staking rewards, governance, marketing, and real-world access to investor networks."
@@ -182,7 +182,7 @@
           "title": "Vision",
           "highlight": {
             "style": "green",
-            "content": "To become the leading Web3 ecosystem where projects gain visibility, investors access transparent data and liquidity, and communities are rewarded for engagement."
+            "content": "To position NYALTX.Pro as the global leader in DeFi media and project visibility, transforming how Web3 ventures connect with investors and audiences by turning attention, transparency, and trust into real market value."
           }
         },
         {
@@ -190,7 +190,7 @@
           "title": "Mission",
           "highlight": {
             "style": "purple",
-            "content": "To empower projects and investors with tools that combine DeFi trading, marketing, and social interaction—backed by a sustainable token economy."
+            "content": "To empower projects, investors, and communities through a unified platform that combines DeFi trading, media visibility, and social engagement—all supported by a transparent, sustainable token economy designed for long-term growth."
           }
         }
       ]
@@ -199,7 +199,7 @@
       "id": "market-opportunity",
       "title": "Market Opportunity",
       "level": "0",
-      "content": "Most platforms offer analytics but do not provide profile-driven, community-first visibility. NYALTX fills this gap with a project and investor marketing ecosystem, monetizing not just trading, but also attention and engagement.",
+      "content": "Unlike typical DeFi platforms that focus solely on analytics or trading volume, NYALTX.Pro stands out as a leader in DeFi media and project visibility. It’s built around profile-driven exposure and community engagement, connecting projects, investors, and audiences through a unified marketing ecosystem. NYALTX.Pro monetizes not just trading, but also attention, interaction, and reach, turning visibility itself into a measurable asset that bridges decentralized markets with real-world investor awareness.",
       "stats": [
         {
           "value": "18,000+",
@@ -238,17 +238,17 @@
         {
           "id": "crypto-profiles",
           "title": "Crypto Profiles",
-          "content": "Customizable project pages with integrated charts, social links, news feeds, and promotional videos."
+          "content": "Each project on NYALTX.Pro receives a dedicated profile page featuring live market charts, social links, and automated news feeds from verified sources. Projects can embed promotional videos, interviews, and announcements, creating a dynamic showcase that blends data, media, and community engagement to build credibility and visibility in the decentralized market."
         },
         {
           "id": "embedded-trading",
           "title": "Embedded Trading",
-          "content": "Non-custodial swaps via Uniswap integration, allowing seamless trading directly from project profiles."
+          "content": "NYALTX.Pro integrates with leading decentralized exchanges—Uniswap, PancakeSwap, SushiSwap, and others—to enable non-custodial, on-chain swaps directly within project pages. Through this multi-swap framework, users maintain full wallet ownership while accessing cross-chain liquidity for optimal pricing and execution. The result is a unified interface that connects token discovery, analytics, and trading into a single decentralized environment."
         },
         {
           "id": "token-generator",
           "title": "Token Generator",
-          "content": "Simple token creation with liquidity fees, making it easy for projects to launch their tokens."
+          "content": "NYALTX.Pro offers a streamlined token creation system powered by a Pump API integration, enabling projects to launch new tokens quickly and transparently. Creators can customize supply, name, symbol, and liquidity fees while deploying directly to supported networks. This system simplifies token generation for founders without requiring coding expertise. Building on this foundation, NYALTX.Pro is developing its own native multi-chain token creation API, designed to support multiple blockchains beyond Solana, including Ethereum, BNB Chain, and others. This expansion will allow seamless cross-chain deployment, enhanced liquidity options, and more flexible token economics—all within the NYALTX.Pro ecosystem."
         }
       ]
     },
@@ -256,27 +256,45 @@
       "id": "authentication-and-security",
       "title": "Authentication & Security ",
       "level": "0",
-      "content": "NYALTX.Pro uses non-custodial Web3 authentication, allowing users to connect through wallets such as MetaMask, Phantom, or WalletConnect. Access is verified via cryptographic signatures, not usernames or passwords, ensuring users retain full control of their assets. Smart-contract addresses are cross-checked against verified sources to prevent spoofing and maintain transparency.  Security & Data Integrity The platform employs encrypted connections, smart-contract verification, and multi-chain monitoring to safeguard user activity. All interactions occur through secure blockchain protocols, ensuring transparency and immutability. No private keys or personal information are stored, maintaining full user ownership and trustless integrity.  Compliance & Transparency NYALTX.Pro is built with a forward-looking approach to regulatory alignment under emerging Web3 standards. The platform maintains transaction auditability, project verification, and public reporting of listed contracts. This ensures that every project meets NYALTX.Pro’s internal standards for disclosure, legitimacy, and ethical engagement within decentralized finance."
+      "content": "",
+      "subsections": [
+        {
+          "id": "authentication",
+          "title": "Authentication",
+          "content": "NYALTX.Pro uses non-custodial Web3 authentication, allowing users to connect through wallets such as MetaMask, Phantom, or WalletConnect. Access is verified via cryptographic signatures, not usernames or passwords, ensuring users retain full control of their assets. Smart-contract addresses are cross-checked against verified sources to prevent spoofing and maintain transparency."
+        },
+        {
+          "id": "security-and-data-integrity",
+          "title": "Security & Data Integrity",
+          "content": "The platform employs encrypted connections, smart-contract verification, and multi-chain monitoring to safeguard user activity. All interactions occur through secure blockchain protocols, ensuring transparency and immutability. No private keys or personal information are stored, maintaining full user ownership and trustless integrity."
+        },
+        {
+          "id": "compliance-and-transparency",
+          "title": "Compliance & Transparency",
+          "content": "NYALTX.Pro is built with a forward-looking approach to regulatory alignment under emerging Web3 standards. The platform maintains transaction auditability, project verification, and public reporting of listed contracts. This ensures that every project meets NYALTX.Pro’s internal standards for disclosure, legitimacy, and ethical engagement within decentralized finance."
+        }
+      ]
     },
     {
       "id": "nyax-token",
       "title": "The NYAX Token",
       "level": "0",
+      "content": "The NYAX Token is the native utility asset of the NYALTX.Pro ecosystem, designed to power engagement, visibility, and growth across the platform. Holders can use NYAX to access premium listing features, participate in community governance, and unlock promotional and media packages that connect Web3 projects with global audiences. NYAX also serves as the conversion bridge between tokenized listings and Corporate Roadshow’s traditional investor network, aligning DeFi innovation with real-world market visibility.",
       "subsections": [
         {
           "id": "payment-token",
           "title": "Payment Token",
-          "content": "NYAX serves as the primary payment method for platform services, offering discounts and exclusive features."
+          "content": "NYAX serves as the primary payment method for all platform services within the NYALTX.Pro ecosystem. Projects can use NYAX to pay for listings, promotional campaigns, and premium exposure tools—often at discounted rates compared to traditional payments. Token holders gain access to exclusive features, including enhanced placement in the discovery feed, early access to new tools, and priority consideration for media promotions through Corporate Roadshow and the Off Road with Frank Ferraro podcast network. By integrating NYAX as a native payment option, the platform creates a closed-loop economy that rewards active participation and reinforces token demand as the ecosystem grows."
         },
         {
           "id": "governance",
           "title": "Governance",
-          "content": "Token holders participate in platform governance, voting on key decisions and feature implementations."
+          "content": "NYAX token holders will gain the ability to participate in platform governance, voting on key updates, feature integrations, and ecosystem priorities. This governance framework will be activated following the completion of the current offering, ensuring that decision-making evolves in alignment with both regulatory readiness and community growth. The goal is to create a balanced model where verified stakeholders help guide NYALTX.Pro’s future development while preserving transparency and accountability across the platform."
         },
         {
           "id": "staking-rewards",
           "title": "Staking & Rewards",
-          "content": "Stake NYAX tokens to earn rewards and access premium platform features."
+          "content": "Staking features will be introduced after the current offering, following regulatory review and platform readiness. Verified users will be able to stake NYAX tokens for access to enhanced visibility, service discounts, and upcoming platform benefits—all within a compliant, transparent framework."
         }
       ]
     },
@@ -284,6 +302,7 @@
       "id": "tokenomics",
       "title": "Tokenomics",
       "level": "0",
+      "content": "The NYAX Token is the economic foundation of the NYALTX.Pro ecosystem, designed to align user participation with platform growth. Its model rewards engagement, visibility, and liquidity—ensuring that value flows between creators, investors, and the platform itself. Rather than existing solely as a trading instrument, NYAX functions as the fuel behind listings, promotions, and transaction activity across the network. The tokenomics framework is built for long-term sustainability, balancing supply control, utility, and future integrations",
       "subsections": [
         {
           "id": "token-details",
@@ -298,12 +317,16 @@
             },
             {
               "content": " Blockchain: Ethereum (ERC-20) standard."
+            },
+            {
+              "content": "Contract Address : 0x5eEd5621B92Be4473F99BaCAC77ACfA27DEB57d9"
             }
           ]
         },
         {
           "id": "allocation",
-          "title": "Allocation"
+          "title": "Allocation",
+          "content": "NYAX Tokens are distributed to support the overall growth and sustainability of the NYALTX.Pro ecosystem. A portion is reserved for investors through the current offering or future offerings, while additional tokens are allocated to the team, advisors, marketing, liquidity, and future development. This balanced structure ensures ongoing platform support, market stability, and long-term value for all participants."
         },
         {
           "id": "revenue-model",
@@ -429,6 +452,6 @@
   "seo": {
     "metaTitle": "NYALTX Whitepaper",
     "metaDescription": "Explore the NYALTX whitepaper detailing our Web3 ecosystem, NYAX token utility, tokenomics, and product roadmap.",
-    "keywords": "NYALTX, NYAX token, whitepaper, DeFi ecosystem, tokenomics, roadmap"
+    "keywords": "NYALTX, NYAX token, whitepaper, DeFi ecosystem, tokenomics, roadmap, web3, "
   }
 }
