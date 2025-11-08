@@ -30,10 +30,10 @@ export const metadata: Metadata = {
     description: 'Track meme tokens, view real-time charts, participate in Race to Liberty gamification, and discover trending cryptocurrencies across multiple blockchains.',
     images: [
       {
-        url: `/og-image.png`,
-        width: 630,
-        height: 630,
-        alt: 'NYALTX - Crypto Token Tracker',
+        url: `${baseUrl}/logo.png`,
+        width: 512,
+        height: 512,
+        alt: 'NYALTX Logo',
       },
     ],
   },
@@ -45,9 +45,7 @@ export const metadata: Metadata = {
 
   manifest: '/manifest.json',
   themeColor: '#06b6d4',
-  other: {
-    'og:logo': `${baseUrl}/logo.png`,
-  },
+
 };
 
 export const viewport = 'width=device-width, initial-scale=1';
@@ -85,7 +83,7 @@ export default function RootLayout({
               '@type': 'Organization',
               name: 'NYALTX',
               url: baseUrl,
-              logo: `https://www.nyaltx.pro/favicon.ico`,
+              logo: `https://www.nyaltx.pro/logo.png`,
               description: 'Crypto token tracker and DeFi platform for discovering, tracking, and promoting cryptocurrency tokens.',
               sameAs: ['https://twitter.com/nyaltx', 'https://t.me/nyaltx', 'https://discord.gg/nyaltx'],
             })
