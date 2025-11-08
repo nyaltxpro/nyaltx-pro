@@ -319,7 +319,7 @@ const WhitepaperPage: React.FC<WhitepaperPageProps> = ({ data }) => {
       <div className="flex">
         <aside
           className={clsx(
-            ' lg:block fixed translate-x-0 lg:static lg:z-0 top-32 left-0 z-30 w-80 h-[calc(100vh-8rem)] border-r border-white/10 transition-transform duration-300 ease-in-out overflow-y-auto',
+            'hidden lg:block fixed translate-x-0 lg:static lg:z-0 top-32 left-0 z-30 w-80 h-[calc(100vh-8rem)] border-r border-white/10 transition-transform duration-300 ease-in-out overflow-y-auto',
 
           )}
         >
