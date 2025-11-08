@@ -301,7 +301,7 @@ const WhitepaperPage: React.FC<WhitepaperPageProps> = ({ data }) => {
     <div className="min-h-screen  text-white">
       <PublicHeader />
 
-      <div className="z-40 sticky top-16 hidden lg:flex items-center justify-between border-b border-white/10 bg-[#0b1217]/95 px-4 py-4">
+      {/* <div className="z-40 sticky top-16 hidden lg:flex items-center justify-between border-b border-white/10 bg-[#0b1217]/95 px-4 py-4">
         <div>
           <h1 className="text-lg font-semibold">{pageData?.title ?? 'Whitepaper'}</h1>
           {pageData?.hero?.subtitle && (
@@ -314,13 +314,13 @@ const WhitepaperPage: React.FC<WhitepaperPageProps> = ({ data }) => {
         >
           {sidebarOpen ? 'Close' : 'Contents'}
         </button>
-      </div>
+      </div> */}
 
       <div className="flex">
         <aside
           className={clsx(
-            'hidden lg:block fixed lg:static lg:z-0 top-32 left-0 z-30 w-80 h-[calc(100vh-8rem)] border-r border-white/10 transition-transform duration-300 ease-in-out overflow-y-auto',
-            sidebarOpen ? 'translate-x-0' : '-translate-x-full',
+            ' lg:block fixed translate-x-0 lg:static lg:z-0 top-32 left-0 z-30 w-80 h-[calc(100vh-8rem)] border-r border-white/10 transition-transform duration-300 ease-in-out overflow-y-auto',
+
           )}
         >
           <div className="p-6">
