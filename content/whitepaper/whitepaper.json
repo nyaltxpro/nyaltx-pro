@@ -248,7 +248,7 @@
         {
           "id": "token-generator",
           "title": "Token Generator",
-          "content": "Simple token creation with liquidity fees, making it easy for projects to launch their tokens."
+          "content": "NYALTX.Pro offers a streamlined token creation system powered by a Pump API integration, enabling projects to launch new tokens quickly and transparently. Creators can customize supply, name, symbol, and liquidity fees while deploying directly to supported networks. This system simplifies token generation for founders without requiring coding expertise. Building on this foundation, NYALTX.Pro is developing its own native multi-chain token creation API, designed to support multiple blockchains beyond Solana, including Ethereum, BNB Chain, and others. This expansion will allow seamless cross-chain deployment, enhanced liquidity options, and more flexible token economics—all within the NYALTX.Pro ecosystem."
         }
       ]
     },
