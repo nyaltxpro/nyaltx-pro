@@ -124,6 +124,8 @@ const whitepaper: Collection = {
           type: "string",
           name: "content",
           label: "Section Content",
+          ui: { component: "textarea" }
+          
         },
         {
           type: "object",
@@ -272,7 +274,7 @@ const whitepaper: Collection = {
               type: "string",
               name: "content",
               label: "Content",
-              // ui: { component: "textarea" }
+             
             },
             {
               type: "object",
