@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     description: 'Track meme tokens, view real-time charts, participate in Race to Liberty gamification, and discover trending cryptocurrencies across multiple blockchains.',
     images: [
       {
-        url: `${baseUrl}/logo.png`,
+        url: `${baseUrl}/og-image.png`,
         width: 512,
         height: 512,
         alt: 'NYALTX Logo',
