@@ -159,7 +159,7 @@ export default function Sidebar({ isMobileMenuOpen, toggleMobileMenu }: SidebarP
               className="relative group-hover:scale-110 transition-transform duration-300"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-[#00d4aa] to-[#3b82f6] rounded-full blur-sm opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
-              <Image src="/logo.png" alt="NYALTX Logo - Go to Home" width={30} height={30} className="relative z-10" />
+              <Image src="/nyaltxpro.png" alt="NYALTX Logo - Go to Home" width={30} height={30} className="relative z-10" />
             </motion.div>
             <AnimatePresence>
               {sidebarExpanded && (
