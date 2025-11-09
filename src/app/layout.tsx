@@ -17,9 +17,9 @@ export const metadata: Metadata = {
   publisher: 'NYALTX',
   robots: 'index, follow',
   icons: {
-    icon: "/favicon.ico",
-    shortcut: "/favicon.ico",
-    apple: "/favicon.ico",
+    icon: `${baseUrl}/og-image.png`,
+    shortcut: `${baseUrl}/og-image.png`,
+    apple: `${baseUrl}/og-image.png`,
   },
   openGraph: {
     type: 'website',
@@ -83,7 +83,7 @@ export default function RootLayout({
               '@type': 'Organization',
               name: 'NYALTX',
               url: baseUrl,
-              logo: `https://www.nyaltx.pro/logo.png`,
+              logo: `${baseUrl}/og-image.png`,
               description: 'Crypto token tracker and DeFi platform for discovering, tracking, and promoting cryptocurrency tokens.',
               sameAs: ['https://twitter.com/nyaltx', 'https://t.me/nyaltx', 'https://discord.gg/nyaltx'],
             })
