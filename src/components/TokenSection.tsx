@@ -571,7 +571,7 @@ export default function PumpPortalSimpleUI() {
             <div className="flex items-center gap-3">
               <RocketIcon className="w-6 h-6 text-[#00d4aa]" />
               <h1 className="font-bold text-2xl text-white" style={{ fontFamily: 'Space Grotesk, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                Newest Memes
+                Newest Live Pairs
               </h1>
               {connected && (
                 <div className="flex items-center gap-2">
