@@ -39,20 +39,17 @@ export default function RootLayout({
     };
 
     return (
-
-        <body className={inter.className}>
-
+        <div className={`${inter.className} flex`}>        
             <Sidebar isMobileMenuOpen={isMobileMenuOpen} toggleMobileMenu={toggleMobileMenu} />
             {/* Apply margin-left for desktop, none for mobile */}
-            <div className="md:ml-16 transition-all duration-300 flex flex-col min-h-screen">
+            <div className="md:ml-16 transition-all duration-300 flex flex-col min-h-screen flex-1">
                 <Header toggleMobileMenu={toggleMobileMenu} />
                 <main className="flex-grow">
                     {children}
                 </main>
                 {/* <Footer /> */}
             </div>
-
-        </body>
+        </div>
 
     );
 }
