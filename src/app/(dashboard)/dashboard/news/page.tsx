@@ -12,7 +12,6 @@ const NewsGrid = dynamic(() => import('@/components/NewsGrid'), {
       ))}
     </div>
   ),
-  ssr: false,
 });
 
 export default function NewsPage() {
