@@ -15,23 +15,27 @@ function formatDate(d?: Date): string {
   }
 }
 
-export default async function NewsPage() {
+const NewsPage = async () => {
   let items = [] as Awaited<ReturnType<typeof getNews>>;
+  let error: string | null = null;
+
   try {
-    items = await getNews(revalidate);
+    items = await getNews();
+    console.log('Fetched news items:', items.length);
   } catch (e) {
-    // Leave items empty
+    console.error('Error fetching news:', e);
+    error = e instanceof Error ? e.message : 'Failed to fetch news';
   }
 
   return (
-    <div className="min-h-screen  px-4 py-6 md:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 px-4 py-6 md:px-6 lg:px-8">
       {/* Header Section */}
       <div className="relative mb-8">
-        <div className="absolute inset-0  rounded-2xl blur-xl"></div>
-        <div className="relative   rounded-2xl p-6">
+        <div className="absolute inset-0 bg-gradient-to-r from-[#00c3ff]/20 via-[#7c3aed]/20 to-[#f59e0b]/20 rounded-2xl blur-xl"></div>
+        <div className="relative bg-black/40 backdrop-blur-md border border-gray-800/50 rounded-2xl p-6">
           <div className="flex items-center gap-4 mb-4">
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold bg-white bg-clip-text text-transparent">
+              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
                 DeFi News Hub
               </h1>
               <div className="flex items-center gap-2 mt-1">
@@ -42,13 +46,25 @@ export default async function NewsPage() {
               </div>
             </div>
           </div>
-
-          {/* Stats Bar */}
-
         </div>
       </div>
 
-      {items.length === 0 ? (
+      {/* Error Message */}
+      {error && (
+        <div className="mb-6 bg-red-900/20 border border-red-500/50 rounded-xl p-4">
+          <div className="flex items-center gap-3">
+            <svg className="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div>
+              <h3 className="text-red-400 font-semibold">Error Loading News</h3>
+              <p className="text-red-300/80 text-sm">{error}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {items.length === 0 && !error ? (
         <div className="text-center py-16">
           <div className="w-20 h-20 bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <svg
@@ -72,16 +88,13 @@ export default async function NewsPage() {
         <div className="grid gap-6 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
           {items.map((item, index) => (
             <div key={item.id} className="group relative">
-              {/* Glow effect */}
-              {/* <div className="absolute -inset-0.5 bg-gradient-to-r from-[#00c3ff]/20 via-[#7c3aed]/20 to-[#f59e0b]/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-500"></div> */}
-
               <div className="relative bg-black/60 backdrop-blur-sm border border-gray-800/50 rounded-2xl overflow-hidden hover:border-gray-700/50 transition-all duration-300 group-hover:transform group-hover:scale-[1.02]">
                 {item.image ? (
                   <div className="relative h-48 overflow-hidden">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={item.image}
-                      alt=""
+                      alt={item.title}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
@@ -194,3 +207,5 @@ export default async function NewsPage() {
     </div>
   );
 }
+
+export default NewsPage;
