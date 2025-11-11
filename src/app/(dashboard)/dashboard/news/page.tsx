@@ -1,5 +1,5 @@
-import { Suspense } from 'react';
 import dynamic from 'next/dynamic';
+import { Suspense } from 'react';
 
 const NewsGrid = dynamic(() => import('@/components/NewsGrid'), {
   loading: () => (
