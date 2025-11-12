@@ -14,8 +14,7 @@ import {
   ReaderIcon,
   RocketIcon,
   StarIcon,
-  TargetIcon,
-  TokensIcon
+  TargetIcon
 } from '@radix-ui/react-icons';
 import { AnimatePresence, motion } from 'framer-motion';
 import Image from 'next/image';
@@ -99,7 +98,7 @@ export default function Sidebar({ isMobileMenuOpen, toggleMobileMenu }: SidebarP
       text: 'NYAX',
       href: '/dashboard/trade?base=NYAX&chain=ethereum&address=0x5eed5621b92be4473f99bacac77acfa27deb57d9',
     },
-    { icon: <TokensIcon />, text: 'Create Token', href: '/dashboard/create-token' },
+    // { icon: <TokensIcon />, text: 'Create Token', href: '/dashboard/create-token' },
     { icon: <PlusIcon />, text: 'Register Token', href: '/pricing' },
 
     { icon: <StarIcon />, text: 'Favorites', href: '/dashboard/favorites' },
