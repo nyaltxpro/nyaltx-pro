@@ -58,12 +58,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'weekly',
       priority: 0.8,
     },
-    {
-      url: `${baseUrl}/dashboard/create-token`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.8,
-    },
    {
       url: `${baseUrl}/whitepaper`,
       lastModified: new Date(),

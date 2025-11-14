@@ -42,6 +42,7 @@ export default function robots(): MetadataRoute.Robots {
           '/pricing/checkout/*',
           '/pricing/race-to-liberty/*/checkout',
           '/pricing/boost-pack/*/checkout',
+          '/dashboard/create-token',
         ],
       },
       // Special rules for search engine bots
