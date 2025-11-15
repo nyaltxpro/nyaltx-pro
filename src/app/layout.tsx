@@ -8,7 +8,12 @@ import "./globals.css";
 import Providers from './providers';
 
 const baseUrl = 'https://www.nyaltx.pro';
+const metadataBase = new URL(baseUrl);
 export const metadata: Metadata = {
+  metadataBase,
+  alternates: {
+    canonical: baseUrl,
+  },
   title: 'NYALTX | Crypto Token Tracker & DeFi Platform',
   description: 'Track meme tokens, view real-time charts, participate in Race to Liberty gamification, and discover trending cryptocurrencies across multiple blockchains.',
   keywords: 'crypto, cryptocurrency, token tracker, DeFi, meme tokens, blockchain, Ethereum, trading, gamification, Race to Liberty, NYAX',
