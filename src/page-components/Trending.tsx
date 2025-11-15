@@ -633,7 +633,7 @@ export default function TrendingPage() {
                         </div>
                     )}
 
-                    {(trendingError || marketDataError) && (
+                    {/* {(trendingError || marketDataError) && (
                         <div className="my-4 p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-red-200">
                             <strong>Error:</strong> {trendingError || marketDataError}
                             {hasCachedData && (
@@ -658,7 +658,7 @@ export default function TrendingPage() {
                                 </button>
                             </div>
                         </div>
-                    )}
+                    )} */}
 
                     {/* Market Stats Cards */}
                     {globalData && (
