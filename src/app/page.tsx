@@ -1,33 +1,20 @@
-import { getLandingPageSeo } from '@/lib/landingSeo';
 import LandingPage from '@/page-components/LandingPage';
 import type { Metadata } from 'next';
 
-export const revalidate = 300;
-
-export async function generateMetadata(): Promise<Metadata> {
-  const seo = await getLandingPageSeo();
-
-  return {
-    title: seo.title,
-    description: seo.description,
-    keywords: seo.keywords,
-    openGraph: {
-      title: seo.title,
-      description: seo.description,
-      images: seo.ogImage ? [{ url: seo.ogImage }] : undefined,
-      url: seo.canonical,
-    },
-    twitter: {
-      card: seo.ogImage ? 'summary_large_image' : 'summary',
-      title: seo.title,
-      description: seo.description,
-      images: seo.ogImage ? [seo.ogImage] : undefined,
-    },
-    alternates: {
-      canonical: seo.canonical,
-    },
-  };
+export const metadata: Metadata = {
+  title: 'NYALTX | Crypto Token Tracker & DeFi Platform',
+  description:
+    'Discover, track, and grow your crypto tokens with NYALTX. Real-time insights, curated listings, and gamified promotion across multiple blockchains.',
+  keywords:
+    'crypto, cryptocurrency, token tracker, DeFi, meme tokens, blockchain, Ethereum, trading, gamification, Race to Liberty, NYAX',
+  openGraph: {
+    title: 'NYALTX | Crypto Token Tracker & DeFi Platform',
+    description: 'Discover, track, and grow your crypto tokens with NYALTX. Real-time insights, curated listings, and gamified promotion across multiple blockchains.',
+    type: 'website',
+  },
 }
+
+export const revalidate = 300;
 
 export default function Page() {
   return <LandingPage />;
