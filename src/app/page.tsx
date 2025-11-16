@@ -2,14 +2,15 @@ import LandingPage from '@/page-components/LandingPage';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'NYALTX | Crypto Token Tracker & DeFi Platform',
+  title: 'NYALTX.pro – Token Profiles & Project Visibility',
   description:
-    'Discover, track, and grow your crypto tokens with NYALTX. Real-time insights, curated listings, and gamified promotion across multiple blockchains.',
+    'Discover token profiles, project details, and updates in one place. NYALTX.pro helps teams share information and connect with their community in a simple, organized way.',
   keywords:
     'crypto, cryptocurrency, token tracker, DeFi, meme tokens, blockchain, Ethereum, trading, gamification, Race to Liberty, NYAX',
   openGraph: {
-    title: 'NYALTX | Crypto Token Tracker & DeFi Platform',
-    description: 'Discover, track, and grow your crypto tokens with NYALTX. Real-time insights, curated listings, and gamified promotion across multiple blockchains.',
+    title: 'NYALTX.pro – Token Profiles & Project Visibility',
+    description:
+      'Discover token profiles, project details, and updates in one place. NYALTX.pro helps teams share information and connect with their community in a simple, organized way.',
     type: 'website',
   },
 }

@@ -3,12 +3,13 @@ import { Metadata } from 'next';
 import NewsGrid from '../../../components/NewsGrid';
 
 export const metadata: Metadata = {
-  title: 'NYALTX News - Latest Updates & Announcements',
-  description: 'Stay updated with the latest news, announcements, and developments from NYALTX. Get insights into our platform updates, partnerships, and industry trends.',
+  title: 'NYALTX News – Updates & Announcements',
+  description:
+    'Stay up to date with the latest NYALTX.pro announcements, platform features, and community updates.',
   keywords: 'NYALTX news, crypto news, blockchain updates, platform announcements, partnerships',
   openGraph: {
-    title: 'NYALTX News - Latest Updates & Announcements',
-    description: 'Stay updated with the latest news and announcements from NYALTX',
+    title: 'NYALTX News – Updates & Announcements',
+    description: 'Stay up to date with the latest NYALTX.pro announcements, platform features, and community updates.',
     type: 'website',
   },
 };
@@ -27,7 +28,7 @@ export default function NewsPage() {
 
         <div className="mx-auto max-w-7xl px-6 py-20 md:py-28">
           <div className="text-center">
-            <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-indigo-400 mb-6">
+            <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight bg-clip-text text-transparent bg-linear-to-r from-cyan-400 to-indigo-400 mb-6">
               NYALTX News
             </h1>
             <p className="text-xl text-gray-300/90 max-w-3xl mx-auto mb-8">
@@ -73,7 +74,7 @@ export default function NewsPage() {
               placeholder="Enter your email"
               className="flex-1 px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500"
             />
-            <button className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-indigo-500 hover:from-cyan-600 hover:to-indigo-600 text-white font-medium rounded-lg transition-all duration-200">
+            <button className="px-6 py-3 bg-linear-to-r from-cyan-500 to-indigo-500 hover:from-cyan-600 hover:to-indigo-600 text-white font-medium rounded-lg transition-all duration-200">
               Subscribe
             </button>
           </div>

@@ -3,15 +3,15 @@ import PublicHeader from "@/components/PublicHeader";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-    title: "NYALTX Blog - Platform Updates, Insights & Stories",
+    title: "NYALTX Blog – Web3 Ideas, Insights & Updates",
     description:
-        "Read the latest NYALTX blog posts covering platform announcements, trading insights, community stories, and crypto education.",
+        "Read articles about governance, project growth, and the Web3 landscape. Simple, useful insight for teams building in the space.",
     keywords:
         "nyaltx blog, defi insights, platform updates, crypto education, trading tips, nyaltx news",
     openGraph: {
-        title: "NYALTX Blog - Platform Updates & Stories",
+        title: "NYALTX Blog – Web3 Ideas, Insights & Updates",
         description:
-            "Stay current with NYALTX product releases, trading education, and community highlights.",
+            "Read articles about governance, project growth, and the Web3 landscape. Simple, useful insight for teams building in the space.",
         type: "website",
     },
 };
