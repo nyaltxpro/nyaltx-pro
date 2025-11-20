@@ -21,18 +21,7 @@
     "fetch:coins:detailed": "node scripts/getTop400CoinsDetailed.js",
     "tina:init": "tinacms init",
     "tina:build": "tinacms build",
-    "tina:dev": "tinacms dev",
-    "contracts:install": "cd contracts && npm install",
-    "contracts:compile": "cd contracts && npm run compile",
-    "contracts:test": "cd contracts && npm run test",
-    "contracts:deploy:local": "cd contracts && npm run deploy:local",
-    "contracts:deploy:sepolia": "cd contracts && npm run deploy:sepolia",
-    "contracts:deploy:mainnet": "cd contracts && npm run deploy:mainnet",
-    "contracts:verify:sepolia": "cd contracts && npm run verify:sepolia",
-    "contracts:verify:mainnet": "cd contracts && npm run verify:mainnet",
-    "contracts:setup-governance": "cd contracts && node scripts/setup-governance.js",
-    "contracts:node": "cd contracts && npm run node",
-    "contracts:clean": "cd contracts && npm run clean"
+    "tina:dev": "tinacms dev"
   },
   "dependencies": {
     "@paypal/react-paypal-js": "^8.9.1",
