@@ -7,7 +7,6 @@ import {
     Minus,
     Plus,
     Send,
-    Settings,
     Shield,
     Users
 } from 'lucide-react';
@@ -65,7 +64,7 @@ const Input = ({ className = '', type = 'text', value, onChange, placeholder, ..
         value={value}
         onChange={onChange}
         placeholder={placeholder}
-        className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
+        className={`flex h-10 w-full rounded-lg border border-gray-600/50 bg-black/20 backdrop-blur-sm px-3 py-2 text-sm text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00d4aa] focus:border-transparent transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
         {...props}
     />
 );
@@ -125,6 +124,34 @@ const TabsContent = ({ value, children, className = '' }: {
     </div>
 );
 
+// Modal Component
+const Modal = ({ isOpen, onClose, title, children }: {
+    isOpen: boolean;
+    onClose: () => void;
+    title: string;
+    children: React.ReactNode;
+}) => {
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
+            <div className="relative bg-black/80 backdrop-blur-md border border-gray-700/50 rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl">
+                <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-white">{title}</h3>
+                    <button
+                        onClick={onClose}
+                        className="text-gray-400 hover:text-white transition-colors"
+                    >
+                        ✕
+                    </button>
+                </div>
+                {children}
+            </div>
+        </div>
+    );
+};
+
 export function AdminDashboard() {
     const { address } = useAccount();
     const { treasuryBalance, categories } = useTreasury();
@@ -147,329 +174,450 @@ export function AdminDashboard() {
         durationMonths: ''
     });
 
+    // Modal state
+    const [modalState, setModalState] = useState({
+        isOpen: false,
+        title: '',
+        type: '',
+        data: null as any
+    });
+
+    const openModal = (title: string, type: string, data?: any) => {
+        setModalState({ isOpen: true, title, type, data });
+    };
+
+    const closeModal = () => {
+        setModalState({ isOpen: false, title: '', type: '', data: null });
+    };
+
     return (
-        <div className="min-h-screen  p-6">
-            <div className="max-w-7xl mx-auto space-y-6">
+        <div className="flex flex-col min-h-screen" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+            <div className="max-w-7xl mx-auto w-full space-y-6 p-4">
                 {/* Header */}
-                <div className="flex justify-between items-center">
-                    <div>
-                        <h1 className="text-3xl font-bold text-white">NYAX Admin Dashboard</h1>
-                        <p className="text-gray-300">Platform administration and management</p>
+                <div className="bg-black/60 backdrop-blur-sm border border-gray-800/50 rounded-2xl p-6 hover:border-gray-700/50 transition-all duration-300">
+                    <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+                        <div>
+                            <h1 className="text-3xl font-bold text-white">NYAX Admin Dashboard</h1>
+                            <p className="text-gray-400 mt-2">Manage NYAX token operations and platform governance</p>
+                        </div>
+                        <div className="flex items-center space-x-4">
+                            <Badge className="bg-[#00d4aa] text-black font-semibold">Admin Mode</Badge>
+                            <div className="text-right">
+                                <p className="text-sm text-gray-400">Connected Wallet</p>
+                                <p className="text-white font-mono text-sm">
+                                    {address ? `${address.slice(0, 6)}...${address.slice(-4)}` : 'Not Connected'}
+                                </p>
+                            </div>
+                        </div>
                     </div>
-                    <Badge variant="outline" className="text-red-400 border-red-400">
-                        <Shield className="w-3 h-3 mr-1" />
-                        Admin Access
-                    </Badge>
                 </div>
 
                 {/* Stats Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <Card className="bg-gray-800/50 border-gray-700">
+                    <Card className="bg-black/60 backdrop-blur-sm border border-gray-800/50 rounded-2xl hover:border-gray-700/50 transition-all duration-300">
                         <CardContent className="p-6">
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-sm text-gray-400">Treasury Balance</p>
                                     <p className="text-2xl font-bold text-white">{treasuryBalance}</p>
                                 </div>
-                                <Coins className="w-8 h-8 text-yellow-400" />
+                                <Coins className="w-8 h-8 text-[#00d4aa]" />
                             </div>
                         </CardContent>
                     </Card>
 
-                    <Card className="bg-gray-800/50 border-gray-700">
+                    <Card className="bg-black/60 backdrop-blur-sm border border-gray-800/50 rounded-2xl hover:border-gray-700/50 transition-all duration-300">
                         <CardContent className="p-6">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm text-gray-400">Categories</p>
-                                    <p className="text-2xl font-bold text-white">{categories.length}</p>
+                                    <p className="text-sm text-gray-400">Total Supply</p>
+                                    <p className="text-2xl font-bold text-white">1,000,000,000</p>
                                 </div>
-                                <Users className="w-8 h-8 text-blue-400" />
+                                <Shield className="w-8 h-8 text-[#00d4aa]" />
                             </div>
                         </CardContent>
                     </Card>
 
-                    <Card className="bg-gray-800/50 border-gray-700">
+                    <Card className="bg-black/60 backdrop-blur-sm border border-gray-800/50 rounded-2xl hover:border-gray-700/50 transition-all duration-300">
+                        <CardContent className="p-6">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm text-gray-400">Active Users</p>
+                                    <p className="text-2xl font-bold text-white">15,432</p>
+                                </div>
+                                <Users className="w-8 h-8 text-[#00d4aa]" />
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card className="bg-black/60 backdrop-blur-sm border border-gray-800/50 rounded-2xl hover:border-gray-700/50 transition-all duration-300">
                         <CardContent className="p-6">
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-sm text-gray-400">Active Vesting</p>
                                     <p className="text-2xl font-bold text-white">12</p>
                                 </div>
-                                <Clock className="w-8 h-8 text-green-400" />
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="bg-gray-800/50 border-gray-700">
-                        <CardContent className="p-6">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-sm text-gray-400">Pending Proposals</p>
-                                    <p className="text-2xl font-bold text-white">3</p>
-                                </div>
-                                <Settings className="w-8 h-8 text-purple-400" />
+                                <Clock className="w-8 h-8 text-[#00d4aa]" />
                             </div>
                         </CardContent>
                     </Card>
                 </div>
 
                 {/* Main Content Tabs */}
-                <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
-                    <TabsList className="grid w-full grid-cols-4 bg-gray-800/50">
-                        <TabsTrigger
-                            value="overview"
-                            className={`text-white ${selectedTab === 'overview' ? 'bg-gray-700' : ''}`}
-                            onClick={() => setSelectedTab('overview')}
-                        >
-                            Overview
-                        </TabsTrigger>
-                        <TabsTrigger
-                            value="tokens"
-                            className={`text-white ${selectedTab === 'tokens' ? 'bg-gray-700' : ''}`}
-                            onClick={() => setSelectedTab('tokens')}
-                        >
-                            Token Management
-                        </TabsTrigger>
-                        <TabsTrigger
-                            value="treasury"
-                            className={`text-white ${selectedTab === 'treasury' ? 'bg-gray-700' : ''}`}
-                            onClick={() => setSelectedTab('treasury')}
-                        >
-                            Treasury
-                        </TabsTrigger>
-                        <TabsTrigger
-                            value="vesting"
-                            className={`text-white ${selectedTab === 'vesting' ? 'bg-gray-700' : ''}`}
-                            onClick={() => setSelectedTab('vesting')}
-                        >
-                            Vesting
-                        </TabsTrigger>
-                    </TabsList>
+                <div className="bg-black/60 backdrop-blur-sm border border-gray-800/50 rounded-2xl p-6 hover:border-gray-700/50 transition-all duration-300">
+                    <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
+                        <TabsList className="grid w-full grid-cols-4 bg-black/40 backdrop-blur-sm border border-gray-700/50 rounded-xl p-1">
+                            <TabsTrigger
+                                value="overview"
+                                className={`text-white transition-all duration-200 rounded-lg ${selectedTab === 'overview' ? 'bg-[#00d4aa] text-black font-semibold' : 'hover:bg-gray-700/50'}`}
+                                onClick={() => setSelectedTab('overview')}
+                            >
+                                Overview
+                            </TabsTrigger>
+                            <TabsTrigger
+                                value="tokens"
+                                className={`text-white transition-all duration-200 rounded-lg ${selectedTab === 'tokens' ? 'bg-[#00d4aa] text-black font-semibold' : 'hover:bg-gray-700/50'}`}
+                                onClick={() => setSelectedTab('tokens')}
+                            >
+                                Token Management
+                            </TabsTrigger>
+                            <TabsTrigger
+                                value="treasury"
+                                className={`text-white transition-all duration-200 rounded-lg ${selectedTab === 'treasury' ? 'bg-[#00d4aa] text-black font-semibold' : 'hover:bg-gray-700/50'}`}
+                                onClick={() => setSelectedTab('treasury')}
+                            >
+                                Treasury
+                            </TabsTrigger>
+                            <TabsTrigger
+                                value="vesting"
+                                className={`text-white transition-all duration-200 rounded-lg ${selectedTab === 'vesting' ? 'bg-[#00d4aa] text-black font-semibold' : 'hover:bg-gray-700/50'}`}
+                                onClick={() => setSelectedTab('vesting')}
+                            >
+                                Vesting
+                            </TabsTrigger>
+                        </TabsList>
 
-                    {/* Overview Tab */}
-                    {selectedTab === 'overview' && (
-                        <TabsContent value="overview" className="space-y-6">
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                <Card className="bg-gray-800/50 border-gray-700">
-                                    <CardHeader>
-                                        <CardTitle className="text-white">Quick Actions</CardTitle>
-                                    </CardHeader>
-                                    <CardContent className="space-y-4">
-                                        <Button className="w-full bg-green-600 hover:bg-green-700">
-                                            <Plus className="w-4 h-4 mr-2" />
-                                            Mint Tokens
-                                        </Button>
-                                        <Button className="w-full bg-red-600 hover:bg-red-700">
-                                            <Minus className="w-4 h-4 mr-2" />
-                                            Burn Tokens
-                                        </Button>
-                                        <Button className="w-full bg-blue-600 hover:bg-blue-700">
-                                            <Send className="w-4 h-4 mr-2" />
-                                            Treasury Transfer
-                                        </Button>
-                                    </CardContent>
-                                </Card>
+                        {/* Overview Tab */}
+                        {selectedTab === 'overview' && (
+                            <TabsContent value="overview" className="space-y-6">
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                    <Card className="bg-black/40 backdrop-blur-sm border border-gray-700/50 rounded-xl hover:border-gray-600/50 transition-all duration-300">
+                                        <CardHeader>
+                                            <CardTitle className="text-white">Quick Actions</CardTitle>
+                                        </CardHeader>
+                                        <CardContent className="space-y-4">
+                                            <Button className="w-full bg-[#00d4aa] hover:bg-[#00d4aa]/80 text-black font-semibold transition-all duration-200">
+                                                <Plus className="w-4 h-4 mr-2" />
+                                                Mint Tokens
+                                            </Button>
+                                            <Button className="w-full bg-red-500 hover:bg-red-600 text-white font-semibold transition-all duration-200">
+                                                <Minus className="w-4 h-4 mr-2" />
+                                                Burn Tokens
+                                            </Button>
+                                            <Button className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold transition-all duration-200">
+                                                <Send className="w-4 h-4 mr-2" />
+                                                Treasury Transfer
+                                            </Button>
+                                        </CardContent>
+                                    </Card>
 
-                                <Card className="bg-gray-800/50 border-gray-700">
-                                    <CardHeader>
-                                        <CardTitle className="text-white">System Status</CardTitle>
-                                    </CardHeader>
-                                    <CardContent className="space-y-4">
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-gray-300">Transfers Enabled</span>
-                                            <Badge className="bg-green-600">Active</Badge>
-                                        </div>
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-gray-300">MultiSig Status</span>
-                                            <Badge className="bg-green-600">Operational</Badge>
-                                        </div>
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-gray-300">Governance</span>
-                                            <Badge className="bg-green-600">Active</Badge>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            </div>
-                        </TabsContent>
-                    )}
-
-                    {/* Token Management Tab */}
-                    {selectedTab === 'tokens' && (
-                        <TabsContent value="tokens" className="space-y-6">
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                {/* Mint Tokens */}
-                                <Card className="bg-gray-800/50 border-gray-700">
-                                    <CardHeader>
-                                        <CardTitle className="text-white">Mint Tokens</CardTitle>
-                                    </CardHeader>
-                                    <CardContent className="space-y-4">
-                                        <div>
-                                            <Label htmlFor="mintAddress" className="text-gray-300">Recipient Address</Label>
-                                            <Input
-                                                id="mintAddress"
-                                                value={mintAddress}
-                                                onChange={(e) => setMintAddress(e.target.value)}
-                                                placeholder="0x..."
-                                                className="bg-gray-700 border-gray-600 text-white"
-                                            />
-                                        </div>
-                                        <div>
-                                            <Label htmlFor="mintAmount" className="text-gray-300">Amount (NYAX)</Label>
-                                            <Input
-                                                id="mintAmount"
-                                                value={mintAmount}
-                                                onChange={(e) => setMintAmount(e.target.value)}
-                                                placeholder="1000"
-                                                className="bg-gray-700 border-gray-600 text-white"
-                                            />
-                                        </div>
-                                        <Button className="w-full bg-green-600 hover:bg-green-700">
-                                            <Plus className="w-4 h-4 mr-2" />
-                                            Mint Tokens
-                                        </Button>
-                                    </CardContent>
-                                </Card>
-
-                                {/* Burn Tokens */}
-                                <Card className="bg-gray-800/50 border-gray-700">
-                                    <CardHeader>
-                                        <CardTitle className="text-white">Burn Tokens</CardTitle>
-                                    </CardHeader>
-                                    <CardContent className="space-y-4">
-                                        <div>
-                                            <Label htmlFor="burnAmount" className="text-gray-300">Amount to Burn (NYAX)</Label>
-                                            <Input
-                                                id="burnAmount"
-                                                value={burnAmount}
-                                                onChange={(e) => setBurnAmount(e.target.value)}
-                                                placeholder="1000"
-                                                className="bg-gray-700 border-gray-600 text-white"
-                                            />
-                                        </div>
-                                        <Button className="w-full bg-red-600 hover:bg-red-700">
-                                            <Minus className="w-4 h-4 mr-2" />
-                                            Burn from Treasury
-                                        </Button>
-                                    </CardContent>
-                                </Card>
-                            </div>
-                        </TabsContent>
-                    )}
-
-                    {/* Treasury Tab */}
-                    {selectedTab === 'treasury' && (
-                        <TabsContent value="treasury" className="space-y-6">
-                            <Card className="bg-gray-800/50 border-gray-700">
-                                <CardHeader>
-                                    <CardTitle className="text-white">Category Management</CardTitle>
-                                </CardHeader>
-                                <CardContent className="space-y-6">
-                                    {/* Add New Category */}
-                                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                                        <Input
-                                            placeholder="Category Name"
-                                            value={newCategory.name}
-                                            onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
-                                            className="bg-gray-700 border-gray-600 text-white"
-                                        />
-                                        <Input
-                                            placeholder="Wallet Address"
-                                            value={newCategory.wallet}
-                                            onChange={(e) => setNewCategory({ ...newCategory, wallet: e.target.value })}
-                                            className="bg-gray-700 border-gray-600 text-white"
-                                        />
-                                        <Input
-                                            placeholder="Allocation %"
-                                            value={newCategory.allocation}
-                                            onChange={(e) => setNewCategory({ ...newCategory, allocation: e.target.value })}
-                                            className="bg-gray-700 border-gray-600 text-white"
-                                        />
-                                        <Button className="bg-blue-600 hover:bg-blue-700">
-                                            <Plus className="w-4 h-4 mr-2" />
-                                            Add Category
-                                        </Button>
-                                    </div>
-
-                                    {/* Existing Categories */}
-                                    <div className="space-y-4">
-                                        {categories.map((category) => (
-                                            <div key={category} className="flex items-center justify-between p-4 border border-gray-600 rounded-lg">
-                                                <div>
-                                                    <h3 className="text-white font-medium capitalize">{category}</h3>
-                                                    <p className="text-sm text-gray-400">Active category</p>
-                                                </div>
-                                                <div className="flex space-x-2">
-                                                    <Button size="sm" variant="outline" className="border-gray-600 text-gray-300">
-                                                        Edit
-                                                    </Button>
-                                                    <Button size="sm" variant="outline" className="border-red-600 text-red-400">
-                                                        Remove
-                                                    </Button>
-                                                </div>
+                                    <Card className="bg-black/40 backdrop-blur-sm border border-gray-700/50 rounded-xl hover:border-gray-600/50 transition-all duration-300">
+                                        <CardHeader>
+                                            <CardTitle className="text-white">System Status</CardTitle>
+                                        </CardHeader>
+                                        <CardContent className="space-y-4">
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-gray-300">Transfers Enabled</span>
+                                                <Badge className="bg-[#00d4aa] text-black font-semibold">Active</Badge>
                                             </div>
-                                        ))}
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </TabsContent>
-                    )}
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-gray-300">MultiSig Status</span>
+                                                <Badge className="bg-[#00d4aa] text-black font-semibold">Operational</Badge>
+                                            </div>
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-gray-300">Governance</span>
+                                                <Badge className="bg-[#00d4aa] text-black font-semibold">Active</Badge>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                </div>
+                            </TabsContent>
+                        )}
 
-                    {/* Vesting Tab */}
-                    {selectedTab === 'vesting' && (
-                        <TabsContent value="vesting" className="space-y-6">
-                            <Card className="bg-gray-800/50 border-gray-700">
-                                <CardHeader>
-                                    <CardTitle className="text-white">Create Vesting Schedule</CardTitle>
-                                </CardHeader>
-                                <CardContent className="space-y-4">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <Label className="text-gray-300">Beneficiary Address</Label>
+                        {/* Token Management Tab */}
+                        {selectedTab === 'tokens' && (
+                            <TabsContent value="tokens" className="space-y-6">
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                    {/* Mint Tokens */}
+                                    <Card className="bg-black/40 backdrop-blur-sm border border-gray-700/50 rounded-xl hover:border-gray-600/50 transition-all duration-300">
+                                        <CardHeader>
+                                            <CardTitle className="text-white">Mint Tokens</CardTitle>
+                                        </CardHeader>
+                                        <CardContent className="space-y-4">
+                                            <div>
+                                                <Label htmlFor="mintAddress" className="text-gray-300">Recipient Address</Label>
+                                                <Input
+                                                    id="mintAddress"
+                                                    value={mintAddress}
+                                                    onChange={(e) => setMintAddress(e.target.value)}
+                                                    placeholder="0x..."
+                                                />
+                                            </div>
+                                            <div>
+                                                <Label htmlFor="mintAmount" className="text-gray-300">Amount (NYAX)</Label>
+                                                <Input
+                                                    id="mintAmount"
+                                                    value={mintAmount}
+                                                    onChange={(e) => setMintAmount(e.target.value)}
+                                                    placeholder="1000"
+                                                />
+                                            </div>
+                                            <Button
+                                                className="w-full bg-[#00d4aa] hover:bg-[#00d4aa]/80 text-black font-semibold transition-all duration-200"
+                                                onClick={() => openModal('Confirm Token Mint', 'mint')}
+                                                disabled={!mintAddress || !mintAmount}
+                                            >
+                                                <Plus className="w-4 h-4 mr-2" />
+                                                Mint Tokens
+                                            </Button>
+                                        </CardContent>
+                                    </Card>
+
+                                    {/* Burn Tokens */}
+                                    <Card className="bg-black/40 backdrop-blur-sm border border-gray-700/50 rounded-xl hover:border-gray-600/50 transition-all duration-300">
+                                        <CardHeader>
+                                            <CardTitle className="text-white">Burn Tokens</CardTitle>
+                                        </CardHeader>
+                                        <CardContent className="space-y-4">
+                                            <div>
+                                                <Label htmlFor="burnAmount" className="text-gray-300">Amount to Burn (NYAX)</Label>
+                                                <Input
+                                                    id="burnAmount"
+                                                    value={burnAmount}
+                                                    onChange={(e) => setBurnAmount(e.target.value)}
+                                                    placeholder="1000"
+                                                />
+                                            </div>
+                                            <Button
+                                                className="w-full bg-red-500 hover:bg-red-600 text-white font-semibold transition-all duration-200"
+                                                onClick={() => openModal('Confirm Token Burn', 'burn')}
+                                                disabled={!burnAmount}
+                                            >
+                                                <Minus className="w-4 h-4 mr-2" />
+                                                Burn from Treasury
+                                            </Button>
+                                        </CardContent>
+                                    </Card>
+                                </div>
+                            </TabsContent>
+                        )}
+
+                        {/* Treasury Tab */}
+                        {selectedTab === 'treasury' && (
+                            <TabsContent value="treasury" className="space-y-6">
+                                <Card className="bg-black/40 backdrop-blur-sm border border-gray-700/50 rounded-xl hover:border-gray-600/50 transition-all duration-300">
+                                    <CardHeader>
+                                        <CardTitle className="text-white">Category Management</CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="space-y-6">
+                                        {/* Add New Category */}
+                                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                                             <Input
-                                                value={vestingForm.beneficiary}
-                                                onChange={(e) => setVestingForm({ ...vestingForm, beneficiary: e.target.value })}
-                                                placeholder="0x..."
-                                                className="bg-gray-700 border-gray-600 text-white"
+                                                placeholder="Category Name"
+                                                value={newCategory.name}
+                                                onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
                                             />
-                                        </div>
-                                        <div>
-                                            <Label className="text-gray-300">Amount (NYAX)</Label>
                                             <Input
-                                                value={vestingForm.amount}
-                                                onChange={(e) => setVestingForm({ ...vestingForm, amount: e.target.value })}
-                                                placeholder="10000"
-                                                className="bg-gray-700 border-gray-600 text-white"
+                                                placeholder="Wallet Address"
+                                                value={newCategory.wallet}
+                                                onChange={(e) => setNewCategory({ ...newCategory, wallet: e.target.value })}
                                             />
-                                        </div>
-                                        <div>
-                                            <Label className="text-gray-300">Category</Label>
                                             <Input
-                                                value={vestingForm.category}
-                                                onChange={(e) => setVestingForm({ ...vestingForm, category: e.target.value })}
-                                                placeholder="team"
-                                                className="bg-gray-700 border-gray-600 text-white"
+                                                placeholder="Allocation %"
+                                                value={newCategory.allocation}
+                                                onChange={(e) => setNewCategory({ ...newCategory, allocation: e.target.value })}
                                             />
+                                            <Button className="bg-[#00d4aa] hover:bg-[#00d4aa]/80 text-black font-semibold transition-all duration-200">
+                                                <Plus className="w-4 h-4 mr-2" />
+                                                Add Category
+                                            </Button>
                                         </div>
-                                        <div>
-                                            <Label className="text-gray-300">Cliff Period (Months)</Label>
-                                            <Input
-                                                value={vestingForm.cliffMonths}
-                                                onChange={(e) => setVestingForm({ ...vestingForm, cliffMonths: e.target.value })}
-                                                placeholder="12"
-                                                className="bg-gray-700 border-gray-600 text-white"
-                                            />
+
+                                        {/* Existing Categories */}
+                                        <div className="space-y-4">
+                                            {categories.map((category) => (
+                                                <div key={category} className="flex items-center justify-between p-4 bg-black/20 backdrop-blur-sm border border-gray-700/50 rounded-xl hover:border-gray-600/50 transition-all duration-300">
+                                                    <div>
+                                                        <h3 className="text-white font-medium capitalize">{category}</h3>
+                                                        <p className="text-sm text-gray-400">Active category</p>
+                                                    </div>
+                                                    <div className="flex space-x-2">
+                                                        <Button size="sm" className="bg-blue-500 hover:bg-blue-600 text-white font-medium transition-all duration-200">
+                                                            Edit
+                                                        </Button>
+                                                        <Button size="sm" className="bg-red-500 hover:bg-red-600 text-white font-medium transition-all duration-200">
+                                                            Remove
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            ))}
                                         </div>
-                                    </div>
-                                    <Button className="w-full bg-purple-600 hover:bg-purple-700">
-                                        <Clock className="w-4 h-4 mr-2" />
-                                        Create Vesting Schedule
-                                    </Button>
-                                </CardContent>
-                            </Card>
-                        </TabsContent>
-                    )}
-                </Tabs>
+                                    </CardContent>
+                                </Card>
+                            </TabsContent>
+                        )}
+
+                        {/* Vesting Tab */}
+                        {selectedTab === 'vesting' && (
+                            <TabsContent value="vesting" className="space-y-6">
+                                <Card className="bg-black/40 backdrop-blur-sm border border-gray-700/50 rounded-xl hover:border-gray-600/50 transition-all duration-300">
+                                    <CardHeader>
+                                        <CardTitle className="text-white">Create Vesting Schedule</CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="space-y-4">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <Label className="text-gray-300">Beneficiary Address</Label>
+                                                <Input
+                                                    value={vestingForm.beneficiary}
+                                                    onChange={(e) => setVestingForm({ ...vestingForm, beneficiary: e.target.value })}
+                                                    placeholder="0x..."
+                                                />
+                                            </div>
+                                            <div>
+                                                <Label className="text-gray-300">Amount (NYAX)</Label>
+                                                <Input
+                                                    value={vestingForm.amount}
+                                                    onChange={(e) => setVestingForm({ ...vestingForm, amount: e.target.value })}
+                                                    placeholder="10000"
+                                                />
+                                            </div>
+                                            <div>
+                                                <Label className="text-gray-300">Category</Label>
+                                                <Input
+                                                    value={vestingForm.category}
+                                                    onChange={(e) => setVestingForm({ ...vestingForm, category: e.target.value })}
+                                                    placeholder="team"
+                                                />
+                                            </div>
+                                            <div>
+                                                <Label className="text-gray-300">Cliff Period (Months)</Label>
+                                                <Input
+                                                    value={vestingForm.cliffMonths}
+                                                    onChange={(e) => setVestingForm({ ...vestingForm, cliffMonths: e.target.value })}
+                                                    placeholder="12"
+                                                />
+                                            </div>
+                                        </div>
+                                        <Button
+                                            className="w-full bg-[#00d4aa] hover:bg-[#00d4aa]/80 text-black font-semibold transition-all duration-200"
+                                            onClick={() => openModal('Confirm Vesting Schedule', 'vesting')}
+                                            disabled={!vestingForm.beneficiary || !vestingForm.amount}
+                                        >
+                                            <Clock className="w-4 h-4 mr-2" />
+                                            Create Vesting Schedule
+                                        </Button>
+                                    </CardContent>
+                                </Card>
+                            </TabsContent>
+                        )}
+                    </Tabs>
+                </div>
             </div>
+
+            {/* Modal */}
+            <Modal
+                isOpen={modalState.isOpen}
+                onClose={closeModal}
+                title={modalState.title}
+            >
+                {modalState.type === 'mint' && (
+                    <div className="space-y-4">
+                        <p className="text-gray-300">
+                            Are you sure you want to mint <span className="text-[#00d4aa] font-semibold">{mintAmount} NYAX</span> tokens to:
+                        </p>
+                        <p className="text-white font-mono text-sm bg-black/20 p-2 rounded-lg">
+                            {mintAddress}
+                        </p>
+                        <div className="flex space-x-3">
+                            <Button
+                                className="flex-1 bg-[#00d4aa] hover:bg-[#00d4aa]/80 text-black font-semibold"
+                                onClick={() => {
+                                    // Add mint logic here
+                                    console.log('Minting tokens...');
+                                    closeModal();
+                                }}
+                            >
+                                Confirm Mint
+                            </Button>
+                            <Button
+                                className="flex-1 bg-gray-600 hover:bg-gray-700 text-white"
+                                onClick={closeModal}
+                            >
+                                Cancel
+                            </Button>
+                        </div>
+                    </div>
+                )}
+
+                {modalState.type === 'burn' && (
+                    <div className="space-y-4">
+                        <p className="text-gray-300">
+                            Are you sure you want to burn <span className="text-red-400 font-semibold">{burnAmount} NYAX</span> tokens from the treasury?
+                        </p>
+                        <p className="text-yellow-400 text-sm">⚠️ This action cannot be undone.</p>
+                        <div className="flex space-x-3">
+                            <Button
+                                className="flex-1 bg-red-500 hover:bg-red-600 text-white font-semibold"
+                                onClick={() => {
+                                    // Add burn logic here
+                                    console.log('Burning tokens...');
+                                    closeModal();
+                                }}
+                            >
+                                Confirm Burn
+                            </Button>
+                            <Button
+                                className="flex-1 bg-gray-600 hover:bg-gray-700 text-white"
+                                onClick={closeModal}
+                            >
+                                Cancel
+                            </Button>
+                        </div>
+                    </div>
+                )}
+
+                {modalState.type === 'vesting' && (
+                    <div className="space-y-4">
+                        <p className="text-gray-300">
+                            Create vesting schedule for <span className="text-[#00d4aa] font-semibold">{vestingForm.amount} NYAX</span>?
+                        </p>
+                        <div className="bg-black/20 p-3 rounded-lg space-y-2 text-sm">
+                            <div><span className="text-gray-400">Beneficiary:</span> <span className="text-white font-mono">{vestingForm.beneficiary}</span></div>
+                            <div><span className="text-gray-400">Category:</span> <span className="text-white">{vestingForm.category}</span></div>
+                            <div><span className="text-gray-400">Cliff:</span> <span className="text-white">{vestingForm.cliffMonths} months</span></div>
+                        </div>
+                        <div className="flex space-x-3">
+                            <Button
+                                className="flex-1 bg-[#00d4aa] hover:bg-[#00d4aa]/80 text-black font-semibold"
+                                onClick={() => {
+                                    // Add vesting logic here
+                                    console.log('Creating vesting schedule...');
+                                    closeModal();
+                                }}
+                            >
+                                Create Schedule
+                            </Button>
+                            <Button
+                                className="flex-1 bg-gray-600 hover:bg-gray-700 text-white"
+                                onClick={closeModal}
+                            >
+                                Cancel
+                            </Button>
+                        </div>
+                    </div>
+                )}
+            </Modal>
         </div>
     );
 }
