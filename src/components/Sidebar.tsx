@@ -95,8 +95,18 @@ export default function Sidebar({ isMobileMenuOpen, toggleMobileMenu }: SidebarP
     { icon: <PersonIcon />, text: 'Profile', href: '/dashboard/profile' },
     {
       icon: <BarChartIcon />,
-      text: 'NYAX',
-      href: '/dashboard/trade?base=NYAX&chain=ethereum&address=0x5eed5621b92be4473f99bacac77acfa27deb57d9',
+      text: 'NYAX Dashboard',
+      href: '/dashboard/nyax',
+    },
+    {
+      icon: <PlusIcon />,
+      text: 'NYAX Sale',
+      href: '/dashboard/nyax-sale',
+    },
+    {
+      icon: <TargetIcon />,
+      text: 'Governance',
+      href: '/dashboard/governance',
     },
     // { icon: <TokensIcon />, text: 'Create Token', href: '/dashboard/create-token' },
     { icon: <PlusIcon />, text: 'Register Token', href: '/pricing' },
