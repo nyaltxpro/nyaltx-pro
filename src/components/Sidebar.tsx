@@ -98,11 +98,11 @@ export default function Sidebar({ isMobileMenuOpen, toggleMobileMenu }: SidebarP
       text: 'NYAX Dashboard',
       href: '/dashboard/nyax',
     },
-    {
-      icon: <PlusIcon />,
-      text: 'NYAX Sale',
-      href: '/dashboard/nyax-sale',
-    },
+    // {
+    //   icon: <PlusIcon />,
+    //   text: 'NYAX Sale',
+    //   href: '/dashboard/nyax-sale',
+    // },
     {
       icon: <TargetIcon />,
       text: 'Governance',
