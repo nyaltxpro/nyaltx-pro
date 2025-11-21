@@ -184,7 +184,7 @@ export function UserDashboard() {
 
     if (!isConnected) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 flex items-center justify-center">
+            <div className="min-h-screen  flex items-center justify-center">
                 <Card className="w-full max-w-md bg-gray-800/50 border-gray-700">
                     <CardHeader className="text-center">
                         <CardTitle className="text-2xl text-white">Connect Your Wallet</CardTitle>
