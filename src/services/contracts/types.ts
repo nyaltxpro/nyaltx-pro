@@ -1,0 +1,103 @@
+// Contract Types and Interfaces
+export interface ContractAddresses {
+  nyaxToken: string;
+  nyaxGovernor: string;
+  treasury: string;
+  multisig: string;
+  vestingFactory: string;
+  timelock: string;
+}
+
+export interface ProposalData {
+  id: string;
+  title: string;
+  description: string;
+  proposer: string;
+  status: 'active' | 'succeeded' | 'defeated' | 'queued' | 'executed' | 'canceled';
+  forVotes: string;
+  againstVotes: string;
+  abstainVotes: string;
+  startBlock: number;
+  endBlock: number;
+  eta: number;
+  isEmergency: boolean;
+  isFastTrack: boolean;
+  category: string;
+  targets: string[];
+  values: string[];
+  calldatas: string[];
+}
+
+export interface VestingSchedule {
+  id: string;
+  beneficiary: string;
+  totalAmount: string;
+  start: number;
+  cliff: number;
+  duration: number;
+  released: string;
+  revoked: boolean;
+  revocable: boolean;
+  category: string;
+  releasableAmount: string;
+  vestedAmount: string;
+}
+
+export interface TreasuryCategory {
+  name: string;
+  wallet: string;
+  allocation: number; // basis points
+  distributed: string;
+  remaining: string;
+}
+
+export interface MultisigTransaction {
+  id: number;
+  to: string;
+  value: string;
+  data: string;
+  executed: boolean;
+  confirmations: number;
+  isConfirmed: boolean;
+}
+
+export interface TokenInfo {
+  name: string;
+  symbol: string;
+  decimals: number;
+  totalSupply: string;
+  maxSupply: string;
+  remainingMintable: string;
+}
+
+export interface VotingPower {
+  balance: string;
+  votes: string;
+  delegatedTo: string;
+  delegatedFrom: string[];
+}
+
+export interface GovernanceStats {
+  totalProposals: number;
+  activeProposals: number;
+  totalVoters: number;
+  quorumVotes: string;
+  proposalThreshold: string;
+  votingDelay: number;
+  votingPeriod: number;
+}
+
+export interface TreasuryStats {
+  totalBalance: string;
+  totalAllocated: number;
+  categoriesCount: number;
+  multisigThreshold: string;
+}
+
+export interface ContractError {
+  code: string;
+  message: string;
+  data?: any;
+}
+
+export type VoteSupport = 0 | 1 | 2; // Against, For, Abstain
