@@ -1,3 +1,4 @@
+'use client'
 import { useMultisig, useTreasury } from '@/hooks/useDAOService';
 import {
     AlertTriangle,
