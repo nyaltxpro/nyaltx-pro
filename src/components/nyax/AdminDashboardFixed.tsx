@@ -2,6 +2,7 @@
 import type { LucideIcon } from 'lucide-react';
 import { ArrowRight, BarChart3, Clock, Coins, Lock, Settings, Shield, TrendingUp, Users } from 'lucide-react';
 import { useState } from 'react';
+import { useMultisig, useTreasury } from '../../hooks/useDAOService';
 
 const COLOR_CLASS_MAP = {
     blue: 'bg-blue-500',
