@@ -1,28 +1,71 @@
-'use client'
-import { useMultisig, useTreasury } from '@/hooks/useDAOService';
+'use client';
+import type { LucideIcon } from 'lucide-react';
 import {
     AlertTriangle,
+    ArrowRight,
+    BarChart3,
     CheckCircle,
     Clock,
     Coins,
+    Lock,
     Plus,
     Send,
+    Settings,
     Shield,
+    TrendingUp,
+    Users,
     Wallet,
     X
 } from 'lucide-react';
-import type { ReactNode } from 'react';
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { useMultisig, useTreasury } from '@/hooks/useDAOService';
 
-// Simple UI Components (replacing missing UI library components)
-const Badge = ({ children, className, variant }: { children: ReactNode; className?: string; variant?: string }) => (
+const COLOR_CLASS_MAP = {
+    blue: 'bg-blue-500',
+    green: 'bg-green-500',
+    purple: 'bg-purple-500',
+    orange: 'bg-orange-500',
+    red: 'bg-red-500',
+    yellow: 'bg-yellow-500'
+} as const;
+
+const BORDER_CLASS_MAP = {
+    blue: 'border-blue-500',
+    green: 'border-green-500',
+    purple: 'border-purple-500',
+    orange: 'border-orange-500',
+    red: 'border-red-500',
+    yellow: 'border-yellow-500'
+} as const;
+
+type WalletColor = keyof typeof COLOR_CLASS_MAP;
+type WalletStatus = 'active' | 'vesting' | 'locked';
+type WalletType = 'master' | 'vesting' | 'operational' | 'governance' | 'special';
+type TabKey = 'overview' | 'transfers' | 'vesting' | 'activity';
+
+interface Wallet {
+    id: string;
+    name: string;
+    balance: number;
+    percentage: number;
+    type: 'master' | 'operational' | 'vesting' | 'reserve';
+    icon: LucideIcon;
+    color: WalletColor;
+    multisig?: string;
+    status: 'active' | 'inactive' | 'pending';
+    allocated?: number;
+    vested?: number;
+    vestingEnd?: string;
+}
+
+const Badge = ({ children, className, variant }: { children: React.ReactNode; className?: string; variant?: string }) => (
     <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${className}`}>
         {children}
     </span>
 );
 
 const Button = ({ children, onClick, className, size, variant, disabled }: {
-    children: ReactNode;
+    children: React.ReactNode;
     onClick?: () => void;
     className?: string;
     size?: string;
@@ -38,25 +81,40 @@ const Button = ({ children, onClick, className, size, variant, disabled }: {
     </button>
 );
 
-const Card = ({ children, className }: { children: ReactNode; className?: string }) => (
+const Card = ({ children, className }: { children: React.ReactNode; className?: string }) => (
     <div className={`rounded-lg border ${className}`}>{children}</div>
 );
 
-const CardHeader = ({ children }: { children: ReactNode }) => (
+const CardHeader = ({ children }: { children: React.ReactNode }) => (
     <div className="p-6 pb-4">{children}</div>
 );
 
-const CardTitle = ({ children, className }: { children: ReactNode; className?: string }) => (
+const CardTitle = ({ children, className }: { children: React.ReactNode; className?: string }) => (
     <h3 className={`text-lg font-semibold ${className}`}>{children}</h3>
 );
 
-const CardContent = ({ children, className }: { children: ReactNode; className?: string }) => (
+const CardContent = ({ children, className }: { children: React.ReactNode; className?: string }) => (
     <div className={`p-6 pt-0 ${className || ''}`}>{children}</div>
 );
 
-// Keep existing types and helper functions
+orange: 'bg-orange-500',
+    red: 'bg-red-500',
+        yellow: 'bg-yellow-500'
+} as const ;
+
+const BORDER_CLASS_MAP = {
+    blue: 'border-blue-500',
+    green: 'border-green-500',
+    purple: 'border-purple-500',
+    orange: 'border-orange-500',
+    red: 'border-red-500',
+    yellow: 'border-yellow-500'
+} as const;
+
+type WalletColor = keyof typeof COLOR_CLASS_MAP;
+type WalletStatus = 'active' | 'vesting' | 'locked';
+type WalletType = 'master' | 'vesting' | 'operational' | 'governance' | 'special';
 type TabKey = 'overview' | 'transfers' | 'vesting' | 'activity';
-type WalletColor = 'blue' | 'green' | 'purple' | 'orange' | 'red' | 'yellow';
 
 interface Wallet {
     id: string;
