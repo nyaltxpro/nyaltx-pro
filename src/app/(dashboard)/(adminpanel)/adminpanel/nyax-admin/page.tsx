@@ -1,4 +1,4 @@
-import AdminDashboard from '@/components/nyax/AdminDashboard';
+import AdminDashboard from '@/components/nyax/AdminDashboardIntegrated';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {

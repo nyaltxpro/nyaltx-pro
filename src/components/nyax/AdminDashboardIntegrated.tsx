@@ -1,6 +1,3 @@
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useMultisig, useTreasury } from '@/hooks/useDAOService';
 import {
     AlertTriangle,
@@ -13,7 +10,48 @@ import {
     Wallet,
     X
 } from 'lucide-react';
+import type { ReactNode } from 'react';
 import React, { useState } from 'react';
+
+// Simple UI Components (replacing missing UI library components)
+const Badge = ({ children, className, variant }: { children: ReactNode; className?: string; variant?: string }) => (
+    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${className}`}>
+        {children}
+    </span>
+);
+
+const Button = ({ children, onClick, className, size, variant, disabled }: {
+    children: ReactNode;
+    onClick?: () => void;
+    className?: string;
+    size?: string;
+    variant?: string;
+    disabled?: boolean;
+}) => (
+    <button
+        onClick={onClick}
+        disabled={disabled}
+        className={`px-4 py-2 rounded-md font-medium transition-colors ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-90'} ${className}`}
+    >
+        {children}
+    </button>
+);
+
+const Card = ({ children, className }: { children: ReactNode; className?: string }) => (
+    <div className={`rounded-lg border ${className}`}>{children}</div>
+);
+
+const CardHeader = ({ children }: { children: ReactNode }) => (
+    <div className="p-6 pb-4">{children}</div>
+);
+
+const CardTitle = ({ children, className }: { children: ReactNode; className?: string }) => (
+    <h3 className={`text-lg font-semibold ${className}`}>{children}</h3>
+);
+
+const CardContent = ({ children, className }: { children: ReactNode; className?: string }) => (
+    <div className={`p-6 pt-0 ${className || ''}`}>{children}</div>
+);
 
 // Keep existing types and helper functions
 type TabKey = 'overview' | 'transfers' | 'vesting' | 'activity';
@@ -406,8 +444,8 @@ const AdminDashboardIntegrated: React.FC = () => {
                             key={tab.key}
                             onClick={() => setActiveTab(tab.key as TabKey)}
                             className={`px-4 py-2 rounded-md font-medium transition-colors ${activeTab === tab.key
-                                    ? 'bg-blue-600 text-white'
-                                    : 'text-gray-400 hover:text-white hover:bg-slate-700'
+                                ? 'bg-blue-600 text-white'
+                                : 'text-gray-400 hover:text-white hover:bg-slate-700'
                                 }`}
                         >
                             {tab.label}

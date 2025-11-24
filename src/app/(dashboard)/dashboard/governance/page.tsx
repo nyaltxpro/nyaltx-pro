@@ -1,4 +1,4 @@
-import { GovernancePortal } from '@/components/nyax/GovernancePortal';
+import GovernancePortal from '@/components/nyax/GovernancePortalIntegrated';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
