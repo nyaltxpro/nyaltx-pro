@@ -163,7 +163,7 @@ export function GovernancePortal() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white">
+        <div className="min-h-screen  text-white">
             <div className="max-w-7xl mx-auto px-6 py-12 space-y-10">
                 {/* Hero */}
                 <div className="bg-slate-900/70 border border-slate-800 rounded-3xl p-8 md:p-10 relative overflow-hidden">
