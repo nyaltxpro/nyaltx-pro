@@ -1,3 +1,4 @@
+'use client';
 import type { LucideIcon } from 'lucide-react';
 import { ArrowRight, BarChart3, CheckCircle, Clock, Coins, Lock, Settings, Shield, TrendingUp, Users } from 'lucide-react';
 import { useState } from 'react';
