@@ -1,7 +1,6 @@
 'use client';
 
 import {
-  BarChartIcon,
   CalendarIcon,
   GearIcon,
   HomeIcon,
@@ -93,11 +92,11 @@ export default function Sidebar({ isMobileMenuOpen, toggleMobileMenu }: SidebarP
   const navItems = [
     { icon: <HomeIcon />, text: 'Home', href: '/dashboard' },
     { icon: <PersonIcon />, text: 'Profile', href: '/dashboard/profile' },
-    {
-      icon: <BarChartIcon />,
-      text: 'NYAX Dashboard',
-      href: '/dashboard/nyax',
-    },
+    // {
+    //   icon: <BarChartIcon />,
+    //   text: 'NYAX Dashboard',
+    //   href: '/dashboard/nyax',
+    // },
     // {
     //   icon: <PlusIcon />,
     //   text: 'NYAX Sale',
