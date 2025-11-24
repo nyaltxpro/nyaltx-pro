@@ -1,6 +1,5 @@
 'use client';
 
-import { useGovernance } from '@/hooks/useDAOService';
 import {
     AlertCircle,
     CheckCircle,
@@ -13,6 +12,7 @@ import {
 import type { ReactNode } from 'react';
 import { useMemo, useState } from 'react';
 import { useAccount } from 'wagmi';
+import { useGovernance } from '../../hooks/useDAOService';
 
 interface Proposal {
     id: string;
@@ -319,7 +319,7 @@ export function GovernancePortal() {
     const userVotingPower = votingPower?.votes || '0';
 
     return (
-        <div className="min-h-screen text-white">
+        <div className="min-h-screen  text-white">
             <div className="max-w-7xl mx-auto px-6 py-12 space-y-10">
                 {/* Hero */}
                 <div className="bg-slate-900/70 border border-slate-800 rounded-3xl p-8 md:p-10 relative overflow-hidden">
