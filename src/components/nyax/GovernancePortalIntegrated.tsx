@@ -1,3 +1,4 @@
+'use client'
 import { useGovernance } from '@/hooks/useDAOService';
 import type { ProposalData } from '@/services/contracts/types';
 import {
