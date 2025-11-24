@@ -1,3 +1,4 @@
+'use client';
 import { DAOService, createDAOService } from '@/services/contracts';
 import { GovernanceStats, ProposalData, TreasuryStats, VotingPower } from '@/services/contracts/types';
 import { useCallback, useEffect, useMemo, useState } from 'react';
