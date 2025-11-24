@@ -1,6 +1,6 @@
 'use client';
 import type { LucideIcon } from 'lucide-react';
-import { ArrowRight, BarChart3, CheckCircle, Clock, Coins, Lock, Settings, Shield, TrendingUp, Users } from 'lucide-react';
+import { ArrowRight, BarChart3, Clock, Coins, Lock, Settings, Shield, TrendingUp, Users } from 'lucide-react';
 import { useState } from 'react';
 
 const COLOR_CLASS_MAP = {
@@ -56,6 +56,8 @@ const isVestingWallet = (
 const GovernanceDashboard = () => {
     const [activeTab, setActiveTab] = useState<TabKey>('overview');
     const [selectedWallet, setSelectedWallet] = useState<Wallet | null>(null);
+    const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
+    const [isVestingModalOpen, setIsVestingModalOpen] = useState(false);
 
     // Mock data
     const totalSupply = 1000000000;
@@ -214,348 +216,430 @@ const GovernanceDashboard = () => {
     };
 
     return (
-        <div className="min-h-screen  text-white p-6">
-            <div className="max-w-7xl mx-auto">
-                {/* Header */}
-                <div className="mb-8">
-                    <div className="flex items-center justify-between mb-4">
-                        <div>
-                            <h1 className="text-4xl font-bold mb-2">Treasury Governance</h1>
-                            <p className="text-slate-400">Multi-signature token management system</p>
-                        </div>
-                        <button className="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg flex items-center gap-2 transition-colors">
-                            <Settings className="w-5 h-5" />
-                            Admin Settings
-                        </button>
-                    </div>
-
-                    {/* Total Supply Card */}
-                    <div className="bg-slate-800/50 backdrop-blur border border-slate-700 rounded-xl p-6">
-                        <div className="grid grid-cols-3 gap-6">
+        <>
+            <div className="min-h-screen  text-white p-6">
+                <div className="max-w-7xl mx-auto">
+                    {/* Header */}
+                    <div className="mb-8">
+                        <div className="flex items-center justify-between mb-4">
                             <div>
-                                <p className="text-slate-400 text-sm mb-1">Total Minted Supply</p>
-                                <p className="text-3xl font-bold">{formatNumber(totalSupply)}</p>
+                                <h1 className="text-4xl font-bold mb-2">Treasury Governance</h1>
+                                <p className="text-slate-400">Multi-signature token management system</p>
                             </div>
-                            <div>
-                                <p className="text-slate-400 text-sm mb-1">Treasury Balance</p>
-                                <p className="text-3xl font-bold text-blue-400">{formatNumber(treasuryBalance)}</p>
-                            </div>
-                            <div>
-                                <p className="text-slate-400 text-sm mb-1">Circulating Supply</p>
-                                <p className="text-3xl font-bold text-green-400">{formatNumber(totalSupply - treasuryBalance)}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Navigation Tabs */}
-                <div className="flex gap-2 mb-6 border-b border-slate-700">
-                    {(['overview', 'transfers', 'vesting', 'activity'] as const).map((tab: TabKey) => (
-                        <button
-                            key={tab}
-                            onClick={() => setActiveTab(tab)}
-                            className={`px-6 py-3 font-medium capitalize transition-colors ${activeTab === tab
-                                ? 'text-blue-400 border-b-2 border-blue-400'
-                                : 'text-slate-400 hover:text-white'
-                                }`}
-                        >
-                            {tab}
-                        </button>
-                    ))}
-                </div>
-
-                {/* Overview Tab */}
-                {activeTab === 'overview' && (
-                    <div className="space-y-6">
-                        {/* Wallet Cards */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {wallets.map((wallet) => {
-                                const Icon = wallet.icon;
-                                return (
-                                    <div
-                                        key={wallet.id}
-                                        onClick={() => setSelectedWallet(wallet)}
-                                        className={`bg-slate-800/50 backdrop-blur border ${getBorderColor(wallet.color)} rounded-xl p-6 cursor-pointer hover:bg-slate-800 transition-all hover:scale-105`}
-                                    >
-                                        <div className="flex items-start justify-between mb-4">
-                                            <div className={`${getColorClass(wallet.color)} p-3 rounded-lg`}>
-                                                <Icon className="w-6 h-6" />
-                                            </div>
-                                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${wallet.status === 'active' ? 'bg-green-500/20 text-green-400' :
-                                                wallet.status === 'vesting' ? 'bg-yellow-500/20 text-yellow-400' :
-                                                    'bg-red-500/20 text-red-400'
-                                                }`}>
-                                                {wallet.status}
-                                            </span>
-                                        </div>
-
-                                        <h3 className="text-lg font-semibold mb-2">{wallet.name}</h3>
-                                        <p className="text-2xl font-bold mb-1">{formatNumber(wallet.balance)}</p>
-                                        <p className="text-slate-400 text-sm mb-3">{wallet.percentage}% of supply</p>
-
-                                        {hasVestingData(wallet) && (
-                                            <div className="pt-3 border-t border-slate-700">
-                                                <div className="flex justify-between text-sm mb-1">
-                                                    <span className="text-slate-400">Vested</span>
-                                                    <span className="font-medium">{formatNumber(wallet.vested)}</span>
-                                                </div>
-                                                <div className="w-full bg-slate-700 rounded-full h-2">
-                                                    <div
-                                                        className={`${getColorClass(wallet.color)} h-2 rounded-full`}
-                                                        style={{ width: `${(wallet.vested / wallet.allocated) * 100}%` }}
-                                                    />
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {wallet.multisig && (
-                                            <div className="mt-3 flex items-center gap-2 text-sm text-slate-400">
-                                                <Shield className="w-4 h-4" />
-                                                <span>Multi-sig: {wallet.multisig}</span>
-                                            </div>
-                                        )}
-                                    </div>
-                                );
-                            })}
-                        </div>
-
-                        {/* Distribution Chart */}
-                        <div className="bg-slate-800/50 backdrop-blur border border-slate-700 rounded-xl p-6">
-                            <h3 className="text-xl font-semibold mb-4">Token Distribution</h3>
-                            <div className="space-y-3">
-                                {wallets.map((wallet) => (
-                                    <div key={wallet.id} className="space-y-1">
-                                        <div className="flex justify-between text-sm">
-                                            <span>{wallet.name}</span>
-                                            <span className="font-medium">{wallet.percentage}%</span>
-                                        </div>
-                                        <div className="w-full bg-slate-700 rounded-full h-3">
-                                            <div
-                                                className={`${getColorClass(wallet.color)} h-3 rounded-full transition-all`}
-                                                style={{ width: `${wallet.percentage}%` }}
-                                            />
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* Transfers Tab */}
-                {activeTab === 'transfers' && (
-                    <div className="space-y-6">
-                        {/* Pending Approvals */}
-                        <div className="bg-slate-800/50 backdrop-blur border border-slate-700 rounded-xl p-6">
-                            <div className="flex items-center justify-between mb-4">
-                                <h3 className="text-xl font-semibold flex items-center gap-2">
-                                    <Clock className="w-5 h-5 text-yellow-400" />
-                                    Pending Approvals
-                                </h3>
-                                <button className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-sm transition-colors">
-                                    New Transfer
-                                </button>
-                            </div>
-
-                            <div className="space-y-4">
-                                {pendingTransactions.map((tx) => (
-                                    <div key={tx.id} className="bg-slate-900/50 border border-slate-700 rounded-lg p-4">
-                                        <div className="flex items-start justify-between mb-3">
-                                            <div className="flex-1">
-                                                <div className="flex items-center gap-2 mb-2">
-                                                    <span className="font-medium">{tx.from}</span>
-                                                    <ArrowRight className="w-4 h-4 text-slate-400" />
-                                                    <span className="font-medium">{tx.to}</span>
-                                                </div>
-                                                <p className="text-2xl font-bold mb-1">{formatNumber(tx.amount)} tokens</p>
-                                                <p className="text-slate-400 text-sm">{tx.reason}</p>
-                                            </div>
-
-                                            <div className="text-right">
-                                                <div className="flex items-center gap-2 mb-2">
-                                                    <div className="bg-yellow-500/20 text-yellow-400 px-3 py-1 rounded-full text-xs font-medium">
-                                                        {tx.approvals}/{tx.required} signatures
-                                                    </div>
-                                                </div>
-                                                <p className="text-slate-400 text-xs">Initiated: {tx.initiated}</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex gap-2">
-                                            <button className="flex-1 bg-green-600 hover:bg-green-700 py-2 rounded-lg text-sm font-medium transition-colors">
-                                                Approve
-                                            </button>
-                                            <button className="flex-1 bg-red-600 hover:bg-red-700 py-2 rounded-lg text-sm font-medium transition-colors">
-                                                Reject
-                                            </button>
-                                            <button className="px-4 bg-slate-700 hover:bg-slate-600 py-2 rounded-lg text-sm font-medium transition-colors">
-                                                Details
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Transfer Form */}
-                        <div className="bg-slate-800/50 backdrop-blur border border-slate-700 rounded-xl p-6">
-                            <h3 className="text-xl font-semibold mb-4">Initiate New Transfer</h3>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium mb-2">From Wallet</label>
-                                    <select className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2">
-                                        <option>Treasury Master</option>
-                                        <option>Marketing & Community</option>
-                                        <option>Liquidity Pool</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium mb-2">To Address</label>
-                                    <input type="text" placeholder="0x..." className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2" />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium mb-2">Amount</label>
-                                    <input type="number" placeholder="0.00" className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2" />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium mb-2">Purpose</label>
-                                    <select className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2">
-                                        <option>Marketing Campaign</option>
-                                        <option>Liquidity Provision</option>
-                                        <option>Partnership</option>
-                                        <option>Development</option>
-                                    </select>
-                                </div>
-                                <div className="col-span-2">
-                                    <label className="block text-sm font-medium mb-2">Reason / Notes</label>
-                                    <textarea className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 h-24" placeholder="Detailed explanation..."></textarea>
-                                </div>
-                            </div>
-                            <button className="mt-4 w-full bg-blue-600 hover:bg-blue-700 py-3 rounded-lg font-medium transition-colors">
-                                Submit for Approval
+                            <button className="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg flex items-center gap-2 transition-colors">
+                                <Settings className="w-5 h-5" />
+                                Admin Settings
                             </button>
                         </div>
-                    </div>
-                )}
 
-                {/* Vesting Tab */}
-                {activeTab === 'vesting' && (
-                    <div className="space-y-6">
+                        {/* Total Supply Card */}
                         <div className="bg-slate-800/50 backdrop-blur border border-slate-700 rounded-xl p-6">
-                            <h3 className="text-xl font-semibold mb-4">Active Vesting Schedules</h3>
-                            <div className="space-y-4">
-                                {wallets.filter(isVestingWallet).map((wallet) => {
+                            <div className="grid grid-cols-3 gap-6">
+                                <div>
+                                    <p className="text-slate-400 text-sm mb-1">Total Minted Supply</p>
+                                    <p className="text-3xl font-bold">{formatNumber(totalSupply)}</p>
+                                </div>
+                                <div>
+                                    <p className="text-slate-400 text-sm mb-1">Treasury Balance</p>
+                                    <p className="text-3xl font-bold text-blue-400">{formatNumber(treasuryBalance)}</p>
+                                </div>
+                                <div>
+                                    <p className="text-slate-400 text-sm mb-1">Circulating Supply</p>
+                                    <p className="text-3xl font-bold text-green-400">{formatNumber(totalSupply - treasuryBalance)}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Navigation Tabs */}
+                    <div className="flex gap-2 mb-6 border-b border-slate-700">
+                        {(['overview', 'transfers', 'vesting', 'activity'] as const).map((tab: TabKey) => (
+                            <button
+                                key={tab}
+                                onClick={() => setActiveTab(tab)}
+                                className={`px-6 py-3 font-medium capitalize transition-colors ${activeTab === tab
+                                    ? 'text-blue-400 border-b-2 border-blue-400'
+                                    : 'text-slate-400 hover:text-white'
+                                    }`}
+                            >
+                                {tab}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Overview Tab */}
+                    {activeTab === 'overview' && (
+                        <div className="space-y-6">
+                            {/* Wallet Cards */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {wallets.map((wallet) => {
                                     const Icon = wallet.icon;
                                     return (
-                                        <div key={wallet.id} className="bg-slate-900/50 border border-slate-700 rounded-lg p-4">
-                                            <div className="flex items-center gap-3 mb-4">
-                                                <div className={`${getColorClass(wallet.color)} p-2 rounded-lg`}>
-                                                    <Icon className="w-5 h-5" />
+                                        <div
+                                            key={wallet.id}
+                                            onClick={() => setSelectedWallet(wallet)}
+                                            className={`bg-slate-800/50 backdrop-blur border ${getBorderColor(wallet.color)} rounded-xl p-6 cursor-pointer hover:bg-slate-800 transition-all hover:scale-105`}
+                                        >
+                                            <div className="flex items-start justify-between mb-4">
+                                                <div className={`${getColorClass(wallet.color)} p-3 rounded-lg`}>
+                                                    <Icon className="w-6 h-6" />
                                                 </div>
-                                                <div className="flex-1">
-                                                    <h4 className="font-semibold">{wallet.name}</h4>
-                                                    <p className="text-slate-400 text-sm">Vesting ends: {wallet.vestingEnd}</p>
-                                                </div>
-                                                <button className="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg text-sm transition-colors">
-                                                    Manage
-                                                </button>
+                                                <span className={`px-3 py-1 rounded-full text-xs font-medium ${wallet.status === 'active' ? 'bg-green-500/20 text-green-400' :
+                                                    wallet.status === 'vesting' ? 'bg-yellow-500/20 text-yellow-400' :
+                                                        'bg-red-500/20 text-red-400'
+                                                    }`}>
+                                                    {wallet.status}
+                                                </span>
                                             </div>
 
-                                            <div className="grid grid-cols-3 gap-4 mb-3">
-                                                <div>
-                                                    <p className="text-slate-400 text-xs mb-1">Total Allocated</p>
-                                                    <p className="font-semibold">{formatNumber(wallet.allocated)}</p>
-                                                </div>
-                                                <div>
-                                                    <p className="text-slate-400 text-xs mb-1">Vested</p>
-                                                    <p className="font-semibold text-green-400">{formatNumber(wallet.vested)}</p>
-                                                </div>
-                                                <div>
-                                                    <p className="text-slate-400 text-xs mb-1">Remaining</p>
-                                                    <p className="font-semibold text-yellow-400">{formatNumber(wallet.allocated - wallet.vested)}</p>
-                                                </div>
-                                            </div>
+                                            <h3 className="text-lg font-semibold mb-2">{wallet.name}</h3>
+                                            <p className="text-2xl font-bold mb-1">{formatNumber(wallet.balance)}</p>
+                                            <p className="text-slate-400 text-sm mb-3">{wallet.percentage}% of supply</p>
 
-                                            <div className="w-full bg-slate-700 rounded-full h-3">
-                                                <div
-                                                    className={`${getColorClass(wallet.color)} h-3 rounded-full`}
-                                                    style={{ width: `${(wallet.vested / wallet.allocated) * 100}%` }}
-                                                />
-                                            </div>
-                                            <p className="text-right text-sm text-slate-400 mt-1">
-                                                {((wallet.vested / wallet.allocated) * 100).toFixed(1)}% vested
-                                            </p>
+                                            {hasVestingData(wallet) && (
+                                                <div className="pt-3 border-t border-slate-700">
+                                                    <div className="flex justify-between text-sm mb-1">
+                                                        <span className="text-slate-400">Vested</span>
+                                                        <span className="font-medium">{formatNumber(wallet.vested)}</span>
+                                                    </div>
+                                                    <div className="w-full bg-slate-700 rounded-full h-2">
+                                                        <div
+                                                            className={`${getColorClass(wallet.color)} h-2 rounded-full`}
+                                                            style={{ width: `${(wallet.vested / wallet.allocated) * 100}%` }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {wallet.multisig && (
+                                                <div className="mt-3 flex items-center gap-2 text-sm text-slate-400">
+                                                    <Shield className="w-4 h-4" />
+                                                    <span>Multi-sig: {wallet.multisig}</span>
+                                                </div>
+                                            )}
                                         </div>
                                     );
                                 })}
                             </div>
-                        </div>
 
-                        {/* Create Vesting Schedule */}
-                        <div className="bg-slate-800/50 backdrop-blur border border-slate-700 rounded-xl p-6">
-                            <h3 className="text-xl font-semibold mb-4">Create Vesting Schedule</h3>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium mb-2">Beneficiary Address</label>
-                                    <input type="text" placeholder="0x..." className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2" />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium mb-2">Total Amount</label>
-                                    <input type="number" placeholder="0.00" className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2" />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium mb-2">Start Date</label>
-                                    <input type="date" className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2" />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium mb-2">Cliff Period (months)</label>
-                                    <input type="number" placeholder="12" className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2" />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium mb-2">Vesting Duration (months)</label>
-                                    <input type="number" placeholder="48" className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2" />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium mb-2">Release Type</label>
-                                    <select className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2">
-                                        <option>Linear Release</option>
-                                        <option>Monthly Milestones</option>
-                                        <option>Quarterly Milestones</option>
-                                    </select>
+                            {/* Distribution Chart */}
+                            <div className="bg-slate-800/50 backdrop-blur border border-slate-700 rounded-xl p-6">
+                                <h3 className="text-xl font-semibold mb-4">Token Distribution</h3>
+                                <div className="space-y-3">
+                                    {wallets.map((wallet) => (
+                                        <div key={wallet.id} className="space-y-1">
+                                            <div className="flex justify-between text-sm">
+                                                <span>{wallet.name}</span>
+                                                <span className="font-medium">{wallet.percentage}%</span>
+                                            </div>
+                                            <div className="w-full bg-slate-700 rounded-full h-3">
+                                                <div
+                                                    className={`${getColorClass(wallet.color)} h-3 rounded-full transition-all`}
+                                                    style={{ width: `${wallet.percentage}%` }}
+                                                />
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
-                            <button className="mt-4 w-full bg-blue-600 hover:bg-blue-700 py-3 rounded-lg font-medium transition-colors">
+                        </div>
+                    )}
+
+                    {/* Transfers Tab */}
+                    {activeTab === 'transfers' && (
+                        <div className="space-y-6">
+                            {/* Pending Approvals */}
+                            <div className="bg-slate-800/50 backdrop-blur border border-slate-700 rounded-xl p-6">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="text-xl font-semibold flex items-center gap-2">
+                                        <Clock className="w-5 h-5 text-yellow-400" />
+                                        Pending Approvals
+                                    </h3>
+                                    <button
+                                        className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-sm transition-colors"
+                                        onClick={() => setIsTransferModalOpen(true)}
+                                    >
+                                        New Transfer
+                                    </button>
+                                </div>
+
+                                <div className="space-y-4">
+                                    {pendingTransactions.map((tx) => (
+                                        <div key={tx.id} className="bg-slate-900/50 border border-slate-700 rounded-lg p-4">
+                                            <div className="flex items-start justify-between mb-3">
+                                                <div className="flex-1">
+                                                    <div className="flex items-center gap-2 mb-2">
+                                                        <span className="font-medium">{tx.from}</span>
+                                                        <ArrowRight className="w-4 h-4 text-slate-400" />
+                                                        <span className="font-medium">{tx.to}</span>
+                                                    </div>
+                                                    <p className="text-2xl font-bold mb-1">{formatNumber(tx.amount)} tokens</p>
+                                                    <p className="text-slate-400 text-sm">{tx.reason}</p>
+                                                </div>
+
+                                                <div className="text-right">
+                                                    <div className="flex items-center gap-2 mb-2">
+                                                        <div className="bg-yellow-500/20 text-yellow-400 px-3 py-1 rounded-full text-xs font-medium">
+                                                            {tx.approvals}/{tx.required} signatures
+                                                        </div>
+                                                    </div>
+                                                    <p className="text-slate-400 text-xs">Initiated: {tx.initiated}</p>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex gap-2">
+                                                <button className="flex-1 bg-green-600 hover:bg-green-700 py-2 rounded-lg text-sm font-medium transition-colors">
+                                                    Approve
+                                                </button>
+                                                <button className="flex-1 bg-red-600 hover:bg-red-700 py-2 rounded-lg text-sm font-medium transition-colors">
+                                                    Reject
+                                                </button>
+                                                <button className="px-4 bg-slate-700 hover:bg-slate-600 py-2 rounded-lg text-sm font-medium transition-colors">
+                                                    Details
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="bg-slate-800/50 backdrop-blur border border-slate-700 rounded-xl p-6 flex items-center justify-between">
+                                <div>
+                                    <h3 className="text-xl font-semibold mb-2">Initiate New Transfer</h3>
+                                    <p className="text-sm text-slate-400">Launch the transfer wizard to create, review, and submit a multi-sig request.</p>
+                                </div>
+                                <button
+                                    className="bg-blue-600 hover:bg-blue-700 px-5 py-2 rounded-lg text-sm font-medium transition-colors"
+                                    onClick={() => setIsTransferModalOpen(true)}
+                                >
+                                    Open Modal
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Vesting Tab */}
+                    {activeTab === 'vesting' && (
+                        <div className="space-y-6">
+                            <div className="bg-slate-800/50 backdrop-blur border border-slate-700 rounded-xl p-6">
+                                <h3 className="text-xl intended font-semibold mb-4">Active Vesting Schedules</h3>
+                                <div className="space-y-4">
+                                    {wallets.filter(isVestingWallet).map((wallet) => {
+                                        const Icon = wallet.icon;
+                                        return (
+                                            <div key={wallet.id} className="bg-slate-900/50 border border-slate-700 rounded-lg p-4">
+                                                <div className="flex items-center gap-3 mb-4">
+                                                    <div className={`${getColorClass(wallet.color)} p-2 rounded-lg`}>
+                                                        <Icon className="w-5 h-5" />
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <h4 className="font-semibold">{wallet.name}</h4>
+                                                        <p className="text-slate-400 text-sm">Vesting ends: {wallet.vestingEnd}</p>
+                                                    </div>
+                                                    <button className="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg text-sm transition-colors">
+                                                        Manage
+                                                    </button>
+                                                </div>
+
+                                                <div className="grid grid-cols-3 gap-4 mb-3">
+                                                    <div>
+                                                        <p className="text-slate-400 text-xs mb-1">Total Allocated</p>
+                                                        <p className="font-semibold">{formatNumber(wallet.allocated)}</p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-slate-400 text-xs mb-1">Vested</p>
+                                                        <p className="font-semibold text-green-400">{formatNumber(wallet.vested)}</p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-slate-400 text-xs mb-1">Remaining</p>
+                                                        <p className="font-semibold text-yellow-400">{formatNumber(wallet.allocated - wallet.vested)}</p>
+                                                    </div>
+                                                </div>
+
+                                                <div className="w-full bg-slate-700 rounded-full h-3">
+                                                    <div
+                                                        className={`${getColorClass(wallet.color)} h-3 rounded-full`}
+                                                        style={{ width: `${(wallet.vested / wallet.allocated) * 100}%` }}
+                                                    />
+                                                </div>
+                                                <p className="text-right text-sm text-slate-400 mt-1">
+                                                    {((wallet.vested / wallet.allocated) * 100).toFixed(1)}% vested
+                                                </p>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            <div className="bg-slate-800/50 backdrop-blur border border-slate-700 rounded-xl p-6 flex items-center justify-between">
+                                <div>
+                                    <h3 className="text-xl font-semibold mb-2">Create Vesting Schedule</h3>
+                                    <p className="text-sm text-slate-400">Configure cliffs, duration, and beneficiaries using the guided modal.</p>
+                                </div>
+                                <button
+                                    className="bg-blue-600 hover:bg-blue-700 px-5 py-2 rounded-lg text-sm font-medium transition-colors"
+                                    onClick={() => setIsVestingModalOpen(true)}
+                                >
+                                    Launch Builder
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {isTransferModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-black/70" onClick={() => setIsTransferModalOpen(false)} />
+                    <div
+                        role="dialog"
+                        aria-modal="true"
+                        className="relative z-10 w-full max-w-2xl bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl p-6"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex items-start justify-between mb-4">
+                            <div>
+                                <p className="text-xs uppercase tracking-widest text-slate-500">Transfer Wizard</p>
+                                <h3 className="text-2xl font-semibold">Initiate New Transfer</h3>
+                                <p className="text-sm text-slate-400">Fill in all details before submitting for multi-sig approval.</p>
+                            </div>
+                            <button
+                                className="text-slate-400 hover:text-white transition-colors"
+                                onClick={() => setIsTransferModalOpen(false)}
+                                aria-label="Close transfer modal"
+                            >
+                                ✕
+                            </button>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium mb-2">From Wallet</label>
+                                <select className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2">
+                                    <option>Treasury Master</option>
+                                    <option>Marketing & Community</option>
+                                    <option>Liquidity Pool</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-2">To Address</label>
+                                <input type="text" placeholder="0x..." className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2" />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-2">Amount</label>
+                                <input type="number" placeholder="0.00" className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2" />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-2">Purpose</label>
+                                <select className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2">
+                                    <option>Marketing Campaign</option>
+                                    <option>Liquidity Provision</option>
+                                    <option>Partnership</option>
+                                    <option>Development</option>
+                                </select>
+                            </div>
+                            <div className="md:col-span-2">
+                                <label className="block text-sm font-medium mb-2">Reason / Notes</label>
+                                <textarea className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 h-24" placeholder="Detailed explanation..."></textarea>
+                            </div>
+                        </div>
+                        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
+                            <button
+                                className="px-5 py-3 rounded-lg border border-slate-600 text-sm font-medium hover:bg-slate-800 transition-colors"
+                                onClick={() => setIsTransferModalOpen(false)}
+                            >
+                                Cancel
+                            </button>
+                            <button className="px-6 py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-sm font-semibold transition-colors">
+                                Submit for Approval
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {isVestingModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-black/70" onClick={() => setIsVestingModalOpen(false)} />
+                    <div
+                        role="dialog"
+                        aria-modal="true"
+                        className="relative z-10 w-full max-w-3xl bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl p-6"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex items-start justify-between mb-4">
+                            <div>
+                                <p className="text-xs uppercase tracking-widest text-slate-500">Vesting Builder</p>
+                                <h3 className="text-2xl font-semibold">Create Vesting Schedule</h3>
+                                <p className="text-sm text-slate-400">Define beneficiary, amounts, timing, and release cadence.</p>
+                            </div>
+                            <button
+                                className="text-slate-400 hover:text-white transition-colors"
+                                onClick={() => setIsVestingModalOpen(false)}
+                                aria-label="Close vesting modal"
+                            >
+                                ✕
+                            </button>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium mb-2">Beneficiary Address</label>
+                                <input type="text" placeholder="0x..." className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2" />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-2">Beneficiary Name (optional)</label>
+                                <input type="text" placeholder="Team Member / Fund" className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2" />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-2">Total Amount</label>
+                                <input type="number" placeholder="0.00" className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2" />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-2">Token Source</label>
+                                <select className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2">
+                                    <option>Treasury Master</option>
+                                    <option>Founders & Team</option>
+                                    <option>Investors Pool</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-2">Start Date</label>
+                                <input type="date" className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2" />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-2">Cliff Period (months)</label>
+                                <input type="number" placeholder="12" className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2" />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-2">Vesting Duration (months)</label>
+                                <input type="number" placeholder="48" className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2" />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-2">Release Cadence</label>
+                                <select className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2">
+                                    <option>Linear Release</option>
+                                    <option>Monthly Milestones</option>
+                                    <option>Quarterly Milestones</option>
+                                </select>
+                            </div>
+                            <div className="md:col-span-2">
+                                <label className="block text-sm font-medium mb-2">Notes / Instructions</label>
+                                <textarea className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 h-24" placeholder="Add compliance notes, unlock logic, or approvals..."></textarea>
+                            </div>
+                        </div>
+                        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
+                            <button
+                                className="px-5 py-3 rounded-lg border border-slate-600 text-sm font-medium hover:bg-slate-800 transition-colors"
+                                onClick={() => setIsVestingModalOpen(false)}
+                            >
+                                Cancel
+                            </button>
+                            <button className="px-6 py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-sm font-semibold transition-colors">
                                 Create Vesting Schedule
                             </button>
                         </div>
                     </div>
-                )}
-
-                {/* Activity Tab */}
-                {activeTab === 'activity' && (
-                    <div className="bg-slate-800/50 backdrop-blur border border-slate-700 rounded-xl p-6">
-                        <h3 className="text-xl font-semibold mb-4">Recent Activity</h3>
-                        <div className="space-y-3">
-                            {recentActivity.map((activity) => (
-                                <div key={activity.id} className="flex items-center gap-4 bg-slate-900/50 border border-slate-700 rounded-lg p-4">
-                                    <div className={`${activity.status === 'completed' ? 'bg-green-500' : 'bg-yellow-500'} p-2 rounded-lg`}>
-                                        {activity.status === 'completed' ? <CheckCircle className="w-5 h-5" /> : <Clock className="w-5 h-5" />}
-                                    </div>
-                                    <div className="flex-1">
-                                        <p className="font-medium">{activity.action}</p>
-                                        <p className="text-sm text-slate-400">{activity.from} → {activity.to}</p>
-                                    </div>
-                                    <div className="text-right">
-                                        <p className="font-semibold">{formatNumber(activity.amount)}</p>
-                                        <p className="text-xs text-slate-400">{activity.date}</p>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
-            </div>
-        </div>
+                </div>
+            )}
+        </>
     );
 };
 
