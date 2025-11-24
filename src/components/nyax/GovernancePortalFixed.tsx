@@ -69,73 +69,96 @@ export function GovernancePortal() {
     const [selectedTab, setSelectedTab] = useState<'active' | 'history'>('active');
     const [proposalFilter, setProposalFilter] = useState<typeof FILTERS[number]['value']>('all');
 
-    // Convert contract proposals to component format or use mock data
+    // Convert contract proposals to component format with enhanced integration
     const proposals: Proposal[] = useMemo(() => {
+        // Always prioritize real contract data when available
         if (contractProposals && contractProposals.length > 0) {
-            return contractProposals.map(p => ({
-                id: p.id,
-                title: p.title || `Proposal #${p.id}`,
-                description: p.description || 'No description provided',
-                proposer: p.proposer,
-                status: p.status === 'canceled' ? 'defeated' : p.status,
-                forVotes: p.forVotes,
-                againstVotes: p.againstVotes,
-                abstainVotes: p.abstainVotes,
-                startTime: new Date(p.startBlock * 12000), // Approximate block time
-                endTime: new Date(p.endBlock * 12000),
-                executionTime: p.eta > 0 ? new Date(p.eta * 1000) : undefined,
-                quorum: stats?.quorumVotes || '1000000',
-                category: p.category?.toLowerCase() === 'treasury' ? 'treasury' :
-                    p.category?.toLowerCase() === 'protocol' ? 'protocol' : 'ecosystem',
-                isEmergency: p.isEmergency
-            }));
+            console.log('Using real contract proposals:', contractProposals.length);
+            return contractProposals.map(p => {
+                // Convert block numbers to approximate timestamps (assuming 12 second blocks)
+                const startTime = p.startBlock > 0 ? new Date(Date.now() - ((Date.now() / 1000 - p.startBlock * 12) * 1000)) : new Date();
+                const endTime = p.endBlock > 0 ? new Date(Date.now() + ((p.endBlock * 12 - Date.now() / 1000) * 1000)) : new Date(Date.now() + 604800000);
+
+                return {
+                    id: p.id,
+                    title: p.title || `Proposal #${p.id}`,
+                    description: p.description || 'This proposal is currently being loaded from the blockchain.',
+                    proposer: p.proposer,
+                    status: p.status === 'canceled' ? 'defeated' : p.status as Proposal['status'],
+                    forVotes: p.forVotes,
+                    againstVotes: p.againstVotes,
+                    abstainVotes: p.abstainVotes,
+                    startTime,
+                    endTime,
+                    executionTime: p.eta > 0 ? new Date(p.eta * 1000) : undefined,
+                    quorum: stats?.quorumVotes || '1000000',
+                    category: (p.category?.toLowerCase() === 'treasury' ? 'treasury' :
+                        p.category?.toLowerCase() === 'protocol' ? 'protocol' : 'ecosystem') as Proposal['category'],
+                    isEmergency: p.isEmergency || false
+                };
+            });
         }
 
-        // Fallback to mock data
+        // Enhanced mock data with more realistic scenarios for testing
+        console.log('Using mock proposal data for testing');
         return [
             {
                 id: '1',
-                title: 'Increase Treasury Allocation for Development',
-                description: 'Increase the development category allocation from 25% to 30% to accelerate platform growth.',
+                title: 'Treasury Rebalancing Initiative',
+                description: 'Rebalance treasury allocations to support increased development velocity and community growth initiatives.',
                 proposer: '0x742d35Cc6634C0532925a3b8D4C2C4e4C4C4C4C4',
                 status: 'active',
-                forVotes: '2500000',
-                againstVotes: '500000',
-                abstainVotes: '100000',
-                startTime: new Date(Date.now() - 86400000),
-                endTime: new Date(Date.now() + 518400000),
-                quorum: '1000000',
+                forVotes: '3200000',
+                againstVotes: '450000',
+                abstainVotes: '180000',
+                startTime: new Date(Date.now() - 172800000), // 2 days ago
+                endTime: new Date(Date.now() + 345600000), // 4 days from now
+                quorum: '1500000',
                 category: 'treasury'
             },
             {
                 id: '2',
-                title: 'Emergency Protocol Upgrade',
-                description: 'Critical security upgrade to fix a potential vulnerability in the treasury contract.',
+                title: 'Emergency Security Patch v2.1',
+                description: 'Critical security upgrade to address potential vulnerability in the governance timelock mechanism.',
                 proposer: '0x123d35Cc6634C0532925a3b8D4C2C4e4C4C4C4C4',
                 status: 'succeeded',
-                forVotes: '5000000',
-                againstVotes: '200000',
-                abstainVotes: '50000',
-                startTime: new Date(Date.now() - 604800000),
-                endTime: new Date(Date.now() - 86400000),
-                executionTime: new Date(Date.now() + 172800000),
-                quorum: '1000000',
+                forVotes: '5800000',
+                againstVotes: '120000',
+                abstainVotes: '80000',
+                startTime: new Date(Date.now() - 518400000), // 6 days ago
+                endTime: new Date(Date.now() - 86400000), // 1 day ago
+                executionTime: new Date(Date.now() + 86400000), // 1 day from now
+                quorum: '1500000',
                 category: 'protocol',
                 isEmergency: true
             },
             {
                 id: '3',
-                title: 'Community Accelerator Grants',
-                description: 'Allocate 2% of the ecosystem fund to sponsor NYAX community hackathons and accelerators.',
+                title: 'Community Grants Program Q1 2025',
+                description: 'Establish a quarterly grants program to fund community-driven projects, hackathons, and educational initiatives.',
                 proposer: '0x98ab35aa6634C0532925a3b8D4C2C4e4C4C4BEEF',
                 status: 'active',
-                forVotes: '1200000',
-                againstVotes: '150000',
-                abstainVotes: '20000',
-                startTime: new Date(Date.now() - 43200000),
-                endTime: new Date(Date.now() + 259200000),
-                quorum: '800000',
+                forVotes: '1850000',
+                againstVotes: '280000',
+                abstainVotes: '95000',
+                startTime: new Date(Date.now() - 86400000), // 1 day ago
+                endTime: new Date(Date.now() + 432000000), // 5 days from now
+                quorum: '1200000',
                 category: 'ecosystem'
+            },
+            {
+                id: '4',
+                title: 'Governance Parameter Optimization',
+                description: 'Adjust voting periods and quorum requirements based on community feedback and participation analysis.',
+                proposer: '0x456d35Cc6634C0532925a3b8D4C2C4e4C4C4CAFE',
+                status: 'defeated',
+                forVotes: '890000',
+                againstVotes: '2100000',
+                abstainVotes: '150000',
+                startTime: new Date(Date.now() - 864000000), // 10 days ago
+                endTime: new Date(Date.now() - 259200000), // 3 days ago
+                quorum: '1500000',
+                category: 'protocol'
             }
         ];
     }, [contractProposals, stats]);
@@ -150,23 +173,53 @@ export function GovernancePortal() {
         return dataset.filter((p) => p.category === proposalFilter);
     }, [activeProposals, historicalProposals, proposalFilter, selectedTab]);
 
-    const governanceHighlights = [
-        {
-            title: 'Emergency Bridge Upgrade',
-            description: 'Executed 24h after quorum with 92% approval.',
-            status: 'executed' as const
-        },
-        {
-            title: 'Treasury Streaming Pilot',
-            description: 'Queued for execution pending on-chain audit.',
-            status: 'queued' as const
-        },
-        {
-            title: 'Community Accelerator Grants',
-            description: 'Live vote gathering ecosystem delegates.',
-            status: 'active' as const
+    // Dynamic governance highlights based on actual proposal data
+    const governanceHighlights = useMemo(() => {
+        const recentProposals = proposals.slice(0, 3);
+
+        if (recentProposals.length === 0) {
+            return [
+                {
+                    title: 'No Active Proposals',
+                    description: 'Connect your wallet to view governance activity.',
+                    status: 'active' as const
+                }
+            ];
         }
-    ];
+
+        return recentProposals.map(proposal => {
+            let description = '';
+            const totalVotes = parseFloat(proposal.forVotes) + parseFloat(proposal.againstVotes) + parseFloat(proposal.abstainVotes);
+            const approvalRate = totalVotes > 0 ? (parseFloat(proposal.forVotes) / totalVotes * 100).toFixed(0) : '0';
+
+            switch (proposal.status) {
+                case 'executed':
+                    description = `Executed with ${approvalRate}% approval rate.`;
+                    break;
+                case 'succeeded':
+                    description = `Passed with ${approvalRate}% approval, queued for execution.`;
+                    break;
+                case 'queued':
+                    description = `Queued for execution with ${approvalRate}% approval.`;
+                    break;
+                case 'active':
+                    const timeLeft = Math.ceil((proposal.endTime.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+                    description = `Active vote with ${timeLeft} days remaining.`;
+                    break;
+                case 'defeated':
+                    description = `Failed to reach quorum with ${approvalRate}% approval.`;
+                    break;
+                default:
+                    description = `Current approval rate: ${approvalRate}%.`;
+            }
+
+            return {
+                title: proposal.title.length > 30 ? proposal.title.substring(0, 30) + '...' : proposal.title,
+                description,
+                status: proposal.status === 'succeeded' ? 'queued' as const : proposal.status as 'active' | 'queued' | 'executed'
+            };
+        });
+    }, [proposals]);
 
     const governanceTimeline = [
         { label: 'Proposal Draft', value: 'Nov 12, 2025' },
@@ -175,11 +228,61 @@ export function GovernancePortal() {
         { label: 'Execution ETA', value: 'Nov 27, 2025' }
     ];
 
-    const activityFeed = [
-        { id: 1, action: 'You delegated 250,000 NYAX to 0x42...BEEF', meta: '3 hours ago' },
-        { id: 2, action: 'Protocol Upgrade #12 moved to queue', meta: 'Yesterday • 6:12 PM' },
-        { id: 3, action: '5 new delegates joined the council', meta: 'Nov 20, 2025' }
-    ];
+    // Dynamic activity feed based on proposal activity
+    const activityFeed = useMemo(() => {
+        const activities = [];
+
+        // Add recent proposal activities
+        proposals.slice(0, 4).forEach((proposal, index) => {
+            const timeAgo = Math.floor((Date.now() - proposal.startTime.getTime()) / (1000 * 60 * 60));
+            let timeText = '';
+
+            if (timeAgo < 1) {
+                timeText = 'Just now';
+            } else if (timeAgo < 24) {
+                timeText = `${timeAgo} hours ago`;
+            } else {
+                const daysAgo = Math.floor(timeAgo / 24);
+                timeText = `${daysAgo} days ago`;
+            }
+
+            let action = '';
+            switch (proposal.status) {
+                case 'active':
+                    action = `Proposal "${proposal.title}" is now active for voting`;
+                    break;
+                case 'succeeded':
+                    action = `Proposal "${proposal.title}" passed and queued for execution`;
+                    break;
+                case 'executed':
+                    action = `Proposal "${proposal.title}" has been executed`;
+                    break;
+                case 'defeated':
+                    action = `Proposal "${proposal.title}" was defeated`;
+                    break;
+                case 'queued':
+                    action = `Proposal "${proposal.title}" is queued for execution`;
+                    break;
+            }
+
+            activities.push({
+                id: index + 1,
+                action: action.length > 60 ? action.substring(0, 60) + '...' : action,
+                meta: timeText
+            });
+        });
+
+        // Add some governance system activities if we have space
+        if (activities.length < 3) {
+            activities.push({
+                id: activities.length + 1,
+                action: isConnected ? `Connected wallet: ${address?.slice(0, 6)}...${address?.slice(-4)}` : 'Wallet not connected',
+                meta: 'Current session'
+            });
+        }
+
+        return activities.slice(0, 3); // Limit to 3 items
+    }, [proposals, isConnected, address]);
 
     const calculateVotePercentage = (votes: string, total: string) => {
         const voteNum = parseFloat(votes);
@@ -193,11 +296,23 @@ export function GovernancePortal() {
         return 'bg-emerald-500/20 text-emerald-100 border border-emerald-500/30';
     };
 
+    const [votingStates, setVotingStates] = useState<Record<string, boolean>>({});
+    const [voteErrors, setVoteErrors] = useState<Record<string, string>>({});
+
     const handleVote = async (proposalId: string, support: 0 | 1 | 2) => {
+        setVotingStates(prev => ({ ...prev, [proposalId]: true }));
+        setVoteErrors(prev => ({ ...prev, [proposalId]: '' }));
+
         try {
             await castVote(proposalId, support);
+            // Show success message or update UI
+            console.log(`Successfully voted ${support === 1 ? 'FOR' : support === 0 ? 'AGAINST' : 'ABSTAIN'} on proposal ${proposalId}`);
         } catch (error) {
             console.error('Error casting vote:', error);
+            const errorMessage = error instanceof Error ? error.message : 'Failed to cast vote';
+            setVoteErrors(prev => ({ ...prev, [proposalId]: errorMessage }));
+        } finally {
+            setVotingStates(prev => ({ ...prev, [proposalId]: false }));
         }
     };
 
@@ -337,8 +452,15 @@ export function GovernancePortal() {
                             ))}
                         </div>
 
+                        {isLoading && (
+                            <div className="text-center py-8">
+                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mx-auto mb-4"></div>
+                                <p className="text-slate-400">Loading proposals from blockchain...</p>
+                            </div>
+                        )}
+
                         <div className="space-y-5">
-                            {filteredProposals.map((proposal) => {
+                            {!isLoading && filteredProposals.map((proposal) => {
                                 const totalVotes = parseFloat(proposal.forVotes) + parseFloat(proposal.againstVotes) + parseFloat(proposal.abstainVotes);
                                 const forPercentage = calculateVotePercentage(proposal.forVotes, totalVotes.toString());
                                 const againstPercentage = calculateVotePercentage(proposal.againstVotes, totalVotes.toString());
@@ -398,25 +520,46 @@ export function GovernancePortal() {
                                         </div>
 
                                         {proposal.status === 'active' && isConnected && parseFloat(userVotingPower) > 0 && (
-                                            <div className="flex flex-wrap gap-3">
-                                                <button
-                                                    onClick={() => handleVote(proposal.id, 1)}
-                                                    className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 font-semibold flex items-center gap-2"
-                                                >
-                                                    <CheckCircle className="w-4 h-4" /> Vote For
-                                                </button>
-                                                <button
-                                                    onClick={() => handleVote(proposal.id, 0)}
-                                                    className="px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 font-semibold flex items-center gap-2"
-                                                >
-                                                    <XCircle className="w-4 h-4" /> Vote Against
-                                                </button>
-                                                <button
-                                                    onClick={() => handleVote(proposal.id, 2)}
-                                                    className="px-4 py-2 rounded-lg border border-slate-700 text-slate-200"
-                                                >
-                                                    Abstain
-                                                </button>
+                                            <div className="space-y-3">
+                                                <div className="flex flex-wrap gap-3">
+                                                    <button
+                                                        onClick={() => handleVote(proposal.id, 1)}
+                                                        disabled={votingStates[proposal.id]}
+                                                        className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold flex items-center gap-2"
+                                                    >
+                                                        {votingStates[proposal.id] ? (
+                                                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                                        ) : (
+                                                            <CheckCircle className="w-4 h-4" />
+                                                        )}
+                                                        {votingStates[proposal.id] ? 'Voting...' : 'Vote For'}
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleVote(proposal.id, 0)}
+                                                        disabled={votingStates[proposal.id]}
+                                                        className="px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold flex items-center gap-2"
+                                                    >
+                                                        {votingStates[proposal.id] ? (
+                                                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                                        ) : (
+                                                            <XCircle className="w-4 h-4" />
+                                                        )}
+                                                        {votingStates[proposal.id] ? 'Voting...' : 'Vote Against'}
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleVote(proposal.id, 2)}
+                                                        disabled={votingStates[proposal.id]}
+                                                        className="px-4 py-2 rounded-lg border border-slate-700 text-slate-200 hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    >
+                                                        {votingStates[proposal.id] ? 'Voting...' : 'Abstain'}
+                                                    </button>
+                                                </div>
+                                                {voteErrors[proposal.id] && (
+                                                    <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-300 text-sm">
+                                                        <AlertCircle className="w-4 h-4 inline-block mr-2" />
+                                                        {voteErrors[proposal.id]}
+                                                    </div>
+                                                )}
                                             </div>
                                         )}
 
