@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.24;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "./NYAXToken.sol";
 import "./SimpleMultiSig.sol";
 
@@ -23,7 +22,6 @@ import "./SimpleMultiSig.sol";
  */
 contract Treasury is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
-    using SafeMath for uint256;
 
     // State variables
     NYAXToken public nyax;
@@ -71,14 +69,13 @@ contract Treasury is Ownable, ReentrancyGuard {
         address _nyax,
         address _multisig,
         address _owner
-    ) {
+    ) Ownable(_owner) {
         require(_nyax != address(0), "Treasury: Invalid NYAX address");
         require(_multisig != address(0), "Treasury: Invalid multisig address");
         require(_owner != address(0), "Treasury: Invalid owner address");
 
         nyax = NYAXToken(_nyax);
         multisig = SimpleMultiSig(payable(_multisig));
-        _transferOwnership(_owner);
     }
 
     /**
@@ -152,10 +149,10 @@ contract Treasury is Ownable, ReentrancyGuard {
 
         // Update category tracking if category exists
         if (categoryExists[category]) {
-            categoryDistributed[category] = categoryDistributed[category].add(amount);
+            categoryDistributed[category] += amount;
         }
 
-        nyax.safeTransfer(to, amount);
+        IERC20(address(nyax)).safeTransfer(to, amount);
         emit TransferExecuted(to, amount, reason, category);
     }
 
@@ -178,10 +175,10 @@ contract Treasury is Ownable, ReentrancyGuard {
 
         // Update category tracking if category exists
         if (categoryExists[category]) {
-            categoryDistributed[category] = categoryDistributed[category].add(amount);
+            categoryDistributed[category] += amount;
         }
 
-        nyax.safeTransfer(to, amount);
+        IERC20(address(nyax)).safeTransfer(to, amount);
         emit MultisigTransferExecuted(to, amount, reason, category);
     }
 
@@ -215,7 +212,7 @@ contract Treasury is Ownable, ReentrancyGuard {
 
         // Update category tracking if category exists
         if (categoryExists[category]) {
-            categoryDistributed[category] = categoryDistributed[category].add(amount);
+            categoryDistributed[category] += amount;
         }
 
         nyax.mint(to, amount);
@@ -270,8 +267,8 @@ contract Treasury is Ownable, ReentrancyGuard {
         distributed = categoryDistributed[category];
         
         uint256 totalSupply = nyax.totalSupply();
-        uint256 maxAllocation = totalSupply.mul(allocation).div(BASIS_POINTS);
-        remaining = maxAllocation > distributed ? maxAllocation.sub(distributed) : 0;
+        uint256 maxAllocation = (totalSupply * allocation) / BASIS_POINTS;
+        remaining = maxAllocation > distributed ? maxAllocation - distributed : 0;
     }
 
     /**
@@ -297,7 +294,7 @@ contract Treasury is Ownable, ReentrancyGuard {
     function getTotalAllocation() external view returns (uint256) {
         uint256 total = 0;
         for (uint256 i = 0; i < categories.length; i++) {
-            total = total.add(categoryAllocation[categories[i]]);
+            total += categoryAllocation[categories[i]];
         }
         return total;
     }

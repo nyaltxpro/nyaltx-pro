@@ -107,6 +107,11 @@ export default function Sidebar({ isMobileMenuOpen, toggleMobileMenu }: SidebarP
       text: 'Governance',
       href: '/dashboard/governance',
     },
+    {
+      icon: <GearIcon />,
+      text: 'DAO',
+      href: '/dashboard/dao',
+    },
     // { icon: <TokensIcon />, text: 'Create Token', href: '/dashboard/create-token' },
     { icon: <PlusIcon />, text: 'Register Token', href: '/pricing' },
 

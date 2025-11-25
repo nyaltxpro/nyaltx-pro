@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.24;
 
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /**
  * @title SimpleMultiSig
@@ -18,7 +17,6 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
  * Note: For production, consider using Gnosis Safe instead
  */
 contract SimpleMultiSig is ReentrancyGuard {
-    using SafeMath for uint256;
 
     // Events
     event OwnerAdded(address indexed owner);
@@ -122,7 +120,7 @@ contract SimpleMultiSig is ReentrancyGuard {
         transaction.executed = false;
         transaction.confirmations = 0;
 
-        transactionCount = transactionCount.add(1);
+        transactionCount += 1;
 
         emit TransactionSubmitted(txIndex, to, value, data);
         
@@ -145,7 +143,7 @@ contract SimpleMultiSig is ReentrancyGuard {
     {
         Transaction storage transaction = transactions[txIndex];
         transaction.isConfirmed[msg.sender] = true;
-        transaction.confirmations = transaction.confirmations.add(1);
+        transaction.confirmations += 1;
 
         emit TransactionConfirmed(msg.sender, txIndex);
 
@@ -169,7 +167,7 @@ contract SimpleMultiSig is ReentrancyGuard {
         require(transaction.isConfirmed[msg.sender], "SimpleMultiSig: Transaction not confirmed");
 
         transaction.isConfirmed[msg.sender] = false;
-        transaction.confirmations = transaction.confirmations.sub(1);
+        transaction.confirmations -= 1;
 
         emit TransactionRevoked(msg.sender, txIndex);
     }

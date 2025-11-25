@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.24;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "./VestingWalletFlexible.sol";
 
 /**
@@ -40,12 +40,11 @@ contract VestingFactory is Ownable, ReentrancyGuard {
      * @param _nyaxToken NYAX token address
      * @param _owner Factory owner address
      */
-    constructor(address _nyaxToken, address _owner) {
+    constructor(address _nyaxToken, address _owner) Ownable(_owner) {
         require(_nyaxToken != address(0), "VestingFactory: Invalid token address");
         require(_owner != address(0), "VestingFactory: Invalid owner address");
         
         nyaxToken = _nyaxToken;
-        _transferOwnership(_owner);
     }
 
     /**

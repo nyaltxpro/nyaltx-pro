@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.24;
 
 import "@openzeppelin/contracts/governance/Governor.sol";
 import "@openzeppelin/contracts/governance/extensions/GovernorSettings.sol";
@@ -35,6 +35,9 @@ contract NYAXGovernor is
     // Emergency governance
     mapping(uint256 => bool) public emergencyProposals;
     mapping(uint256 => bool) public fastTrackEnabled;
+
+    // Proposal metadata
+    mapping(uint256 => address) private _proposalCreators;
     
     // Constants
     uint256 public constant EMERGENCY_VOTING_DELAY = 1; // 1 block
@@ -53,8 +56,8 @@ contract NYAXGovernor is
     constructor(
         IVotes _token,
         TimelockController _timelock,
-        uint256 _votingDelay,
-        uint256 _votingPeriod,
+        uint48 _votingDelay,
+        uint32 _votingPeriod,
         uint256 _proposalThreshold,
         uint256 _quorumPercentage
     )
@@ -93,6 +96,19 @@ contract NYAXGovernor is
     }
 
     /**
+     * @dev Override propose to capture proposer addresses
+     */
+    function propose(
+        address[] memory targets,
+        uint256[] memory values,
+        bytes[] memory calldatas,
+        string memory description
+    ) public override returns (uint256 proposalId) {
+        proposalId = super.propose(targets, values, calldatas, description);
+        _proposalCreators[proposalId] = _msgSender();
+    }
+
+    /**
      * @dev Enable fast-track execution for critical proposals
      * @param proposalId The proposal ID to fast-track
      */
@@ -105,7 +121,7 @@ contract NYAXGovernor is
     /**
      * @dev Override voting delay for emergency proposals
      */
-    function proposalDeadline(uint256 proposalId) public view override returns (uint256) {
+    function proposalDeadline(uint256 proposalId) public view override(Governor) returns (uint256) {
         if (emergencyProposals[proposalId]) {
             return proposalSnapshot(proposalId) + EMERGENCY_VOTING_PERIOD;
         }
@@ -115,32 +131,32 @@ contract NYAXGovernor is
     /**
      * @dev Override voting delay for emergency proposals
      */
-    function votingDelay() public view override(IGovernor, GovernorSettings) returns (uint256) {
+    function votingDelay() public view override(Governor, GovernorSettings) returns (uint256) {
         return super.votingDelay();
     }
 
     /**
      * @dev Override voting period
      */
-    function votingPeriod() public view override(IGovernor, GovernorSettings) returns (uint256) {
+    function votingPeriod() public view override(Governor, GovernorSettings) returns (uint256) {
         return super.votingPeriod();
     }
 
     /**
      * @dev Override quorum for emergency proposals
      */
-    function quorum(uint256 blockNumber) public view override(IGovernor, GovernorVotesQuorumFraction) returns (uint256) {
+    function quorum(uint256 blockNumber) public view override(Governor, GovernorVotesQuorumFraction) returns (uint256) {
         return super.quorum(blockNumber);
     }
 
     /**
      * @dev Custom quorum calculation for emergency proposals
      */
-    function _quorumReached(uint256 proposalId) internal view override returns (bool) {
+    function _quorumReached(uint256 proposalId) internal view override(Governor, GovernorCountingSimple) returns (bool) {
         if (emergencyProposals[proposalId]) {
             (uint256 againstVotes, uint256 forVotes, uint256 abstainVotes) = proposalVotes(proposalId);
             uint256 totalVotes = againstVotes + forVotes + abstainVotes;
-            uint256 emergencyQuorumVotes = (token.getPastTotalSupply(proposalSnapshot(proposalId)) * EMERGENCY_QUORUM) / 100;
+            uint256 emergencyQuorumVotes = (token().getPastTotalSupply(proposalSnapshot(proposalId)) * EMERGENCY_QUORUM) / 100;
             return totalVotes >= emergencyQuorumVotes;
         }
         return super._quorumReached(proposalId);
@@ -168,9 +184,41 @@ contract NYAXGovernor is
     }
 
     /**
-     * @dev Override _execute to handle fast-track execution
+     * @dev Skip queuing for fast-track proposals
      */
-    function _execute(
+    function proposalNeedsQueuing(uint256 proposalId)
+        public
+        view
+        override(Governor, GovernorTimelockControl)
+        returns (bool)
+    {
+        if (fastTrackEnabled[proposalId]) {
+            return false;
+        }
+        return super.proposalNeedsQueuing(proposalId);
+    }
+
+    /**
+     * @dev Override queue operations to bypass timelock when fast-track is enabled
+     */
+    function _queueOperations(
+        uint256 proposalId,
+        address[] memory targets,
+        uint256[] memory values,
+        bytes[] memory calldatas,
+        bytes32 descriptionHash
+    ) internal override(Governor, GovernorTimelockControl) returns (uint48) {
+        if (fastTrackEnabled[proposalId]) {
+            // Return 0 to indicate immediate availability
+            return 0;
+        }
+        return super._queueOperations(proposalId, targets, values, calldatas, descriptionHash);
+    }
+
+    /**
+     * @dev Override execute operations to handle fast-track execution
+     */
+    function _executeOperations(
         uint256 proposalId,
         address[] memory targets,
         uint256[] memory values,
@@ -178,13 +226,11 @@ contract NYAXGovernor is
         bytes32 descriptionHash
     ) internal override(Governor, GovernorTimelockControl) {
         if (fastTrackEnabled[proposalId]) {
-            // Execute directly without timelock for fast-track proposals
             for (uint256 i = 0; i < targets.length; ++i) {
-                (bool success, bytes memory returndata) = targets[i].call{value: values[i]}(calldatas[i]);
-                Address.verifyCallResult(success, returndata, "Governor: call reverted without message");
+                _executeDirectCall(targets[i], values[i], calldatas[i]);
             }
         } else {
-            super._execute(proposalId, targets, values, calldatas, descriptionHash);
+            super._executeOperations(proposalId, targets, values, calldatas, descriptionHash);
         }
     }
 
@@ -236,7 +282,7 @@ contract NYAXGovernor is
         bool isFastTrack,
         ProposalState currentState
     ) {
-        proposer = _proposals[proposalId].proposer;
+        proposer = _proposalCreators[proposalId];
         eta = proposalEta(proposalId);
         startBlock = proposalSnapshot(proposalId);
         endBlock = proposalDeadline(proposalId);
@@ -246,16 +292,18 @@ contract NYAXGovernor is
         currentState = state(proposalId);
     }
 
-    /**
-     * @dev Override supportsInterface
-     */
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        override(Governor, GovernorTimelockControl)
-        returns (bool)
-    {
-        return super.supportsInterface(interfaceId);
+    function _executeDirectCall(address target, uint256 value, bytes memory data) private {
+        (bool success, bytes memory returndata) = target.call{value: value}(data);
+        if (!success) {
+            if (returndata.length > 0) {
+                /// @solidity memory-safe-assembly
+                assembly {
+                    revert(add(returndata, 32), mload(returndata))
+                }
+            } else {
+                revert("NYAXGovernor: fast-track execution failed");
+            }
+        }
     }
 }
 

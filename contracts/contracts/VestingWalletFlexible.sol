@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.24;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
@@ -21,7 +20,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
  */
 contract VestingWalletFlexible is ReentrancyGuard, Ownable {
     using SafeERC20 for IERC20;
-    using SafeMath for uint256;
 
     // Structs
     struct VestingSchedule {
@@ -87,12 +85,11 @@ contract VestingWalletFlexible is ReentrancyGuard, Ownable {
      * @param _token NYAX token address
      * @param _owner Contract owner address
      */
-    constructor(address _token, address _owner) {
+    constructor(address _token, address _owner) Ownable(_owner) {
         require(_token != address(0), "VestingWallet: Invalid token address");
         require(_owner != address(0), "VestingWallet: Invalid owner address");
         
         token = IERC20(_token);
-        _transferOwnership(_owner);
     }
 
     /**
@@ -129,7 +126,7 @@ contract VestingWalletFlexible is ReentrancyGuard, Ownable {
             beneficiary: beneficiary,
             totalAmount: totalAmount,
             start: start,
-            cliff: start.add(cliffDuration),
+            cliff: start + cliffDuration,
             duration: duration,
             released: 0,
             revoked: false,
@@ -148,7 +145,7 @@ contract VestingWalletFlexible is ReentrancyGuard, Ownable {
             beneficiary,
             totalAmount,
             start,
-            start.add(cliffDuration),
+            start + cliffDuration,
             duration,
             category
         );
@@ -212,12 +209,12 @@ contract VestingWalletFlexible is ReentrancyGuard, Ownable {
         }
 
         // Linear vesting after cliff
-        if (timestamp >= schedule.start.add(schedule.duration)) {
+        if (timestamp >= schedule.start + schedule.duration) {
             return schedule.totalAmount;
         }
 
-        uint256 elapsed = timestamp.sub(schedule.start);
-        return schedule.totalAmount.mul(elapsed).div(schedule.duration);
+        uint256 elapsed = timestamp - schedule.start;
+        return (schedule.totalAmount * elapsed) / schedule.duration;
     }
 
     /**
@@ -241,11 +238,11 @@ contract VestingWalletFlexible is ReentrancyGuard, Ownable {
         uint256 totalMilestonePercentage = 0;
         for (uint256 i = 0; i < scheduleMilestones.length; i++) {
             if (timestamp >= scheduleMilestones[i].timestamp) {
-                totalMilestonePercentage = totalMilestonePercentage.add(scheduleMilestones[i].percentage);
+                totalMilestonePercentage += scheduleMilestones[i].percentage;
             }
         }
 
-        return schedule.totalAmount.mul(totalMilestonePercentage).div(BASIS_POINTS);
+        return (schedule.totalAmount * totalMilestonePercentage) / BASIS_POINTS;
     }
 
     /**
@@ -265,10 +262,10 @@ contract VestingWalletFlexible is ReentrancyGuard, Ownable {
         );
 
         uint256 vested = vestedAmount(scheduleId, block.timestamp);
-        uint256 unreleased = vested.sub(schedule.released);
+        uint256 unreleased = vested - schedule.released;
         require(unreleased > 0, "VestingWallet: No tokens to release");
 
-        schedule.released = schedule.released.add(unreleased);
+        schedule.released += unreleased;
         token.safeTransfer(schedule.beneficiary, unreleased);
 
         // Mark milestones as released
@@ -291,13 +288,13 @@ contract VestingWalletFlexible is ReentrancyGuard, Ownable {
         require(!schedule.revoked, "VestingWallet: Already revoked");
 
         uint256 vested = vestedAmount(scheduleId, block.timestamp);
-        uint256 unreleased = vested.sub(schedule.released);
-        uint256 refund = schedule.totalAmount.sub(vested);
+        uint256 unreleased = vested - schedule.released;
+        uint256 refund = schedule.totalAmount - vested;
 
         schedule.revoked = true;
 
         if (unreleased > 0) {
-            schedule.released = schedule.released.add(unreleased);
+            schedule.released += unreleased;
             token.safeTransfer(schedule.beneficiary, unreleased);
         }
 
@@ -320,7 +317,7 @@ contract VestingWalletFlexible is ReentrancyGuard, Ownable {
                 scheduleMilestones[i].released = true;
                 
                 VestingSchedule memory schedule = vestingSchedules[scheduleId];
-                uint256 milestoneAmount = schedule.totalAmount.mul(scheduleMilestones[i].percentage).div(BASIS_POINTS);
+                uint256 milestoneAmount = (schedule.totalAmount * scheduleMilestones[i].percentage) / BASIS_POINTS;
                 
                 emit MilestoneReleased(scheduleId, milestoneAmount, scheduleMilestones[i].description);
             }
@@ -339,7 +336,7 @@ contract VestingWalletFlexible is ReentrancyGuard, Ownable {
         returns (uint256) 
     {
         uint256 vested = vestedAmount(scheduleId, block.timestamp);
-        return vested.sub(vestingSchedules[scheduleId].released);
+        return vested - vestingSchedules[scheduleId].released;
     }
 
     /**
