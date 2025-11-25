@@ -2,7 +2,7 @@
 import ConnectWalletButton from '@/components/ConnectWalletButton';
 import { useDAO } from '@/hooks/useDAO';
 import React, { useState } from 'react';
-import { FaBan, FaCoins, FaExclamationTriangle, FaFire, FaRocket, FaShieldAlt, FaWallet } from 'react-icons/fa';
+import { FaBan, FaClock, FaCoins, FaExclamationTriangle, FaFire, FaRocket, FaShieldAlt, FaUsers, FaVoteYea, FaWallet } from 'react-icons/fa';
 
 interface AdminActionCardProps {
     title: string;
@@ -49,12 +49,35 @@ const AdminActionCard: React.FC<AdminActionCardProps> = ({
 export const AdminPanel: React.FC = () => {
     const { isConnected, isInitialized } = useDAO();
 
+    // Token Management State
     const [mintAmount, setMintAmount] = useState('');
     const [mintTo, setMintTo] = useState('');
     const [burnAmount, setBurnAmount] = useState('');
     const [burnFrom, setBurnFrom] = useState('');
     const [blacklistAddress, setBlacklistAddress] = useState('');
     const [transfersEnabled, setTransfersEnabled] = useState(true);
+
+    // Governance State
+    const [proposalTargets, setProposalTargets] = useState('');
+    const [proposalValues, setProposalValues] = useState('');
+    const [proposalCalldatas, setProposalCalldatas] = useState('');
+    const [proposalDescription, setProposalDescription] = useState('');
+    const [proposalId, setProposalId] = useState('');
+
+    // Multisig State
+    const [multisigTo, setMultisigTo] = useState('');
+    const [multisigValue, setMultisigValue] = useState('');
+    const [multisigData, setMultisigData] = useState('');
+
+    // Vesting State
+    const [vestingCategory, setVestingCategory] = useState('');
+    const [vestingAmount, setVestingAmount] = useState('');
+    const [vestingBeneficiary, setVestingBeneficiary] = useState('');
+
+    // Treasury State
+    const [treasuryAmount, setTreasuryAmount] = useState('');
+    const [treasuryReason, setTreasuryReason] = useState('');
+
     const [loading, setLoading] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
@@ -176,6 +199,126 @@ export const AdminPanel: React.FC = () => {
             setSuccess('ETH recovered successfully');
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to recover ETH');
+        } finally {
+            setLoading(null);
+        }
+    };
+
+    // Governance Functions
+    const handleCreateProposal = async () => {
+        if (!proposalTargets || !proposalValues || !proposalCalldatas || !proposalDescription) {
+            setError('Please provide all proposal details');
+            return;
+        }
+
+        setLoading('proposal');
+        setError(null);
+        setSuccess(null);
+
+        try {
+            // Mock success
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            setSuccess('Proposal created successfully');
+            setProposalTargets('');
+            setProposalValues('');
+            setProposalCalldatas('');
+            setProposalDescription('');
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to create proposal');
+        } finally {
+            setLoading(null);
+        }
+    };
+
+    const handleExecuteProposal = async () => {
+        if (!proposalId) {
+            setError('Please provide proposal ID');
+            return;
+        }
+
+        setLoading('execute');
+        setError(null);
+        setSuccess(null);
+
+        try {
+            // Mock success
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            setSuccess(`Proposal ${proposalId} executed successfully`);
+            setProposalId('');
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to execute proposal');
+        } finally {
+            setLoading(null);
+        }
+    };
+
+    // Multisig Functions
+    const handleSubmitMultisigTransaction = async () => {
+        if (!multisigTo || !multisigValue || !multisigData) {
+            setError('Please provide all multisig transaction details');
+            return;
+        }
+
+        setLoading('multisig');
+        setError(null);
+        setSuccess(null);
+
+        try {
+            // Mock success
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            setSuccess('Multisig transaction submitted successfully');
+            setMultisigTo('');
+            setMultisigValue('');
+            setMultisigData('');
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to submit multisig transaction');
+        } finally {
+            setLoading(null);
+        }
+    };
+
+    // Vesting Functions
+    const handleCreateVestingContract = async () => {
+        if (!vestingCategory) {
+            setError('Please provide vesting category');
+            return;
+        }
+
+        setLoading('vesting');
+        setError(null);
+        setSuccess(null);
+
+        try {
+            // Mock success
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            setSuccess(`Vesting contract created for ${vestingCategory}`);
+            setVestingCategory('');
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to create vesting contract');
+        } finally {
+            setLoading(null);
+        }
+    };
+
+    // Treasury Functions
+    const handleMintToTreasury = async () => {
+        if (!treasuryAmount || !treasuryReason) {
+            setError('Please provide amount and reason for treasury mint');
+            return;
+        }
+
+        setLoading('treasury');
+        setError(null);
+        setSuccess(null);
+
+        try {
+            // Mock success
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            setSuccess(`Successfully minted ${treasuryAmount} NYAX to treasury`);
+            setTreasuryAmount('');
+            setTreasuryReason('');
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to mint to treasury');
         } finally {
             setLoading(null);
         }
@@ -391,6 +534,244 @@ export const AdminPanel: React.FC = () => {
                                     className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
                                 >
                                     {loading === 'transfers' ? 'Processing...' : `${transfersEnabled ? 'Disable' : 'Enable'} Transfers`}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Governance Functions */}
+                <div className="mb-8">
+                    <h2 className="text-xl font-semibold text-white mb-4">Governance Management</h2>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        {/* Create Proposal */}
+                        <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+                            <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+                                <FaVoteYea className="mr-2 text-purple-400" />
+                                Create Proposal
+                            </h3>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                        Target Addresses (comma-separated)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={proposalTargets}
+                                        onChange={(e) => setProposalTargets(e.target.value)}
+                                        placeholder="0x...,0x..."
+                                        className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-purple-400"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                        Values (comma-separated, in wei)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={proposalValues}
+                                        onChange={(e) => setProposalValues(e.target.value)}
+                                        placeholder="0,0"
+                                        className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-purple-400"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                        Call Data (comma-separated)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={proposalCalldatas}
+                                        onChange={(e) => setProposalCalldatas(e.target.value)}
+                                        placeholder="0x...,0x..."
+                                        className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-purple-400"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                        Description
+                                    </label>
+                                    <textarea
+                                        value={proposalDescription}
+                                        onChange={(e) => setProposalDescription(e.target.value)}
+                                        placeholder="Proposal description..."
+                                        rows={3}
+                                        className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-purple-400"
+                                    />
+                                </div>
+                                <button
+                                    onClick={handleCreateProposal}
+                                    disabled={loading === 'proposal'}
+                                    className="w-full px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                                >
+                                    {loading === 'proposal' ? 'Creating...' : 'Create Proposal'}
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Execute Proposal */}
+                        <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+                            <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+                                <FaRocket className="mr-2 text-green-400" />
+                                Execute Proposal
+                            </h3>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                        Proposal ID
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={proposalId}
+                                        onChange={(e) => setProposalId(e.target.value)}
+                                        placeholder="123"
+                                        className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-green-400"
+                                    />
+                                </div>
+                                <button
+                                    onClick={handleExecuteProposal}
+                                    disabled={loading === 'execute'}
+                                    className="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                                >
+                                    {loading === 'execute' ? 'Executing...' : 'Execute Proposal'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Multisig Functions */}
+                <div className="mb-8">
+                    <h2 className="text-xl font-semibold text-white mb-4">Multisig Management</h2>
+                    <div className="grid grid-cols-1 gap-6">
+                        <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+                            <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+                                <FaUsers className="mr-2 text-orange-400" />
+                                Submit Multisig Transaction
+                            </h3>
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                        To Address
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={multisigTo}
+                                        onChange={(e) => setMultisigTo(e.target.value)}
+                                        placeholder="0x..."
+                                        className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-orange-400"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                        Value (ETH)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={multisigValue}
+                                        onChange={(e) => setMultisigValue(e.target.value)}
+                                        placeholder="0.0"
+                                        className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-orange-400"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                        Data
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={multisigData}
+                                        onChange={(e) => setMultisigData(e.target.value)}
+                                        placeholder="0x..."
+                                        className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-orange-400"
+                                    />
+                                </div>
+                            </div>
+                            <button
+                                onClick={handleSubmitMultisigTransaction}
+                                disabled={loading === 'multisig'}
+                                className="w-full mt-4 px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                            >
+                                {loading === 'multisig' ? 'Submitting...' : 'Submit Transaction'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Vesting Functions */}
+                <div className="mb-8">
+                    <h2 className="text-xl font-semibold text-white mb-4">Vesting Management</h2>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+                            <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+                                <FaClock className="mr-2 text-indigo-400" />
+                                Create Vesting Contract
+                            </h3>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                        Vesting Category
+                                    </label>
+                                    <select
+                                        value={vestingCategory}
+                                        onChange={(e) => setVestingCategory(e.target.value)}
+                                        className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-indigo-400"
+                                    >
+                                        <option value="">Select Category</option>
+                                        <option value="team">Team</option>
+                                        <option value="advisors">Advisors</option>
+                                        <option value="investors">Investors</option>
+                                        <option value="ecosystem">Ecosystem</option>
+                                        <option value="treasury">Treasury</option>
+                                    </select>
+                                </div>
+                                <button
+                                    onClick={handleCreateVestingContract}
+                                    disabled={loading === 'vesting'}
+                                    className="w-full px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                                >
+                                    {loading === 'vesting' ? 'Creating...' : 'Create Vesting Contract'}
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Treasury Functions */}
+                        <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+                            <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+                                <FaWallet className="mr-2 text-teal-400" />
+                                Mint to Treasury
+                            </h3>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                        Amount (NYAX)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={treasuryAmount}
+                                        onChange={(e) => setTreasuryAmount(e.target.value)}
+                                        placeholder="1000"
+                                        className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-teal-400"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                        Reason
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={treasuryReason}
+                                        onChange={(e) => setTreasuryReason(e.target.value)}
+                                        placeholder="Reason for minting..."
+                                        className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-teal-400"
+                                    />
+                                </div>
+                                <button
+                                    onClick={handleMintToTreasury}
+                                    disabled={loading === 'treasury'}
+                                    className="w-full px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                                >
+                                    {loading === 'treasury' ? 'Minting...' : 'Mint to Treasury'}
                                 </button>
                             </div>
                         </div>
