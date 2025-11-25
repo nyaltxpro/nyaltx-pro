@@ -1,3 +1,4 @@
+'use client'
 import { useDAO } from '@/hooks/useDAO';
 import { GovernanceStats, TokenInfo, TreasuryCategory, TreasuryStats, VotingPower } from '@/services/contracts/types';
 import React, { useEffect, useState } from 'react';

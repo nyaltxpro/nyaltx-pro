@@ -1,3 +1,4 @@
+'use client'
 import { useDAO } from '@/hooks/useDAO';
 import React, { useState } from 'react';
 import { FaBan, FaCoins, FaExclamationTriangle, FaFire, FaRocket, FaShieldAlt } from 'react-icons/fa';
@@ -33,8 +34,8 @@ const AdminActionCard: React.FC<AdminActionCardProps> = ({
                     onClick={onAction}
                     disabled={loading}
                     className={`px-4 py-2 rounded font-medium text-sm ${dangerous
-                            ? 'bg-red-600 hover:bg-red-700 text-white'
-                            : 'bg-cyan-600 hover:bg-cyan-700 text-white'
+                        ? 'bg-red-600 hover:bg-red-700 text-white'
+                        : 'bg-cyan-600 hover:bg-cyan-700 text-white'
                         } disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
                     {loading ? 'Processing...' : 'Execute'}

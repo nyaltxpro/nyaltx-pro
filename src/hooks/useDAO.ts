@@ -1,10 +1,11 @@
+'use client'
 import { DAOService, initializeDAOService } from '@/services/contracts/dao';
 import {
-    GovernanceStats,
-    TokenInfo,
-    TreasuryCategory,
-    TreasuryStats,
-    VotingPower
+  GovernanceStats,
+  TokenInfo,
+  TreasuryCategory,
+  TreasuryStats,
+  VotingPower
 } from '@/services/contracts/types';
 import { ethers } from 'ethers';
 import { useCallback, useEffect, useState } from 'react';
