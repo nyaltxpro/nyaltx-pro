@@ -1,50 +1,62 @@
 'use client'
 import ConnectWalletButton from '@/components/ConnectWalletButton';
 import { useDAO } from '@/hooks/useDAO';
+import {
+    AlertTriangle,
+    CheckCircle,
+    Clock,
+    Coins,
+    Settings,
+    TrendingUp,
+    Users,
+    Vote,
+    Wallet,
+    XCircle
+} from 'lucide-react';
 import React, { useState } from 'react';
-import { FaBan, FaClock, FaCoins, FaExclamationTriangle, FaFire, FaRocket, FaShieldAlt, FaUsers, FaVoteYea, FaWallet } from 'react-icons/fa';
 
-interface AdminActionCardProps {
+type TabKey = 'overview' | 'token' | 'governance' | 'multisig' | 'vesting' | 'treasury' | 'emergency';
+
+interface AdminSectionProps {
     title: string;
     description: string;
     icon: React.ReactNode;
-    onAction: () => void;
-    loading?: boolean;
-    dangerous?: boolean;
+    children: React.ReactNode;
+    color?: 'blue' | 'purple' | 'green' | 'orange' | 'cyan' | 'indigo' | 'red';
 }
 
-const AdminActionCard: React.FC<AdminActionCardProps> = ({
+const AdminSection: React.FC<AdminSectionProps> = ({
     title,
     description,
     icon,
-    onAction,
-    loading,
-    dangerous
-}) => (
-    <div className={`bg-gray-800 rounded-lg p-6 border ${dangerous ? 'border-red-500/50' : 'border-gray-700'}`}>
-        <div className="flex items-start space-x-4">
-            <div className={`text-2xl ${dangerous ? 'text-red-400' : 'text-cyan-400'}`}>
-                {icon}
+    children,
+    color = 'blue'
+}) => {
+    const colorClasses = {
+        blue: 'border-blue-500 text-blue-400',
+        purple: 'border-purple-500 text-purple-400',
+        green: 'border-green-500 text-green-400',
+        orange: 'border-orange-500 text-orange-400',
+        cyan: 'border-cyan-500 text-cyan-400',
+        indigo: 'border-indigo-500 text-indigo-400',
+        red: 'border-red-500 text-red-400'
+    };
+
+    return (
+        <div className={`bg-slate-800/50 backdrop-blur border ${colorClasses[color].split(' ')[0]} rounded-xl p-6`}>
+            <div className="flex items-center gap-3 mb-4">
+                <div className={`${colorClasses[color].split(' ')[1]} p-2 rounded-lg bg-slate-700/50`}>
+                    {icon}
+                </div>
+                <div>
+                    <h3 className="text-xl font-semibold text-white">{title}</h3>
+                    <p className="text-slate-400 text-sm">{description}</p>
+                </div>
             </div>
-            <div className="flex-1">
-                <h3 className={`text-lg font-semibold mb-2 ${dangerous ? 'text-red-300' : 'text-white'}`}>
-                    {title}
-                </h3>
-                <p className="text-gray-400 text-sm mb-4">{description}</p>
-                <button
-                    onClick={onAction}
-                    disabled={loading}
-                    className={`px-4 py-2 rounded font-medium text-sm ${dangerous
-                        ? 'bg-red-600 hover:bg-red-700 text-white'
-                        : 'bg-cyan-600 hover:bg-cyan-700 text-white'
-                        } disabled:opacity-50 disabled:cursor-not-allowed`}
-                >
-                    {loading ? 'Processing...' : 'Execute'}
-                </button>
-            </div>
+            {children}
         </div>
-    </div>
-);
+    );
+};
 
 export const AdminPanel: React.FC = () => {
     const {
@@ -60,6 +72,8 @@ export const AdminPanel: React.FC = () => {
         createVestingContract,
         mintToTreasury
     } = useDAO();
+
+    const [activeTab, setActiveTab] = useState<TabKey>('overview');
 
     // Token Management State
     const [mintAmount, setMintAmount] = useState('');
@@ -83,8 +97,6 @@ export const AdminPanel: React.FC = () => {
 
     // Vesting State
     const [vestingCategory, setVestingCategory] = useState('');
-    const [vestingAmount, setVestingAmount] = useState('');
-    const [vestingBeneficiary, setVestingBeneficiary] = useState('');
 
     // Treasury State
     const [treasuryAmount, setTreasuryAmount] = useState('');
@@ -94,7 +106,7 @@ export const AdminPanel: React.FC = () => {
     const [success, setSuccess] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
 
-    // Mock admin functions - in real implementation, these would use the DAO service
+    // Handler functions
     const handleMintTokens = async () => {
         if (!mintTo || !mintAmount) {
             setError('Please provide recipient address and amount');
@@ -147,88 +159,6 @@ export const AdminPanel: React.FC = () => {
         }
     };
 
-    const handleToggleBlacklist = async () => {
-        if (!blacklistAddress) {
-            setError('Please provide address to blacklist/unblacklist');
-            return;
-        }
-
-        setLoading('blacklist');
-        setError(null);
-        setSuccess(null);
-
-        try {
-            const success = await setBlacklisted(blacklistAddress, true);
-            if (success) {
-                setSuccess(`Successfully blacklisted ${blacklistAddress}`);
-                setBlacklistAddress('');
-            } else {
-                setError('Failed to update blacklist');
-            }
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to update blacklist');
-        } finally {
-            setLoading(null);
-        }
-    };
-
-    const handleToggleTransfers = async () => {
-        setLoading('transfers');
-        setError(null);
-        setSuccess(null);
-
-        try {
-            const newState = !transfersEnabled;
-            const success = await setTransfersEnabled(newState);
-            if (success) {
-                setTransfersEnabledState(newState);
-                setSuccess(`Transfers ${newState ? 'enabled' : 'disabled'} successfully`);
-            } else {
-                setError('Failed to toggle transfers');
-            }
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to toggle transfers');
-        } finally {
-            setLoading(null);
-        }
-    };
-
-    const handleEmergencyPause = async () => {
-        setLoading('emergency');
-        setError(null);
-        setSuccess(null);
-
-        try {
-            // Mock success
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            setSuccess('Emergency pause activated successfully');
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to activate emergency pause');
-        } finally {
-            setLoading(null);
-        }
-    };
-
-    const handleRecoverETH = async () => {
-        setLoading('recover');
-        setError(null);
-        setSuccess(null);
-
-        try {
-            const success = await recoverETH();
-            if (success) {
-                setSuccess('ETH recovered successfully');
-            } else {
-                setError('Failed to recover ETH');
-            }
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to recover ETH');
-        } finally {
-            setLoading(null);
-        }
-    };
-
-    // Governance Functions
     const handleCreateProposal = async () => {
         if (!proposalTargets || !proposalValues || !proposalCalldatas || !proposalDescription) {
             setError('Please provide all proposal details');
@@ -261,106 +191,12 @@ export const AdminPanel: React.FC = () => {
         }
     };
 
-    const handleExecuteProposal = async () => {
-        if (!proposalId) {
-            setError('Please provide proposal ID');
-            return;
-        }
-
-        setLoading('execute');
-        setError(null);
-        setSuccess(null);
-
-        try {
-            // Mock success
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            setSuccess(`Proposal ${proposalId} executed successfully`);
-            setProposalId('');
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to execute proposal');
-        } finally {
-            setLoading(null);
-        }
-    };
-
-    // Multisig Functions
-    const handleSubmitMultisigTransaction = async () => {
-        if (!multisigTo || !multisigValue || !multisigData) {
-            setError('Please provide all multisig transaction details');
-            return;
-        }
-
-        setLoading('multisig');
-        setError(null);
-        setSuccess(null);
-
-        try {
-            // Mock success
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            setSuccess('Multisig transaction submitted successfully');
-            setMultisigTo('');
-            setMultisigValue('');
-            setMultisigData('');
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to submit multisig transaction');
-        } finally {
-            setLoading(null);
-        }
-    };
-
-    // Vesting Functions
-    const handleCreateVestingContract = async () => {
-        if (!vestingCategory) {
-            setError('Please provide vesting category');
-            return;
-        }
-
-        setLoading('vesting');
-        setError(null);
-        setSuccess(null);
-
-        try {
-            // Mock success
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            setSuccess(`Vesting contract created for ${vestingCategory}`);
-            setVestingCategory('');
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to create vesting contract');
-        } finally {
-            setLoading(null);
-        }
-    };
-
-    // Treasury Functions
-    const handleMintToTreasury = async () => {
-        if (!treasuryAmount || !treasuryReason) {
-            setError('Please provide amount and reason for treasury mint');
-            return;
-        }
-
-        setLoading('treasury');
-        setError(null);
-        setSuccess(null);
-
-        try {
-            // Mock success
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            setSuccess(`Successfully minted ${treasuryAmount} NYAX to treasury`);
-            setTreasuryAmount('');
-            setTreasuryReason('');
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to mint to treasury');
-        } finally {
-            setLoading(null);
-        }
-    };
-
     if (!isInitialized) {
         return (
-            <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+            <div className="min-h-screen bg-slate-900 text-white flex items-center justify-center">
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-400 mx-auto mb-4"></div>
-                    <p className="text-white">Initializing admin panel...</p>
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                    <p className="text-slate-300">Initializing DAO admin panel...</p>
                 </div>
             </div>
         );
@@ -368,22 +204,22 @@ export const AdminPanel: React.FC = () => {
 
     if (!isConnected) {
         return (
-            <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+            <div className="min-h-screen bg-slate-900 text-white flex items-center justify-center">
                 <div className="text-center max-w-md">
-                    <div className="text-yellow-400 text-6xl mb-6">
-                        <FaWallet className="mx-auto" />
+                    <div className="text-blue-400 text-6xl mb-6">
+                        <Wallet className="mx-auto w-16 h-16" />
                     </div>
                     <h2 className="text-2xl font-semibold text-white mb-3">Admin Access Required</h2>
-                    <p className="text-gray-400 mb-6">
+                    <p className="text-slate-400 mb-6">
                         Connect your admin wallet to access the DAO administration panel.
                     </p>
                     <div className="space-y-4">
                         <ConnectWalletButton
                             className="w-full py-3 px-6 text-base font-semibold"
                         />
-                        <div className="text-xs text-gray-500 bg-gray-800/50 rounded-lg p-3 border border-gray-700">
+                        <div className="text-xs text-slate-400 bg-slate-800/50 backdrop-blur rounded-lg p-3 border border-slate-700">
                             <p className="flex items-center justify-center mb-1">
-                                <FaExclamationTriangle className="mr-2 text-yellow-400" />
+                                <AlertTriangle className="mr-2 text-yellow-400 w-4 h-4" />
                                 <strong>Note:</strong>
                             </p>
                             <p>Only pre-approved admin wallet addresses can access this panel.</p>
@@ -396,456 +232,362 @@ export const AdminPanel: React.FC = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gray-900 p-6">
+        <div className="min-h-screen bg-slate-900 text-white p-6">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-white mb-2">DAO Admin Panel</h1>
-                    <p className="text-gray-400">
-                        Advanced administration functions for NYAX DAO contracts
-                    </p>
-                    <div className="mt-4 p-4 bg-yellow-900/20 border border-yellow-500/50 rounded-lg">
-                        <p className="text-yellow-400 text-sm flex items-center">
-                            <FaExclamationTriangle className="mr-2" />
-                            <strong>Warning:</strong> These are powerful administrative functions. Use with extreme caution.
-                        </p>
+                    <div className="flex items-center justify-between mb-4">
+                        <div>
+                            <h1 className="text-4xl font-bold mb-2">DAO Administration</h1>
+                            <p className="text-slate-400">Multi-signature governance and treasury management</p>
+                        </div>
+                        <button className="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg flex items-center gap-2 transition-colors">
+                            <Settings className="w-5 h-5" />
+                            Settings
+                        </button>
+                    </div>
+
+                    {/* Warning Card */}
+                    <div className="bg-slate-800/50 backdrop-blur border border-yellow-500/50 rounded-xl p-6">
+                        <div className="flex items-center gap-3">
+                            <AlertTriangle className="w-6 h-6 text-yellow-400" />
+                            <div>
+                                <h3 className="text-lg font-semibold text-yellow-400">Administrative Access</h3>
+                                <p className="text-slate-300 text-sm">These are powerful functions that directly interact with DAO contracts. Use with extreme caution.</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 {/* Status Messages */}
                 {error && (
-                    <div className="mb-6 bg-red-900/20 border border-red-500/50 rounded-lg p-4">
-                        <p className="text-red-400 text-sm">{error}</p>
+                    <div className="mb-6 bg-red-900/20 backdrop-blur border border-red-500/50 rounded-xl p-4">
+                        <div className="flex items-center gap-2">
+                            <XCircle className="w-5 h-5 text-red-400" />
+                            <p className="text-red-300">{error}</p>
+                        </div>
                     </div>
                 )}
 
                 {success && (
-                    <div className="mb-6 bg-green-900/20 border border-green-500/50 rounded-lg p-4">
-                        <p className="text-green-400 text-sm">{success}</p>
+                    <div className="mb-6 bg-green-900/20 backdrop-blur border border-green-500/50 rounded-xl p-4">
+                        <div className="flex items-center gap-2">
+                            <CheckCircle className="w-5 h-5 text-green-400" />
+                            <p className="text-green-300">{success}</p>
+                        </div>
                     </div>
                 )}
 
-                {/* Token Management */}
-                <div className="mb-8">
-                    <h2 className="text-xl font-semibold text-white mb-4">Token Management</h2>
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        {/* Mint Tokens */}
-                        <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-                            <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
-                                <FaCoins className="mr-2 text-cyan-400" />
-                                Mint Tokens
-                            </h3>
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                                        Recipient Address
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={mintTo}
-                                        onChange={(e) => setMintTo(e.target.value)}
-                                        placeholder="0x..."
-                                        className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-cyan-400"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                                        Amount (NYAX)
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={mintAmount}
-                                        onChange={(e) => setMintAmount(e.target.value)}
-                                        placeholder="1000"
-                                        className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-cyan-400"
-                                    />
-                                </div>
-                                <button
-                                    onClick={handleMintTokens}
-                                    disabled={loading === 'mint'}
-                                    className="w-full px-4 py-2 bg-cyan-600 text-white rounded hover:bg-cyan-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-                                >
-                                    {loading === 'mint' ? 'Minting...' : 'Mint Tokens'}
-                                </button>
-                            </div>
-                        </div>
+                {/* Navigation Tabs */}
+                <div className="flex gap-2 mb-6 border-b border-slate-700">
+                    {(['overview', 'token', 'governance', 'multisig', 'vesting', 'treasury', 'emergency'] as const).map((tab: TabKey) => (
+                        <button
+                            key={tab}
+                            onClick={() => setActiveTab(tab)}
+                            className={`px-6 py-3 font-medium capitalize transition-colors ${activeTab === tab
+                                ? 'text-blue-400 border-b-2 border-blue-400'
+                                : 'text-slate-400 hover:text-white'
+                                }`}
+                        >
+                            {tab}
+                        </button>
+                    ))}
+                </div>
 
-                        {/* Burn Tokens */}
-                        <div className="bg-gray-800 rounded-lg p-6 border border-red-500/50">
-                            <h3 className="text-lg font-semibold text-red-300 mb-4 flex items-center">
-                                <FaFire className="mr-2 text-red-400" />
-                                Burn Tokens
-                            </h3>
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                                        From Address
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={burnFrom}
-                                        onChange={(e) => setBurnFrom(e.target.value)}
-                                        placeholder="0x..."
-                                        className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-red-400"
-                                    />
+                {/* Tab Content */}
+                {activeTab === 'overview' && (
+                    <div className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div className="bg-slate-800/50 backdrop-blur border border-blue-500 rounded-xl p-6 cursor-pointer hover:bg-slate-800 transition-all hover:scale-105">
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className="bg-blue-500/20 p-3 rounded-lg">
+                                        <Coins className="w-6 h-6 text-blue-400" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-lg font-semibold">Token Management</h3>
+                                        <p className="text-slate-400 text-sm">Mint, burn, and control token supply</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                                        Amount (NYAX)
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={burnAmount}
-                                        onChange={(e) => setBurnAmount(e.target.value)}
-                                        placeholder="1000"
-                                        className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-red-400"
-                                    />
+                            </div>
+
+                            <div className="bg-slate-800/50 backdrop-blur border border-purple-500 rounded-xl p-6 cursor-pointer hover:bg-slate-800 transition-all hover:scale-105">
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className="bg-purple-500/20 p-3 rounded-lg">
+                                        <Vote className="w-6 h-6 text-purple-400" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-lg font-semibold">Governance</h3>
+                                        <p className="text-slate-400 text-sm">Create and execute proposals</p>
+                                    </div>
                                 </div>
-                                <button
-                                    onClick={handleBurnTokens}
-                                    disabled={loading === 'burn'}
-                                    className="w-full px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-                                >
-                                    {loading === 'burn' ? 'Burning...' : 'Burn Tokens'}
-                                </button>
+                            </div>
+
+                            <div className="bg-slate-800/50 backdrop-blur border border-orange-500 rounded-xl p-6 cursor-pointer hover:bg-slate-800 transition-all hover:scale-105">
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className="bg-orange-500/20 p-3 rounded-lg">
+                                        <Users className="w-6 h-6 text-orange-400" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-lg font-semibold">Multisig</h3>
+                                        <p className="text-slate-400 text-sm">Multi-signature transactions</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bg-slate-800/50 backdrop-blur border border-indigo-500 rounded-xl p-6 cursor-pointer hover:bg-slate-800 transition-all hover:scale-105">
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className="bg-indigo-500/20 p-3 rounded-lg">
+                                        <Clock className="w-6 h-6 text-indigo-400" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-lg font-semibold">Vesting</h3>
+                                        <p className="text-slate-400 text-sm">Token vesting schedules</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bg-slate-800/50 backdrop-blur border border-green-500 rounded-xl p-6 cursor-pointer hover:bg-slate-800 transition-all hover:scale-105">
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className="bg-green-500/20 p-3 rounded-lg">
+                                        <TrendingUp className="w-6 h-6 text-green-400" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-lg font-semibold">Treasury</h3>
+                                        <p className="text-slate-400 text-sm">Treasury management</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bg-slate-800/50 backdrop-blur border border-red-500 rounded-xl p-6 cursor-pointer hover:bg-slate-800 transition-all hover:scale-105">
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className="bg-red-500/20 p-3 rounded-lg">
+                                        <AlertTriangle className="w-6 h-6 text-red-400" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-lg font-semibold">Emergency</h3>
+                                        <p className="text-slate-400 text-sm">Emergency functions</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                )}
 
-                {/* Security Controls */}
-                <div className="mb-8">
-                    <h2 className="text-xl font-semibold text-white mb-4">Security Controls</h2>
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        {/* Blacklist Management */}
-                        <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-                            <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
-                                <FaBan className="mr-2 text-yellow-400" />
-                                Blacklist Management
-                            </h3>
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                                        Address to Blacklist/Unblacklist
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={blacklistAddress}
-                                        onChange={(e) => setBlacklistAddress(e.target.value)}
-                                        placeholder="0x..."
-                                        className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-yellow-400"
-                                    />
+                {activeTab === 'token' && (
+                    <div className="space-y-6">
+                        <AdminSection
+                            title="Token Management"
+                            description="Mint, burn, and control NYAX token supply"
+                            icon={<Coins className="w-5 h-5" />}
+                            color="cyan"
+                        >
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                {/* Mint Tokens */}
+                                <div className="space-y-4">
+                                    <h4 className="text-lg font-semibold text-white">Mint Tokens</h4>
+                                    <div className="space-y-3">
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-300 mb-2">
+                                                Recipient Address
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={mintTo}
+                                                onChange={(e) => setMintTo(e.target.value)}
+                                                placeholder="0x..."
+                                                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-cyan-400"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-300 mb-2">
+                                                Amount (NYAX)
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={mintAmount}
+                                                onChange={(e) => setMintAmount(e.target.value)}
+                                                placeholder="1000"
+                                                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-cyan-400"
+                                            />
+                                        </div>
+                                        <button
+                                            onClick={handleMintTokens}
+                                            disabled={loading === 'mint'}
+                                            className="w-full px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors"
+                                        >
+                                            {loading === 'mint' ? 'Minting...' : 'Mint Tokens'}
+                                        </button>
+                                    </div>
                                 </div>
-                                <button
-                                    onClick={handleToggleBlacklist}
-                                    disabled={loading === 'blacklist'}
-                                    className="w-full px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-                                >
-                                    {loading === 'blacklist' ? 'Processing...' : 'Toggle Blacklist'}
-                                </button>
-                            </div>
-                        </div>
 
-                        {/* Transfer Controls */}
-                        <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-                            <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
-                                <FaShieldAlt className="mr-2 text-blue-400" />
-                                Transfer Controls
-                            </h3>
-                            <div className="space-y-4">
-                                <div className="flex items-center justify-between">
-                                    <span className="text-gray-300">Transfers Enabled:</span>
-                                    <span className={`font-medium ${transfersEnabled ? 'text-green-400' : 'text-red-400'}`}>
-                                        {transfersEnabled ? 'Yes' : 'No'}
-                                    </span>
+                                {/* Burn Tokens */}
+                                <div className="space-y-4">
+                                    <h4 className="text-lg font-semibold text-red-300">Burn Tokens</h4>
+                                    <div className="space-y-3">
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-300 mb-2">
+                                                From Address
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={burnFrom}
+                                                onChange={(e) => setBurnFrom(e.target.value)}
+                                                placeholder="0x..."
+                                                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-red-400"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-300 mb-2">
+                                                Amount (NYAX)
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={burnAmount}
+                                                onChange={(e) => setBurnAmount(e.target.value)}
+                                                placeholder="1000"
+                                                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-red-400"
+                                            />
+                                        </div>
+                                        <button
+                                            onClick={handleBurnTokens}
+                                            disabled={loading === 'burn'}
+                                            className="w-full px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors"
+                                        >
+                                            {loading === 'burn' ? 'Burning...' : 'Burn Tokens'}
+                                        </button>
+                                    </div>
                                 </div>
-                                <button
-                                    onClick={handleToggleTransfers}
-                                    disabled={loading === 'transfers'}
-                                    className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-                                >
-                                    {loading === 'transfers' ? 'Processing...' : `${transfersEnabled ? 'Disable' : 'Enable'} Transfers`}
-                                </button>
                             </div>
-                        </div>
+                        </AdminSection>
                     </div>
-                </div>
+                )}
 
-                {/* Governance Functions */}
-                <div className="mb-8">
-                    <h2 className="text-xl font-semibold text-white mb-4">Governance Management</h2>
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        {/* Create Proposal */}
-                        <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-                            <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
-                                <FaVoteYea className="mr-2 text-purple-400" />
-                                Create Proposal
-                            </h3>
-                            <div className="space-y-4">
+                {activeTab === 'governance' && (
+                    <div className="space-y-6">
+                        <AdminSection
+                            title="Governance Management"
+                            description="Create and manage DAO proposals"
+                            icon={<Vote className="w-5 h-5" />}
+                            color="purple"
+                        >
+                            <div className="space-y-6">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                                        Target Addresses (comma-separated)
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={proposalTargets}
-                                        onChange={(e) => setProposalTargets(e.target.value)}
-                                        placeholder="0x...,0x..."
-                                        className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-purple-400"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                                        Values (comma-separated, in wei)
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={proposalValues}
-                                        onChange={(e) => setProposalValues(e.target.value)}
-                                        placeholder="0,0"
-                                        className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-purple-400"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                                        Call Data (comma-separated)
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={proposalCalldatas}
-                                        onChange={(e) => setProposalCalldatas(e.target.value)}
-                                        placeholder="0x...,0x..."
-                                        className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-purple-400"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                                        Description
-                                    </label>
-                                    <textarea
-                                        value={proposalDescription}
-                                        onChange={(e) => setProposalDescription(e.target.value)}
-                                        placeholder="Proposal description..."
-                                        rows={3}
-                                        className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-purple-400"
-                                    />
-                                </div>
-                                <button
-                                    onClick={handleCreateProposal}
-                                    disabled={loading === 'proposal'}
-                                    className="w-full px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-                                >
-                                    {loading === 'proposal' ? 'Creating...' : 'Create Proposal'}
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Execute Proposal */}
-                        <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-                            <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
-                                <FaRocket className="mr-2 text-green-400" />
-                                Execute Proposal
-                            </h3>
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                                        Proposal ID
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={proposalId}
-                                        onChange={(e) => setProposalId(e.target.value)}
-                                        placeholder="123"
-                                        className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-green-400"
-                                    />
-                                </div>
-                                <button
-                                    onClick={handleExecuteProposal}
-                                    disabled={loading === 'execute'}
-                                    className="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-                                >
-                                    {loading === 'execute' ? 'Executing...' : 'Execute Proposal'}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Multisig Functions */}
-                <div className="mb-8">
-                    <h2 className="text-xl font-semibold text-white mb-4">Multisig Management</h2>
-                    <div className="grid grid-cols-1 gap-6">
-                        <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-                            <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
-                                <FaUsers className="mr-2 text-orange-400" />
-                                Submit Multisig Transaction
-                            </h3>
-                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                                        To Address
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={multisigTo}
-                                        onChange={(e) => setMultisigTo(e.target.value)}
-                                        placeholder="0x..."
-                                        className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-orange-400"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                                        Value (ETH)
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={multisigValue}
-                                        onChange={(e) => setMultisigValue(e.target.value)}
-                                        placeholder="0.0"
-                                        className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-orange-400"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                                        Data
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={multisigData}
-                                        onChange={(e) => setMultisigData(e.target.value)}
-                                        placeholder="0x..."
-                                        className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-orange-400"
-                                    />
-                                </div>
-                            </div>
-                            <button
-                                onClick={handleSubmitMultisigTransaction}
-                                disabled={loading === 'multisig'}
-                                className="w-full mt-4 px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-                            >
-                                {loading === 'multisig' ? 'Submitting...' : 'Submit Transaction'}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Vesting Functions */}
-                <div className="mb-8">
-                    <h2 className="text-xl font-semibold text-white mb-4">Vesting Management</h2>
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-                            <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
-                                <FaClock className="mr-2 text-indigo-400" />
-                                Create Vesting Contract
-                            </h3>
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                                        Vesting Category
-                                    </label>
-                                    <select
-                                        value={vestingCategory}
-                                        onChange={(e) => setVestingCategory(e.target.value)}
-                                        className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-indigo-400"
+                                    <h4 className="text-lg font-semibold text-white mb-4">Create Proposal</h4>
+                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-300 mb-2">
+                                                Target Addresses (comma-separated)
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={proposalTargets}
+                                                onChange={(e) => setProposalTargets(e.target.value)}
+                                                placeholder="0x...,0x..."
+                                                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-purple-400"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-300 mb-2">
+                                                Values (comma-separated, in wei)
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={proposalValues}
+                                                onChange={(e) => setProposalValues(e.target.value)}
+                                                placeholder="0,0"
+                                                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-purple-400"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-300 mb-2">
+                                                Call Data (comma-separated)
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={proposalCalldatas}
+                                                onChange={(e) => setProposalCalldatas(e.target.value)}
+                                                placeholder="0x...,0x..."
+                                                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-purple-400"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-300 mb-2">
+                                                Description
+                                            </label>
+                                            <textarea
+                                                value={proposalDescription}
+                                                onChange={(e) => setProposalDescription(e.target.value)}
+                                                placeholder="Proposal description..."
+                                                rows={3}
+                                                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-purple-400"
+                                            />
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={handleCreateProposal}
+                                        disabled={loading === 'proposal'}
+                                        className="mt-4 w-full px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors"
                                     >
-                                        <option value="">Select Category</option>
-                                        <option value="team">Team</option>
-                                        <option value="advisors">Advisors</option>
-                                        <option value="investors">Investors</option>
-                                        <option value="ecosystem">Ecosystem</option>
-                                        <option value="treasury">Treasury</option>
-                                    </select>
+                                        {loading === 'proposal' ? 'Creating...' : 'Create Proposal'}
+                                    </button>
                                 </div>
-                                <button
-                                    onClick={handleCreateVestingContract}
-                                    disabled={loading === 'vesting'}
-                                    className="w-full px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-                                >
-                                    {loading === 'vesting' ? 'Creating...' : 'Create Vesting Contract'}
-                                </button>
                             </div>
-                        </div>
-
-                        {/* Treasury Functions */}
-                        <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-                            <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
-                                <FaWallet className="mr-2 text-teal-400" />
-                                Mint to Treasury
-                            </h3>
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                                        Amount (NYAX)
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={treasuryAmount}
-                                        onChange={(e) => setTreasuryAmount(e.target.value)}
-                                        placeholder="1000"
-                                        className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-teal-400"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                                        Reason
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={treasuryReason}
-                                        onChange={(e) => setTreasuryReason(e.target.value)}
-                                        placeholder="Reason for minting..."
-                                        className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-teal-400"
-                                    />
-                                </div>
-                                <button
-                                    onClick={handleMintToTreasury}
-                                    disabled={loading === 'treasury'}
-                                    className="w-full px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-                                >
-                                    {loading === 'treasury' ? 'Minting...' : 'Mint to Treasury'}
-                                </button>
-                            </div>
-                        </div>
+                        </AdminSection>
                     </div>
-                </div>
+                )}
 
-                {/* Emergency Functions */}
-                <div className="mb-8">
-                    <h2 className="text-xl font-semibold text-white mb-4">Emergency Functions</h2>
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <AdminActionCard
-                            title="Emergency Pause"
-                            description="Immediately pause all contract operations. Use only in critical situations."
-                            icon={<FaExclamationTriangle />}
-                            onAction={handleEmergencyPause}
-                            loading={loading === 'emergency'}
-                            dangerous={true}
-                        />
-
-                        <AdminActionCard
-                            title="Recover ETH"
-                            description="Recover accidentally sent ETH from contracts to admin wallet."
-                            icon={<FaRocket />}
-                            onAction={handleRecoverETH}
-                            loading={loading === 'recover'}
-                        />
+                {/* Placeholder tabs for other sections */}
+                {activeTab === 'multisig' && (
+                    <div className="space-y-6">
+                        <AdminSection
+                            title="Multisig Management"
+                            description="Multi-signature wallet operations"
+                            icon={<Users className="w-5 h-5" />}
+                            color="orange"
+                        >
+                            <p className="text-slate-400">Multisig functionality coming soon...</p>
+                        </AdminSection>
                     </div>
-                </div>
+                )}
 
-                {/* Disclaimer */}
-                <div className="bg-red-900/20 border border-red-500/50 rounded-lg p-6">
-                    <h3 className="text-lg font-semibold text-red-300 mb-2 flex items-center">
-                        <FaExclamationTriangle className="mr-2" />
-                        Important Disclaimer
-                    </h3>
-                    <div className="text-red-400 text-sm space-y-2">
-                        <p>• These administrative functions have significant impact on the DAO and token holders.</p>
-                        <p>• Always verify addresses and amounts before executing transactions.</p>
-                        <p>• Emergency functions should only be used in critical situations.</p>
-                        <p>• Consider using multisig approval for large operations.</p>
-                        <p>• All actions are logged and auditable on the blockchain.</p>
+                {activeTab === 'vesting' && (
+                    <div className="space-y-6">
+                        <AdminSection
+                            title="Vesting Management"
+                            description="Token vesting schedules"
+                            icon={<Clock className="w-5 h-5" />}
+                            color="indigo"
+                        >
+                            <p className="text-slate-400">Vesting functionality coming soon...</p>
+                        </AdminSection>
                     </div>
-                </div>
+                )}
+
+                {activeTab === 'treasury' && (
+                    <div className="space-y-6">
+                        <AdminSection
+                            title="Treasury Management"
+                            description="Treasury operations and funding"
+                            icon={<TrendingUp className="w-5 h-5" />}
+                            color="green"
+                        >
+                            <p className="text-slate-400">Treasury functionality coming soon...</p>
+                        </AdminSection>
+                    </div>
+                )}
+
+                {activeTab === 'emergency' && (
+                    <div className="space-y-6">
+                        <AdminSection
+                            title="Emergency Functions"
+                            description="Critical emergency operations"
+                            icon={<AlertTriangle className="w-5 h-5" />}
+                            color="red"
+                        >
+                            <p className="text-slate-400">Emergency functions coming soon...</p>
+                        </AdminSection>
+                    </div>
+                )}
             </div>
         </div>
     );
