@@ -68,6 +68,8 @@ export interface TokenInfo {
   totalSupply: string;
   maxSupply: string;
   remainingMintable: string;
+  treasury: string;
+  transfersEnabled: boolean;
 }
 
 export interface VotingPower {

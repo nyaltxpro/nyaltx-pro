@@ -125,18 +125,7 @@ async function main() {
         console.log();
 
         // Verify NYAXGovernor
-        await verifyContract(
-            deployedContracts.governor,
-            [
-                config.token.address,
-                deployedContracts.timelock,
-                config.governance.votingDelay,
-                config.governance.votingPeriod,
-                config.governance.proposalThreshold,
-                config.governance.quorumPercentage
-            ],
-            "NYAXGovernor"
-        );
+    
 
         // ===== 3. Configure Timelock Roles =====
         console.log("🔧 Configuring Timelock roles...");

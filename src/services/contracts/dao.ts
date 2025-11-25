@@ -63,17 +63,28 @@ export class DAOService {
     return contract;
   }
 
+  private getVestingWalletContract(address: string, withSigner = false) {
+    const contract = new ethers.Contract(
+      address,
+      CONTRACT_ABIS.vestingWallet,
+      withSigner && this.signer ? this.signer : this.provider
+    );
+    return contract;
+  }
+
   // Token functions
   async getTokenInfo(): Promise<TokenInfo> {
     const contract = this.getNYAXTokenContract();
     
-    const [name, symbol, decimals, totalSupply, maxSupply, remainingMintable] = await Promise.all([
+    const [name, symbol, decimals, totalSupply, maxSupply, remainingMintable, treasury, transfersEnabled] = await Promise.all([
       contract.name(),
       contract.symbol(),
       contract.decimals(),
       contract.totalSupply(),
       contract.MAX_SUPPLY(),
-      contract.remainingMintableSupply()
+      contract.remainingMintableSupply(),
+      contract.treasury(),
+      contract.transfersEnabled()
     ]);
 
     return {
@@ -82,8 +93,68 @@ export class DAOService {
       decimals: Number(decimals),
       totalSupply: ethers.formatEther(totalSupply),
       maxSupply: ethers.formatEther(maxSupply),
-      remainingMintable: ethers.formatEther(remainingMintable)
+      remainingMintable: ethers.formatEther(remainingMintable),
+      treasury,
+      transfersEnabled
     };
+  }
+
+  // Additional Token Functions
+  async isBlacklisted(address: string): Promise<boolean> {
+    const contract = this.getNYAXTokenContract();
+    return await contract.blacklisted(address);
+  }
+
+  async mintTokens(to: string, amount: string): Promise<ethers.ContractTransactionResponse> {
+    if (!this.signer) throw new Error('Signer required for minting');
+    const contract = this.getNYAXTokenContract(true);
+    const amountWei = ethers.parseEther(amount);
+    return await contract.mint(to, amountWei);
+  }
+
+  async burnTokens(from: string, amount: string): Promise<ethers.ContractTransactionResponse> {
+    if (!this.signer) throw new Error('Signer required for burning');
+    const contract = this.getNYAXTokenContract(true);
+    const amountWei = ethers.parseEther(amount);
+    return await contract.burn(from, amountWei);
+  }
+
+  async burnSelfTokens(amount: string): Promise<ethers.ContractTransactionResponse> {
+    if (!this.signer) throw new Error('Signer required for burning');
+    const contract = this.getNYAXTokenContract(true);
+    const amountWei = ethers.parseEther(amount);
+    return await contract.burnSelf(amountWei);
+  }
+
+  async setTransfersEnabled(enabled: boolean): Promise<ethers.ContractTransactionResponse> {
+    if (!this.signer) throw new Error('Signer required for setting transfers');
+    const contract = this.getNYAXTokenContract(true);
+    return await contract.setTransfersEnabled(enabled);
+  }
+
+  async setBlacklisted(account: string, isBlacklisted: boolean): Promise<ethers.ContractTransactionResponse> {
+    if (!this.signer) throw new Error('Signer required for blacklisting');
+    const contract = this.getNYAXTokenContract(true);
+    return await contract.setBlacklisted(account, isBlacklisted);
+  }
+
+  async batchSetBlacklisted(accounts: string[], isBlacklisted: boolean): Promise<ethers.ContractTransactionResponse> {
+    if (!this.signer) throw new Error('Signer required for batch blacklisting');
+    const contract = this.getNYAXTokenContract(true);
+    return await contract.batchSetBlacklisted(accounts, isBlacklisted);
+  }
+
+  async recoverERC20(tokenAddress: string, amount: string): Promise<ethers.ContractTransactionResponse> {
+    if (!this.signer) throw new Error('Signer required for recovery');
+    const contract = this.getNYAXTokenContract(true);
+    const amountWei = ethers.parseEther(amount);
+    return await contract.recoverERC20(tokenAddress, amountWei);
+  }
+
+  async recoverETH(): Promise<ethers.ContractTransactionResponse> {
+    if (!this.signer) throw new Error('Signer required for recovery');
+    const contract = this.getNYAXTokenContract(true);
+    return await contract.recoverETH();
   }
 
   async getTokenBalance(address: string): Promise<string> {
@@ -183,6 +254,102 @@ export class DAOService {
     };
   }
 
+  // Additional Governor Functions
+  async createEmergencyProposal(
+    targets: string[],
+    values: string[],
+    calldatas: string[],
+    description: string
+  ): Promise<ethers.ContractTransactionResponse> {
+    if (!this.signer) throw new Error('Signer required for emergency proposal creation');
+    const contract = this.getGovernorContract(true);
+    return await contract.proposeEmergency(targets, values, calldatas, description);
+  }
+
+  async enableFastTrack(proposalId: string): Promise<ethers.ContractTransactionResponse> {
+    if (!this.signer) throw new Error('Signer required for fast track');
+    const contract = this.getGovernorContract(true);
+    return await contract.enableFastTrack(proposalId);
+  }
+
+  async isEmergencyProposal(proposalId: string): Promise<boolean> {
+    const contract = this.getGovernorContract();
+    return await contract.isEmergencyProposal(proposalId);
+  }
+
+  async isFastTrackEnabled(proposalId: string): Promise<boolean> {
+    const contract = this.getGovernorContract();
+    return await contract.isFastTrackEnabled(proposalId);
+  }
+
+  async getProposalDetails(proposalId: string): Promise<{
+    proposer: string;
+    eta: number;
+    startBlock: number;
+    endBlock: number;
+    forVotes: string;
+    againstVotes: string;
+    abstainVotes: string;
+    isEmergency: boolean;
+    isFastTrack: boolean;
+    currentState: string;
+  }> {
+    const contract = this.getGovernorContract();
+    const details = await contract.getProposalDetails(proposalId);
+    
+    return {
+      proposer: details.proposer,
+      eta: Number(details.eta),
+      startBlock: Number(details.startBlock),
+      endBlock: Number(details.endBlock),
+      forVotes: ethers.formatEther(details.forVotes),
+      againstVotes: ethers.formatEther(details.againstVotes),
+      abstainVotes: ethers.formatEther(details.abstainVotes),
+      isEmergency: details.isEmergency,
+      isFastTrack: details.isFastTrack,
+      currentState: CONSTANTS.PROPOSAL_STATES[details.currentState as keyof typeof CONSTANTS.PROPOSAL_STATES] || 'Unknown'
+    };
+  }
+
+  async hasVoted(proposalId: string, account: string): Promise<boolean> {
+    const contract = this.getGovernorContract();
+    return await contract.hasVoted(proposalId, account);
+  }
+
+  async getProposalSnapshot(proposalId: string): Promise<number> {
+    const contract = this.getGovernorContract();
+    const snapshot = await contract.proposalSnapshot(proposalId);
+    return Number(snapshot);
+  }
+
+  async getProposalDeadline(proposalId: string): Promise<number> {
+    const contract = this.getGovernorContract();
+    const deadline = await contract.proposalDeadline(proposalId);
+    return Number(deadline);
+  }
+
+  async executeProposal(
+    targets: string[],
+    values: string[],
+    calldatas: string[],
+    descriptionHash: string
+  ): Promise<ethers.ContractTransactionResponse> {
+    if (!this.signer) throw new Error('Signer required for proposal execution');
+    const contract = this.getGovernorContract(true);
+    return await contract.execute(targets, values, calldatas, descriptionHash);
+  }
+
+  async cancelProposal(
+    targets: string[],
+    values: string[],
+    calldatas: string[],
+    descriptionHash: string
+  ): Promise<ethers.ContractTransactionResponse> {
+    if (!this.signer) throw new Error('Signer required for proposal cancellation');
+    const contract = this.getGovernorContract(true);
+    return await contract.cancel(targets, values, calldatas, descriptionHash);
+  }
+
   // Treasury functions
   async getTreasuryStats(): Promise<TreasuryStats> {
     const contract = this.getTreasuryContract();
@@ -230,6 +397,91 @@ export class DAOService {
     return await contract.mintToTreasury(amountWei, reason);
   }
 
+  // Additional Treasury Functions
+  async setCategoryWallet(
+    category: string,
+    wallet: string,
+    allocation: number
+  ): Promise<ethers.ContractTransactionResponse> {
+    if (!this.signer) throw new Error('Signer required for setting category');
+    const contract = this.getTreasuryContract(true);
+    return await contract.setCategoryWallet(category, wallet, allocation);
+  }
+
+  async removeCategory(category: string): Promise<ethers.ContractTransactionResponse> {
+    if (!this.signer) throw new Error('Signer required for removing category');
+    const contract = this.getTreasuryContract(true);
+    return await contract.removeCategory(category);
+  }
+
+  async transferTo(
+    to: string,
+    amount: string,
+    reason: string,
+    category: string
+  ): Promise<ethers.ContractTransactionResponse> {
+    if (!this.signer) throw new Error('Signer required for transfer');
+    const contract = this.getTreasuryContract(true);
+    const amountWei = ethers.parseEther(amount);
+    return await contract.transferTo(to, amountWei, reason, category);
+  }
+
+  async multisigTransfer(
+    to: string,
+    amount: string,
+    reason: string,
+    category: string
+  ): Promise<ethers.ContractTransactionResponse> {
+    if (!this.signer) throw new Error('Signer required for multisig transfer');
+    const contract = this.getTreasuryContract(true);
+    const amountWei = ethers.parseEther(amount);
+    return await contract.multisigTransfer(to, amountWei, reason, category);
+  }
+
+  async mintTo(
+    to: string,
+    amount: string,
+    reason: string,
+    category: string
+  ): Promise<ethers.ContractTransactionResponse> {
+    if (!this.signer) throw new Error('Signer required for minting');
+    const contract = this.getTreasuryContract(true);
+    const amountWei = ethers.parseEther(amount);
+    return await contract.mintTo(to, amountWei, reason, category);
+  }
+
+  async burnFromTreasury(amount: string, reason: string): Promise<ethers.ContractTransactionResponse> {
+    if (!this.signer) throw new Error('Signer required for burning');
+    const contract = this.getTreasuryContract(true);
+    const amountWei = ethers.parseEther(amount);
+    return await contract.burnFromTreasury(amountWei, reason);
+  }
+
+  async setTreasuryMultisig(multisig: string): Promise<ethers.ContractTransactionResponse> {
+    if (!this.signer) throw new Error('Signer required for setting multisig');
+    const contract = this.getTreasuryContract(true);
+    return await contract.setMultisig(multisig);
+  }
+
+  async requiresMultisig(amount: string): Promise<boolean> {
+    const contract = this.getTreasuryContract();
+    const amountWei = ethers.parseEther(amount);
+    return await contract.requiresMultisig(amountWei);
+  }
+
+  async emergencyRecoverERC20(tokenAddress: string, amount: string): Promise<ethers.ContractTransactionResponse> {
+    if (!this.signer) throw new Error('Signer required for recovery');
+    const contract = this.getTreasuryContract(true);
+    const amountWei = ethers.parseEther(amount);
+    return await contract.emergencyRecoverERC20(tokenAddress, amountWei);
+  }
+
+  async emergencyRecoverETH(): Promise<ethers.ContractTransactionResponse> {
+    if (!this.signer) throw new Error('Signer required for recovery');
+    const contract = this.getTreasuryContract(true);
+    return await contract.emergencyRecoverETH();
+  }
+
   // Multisig functions
   async getMultisigInfo(): Promise<{ threshold: number; owners: string[]; transactionCount: number }> {
     const contract = this.getMultisigContract();
@@ -270,6 +522,48 @@ export class DAOService {
     return await contract.executeTransaction(txIndex);
   }
 
+  // Additional Multisig Functions
+  async revokeConfirmation(txIndex: number): Promise<ethers.ContractTransactionResponse> {
+    if (!this.signer) throw new Error('Signer required for revocation');
+    const contract = this.getMultisigContract(true);
+    return await contract.revokeConfirmation(txIndex);
+  }
+
+  async getMultisigTransaction(txIndex: number): Promise<{
+    to: string;
+    value: string;
+    data: string;
+    executed: boolean;
+    confirmations: number;
+  }> {
+    const contract = this.getMultisigContract();
+    const tx = await contract.getTransaction(txIndex);
+    
+    return {
+      to: tx.to,
+      value: ethers.formatEther(tx.value),
+      data: tx.data,
+      executed: tx.executed,
+      confirmations: Number(tx.confirmations)
+    };
+  }
+
+  async isConfirmed(txIndex: number, owner: string): Promise<boolean> {
+    const contract = this.getMultisigContract();
+    return await contract.isConfirmed(txIndex, owner);
+  }
+
+  async getOwnerCount(): Promise<number> {
+    const contract = this.getMultisigContract();
+    const count = await contract.getOwnerCount();
+    return Number(count);
+  }
+
+  async isOwner(address: string): Promise<boolean> {
+    const contract = this.getMultisigContract();
+    return await contract.isOwner(address);
+  }
+
   // Vesting functions
   async createVestingContract(category: string): Promise<ethers.ContractTransactionResponse> {
     if (!this.signer) throw new Error('Signer required for vesting contract creation');
@@ -290,6 +584,193 @@ export class DAOService {
   async getVestingCategories(): Promise<string[]> {
     const contract = this.getVestingFactoryContract();
     return await contract.getCategories();
+  }
+
+  // Additional Vesting Factory Functions
+  async getCategoryContractCount(category: string): Promise<number> {
+    const contract = this.getVestingFactoryContract();
+    const count = await contract.getCategoryContractCount(category);
+    return Number(count);
+  }
+
+  async getTotalContractCount(): Promise<number> {
+    const contract = this.getVestingFactoryContract();
+    const count = await contract.getTotalContractCount();
+    return Number(count);
+  }
+
+  async isFactoryContract(contractAddress: string): Promise<boolean> {
+    const contract = this.getVestingFactoryContract();
+    return await contract.isFactoryContract(contractAddress);
+  }
+
+  async getContractCategory(contractAddress: string): Promise<string> {
+    const contract = this.getVestingFactoryContract();
+    return await contract.getContractCategory(contractAddress);
+  }
+
+  // VestingWallet Functions
+  async createVestingSchedule(
+    vestingWalletAddress: string,
+    beneficiary: string,
+    totalAmount: string,
+    start: number,
+    cliffDuration: number,
+    duration: number,
+    revocable: boolean,
+    category: string
+  ): Promise<ethers.ContractTransactionResponse> {
+    if (!this.signer) throw new Error('Signer required for creating vesting schedule');
+    const contract = this.getVestingWalletContract(vestingWalletAddress, true);
+    const amountWei = ethers.parseEther(totalAmount);
+    return await contract.createVestingSchedule(
+      beneficiary,
+      amountWei,
+      start,
+      cliffDuration,
+      duration,
+      revocable,
+      category
+    );
+  }
+
+  async addMilestone(
+    vestingWalletAddress: string,
+    scheduleId: string,
+    timestamp: number,
+    percentage: number,
+    description: string
+  ): Promise<ethers.ContractTransactionResponse> {
+    if (!this.signer) throw new Error('Signer required for adding milestone');
+    const contract = this.getVestingWalletContract(vestingWalletAddress, true);
+    return await contract.addMilestone(scheduleId, timestamp, percentage, description);
+  }
+
+  async getVestedAmount(
+    vestingWalletAddress: string,
+    scheduleId: string,
+    timestamp: number
+  ): Promise<string> {
+    const contract = this.getVestingWalletContract(vestingWalletAddress);
+    const amount = await contract.vestedAmount(scheduleId, timestamp);
+    return ethers.formatEther(amount);
+  }
+
+  async getMilestoneVested(
+    vestingWalletAddress: string,
+    scheduleId: string,
+    timestamp: number
+  ): Promise<string> {
+    const contract = this.getVestingWalletContract(vestingWalletAddress);
+    const amount = await contract.getMilestoneVested(scheduleId, timestamp);
+    return ethers.formatEther(amount);
+  }
+
+  async releaseVestedTokens(
+    vestingWalletAddress: string,
+    scheduleId: string
+  ): Promise<ethers.ContractTransactionResponse> {
+    if (!this.signer) throw new Error('Signer required for releasing tokens');
+    const contract = this.getVestingWalletContract(vestingWalletAddress, true);
+    return await contract.release(scheduleId);
+  }
+
+  async revokeVesting(
+    vestingWalletAddress: string,
+    scheduleId: string
+  ): Promise<ethers.ContractTransactionResponse> {
+    if (!this.signer) throw new Error('Signer required for revoking vesting');
+    const contract = this.getVestingWalletContract(vestingWalletAddress, true);
+    return await contract.revoke(scheduleId);
+  }
+
+  async getReleasableAmount(
+    vestingWalletAddress: string,
+    scheduleId: string
+  ): Promise<string> {
+    const contract = this.getVestingWalletContract(vestingWalletAddress);
+    const amount = await contract.releasableAmount(scheduleId);
+    return ethers.formatEther(amount);
+  }
+
+  async getBeneficiarySchedules(
+    vestingWalletAddress: string,
+    beneficiary: string
+  ): Promise<string[]> {
+    const contract = this.getVestingWalletContract(vestingWalletAddress);
+    return await contract.getBeneficiarySchedules(beneficiary);
+  }
+
+  async getAllSchedules(vestingWalletAddress: string): Promise<string[]> {
+    const contract = this.getVestingWalletContract(vestingWalletAddress);
+    return await contract.getAllSchedules();
+  }
+
+  async getMilestones(
+    vestingWalletAddress: string,
+    scheduleId: string
+  ): Promise<Array<{
+    timestamp: number;
+    percentage: number;
+    released: boolean;
+    description: string;
+  }>> {
+    const contract = this.getVestingWalletContract(vestingWalletAddress);
+    const milestones = await contract.getMilestones(scheduleId);
+    
+    return milestones.map((milestone: any) => ({
+      timestamp: Number(milestone.timestamp),
+      percentage: Number(milestone.percentage),
+      released: milestone.released,
+      description: milestone.description
+    }));
+  }
+
+  async toggleVestingPause(vestingWalletAddress: string): Promise<ethers.ContractTransactionResponse> {
+    if (!this.signer) throw new Error('Signer required for toggling pause');
+    const contract = this.getVestingWalletContract(vestingWalletAddress, true);
+    return await contract.togglePause();
+  }
+
+  async getVestingContractBalance(vestingWalletAddress: string): Promise<string> {
+    const contract = this.getVestingWalletContract(vestingWalletAddress);
+    const balance = await contract.getContractBalance();
+    return ethers.formatEther(balance);
+  }
+
+  async isVestingPaused(vestingWalletAddress: string): Promise<boolean> {
+    const contract = this.getVestingWalletContract(vestingWalletAddress);
+    return await contract.paused();
+  }
+
+  async getVestingSchedule(
+    vestingWalletAddress: string,
+    scheduleId: string
+  ): Promise<{
+    beneficiary: string;
+    totalAmount: string;
+    start: number;
+    cliff: number;
+    duration: number;
+    released: string;
+    revoked: boolean;
+    revocable: boolean;
+    category: string;
+  }> {
+    const contract = this.getVestingWalletContract(vestingWalletAddress);
+    const schedule = await contract.vestingSchedules(scheduleId);
+    
+    return {
+      beneficiary: schedule.beneficiary,
+      totalAmount: ethers.formatEther(schedule.totalAmount),
+      start: Number(schedule.start),
+      cliff: Number(schedule.cliff),
+      duration: Number(schedule.duration),
+      released: ethers.formatEther(schedule.released),
+      revoked: schedule.revoked,
+      revocable: schedule.revocable,
+      category: schedule.category
+    };
   }
 
   // Utility functions
