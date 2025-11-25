@@ -19,6 +19,9 @@ export class DAOService {
 
   // Contract instances
   private getNYAXTokenContract(withSigner = false) {
+    if (!CONTRACT_ADDRESSES.nyaxToken) {
+      throw new Error('NYAX Token contract address not configured. Please check your environment variables.');
+    }
     const contract = new ethers.Contract(
       CONTRACT_ADDRESSES.nyaxToken,
       CONTRACT_ABIS.nyaxToken,
@@ -28,6 +31,9 @@ export class DAOService {
   }
 
   private getGovernorContract(withSigner = false) {
+    if (!CONTRACT_ADDRESSES.nyaxGovernor) {
+      throw new Error('NYAX Governor contract address not configured. Please check your environment variables.');
+    }
     const contract = new ethers.Contract(
       CONTRACT_ADDRESSES.nyaxGovernor,
       CONTRACT_ABIS.nyaxGovernor,
@@ -37,6 +43,9 @@ export class DAOService {
   }
 
   private getTreasuryContract(withSigner = false) {
+    if (!CONTRACT_ADDRESSES.treasury) {
+      throw new Error('Treasury contract address not configured. Please check your environment variables.');
+    }
     const contract = new ethers.Contract(
       CONTRACT_ADDRESSES.treasury,
       CONTRACT_ABIS.treasury,
@@ -46,6 +55,9 @@ export class DAOService {
   }
 
   private getMultisigContract(withSigner = false) {
+    if (!CONTRACT_ADDRESSES.multisig) {
+      throw new Error('Multisig contract address not configured. Please check your environment variables.');
+    }
     const contract = new ethers.Contract(
       CONTRACT_ADDRESSES.multisig,
       CONTRACT_ABIS.multisig,
@@ -55,6 +67,9 @@ export class DAOService {
   }
 
   private getVestingFactoryContract(withSigner = false) {
+    if (!CONTRACT_ADDRESSES.vestingFactory) {
+      throw new Error('Vesting Factory contract address not configured. Please check your environment variables.');
+    }
     const contract = new ethers.Contract(
       CONTRACT_ADDRESSES.vestingFactory,
       CONTRACT_ABIS.vestingFactory,
