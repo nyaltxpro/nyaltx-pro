@@ -174,6 +174,46 @@ export const useDAO = () => {
     }
   }, [daoService, isConnected]);
 
+  const batchSetBlacklisted = useCallback(async (accounts: string[], isBlacklisted: boolean): Promise<boolean> => {
+    if (!daoService || !isConnected) return false;
+    
+    try {
+      const tx = await daoService.batchSetBlacklisted(accounts, isBlacklisted);
+      await tx.wait();
+      return true;
+    } catch (err) {
+      console.error('Failed to batch set blacklist:', err);
+      setError(err instanceof Error ? err.message : 'Failed to batch set blacklist');
+      return false;
+    }
+  }, [daoService, isConnected]);
+
+  const recoverERC20 = useCallback(async (tokenAddress: string, amount: string): Promise<boolean> => {
+    if (!daoService || !isConnected) return false;
+    
+    try {
+      const tx = await daoService.recoverERC20(tokenAddress, amount);
+      await tx.wait();
+      return true;
+    } catch (err) {
+      console.error('Failed to recover ERC20:', err);
+      setError(err instanceof Error ? err.message : 'Failed to recover ERC20');
+      return false;
+    }
+  }, [daoService, isConnected]);
+
+  const isBlacklisted = useCallback(async (address: string): Promise<boolean | null> => {
+    if (!daoService) return null;
+    
+    try {
+      return await daoService.isBlacklisted(address);
+    } catch (err) {
+      console.error('Failed to check blacklist status:', err);
+      setError(err instanceof Error ? err.message : 'Failed to check blacklist status');
+      return null;
+    }
+  }, [daoService]);
+
   // Governance functions
   const getGovernanceStats = useCallback(async (): Promise<GovernanceStats | null> => {
     if (!daoService) return null;
@@ -287,6 +327,102 @@ export const useDAO = () => {
     }
   }, [daoService, isConnected]);
 
+  const setCategoryWallet = useCallback(async (category: string, wallet: string, allocation: number): Promise<boolean> => {
+    if (!daoService || !isConnected) return false;
+    
+    try {
+      const tx = await daoService.setCategoryWallet(category, wallet, allocation);
+      await tx.wait();
+      return true;
+    } catch (err) {
+      console.error('Failed to set category wallet:', err);
+      setError(err instanceof Error ? err.message : 'Failed to set category wallet');
+      return false;
+    }
+  }, [daoService, isConnected]);
+
+  const removeCategory = useCallback(async (category: string): Promise<boolean> => {
+    if (!daoService || !isConnected) return false;
+    
+    try {
+      const tx = await daoService.removeCategory(category);
+      await tx.wait();
+      return true;
+    } catch (err) {
+      console.error('Failed to remove category:', err);
+      setError(err instanceof Error ? err.message : 'Failed to remove category');
+      return false;
+    }
+  }, [daoService, isConnected]);
+
+  const transferTo = useCallback(async (to: string, amount: string, reason: string, category: string): Promise<boolean> => {
+    if (!daoService || !isConnected) return false;
+    
+    try {
+      const tx = await daoService.transferTo(to, amount, reason, category);
+      await tx.wait();
+      return true;
+    } catch (err) {
+      console.error('Failed to transfer:', err);
+      setError(err instanceof Error ? err.message : 'Failed to transfer');
+      return false;
+    }
+  }, [daoService, isConnected]);
+
+  const multisigTransfer = useCallback(async (to: string, amount: string, reason: string, category: string): Promise<boolean> => {
+    if (!daoService || !isConnected) return false;
+    
+    try {
+      const tx = await daoService.multisigTransfer(to, amount, reason, category);
+      await tx.wait();
+      return true;
+    } catch (err) {
+      console.error('Failed to multisig transfer:', err);
+      setError(err instanceof Error ? err.message : 'Failed to multisig transfer');
+      return false;
+    }
+  }, [daoService, isConnected]);
+
+  const mintTo = useCallback(async (to: string, amount: string, reason: string, category: string): Promise<boolean> => {
+    if (!daoService || !isConnected) return false;
+    
+    try {
+      const tx = await daoService.mintTo(to, amount, reason, category);
+      await tx.wait();
+      return true;
+    } catch (err) {
+      console.error('Failed to mint to address:', err);
+      setError(err instanceof Error ? err.message : 'Failed to mint to address');
+      return false;
+    }
+  }, [daoService, isConnected]);
+
+  const burnFromTreasury = useCallback(async (amount: string, reason: string): Promise<boolean> => {
+    if (!daoService || !isConnected) return false;
+    
+    try {
+      const tx = await daoService.burnFromTreasury(amount, reason);
+      await tx.wait();
+      return true;
+    } catch (err) {
+      console.error('Failed to burn from treasury:', err);
+      setError(err instanceof Error ? err.message : 'Failed to burn from treasury');
+      return false;
+    }
+  }, [daoService, isConnected]);
+
+  const requiresMultisig = useCallback(async (amount: string): Promise<boolean | null> => {
+    if (!daoService) return null;
+    
+    try {
+      return await daoService.requiresMultisig(amount);
+    } catch (err) {
+      console.error('Failed to check multisig requirement:', err);
+      setError(err instanceof Error ? err.message : 'Failed to check multisig requirement');
+      return null;
+    }
+  }, [daoService]);
+
   // Multisig functions
   const getMultisigInfo = useCallback(async () => {
     if (!daoService) return null;
@@ -317,6 +453,84 @@ export const useDAO = () => {
       return false;
     }
   }, [daoService, isConnected]);
+
+  const confirmMultisigTransaction = useCallback(async (txIndex: number): Promise<boolean> => {
+    if (!daoService || !isConnected) return false;
+    
+    try {
+      const tx = await daoService.confirmMultisigTransaction(txIndex);
+      await tx.wait();
+      return true;
+    } catch (err) {
+      console.error('Failed to confirm multisig transaction:', err);
+      setError(err instanceof Error ? err.message : 'Failed to confirm multisig transaction');
+      return false;
+    }
+  }, [daoService, isConnected]);
+
+  const executeMultisigTransaction = useCallback(async (txIndex: number): Promise<boolean> => {
+    if (!daoService || !isConnected) return false;
+    
+    try {
+      const tx = await daoService.executeMultisigTransaction(txIndex);
+      await tx.wait();
+      return true;
+    } catch (err) {
+      console.error('Failed to execute multisig transaction:', err);
+      setError(err instanceof Error ? err.message : 'Failed to execute multisig transaction');
+      return false;
+    }
+  }, [daoService, isConnected]);
+
+  const revokeConfirmation = useCallback(async (txIndex: number): Promise<boolean> => {
+    if (!daoService || !isConnected) return false;
+    
+    try {
+      const tx = await daoService.revokeConfirmation(txIndex);
+      await tx.wait();
+      return true;
+    } catch (err) {
+      console.error('Failed to revoke confirmation:', err);
+      setError(err instanceof Error ? err.message : 'Failed to revoke confirmation');
+      return false;
+    }
+  }, [daoService, isConnected]);
+
+  const getMultisigTransaction = useCallback(async (txIndex: number) => {
+    if (!daoService) return null;
+    
+    try {
+      return await daoService.getMultisigTransaction(txIndex);
+    } catch (err) {
+      console.error('Failed to get multisig transaction:', err);
+      setError(err instanceof Error ? err.message : 'Failed to get multisig transaction');
+      return null;
+    }
+  }, [daoService]);
+
+  const isConfirmed = useCallback(async (txIndex: number, owner: string): Promise<boolean | null> => {
+    if (!daoService) return null;
+    
+    try {
+      return await daoService.isConfirmed(txIndex, owner);
+    } catch (err) {
+      console.error('Failed to check confirmation:', err);
+      setError(err instanceof Error ? err.message : 'Failed to check confirmation');
+      return null;
+    }
+  }, [daoService]);
+
+  const isOwner = useCallback(async (address: string): Promise<boolean | null> => {
+    if (!daoService) return null;
+    
+    try {
+      return await daoService.isOwner(address);
+    } catch (err) {
+      console.error('Failed to check owner status:', err);
+      setError(err instanceof Error ? err.message : 'Failed to check owner status');
+      return null;
+    }
+  }, [daoService]);
 
   // Vesting functions
   const createVestingContract = useCallback(async (category: string): Promise<boolean> => {
@@ -357,6 +571,178 @@ export const useDAO = () => {
     }
   }, [daoService]);
 
+  const createVestingSchedule = useCallback(async (
+    vestingWalletAddress: string,
+    beneficiary: string,
+    totalAmount: string,
+    start: number,
+    cliffDuration: number,
+    duration: number,
+    revocable: boolean,
+    category: string
+  ): Promise<boolean> => {
+    if (!daoService || !isConnected) return false;
+    
+    try {
+      const tx = await daoService.createVestingSchedule(
+        vestingWalletAddress,
+        beneficiary,
+        totalAmount,
+        start,
+        cliffDuration,
+        duration,
+        revocable,
+        category
+      );
+      await tx.wait();
+      return true;
+    } catch (err) {
+      console.error('Failed to create vesting schedule:', err);
+      setError(err instanceof Error ? err.message : 'Failed to create vesting schedule');
+      return false;
+    }
+  }, [daoService, isConnected]);
+
+  const releaseVestedTokens = useCallback(async (vestingWalletAddress: string, scheduleId: string): Promise<boolean> => {
+    if (!daoService || !isConnected) return false;
+    
+    try {
+      const tx = await daoService.releaseVestedTokens(vestingWalletAddress, scheduleId);
+      await tx.wait();
+      return true;
+    } catch (err) {
+      console.error('Failed to release vested tokens:', err);
+      setError(err instanceof Error ? err.message : 'Failed to release vested tokens');
+      return false;
+    }
+  }, [daoService, isConnected]);
+
+  const revokeVesting = useCallback(async (vestingWalletAddress: string, scheduleId: string): Promise<boolean> => {
+    if (!daoService || !isConnected) return false;
+    
+    try {
+      const tx = await daoService.revokeVesting(vestingWalletAddress, scheduleId);
+      await tx.wait();
+      return true;
+    } catch (err) {
+      console.error('Failed to revoke vesting:', err);
+      setError(err instanceof Error ? err.message : 'Failed to revoke vesting');
+      return false;
+    }
+  }, [daoService, isConnected]);
+
+  const getVestingSchedule = useCallback(async (vestingWalletAddress: string, scheduleId: string) => {
+    if (!daoService) return null;
+    
+    try {
+      return await daoService.getVestingSchedule(vestingWalletAddress, scheduleId);
+    } catch (err) {
+      console.error('Failed to get vesting schedule:', err);
+      setError(err instanceof Error ? err.message : 'Failed to get vesting schedule');
+      return null;
+    }
+  }, [daoService]);
+
+  const getReleasableAmount = useCallback(async (vestingWalletAddress: string, scheduleId: string): Promise<string | null> => {
+    if (!daoService) return null;
+    
+    try {
+      return await daoService.getReleasableAmount(vestingWalletAddress, scheduleId);
+    } catch (err) {
+      console.error('Failed to get releasable amount:', err);
+      setError(err instanceof Error ? err.message : 'Failed to get releasable amount');
+      return null;
+    }
+  }, [daoService]);
+
+  const getBeneficiarySchedules = useCallback(async (vestingWalletAddress: string, beneficiary: string): Promise<string[] | null> => {
+    if (!daoService) return null;
+    
+    try {
+      return await daoService.getBeneficiarySchedules(vestingWalletAddress, beneficiary);
+    } catch (err) {
+      console.error('Failed to get beneficiary schedules:', err);
+      setError(err instanceof Error ? err.message : 'Failed to get beneficiary schedules');
+      return null;
+    }
+  }, [daoService]);
+
+  const toggleVestingPause = useCallback(async (vestingWalletAddress: string): Promise<boolean> => {
+    if (!daoService || !isConnected) return false;
+    
+    try {
+      const tx = await daoService.toggleVestingPause(vestingWalletAddress);
+      await tx.wait();
+      return true;
+    } catch (err) {
+      console.error('Failed to toggle vesting pause:', err);
+      setError(err instanceof Error ? err.message : 'Failed to toggle vesting pause');
+      return false;
+    }
+  }, [daoService, isConnected]);
+
+  // Emergency functions
+  const emergencyRecoverERC20 = useCallback(async (tokenAddress: string, amount: string): Promise<boolean> => {
+    if (!daoService || !isConnected) return false;
+    
+    try {
+      const tx = await daoService.emergencyRecoverERC20(tokenAddress, amount);
+      await tx.wait();
+      return true;
+    } catch (err) {
+      console.error('Failed to emergency recover ERC20:', err);
+      setError(err instanceof Error ? err.message : 'Failed to emergency recover ERC20');
+      return false;
+    }
+  }, [daoService, isConnected]);
+
+  const emergencyRecoverETH = useCallback(async (): Promise<boolean> => {
+    if (!daoService || !isConnected) return false;
+    
+    try {
+      const tx = await daoService.emergencyRecoverETH();
+      await tx.wait();
+      return true;
+    } catch (err) {
+      console.error('Failed to emergency recover ETH:', err);
+      setError(err instanceof Error ? err.message : 'Failed to emergency recover ETH');
+      return false;
+    }
+  }, [daoService, isConnected]);
+
+  const createEmergencyProposal = useCallback(async (
+    targets: string[],
+    values: string[],
+    calldatas: string[],
+    description: string
+  ): Promise<string | null> => {
+    if (!daoService || !isConnected) return null;
+    
+    try {
+      const tx = await daoService.createEmergencyProposal(targets, values, calldatas, description);
+      const receipt = await tx.wait();
+      return receipt?.hash || null;
+    } catch (err) {
+      console.error('Failed to create emergency proposal:', err);
+      setError(err instanceof Error ? err.message : 'Failed to create emergency proposal');
+      return null;
+    }
+  }, [daoService, isConnected]);
+
+  const enableFastTrack = useCallback(async (proposalId: string): Promise<boolean> => {
+    if (!daoService || !isConnected) return false;
+    
+    try {
+      const tx = await daoService.enableFastTrack(proposalId);
+      await tx.wait();
+      return true;
+    } catch (err) {
+      console.error('Failed to enable fast track:', err);
+      setError(err instanceof Error ? err.message : 'Failed to enable fast track');
+      return false;
+    }
+  }, [daoService, isConnected]);
+
   // Utility functions
   const clearError = useCallback(() => {
     setError(null);
@@ -381,6 +767,9 @@ export const useDAO = () => {
     setBlacklisted,
     setTransfersEnabled,
     recoverETH,
+    batchSetBlacklisted,
+    recoverERC20,
+    isBlacklisted,
     
     // Governance functions
     getGovernanceStats,
@@ -393,15 +782,41 @@ export const useDAO = () => {
     getTreasuryStats,
     getTreasuryCategories,
     mintToTreasury,
+    setCategoryWallet,
+    removeCategory,
+    transferTo,
+    multisigTransfer,
+    mintTo,
+    burnFromTreasury,
+    requiresMultisig,
     
     // Multisig functions
     getMultisigInfo,
     submitMultisigTransaction,
+    confirmMultisigTransaction,
+    executeMultisigTransaction,
+    revokeConfirmation,
+    getMultisigTransaction,
+    isConfirmed,
+    isOwner,
     
     // Vesting functions
     createVestingContract,
     getVestingContracts,
     getVestingCategories,
+    createVestingSchedule,
+    releaseVestedTokens,
+    revokeVesting,
+    getVestingSchedule,
+    getReleasableAmount,
+    getBeneficiarySchedules,
+    toggleVestingPause,
+    
+    // Emergency functions
+    emergencyRecoverERC20,
+    emergencyRecoverETH,
+    createEmergencyProposal,
+    enableFastTrack,
     
     // Utilities
     clearError,

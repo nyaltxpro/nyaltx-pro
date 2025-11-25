@@ -67,10 +67,28 @@ export const AdminPanel: React.FC = () => {
         setBlacklisted,
         setTransfersEnabled,
         recoverETH,
+        batchSetBlacklisted,
+        recoverERC20,
         createProposal,
+        getMultisigInfo,
         submitMultisigTransaction,
+        confirmMultisigTransaction,
+        executeMultisigTransaction,
+        getMultisigTransaction,
         createVestingContract,
-        mintToTreasury
+        createVestingSchedule,
+        getVestingContracts,
+        releaseVestedTokens,
+        revokeVesting,
+        mintToTreasury,
+        setCategoryWallet,
+        removeCategory,
+        transferTo,
+        burnFromTreasury,
+        getTreasuryCategories,
+        emergencyRecoverERC20,
+        emergencyRecoverETH,
+        createEmergencyProposal
     } = useDAO();
 
     const [activeTab, setActiveTab] = useState<TabKey>('overview');
@@ -101,6 +119,32 @@ export const AdminPanel: React.FC = () => {
     // Treasury State
     const [treasuryAmount, setTreasuryAmount] = useState('');
     const [treasuryReason, setTreasuryReason] = useState('');
+    const [treasuryCategory, setTreasuryCategory] = useState('');
+    const [treasuryTo, setTreasuryTo] = useState('');
+    const [categoryName, setCategoryName] = useState('');
+    const [categoryWalletAddress, setCategoryWalletAddress] = useState('');
+    const [categoryAllocation, setCategoryAllocation] = useState('');
+
+    // Vesting State Extended
+    const [vestingWalletAddress, setVestingWalletAddress] = useState('');
+    const [vestingBeneficiary, setVestingBeneficiary] = useState('');
+    const [vestingAmount, setVestingAmount] = useState('');
+    const [vestingStart, setVestingStart] = useState('');
+    const [vestingCliff, setVestingCliff] = useState('');
+    const [vestingDuration, setVestingDuration] = useState('');
+    const [vestingRevocable, setVestingRevocable] = useState(true);
+    const [scheduleId, setScheduleId] = useState('');
+
+    // Multisig State Extended
+    const [multisigTxIndex, setMultisigTxIndex] = useState('');
+
+    // Emergency State
+    const [emergencyTokenAddress, setEmergencyTokenAddress] = useState('');
+    const [emergencyAmount, setEmergencyAmount] = useState('');
+    const [emergencyTargets, setEmergencyTargets] = useState('');
+    const [emergencyValues, setEmergencyValues] = useState('');
+    const [emergencyCalldatas, setEmergencyCalldatas] = useState('');
+    const [emergencyDescription, setEmergencyDescription] = useState('');
 
     const [loading, setLoading] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
@@ -536,7 +580,6 @@ export const AdminPanel: React.FC = () => {
                     </div>
                 )}
 
-                {/* Placeholder tabs for other sections */}
                 {activeTab === 'multisig' && (
                     <div className="space-y-6">
                         <AdminSection
@@ -545,7 +588,135 @@ export const AdminPanel: React.FC = () => {
                             icon={<Users className="w-5 h-5" />}
                             color="orange"
                         >
-                            <p className="text-slate-400">Multisig functionality coming soon...</p>
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                {/* Submit Transaction */}
+                                <div className="space-y-4">
+                                    <h4 className="text-lg font-semibold text-white">Submit Transaction</h4>
+                                    <div className="space-y-3">
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-300 mb-2">
+                                                To Address
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={multisigTo}
+                                                onChange={(e) => setMultisigTo(e.target.value)}
+                                                placeholder="0x..."
+                                                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-orange-400"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-300 mb-2">
+                                                Value (ETH)
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={multisigValue}
+                                                onChange={(e) => setMultisigValue(e.target.value)}
+                                                placeholder="0.0"
+                                                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-orange-400"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-300 mb-2">
+                                                Call Data
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={multisigData}
+                                                onChange={(e) => setMultisigData(e.target.value)}
+                                                placeholder="0x..."
+                                                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-orange-400"
+                                            />
+                                        </div>
+                                        <button
+                                            onClick={async () => {
+                                                if (!multisigTo || !multisigValue || !multisigData) {
+                                                    setError('Please provide all transaction details');
+                                                    return;
+                                                }
+                                                setLoading('multisig-submit');
+                                                const success = await submitMultisigTransaction(multisigTo, multisigValue, multisigData);
+                                                if (success) {
+                                                    setSuccess('Multisig transaction submitted successfully');
+                                                    setMultisigTo('');
+                                                    setMultisigValue('');
+                                                    setMultisigData('');
+                                                } else {
+                                                    setError('Failed to submit multisig transaction');
+                                                }
+                                                setLoading(null);
+                                            }}
+                                            disabled={loading === 'multisig-submit'}
+                                            className="w-full px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors"
+                                        >
+                                            {loading === 'multisig-submit' ? 'Submitting...' : 'Submit Transaction'}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Confirm/Execute Transaction */}
+                                <div className="space-y-4">
+                                    <h4 className="text-lg font-semibold text-white">Manage Transaction</h4>
+                                    <div className="space-y-3">
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-300 mb-2">
+                                                Transaction Index
+                                            </label>
+                                            <input
+                                                type="number"
+                                                value={multisigTxIndex}
+                                                onChange={(e) => setMultisigTxIndex(e.target.value)}
+                                                placeholder="0"
+                                                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-orange-400"
+                                            />
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <button
+                                                onClick={async () => {
+                                                    if (!multisigTxIndex) {
+                                                        setError('Please provide transaction index');
+                                                        return;
+                                                    }
+                                                    setLoading('multisig-confirm');
+                                                    const success = await confirmMultisigTransaction(parseInt(multisigTxIndex));
+                                                    if (success) {
+                                                        setSuccess('Transaction confirmed successfully');
+                                                    } else {
+                                                        setError('Failed to confirm transaction');
+                                                    }
+                                                    setLoading(null);
+                                                }}
+                                                disabled={loading === 'multisig-confirm'}
+                                                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors"
+                                            >
+                                                {loading === 'multisig-confirm' ? 'Confirming...' : 'Confirm'}
+                                            </button>
+                                            <button
+                                                onClick={async () => {
+                                                    if (!multisigTxIndex) {
+                                                        setError('Please provide transaction index');
+                                                        return;
+                                                    }
+                                                    setLoading('multisig-execute');
+                                                    const success = await executeMultisigTransaction(parseInt(multisigTxIndex));
+                                                    if (success) {
+                                                        setSuccess('Transaction executed successfully');
+                                                        setMultisigTxIndex('');
+                                                    } else {
+                                                        setError('Failed to execute transaction');
+                                                    }
+                                                    setLoading(null);
+                                                }}
+                                                disabled={loading === 'multisig-execute'}
+                                                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors"
+                                            >
+                                                {loading === 'multisig-execute' ? 'Executing...' : 'Execute'}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </AdminSection>
                     </div>
                 )}
@@ -558,7 +729,235 @@ export const AdminPanel: React.FC = () => {
                             icon={<Clock className="w-5 h-5" />}
                             color="indigo"
                         >
-                            <p className="text-slate-400">Vesting functionality coming soon...</p>
+                            <div className="space-y-6">
+                                {/* Create Vesting Contract */}
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                    <div className="space-y-4">
+                                        <h4 className="text-lg font-semibold text-white">Create Vesting Contract</h4>
+                                        <div className="space-y-3">
+                                            <div>
+                                                <label className="block text-sm font-medium text-slate-300 mb-2">
+                                                    Category
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={vestingCategory}
+                                                    onChange={(e) => setVestingCategory(e.target.value)}
+                                                    placeholder="team, advisors, etc."
+                                                    className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-400"
+                                                />
+                                            </div>
+                                            <button
+                                                onClick={async () => {
+                                                    if (!vestingCategory) {
+                                                        setError('Please provide category');
+                                                        return;
+                                                    }
+                                                    setLoading('vesting-contract');
+                                                    const success = await createVestingContract(vestingCategory);
+                                                    if (success) {
+                                                        setSuccess('Vesting contract created successfully');
+                                                        setVestingCategory('');
+                                                    } else {
+                                                        setError('Failed to create vesting contract');
+                                                    }
+                                                    setLoading(null);
+                                                }}
+                                                disabled={loading === 'vesting-contract'}
+                                                className="w-full px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors"
+                                            >
+                                                {loading === 'vesting-contract' ? 'Creating...' : 'Create Contract'}
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* Release/Revoke Vesting */}
+                                    <div className="space-y-4">
+                                        <h4 className="text-lg font-semibold text-white">Manage Vesting</h4>
+                                        <div className="space-y-3">
+                                            <div>
+                                                <label className="block text-sm font-medium text-slate-300 mb-2">
+                                                    Vesting Wallet Address
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={vestingWalletAddress}
+                                                    onChange={(e) => setVestingWalletAddress(e.target.value)}
+                                                    placeholder="0x..."
+                                                    className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-400"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-slate-300 mb-2">
+                                                    Schedule ID
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={scheduleId}
+                                                    onChange={(e) => setScheduleId(e.target.value)}
+                                                    placeholder="Schedule ID"
+                                                    className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-400"
+                                                />
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-2">
+                                                <button
+                                                    onClick={async () => {
+                                                        if (!vestingWalletAddress || !scheduleId) {
+                                                            setError('Please provide wallet address and schedule ID');
+                                                            return;
+                                                        }
+                                                        setLoading('vesting-release');
+                                                        const success = await releaseVestedTokens(vestingWalletAddress, scheduleId);
+                                                        if (success) {
+                                                            setSuccess('Vested tokens released successfully');
+                                                        } else {
+                                                            setError('Failed to release vested tokens');
+                                                        }
+                                                        setLoading(null);
+                                                    }}
+                                                    disabled={loading === 'vesting-release'}
+                                                    className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors"
+                                                >
+                                                    {loading === 'vesting-release' ? 'Releasing...' : 'Release'}
+                                                </button>
+                                                <button
+                                                    onClick={async () => {
+                                                        if (!vestingWalletAddress || !scheduleId) {
+                                                            setError('Please provide wallet address and schedule ID');
+                                                            return;
+                                                        }
+                                                        setLoading('vesting-revoke');
+                                                        const success = await revokeVesting(vestingWalletAddress, scheduleId);
+                                                        if (success) {
+                                                            setSuccess('Vesting revoked successfully');
+                                                        } else {
+                                                            setError('Failed to revoke vesting');
+                                                        }
+                                                        setLoading(null);
+                                                    }}
+                                                    disabled={loading === 'vesting-revoke'}
+                                                    className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors"
+                                                >
+                                                    {loading === 'vesting-revoke' ? 'Revoking...' : 'Revoke'}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Create Vesting Schedule */}
+                                <div className="space-y-4">
+                                    <h4 className="text-lg font-semibold text-white">Create Vesting Schedule</h4>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-300 mb-2">
+                                                Beneficiary Address
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={vestingBeneficiary}
+                                                onChange={(e) => setVestingBeneficiary(e.target.value)}
+                                                placeholder="0x..."
+                                                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-400"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-300 mb-2">
+                                                Total Amount (NYAX)
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={vestingAmount}
+                                                onChange={(e) => setVestingAmount(e.target.value)}
+                                                placeholder="1000"
+                                                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-400"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-300 mb-2">
+                                                Start Timestamp
+                                            </label>
+                                            <input
+                                                type="number"
+                                                value={vestingStart}
+                                                onChange={(e) => setVestingStart(e.target.value)}
+                                                placeholder="Unix timestamp"
+                                                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-400"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-300 mb-2">
+                                                Cliff Duration (seconds)
+                                            </label>
+                                            <input
+                                                type="number"
+                                                value={vestingCliff}
+                                                onChange={(e) => setVestingCliff(e.target.value)}
+                                                placeholder="2592000"
+                                                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-400"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-300 mb-2">
+                                                Duration (seconds)
+                                            </label>
+                                            <input
+                                                type="number"
+                                                value={vestingDuration}
+                                                onChange={(e) => setVestingDuration(e.target.value)}
+                                                placeholder="31536000"
+                                                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-400"
+                                            />
+                                        </div>
+                                        <div className="flex items-center space-x-2">
+                                            <input
+                                                type="checkbox"
+                                                id="revocable"
+                                                checked={vestingRevocable}
+                                                onChange={(e) => setVestingRevocable(e.target.checked)}
+                                                className="w-4 h-4 text-indigo-600 bg-slate-700 border-slate-600 rounded focus:ring-indigo-500"
+                                            />
+                                            <label htmlFor="revocable" className="text-sm font-medium text-slate-300">
+                                                Revocable
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={async () => {
+                                            if (!vestingWalletAddress || !vestingBeneficiary || !vestingAmount || !vestingStart || !vestingCliff || !vestingDuration || !vestingCategory) {
+                                                setError('Please provide all vesting schedule details');
+                                                return;
+                                            }
+                                            setLoading('vesting-schedule');
+                                            const success = await createVestingSchedule(
+                                                vestingWalletAddress,
+                                                vestingBeneficiary,
+                                                vestingAmount,
+                                                parseInt(vestingStart),
+                                                parseInt(vestingCliff),
+                                                parseInt(vestingDuration),
+                                                vestingRevocable,
+                                                vestingCategory
+                                            );
+                                            if (success) {
+                                                setSuccess('Vesting schedule created successfully');
+                                                setVestingBeneficiary('');
+                                                setVestingAmount('');
+                                                setVestingStart('');
+                                                setVestingCliff('');
+                                                setVestingDuration('');
+                                            } else {
+                                                setError('Failed to create vesting schedule');
+                                            }
+                                            setLoading(null);
+                                        }}
+                                        disabled={loading === 'vesting-schedule'}
+                                        className="w-full px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors"
+                                    >
+                                        {loading === 'vesting-schedule' ? 'Creating...' : 'Create Vesting Schedule'}
+                                    </button>
+                                </div>
+                            </div>
                         </AdminSection>
                     </div>
                 )}
@@ -571,7 +970,253 @@ export const AdminPanel: React.FC = () => {
                             icon={<TrendingUp className="w-5 h-5" />}
                             color="green"
                         >
-                            <p className="text-slate-400">Treasury functionality coming soon...</p>
+                            <div className="space-y-6">
+                                {/* Treasury Operations */}
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                    <div className="space-y-4">
+                                        <h4 className="text-lg font-semibold text-white">Treasury Transfer</h4>
+                                        <div className="space-y-3">
+                                            <div>
+                                                <label className="block text-sm font-medium text-slate-300 mb-2">
+                                                    To Address
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={treasuryTo}
+                                                    onChange={(e) => setTreasuryTo(e.target.value)}
+                                                    placeholder="0x..."
+                                                    className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-green-400"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-slate-300 mb-2">
+                                                    Amount (NYAX)
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={treasuryAmount}
+                                                    onChange={(e) => setTreasuryAmount(e.target.value)}
+                                                    placeholder="1000"
+                                                    className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-green-400"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-slate-300 mb-2">
+                                                    Category
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={treasuryCategory}
+                                                    onChange={(e) => setTreasuryCategory(e.target.value)}
+                                                    placeholder="development, marketing, etc."
+                                                    className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-green-400"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-slate-300 mb-2">
+                                                    Reason
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={treasuryReason}
+                                                    onChange={(e) => setTreasuryReason(e.target.value)}
+                                                    placeholder="Payment for services"
+                                                    className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-green-400"
+                                                />
+                                            </div>
+                                            <button
+                                                onClick={async () => {
+                                                    if (!treasuryTo || !treasuryAmount || !treasuryCategory || !treasuryReason) {
+                                                        setError('Please provide all transfer details');
+                                                        return;
+                                                    }
+                                                    setLoading('treasury-transfer');
+                                                    const success = await transferTo(treasuryTo, treasuryAmount, treasuryReason, treasuryCategory);
+                                                    if (success) {
+                                                        setSuccess('Treasury transfer completed successfully');
+                                                        setTreasuryTo('');
+                                                        setTreasuryAmount('');
+                                                        setTreasuryCategory('');
+                                                        setTreasuryReason('');
+                                                    } else {
+                                                        setError('Failed to complete treasury transfer');
+                                                    }
+                                                    setLoading(null);
+                                                }}
+                                                disabled={loading === 'treasury-transfer'}
+                                                className="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors"
+                                            >
+                                                {loading === 'treasury-transfer' ? 'Transferring...' : 'Transfer Funds'}
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        <h4 className="text-lg font-semibold text-white">Treasury Mint/Burn</h4>
+                                        <div className="space-y-3">
+                                            <div>
+                                                <label className="block text-sm font-medium text-slate-300 mb-2">
+                                                    Amount (NYAX)
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={treasuryAmount}
+                                                    onChange={(e) => setTreasuryAmount(e.target.value)}
+                                                    placeholder="1000"
+                                                    className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-green-400"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-slate-300 mb-2">
+                                                    Reason
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={treasuryReason}
+                                                    onChange={(e) => setTreasuryReason(e.target.value)}
+                                                    placeholder="Treasury funding"
+                                                    className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-green-400"
+                                                />
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-2">
+                                                <button
+                                                    onClick={async () => {
+                                                        if (!treasuryAmount || !treasuryReason) {
+                                                            setError('Please provide amount and reason');
+                                                            return;
+                                                        }
+                                                        setLoading('treasury-mint');
+                                                        const success = await mintToTreasury(treasuryAmount, treasuryReason);
+                                                        if (success) {
+                                                            setSuccess('Tokens minted to treasury successfully');
+                                                            setTreasuryAmount('');
+                                                            setTreasuryReason('');
+                                                        } else {
+                                                            setError('Failed to mint to treasury');
+                                                        }
+                                                        setLoading(null);
+                                                    }}
+                                                    disabled={loading === 'treasury-mint'}
+                                                    className="px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors"
+                                                >
+                                                    {loading === 'treasury-mint' ? 'Minting...' : 'Mint'}
+                                                </button>
+                                                <button
+                                                    onClick={async () => {
+                                                        if (!treasuryAmount || !treasuryReason) {
+                                                            setError('Please provide amount and reason');
+                                                            return;
+                                                        }
+                                                        setLoading('treasury-burn');
+                                                        const success = await burnFromTreasury(treasuryAmount, treasuryReason);
+                                                        if (success) {
+                                                            setSuccess('Tokens burned from treasury successfully');
+                                                            setTreasuryAmount('');
+                                                            setTreasuryReason('');
+                                                        } else {
+                                                            setError('Failed to burn from treasury');
+                                                        }
+                                                        setLoading(null);
+                                                    }}
+                                                    disabled={loading === 'treasury-burn'}
+                                                    className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors"
+                                                >
+                                                    {loading === 'treasury-burn' ? 'Burning...' : 'Burn'}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Category Management */}
+                                <div className="space-y-4">
+                                    <h4 className="text-lg font-semibold text-white">Category Management</h4>
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-300 mb-2">
+                                                Category Name
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={categoryName}
+                                                onChange={(e) => setCategoryName(e.target.value)}
+                                                placeholder="development"
+                                                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-green-400"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-300 mb-2">
+                                                Wallet Address
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={categoryWalletAddress}
+                                                onChange={(e) => setCategoryWalletAddress(e.target.value)}
+                                                placeholder="0x..."
+                                                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-green-400"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-300 mb-2">
+                                                Allocation %
+                                            </label>
+                                            <input
+                                                type="number"
+                                                value={categoryAllocation}
+                                                onChange={(e) => setCategoryAllocation(e.target.value)}
+                                                placeholder="25"
+                                                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-green-400"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <button
+                                            onClick={async () => {
+                                                if (!categoryName || !categoryWalletAddress || !categoryAllocation) {
+                                                    setError('Please provide all category details');
+                                                    return;
+                                                }
+                                                setLoading('category-set');
+                                                const success = await setCategoryWallet(categoryName, categoryWalletAddress, parseInt(categoryAllocation));
+                                                if (success) {
+                                                    setSuccess('Category wallet set successfully');
+                                                    setCategoryName('');
+                                                    setCategoryWalletAddress('');
+                                                    setCategoryAllocation('');
+                                                } else {
+                                                    setError('Failed to set category wallet');
+                                                }
+                                                setLoading(null);
+                                            }}
+                                            disabled={loading === 'category-set'}
+                                            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors"
+                                        >
+                                            {loading === 'category-set' ? 'Setting...' : 'Set Category'}
+                                        </button>
+                                        <button
+                                            onClick={async () => {
+                                                if (!categoryName) {
+                                                    setError('Please provide category name');
+                                                    return;
+                                                }
+                                                setLoading('category-remove');
+                                                const success = await removeCategory(categoryName);
+                                                if (success) {
+                                                    setSuccess('Category removed successfully');
+                                                    setCategoryName('');
+                                                } else {
+                                                    setError('Failed to remove category');
+                                                }
+                                                setLoading(null);
+                                            }}
+                                            disabled={loading === 'category-remove'}
+                                            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors"
+                                        >
+                                            {loading === 'category-remove' ? 'Removing...' : 'Remove Category'}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </AdminSection>
                     </div>
                 )}
@@ -584,7 +1229,184 @@ export const AdminPanel: React.FC = () => {
                             icon={<AlertTriangle className="w-5 h-5" />}
                             color="red"
                         >
-                            <p className="text-slate-400">Emergency functions coming soon...</p>
+                            <div className="space-y-6">
+                                {/* Emergency Recovery */}
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                    <div className="space-y-4">
+                                        <h4 className="text-lg font-semibold text-red-300">Emergency ERC20 Recovery</h4>
+                                        <div className="space-y-3">
+                                            <div>
+                                                <label className="block text-sm font-medium text-slate-300 mb-2">
+                                                    Token Address
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={emergencyTokenAddress}
+                                                    onChange={(e) => setEmergencyTokenAddress(e.target.value)}
+                                                    placeholder="0x..."
+                                                    className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-red-400"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-slate-300 mb-2">
+                                                    Amount
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={emergencyAmount}
+                                                    onChange={(e) => setEmergencyAmount(e.target.value)}
+                                                    placeholder="1000"
+                                                    className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-red-400"
+                                                />
+                                            </div>
+                                            <button
+                                                onClick={async () => {
+                                                    if (!emergencyTokenAddress || !emergencyAmount) {
+                                                        setError('Please provide token address and amount');
+                                                        return;
+                                                    }
+                                                    setLoading('emergency-erc20');
+                                                    const success = await emergencyRecoverERC20(emergencyTokenAddress, emergencyAmount);
+                                                    if (success) {
+                                                        setSuccess('Emergency ERC20 recovery completed successfully');
+                                                        setEmergencyTokenAddress('');
+                                                        setEmergencyAmount('');
+                                                    } else {
+                                                        setError('Failed to recover ERC20 tokens');
+                                                    }
+                                                    setLoading(null);
+                                                }}
+                                                disabled={loading === 'emergency-erc20'}
+                                                className="w-full px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors"
+                                            >
+                                                {loading === 'emergency-erc20' ? 'Recovering...' : 'Emergency Recover ERC20'}
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        <h4 className="text-lg font-semibold text-red-300">Emergency ETH Recovery</h4>
+                                        <div className="space-y-3">
+                                            <p className="text-slate-400 text-sm">
+                                                Recover all ETH from treasury contract in case of emergency.
+                                            </p>
+                                            <button
+                                                onClick={async () => {
+                                                    setLoading('emergency-eth');
+                                                    const success = await emergencyRecoverETH();
+                                                    if (success) {
+                                                        setSuccess('Emergency ETH recovery completed successfully');
+                                                    } else {
+                                                        setError('Failed to recover ETH');
+                                                    }
+                                                    setLoading(null);
+                                                }}
+                                                disabled={loading === 'emergency-eth'}
+                                                className="w-full px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors"
+                                            >
+                                                {loading === 'emergency-eth' ? 'Recovering...' : 'Emergency Recover ETH'}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Emergency Proposal */}
+                                <div className="space-y-4">
+                                    <h4 className="text-lg font-semibold text-red-300">Emergency Proposal</h4>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-300 mb-2">
+                                                Target Addresses (comma-separated)
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={emergencyTargets}
+                                                onChange={(e) => setEmergencyTargets(e.target.value)}
+                                                placeholder="0x...,0x..."
+                                                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-red-400"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-300 mb-2">
+                                                Values (comma-separated, in wei)
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={emergencyValues}
+                                                onChange={(e) => setEmergencyValues(e.target.value)}
+                                                placeholder="0,0"
+                                                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-red-400"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-300 mb-2">
+                                                Call Data (comma-separated)
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={emergencyCalldatas}
+                                                onChange={(e) => setEmergencyCalldatas(e.target.value)}
+                                                placeholder="0x...,0x..."
+                                                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-red-400"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-300 mb-2">
+                                                Description
+                                            </label>
+                                            <textarea
+                                                value={emergencyDescription}
+                                                onChange={(e) => setEmergencyDescription(e.target.value)}
+                                                placeholder="Emergency proposal description..."
+                                                rows={3}
+                                                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-red-400"
+                                            />
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={async () => {
+                                            if (!emergencyTargets || !emergencyValues || !emergencyCalldatas || !emergencyDescription) {
+                                                setError('Please provide all emergency proposal details');
+                                                return;
+                                            }
+                                            setLoading('emergency-proposal');
+                                            const targets = emergencyTargets.split(',').map(t => t.trim());
+                                            const values = emergencyValues.split(',').map(v => v.trim());
+                                            const calldatas = emergencyCalldatas.split(',').map(c => c.trim());
+
+                                            const txHash = await createEmergencyProposal(targets, values, calldatas, emergencyDescription);
+                                            if (txHash) {
+                                                setSuccess('Emergency proposal created successfully');
+                                                setEmergencyTargets('');
+                                                setEmergencyValues('');
+                                                setEmergencyCalldatas('');
+                                                setEmergencyDescription('');
+                                            } else {
+                                                setError('Failed to create emergency proposal');
+                                            }
+                                            setLoading(null);
+                                        }}
+                                        disabled={loading === 'emergency-proposal'}
+                                        className="w-full px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors"
+                                    >
+                                        {loading === 'emergency-proposal' ? 'Creating...' : 'Create Emergency Proposal'}
+                                    </button>
+                                </div>
+
+                                {/* Warning */}
+                                <div className="bg-red-900/20 backdrop-blur border border-red-500/50 rounded-xl p-6">
+                                    <div className="flex items-center gap-3">
+                                        <AlertTriangle className="w-6 h-6 text-red-400" />
+                                        <div>
+                                            <h3 className="text-lg font-semibold text-red-400">⚠️ CRITICAL WARNING</h3>
+                                            <p className="text-red-300 text-sm mt-1">
+                                                Emergency functions bypass normal governance processes and should only be used in critical situations.
+                                                These actions are irreversible and require extreme caution.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </AdminSection>
                     </div>
                 )}
