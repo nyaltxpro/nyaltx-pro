@@ -1,10 +1,10 @@
 'use client';
-import { mainnet, arbitrum, base, polygon, scroll } from '@reown/appkit/networks';
+import { sepolia } from '@reown/appkit/networks';
 import { createAppKit } from '@reown/appkit/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { type ReactNode } from 'react';
 import { cookieToInitialState, WagmiProvider, type Config } from 'wagmi';
-import { projectId, wagmiAdapter, SolanaWalletContext } from '../lib/web3modal';
+import { projectId, SolanaWalletContext, wagmiAdapter } from '../lib/web3modal';
 
 
 const queryClient = new QueryClient();
@@ -16,8 +16,8 @@ if (!projectId) {
 const modal = createAppKit({
   adapters: [wagmiAdapter],
   projectId,
-  networks: [mainnet, arbitrum, base, polygon, scroll],
-  defaultNetwork: mainnet,
+  networks: [sepolia],
+  defaultNetwork: sepolia,
   metadata: {
     name: 'NYALTX',
     description: 'NYALTX - Crypto Trading Platform',
