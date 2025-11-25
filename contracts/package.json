@@ -28,7 +28,12 @@
     "size": "hardhat size-contracts",
     "gas-report": "REPORT_GAS=true hardhat test",
     "flatten": "hardhat flatten",
-    "console": "hardhat console"
+    "console": "hardhat console",
+    "manage-owners": "hardhat run scripts/manage-multisig-owners.js --network sepolia",
+    "manage-owners:local": "hardhat run scripts/manage-multisig-owners.js --network localhost",
+    "add-owner": "hardhat run scripts/add-owner.js --network sepolia",
+    "get-owners": "hardhat run scripts/get-owners.js --network sepolia",
+    "deploy-new-multisig": "hardhat run scripts/deploy-new-multisig.js --network sepolia"
   },
   "keywords": [
     "ethereum",
