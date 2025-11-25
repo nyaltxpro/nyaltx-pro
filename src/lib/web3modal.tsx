@@ -1,21 +1,45 @@
 'use client';
-import React, { FC, ReactNode, useMemo } from 'react';
+import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';
+import { arbitrum, base, mainnet, polygon, scroll } from '@reown/appkit/networks';
 import {
   ConnectionProvider,
   WalletProvider,
 } from '@solana/wallet-adapter-react';
+import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 import {
   PhantomWalletAdapter,
   SolflareWalletAdapter,
 } from '@solana/wallet-adapter-wallets';
-import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 import { clusterApiUrl } from '@solana/web3.js';
-import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';
-import { arbitrum, base, mainnet, polygon, scroll } from '@reown/appkit/networks';
 import { cookieStorage, createStorage, http } from '@wagmi/core';
+import { sepolia as sepoliaChain } from '@wagmi/core/chains';
+import { FC, ReactNode, useMemo } from 'react';
 
 // Import Solana wallet adapter styles
 import '@solana/wallet-adapter-react-ui/styles.css';
+
+// Create AppKit-compatible Sepolia network
+const sepolia = {
+  id: 11155111,
+  name: 'Sepolia',
+  nativeCurrency: {
+    name: 'Sepolia Ether',
+    symbol: 'ETH',
+    decimals: 18,
+  },
+  rpcUrls: {
+    default: {
+      http: ['https://rpc.sepolia.org'],
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: 'Etherscan',
+      url: 'https://sepolia.etherscan.io',
+    },
+  },
+  testnet: true,
+};
 
 // Get projectId from https://dashboard.reown.com
 export const projectId = 'f56614799c9232532c3e3e76536d3be3';
@@ -24,8 +48,8 @@ if (!projectId) {
   throw new Error('Project ID is not defined');
 }
 
-// EVM networks for Wagmi
-export const networks = [mainnet, arbitrum, polygon, base, scroll];
+// EVM networks for Wagmi (using actual chain objects for wagmi)
+export const networks = [sepoliaChain, mainnet, arbitrum, polygon, base, scroll];
 
 // Solana Wallet Context Provider
 export const SolanaWalletContext: FC<{ children: ReactNode }> = ({ children }) => {
@@ -54,6 +78,7 @@ export const wagmiAdapter = new WagmiAdapter({
   projectId,
   networks,
   transports: {
+    [sepoliaChain.id]: http(),
     [mainnet.id]: http(),
     [arbitrum.id]: http(),
     [polygon.id]: http(),
