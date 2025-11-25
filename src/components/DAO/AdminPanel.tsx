@@ -47,7 +47,19 @@ const AdminActionCard: React.FC<AdminActionCardProps> = ({
 );
 
 export const AdminPanel: React.FC = () => {
-    const { isConnected, isInitialized } = useDAO();
+    const {
+        isConnected,
+        isInitialized,
+        mintTokens,
+        burnTokens,
+        setBlacklisted,
+        setTransfersEnabled,
+        recoverETH,
+        createProposal,
+        submitMultisigTransaction,
+        createVestingContract,
+        mintToTreasury
+    } = useDAO();
 
     // Token Management State
     const [mintAmount, setMintAmount] = useState('');
@@ -55,7 +67,7 @@ export const AdminPanel: React.FC = () => {
     const [burnAmount, setBurnAmount] = useState('');
     const [burnFrom, setBurnFrom] = useState('');
     const [blacklistAddress, setBlacklistAddress] = useState('');
-    const [transfersEnabled, setTransfersEnabled] = useState(true);
+    const [transfersEnabled, setTransfersEnabledState] = useState(true);
 
     // Governance State
     const [proposalTargets, setProposalTargets] = useState('');
@@ -94,14 +106,14 @@ export const AdminPanel: React.FC = () => {
         setSuccess(null);
 
         try {
-            const daoService = getDAOService();
-            await daoService.mintTokens(mintTo, mintAmount);
-
-            // Mock success
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            setSuccess(`Successfully minted ${mintAmount} NYAX to ${mintTo}`);
-            setMintAmount('');
-            setMintTo('');
+            const success = await mintTokens(mintTo, mintAmount);
+            if (success) {
+                setSuccess(`Successfully minted ${mintAmount} NYAX to ${mintTo}`);
+                setMintAmount('');
+                setMintTo('');
+            } else {
+                setError('Failed to mint tokens');
+            }
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to mint tokens');
         } finally {
@@ -120,11 +132,14 @@ export const AdminPanel: React.FC = () => {
         setSuccess(null);
 
         try {
-            // Mock success
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            setSuccess(`Successfully burned ${burnAmount} NYAX from ${burnFrom}`);
-            setBurnAmount('');
-            setBurnFrom('');
+            const success = await burnTokens(burnFrom, burnAmount);
+            if (success) {
+                setSuccess(`Successfully burned ${burnAmount} NYAX from ${burnFrom}`);
+                setBurnAmount('');
+                setBurnFrom('');
+            } else {
+                setError('Failed to burn tokens');
+            }
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to burn tokens');
         } finally {
@@ -143,10 +158,13 @@ export const AdminPanel: React.FC = () => {
         setSuccess(null);
 
         try {
-            // Mock success
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            setSuccess(`Successfully updated blacklist status for ${blacklistAddress}`);
-            setBlacklistAddress('');
+            const success = await setBlacklisted(blacklistAddress, true);
+            if (success) {
+                setSuccess(`Successfully blacklisted ${blacklistAddress}`);
+                setBlacklistAddress('');
+            } else {
+                setError('Failed to update blacklist');
+            }
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to update blacklist');
         } finally {
@@ -160,11 +178,14 @@ export const AdminPanel: React.FC = () => {
         setSuccess(null);
 
         try {
-            // Mock success
-            await new Promise(resolve => setTimeout(resolve, 2000));
             const newState = !transfersEnabled;
-            setTransfersEnabled(newState);
-            setSuccess(`Transfers ${newState ? 'enabled' : 'disabled'} successfully`);
+            const success = await setTransfersEnabled(newState);
+            if (success) {
+                setTransfersEnabledState(newState);
+                setSuccess(`Transfers ${newState ? 'enabled' : 'disabled'} successfully`);
+            } else {
+                setError('Failed to toggle transfers');
+            }
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to toggle transfers');
         } finally {
@@ -194,9 +215,12 @@ export const AdminPanel: React.FC = () => {
         setSuccess(null);
 
         try {
-            // Mock success
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            setSuccess('ETH recovered successfully');
+            const success = await recoverETH();
+            if (success) {
+                setSuccess('ETH recovered successfully');
+            } else {
+                setError('Failed to recover ETH');
+            }
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to recover ETH');
         } finally {
@@ -216,13 +240,20 @@ export const AdminPanel: React.FC = () => {
         setSuccess(null);
 
         try {
-            // Mock success
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            setSuccess('Proposal created successfully');
-            setProposalTargets('');
-            setProposalValues('');
-            setProposalCalldatas('');
-            setProposalDescription('');
+            const targets = proposalTargets.split(',').map(t => t.trim());
+            const values = proposalValues.split(',').map(v => v.trim());
+            const calldatas = proposalCalldatas.split(',').map(c => c.trim());
+
+            const txHash = await createProposal(targets, values, calldatas, proposalDescription);
+            if (txHash) {
+                setSuccess('Proposal created successfully');
+                setProposalTargets('');
+                setProposalValues('');
+                setProposalCalldatas('');
+                setProposalDescription('');
+            } else {
+                setError('Failed to create proposal');
+            }
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to create proposal');
         } finally {

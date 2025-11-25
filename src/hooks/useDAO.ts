@@ -103,6 +103,77 @@ export const useDAO = () => {
     }
   }, [daoService, isConnected]);
 
+  // Admin token functions
+  const mintTokens = useCallback(async (to: string, amount: string): Promise<boolean> => {
+    if (!daoService || !isConnected) return false;
+    
+    try {
+      const tx = await daoService.mintTokens(to, amount);
+      await tx.wait();
+      return true;
+    } catch (err) {
+      console.error('Failed to mint tokens:', err);
+      setError(err instanceof Error ? err.message : 'Failed to mint tokens');
+      return false;
+    }
+  }, [daoService, isConnected]);
+
+  const burnTokens = useCallback(async (from: string, amount: string): Promise<boolean> => {
+    if (!daoService || !isConnected) return false;
+    
+    try {
+      const tx = await daoService.burnTokens(from, amount);
+      await tx.wait();
+      return true;
+    } catch (err) {
+      console.error('Failed to burn tokens:', err);
+      setError(err instanceof Error ? err.message : 'Failed to burn tokens');
+      return false;
+    }
+  }, [daoService, isConnected]);
+
+  const setBlacklisted = useCallback(async (account: string, isBlacklisted: boolean): Promise<boolean> => {
+    if (!daoService || !isConnected) return false;
+    
+    try {
+      const tx = await daoService.setBlacklisted(account, isBlacklisted);
+      await tx.wait();
+      return true;
+    } catch (err) {
+      console.error('Failed to set blacklist:', err);
+      setError(err instanceof Error ? err.message : 'Failed to set blacklist');
+      return false;
+    }
+  }, [daoService, isConnected]);
+
+  const setTransfersEnabled = useCallback(async (enabled: boolean): Promise<boolean> => {
+    if (!daoService || !isConnected) return false;
+    
+    try {
+      const tx = await daoService.setTransfersEnabled(enabled);
+      await tx.wait();
+      return true;
+    } catch (err) {
+      console.error('Failed to set transfers enabled:', err);
+      setError(err instanceof Error ? err.message : 'Failed to set transfers enabled');
+      return false;
+    }
+  }, [daoService, isConnected]);
+
+  const recoverETH = useCallback(async (): Promise<boolean> => {
+    if (!daoService || !isConnected) return false;
+    
+    try {
+      const tx = await daoService.recoverETH();
+      await tx.wait();
+      return true;
+    } catch (err) {
+      console.error('Failed to recover ETH:', err);
+      setError(err instanceof Error ? err.message : 'Failed to recover ETH');
+      return false;
+    }
+  }, [daoService, isConnected]);
+
   // Governance functions
   const getGovernanceStats = useCallback(async (): Promise<GovernanceStats | null> => {
     if (!daoService) return null;
@@ -303,6 +374,13 @@ export const useDAO = () => {
     getTokenBalance,
     getVotingPower,
     delegateVotes,
+    
+    // Admin token functions
+    mintTokens,
+    burnTokens,
+    setBlacklisted,
+    setTransfersEnabled,
+    recoverETH,
     
     // Governance functions
     getGovernanceStats,
