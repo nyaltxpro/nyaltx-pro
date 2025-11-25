@@ -107,11 +107,11 @@ export default function Sidebar({ isMobileMenuOpen, toggleMobileMenu }: SidebarP
       text: 'Governance',
       href: '/dashboard/governance',
     },
-    {
-      icon: <GearIcon />,
-      text: 'Call Data Helper',
-      href: '/dashboard/call-data-helper',
-    },
+    // {
+    //   icon: <GearIcon />,
+    //   text: 'Call Data Helper',
+    //   href: '/dashboard/call-data-helper',
+    // },
     {
       icon: <GearIcon />,
       text: 'DAO',
