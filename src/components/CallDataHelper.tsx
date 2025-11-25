@@ -60,6 +60,12 @@ export default function CallDataHelper() {
                     setContractAddress(CONTRACT_ADDRESSES.NYAX_TOKEN);
                     callData = generateTransferCallData(recipient as Address, amount);
                     break;
+                case 'transferToMultisig':
+                    // For transfer TO multisig, set contract to NYAX token and recipient to multisig
+                    setContractAddress(CONTRACT_ADDRESSES.NYAX_TOKEN);
+                    setRecipient(CONTRACT_ADDRESSES.MULTISIG);
+                    callData = generateTransferCallData(CONTRACT_ADDRESSES.MULTISIG, amount);
+                    break;
                 case 'addOwner':
                     callData = generateAddOwnerCallData(recipient as Address);
                     break;
@@ -106,6 +112,7 @@ export default function CallDataHelper() {
                     <option value="approve">Approve NYAX Tokens</option>
                     <option value="mint">Mint NYAX Tokens</option>
                     <option value="transferDirect">Direct NYAX Transfer (Simple)</option>
+                    <option value="transferToMultisig">Transfer NYAX TO Multisig</option>
                     <option value="addOwner">Add Multisig Owner</option>
                     <option value="changeThreshold">Change Multisig Threshold</option>
                 </select>
@@ -157,6 +164,13 @@ export default function CallDataHelper() {
                         <>
                             <p><strong>To Address:</strong> Automatically set to NYAX Token</p>
                             <p><strong>Recipient:</strong> Who receives the tokens</p>
+                        </>
+                    )}
+                    {transactionType === 'transferToMultisig' && (
+                        <>
+                            <p><strong>To Address:</strong> Automatically set to NYAX Token</p>
+                            <p><strong>Recipient:</strong> Automatically set to Multisig</p>
+                            <p><strong>Amount:</strong> How many NYAX tokens to send to multisig</p>
                         </>
                     )}
                     {(transactionType === 'transfer' || transactionType === 'approve' || transactionType === 'mint') && (
