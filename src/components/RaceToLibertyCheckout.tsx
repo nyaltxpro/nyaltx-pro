@@ -1195,8 +1195,8 @@ export default function RaceToLibertyCheckout({
                         placeholder="your@email.com"
                         required
                         className={`w-full px-4 py-3 rounded-xl bg-white/5 border text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-cyan-500/50 transition-all duration-300 ${emailError
-                            ? 'border-red-500/50 focus:ring-red-500/50'
-                            : 'border-white/10 focus:ring-cyan-500/50'
+                          ? 'border-red-500/50 focus:ring-red-500/50'
+                          : 'border-white/10 focus:ring-cyan-500/50'
                           }`}
                       />
                       {emailError && (
