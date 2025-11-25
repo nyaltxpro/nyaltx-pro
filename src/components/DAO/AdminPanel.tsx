@@ -94,8 +94,8 @@ export const AdminPanel: React.FC = () => {
         setSuccess(null);
 
         try {
-            // const daoService = getDAOService();
-            // await daoService.mintTokens(mintTo, mintAmount);
+            const daoService = getDAOService();
+            await daoService.mintTokens(mintTo, mintAmount);
 
             // Mock success
             await new Promise(resolve => setTimeout(resolve, 2000));
