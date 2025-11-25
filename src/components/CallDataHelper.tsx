@@ -55,6 +55,11 @@ export default function CallDataHelper() {
                 case 'mint':
                     callData = generateMintCallData(recipient as Address, amount);
                     break;
+                case 'transferDirect':
+                    // For direct transfer, automatically set contract address to NYAX token
+                    setContractAddress(CONTRACT_ADDRESSES.NYAX_TOKEN);
+                    callData = generateTransferCallData(recipient as Address, amount);
+                    break;
                 case 'addOwner':
                     callData = generateAddOwnerCallData(recipient as Address);
                     break;
@@ -97,9 +102,10 @@ export default function CallDataHelper() {
                     onChange={(e) => setTransactionType(e.target.value)}
                     className="w-full p-2 bg-gray-800 border border-gray-600 rounded"
                 >
-                    <option value="transfer">Transfer Tokens</option>
-                    <option value="approve">Approve Tokens</option>
-                    <option value="mint">Mint Tokens</option>
+                    <option value="transfer">Transfer NYAX Tokens</option>
+                    <option value="approve">Approve NYAX Tokens</option>
+                    <option value="mint">Mint NYAX Tokens</option>
+                    <option value="transferDirect">Direct NYAX Transfer (Simple)</option>
                     <option value="addOwner">Add Multisig Owner</option>
                     <option value="changeThreshold">Change Multisig Threshold</option>
                 </select>
@@ -141,6 +147,37 @@ export default function CallDataHelper() {
                     placeholder="100"
                     className="w-full p-2 bg-gray-800 border border-gray-600 rounded"
                 />
+            </div>
+
+            {/* Address Hints */}
+            <div className="mb-4 p-3 bg-yellow-900/20 border border-yellow-600/30 rounded">
+                <h4 className="text-yellow-400 font-semibold mb-2">💡 Address Guide:</h4>
+                <div className="text-sm text-yellow-200 space-y-1">
+                    {transactionType === 'transferDirect' && (
+                        <>
+                            <p><strong>To Address:</strong> Automatically set to NYAX Token</p>
+                            <p><strong>Recipient:</strong> Who receives the tokens</p>
+                        </>
+                    )}
+                    {(transactionType === 'transfer' || transactionType === 'approve' || transactionType === 'mint') && (
+                        <>
+                            <p><strong>To Address:</strong> NYAX Token ({CONTRACT_ADDRESSES.NYAX_TOKEN})</p>
+                            <p><strong>Recipient/Spender:</strong> Who receives/can spend the tokens</p>
+                        </>
+                    )}
+                    {transactionType === 'addOwner' && (
+                        <>
+                            <p><strong>To Address:</strong> Multisig Contract ({CONTRACT_ADDRESSES.MULTISIG})</p>
+                            <p><strong>Recipient:</strong> New owner address to add</p>
+                        </>
+                    )}
+                    {transactionType === 'changeThreshold' && (
+                        <>
+                            <p><strong>To Address:</strong> Multisig Contract ({CONTRACT_ADDRESSES.MULTISIG})</p>
+                            <p><strong>Amount:</strong> New threshold number (not address)</p>
+                        </>
+                    )}
+                </div>
             </div>
 
             {/* Generate Button */}
