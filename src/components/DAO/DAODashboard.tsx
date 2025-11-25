@@ -1,4 +1,5 @@
 'use client'
+import ConnectWalletButton from '@/components/ConnectWalletButton';
 import { useDAO } from '@/hooks/useDAO';
 import { GovernanceStats, TokenInfo, TreasuryCategory, TreasuryStats, VotingPower } from '@/services/contracts/types';
 import React, { useEffect, useState } from 'react';
@@ -354,13 +355,21 @@ export const DAODashboard: React.FC = () => {
                 {/* Connection Prompt */}
                 {!isConnected && (
                     <div className="mt-8 bg-gray-800 rounded-lg p-6 border border-gray-700 text-center">
-                        <h3 className="text-lg font-semibold text-white mb-2">Connect Your Wallet</h3>
-                        <p className="text-gray-400 mb-4">
+                        <div className="text-cyan-400 text-4xl mb-4">
+                            <FaWallet className="mx-auto" />
+                        </div>
+                        <h3 className="text-xl font-semibold text-white mb-3">Connect Your Wallet</h3>
+                        <p className="text-gray-400 mb-6">
                             Connect your wallet to view your NYAX balance, voting power, and participate in governance.
                         </p>
-                        <p className="text-sm text-gray-500">
-                            Use the wallet connection button in the header to get started.
-                        </p>
+                        <div className="space-y-4">
+                            <ConnectWalletButton
+                                className="w-full max-w-xs mx-auto py-3 px-6 text-base font-semibold"
+                            />
+                            <p className="text-xs text-gray-500">
+                                Your wallet will be used to interact with NYAX DAO smart contracts
+                            </p>
+                        </div>
                     </div>
                 )}
             </div>

@@ -1,7 +1,8 @@
 'use client'
+import ConnectWalletButton from '@/components/ConnectWalletButton';
 import { useDAO } from '@/hooks/useDAO';
 import React, { useState } from 'react';
-import { FaBan, FaCoins, FaExclamationTriangle, FaFire, FaRocket, FaShieldAlt } from 'react-icons/fa';
+import { FaBan, FaCoins, FaExclamationTriangle, FaFire, FaRocket, FaShieldAlt, FaWallet } from 'react-icons/fa';
 
 interface AdminActionCardProps {
     title: string;
@@ -195,11 +196,26 @@ export const AdminPanel: React.FC = () => {
         return (
             <div className="min-h-screen bg-gray-900 flex items-center justify-center">
                 <div className="text-center max-w-md">
-                    <div className="text-yellow-400 text-4xl mb-4">🔐</div>
-                    <h2 className="text-xl font-semibold text-white mb-2">Admin Access Required</h2>
-                    <p className="text-gray-400 mb-4">
+                    <div className="text-yellow-400 text-6xl mb-6">
+                        <FaWallet className="mx-auto" />
+                    </div>
+                    <h2 className="text-2xl font-semibold text-white mb-3">Admin Access Required</h2>
+                    <p className="text-gray-400 mb-6">
                         Connect your admin wallet to access the DAO administration panel.
                     </p>
+                    <div className="space-y-4">
+                        <ConnectWalletButton
+                            className="w-full py-3 px-6 text-base font-semibold"
+                        />
+                        <div className="text-xs text-gray-500 bg-gray-800/50 rounded-lg p-3 border border-gray-700">
+                            <p className="flex items-center justify-center mb-1">
+                                <FaExclamationTriangle className="mr-2 text-yellow-400" />
+                                <strong>Note:</strong>
+                            </p>
+                            <p>Only pre-approved admin wallet addresses can access this panel.</p>
+                            <p className="mt-1">Configure via <code className="text-cyan-400">ADMIN_WALLET_ADDRESSES</code> environment variable.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         );
