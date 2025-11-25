@@ -108,12 +108,23 @@ export const useDAO = () => {
     if (!daoService || !isConnected) return false;
     
     try {
+      // Debug logging
+      console.log('Attempting to mint tokens:', { to, amount });
+      console.log('Contract address being used:', process.env.NEXT_NYAX_TOKEN_ADDRESS);
+      console.log('Chain ID configured:', process.env.NEXT_PUBLIC_CHAIN_ID);
+      
       const tx = await daoService.mintTokens(to, amount);
       await tx.wait();
       return true;
     } catch (err) {
       console.error('Failed to mint tokens:', err);
-      setError(err instanceof Error ? err.message : 'Failed to mint tokens');
+      
+      // Enhanced error message for network mismatch
+      if (err instanceof Error && err.message.includes('missing revert data')) {
+        setError('Network mismatch: Please ensure you are connected to Sepolia Testnet (Chain ID: 11155111) and using the correct contract addresses.');
+      } else {
+        setError(err instanceof Error ? err.message : 'Failed to mint tokens');
+      }
       return false;
     }
   }, [daoService, isConnected]);

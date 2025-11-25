@@ -2,7 +2,7 @@ import { ContractAddresses } from './types';
 
 // Contract addresses - Update these with deployed contract addresses
 export const CONTRACT_ADDRESSES: ContractAddresses = {
-  nyaxToken: process.env.NEXT_PUBLIC_NYAX_TOKEN_ADDRESS || '',
+  nyaxToken: process.env.NEXT_NYAX_TOKEN_ADDRESS || '',
   nyaxGovernor: process.env.NEXT_PUBLIC_NYAX_GOVERNOR_ADDRESS || '',
   treasury: process.env.NEXT_PUBLIC_TREASURY_ADDRESS || '',
   multisig: process.env.NEXT_PUBLIC_MULTISIG_ADDRESS || '',
