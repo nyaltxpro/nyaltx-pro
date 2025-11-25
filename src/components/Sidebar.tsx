@@ -109,6 +109,11 @@ export default function Sidebar({ isMobileMenuOpen, toggleMobileMenu }: SidebarP
     },
     {
       icon: <GearIcon />,
+      text: 'Call Data Helper',
+      href: '/dashboard/call-data-helper',
+    },
+    {
+      icon: <GearIcon />,
       text: 'DAO',
       href: '/dashboard/dao',
     },

@@ -2,6 +2,10 @@
 import { useState } from 'react';
 import { Address, isAddress } from 'viem';
 import {
+    generateAddOwnerCallData,
+    generateChangeThresholdCallData
+} from '../utils/addMultisigOwner';
+import {
     CONTRACT_ADDRESSES,
     generateApprovalCallData,
     generateMintCallData,
@@ -51,6 +55,12 @@ export default function CallDataHelper() {
                 case 'mint':
                     callData = generateMintCallData(recipient as Address, amount);
                     break;
+                case 'addOwner':
+                    callData = generateAddOwnerCallData(recipient as Address);
+                    break;
+                case 'changeThreshold':
+                    callData = generateChangeThresholdCallData(parseInt(amount));
+                    break;
                 default:
                     throw new Error('Invalid transaction type');
             }
@@ -90,6 +100,8 @@ export default function CallDataHelper() {
                     <option value="transfer">Transfer Tokens</option>
                     <option value="approve">Approve Tokens</option>
                     <option value="mint">Mint Tokens</option>
+                    <option value="addOwner">Add Multisig Owner</option>
+                    <option value="changeThreshold">Change Multisig Threshold</option>
                 </select>
             </div>
 
