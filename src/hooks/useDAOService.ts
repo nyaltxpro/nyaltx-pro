@@ -2,12 +2,15 @@
 import { DAOService, createDAOService } from '@/services/contracts';
 import { GovernanceStats, ProposalData, TreasuryStats, VotingPower } from '@/services/contracts/types';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useAccount, usePublicClient, useWalletClient } from 'wagmi';
+import { useAccount, useWalletClient } from 'wagmi';
+
+let cachedDAOService: DAOService | null = null;
+let daoServiceInitPromise: Promise<DAOService> | null = null;
+let hasValidatedContracts = false;
 
 export function useDAOService() {
   const { address, isConnected } = useAccount();
-  const walletClient = useWalletClient();
-  const publicClient = usePublicClient();
+  const { data: walletClient } = useWalletClient();
   
   const [daoService, setDAOService] = useState<DAOService | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -15,41 +18,72 @@ export function useDAOService() {
 
   // Initialize DAO service
   useEffect(() => {
+    let isMounted = true;
+
     const initService = async () => {
       try {
         setIsLoading(true);
         setError(null);
-        
-        // For now, create service with public client only
-        // In production, you'd need to adapt the service to work with wagmi v2 clients
-        const service = await createDAOService();
+
+        if (cachedDAOService) {
+          if (isMounted) {
+            setDAOService(cachedDAOService);
+            setIsLoading(false);
+          }
+          return;
+        }
+
+        if (!daoServiceInitPromise) {
+          daoServiceInitPromise = createDAOService()
+            .then(service => {
+              cachedDAOService = service;
+              return service;
+            })
+            .finally(() => {
+              daoServiceInitPromise = null;
+            });
+        }
+
+        const service = await daoServiceInitPromise;
+        if (!isMounted) return;
         setDAOService(service);
-        
-        // Validate contracts
-        const validation = await service.validateContracts();
-        const hasValidContracts = Object.values(validation).some(Boolean);
-        
-        if (!hasValidContracts) {
-          setError('No valid contracts found. Please check contract addresses.');
+
+        if (!hasValidatedContracts) {
+          const validation = await service.validateContracts();
+          const hasValidContracts = Object.values(validation).some(Boolean);
+
+          if (!hasValidContracts) {
+            setError('No valid contracts found. Please check contract addresses.');
+          }
+
+          hasValidatedContracts = true;
         }
       } catch (err) {
         console.error('Failed to initialize DAO service:', err);
-        setError('Failed to initialize DAO service');
+        if (isMounted) {
+          setError('Failed to initialize DAO service');
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
 
     initService();
-  }, [walletClient, publicClient]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // Update service when wallet client changes
   useEffect(() => {
-    if (daoService && walletClient.data) {
+    if (daoService && walletClient) {
       // In production, you'd update the service with the new wallet client
-      // daoService.updateSigner(walletClient.data);
+      // daoService.updateSigner(walletClient);
     }
-  }, [daoService, walletClient.data]);
+  }, [daoService, walletClient]);
 
   return {
     daoService,
