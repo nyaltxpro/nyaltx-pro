@@ -1,5 +1,5 @@
 'use client';
-import { sepolia } from '@reown/appkit/networks';
+import { arbitrum, base, mainnet, polygon, scroll } from '@reown/appkit/networks';
 import { createAppKit } from '@reown/appkit/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { type ReactNode } from 'react';
@@ -16,8 +16,8 @@ if (!projectId) {
 const modal = createAppKit({
   adapters: [wagmiAdapter],
   projectId,
-  networks: [sepolia],
-  defaultNetwork: sepolia,
+  networks: [mainnet, arbitrum, base, polygon, scroll],
+  defaultNetwork: mainnet,
   metadata: {
     name: 'NYALTX',
     description: 'NYALTX - Crypto Trading Platform',

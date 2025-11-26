@@ -1,5 +1,6 @@
 'use client';
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';
+import { arbitrum, base, mainnet, polygon, scroll } from '@reown/appkit/networks';
 import {
   ConnectionProvider,
   WalletProvider,
@@ -11,34 +12,10 @@ import {
 } from '@solana/wallet-adapter-wallets';
 import { clusterApiUrl } from '@solana/web3.js';
 import { cookieStorage, createStorage, http } from '@wagmi/core';
-import { sepolia as sepoliaChain } from '@wagmi/core/chains';
 import { FC, ReactNode, useMemo } from 'react';
 
 // Import Solana wallet adapter styles
 import '@solana/wallet-adapter-react-ui/styles.css';
-
-// Create AppKit-compatible Sepolia network
-const sepolia = {
-  id: 11155111,
-  name: 'Sepolia',
-  nativeCurrency: {
-    name: 'Sepolia Ether',
-    symbol: 'ETH',
-    decimals: 18,
-  },
-  rpcUrls: {
-    default: {
-      http: ['https://rpc.sepolia.org'],
-    },
-  },
-  blockExplorers: {
-    default: {
-      name: 'Etherscan',
-      url: 'https://sepolia.etherscan.io',
-    },
-  },
-  testnet: true,
-};
 
 // Get projectId from https://dashboard.reown.com
 export const projectId = 'f56614799c9232532c3e3e76536d3be3';
@@ -47,8 +24,8 @@ if (!projectId) {
   throw new Error('Project ID is not defined');
 }
 
-// EVM networks for Wagmi (using only Sepolia for development)
-export const networks = [sepoliaChain];
+// EVM networks for Wagmi
+export const networks = [mainnet, arbitrum, polygon, base, scroll];
 
 // Solana Wallet Context Provider
 export const SolanaWalletContext: FC<{ children: ReactNode }> = ({ children }) => {
@@ -77,7 +54,11 @@ export const wagmiAdapter = new WagmiAdapter({
   projectId,
   networks,
   transports: {
-    [sepoliaChain.id]: http(),
+    [mainnet.id]: http(),
+    [arbitrum.id]: http(),
+    [polygon.id]: http(),
+    [base.id]: http(),
+    [scroll.id]: http(),
   },
 });
 
