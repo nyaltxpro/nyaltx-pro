@@ -13,6 +13,7 @@ const RPC_URLS = {
   43114: 'https://api.avax.network/ext/bc/C/rpc', // Avalanche
   250: 'https://rpc.ftm.tools/', // Fantom
   8453: 'https://mainnet.base.org', // Base
+  11155111: 'https://sepolia.infura.io/v3/YOUR_INFURA_KEY', // Sepolia (testnet)
   101: 'https://api.mainnet-beta.solana.com', // Solana
 };
 
