@@ -315,13 +315,7 @@ export default function AdminDashboardFixed() {
         );
     };
 
-    if (loading && folders.length === 0) {
-        return (
-            <div className="w-full flex items-center justify-center text-gray-300 py-20">
-                <Loader2 className="h-5 w-5 animate-spin mr-2" /> Loading on-chain data...
-            </div>
-        );
-    }
+
 
     return (
         <div className="min-h-screen  p-6">
