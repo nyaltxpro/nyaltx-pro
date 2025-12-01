@@ -4,6 +4,7 @@ import { useFolderRegistry } from '@/hooks/useFolderRegistry';
 import { FolderInfo } from '@/services/contracts/types';
 import { Filter, Loader2, Lock, Plus, Search, Shield } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
+import { useAccount } from 'wagmi';
 
 const DAY_IN_SECONDS = 86_400;
 const PERMISSION_FLAGS = [
@@ -36,6 +37,8 @@ export default function AdminDashboardFixed() {
         createFolder,
     } = useFolderRegistry();
 
+    const { isConnected } = useAccount();
+
     const [searchValue, setSearchValue] = useState('');
     const [showAddModal, setShowAddModal] = useState(false);
     const [newFolderName, setNewFolderName] = useState('');
@@ -59,6 +62,10 @@ export default function AdminDashboardFixed() {
     }, [selectedFolderId, membersByFolder, fetchMembers]);
 
     const handleCreateFolder = async () => {
+        if (!isConnected) {
+            setFormError('Connect a wallet before creating folders.');
+            return;
+        }
         if (!newFolderName.trim()) {
             setFormError('Folder name is required');
             return;
@@ -170,12 +177,19 @@ export default function AdminDashboardFixed() {
                     </div>
                     <button
                         onClick={() => setShowAddModal(true)}
-                        className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-semibold flex items-center gap-2 transition-all"
+                        disabled={!isConnected}
+                        className="px-6 py-3 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-600/40 disabled:cursor-not-allowed text-white rounded-lg font-semibold flex items-center gap-2 transition-all"
                     >
                         <Plus className="w-5 h-5" />
-                        New Folder
+                        {isConnected ? 'New Folder' : 'Connect Wallet'}
                     </button>
                 </div>
+
+                {!isConnected && (
+                    <div className="bg-yellow-500/10 border border-yellow-500/40 text-yellow-200 text-sm rounded-lg px-4 py-3">
+                        Connect a wallet to create or manage folders.
+                    </div>
+                )}
 
                 <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
                     <h2 className="text-white font-semibold mb-4 flex items-center gap-2">
@@ -319,10 +333,10 @@ export default function AdminDashboardFixed() {
                                 </button>
                                 <button
                                     onClick={handleCreateFolder}
-                                    disabled={actionPending}
+                                    disabled={actionPending || !isConnected}
                                     className="flex-1 px-4 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-semibold transition-all disabled:opacity-50"
                                 >
-                                    {actionPending ? 'Creating...' : 'Create'}
+                                    {actionPending ? 'Creating...' : !isConnected ? 'Connect Wallet' : 'Create'}
                                 </button>
                             </div>
                         </div>
