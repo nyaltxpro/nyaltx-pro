@@ -27,6 +27,11 @@ let cachedDAOService: DAOService | null = null;
 let daoServiceInitPromise: Promise<DAOService> | null = null;
 let hasValidatedContracts = false;
 
+const getInjectedProvider = () => {
+  if (typeof window === "undefined") return undefined;
+  return (window as typeof window & { ethereum?: unknown }).ethereum;
+};
+
 export function useDAOService() {
   const { address, isConnected } = useAccount();
   const { data: walletClient } = useWalletClient();
@@ -88,12 +93,9 @@ export function useDAOService() {
 
     const syncSigner = async () => {
       try {
-        if (walletClient) {
-          const provider = {
-            request: async ({ method, params }: { method: string; params?: unknown[] }) =>
-              walletClient.request({ method, params } as any),
-          };
-          await service.updateSigner(provider);
+        const injected = getInjectedProvider();
+        if (injected) {
+          await service.updateSigner(injected);
         } else {
           await service.updateSigner();
         }
