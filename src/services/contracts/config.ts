@@ -61,6 +61,27 @@ export const CONTRACT_ABIS = {
     'event TokensMinted(address indexed to, uint256 amount)',
     'event TokensBurned(address indexed from, uint256 amount)',
   ],
+
+  legacyMigrationVault: [
+    // View functions
+    'function conversionRatio() view returns (uint256)',
+    'function depositsEnabled() view returns (bool)',
+    'function legacyToken() view returns (address)',
+    'function governanceToken() view returns (address)',
+
+    // Admin functions
+    'function setConversionRatio(uint256 ratio)',
+    'function setDepositsEnabled(bool enabled)',
+    'function authorizeMigrationContract(bool authorized)',
+
+    // Core user function
+    'function depositLegacy(uint256 amount, address beneficiary) returns (uint256 minted)',
+
+    // Events
+    'event LegacyDeposited(address indexed account, uint256 legacyAmount, uint256 governanceMinted)',
+    'event ConversionRatioUpdated(uint256 ratio)',
+    'event DepositsToggled(bool enabled)',
+  ],
   
   nyaxGovernor: [
     // Governor functions

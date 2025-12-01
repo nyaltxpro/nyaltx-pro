@@ -1,7 +1,7 @@
 /**
  * Blockchain Provider utilities
  */
-import { ethers } from 'ethers';
+import { JsonRpcProvider } from 'ethers';
 
 // RPC URLs for different chains
 const RPC_URLS = {
@@ -23,7 +23,7 @@ const providerCache: { [chainId: number]: any } = {};
 /**
  * Get a blockchain provider for the given chain ID
  */
-export function getProvider(chainId: number): ethers.providers.JsonRpcProvider | null {
+export function getProvider(chainId: number): JsonRpcProvider | null {
   if (providerCache[chainId]) {
     return providerCache[chainId];
   }
@@ -35,7 +35,7 @@ export function getProvider(chainId: number): ethers.providers.JsonRpcProvider |
   }
 
   try {
-    const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+    const provider = new JsonRpcProvider(rpcUrl);
     providerCache[chainId] = provider;
     return provider;
   } catch (error) {
