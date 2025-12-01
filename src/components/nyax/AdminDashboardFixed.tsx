@@ -3,6 +3,7 @@
 import ConnectWalletButton from '@/components/ConnectWalletButton';
 import { useFolderRegistry } from '@/hooks/useFolderRegistry';
 import { FolderInfo } from '@/services/contracts/types';
+import { useAppKitAccount } from '@reown/appkit/react';
 import { Filter, Loader2, Lock, Plus, Search, Shield } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useAccount } from 'wagmi';
@@ -38,7 +39,9 @@ export default function AdminDashboardFixed() {
         createFolder,
     } = useFolderRegistry();
 
-    const { isConnected } = useAccount();
+    const { isConnected: isEvmConnected } = useAccount();
+    const { isConnected: isAppKitConnected } = useAppKitAccount();
+    const isConnected = isEvmConnected || isAppKitConnected;
 
     const [searchValue, setSearchValue] = useState('');
     const [showAddModal, setShowAddModal] = useState(false);
