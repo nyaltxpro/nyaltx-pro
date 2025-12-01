@@ -315,13 +315,13 @@ export default function AdminDashboardFixed() {
         );
     };
 
-    if (loading) {
-        return (
-            <div className="w-full flex items-center justify-center text-gray-300 py-20">
-                <Loader2 className="h-5 w-5 animate-spin mr-2" /> Loading on-chain data...
-            </div>
-        );
-    }
+    // if (loading) {
+    //     return (
+    //         <div className="w-full flex items-center justify-center text-gray-300 py-20">
+    //             <Loader2 className="h-5 w-5 animate-spin mr-2" /> Loading on-chain data...
+    //         </div>
+    //     );
+    // }
 
     return (
         <div className="min-h-screen bg-linear-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
