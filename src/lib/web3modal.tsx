@@ -1,6 +1,6 @@
 'use client';
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';
-import { arbitrum, base, mainnet, polygon, scroll } from '@reown/appkit/networks';
+import { sepolia } from '@reown/appkit/networks';
 import {
   ConnectionProvider,
   WalletProvider,
@@ -24,8 +24,8 @@ if (!projectId) {
   throw new Error('Project ID is not defined');
 }
 
-// EVM networks for Wagmi
-export const networks = [mainnet, arbitrum, polygon, base, scroll];
+// EVM networks for Wagmi (Sepolia-only for admin panel)
+export const networks = [sepolia];
 
 // Solana Wallet Context Provider
 export const SolanaWalletContext: FC<{ children: ReactNode }> = ({ children }) => {
@@ -54,11 +54,11 @@ export const wagmiAdapter = new WagmiAdapter({
   projectId,
   networks,
   transports: {
-    [mainnet.id]: http(),
-    [arbitrum.id]: http(),
-    [polygon.id]: http(),
-    [base.id]: http(),
-    [scroll.id]: http(),
+    [sepolia.id]: http(
+      process.env.NEXT_PUBLIC_SEPOLIA_RPC_URL ||
+      process.env.SEPOLIA_RPC_URL ||
+      'https://rpc.sepolia.org'
+    ),
   },
 });
 
