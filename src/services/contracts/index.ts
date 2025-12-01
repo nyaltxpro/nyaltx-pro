@@ -9,18 +9,37 @@ import { StakingService } from './stakingService';
 import { TreasuryService } from './treasuryService';
 import { VestingService } from './vestingService';
 
-function getFallbackRpcUrls(): string[] {
-  const urls: Array<string | undefined> = [];
+function normalizeRpcUrl(candidate?: string): string | undefined {
+  if (!candidate) return undefined;
+  const trimmed = candidate.trim();
+  if (!trimmed) return undefined;
 
-  urls.push(
+  try {
+    const parsed = new URL(trimmed);
+    if (!['http:', 'https:'].includes(parsed.protocol)) {
+      throw new Error(`Unsupported protocol: ${parsed.protocol}`);
+    }
+    return parsed.toString();
+  } catch (error) {
+    console.warn(`[DAOService] Ignoring invalid RPC URL "${candidate}":`, error);
+    return undefined;
+  }
+}
+
+function getFallbackRpcUrls(): string[] {
+  const candidates = [
     process.env.NEXT_PUBLIC_RPC_URL,
     NETWORK_CONFIG.rpcUrl,
     'https://sepolia.infura.io/v3/24570cf454c147f5b44d10966ae49915',
     'https://rpc.sepolia.org',
     'https://endpoints.omniatech.io/v1/eth/sepolia/public'
-  );
+  ];
 
-  return Array.from(new Set(urls.filter(Boolean))) as string[];
+  const urls = candidates
+    .map(normalizeRpcUrl)
+    .filter((url): url is string => Boolean(url));
+
+  return Array.from(new Set(urls));
 }
 
 async function createReadOnlyProvider(): Promise<ethers.JsonRpcProvider> {
