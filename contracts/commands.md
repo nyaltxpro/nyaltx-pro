@@ -12,3 +12,9 @@ npx hardhat run scripts/deploy-legacy-migration-vault.js --network sepolia
 npx hardhat run scripts/deploy-nyaltx-staking.js --network sepolia
 # 7 Treasury Bridge
 npx hardhat run scripts/deploy-treasury-bridge.js --network sepolia
+# 8 Governance Stack
+npx hardhat run scripts/deploy-governance-stack.js --network sepolia
+# 9 GovernanceToken
+npx hardhat run scripts/deploy-nyaltx-governance-token.js --network sepolia
+# 10 Folder Regsitery
+npx hardhat run scripts/deploy-folder-registry.js --network sepolia
