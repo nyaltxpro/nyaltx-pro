@@ -315,16 +315,16 @@ export default function AdminDashboardFixed() {
         );
     };
 
-    // if (loading) {
-    //     return (
-    //         <div className="w-full flex items-center justify-center text-gray-300 py-20">
-    //             <Loader2 className="h-5 w-5 animate-spin mr-2" /> Loading on-chain data...
-    //         </div>
-    //     );
-    // }
+    if (loading && folders.length === 0) {
+        return (
+            <div className="w-full flex items-center justify-center text-gray-300 py-20">
+                <Loader2 className="h-5 w-5 animate-spin mr-2" /> Loading on-chain data...
+            </div>
+        );
+    }
 
     return (
-        <div className="min-h-screen bg-linear-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
+        <div className="min-h-screen  p-6">
             <div className="max-w-7xl mx-auto space-y-8">
                 <div className="flex items-center justify-between">
                     <div>
@@ -356,30 +356,30 @@ export default function AdminDashboardFixed() {
                         Registry Tools
                     </h2>
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                        <button className={TOOL_BUTTON_CLASSES} onClick={() => setShowAddModal(true)} disabled={!isConnected}>
+                        <button className={TOOL_BUTTON_CLASSES} onClick={() => setShowAddModal(true)} disabled={!isConnected || loading}>
                             <Plus className="w-5 h-5" />
                             Create Folder
                         </button>
-                        <button className={TOOL_BUTTON_CLASSES} onClick={refresh}>
+                        <button className={TOOL_BUTTON_CLASSES} onClick={refresh} disabled={loading}>
                             <Loader2 className="w-5 h-5" />
                             Refresh
                         </button>
-                        <button className={TOOL_BUTTON_CLASSES} onClick={openAllocationModal} disabled={!selectedFolder || !isConnected}>
+                        <button className={TOOL_BUTTON_CLASSES} onClick={openAllocationModal} disabled={!selectedFolder || !isConnected || loading}>
                             <UserPlus2 className="w-5 h-5" />
                             Manage Holders
                         </button>
-                        <button className={TOOL_BUTTON_CLASSES} onClick={openPermissionsModal} disabled={!selectedFolder || !isConnected}>
+                        <button className={TOOL_BUTTON_CLASSES} onClick={openPermissionsModal} disabled={!selectedFolder || !isConnected || loading}>
                             <KeySquare className="w-5 h-5" />
                             Set Permissions
                         </button>
-                        <button className={TOOL_BUTTON_CLASSES} onClick={openVestingModal} disabled={!selectedFolder || !isConnected}>
+                        <button className={TOOL_BUTTON_CLASSES} onClick={openVestingModal} disabled={!selectedFolder || !isConnected || loading}>
                             <CalendarClock className="w-5 h-5" />
                             Vesting Schedule
                         </button>
                         <button
                             className={TOOL_BUTTON_CLASSES}
                             onClick={() => handleLockToggle(selectedFolder?.template.revocable ? 'lock' : 'unlock')}
-                            disabled={!selectedFolder || !isConnected}
+                            disabled={!selectedFolder || !isConnected || loading}
                         >
                             <Lock className="w-5 h-5" />
                             {selectedFolder?.template.revocable ? 'Lock Tokens' : 'Unlock Tokens'}

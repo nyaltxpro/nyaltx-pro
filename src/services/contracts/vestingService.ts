@@ -5,17 +5,22 @@ import { ContractError, VestingSchedule } from './types';
 export class VestingService {
   private provider: ethers.Provider;
   private signer?: ethers.Signer;
-  private factoryContract: ethers.Contract;
+  private factoryContract?: ethers.Contract;
 
   constructor(provider: ethers.Provider, signer?: ethers.Signer) {
     this.provider = provider;
     this.signer = signer;
-    
-    this.factoryContract = new ethers.Contract(
-      CONTRACT_ADDRESSES.vestingFactory,
-      CONTRACT_ABIS.vestingFactory,
-      signer || provider
-    );
+    const address = CONTRACT_ADDRESSES.vestingFactory;
+    if (address) {
+      this.factoryContract = new ethers.Contract(address, CONTRACT_ABIS.vestingFactory, signer || provider);
+    }
+  }
+
+  private requireFactoryContract(): ethers.Contract {
+    if (!this.factoryContract) {
+      throw new Error('Vesting factory contract address not configured.');
+    }
+    return this.factoryContract;
   }
 
   // Factory Management
@@ -23,7 +28,8 @@ export class VestingService {
     try {
       if (!this.signer) throw new Error('Signer required for creating vesting contract');
       
-      const tx = await this.factoryContract.createVestingContract(category);
+      const contract = this.requireFactoryContract();
+      const tx = await contract.createVestingContract(category);
       const receipt = await tx.wait();
       
       // Get the contract address from events
@@ -39,7 +45,9 @@ export class VestingService {
 
   async getAllVestingContracts(): Promise<string[]> {
     try {
-      return await this.factoryContract.getAllContracts();
+      const contract = this.factoryContract;
+      if (!contract) return [];
+      return await contract.getAllContracts();
     } catch (error) {
       console.error('Error fetching vesting contracts:', error);
       return [];
@@ -48,7 +56,9 @@ export class VestingService {
 
   async getCategoryContracts(category: string): Promise<string[]> {
     try {
-      return await this.factoryContract.getCategoryContracts(category);
+      const contract = this.factoryContract;
+      if (!contract) return [];
+      return await contract.getCategoryContracts(category);
     } catch (error) {
       console.error('Error fetching category contracts:', error);
       return [];
@@ -57,7 +67,9 @@ export class VestingService {
 
   async getVestingCategories(): Promise<string[]> {
     try {
-      return await this.factoryContract.getCategories();
+      const contract = this.factoryContract;
+      if (!contract) return [];
+      return await contract.getCategories();
     } catch (error) {
       console.error('Error fetching vesting categories:', error);
       return [];
@@ -333,6 +345,10 @@ export class VestingService {
 
   // Event Listeners
   onVestingContractCreated(callback: (contractAddress: string, category: string, creator: string) => void) {
+    if (!this.factoryContract) {
+      console.warn('Vesting factory contract not configured; skipping listener.');
+      return;
+    }
     this.factoryContract.on('VestingContractCreated', (contractAddress, category, creator) => {
       callback(contractAddress, category, creator);
     });
@@ -370,6 +386,8 @@ export class VestingService {
 
   // Cleanup
   removeAllListeners() {
-    this.factoryContract.removeAllListeners();
+    if (this.factoryContract) {
+      this.factoryContract.removeAllListeners();
+    }
   }
 }
