@@ -34,6 +34,7 @@ export function useDAOService() {
   const [state, setState] = useState<DaoHookState>(INITIAL_STATE);
 
   const initialize = useCallback(async () => {
+    console.info('[useDAOService] Initializing DAO service…');
     setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
     try {
@@ -58,11 +59,14 @@ export function useDAOService() {
       }
 
       if (!hasValidatedContracts) {
+        console.info('[useDAOService] Running initial contract validation…');
         try {
           const validation = await service.validateContracts();
           if (!Object.values(validation).some(Boolean)) {
+            console.warn('[useDAOService] Contract validation failed. Results:', validation);
             throw new Error("No valid DAO contracts detected on the connected network.");
           }
+          console.info('[useDAOService] Contract validation succeeded:', validation);
           hasValidatedContracts = true;
         } catch (err) {
           console.error("Contract validation failed:", err);
@@ -70,9 +74,10 @@ export function useDAOService() {
         }
       }
 
+      console.info('[useDAOService] DAO service ready.');
       setState({ daoService: service, isLoading: false, error: null });
     } catch (err) {
-      console.error("Failed to initialize DAO service:", err);
+      console.error("[useDAOService] Failed to initialize DAO service:", err);
       const message = err instanceof Error ? err.message : "Unable to connect to DAO service";
       setState({ daoService: null, isLoading: false, error: message });
     }
