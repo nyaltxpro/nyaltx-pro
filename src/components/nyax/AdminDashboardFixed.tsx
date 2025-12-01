@@ -1,706 +1,313 @@
-'use client';
-import type { LucideIcon } from 'lucide-react';
-import { ArrowRight, BarChart3, Clock, Coins, Lock, Settings, Shield, TrendingUp, Users } from 'lucide-react';
+import { Award, Clock, Edit, Filter, Lock, Megaphone, Plus, Search, Shield, Trash2, TrendingUp, Users } from 'lucide-react';
 import { useState } from 'react';
-import { useMultisig, useTreasury } from '../../hooks/useDAOService';
 
-const COLOR_CLASS_MAP = {
-    blue: 'bg-blue-500',
-    purple: 'bg-purple-500',
-    green: 'bg-green-500',
-    orange: 'bg-orange-500',
-    cyan: 'bg-cyan-500',
-    indigo: 'bg-indigo-500',
-    red: 'bg-red-500'
-} as const;
-
-const BORDER_CLASS_MAP = {
-    blue: 'border-blue-500',
-    purple: 'border-purple-500',
-    green: 'border-green-500',
-    orange: 'border-orange-500',
-    cyan: 'border-cyan-500',
-    indigo: 'border-indigo-500',
-    red: 'border-red-500'
-} as const;
-
-type WalletColor = keyof typeof COLOR_CLASS_MAP;
-type WalletStatus = 'active' | 'vesting' | 'locked';
-type WalletType = 'master' | 'vesting' | 'operational' | 'governance' | 'special';
-type TabKey = 'overview' | 'transfers' | 'vesting' | 'activity';
-
-interface Wallet {
-    id: string;
+type TokenFolder = {
+    id: number;
     name: string;
-    balance: number;
-    percentage: number;
-    type: WalletType;
-    icon: LucideIcon;
-    color: WalletColor;
-    status: WalletStatus;
-    multisig?: string;
-    allocated?: number;
-    vested?: number;
-    vestingEnd?: string;
-}
+    icon: typeof TrendingUp;
+    color: string;
+    totalTokens: string;
+    holders: number;
+    locked: boolean;
+    vestingSchedule: string;
+    permissions: string[];
+};
 
-const hasVestingData = (
-    wallet: Wallet
-): wallet is Wallet & Required<Pick<Wallet, 'allocated' | 'vested'>> =>
-    typeof wallet.allocated === 'number' && typeof wallet.vested === 'number';
+export default function GovernancePanel() {
+    const [activeTab, setActiveTab] = useState('token-management');
+    const [selectedFolder, setSelectedFolder] = useState<TokenFolder | null>(null);
+    const [showAddModal, setShowAddModal] = useState(false);
 
-const isVestingWallet = (
-    wallet: Wallet
-): wallet is Wallet & Required<Pick<Wallet, 'allocated' | 'vested'>> & { type: 'vesting' } =>
-    wallet.type === 'vesting' && hasVestingData(wallet);
-
-const GovernanceDashboard = () => {
-    const [activeTab, setActiveTab] = useState<TabKey>('overview');
-    const [selectedWallet, setSelectedWallet] = useState<Wallet | null>(null);
-    const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
-    const [isVestingModalOpen, setIsVestingModalOpen] = useState(false);
-
-    // Use real contract data
-    const { stats: treasuryStats, categories, isLoading: treasuryLoading } = useTreasury();
-    const { transactions, multisigInfo, isOwner, isLoading: multisigLoading, confirmTransaction, submitTransaction } = useMultisig();
-
-    // Real data with fallbacks
-    const totalSupply = treasuryStats ? parseFloat(treasuryStats.totalBalance) : 1000000000;
-    const treasuryBalance = treasuryStats ? parseFloat(treasuryStats.totalBalance) : 850000000;
-
-    const wallets: Wallet[] = [
+    const tokenFolders: TokenFolder[] = [
         {
-            id: 'treasury',
-            name: 'Treasury Master',
-            balance: treasuryBalance,
-            percentage: 85,
-            type: 'master',
-            icon: Shield,
-            color: 'blue',
-            multisig: multisigInfo ? `${multisigInfo.threshold}/${multisigInfo.owners.length}` : '5/7',
-            status: 'active'
-        },
-        {
-            id: 'founders',
-            name: 'Founders & Team',
-            balance: 150000000,
-            percentage: 15,
-            allocated: 200000000,
-            vested: 50000000,
-            type: 'vesting',
-            icon: Users,
-            color: 'purple',
-            vestingEnd: '2026-12-31',
-            status: 'vesting'
-        },
-        {
-            id: 'investors',
-            name: 'Investors (Reg CF/D/A)',
-            balance: 100000000,
-            percentage: 10,
-            allocated: 150000000,
-            vested: 50000000,
-            type: 'vesting',
+            id: 1,
+            name: 'Investors',
             icon: TrendingUp,
-            color: 'green',
-            vestingEnd: '2025-06-30',
-            status: 'vesting'
+            color: 'bg-blue-500',
+            totalTokens: '45,000,000',
+            holders: 234,
+            locked: true,
+            vestingSchedule: 'Linear 24 months',
+            permissions: ['View Proposals', 'Vote on Proposals']
         },
         {
-            id: 'marketing',
-            name: 'Marketing & Community',
-            balance: 80000000,
-            percentage: 8,
-            allocated: 120000000,
-            type: 'operational',
-            icon: Coins,
-            color: 'orange',
-            status: 'active'
+            id: 2,
+            name: 'Founders',
+            icon: Award,
+            color: 'bg-purple-500',
+            totalTokens: '20,000,000',
+            holders: 5,
+            locked: true,
+            vestingSchedule: 'Cliff 12mo, Linear 36mo',
+            permissions: ['Full Governance Rights', 'Create Proposals', 'Vote']
         },
         {
-            id: 'liquidity',
-            name: 'Liquidity (DEX/CEX)',
-            balance: 120000000,
-            percentage: 12,
-            allocated: 120000000,
-            type: 'operational',
-            icon: BarChart3,
-            color: 'cyan',
-            status: 'active'
+            id: 3,
+            name: 'Marketing',
+            icon: Megaphone,
+            color: 'bg-pink-500',
+            totalTokens: '15,000,000',
+            holders: 12,
+            locked: false,
+            vestingSchedule: 'Unlocked',
+            permissions: ['Limited Voting', 'View Only']
         },
         {
-            id: 'dao',
-            name: 'DAO Pool & Governance',
-            balance: 50000000,
-            percentage: 5,
-            allocated: 100000000,
-            type: 'governance',
+            id: 4,
+            name: 'Legacy Voting',
+            icon: Shield,
+            color: 'bg-yellow-500',
+            totalTokens: '8,500,000',
+            holders: 89,
+            locked: false,
+            vestingSchedule: 'Fully Vested',
+            permissions: ['Vote on Proposals', 'Delegate Votes']
+        },
+        {
+            id: 5,
+            name: 'Team',
             icon: Users,
-            color: 'indigo',
-            status: 'active'
+            color: 'bg-green-500',
+            totalTokens: '30,000,000',
+            holders: 47,
+            locked: true,
+            vestingSchedule: 'Cliff 6mo, Linear 24mo',
+            permissions: ['Vote on Proposals', 'View Proposals']
         },
         {
-            id: 'burn',
-            name: 'Burn & Locking',
-            balance: 30000000,
-            percentage: 3,
-            type: 'special',
+            id: 6,
+            name: 'Treasury Reserve',
             icon: Lock,
-            color: 'red',
-            status: 'locked'
+            color: 'bg-red-500',
+            totalTokens: '75,000,000',
+            holders: 1,
+            locked: true,
+            vestingSchedule: 'Governance Controlled',
+            permissions: ['Requires Multi-sig']
         }
     ];
 
-    // Use real pending transactions from multisig contract
-    const pendingTransactions = transactions && transactions.length > 0 ?
-        transactions.filter((tx: any) => !tx.executed).map((tx: any) => ({
-            id: tx.txIndex || tx.id || Math.random(),
-            from: 'Treasury',
-            to: tx.to ? (tx.to.slice(0, 6) + '...' + tx.to.slice(-4)) : 'Unknown',
-            amount: tx.value ? parseFloat(tx.value) : 0,
-            reason: tx.data === '0x' ? 'Token transfer' : 'Contract interaction',
-            initiated: tx.timestamp ? new Date(tx.timestamp * 1000).toLocaleDateString() : new Date().toLocaleDateString(),
-            approvals: tx.confirmations ? (Array.isArray(tx.confirmations) ? tx.confirmations.length : tx.confirmations) : 0,
-            required: multisigInfo?.threshold || 5,
-            status: 'pending'
-        })) : [
-            {
-                id: 1,
-                from: 'Treasury',
-                to: 'Liquidity Pool',
-                amount: 5000000,
-                reason: 'CEX listing liquidity',
-                initiated: '2025-11-18',
-                approvals: 3,
-                required: 5,
-                status: 'pending'
-            },
-            {
-                id: 2,
-                from: 'Marketing',
-                to: 'Partner Wallet',
-                amount: 500000,
-                reason: 'Q4 campaign payment',
-                initiated: '2025-11-19',
-                approvals: 2,
-                required: 3,
-                status: 'pending'
-            }
-        ];
+    const adminFunctions = [
+        { icon: Plus, label: 'Create Folder', action: 'create' },
+        { icon: Edit, label: 'Edit Allocations', action: 'edit' },
+        { icon: Lock, label: 'Lock/Unlock Tokens', action: 'lock' },
+        { icon: Users, label: 'Manage Holders', action: 'holders' },
+        { icon: Shield, label: 'Set Permissions', action: 'permissions' },
+        { icon: Clock, label: 'Vesting Schedule', action: 'vesting' }
+    ];
 
-    // Use real executed transactions as recent activity
-    const recentActivity = transactions && transactions.length > 0 ?
-        transactions.filter((tx: any) => tx.executed).slice(-3).map((tx: any, index: number) => ({
-            id: tx.txIndex || tx.id || index,
-            action: 'Transaction Executed',
-            from: 'Treasury',
-            to: tx.to ? (tx.to.slice(0, 6) + '...' + tx.to.slice(-4)) : 'Unknown',
-            amount: tx.value ? parseFloat(tx.value) : 0,
-            date: tx.timestamp ? new Date(tx.timestamp * 1000).toLocaleDateString() : new Date().toLocaleDateString(),
-            status: 'completed'
-        })) : [
-            {
-                id: 1,
-                action: 'Transfer Approved',
-                from: 'Treasury',
-                to: 'Founders',
-                amount: 2000000,
-                date: '2025-11-19',
-                status: 'completed'
-            },
-            {
-                id: 2,
-                action: 'Vesting Release',
-                from: 'Investors',
-                to: 'Investor Wallets',
-                amount: 1500000,
-                date: '2025-11-18',
-                status: 'completed'
-            },
-            {
-                id: 3,
-                action: 'Burn Event',
-                from: 'Burn Wallet',
-                to: 'Dead Address',
-                amount: 1000000,
-                date: '2025-11-17',
-                status: 'completed'
-            }
-        ];
-
-    const formatNumber = (num: number) => {
-        return new Intl.NumberFormat('en-US').format(num);
-    };
-
-    const getColorClass = (color?: WalletColor) => {
-        if (!color) return 'bg-gray-500';
-        return COLOR_CLASS_MAP[color] || 'bg-gray-500';
-    };
-
-    const getBorderColor = (color: WalletColor): string => {
-        return BORDER_CLASS_MAP[color];
-    };
-
-    // Multisig transaction handlers
-    const handleApproveTransaction = async (txId: number) => {
-        if (!confirmTransaction || !isOwner) return;
-
-        try {
-            await confirmTransaction(txId);
-            console.log(`Transaction ${txId} approved successfully`);
-        } catch (error) {
-            console.error('Error approving transaction:', error);
-        }
-    };
-
-    const handleRejectTransaction = async (txId: number) => {
-        // Note: Most multisig contracts don't have a reject function
-        // This would typically be handled by not approving within the timelock period
-        console.log(`Transaction ${txId} rejection noted (no approval given)`);
-    };
+    const recentActivity = [
+        { action: 'Moved 500,000 tokens', from: 'Marketing', to: 'Investors', time: '2 hours ago' },
+        { action: 'Locked folder', folder: 'Team', time: '5 hours ago' },
+        { action: 'Added 3 new holders', folder: 'Legacy Voting', time: '1 day ago' },
+        { action: 'Updated vesting schedule', folder: 'Founders', time: '2 days ago' }
+    ];
 
     return (
-        <>
-            <div className="min-h-screen  text-white p-6">
-                <div className="max-w-7xl mx-auto">
-                    {/* Header */}
-                    <div className="mb-8">
-                        <div className="flex items-center justify-between mb-4">
-                            <div>
-                                <h1 className="text-4xl font-bold mb-2">Treasury Governance</h1>
-                                <p className="text-slate-400">Multi-signature token management system</p>
-                            </div>
-                            <button className="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg flex items-center gap-2 transition-colors">
-                                <Settings className="w-5 h-5" />
-                                Admin Settings
-                            </button>
-                        </div>
-
-                        {/* Total Supply Card */}
-                        <div className="bg-slate-800/50 backdrop-blur border border-slate-700 rounded-xl p-6">
-                            {(treasuryLoading || multisigLoading) && (
-                                <div className="text-center py-4 mb-4">
-                                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto mb-2"></div>
-                                    <p className="text-slate-400 text-sm">Loading contract data...</p>
-                                </div>
-                            )}
-                            <div className="grid grid-cols-3 gap-6">
-                                <div>
-                                    <p className="text-slate-400 text-sm mb-1">Total Minted Supply</p>
-                                    <p className="text-3xl font-bold">
-                                        {treasuryLoading ? '...' : formatNumber(totalSupply)}
-                                    </p>
-                                </div>
-                                <div>
-                                    <p className="text-slate-400 text-sm mb-1">Treasury Balance</p>
-                                    <p className="text-3xl font-bold text-blue-400">{formatNumber(treasuryBalance)}</p>
-                                </div>
-                                <div>
-                                    <p className="text-slate-400 text-sm mb-1">Circulating Supply</p>
-                                    <p className="text-3xl font-bold text-green-400">{formatNumber(totalSupply - treasuryBalance)}</p>
-                                </div>
-                            </div>
-                        </div>
+        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
+            <div className="max-w-7xl mx-auto">
+                {/* Header */}
+                <div className="mb-8 flex items-center justify-between">
+                    <div>
+                        <h1 className="text-4xl font-bold text-white mb-2">Token Management</h1>
+                        <p className="text-gray-400">Organize and control token allocations across groups</p>
                     </div>
+                    <button
+                        onClick={() => setShowAddModal(true)}
+                        className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-semibold flex items-center gap-2 transition-all"
+                    >
+                        <Plus className="w-5 h-5" />
+                        New Folder
+                    </button>
+                </div>
 
-                    {/* Navigation Tabs */}
-                    <div className="flex gap-2 mb-6 border-b border-slate-700">
-                        {(['overview', 'transfers', 'vesting', 'activity'] as const).map((tab: TabKey) => (
+                {/* Admin Functions Bar */}
+                <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20 mb-8">
+                    <h2 className="text-white font-semibold mb-4 flex items-center gap-2">
+                        <Shield className="w-5 h-5 text-purple-400" />
+                        Admin Functions
+                    </h2>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                        {adminFunctions.map((func, idx) => (
                             <button
-                                key={tab}
-                                onClick={() => setActiveTab(tab)}
-                                className={`px-6 py-3 font-medium capitalize transition-colors ${activeTab === tab
-                                    ? 'text-blue-400 border-b-2 border-blue-400'
-                                    : 'text-slate-400 hover:text-white'
-                                    }`}
+                                key={idx}
+                                className="flex flex-col items-center gap-2 p-4 bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 hover:border-purple-500/50 transition-all group"
                             >
-                                {tab}
+                                <func.icon className="w-6 h-6 text-gray-400 group-hover:text-purple-400 transition-colors" />
+                                <span className="text-xs text-gray-300 text-center">{func.label}</span>
                             </button>
                         ))}
                     </div>
+                </div>
 
-                    {/* Overview Tab */}
-                    {activeTab === 'overview' && (
-                        <div className="space-y-6">
-                            {/* Wallet Cards */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {wallets.map((wallet) => {
-                                    const Icon = wallet.icon;
-                                    return (
-                                        <div
-                                            key={wallet.id}
-                                            onClick={() => setSelectedWallet(wallet)}
-                                            className={`bg-slate-800/50 backdrop-blur border ${getBorderColor(wallet.color)} rounded-xl p-6 cursor-pointer hover:bg-slate-800 transition-all hover:scale-105`}
-                                        >
-                                            <div className="flex items-start justify-between mb-4">
-                                                <div className={`${getColorClass(wallet.color)} p-3 rounded-lg`}>
-                                                    <Icon className="w-6 h-6" />
-                                                </div>
-                                                <span className={`px-3 py-1 rounded-full text-xs font-medium ${wallet.status === 'active' ? 'bg-green-500/20 text-green-400' :
-                                                    wallet.status === 'vesting' ? 'bg-yellow-500/20 text-yellow-400' :
-                                                        'bg-red-500/20 text-red-400'
-                                                    }`}>
-                                                    {wallet.status}
-                                                </span>
-                                            </div>
+                {/* Search and Filter */}
+                <div className="flex gap-4 mb-6">
+                    <div className="flex-1 relative">
+                        <Search className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
+                        <input
+                            type="text"
+                            placeholder="Search folders or holders..."
+                            className="w-full pl-12 pr-4 py-3 bg-white/10 backdrop-blur-lg rounded-lg border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500"
+                        />
+                    </div>
+                    <button className="px-6 py-3 bg-white/10 backdrop-blur-lg rounded-lg border border-white/20 text-white hover:bg-white/20 transition-all flex items-center gap-2">
+                        <Filter className="w-5 h-5" />
+                        Filter
+                    </button>
+                </div>
 
-                                            <h3 className="text-lg font-semibold mb-2">{wallet.name}</h3>
-                                            <p className="text-2xl font-bold mb-1">{formatNumber(wallet.balance)}</p>
-                                            <p className="text-slate-400 text-sm mb-3">{wallet.percentage}% of supply</p>
-
-                                            {hasVestingData(wallet) && (
-                                                <div className="pt-3 border-t border-slate-700">
-                                                    <div className="flex justify-between text-sm mb-1">
-                                                        <span className="text-slate-400">Vested</span>
-                                                        <span className="font-medium">{formatNumber(wallet.vested)}</span>
-                                                    </div>
-                                                    <div className="w-full bg-slate-700 rounded-full h-2">
-                                                        <div
-                                                            className={`${getColorClass(wallet.color)} h-2 rounded-full`}
-                                                            style={{ width: `${(wallet.vested / wallet.allocated) * 100}%` }}
-                                                        />
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                            {wallet.multisig && (
-                                                <div className="mt-3 flex items-center gap-2 text-sm text-slate-400">
-                                                    <Shield className="w-4 h-4" />
-                                                    <span>Multi-sig: {wallet.multisig}</span>
-                                                </div>
-                                            )}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Token Folders */}
+                    <div className="lg:col-span-2 space-y-4">
+                        <h2 className="text-2xl font-bold text-white mb-4">Token Folders</h2>
+                        {tokenFolders.map((folder) => (
+                            <div
+                                key={folder.id}
+                                onClick={() => setSelectedFolder(folder)}
+                                className={`bg-white/10 backdrop-blur-lg rounded-xl p-6 border transition-all cursor-pointer ${selectedFolder?.id === folder.id
+                                    ? 'border-purple-500 bg-white/20'
+                                    : 'border-white/20 hover:border-white/40'
+                                    }`}
+                            >
+                                <div className="flex items-start justify-between mb-4">
+                                    <div className="flex items-center gap-4">
+                                        <div className={`${folder.color} p-3 rounded-lg`}>
+                                            <folder.icon className="w-6 h-6 text-white" />
                                         </div>
-                                    );
-                                })}
+                                        <div>
+                                            <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                                                {folder.name}
+                                                {folder.locked && <Lock className="w-4 h-4 text-yellow-400" />}
+                                            </h3>
+                                            <p className="text-gray-400 text-sm">{folder.holders} token holders</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <button className="p-2 hover:bg-white/10 rounded-lg transition-all">
+                                            <Edit className="w-4 h-4 text-gray-400" />
+                                        </button>
+                                        <button className="p-2 hover:bg-white/10 rounded-lg transition-all">
+                                            <Trash2 className="w-4 h-4 text-red-400" />
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4 mb-4">
+                                    <div>
+                                        <p className="text-gray-400 text-sm mb-1">Total Tokens</p>
+                                        <p className="text-white font-bold text-lg">{folder.totalTokens}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-gray-400 text-sm mb-1">Vesting</p>
+                                        <p className="text-white font-semibold text-sm">{folder.vestingSchedule}</p>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <p className="text-gray-400 text-sm mb-2">Permissions</p>
+                                    <div className="flex flex-wrap gap-2">
+                                        {folder.permissions.map((perm, idx) => (
+                                            <span
+                                                key={idx}
+                                                className="px-3 py-1 bg-purple-500/20 text-purple-300 rounded-full text-xs font-semibold"
+                                            >
+                                                {perm}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
                             </div>
+                        ))}
+                    </div>
 
-                            {/* Distribution Chart */}
-                            <div className="bg-slate-800/50 backdrop-blur border border-slate-700 rounded-xl p-6">
-                                <h3 className="text-xl font-semibold mb-4">Token Distribution</h3>
-                                <div className="space-y-3">
-                                    {wallets.map((wallet) => (
-                                        <div key={wallet.id} className="space-y-1">
-                                            <div className="flex justify-between text-sm">
-                                                <span>{wallet.name}</span>
-                                                <span className="font-medium">{wallet.percentage}%</span>
-                                            </div>
-                                            <div className="w-full bg-slate-700 rounded-full h-3">
-                                                <div
-                                                    className={`${getColorClass(wallet.color)} h-3 rounded-full transition-all`}
-                                                    style={{ width: `${wallet.percentage}%` }}
-                                                />
-                                            </div>
-                                        </div>
-                                    ))}
+                    {/* Sidebar - Recent Activity */}
+                    <div className="space-y-6">
+                        <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
+                            <h3 className="text-xl font-bold text-white mb-4">Recent Activity</h3>
+                            <div className="space-y-4">
+                                {recentActivity.map((activity, idx) => (
+                                    <div key={idx} className="pb-4 border-b border-white/10 last:border-0 last:pb-0">
+                                        <p className="text-white font-semibold text-sm mb-1">{activity.action}</p>
+                                        {activity.from && activity.to && (
+                                            <p className="text-gray-400 text-xs mb-1">
+                                                {activity.from} → {activity.to}
+                                            </p>
+                                        )}
+                                        {activity.folder && (
+                                            <p className="text-gray-400 text-xs mb-1">{activity.folder}</p>
+                                        )}
+                                        <p className="text-gray-500 text-xs">{activity.time}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Quick Stats */}
+                        <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
+                            <h3 className="text-xl font-bold text-white mb-4">Quick Stats</h3>
+                            <div className="space-y-3">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-gray-400 text-sm">Total Allocated</span>
+                                    <span className="text-white font-bold">193.5M</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-gray-400 text-sm">Locked Tokens</span>
+                                    <span className="text-yellow-400 font-bold">170.5M</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-gray-400 text-sm">Unlocked Tokens</span>
+                                    <span className="text-green-400 font-bold">23M</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-gray-400 text-sm">Total Folders</span>
+                                    <span className="text-white font-bold">6</span>
                                 </div>
                             </div>
                         </div>
-                    )}
+                    </div>
+                </div>
 
-                    {/* Transfers Tab */}
-                    {activeTab === 'transfers' && (
-                        <div className="space-y-6">
-                            {/* Pending Approvals */}
-                            <div className="bg-slate-800/50 backdrop-blur border border-slate-700 rounded-xl p-6">
-                                <div className="flex items-center justify-between mb-4">
-                                    <h3 className="text-xl font-semibold flex items-center gap-2">
-                                        <Clock className="w-5 h-5 text-yellow-400" />
-                                        Pending Approvals
-                                    </h3>
+                {/* Add Folder Modal */}
+                {showAddModal && (
+                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+                        <div className="bg-slate-900 rounded-xl p-8 border border-white/20 max-w-md w-full mx-4">
+                            <h3 className="text-2xl font-bold text-white mb-6">Create New Folder</h3>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="text-gray-400 text-sm mb-2 block">Folder Name</label>
+                                    <input
+                                        type="text"
+                                        placeholder="e.g., Community"
+                                        className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="text-gray-400 text-sm mb-2 block">Token Allocation</label>
+                                    <input
+                                        type="text"
+                                        placeholder="e.g., 10,000,000"
+                                        className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
+                                    />
+                                </div>
+                                <div className="flex gap-3 pt-4">
                                     <button
-                                        className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-sm transition-colors"
-                                        onClick={() => setIsTransferModalOpen(true)}
+                                        onClick={() => setShowAddModal(false)}
+                                        className="flex-1 px-4 py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg font-semibold transition-all"
                                     >
-                                        New Transfer
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={() => setShowAddModal(false)}
+                                        className="flex-1 px-4 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-semibold transition-all"
+                                    >
+                                        Create
                                     </button>
                                 </div>
-
-                                <div className="space-y-4">
-                                    {pendingTransactions.map((tx) => (
-                                        <div key={tx.id} className="bg-slate-900/50 border border-slate-700 rounded-lg p-4">
-                                            <div className="flex items-start justify-between mb-3">
-                                                <div className="flex-1">
-                                                    <div className="flex items-center gap-2 mb-2">
-                                                        <span className="font-medium">{tx.from}</span>
-                                                        <ArrowRight className="w-4 h-4 text-slate-400" />
-                                                        <span className="font-medium">{tx.to}</span>
-                                                    </div>
-                                                    <p className="text-2xl font-bold mb-1">{formatNumber(tx.amount)} tokens</p>
-                                                    <p className="text-slate-400 text-sm">{tx.reason}</p>
-                                                </div>
-
-                                                <div className="text-right">
-                                                    <div className="flex items-center gap-2 mb-2">
-                                                        <div className="bg-yellow-500/20 text-yellow-400 px-3 py-1 rounded-full text-xs font-medium">
-                                                            {tx.approvals}/{tx.required} signatures
-                                                        </div>
-                                                    </div>
-                                                    <p className="text-slate-400 text-xs">Initiated: {tx.initiated}</p>
-                                                </div>
-                                            </div>
-
-                                            <div className="flex gap-2">
-                                                <button
-                                                    onClick={() => handleApproveTransaction(tx.id)}
-                                                    disabled={!isOwner}
-                                                    className="flex-1 bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed py-2 rounded-lg text-sm font-medium transition-colors"
-                                                >
-                                                    Approve
-                                                </button>
-                                                <button
-                                                    onClick={() => handleRejectTransaction(tx.id)}
-                                                    disabled={!isOwner}
-                                                    className="flex-1 bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed py-2 rounded-lg text-sm font-medium transition-colors"
-                                                >
-                                                    Reject
-                                                </button>
-                                                <button className="px-4 bg-slate-700 hover:bg-slate-600 py-2 rounded-lg text-sm font-medium transition-colors">
-                                                    Details
-                                                </button>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div className="bg-slate-800/50 backdrop-blur border border-slate-700 rounded-xl p-6 flex items-center justify-between">
-                                <div>
-                                    <h3 className="text-xl font-semibold mb-2">Initiate New Transfer</h3>
-                                    <p className="text-sm text-slate-400">Launch the transfer wizard to create, review, and submit a multi-sig request.</p>
-                                </div>
-                                <button
-                                    className="bg-blue-600 hover:bg-blue-700 px-5 py-2 rounded-lg text-sm font-medium transition-colors"
-                                    onClick={() => setIsTransferModalOpen(true)}
-                                >
-                                    Open Modal
-                                </button>
                             </div>
                         </div>
-                    )}
-
-                    {/* Vesting Tab */}
-                    {activeTab === 'vesting' && (
-                        <div className="space-y-6">
-                            <div className="bg-slate-800/50 backdrop-blur border border-slate-700 rounded-xl p-6">
-                                <h3 className="text-xl intended font-semibold mb-4">Active Vesting Schedules</h3>
-                                <div className="space-y-4">
-                                    {wallets.filter(isVestingWallet).map((wallet) => {
-                                        const Icon = wallet.icon;
-                                        return (
-                                            <div key={wallet.id} className="bg-slate-900/50 border border-slate-700 rounded-lg p-4">
-                                                <div className="flex items-center gap-3 mb-4">
-                                                    <div className={`${getColorClass(wallet.color)} p-2 rounded-lg`}>
-                                                        <Icon className="w-5 h-5" />
-                                                    </div>
-                                                    <div className="flex-1">
-                                                        <h4 className="font-semibold">{wallet.name}</h4>
-                                                        <p className="text-slate-400 text-sm">Vesting ends: {wallet.vestingEnd}</p>
-                                                    </div>
-                                                    <button className="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg text-sm transition-colors">
-                                                        Manage
-                                                    </button>
-                                                </div>
-
-                                                <div className="grid grid-cols-3 gap-4 mb-3">
-                                                    <div>
-                                                        <p className="text-slate-400 text-xs mb-1">Total Allocated</p>
-                                                        <p className="font-semibold">{formatNumber(wallet.allocated)}</p>
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-slate-400 text-xs mb-1">Vested</p>
-                                                        <p className="font-semibold text-green-400">{formatNumber(wallet.vested)}</p>
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-slate-400 text-xs mb-1">Remaining</p>
-                                                        <p className="font-semibold text-yellow-400">{formatNumber(wallet.allocated - wallet.vested)}</p>
-                                                    </div>
-                                                </div>
-
-                                                <div className="w-full bg-slate-700 rounded-full h-3">
-                                                    <div
-                                                        className={`${getColorClass(wallet.color)} h-3 rounded-full`}
-                                                        style={{ width: `${(wallet.vested / wallet.allocated) * 100}%` }}
-                                                    />
-                                                </div>
-                                                <p className="text-right text-sm text-slate-400 mt-1">
-                                                    {((wallet.vested / wallet.allocated) * 100).toFixed(1)}% vested
-                                                </p>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-
-                            <div className="bg-slate-800/50 backdrop-blur border border-slate-700 rounded-xl p-6 flex items-center justify-between">
-                                <div>
-                                    <h3 className="text-xl font-semibold mb-2">Create Vesting Schedule</h3>
-                                    <p className="text-sm text-slate-400">Configure cliffs, duration, and beneficiaries using the guided modal.</p>
-                                </div>
-                                <button
-                                    className="bg-blue-600 hover:bg-blue-700 px-5 py-2 rounded-lg text-sm font-medium transition-colors"
-                                    onClick={() => setIsVestingModalOpen(true)}
-                                >
-                                    Launch Builder
-                                </button>
-                            </div>
-                        </div>
-                    )}
-                </div>
+                    </div>
+                )}
             </div>
-
-            {isTransferModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center">
-                    <div className="absolute inset-0 bg-black/70" onClick={() => setIsTransferModalOpen(false)} />
-                    <div
-                        role="dialog"
-                        aria-modal="true"
-                        className="relative z-10 w-full max-w-2xl bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl p-6"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <div className="flex items-start justify-between mb-4">
-                            <div>
-                                <p className="text-xs uppercase tracking-widest text-slate-500">Transfer Wizard</p>
-                                <h3 className="text-2xl font-semibold">Initiate New Transfer</h3>
-                                <p className="text-sm text-slate-400">Fill in all details before submitting for multi-sig approval.</p>
-                            </div>
-                            <button
-                                className="text-slate-400 hover:text-white transition-colors"
-                                onClick={() => setIsTransferModalOpen(false)}
-                                aria-label="Close transfer modal"
-                            >
-                                ✕
-                            </button>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium mb-2">From Wallet</label>
-                                <select className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2">
-                                    <option>Treasury Master</option>
-                                    <option>Marketing & Community</option>
-                                    <option>Liquidity Pool</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium mb-2">To Address</label>
-                                <input type="text" placeholder="0x..." className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2" />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium mb-2">Amount</label>
-                                <input type="number" placeholder="0.00" className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2" />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium mb-2">Purpose</label>
-                                <select className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2">
-                                    <option>Marketing Campaign</option>
-                                    <option>Liquidity Provision</option>
-                                    <option>Partnership</option>
-                                    <option>Development</option>
-                                </select>
-                            </div>
-                            <div className="md:col-span-2">
-                                <label className="block text-sm font-medium mb-2">Reason / Notes</label>
-                                <textarea className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 h-24" placeholder="Detailed explanation..."></textarea>
-                            </div>
-                        </div>
-                        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
-                            <button
-                                className="px-5 py-3 rounded-lg border border-slate-600 text-sm font-medium hover:bg-slate-800 transition-colors"
-                                onClick={() => setIsTransferModalOpen(false)}
-                            >
-                                Cancel
-                            </button>
-                            <button className="px-6 py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-sm font-semibold transition-colors">
-                                Submit for Approval
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-            {isVestingModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center">
-                    <div className="absolute inset-0 bg-black/70" onClick={() => setIsVestingModalOpen(false)} />
-                    <div
-                        role="dialog"
-                        aria-modal="true"
-                        className="relative z-10 w-full max-w-3xl bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl p-6"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <div className="flex items-start justify-between mb-4">
-                            <div>
-                                <p className="text-xs uppercase tracking-widest text-slate-500">Vesting Builder</p>
-                                <h3 className="text-2xl font-semibold">Create Vesting Schedule</h3>
-                                <p className="text-sm text-slate-400">Define beneficiary, amounts, timing, and release cadence.</p>
-                            </div>
-                            <button
-                                className="text-slate-400 hover:text-white transition-colors"
-                                onClick={() => setIsVestingModalOpen(false)}
-                                aria-label="Close vesting modal"
-                            >
-                                ✕
-                            </button>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium mb-2">Beneficiary Address</label>
-                                <input type="text" placeholder="0x..." className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2" />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium mb-2">Beneficiary Name (optional)</label>
-                                <input type="text" placeholder="Team Member / Fund" className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2" />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium mb-2">Total Amount</label>
-                                <input type="number" placeholder="0.00" className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2" />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium mb-2">Token Source</label>
-                                <select className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2">
-                                    <option>Treasury Master</option>
-                                    <option>Founders & Team</option>
-                                    <option>Investors Pool</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium mb-2">Start Date</label>
-                                <input type="date" className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2" />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium mb-2">Cliff Period (months)</label>
-                                <input type="number" placeholder="12" className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2" />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium mb-2">Vesting Duration (months)</label>
-                                <input type="number" placeholder="48" className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2" />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium mb-2">Release Cadence</label>
-                                <select className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2">
-                                    <option>Linear Release</option>
-                                    <option>Monthly Milestones</option>
-                                    <option>Quarterly Milestones</option>
-                                </select>
-                            </div>
-                            <div className="md:col-span-2">
-                                <label className="block text-sm font-medium mb-2">Notes / Instructions</label>
-                                <textarea className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 h-24" placeholder="Add compliance notes, unlock logic, or approvals..."></textarea>
-                            </div>
-                        </div>
-                        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
-                            <button
-                                className="px-5 py-3 rounded-lg border border-slate-600 text-sm font-medium hover:bg-slate-800 transition-colors"
-                                onClick={() => setIsVestingModalOpen(false)}
-                            >
-                                Cancel
-                            </button>
-                            <button className="px-6 py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-sm font-semibold transition-colors">
-                                Create Vesting Schedule
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-        </>
+        </div>
     );
-};
-
-export default GovernanceDashboard;
+}

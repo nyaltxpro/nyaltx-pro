@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "/Users/mac/CascadeProjects/2048/contracts/contracts/NYAXGovernor.sol": {
-      "lastModificationDate": 1764072821135,
-      "contentHash": "78efcc5088a6b412a876104d0dbc2b8b",
+      "lastModificationDate": 1764588270764,
+      "contentHash": "f28baac7f33f3f24722aecdd296b324c",
       "sourceName": "contracts/NYAXGovernor.sol",
       "solcConfig": {
         "version": "0.8.25",
@@ -32,19 +32,17 @@
       },
       "imports": [
         "@openzeppelin/contracts/governance/Governor.sol",
-        "@openzeppelin/contracts/governance/extensions/GovernorSettings.sol",
         "@openzeppelin/contracts/governance/extensions/GovernorCountingSimple.sol",
+        "@openzeppelin/contracts/governance/extensions/GovernorSettings.sol",
         "@openzeppelin/contracts/governance/extensions/GovernorVotes.sol",
         "@openzeppelin/contracts/governance/extensions/GovernorVotesQuorumFraction.sol",
-        "@openzeppelin/contracts/governance/extensions/GovernorTimelockControl.sol",
-        "@openzeppelin/contracts/governance/TimelockController.sol"
+        "@openzeppelin/contracts/governance/extensions/GovernorTimelockControl.sol"
       ],
       "versionPragmas": [
         "^0.8.24"
       ],
       "artifacts": [
-        "NYAXGovernor",
-        "NYAXTimelockController"
+        "NYAXGovernor"
       ]
     },
     "/Users/mac/CascadeProjects/2048/contracts/node_modules/@openzeppelin/contracts/governance/Governor.sol": {
@@ -2130,48 +2128,6 @@
         "Ownable"
       ]
     },
-    "/Users/mac/CascadeProjects/2048/contracts/contracts/VestingWalletFlexible.sol": {
-      "lastModificationDate": 1764072371560,
-      "contentHash": "fed6e3707fa8fc658b4057c1e1718481",
-      "sourceName": "contracts/VestingWalletFlexible.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "evmVersion": "cancun",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata",
-                "storageLayout"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
-        "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
-        "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
-        "@openzeppelin/contracts/access/Ownable.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.24"
-      ],
-      "artifacts": [
-        "VestingWalletFlexible"
-      ]
-    },
     "/Users/mac/CascadeProjects/2048/contracts/node_modules/@openzeppelin/contracts/utils/ReentrancyGuard.sol": {
       "lastModificationDate": 1763997439680,
       "contentHash": "190613e556d509d9e9a0ea43dc5d891d",
@@ -2249,54 +2205,10 @@
         "SafeERC20"
       ]
     },
-    "/Users/mac/CascadeProjects/2048/contracts/contracts/Treasury.sol": {
-      "lastModificationDate": 1764072550367,
-      "contentHash": "2a45004108ba7e8c1fa365f1f66b04a6",
-      "sourceName": "contracts/Treasury.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "evmVersion": "cancun",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata",
-                "storageLayout"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "@openzeppelin/contracts/access/Ownable.sol",
-        "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
-        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
-        "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
-        "./NYAXToken.sol",
-        "./SimpleMultiSig.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.24"
-      ],
-      "artifacts": [
-        "Treasury"
-      ]
-    },
-    "/Users/mac/CascadeProjects/2048/contracts/contracts/NYAXToken.sol": {
-      "lastModificationDate": 1764072315943,
-      "contentHash": "23a8a6de890413acba73a46f2ab4cc17",
-      "sourceName": "contracts/NYAXToken.sol",
+    "/Users/mac/CascadeProjects/2048/contracts/contracts/FolderRegistery.sol": {
+      "lastModificationDate": 1764465447522,
+      "contentHash": "fb8aea7456b6028d220356c06ad09361",
+      "sourceName": "contracts/FolderRegistery.sol",
       "solcConfig": {
         "version": "0.8.25",
         "settings": {
@@ -2326,94 +2238,603 @@
         "@openzeppelin/contracts/token/ERC20/ERC20.sol",
         "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol",
         "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol",
-        "@openzeppelin/contracts/access/Ownable.sol",
-        "@openzeppelin/contracts/utils/ReentrancyGuard.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.24"
-      ],
-      "artifacts": [
-        "NYAXToken"
-      ]
-    },
-    "/Users/mac/CascadeProjects/2048/contracts/contracts/SimpleMultiSig.sol": {
-      "lastModificationDate": 1764075434721,
-      "contentHash": "8124976c92ba3c89a7b85e456d61ef70",
-      "sourceName": "contracts/SimpleMultiSig.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "evmVersion": "cancun",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata",
-                "storageLayout"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "@openzeppelin/contracts/utils/ReentrancyGuard.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.24"
-      ],
-      "artifacts": [
-        "SimpleMultiSig"
-      ]
-    },
-    "/Users/mac/CascadeProjects/2048/contracts/contracts/VestingFactory.sol": {
-      "lastModificationDate": 1764072038248,
-      "contentHash": "a562f3b4ec4d69ecb301e3956f064849",
-      "sourceName": "contracts/VestingFactory.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "evmVersion": "cancun",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata",
-                "storageLayout"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "@openzeppelin/contracts/access/Ownable.sol",
+        "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "@openzeppelin/contracts/access/Ownable2Step.sol",
+        "@openzeppelin/contracts/access/AccessControl.sol",
+        "@openzeppelin/contracts/utils/Pausable.sol",
         "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
-        "./VestingWalletFlexible.sol"
+        "@openzeppelin/contracts/utils/math/Math.sol",
+        "@openzeppelin/contracts/utils/math/SafeCast.sol",
+        "@openzeppelin/contracts/utils/structs/EnumerableSet.sol"
       ],
       "versionPragmas": [
         "^0.8.24"
       ],
       "artifacts": [
-        "VestingFactory"
+        "FolderRegistry"
+      ]
+    },
+    "/Users/mac/CascadeProjects/2048/contracts/node_modules/@openzeppelin/contracts/utils/Pausable.sol": {
+      "lastModificationDate": 1763997439680,
+      "contentHash": "0d47b53e10b1985efbb396f937626279",
+      "sourceName": "@openzeppelin/contracts/utils/Pausable.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "cancun",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../utils/Context.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "Pausable"
+      ]
+    },
+    "/Users/mac/CascadeProjects/2048/contracts/node_modules/@openzeppelin/contracts/access/Ownable2Step.sol": {
+      "lastModificationDate": 1763997438403,
+      "contentHash": "4c23c95621f1bdfb8c47bcb3795c53e8",
+      "sourceName": "@openzeppelin/contracts/access/Ownable2Step.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "cancun",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./Ownable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "Ownable2Step"
+      ]
+    },
+    "/Users/mac/CascadeProjects/2048/contracts/node_modules/@openzeppelin/contracts/utils/structs/EnumerableSet.sol": {
+      "lastModificationDate": 1763997432817,
+      "contentHash": "8fb55f589dba17bf8fd749c7549ce5cc",
+      "sourceName": "@openzeppelin/contracts/utils/structs/EnumerableSet.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "cancun",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../Arrays.sol",
+        "../math/Math.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "EnumerableSet"
+      ]
+    },
+    "/Users/mac/CascadeProjects/2048/contracts/node_modules/@openzeppelin/contracts/utils/Arrays.sol": {
+      "lastModificationDate": 1763997432764,
+      "contentHash": "e19f50397668e814730982e8f2aa6e56",
+      "sourceName": "@openzeppelin/contracts/utils/Arrays.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "cancun",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./Comparators.sol",
+        "./SlotDerivation.sol",
+        "./StorageSlot.sol",
+        "./math/Math.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "Arrays"
+      ]
+    },
+    "/Users/mac/CascadeProjects/2048/contracts/node_modules/@openzeppelin/contracts/utils/SlotDerivation.sol": {
+      "lastModificationDate": 1763997440332,
+      "contentHash": "43950136ee6a1761d2cbed39d16bb1e0",
+      "sourceName": "@openzeppelin/contracts/utils/SlotDerivation.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "cancun",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "SlotDerivation"
+      ]
+    },
+    "/Users/mac/CascadeProjects/2048/contracts/node_modules/@openzeppelin/contracts/utils/Comparators.sol": {
+      "lastModificationDate": 1763997432765,
+      "contentHash": "0e57405a6f979853cbfeb0df3546c3a3",
+      "sourceName": "@openzeppelin/contracts/utils/Comparators.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "cancun",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "Comparators"
+      ]
+    },
+    "/Users/mac/CascadeProjects/2048/contracts/node_modules/@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol": {
+      "lastModificationDate": 1763997434243,
+      "contentHash": "273d8d24b06f67207dd5f35c3a0c1086",
+      "sourceName": "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "cancun",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../ERC20.sol",
+        "../../../utils/Context.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "ERC20Burnable"
+      ]
+    },
+    "/Users/mac/CascadeProjects/2048/contracts/contracts/TreasuryBridge.sol": {
+      "lastModificationDate": 1764587579379,
+      "contentHash": "3f9df0b6be9909df4e5a6bee660652a6",
+      "sourceName": "contracts/TreasuryBridge.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "cancun",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC20/ERC20.sol",
+        "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol",
+        "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol",
+        "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "@openzeppelin/contracts/access/Ownable2Step.sol",
+        "@openzeppelin/contracts/access/AccessControl.sol",
+        "@openzeppelin/contracts/utils/Pausable.sol",
+        "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
+        "@openzeppelin/contracts/utils/math/Math.sol",
+        "@openzeppelin/contracts/utils/math/SafeCast.sol",
+        "@openzeppelin/contracts/utils/structs/EnumerableSet.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "TreasuryBridge"
+      ]
+    },
+    "/Users/mac/CascadeProjects/2048/contracts/contracts/NyaltxStaking.sol": {
+      "lastModificationDate": 1764457844002,
+      "contentHash": "6130ed6019bdf4eb3ba728511daeadbe",
+      "sourceName": "contracts/NyaltxStaking.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "cancun",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC20/ERC20.sol",
+        "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol",
+        "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol",
+        "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "@openzeppelin/contracts/access/Ownable2Step.sol",
+        "@openzeppelin/contracts/access/AccessControl.sol",
+        "@openzeppelin/contracts/utils/Pausable.sol",
+        "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
+        "@openzeppelin/contracts/utils/math/Math.sol",
+        "@openzeppelin/contracts/utils/math/SafeCast.sol",
+        "@openzeppelin/contracts/utils/structs/EnumerableSet.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "NYALTXStaking"
+      ]
+    },
+    "/Users/mac/CascadeProjects/2048/contracts/contracts/NYALTXGovernanceToken.sol": {
+      "lastModificationDate": 1764465441203,
+      "contentHash": "67554b897520d37205b7fcbe922eeda9",
+      "sourceName": "contracts/NYALTXGovernanceToken.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "cancun",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC20/ERC20.sol",
+        "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol",
+        "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol",
+        "@openzeppelin/contracts/access/Ownable2Step.sol",
+        "@openzeppelin/contracts/access/AccessControl.sol",
+        "@openzeppelin/contracts/utils/Pausable.sol",
+        "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
+        "@openzeppelin/contracts/utils/Nonces.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "NYALTXGovernanceToken"
+      ]
+    },
+    "/Users/mac/CascadeProjects/2048/contracts/contracts/NYAXTimelockController.sol": {
+      "lastModificationDate": 1764588063329,
+      "contentHash": "7c837a3b8b28fd5d1540c4f2bf5065cd",
+      "sourceName": "contracts/NYAXTimelockController.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "cancun",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/governance/TimelockController.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "NYAXTimelockController"
+      ]
+    },
+    "/Users/mac/CascadeProjects/2048/contracts/contracts/LegacyMigrationVault.sol": {
+      "lastModificationDate": 1764589987772,
+      "contentHash": "0d6ff457058b229409bcf07a27bf1b93",
+      "sourceName": "contracts/LegacyMigrationVault.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "cancun",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
+        "@openzeppelin/contracts/access/Ownable2Step.sol",
+        "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
+        "@openzeppelin/contracts/utils/math/Math.sol",
+        "./NYALTXGovernanceToken.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "ILegacyBurnable",
+        "LegacyMigrationVault"
+      ]
+    },
+    "/Users/mac/CascadeProjects/2048/contracts/contracts/LegacyToken.sol": {
+      "lastModificationDate": 1764588366183,
+      "contentHash": "62afcbf163ad1dbda98f6e3311e577f2",
+      "sourceName": "contracts/LegacyToken.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "cancun",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC20/ERC20.sol",
+        "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol",
+        "@openzeppelin/contracts/access/Ownable2Step.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "LegacyToken"
+      ]
+    },
+    "/Users/mac/CascadeProjects/2048/contracts/contracts/TreasuryMultisig.sol": {
+      "lastModificationDate": 1764588046342,
+      "contentHash": "48d30b4a7702cc4eaff65ac53cbebfa6",
+      "sourceName": "contracts/TreasuryMultisig.sol",
+      "solcConfig": {
+        "version": "0.8.25",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "cancun",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "TreasuryMultisig"
       ]
     }
   }
