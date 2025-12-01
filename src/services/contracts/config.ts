@@ -221,7 +221,7 @@ export const CONTRACT_ABIS = {
 // Network configuration
 export const NETWORK_CONFIG = {
   chainId: '11155111',
-  rpcUrl: 'https://eth-sepolia.g.alchemy.com/v2/pX3Zri_PFYwFbZ_2W05Qn',
+  rpcUrl: 'https://sepolia.infura.io/v3/24570cf454c147f5b44d10966ae49915',
   blockExplorer:  'https://sepolia.etherscan.io',
 };
 
