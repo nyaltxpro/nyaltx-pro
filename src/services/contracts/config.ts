@@ -163,6 +163,32 @@ export const CONTRACT_ABIS = {
     'event TransactionExecuted(uint256 indexed txIndex)',
   ],
   
+  folderRegistry: [
+    'function folderCount() view returns (uint256)',
+    'function folders(uint256 folderId) view returns (string name, uint32 defaultPermissions, tuple(uint64 cliff, uint64 duration, bool revocable) template, uint256 totalAllocated, bool exists)',
+    'function permissionsOf(uint256 folderId, address account) view returns (uint32)',
+    'function unlockedTokens(uint256 folderId, address account, uint64 timestamp) view returns (uint256)',
+    'function folderMembers(uint256 folderId) view returns (address[])',
+    'function createFolder(string name, uint32 permissions, tuple(uint64 cliff, uint64 duration, bool revocable) template) returns (uint256)',
+    'function updateFolder(uint256 folderId, uint32 permissions, tuple(uint64 cliff, uint64 duration, bool revocable) template)',
+    'function setAllocation(uint256 folderId, address account, uint256 amount, tuple(uint64 start, uint64 cliff, uint64 duration, bool revocable, bool revoked, uint64 revokedAt) schedule, uint32 permissions)',
+    'function claim(uint256 folderId, address account, uint256 amount)',
+    'function revoke(uint256 folderId, address account)'
+  ],
+  
+  staking: [
+    'function MIN_LOCK() view returns (uint64)',
+    'function MAX_LOCK() view returns (uint64)',
+    'function totalStaked() view returns (uint256)',
+    'function totalSupply() view returns (uint256)',
+    'function emergencyUnlock() view returns (bool)',
+    'function stake(uint256 amount, uint64 lockDuration, address delegatee) returns (uint256 stakeId, uint256 votingPower)',
+    'function extendLock(uint256 stakeId, uint64 additionalDuration)',
+    'function unstake(uint256 stakeId, address recipient)',
+    'function stakeCount(address account) view returns (uint256)',
+    'function stakeInfo(address account, uint256 stakeId) view returns (uint128 amount, uint128 votingPower, uint64 unlockTime, bool withdrawn)'
+  ],
+  
   vestingFactory: [
     // VestingFactory functions
     'function nyaxToken() view returns (address)',

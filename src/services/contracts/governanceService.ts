@@ -64,6 +64,11 @@ export class GovernanceService {
       
       const event = events[0] as ethers.EventLog;
       const { targets, values, calldatas, description } = event.args;
+      const normalizedValues = Array.isArray(values)
+        ? values
+        : typeof values === 'function'
+        ? Array.from(values())
+        : Array.from(values ?? []);
       
       return {
         id: proposalId,
@@ -81,7 +86,7 @@ export class GovernanceService {
         isFastTrack,
         category: this.extractCategory(description),
         targets,
-        values: values.map((v: bigint) => v.toString()),
+        values: normalizedValues.map((v: bigint) => v.toString()),
         calldatas,
       };
     } catch (error) {
