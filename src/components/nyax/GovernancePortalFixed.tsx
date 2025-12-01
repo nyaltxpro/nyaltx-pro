@@ -1,3 +1,4 @@
+'use client'
 import { CheckCircle, Coins, TrendingUp, Users, XCircle } from 'lucide-react';
 import { useState } from 'react';
 import { Bar, BarChart, CartesianGrid, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';

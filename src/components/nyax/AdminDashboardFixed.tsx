@@ -1,3 +1,4 @@
+'use client'
 import { Award, Clock, Edit, Filter, Lock, Megaphone, Plus, Search, Shield, Trash2, TrendingUp, Users } from 'lucide-react';
 import { useState } from 'react';
 
