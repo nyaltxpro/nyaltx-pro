@@ -1,4 +1,4 @@
-import { FolderInfo, FolderMemberInfo, FolderTemplate } from '@/services/contracts/types';
+import { FolderAllocationScheduleInput, FolderInfo, FolderMemberInfo, FolderTemplate } from '@/services/contracts/types';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDAOService } from './useDAOService';
 
@@ -6,6 +6,19 @@ export type CreateFolderInput = {
   name: string;
   permissions: number;
   template: FolderTemplate;
+};
+
+type UpdateFolderOptions = {
+  permissions?: number;
+  template?: FolderTemplate;
+};
+
+type AllocationInput = {
+  folderId: number;
+  account: string;
+  amount: string;
+  schedule: FolderAllocationScheduleInput;
+  permissions?: number;
 };
 
 export function useFolderRegistry() {
@@ -61,6 +74,67 @@ export function useFolderRegistry() {
     await fetchFolders();
   }, [fetchFolders]);
 
+  const updateFolder = useCallback(
+    async (folderId: number, updates: UpdateFolderOptions) => {
+      if (!daoService) throw new Error('DAO service not initialized');
+      setActionPending(true);
+      setError(null);
+      try {
+        const folder = folders.find(item => item.id === folderId) ?? (await daoService.folders.getFolder(folderId));
+        if (!folder) throw new Error('Folder not found');
+        const permissions = updates.permissions ?? folder.defaultPermissions;
+        const template = updates.template ?? folder.template;
+        await daoService.folders.updateFolder(folderId, permissions, template);
+        await fetchFolders();
+      } catch (err) {
+        console.error('Failed to update folder', err);
+        setError(err instanceof Error ? err.message : 'Failed to update folder');
+        throw err;
+      } finally {
+        setActionPending(false);
+      }
+    },
+    [daoService, folders, fetchFolders]
+  );
+
+  const setFolderAllocation = useCallback(
+    async ({ folderId, account, amount, schedule, permissions }: AllocationInput) => {
+      if (!daoService) throw new Error('DAO service not initialized');
+      setActionPending(true);
+      setError(null);
+      try {
+        await daoService.folders.setAllocation(folderId, account, amount, schedule, permissions);
+        await Promise.all([fetchFolders(), fetchMembers(folderId)]);
+      } catch (err) {
+        console.error('Failed to set allocation', err);
+        setError(err instanceof Error ? err.message : 'Failed to set allocation');
+        throw err;
+      } finally {
+        setActionPending(false);
+      }
+    },
+    [daoService, fetchFolders, fetchMembers]
+  );
+
+  const revokeAllocation = useCallback(
+    async (folderId: number, account: string) => {
+      if (!daoService) throw new Error('DAO service not initialized');
+      setActionPending(true);
+      setError(null);
+      try {
+        await daoService.folders.revokeAllocation(folderId, account);
+        await Promise.all([fetchFolders(), fetchMembers(folderId)]);
+      } catch (err) {
+        console.error('Failed to revoke allocation', err);
+        setError(err instanceof Error ? err.message : 'Failed to revoke allocation');
+        throw err;
+      } finally {
+        setActionPending(false);
+      }
+    },
+    [daoService, fetchFolders, fetchMembers]
+  );
+
   useEffect(() => {
     if (!serviceLoading && daoService) {
       fetchFolders();
@@ -87,5 +161,8 @@ export function useFolderRegistry() {
     refresh,
     fetchMembers,
     createFolder,
+    updateFolder,
+    setFolderAllocation,
+    revokeAllocation,
   };
 }

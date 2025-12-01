@@ -79,10 +79,21 @@ export function useDAOService() {
 
   // Update service when wallet client changes
   useEffect(() => {
-    if (daoService && walletClient) {
-      // In production, you'd update the service with the new wallet client
-      // daoService.updateSigner(walletClient);
-    }
+    if (!daoService) return;
+
+    const syncSigner = async () => {
+      try {
+        if (walletClient) {
+          await daoService.updateSigner(walletClient.transport);
+        } else {
+          await daoService.updateSigner();
+        }
+      } catch (err) {
+        console.error('Failed to sync DAO signer', err);
+      }
+    };
+
+    syncSigner();
   }, [daoService, walletClient]);
 
   return {
