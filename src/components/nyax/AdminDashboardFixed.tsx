@@ -1,5 +1,6 @@
 'use client';
 
+import ConnectWalletButton from '@/components/ConnectWalletButton';
 import { useFolderRegistry } from '@/hooks/useFolderRegistry';
 import { FolderInfo } from '@/services/contracts/types';
 import { Filter, Loader2, Lock, Plus, Search, Shield } from 'lucide-react';
@@ -175,14 +176,17 @@ export default function AdminDashboardFixed() {
                         <h1 className="text-4xl font-bold text-white mb-2">NYAX Folder Registry</h1>
                         <p className="text-gray-400">Manage allocation groups, vesting templates, and permissions</p>
                     </div>
-                    <button
-                        onClick={() => setShowAddModal(true)}
-                        disabled={!isConnected}
-                        className="px-6 py-3 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-600/40 disabled:cursor-not-allowed text-white rounded-lg font-semibold flex items-center gap-2 transition-all"
-                    >
-                        <Plus className="w-5 h-5" />
-                        {isConnected ? 'New Folder' : 'Connect Wallet'}
-                    </button>
+                    <div className="flex items-center gap-3">
+                        {!isConnected && <ConnectWalletButton className="bg-purple-600 hover:bg-purple-700" />}
+                        <button
+                            onClick={() => setShowAddModal(true)}
+                            disabled={!isConnected}
+                            className="px-6 py-3 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-600/40 disabled:cursor-not-allowed text-white rounded-lg font-semibold flex items-center gap-2 transition-all"
+                        >
+                            <Plus className="w-5 h-5" />
+                            New Folder
+                        </button>
+                    </div>
                 </div>
 
                 {!isConnected && (
