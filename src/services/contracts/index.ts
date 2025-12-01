@@ -9,20 +9,33 @@ import { StakingService } from './stakingService';
 import { TreasuryService } from './treasuryService';
 import { VestingService } from './vestingService';
 
-const FALLBACK_RPC_URLS = Array.from(
-  new Set(
-    [
-      process.env.NEXT_PUBLIC_RPC_URL,
-      NETWORK_CONFIG.rpcUrl,
-      'https://rpc.sepolia.org',
-      'https://sepolia.infura.io/v3/24570cf454c147f5b44d10966ae49915',
-    ].filter(Boolean)
-  )
-) as string[];
+function getFallbackRpcUrls(): string[] {
+  const urls: Array<string | undefined> = [];
+
+  if (typeof window !== 'undefined') {
+    urls.push(`${window.location.origin}/api/rpc/proxy`);
+  } else if (process.env.NEXT_PUBLIC_RPC_PROXY_URL) {
+    urls.push(process.env.NEXT_PUBLIC_RPC_PROXY_URL);
+  }
+
+  urls.push(
+    process.env.NEXT_PUBLIC_RPC_URL,
+    NETWORK_CONFIG.rpcUrl,
+    'https://rpc.sepolia.org',
+    'https://sepolia.infura.io/v3/24570cf454c147f5b44d10966ae49915'
+  );
+
+  return Array.from(new Set(urls.filter(Boolean))) as string[];
+}
 
 async function createReadOnlyProvider(): Promise<ethers.JsonRpcProvider> {
+  const urls = getFallbackRpcUrls();
+  if (!urls.length) {
+    throw new Error('No RPC URLs configured for DAO service.');
+  }
+
   let lastError: unknown = null;
-  for (const url of FALLBACK_RPC_URLS) {
+  for (const url of urls) {
     try {
       const provider = new ethers.JsonRpcProvider(url);
       await provider.getBlockNumber();
