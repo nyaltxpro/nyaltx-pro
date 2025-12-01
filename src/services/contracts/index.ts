@@ -1,6 +1,6 @@
 // Main service aggregator for DAO contracts
 import { ethers } from 'ethers';
-import { CONTRACT_ADDRESSES } from './config';
+import { CONTRACT_ADDRESSES, NETWORK_CONFIG } from './config';
 import { FolderRegistryService } from './folderRegistryService';
 import { GovernanceService } from './governanceService';
 import { MigrationVaultService } from './migrationVaultService';
@@ -13,7 +13,11 @@ function getFallbackRpcUrls(): string[] {
   const urls: Array<string | undefined> = [];
 
   urls.push(
-    'https://sepolia.infura.io/v3/24570cf454c147f5b44d10966ae49915'
+    process.env.NEXT_PUBLIC_RPC_URL,
+    NETWORK_CONFIG.rpcUrl,
+    'https://sepolia.infura.io/v3/24570cf454c147f5b44d10966ae49915',
+    'https://rpc.sepolia.org',
+    'https://endpoints.omniatech.io/v1/eth/sepolia/public'
   );
 
   return Array.from(new Set(urls.filter(Boolean))) as string[];
