@@ -2,12 +2,17 @@ import { ContractAddresses } from './types';
 
 // Contract addresses - Update these with deployed contract addresses
 export const CONTRACT_ADDRESSES: ContractAddresses = {
-  nyaxToken: process.env.NEXT_NYAX_TOKEN_ADDRESS || '0x9b3C66f562EA32496bA19D9C7174613c37A91F98',
-  nyaxGovernor: process.env.NEXT_PUBLIC_NYAX_GOVERNOR_ADDRESS || '',
-  treasury: process.env.NEXT_PUBLIC_TREASURY_ADDRESS || '',
-  multisig: process.env.NEXT_PUBLIC_MULTISIG_ADDRESS || '',
+  nyaxToken: process.env.NEXT_NYAX_TOKEN_ADDRESS || '0xa879282ad7097f2503A4D128b807546e79A88F2f',
+  legacyToken: process.env.NEXT_PUBLIC_LEGACY_TOKEN_ADDRESS || '0xe75B4240053FC34c5c5751Ab0282190149dfC4Be',
+  legacyMigrationVault: process.env.NEXT_PUBLIC_LEGACY_MIGRATION_VAULT_ADDRESS || '0x0b8963BaD0B5331852D5FA5d15661317Cb96a40B',
+  staking: process.env.NEXT_PUBLIC_STAKING_ADDRESS || '0xA6518003fb0F4062e370C21b5f5096F9d88bcDfE',
+  folderRegistry: process.env.NEXT_PUBLIC_FOLDER_REGISTRY_ADDRESS || '0x9b8209dA26ab232C1F6Caa30Ddcf3B6fA0394C34',
+  nyaxGovernor: process.env.NEXT_PUBLIC_NYAX_GOVERNOR_ADDRESS || '0xD69743C1b6Ee9Ab46922993b282D3BA7dd093086',
+  timelock: process.env.NEXT_PUBLIC_TIMELOCK_ADDRESS || '0xa17B822F9D0A26C20BDe453F0e566a2D2787E851',
+  treasury: process.env.NEXT_PUBLIC_TREASURY_ADDRESS || '0x7ab3eBb87afa9A921d0770Fa304F20Fc8D2a4763',
+  multisig: process.env.NEXT_PUBLIC_MULTISIG_ADDRESS || '0x5cD8aD5E36324C386b6F62Ce2374aa3F3f8Ae0aD',
   vestingFactory: process.env.NEXT_PUBLIC_VESTING_FACTORY_ADDRESS || '',
-  timelock: process.env.NEXT_PUBLIC_TIMELOCK_ADDRESS || '',
+  treasuryBridge: process.env.NEXT_PUBLIC_TREASURY_BRIDGE_ADDRESS || '0x7ab3eBb87afa9A921d0770Fa304F20Fc8D2a4763',
 };
 
 // Contract ABIs - Import from generated files or define here
@@ -210,6 +215,58 @@ export const CONTRACT_ABIS = {
     'event VestingRevoked(bytes32 indexed scheduleId, address indexed beneficiary, uint256 unreleased)',
     'event MilestoneAdded(bytes32 indexed scheduleId, uint256 timestamp, uint256 percentage, string description)',
     'event MilestoneReleased(bytes32 indexed scheduleId, uint256 amount, string description)',
+  ],
+
+  legacyToken: [
+    'function name() view returns (string)',
+    'function symbol() view returns (string)',
+    'function decimals() view returns (uint8)',
+    'function balanceOf(address) view returns (uint256)',
+    'function allowance(address owner, address spender) view returns (uint256)',
+    'function approve(address spender, uint256 amount) returns (bool)'
+  ],
+
+  legacyMigrationVault: [
+    'function legacyToken() view returns (address)',
+    'function governanceToken() view returns (address)',
+    'function conversionRatio() view returns (uint256)',
+    'function depositsEnabled() view returns (bool)',
+    'function depositLegacy(uint256 amount, address beneficiary) returns (uint256)'
+  ],
+
+  folderRegistry: [
+    'function folderCount() view returns (uint256)',
+    'function folders(uint256 folderId) view returns (string name, uint32 defaultPermissions, tuple(uint64 cliff, uint64 duration, bool revocable) template, uint256 totalAllocated, bool exists)',
+    'function permissionsOf(uint256 folderId, address account) view returns (uint32)',
+    'function unlockedTokens(uint256 folderId, address account, uint64 timestamp) view returns (uint256)',
+    'function folderMembers(uint256 folderId) view returns (address[])',
+    'function createFolder(string name, uint32 permissions, tuple(uint64 cliff, uint64 duration, bool revocable) template) returns (uint256)',
+    'function updateFolder(uint256 folderId, uint32 permissions, tuple(uint64 cliff, uint64 duration, bool revocable) template)',
+    'function setAllocation(uint256 folderId, address account, uint256 amount, tuple(uint64 start, uint64 cliff, uint64 duration, bool revocable, bool revoked, uint64 revokedAt) schedule, uint32 permissions)',
+    'function claim(uint256 folderId, address account, uint256 amount)',
+    'function revoke(uint256 folderId, address account)'
+  ],
+
+  staking: [
+    'function MIN_LOCK() view returns (uint64)',
+    'function MAX_LOCK() view returns (uint64)',
+    'function totalStaked() view returns (uint256)',
+    'function totalSupply() view returns (uint256)',
+    'function emergencyUnlock() view returns (bool)',
+    'function stake(uint256 amount, uint64 lockDuration, address delegatee) returns (uint256 stakeId, uint256 votingPower)',
+    'function extendLock(uint256 stakeId, uint64 additionalDuration)',
+    'function unstake(uint256 stakeId, address recipient)',
+    'function stakeCount(address account) view returns (uint256)',
+    'function stakeInfo(address account, uint256 stakeId) view returns (uint128 amount, uint128 votingPower, uint64 unlockTime, bool withdrawn)'
+  ],
+
+  treasuryBridge: [
+    'function TREASURY_CONTROLLER_ROLE() view returns (bytes32)',
+    'function treasuryMultisig() view returns (address)',
+    'function timelockController() view returns (address)',
+    'function governor() view returns (address)',
+    'function transferTreasuryToken(address token, address to, uint256 amount, bytes32 referenceId)',
+    'function transferTreasuryETH(address to, uint256 amount, bytes32 referenceId)'
   ],
 };
 

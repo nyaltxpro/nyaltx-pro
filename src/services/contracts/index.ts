@@ -1,8 +1,11 @@
 // Main service aggregator for DAO contracts
 import { ethers } from 'ethers';
 import { CONTRACT_ADDRESSES, NETWORK_CONFIG } from './config';
+import { FolderRegistryService } from './folderRegistryService';
 import { GovernanceService } from './governanceService';
+import { MigrationVaultService } from './migrationVaultService';
 import { MultisigService } from './multisigService';
+import { StakingService } from './stakingService';
 import { TreasuryService } from './treasuryService';
 import { VestingService } from './vestingService';
 
@@ -14,6 +17,9 @@ export class DAOService {
   public treasury: TreasuryService;
   public vesting: VestingService;
   public multisig: MultisigService;
+  public folders: FolderRegistryService;
+  public staking: StakingService;
+  public migrationVault: MigrationVaultService;
 
   constructor(provider: ethers.Provider, signer?: ethers.Signer) {
     this.provider = provider;
@@ -24,6 +30,9 @@ export class DAOService {
     this.treasury = new TreasuryService(provider, signer);
     this.vesting = new VestingService(provider, signer);
     this.multisig = new MultisigService(provider, signer);
+    this.folders = new FolderRegistryService(provider, signer);
+    this.staking = new StakingService(provider, signer);
+    this.migrationVault = new MigrationVaultService(provider, signer);
   }
 
   // Factory method to create DAO service with Web3 provider
@@ -33,8 +42,9 @@ export class DAOService {
 
     if (web3Provider) {
       // Use injected provider (MetaMask, etc.)
-      provider = new ethers.BrowserProvider(web3Provider);
-      signer = await provider.getSigner();
+      const browserProvider = new ethers.BrowserProvider(web3Provider);
+      provider = browserProvider;
+      signer = await browserProvider.getSigner();
     } else {
       // Use read-only provider
       provider = new ethers.JsonRpcProvider(NETWORK_CONFIG.rpcUrl);
@@ -46,8 +56,9 @@ export class DAOService {
   // Update signer (when user connects/disconnects wallet)
   async updateSigner(web3Provider?: any): Promise<void> {
     if (web3Provider) {
-      this.provider = new ethers.BrowserProvider(web3Provider);
-      this.signer = await this.provider.getSigner();
+      const browserProvider = new ethers.BrowserProvider(web3Provider);
+      this.provider = browserProvider;
+      this.signer = await browserProvider.getSigner();
     } else {
       this.provider = new ethers.JsonRpcProvider(NETWORK_CONFIG.rpcUrl);
       this.signer = undefined;
@@ -58,6 +69,9 @@ export class DAOService {
     this.treasury = new TreasuryService(this.provider, this.signer);
     this.vesting = new VestingService(this.provider, this.signer);
     this.multisig = new MultisigService(this.provider, this.signer);
+    this.folders = new FolderRegistryService(this.provider, this.signer);
+    this.staking = new StakingService(this.provider, this.signer);
+    this.migrationVault = new MigrationVaultService(this.provider, this.signer);
   }
 
   // Utility methods
@@ -176,8 +190,11 @@ export class DAOService {
 
 // Export individual services and types
 export * from './config';
+export { FolderRegistryService } from './folderRegistryService';
 export { GovernanceService } from './governanceService';
+export { MigrationVaultService } from './migrationVaultService';
 export { MultisigService } from './multisigService';
+export { StakingService } from './stakingService';
 export { TreasuryService } from './treasuryService';
 export * from './types';
 export { VestingService } from './vestingService';

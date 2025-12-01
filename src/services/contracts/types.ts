@@ -1,11 +1,77 @@
 // Contract Types and Interfaces
 export interface ContractAddresses {
   nyaxToken: string;
+  legacyToken: string;
+  legacyMigrationVault: string;
+  staking: string;
+  folderRegistry: string;
   nyaxGovernor: string;
+  timelock: string;
   treasury: string;
   multisig: string;
   vestingFactory: string;
-  timelock: string;
+  treasuryBridge: string;
+}
+
+export interface FolderTemplate {
+  cliff: number;
+  duration: number;
+  revocable: boolean;
+}
+
+export interface FolderAllocationScheduleInput extends FolderTemplate {
+  start: number;
+}
+
+export interface FolderInfo {
+  id: number;
+  name: string;
+  defaultPermissions: number;
+  totalAllocated: string;
+  template: FolderTemplate;
+  exists: boolean;
+  members: string[];
+}
+
+export interface FolderMemberInfo {
+  account: string;
+  permissions: number;
+  unlockedAmount: string;
+}
+
+export interface StakingPosition {
+  stakeId: number;
+  amount: string;
+  votingPower: string;
+  unlockTime: number;
+  withdrawn: boolean;
+}
+
+export interface StakingStats {
+  minLock: number;
+  maxLock: number;
+  totalStaked: string;
+  totalSupply: string;
+  emergencyUnlock: boolean;
+}
+
+export interface MigrationVaultStats {
+  conversionRatio: string;
+  depositsEnabled: boolean;
+  legacyToken: string;
+  governanceToken: string;
+}
+
+export interface LegacyDepositResult {
+  txHash: string;
+  mintedAmount: string;
+}
+
+export interface TreasuryBridgeInfo {
+  treasuryMultisig: string;
+  timelockController: string;
+  governor: string;
+  controllerRole: string;
 }
 
 export interface ProposalData {
