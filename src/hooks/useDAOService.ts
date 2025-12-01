@@ -88,8 +88,12 @@ export function useDAOService() {
 
     const syncSigner = async () => {
       try {
-        if (walletClient?.transport) {
-          await service.updateSigner(walletClient.transport);
+        if (walletClient) {
+          const provider = {
+            request: async ({ method, params }: { method: string; params?: unknown[] }) =>
+              walletClient.request({ method, params } as any),
+          };
+          await service.updateSigner(provider);
         } else {
           await service.updateSigner();
         }
