@@ -216,65 +216,13 @@ export const CONTRACT_ABIS = {
     'event MilestoneAdded(bytes32 indexed scheduleId, uint256 timestamp, uint256 percentage, string description)',
     'event MilestoneReleased(bytes32 indexed scheduleId, uint256 amount, string description)',
   ],
-
-  legacyToken: [
-    'function name() view returns (string)',
-    'function symbol() view returns (string)',
-    'function decimals() view returns (uint8)',
-    'function balanceOf(address) view returns (uint256)',
-    'function allowance(address owner, address spender) view returns (uint256)',
-    'function approve(address spender, uint256 amount) returns (bool)'
-  ],
-
-  legacyMigrationVault: [
-    'function legacyToken() view returns (address)',
-    'function governanceToken() view returns (address)',
-    'function conversionRatio() view returns (uint256)',
-    'function depositsEnabled() view returns (bool)',
-    'function depositLegacy(uint256 amount, address beneficiary) returns (uint256)'
-  ],
-
-  folderRegistry: [
-    'function folderCount() view returns (uint256)',
-    'function folders(uint256 folderId) view returns (string name, uint32 defaultPermissions, tuple(uint64 cliff, uint64 duration, bool revocable) template, uint256 totalAllocated, bool exists)',
-    'function permissionsOf(uint256 folderId, address account) view returns (uint32)',
-    'function unlockedTokens(uint256 folderId, address account, uint64 timestamp) view returns (uint256)',
-    'function folderMembers(uint256 folderId) view returns (address[])',
-    'function createFolder(string name, uint32 permissions, tuple(uint64 cliff, uint64 duration, bool revocable) template) returns (uint256)',
-    'function updateFolder(uint256 folderId, uint32 permissions, tuple(uint64 cliff, uint64 duration, bool revocable) template)',
-    'function setAllocation(uint256 folderId, address account, uint256 amount, tuple(uint64 start, uint64 cliff, uint64 duration, bool revocable, bool revoked, uint64 revokedAt) schedule, uint32 permissions)',
-    'function claim(uint256 folderId, address account, uint256 amount)',
-    'function revoke(uint256 folderId, address account)'
-  ],
-
-  staking: [
-    'function MIN_LOCK() view returns (uint64)',
-    'function MAX_LOCK() view returns (uint64)',
-    'function totalStaked() view returns (uint256)',
-    'function totalSupply() view returns (uint256)',
-    'function emergencyUnlock() view returns (bool)',
-    'function stake(uint256 amount, uint64 lockDuration, address delegatee) returns (uint256 stakeId, uint256 votingPower)',
-    'function extendLock(uint256 stakeId, uint64 additionalDuration)',
-    'function unstake(uint256 stakeId, address recipient)',
-    'function stakeCount(address account) view returns (uint256)',
-    'function stakeInfo(address account, uint256 stakeId) view returns (uint128 amount, uint128 votingPower, uint64 unlockTime, bool withdrawn)'
-  ],
-
-  treasuryBridge: [
-    'function TREASURY_CONTROLLER_ROLE() view returns (bytes32)',
-    'function treasuryMultisig() view returns (address)',
-    'function timelockController() view returns (address)',
-    'function governor() view returns (address)',
-    'function transferTreasuryToken(address token, address to, uint256 amount, bytes32 referenceId)',
-    'function transferTreasuryETH(address to, uint256 amount, bytes32 referenceId)'
-  ],
 };
 
 // Network configuration
 export const NETWORK_CONFIG = {
-  chainId: parseInt(process.env.NEXT_PUBLIC_CHAIN_ID || '1'),
-  rpcUrl: process.env.NEXT_PUBLIC_RPC_URL || '',
-  blockExplorer: process.env.NEXT_PUBLIC_BLOCK_EXPLORER || '',
+  chainId: '11155111',
+  rpcUrl: 'https://rpc.sepolia.org',
+  blockExplorer:  'https://sepolia.etherscan.io',
 };
 
 // Constants
