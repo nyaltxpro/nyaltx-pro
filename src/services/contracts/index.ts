@@ -1,6 +1,6 @@
 // Main service aggregator for DAO contracts
 import { ethers } from 'ethers';
-import { CONTRACT_ADDRESSES, NETWORK_CONFIG } from './config';
+import { CONTRACT_ADDRESSES } from './config';
 import { FolderRegistryService } from './folderRegistryService';
 import { GovernanceService } from './governanceService';
 import { MigrationVaultService } from './migrationVaultService';
@@ -12,16 +12,7 @@ import { VestingService } from './vestingService';
 function getFallbackRpcUrls(): string[] {
   const urls: Array<string | undefined> = [];
 
-  if (typeof window !== 'undefined') {
-    urls.push(`${window.location.origin}/api/rpc/proxy`);
-  } else if (process.env.NEXT_PUBLIC_RPC_PROXY_URL) {
-    urls.push(process.env.NEXT_PUBLIC_RPC_PROXY_URL);
-  }
-
   urls.push(
-    process.env.NEXT_PUBLIC_RPC_URL,
-    NETWORK_CONFIG.rpcUrl,
-    'https://rpc.sepolia.org',
     'https://sepolia.infura.io/v3/24570cf454c147f5b44d10966ae49915'
   );
 
