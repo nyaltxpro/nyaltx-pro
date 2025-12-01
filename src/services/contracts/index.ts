@@ -9,6 +9,32 @@ import { StakingService } from './stakingService';
 import { TreasuryService } from './treasuryService';
 import { VestingService } from './vestingService';
 
+const FALLBACK_RPC_URLS = Array.from(
+  new Set(
+    [
+      process.env.NEXT_PUBLIC_RPC_URL,
+      NETWORK_CONFIG.rpcUrl,
+      'https://rpc.sepolia.org',
+      'https://sepolia.infura.io/v3/24570cf454c147f5b44d10966ae49915',
+    ].filter(Boolean)
+  )
+) as string[];
+
+async function createReadOnlyProvider(): Promise<ethers.JsonRpcProvider> {
+  let lastError: unknown = null;
+  for (const url of FALLBACK_RPC_URLS) {
+    try {
+      const provider = new ethers.JsonRpcProvider(url);
+      await provider.getBlockNumber();
+      return provider;
+    } catch (err) {
+      console.error(`[DAOService] Failed to connect to RPC ${url}`, err);
+      lastError = err;
+    }
+  }
+  throw lastError ?? new Error('Unable to connect to any configured RPC endpoint.');
+}
+
 export class DAOService {
   private provider: ethers.Provider;
   private signer?: ethers.Signer;
@@ -46,8 +72,8 @@ export class DAOService {
       provider = browserProvider;
       signer = await browserProvider.getSigner();
     } else {
-      // Use read-only provider
-      provider = new ethers.JsonRpcProvider(NETWORK_CONFIG.rpcUrl);
+      // Use read-only provider with fallbacks
+      provider = await createReadOnlyProvider();
     }
 
     return new DAOService(provider, signer);
@@ -60,7 +86,7 @@ export class DAOService {
       this.provider = browserProvider;
       this.signer = await browserProvider.getSigner();
     } else {
-      this.provider = new ethers.JsonRpcProvider(NETWORK_CONFIG.rpcUrl);
+      this.provider = await createReadOnlyProvider();
       this.signer = undefined;
     }
 
