@@ -3,7 +3,6 @@
 import ConnectWalletButton from '@/components/ConnectWalletButton';
 import { useDAOService } from '@/hooks/useDAOService';
 import { useFolderRegistry } from '@/hooks/useFolderRegistry';
-import { getDAOService } from '@/services/contracts';
 import { FolderInfo } from '@/services/contracts/types';
 import { useAppKitAccount } from '@reown/appkit/react';
 import { CalendarClock, Filter, Gavel, KeySquare, Loader2, Lock, Plus, Search, Shield, UserPlus2 } from 'lucide-react';
@@ -187,8 +186,7 @@ export default function AdminDashboardFixed() {
         setTransfersLoading(true);
         setTransfersError(null);
         try {
-            const service = getDAOService?.() ?? daoService;
-            await service.setTransfersEnabled(!transfersEnabled);
+            await daoService.treasury.setTokenTransfersEnabled(!transfersEnabled);
             setTransfersEnabledState(prev => (prev === null ? null : !prev));
             setFormError(null);
         } catch (err) {
