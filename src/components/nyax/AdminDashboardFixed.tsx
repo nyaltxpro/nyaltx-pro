@@ -1,10 +1,11 @@
 "use client";
 
 import ConnectWalletButton from '@/components/ConnectWalletButton';
+import { useDAOService } from '@/hooks/useDAOService';
 import { useFolderRegistry } from '@/hooks/useFolderRegistry';
 import { FolderInfo } from '@/services/contracts/types';
 import { useAppKitAccount } from '@reown/appkit/react';
-import { CalendarClock, Filter, KeySquare, Loader2, Lock, Plus, Search, Shield, UserPlus2 } from 'lucide-react';
+import { CalendarClock, Filter, Gavel, KeySquare, Loader2, Lock, Plus, Search, Shield, UserPlus2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useAccount } from 'wagmi';
 
@@ -48,6 +49,8 @@ export default function AdminDashboardFixed() {
         refresh,
     } = useFolderRegistry();
 
+    const { daoService } = useDAOService();
+
     const { isConnected: isEvmConnected } = useAccount();
     const { isConnected: isAppKitConnected } = useAppKitAccount();
     const isConnected = isEvmConnected || isAppKitConnected;
@@ -77,6 +80,15 @@ export default function AdminDashboardFixed() {
 
     const [permissionsForm, setPermissionsForm] = useState({ folderId: 0, permissions: '' });
     const [vestingForm, setVestingForm] = useState({ folderId: 0, cliff: '0', duration: '365', revocable: true });
+    const [showProposalModal, setShowProposalModal] = useState(false);
+    const [proposalForm, setProposalForm] = useState({
+        title: '',
+        description: '',
+        targets: '',
+        values: '',
+        calldatas: '',
+    });
+    const [proposalResult, setProposalResult] = useState<string | null>(null);
 
     const [selectedFolderId, setSelectedFolderId] = useState<number | null>(null);
 
@@ -256,6 +268,48 @@ export default function AdminDashboardFixed() {
         }
     };
 
+    const parseCommaOrNewline = (value: string) =>
+        value
+            .split(/[,\n]/)
+            .map(entry => entry.trim())
+            .filter(Boolean);
+
+    const handleCreateProposal = async () => {
+        if (!isConnected) {
+            setFormError('Connect a wallet to submit proposals.');
+            return;
+        }
+        if (!daoService) {
+            setFormError('DAO service unavailable. Try reloading.');
+            return;
+        }
+        if (!proposalForm.title.trim() || !proposalForm.description.trim()) {
+            setFormError('Title and description are required.');
+            return;
+        }
+        const targets = parseCommaOrNewline(proposalForm.targets);
+        const values = parseCommaOrNewline(proposalForm.values);
+        const calldatas = parseCommaOrNewline(proposalForm.calldatas);
+
+        if (!(targets.length && targets.length === values.length && values.length === calldatas.length)) {
+            setFormError('Targets, values, and calldatas must have the same count.');
+            return;
+        }
+
+        try {
+            setFormError(null);
+            setProposalResult(null);
+            const description = `${proposalForm.title.trim()}\n\n${proposalForm.description.trim()}`;
+            const proposalId = await daoService.governance.createProposal(targets, values, calldatas, description);
+            setProposalResult(proposalId);
+            setProposalForm({ title: '', description: '', targets: '', values: '', calldatas: '' });
+            setShowProposalModal(false);
+        } catch (err) {
+            const message = err instanceof Error ? err.message : 'Failed to create proposal';
+            setFormError(message);
+        }
+    };
+
     const renderFolderCard = (folder: FolderInfo) => {
         const memberCount = membersByFolder[folder.id]?.length ?? folder.members.length;
         const permissions = describePermissions(folder.defaultPermissions);
@@ -336,6 +390,10 @@ export default function AdminDashboardFixed() {
                         >
                             <Plus className="w-5 h-5" />
                             New Folder
+                        </button>
+                        <button className={TOOL_BUTTON_CLASSES} onClick={() => setShowProposalModal(true)} disabled={!isConnected || loading}>
+                            <Gavel className="w-5 h-5" />
+                            Create Proposal
                         </button>
                     </div>
                 </div>
@@ -700,6 +758,88 @@ export default function AdminDashboardFixed() {
                                     disabled={actionPending || !isConnected}
                                 >
                                     {actionPending ? 'Saving...' : 'Update Template'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {showProposalModal && (
+                    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+                        <div className="bg-slate-900 rounded-xl p-8 border border-white/20 max-w-3xl w-full mx-4 space-y-4">
+                            <div className="flex items-center justify-between">
+                                <h3 className="text-2xl font-bold text-white flex items-center gap-2">
+                                    <Gavel className="w-6 h-6 text-purple-300" />
+                                    Submit Governance Proposal
+                                </h3>
+                                <button className="text-gray-400 hover:text-white" onClick={() => setShowProposalModal(false)}>
+                                    ✕
+                                </button>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="text-gray-400 text-sm mb-2 block">Title</label>
+                                    <input
+                                        type="text"
+                                        value={proposalForm.title}
+                                        onChange={e => setProposalForm(prev => ({ ...prev, title: e.target.value }))}
+                                        className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="text-gray-400 text-sm mb-2 block">Targets (comma or newline separated)</label>
+                                    <textarea
+                                        value={proposalForm.targets}
+                                        onChange={e => setProposalForm(prev => ({ ...prev, targets: e.target.value }))}
+                                        className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white min-h-[110px]"
+                                    />
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="text-gray-400 text-sm mb-2 block">Values (wei, comma/newline separated)</label>
+                                    <textarea
+                                        value={proposalForm.values}
+                                        onChange={e => setProposalForm(prev => ({ ...prev, values: e.target.value }))}
+                                        className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white min-h-[110px]"
+                                        placeholder="0,0,0"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="text-gray-400 text-sm mb-2 block">Calldatas (hex, comma/newline separated)</label>
+                                    <textarea
+                                        value={proposalForm.calldatas}
+                                        onChange={e => setProposalForm(prev => ({ ...prev, calldatas: e.target.value }))}
+                                        className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white min-h-[110px]"
+                                        placeholder="0x..."
+                                    />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="text-gray-400 text-sm mb-2 block">Proposal Description</label>
+                                <textarea
+                                    value={proposalForm.description}
+                                    onChange={e => setProposalForm(prev => ({ ...prev, description: e.target.value }))}
+                                    className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white min-h-[140px]"
+                                    placeholder="Explain the rationale, execution steps, and expected impact."
+                                />
+                            </div>
+                            {formError && <p className="text-red-400 text-sm">{formError}</p>}
+                            {proposalResult && (
+                                <p className="text-green-400 text-sm">
+                                    Proposal submitted! ID: {proposalResult}
+                                </p>
+                            )}
+                            <div className="flex gap-3">
+                                <button className="flex-1 px-4 py-3 bg-white/10 text-white rounded-lg" onClick={() => setShowProposalModal(false)}>
+                                    Cancel
+                                </button>
+                                <button
+                                    className="flex-1 px-4 py-3 bg-purple-600 text-white rounded-lg disabled:opacity-50"
+                                    onClick={handleCreateProposal}
+                                    disabled={actionPending || !isConnected}
+                                >
+                                    Submit Proposal
                                 </button>
                             </div>
                         </div>
