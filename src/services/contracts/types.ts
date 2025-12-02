@@ -117,6 +117,16 @@ export interface TreasuryCategory {
   remaining: string;
 }
 
+export interface TreasuryTransfer {
+  txHash: string;
+  to: string;
+  amount: string;
+  reason: string;
+  category: string;
+  blockNumber: number;
+  timestamp: number;
+}
+
 export interface MultisigTransaction {
   id: number;
   to: string;

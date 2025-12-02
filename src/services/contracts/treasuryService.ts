@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 import { CONTRACT_ABIS, CONTRACT_ADDRESSES } from './config';
-import { ContractError, TreasuryCategory, TreasuryStats } from './types';
+import { ContractError, TreasuryCategory, TreasuryStats, TreasuryTransfer } from './types';
 
 export class TreasuryService {
   private provider: ethers.Provider;
@@ -39,6 +39,54 @@ export class TreasuryService {
       return receipt.hash;
     } catch (error) {
       throw this.handleError(error);
+    }
+  }
+
+  async getRecentTransfers(limit = 10, lookbackBlocks = 50_000): Promise<TreasuryTransfer[]> {
+    try {
+      const latestBlock = await this.provider.getBlockNumber();
+      const fromBlock = Math.max(latestBlock - lookbackBlocks, 0);
+      const topic = ethers.id('TransferExecuted(address,uint256,string,string)');
+
+      const logs = await this.provider.getLogs({
+        address: CONTRACT_ADDRESSES.treasury,
+        topics: [topic],
+        fromBlock,
+        toBlock: latestBlock,
+      });
+
+      const recentLogs = logs.slice(-limit);
+
+      const transfers = await Promise.all(
+        recentLogs
+          .reverse()
+          .map(async (log) => {
+            const parsed = this.treasuryContract.interface.parseLog(log);
+            const block = await this.provider.getBlock(log.blockNumber);
+            if (!parsed) return null;
+            const { to, amount, reason, category } = parsed.args as unknown as {
+              to: string;
+              amount: bigint;
+              reason: string;
+              category: string;
+            };
+
+            return {
+              txHash: log.transactionHash,
+              to,
+              amount: ethers.formatEther(amount),
+              reason,
+              category,
+              blockNumber: log.blockNumber,
+              timestamp: Number(block?.timestamp ?? 0),
+            } satisfies TreasuryTransfer;
+          })
+      );
+
+      return transfers.filter((entry): entry is TreasuryTransfer => Boolean(entry));
+    } catch (error) {
+      console.error('Error fetching recent transfers:', error);
+      return [];
     }
   }
 

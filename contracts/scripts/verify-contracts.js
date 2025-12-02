@@ -42,6 +42,10 @@ async function main() {
   const governanceAdmin = requireEnv("GOVERNANCE_ADMIN_ADDRESS");
   const treasuryAddress = requireEnv("TREASURY_ADDRESS");
   const legacyToken = requireEnv("LEGACY_TOKEN_ADDRESS");
+  const legacyTokenOwner = requireEnv("LEGACY_TOKEN_OWNER");
+  const legacyTokenName = process.env.LEGACY_TOKEN_NAME || "Legacy NYALTX";
+  const legacyTokenSymbol = process.env.LEGACY_TOKEN_SYMBOL || "lNYAX";
+  const legacyTokenInitialSupplyRaw = process.env.LEGACY_TOKEN_INITIAL_SUPPLY || "0";
   const migrationAdmin = requireEnv("MIGRATION_ADMIN_ADDRESS");
   const stakingAdmin = requireEnv("STAKING_ADMIN_ADDRESS");
   const treasuryMultisig = requireEnv("TREASURY_MULTISIG_ADDRESS");
@@ -57,6 +61,13 @@ async function main() {
   const governorAddr = governorAddress;
   const treasuryBridgeAddr = requireEnv("TREASURY_BRIDGE_ADDRESS");
   const treasuryMultisigAddr = requireEnv("TREASURY_MULTISIG_DEPLOYED_ADDRESS");
+
+  await verifyContract(legacyToken, "contracts/LegacyToken.sol:LegacyToken", [
+    legacyTokenName,
+    legacyTokenSymbol,
+    legacyTokenOwner,
+    hre.ethers.parseUnits(legacyTokenInitialSupplyRaw, 18),
+  ]);
 
   await verifyContract(nyaltxTokenAddr, "contracts/NYALTXGovernanceToken.sol:NYALTXGovernanceToken", [governanceAdmin, treasuryAddress]);
   await verifyContract(legacyVaultAddr, "contracts/LegacyMigrationVault.sol:LegacyMigrationVault", [legacyToken, nyaltxTokenAddr, requireEnv("MIGRATION_RATIO"), migrationAdmin]);

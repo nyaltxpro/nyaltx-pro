@@ -1,7 +1,7 @@
 'use client'
 import { useDAOService } from '@/hooks/useDAOService';
 import { useMigrationVault } from '@/hooks/useMigrationVault';
-import { GovernanceStats, ProposalData, StakingStats } from '@/services/contracts/types';
+import { GovernanceStats, ProposalData, StakingStats, TreasuryTransfer } from '@/services/contracts/types';
 import { CheckCircle, Coins, Shield, TrendingUp, Users, XCircle } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import {
@@ -34,6 +34,19 @@ const formatNumber = (value: number | string | null | undefined, decimals = 2) =
     return new Intl.NumberFormat('en-US', { maximumFractionDigits: decimals }).format(numeric);
 };
 
+const formatTimeFromTimestamp = (timestamp: number) => {
+    if (!timestamp) return 'N/A';
+    const now = Date.now();
+    const diffMs = now - timestamp * 1000;
+    const diffMinutes = Math.floor(diffMs / (60 * 1000));
+    if (diffMinutes < 1) return 'just now';
+    if (diffMinutes < 60) return `${diffMinutes}m ago`;
+    const diffHours = Math.floor(diffMinutes / 60);
+    if (diffHours < 24) return `${diffHours}h ago`;
+    const diffDays = Math.floor(diffHours / 24);
+    return `${diffDays}d ago`;
+};
+
 export default function NYALTXGovernance() {
     const { address, isConnected } = useAccount();
     const { daoService, isLoading: daoLoading, error: daoError } = useDAOService();
@@ -45,13 +58,9 @@ export default function NYALTXGovernance() {
     const [governanceStats, setGovernanceStats] = useState<GovernanceStats | null>(null);
     const [stakingStats, setStakingStats] = useState<StakingStats | null>(null);
     const [tokenMetrics, setTokenMetrics] = useState<TokenMetrics | null>(null);
-
-    const [transfers] = useState([
-        { id: 1, from: '0x742d...a8f3', to: '0x9c21...4b7e', amount: 1500, timestamp: '2 mins ago', type: 'transfer' },
-        { id: 2, from: '0x1a3c...2f91', to: 'Treasury', amount: 5000, timestamp: '15 mins ago', type: 'stake' },
-        { id: 3, from: '0x8e4d...6c2a', to: '0x7f1b...3d9e', amount: 750, timestamp: '1 hour ago', type: 'transfer' },
-        { id: 4, from: 'Treasury', to: '0x5d2e...8a4c', amount: 2200, timestamp: '3 hours ago', type: 'reward' },
-    ]);
+    const [transfers, setTransfers] = useState<TreasuryTransfer[]>([]);
+    const [transfersLoading, setTransfersLoading] = useState(false);
+    const [transfersError, setTransfersError] = useState<string | null>(null);
 
     useEffect(() => {
         if (!daoService) return;
@@ -99,6 +108,28 @@ export default function NYALTXGovernance() {
         };
         loadStaking();
         loadTokenInfo();
+        return () => {
+            cancelled = true;
+        };
+    }, [daoService]);
+
+    useEffect(() => {
+        if (!daoService) return;
+        let cancelled = false;
+        const loadTransfers = async () => {
+            setTransfersLoading(true);
+            setTransfersError(null);
+            try {
+                const recent = await daoService.treasury.getRecentTransfers(15, 75_000);
+                if (!cancelled) setTransfers(recent);
+            } catch (error) {
+                console.error('Failed to load transfers', error);
+                if (!cancelled) setTransfersError('Unable to load recent transfers.');
+            } finally {
+                if (!cancelled) setTransfersLoading(false);
+            }
+        };
+        loadTransfers();
         return () => {
             cancelled = true;
         };
@@ -372,35 +403,55 @@ export default function NYALTXGovernance() {
                 {activeTab === 'transfers' && (
                     <div className="bg-gray-800/50 backdrop-blur rounded-xl border border-gray-700 overflow-hidden">
                         <div className="overflow-x-auto">
-                            <table className="w-full">
-                                <thead className="bg-gray-900/50">
-                                    <tr>
-                                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">From</th>
-                                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">To</th>
-                                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Amount</th>
-                                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Type</th>
-                                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Time</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-700">
-                                    {transfers.map((transfer) => (
-                                        <tr key={transfer.id} className="hover:bg-gray-700/30 transition-colors">
-                                            <td className="px-6 py-4 text-sm font-mono text-gray-300">{transfer.from}</td>
-                                            <td className="px-6 py-4 text-sm font-mono text-gray-300">{transfer.to}</td>
-                                            <td className="px-6 py-4 text-sm font-semibold">{transfer.amount.toLocaleString()} NYALTX</td>
-                                            <td className="px-6 py-4">
-                                                <span className={`px-2 py-1 rounded text-xs font-semibold ${transfer.type === 'stake' ? 'bg-blue-500/20 text-blue-400' :
-                                                    transfer.type === 'reward' ? 'bg-green-500/20 text-green-400' :
-                                                        'bg-purple-500/20 text-purple-400'
-                                                    }`}>
-                                                    {transfer.type}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4 text-sm text-gray-400">{transfer.timestamp}</td>
+                            {transfersLoading ? (
+                                <div className="p-6 text-sm text-gray-300">Loading transfers...</div>
+                            ) : transfersError ? (
+                                <div className="p-6 text-sm text-red-400">{transfersError}</div>
+                            ) : transfers.length === 0 ? (
+                                <div className="p-6 text-sm text-gray-300">No treasury transfers found in the recent history.</div>
+                            ) : (
+                                <table className="w-full">
+                                    <thead className="bg-gray-900/50">
+                                        <tr>
+                                            <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">From</th>
+                                            <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">To</th>
+                                            <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Amount</th>
+                                            <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Reason</th>
+                                            <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Category</th>
+                                            <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Time</th>
+                                            <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Explorer</th>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-700">
+                                        {transfers.map((transfer) => (
+                                            <tr key={`${transfer.txHash}-${transfer.blockNumber}`} className="hover:bg-gray-700/30 transition-colors">
+                                                <td className="px-6 py-4 text-sm font-mono text-gray-300">Treasury</td>
+                                                <td className="px-6 py-4 text-sm font-mono text-gray-300">
+                                                    {transfer.to.slice(0, 6)}...{transfer.to.slice(-4)}
+                                                </td>
+                                                <td className="px-6 py-4 text-sm font-semibold">{formatNumber(transfer.amount)} NYAX</td>
+                                                <td className="px-6 py-4 text-sm text-gray-300">{transfer.reason || 'N/A'}</td>
+                                                <td className="px-6 py-4 text-sm">
+                                                    <span className="px-2 py-1 rounded text-xs bg-purple-500/20 text-purple-300">
+                                                        {transfer.category || 'General'}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4 text-sm text-gray-400">{formatTimeFromTimestamp(transfer.timestamp)}</td>
+                                                <td className="px-6 py-4 text-sm">
+                                                    <a
+                                                        href={`https://sepolia.etherscan.io/tx/${transfer.txHash}`}
+                                                        target="_blank"
+                                                        rel="noreferrer"
+                                                        className="text-blue-400 hover:text-blue-200 text-xs"
+                                                    >
+                                                        View
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            )}
                         </div>
                     </div>
                 )}
