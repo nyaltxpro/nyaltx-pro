@@ -3,6 +3,7 @@
 import ConnectWalletButton from '@/components/ConnectWalletButton';
 import { useDAOService } from '@/hooks/useDAOService';
 import { useFolderRegistry } from '@/hooks/useFolderRegistry';
+import { getDAOService } from '@/services/contracts';
 import { FolderInfo } from '@/services/contracts/types';
 import { useAppKitAccount } from '@reown/appkit/react';
 import { CalendarClock, Filter, Gavel, KeySquare, Loader2, Lock, Plus, Search, Shield, UserPlus2 } from 'lucide-react';
@@ -91,6 +92,9 @@ export default function AdminDashboardFixed() {
     const [proposalResult, setProposalResult] = useState<string | null>(null);
 
     const [selectedFolderId, setSelectedFolderId] = useState<number | null>(null);
+    const [transfersEnabled, setTransfersEnabledState] = useState<boolean | null>(null);
+    const [transfersLoading, setTransfersLoading] = useState(false);
+    const [transfersError, setTransfersError] = useState<string | null>(null);
 
     const selectedFolder = useMemo(
         () => folders.find(folder => folder.id === selectedFolderId) ?? null,
@@ -108,6 +112,29 @@ export default function AdminDashboardFixed() {
             fetchMembers(selectedFolderId);
         }
     }, [selectedFolderId, membersByFolder, fetchMembers]);
+
+    useEffect(() => {
+        if (!daoService) return;
+        let cancelled = false;
+        const loadTransfersState = async () => {
+            try {
+                const info = await daoService.treasury.getTokenInfo();
+                if (!cancelled) {
+                    setTransfersEnabledState(info.transfersEnabled ?? null);
+                    setTransfersError(null);
+                }
+            } catch (err) {
+                if (!cancelled) {
+                    console.error('Failed to load transfer settings', err);
+                    setTransfersError('Unable to load transfer status.');
+                }
+            }
+        };
+        loadTransfersState();
+        return () => {
+            cancelled = true;
+        };
+    }, [daoService]);
 
     const handleSelectFolder = (folderId: number) => {
         setSelectedFolderId(prev => (prev === folderId ? null : folderId));
@@ -148,6 +175,27 @@ export default function AdminDashboardFixed() {
             setShowAddModal(false);
         } catch (err) {
             setFormError(err instanceof Error ? err.message : 'Failed to create folder');
+        }
+    };
+
+    const handleTransferToggle = async () => {
+        if (!isConnected) {
+            setFormError('Connect a wallet to manage token transfers.');
+            return;
+        }
+        if (!daoService || transfersEnabled === null) return;
+        setTransfersLoading(true);
+        setTransfersError(null);
+        try {
+            const service = getDAOService?.() ?? daoService;
+            await service.setTransfersEnabled(!transfersEnabled);
+            setTransfersEnabledState(prev => (prev === null ? null : !prev));
+            setFormError(null);
+        } catch (err) {
+            console.error('Failed to toggle transfers', err);
+            setTransfersError(err instanceof Error ? err.message : 'Failed to update transfer status');
+        } finally {
+            setTransfersLoading(false);
         }
     };
 
@@ -421,7 +469,17 @@ export default function AdminDashboardFixed() {
                                         <Gavel className="w-4 h-4" /> Proposal
                                     </div>
                                 </button>
+                                <button
+                                    className="flex-1 min-w-[140px] px-5 py-3 rounded-2xl border border-emerald-400/40 text-emerald-200 hover:bg-emerald-500/10 transition disabled:opacity-40"
+                                    onClick={openAllocationModal}
+                                    disabled={!selectedFolder || !isConnected || loading}
+                                >
+                                    <div className="flex items-center justify-center gap-2">
+                                        <UserPlus2 className="w-4 h-4" /> Allocation
+                                    </div>
+                                </button>
                             </div>
+                            <p className="text-xs text-gray-400">{selectedFolder ? `Allocations armed for ${selectedFolder.name}` : 'Select a folder card below to unlock allocation tooling.'}</p>
                         </div>
                     </div>
 
@@ -471,7 +529,7 @@ export default function AdminDashboardFixed() {
                         </button>
                         <button className={TOOL_BUTTON_CLASSES} onClick={openAllocationModal} disabled={!selectedFolder || !isConnected || loading}>
                             <UserPlus2 className="w-5 h-5" />
-                            Manage Holders
+                            Allocations
                         </button>
                         <button className={TOOL_BUTTON_CLASSES} onClick={openPermissionsModal} disabled={!selectedFolder || !isConnected || loading}>
                             <KeySquare className="w-5 h-5" />
@@ -489,6 +547,79 @@ export default function AdminDashboardFixed() {
                             <Lock className="w-5 h-5" />
                             {selectedFolder?.template.revocable ? 'Lock Tokens' : 'Unlock Tokens'}
                         </button>
+                    </div>
+                </div>
+
+                <div className="rounded-3xl border border-white/10 bg-black/30 backdrop-blur-xl p-6">
+                    <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                        <div>
+                            <p className="text-xs uppercase tracking-[0.4em] text-gray-400">Allocations</p>
+                            <h2 className="text-2xl font-semibold mt-2">Folder allocation center</h2>
+                            <p className="text-gray-400 text-sm mt-2 max-w-2xl">
+                                Review and assign balances to holders just like on nyax-admin. Select a folder, then trigger the allocation workflow to set vesting, cliffs, and permissions in one pane.
+                            </p>
+                        </div>
+                        <div className="flex flex-col gap-3 min-w-[240px]">
+                            <button
+                                className="px-5 py-3 rounded-2xl bg-linear-to-r from-indigo-500 to-purple-500 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                                onClick={openAllocationModal}
+                                disabled={!selectedFolder || !isConnected || loading}
+                            >
+                                Start allocation
+                            </button>
+                            <div className="text-xs text-gray-400 rounded-2xl border border-white/10 bg-white/5 p-3">
+                                {selectedFolder
+                                    ? `Ready to assign tokens for ${selectedFolder.name}`
+                                    : 'Choose a folder from the list to unlock allocations'}
+                            </div>
+                        </div>
+                    </div>
+                    <div className="mt-6 grid gap-4 sm:grid-cols-3 text-sm text-gray-400">
+                        <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                            <p className="text-xs uppercase tracking-[0.3em] text-gray-500">Step 1</p>
+                            <p className="text-white font-semibold mt-1">Select a folder</p>
+                            <p className="mt-1">Tap any folder card to focus on that allocation group.</p>
+                        </div>
+                        <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                            <p className="text-xs uppercase tracking-[0.3em] text-gray-500">Step 2</p>
+                            <p className="text-white font-semibold mt-1">Open allocation modal</p>
+                            <p className="mt-1">Press “Start allocation” to configure cliffs, duration, and wallet address.</p>
+                        </div>
+                        <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                            <p className="text-xs uppercase tracking-[0.3em] text-gray-500">Step 3</p>
+                            <p className="text-white font-semibold mt-1">Save & refresh</p>
+                            <p className="mt-1">Confirm the transaction, then sync members to view the latest balances.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-6">
+                    <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                        <div>
+                            <p className="text-xs uppercase tracking-[0.4em] text-gray-400">Token safety</p>
+                            <h2 className="text-2xl font-semibold mt-2">Global transfer lock</h2>
+                            <p className="text-gray-400 text-sm mt-2 max-w-2xl">
+                                Toggle NYAX ERC20 transferability directly from the admin console to pause or resume token movement at the contract level.
+                            </p>
+                            {transfersError && <p className="text-sm text-red-400 mt-2">{transfersError}</p>}
+                        </div>
+                        <div className="flex flex-col gap-3 min-w-[240px]">
+                            <span className={`px-4 py-2 rounded-full text-xs border ${transfersEnabled === null
+                                ? 'border-white/20 text-gray-300'
+                                : transfersEnabled
+                                    ? 'border-emerald-400/40 text-emerald-200'
+                                    : 'border-red-400/40 text-red-200'
+                                }`}>
+                                {transfersEnabled === null ? 'Status syncing…' : transfersEnabled ? 'Transfers enabled' : 'Transfers disabled'}
+                            </span>
+                            <button
+                                onClick={handleTransferToggle}
+                                disabled={!isConnected || transfersEnabled === null || transfersLoading}
+                                className="px-5 py-3 rounded-2xl bg-linear-to-r from-pink-500 to-orange-500 font-semibold disabled:opacity-40"
+                            >
+                                {transfersLoading ? 'Updating…' : transfersEnabled ? 'Disable Transfers' : 'Enable Transfers'}
+                            </button>
+                        </div>
                     </div>
                 </div>
 

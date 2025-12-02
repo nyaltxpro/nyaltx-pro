@@ -260,6 +260,8 @@ export class TreasuryService {
     totalSupply: string;
     maxSupply: string;
     remainingMintable: string;
+    treasury: string;
+    transfersEnabled: boolean;
   }> {
     try {
       const [
@@ -268,14 +270,18 @@ export class TreasuryService {
         decimals,
         totalSupply,
         maxSupply,
-        remainingMintable
+        remainingMintable,
+        treasury,
+        transfersEnabled
       ] = await Promise.all([
         this.tokenContract.name(),
         this.tokenContract.symbol(),
         this.tokenContract.decimals(),
         this.tokenContract.totalSupply(),
         this.tokenContract.MAX_SUPPLY(),
-        this.tokenContract.remainingMintableSupply()
+        this.tokenContract.remainingMintableSupply(),
+        this.tokenContract.treasury(),
+        this.tokenContract.transfersEnabled()
       ]);
 
       return {
@@ -285,6 +291,8 @@ export class TreasuryService {
         totalSupply: ethers.formatEther(totalSupply),
         maxSupply: ethers.formatEther(maxSupply),
         remainingMintable: ethers.formatEther(remainingMintable),
+        treasury,
+        transfersEnabled,
       };
     } catch (error) {
       console.error('Error fetching token info:', error);
@@ -295,7 +303,20 @@ export class TreasuryService {
         totalSupply: '0',
         maxSupply: '0',
         remainingMintable: '0',
+        treasury: ethers.ZeroAddress,
+        transfersEnabled: false,
       };
+    }
+  }
+
+  async setTokenTransfersEnabled(enabled: boolean): Promise<string> {
+    try {
+      if (!this.signer) throw new Error('Signer required for toggling transfers');
+      const tx = await this.tokenContract.setTransfersEnabled(enabled);
+      const receipt = await tx.wait();
+      return receipt.hash;
+    } catch (error) {
+      throw this.handleError(error);
     }
   }
 

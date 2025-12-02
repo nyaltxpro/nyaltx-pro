@@ -231,25 +231,56 @@ export default function NYALTXGovernance() {
     };
 
     return (
-        <div className="min-h-screen  text-white p-6">
-            <div className="max-w-7xl mx-auto">
+        <div className="min-h-screen bg-linear-to-br from-[#05060d] via-[#070b1a] to-[#09090e] text-white px-4 py-8">
+            <div className="max-w-7xl mx-auto space-y-8">
                 {/* Header */}
-                <div className="mb-8">
-                    <h1 className="text-4xl font-bold mb-2  text-white">
-                        NYALTX Governance
-                    </h1>
-                    <p className="text-gray-400">Decentralized governance for token holders</p>
+                <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl px-6 py-8 sm:px-8 sm:py-10 shadow-[0_25px_70px_rgba(7,13,30,0.55)]">
+                    <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                        <div className="space-y-4">
+                            <div className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.4em] text-indigo-200/80">
+                                <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" /> NYAX DAO
+                            </div>
+                            <div>
+                                <h1 className="text-4xl font-semibold">NYALTX Governance Command Surface</h1>
+                                <p className="text-gray-300 mt-2 max-w-2xl">
+                                    Monitor protocol health, orchestrate proposals, and stream treasury activity from a single dashboard aligned with the nyaltx.pro admin aesthetic.
+                                </p>
+                            </div>
+                            <div className="flex flex-wrap gap-3 text-xs">
+                                <span className={`flex items-center gap-2 rounded-full px-4 py-1.5 border ${isConnected ? 'border-emerald-400/40 text-emerald-200' : 'border-red-400/30 text-red-200'}`}>
+                                    <span className={`h-2 w-2 rounded-full ${isConnected ? 'bg-emerald-400' : 'bg-red-400'}`} />
+                                    {isConnected ? 'Wallet connected' : 'Connect wallet to act'}
+                                </span>
+                                <span className="flex items-center gap-2 rounded-full border border-white/10 px-4 py-1.5 text-slate-200">
+                                    <Activity className="w-3.5 h-3.5 text-emerald-300" />
+                                    {governanceStats?.activeProposals ?? 0} active proposals
+                                </span>
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3 min-w-[260px]">
+                            <div className="rounded-2xl border border-white/10 bg-black/30 p-4 text-sm text-gray-400">
+                                <p className="uppercase tracking-[0.3em] text-[10px] text-gray-500">Total supply</p>
+                                <p className="text-2xl font-semibold text-white mt-1">{formatNumber(overview.totalSupply)}</p>
+                                <p className="text-xs">Max {formatNumber(tokenMetrics?.maxSupply)}</p>
+                            </div>
+                            <div className="rounded-2xl border border-white/10 bg-black/30 p-4 text-sm text-gray-400">
+                                <p className="uppercase tracking-[0.3em] text-[10px] text-gray-500">Staked</p>
+                                <p className="text-2xl font-semibold text-white mt-1">{formatNumber(overview.stakedTokens)}</p>
+                                <p className="text-xs">{formatNumber((overview.stakedTokens / (overview.totalSupply || 1)) * 100)}% locked</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Navigation */}
-                <div className="flex gap-4 mb-6   pb-2">
+                <div className="flex flex-wrap gap-3 border border-white/10 rounded-full px-2 py-2 bg-black/30 backdrop-blur">
                     {tabs.map((tab) => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
-                            className={`px-4 py-2 rounded-full transition-all ${activeTab === tab
-                                ? 'bg-white text-blue-600'
-                                : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${activeTab === tab
+                                ? 'bg-white text-blue-600 shadow-lg shadow-blue-500/30'
+                                : 'text-gray-400 hover:text-white hover:bg-white/5'
                                 }`}
                         >
                             {tab.charAt(0).toUpperCase() + tab.slice(1)}
