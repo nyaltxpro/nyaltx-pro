@@ -60,6 +60,8 @@ contract NYALTXStaking is ERC20, ERC20Permit, ERC20Votes, AccessControl, Reentra
         _grantRole(MANAGER_ROLE, admin);
     }
 
+    
+
     function stake(uint256 amount, uint64 lockDuration, address delegatee)
         external
         whenNotPaused
