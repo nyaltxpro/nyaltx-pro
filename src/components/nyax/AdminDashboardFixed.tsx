@@ -374,49 +374,100 @@ export default function AdminDashboardFixed() {
 
 
     return (
-        <div className="min-h-screen  p-6">
-            <div className="max-w-7xl mx-auto space-y-8">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-4xl font-bold text-white mb-2">NYAX Folder Registry</h1>
-                        <p className="text-gray-400">Manage allocation groups, vesting templates, and permissions</p>
+        <div className="min-h-screen bg-linear-to-br from-[#05060d] via-[#0b1120] to-[#111] text-white">
+            <div className="max-w-7xl mx-auto space-y-10 px-4 py-10">
+                <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-8 lg:p-10 shadow-[0_25px_80px_rgba(8,19,44,0.45)]">
+                    <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                        <div className="space-y-4">
+                            <div className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.4em] text-indigo-200/70">
+                                <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" /> NYAX Admin
+                            </div>
+                            <div>
+                                <h1 className="text-4xl font-semibold">Governance Command Center</h1>
+                                <p className="text-gray-300 mt-2 max-w-2xl">
+                                    Operate the NYAX folder registry, vesting templates, and proposal tooling with a single, secure console.
+                                    Inspired by the nyaltx.pro admin interface, this surface keeps mission critical actions within reach.
+                                </p>
+                            </div>
+                            <div className="flex flex-wrap items-center gap-3 text-xs">
+                                <span className={`flex items-center gap-2 rounded-full px-4 py-1.5 border ${isConnected ? 'border-emerald-400/40 text-emerald-200' : 'border-red-400/40 text-red-200'}`}>
+                                    <span className={`h-2 w-2 rounded-full ${isConnected ? 'bg-emerald-400' : 'bg-red-400'}`} />
+                                    {isConnected ? 'Admin wallet connected' : 'Connect wallet to enable controls'}
+                                </span>
+                                <span className="flex items-center gap-2 rounded-full border border-white/15 px-4 py-1.5 text-slate-200">
+                                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                    Registry sync {loading ? 'in progress' : 'up to date'}
+                                </span>
+                            </div>
+                        </div>
+                        <div className="flex flex-col gap-3 w-full max-w-sm">
+                            {!isConnected && <ConnectWalletButton className="bg-purple-600 hover:bg-purple-700" />}
+                            <div className="flex gap-3 flex-wrap">
+                                <button
+                                    onClick={() => setShowAddModal(true)}
+                                    disabled={!isConnected}
+                                    className="flex-1 min-w-[140px] px-5 py-3 rounded-2xl bg-linear-to-r from-indigo-500 to-purple-500 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    <div className="flex items-center justify-center gap-2">
+                                        <Plus className="w-4 h-4" /> Create Folder
+                                    </div>
+                                </button>
+                                <button
+                                    className="flex-1 min-w-[140px] px-5 py-3 rounded-2xl border border-white/20 text-white/80 hover:bg-white/10 transition"
+                                    onClick={() => setShowProposalModal(true)}
+                                    disabled={!isConnected || loading}
+                                >
+                                    <div className="flex items-center justify-center gap-2">
+                                        <Gavel className="w-4 h-4" /> Proposal
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                        {!isConnected && <ConnectWalletButton className="bg-purple-600 hover:bg-purple-700" />}
-                        <button
-                            onClick={() => setShowAddModal(true)}
-                            disabled={!isConnected}
-                            className="px-6 py-3 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-600/40 disabled:cursor-not-allowed text-white rounded-lg font-semibold flex items-center gap-2 transition-all"
-                        >
-                            <Plus className="w-5 h-5" />
-                            New Folder
-                        </button>
-                        <button className={TOOL_BUTTON_CLASSES} onClick={() => setShowProposalModal(true)} disabled={!isConnected || loading}>
-                            <Gavel className="w-5 h-5" />
-                            Create Proposal
-                        </button>
+
+                    <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                        {[
+                            { label: 'Allocated NYAX', value: `${formatNumber(summary.totalAllocated)} NYAX`, accent: 'bg-indigo-500/20 text-indigo-200' },
+                            { label: 'Active members', value: formatNumber(summary.totalMembers), accent: 'bg-emerald-500/15 text-emerald-200' },
+                            { label: 'Folders live', value: summary.folderCount, accent: 'bg-blue-500/15 text-blue-200' },
+                            { label: 'Action queue', value: `${filteredFolders.length} folders`, accent: 'bg-purple-500/15 text-purple-200' },
+                        ].map(card => (
+                            <div key={card.label} className="rounded-2xl border border-white/10 bg-black/30 p-5">
+                                <p className="text-xs uppercase tracking-[0.25em] text-gray-400">{card.label}</p>
+                                <p className="text-2xl font-semibold mt-2">{card.value}</p>
+                                <span className={`inline-flex mt-3 px-3 py-1 rounded-full text-xs ${card.accent}`}>{card.label === 'Action queue' ? 'Live folders in view' : 'Real-time'}</span>
+                            </div>
+                        ))}
                     </div>
                 </div>
 
                 {!isConnected && (
-                    <div className="bg-yellow-500/10 border border-yellow-500/40 text-yellow-200 text-sm rounded-lg px-4 py-3">
-                        Connect a wallet to create or modify registry data.
+                    <div className="rounded-2xl border border-yellow-500/30 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-200">
+                        Wallet connection is required to create, edit, or revoke allocations.
                     </div>
                 )}
 
-                <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
-                    <h2 className="text-white font-semibold mb-4 flex items-center gap-2">
-                        <Shield className="w-5 h-5 text-purple-400" />
-                        Registry Tools
-                    </h2>
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-6">
+                    <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                        <div className="space-y-2">
+                            <h2 className="text-2xl font-semibold flex items-center gap-3">
+                                <Shield className="w-5 h-5 text-purple-300" /> Registry Toolkit
+                            </h2>
+                            <p className="text-gray-400 text-sm">Quick actions for folder lifecycle management, mirroring the nyaltx admin workflow.</p>
+                        </div>
+                        <div className="flex gap-2 text-xs text-gray-400">
+                            <span className="px-3 py-1 rounded-full border border-white/10">Selected folder {selectedFolder ? `#${selectedFolder.id}` : '—'}</span>
+                            <span className="px-3 py-1 rounded-full border border-white/10">Tools react to wallet state</span>
+                        </div>
+                    </div>
+                    <div className="mt-6 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                         <button className={TOOL_BUTTON_CLASSES} onClick={() => setShowAddModal(true)} disabled={!isConnected || loading}>
                             <Plus className="w-5 h-5" />
                             Create Folder
                         </button>
                         <button className={TOOL_BUTTON_CLASSES} onClick={refresh} disabled={loading}>
                             <Loader2 className="w-5 h-5" />
-                            Refresh
+                            Refresh Data
                         </button>
                         <button className={TOOL_BUTTON_CLASSES} onClick={openAllocationModal} disabled={!selectedFolder || !isConnected || loading}>
                             <UserPlus2 className="w-5 h-5" />
@@ -428,7 +479,7 @@ export default function AdminDashboardFixed() {
                         </button>
                         <button className={TOOL_BUTTON_CLASSES} onClick={openVestingModal} disabled={!selectedFolder || !isConnected || loading}>
                             <CalendarClock className="w-5 h-5" />
-                            Vesting Schedule
+                            Vesting Template
                         </button>
                         <button
                             className={TOOL_BUTTON_CLASSES}
@@ -441,32 +492,34 @@ export default function AdminDashboardFixed() {
                     </div>
                 </div>
 
-                <div className="flex gap-4">
+                <div className="flex flex-col gap-4 lg:flex-row">
                     <div className="flex-1 relative">
-                        <Search className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
+                        <Search className="w-5 h-5 text-gray-500 absolute left-4 top-1/2 -translate-y-1/2" />
                         <input
                             type="text"
                             value={searchValue}
                             onChange={e => setSearchValue(e.target.value)}
-                            placeholder="Search folders or holders..."
-                            className="w-full pl-12 pr-4 py-3 bg-white/10 backdrop-blur-lg rounded-lg border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500"
+                            placeholder="Search folders, holders, or metadata"
+                            className="w-full pl-12 pr-4 py-3 rounded-2xl border border-white/10 bg-black/30 text-white placeholder-gray-500 focus:outline-none focus:border-purple-400"
                         />
                     </div>
-                    <button className="px-6 py-3 bg-white/10 backdrop-blur-lg rounded-lg border border-white/20 text-white hover:bg-white/20 transition-all flex items-center gap-2">
-                        <Filter className="w-5 h-5" />
-                        Filter
+                    <button className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/15 px-6 py-3 text-sm text-gray-200 hover:bg-white/10 transition">
+                        <Filter className="w-5 h-5" /> Advanced filters
                     </button>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div className="lg:col-span-2 space-y-4">
-                        <div className="flex items-center justify-between mb-2">
-                            <h2 className="text-2xl font-bold text-white">Token Folders</h2>
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-xs uppercase tracking-[0.4em] text-gray-400">Registry</p>
+                                <h2 className="text-2xl font-semibold">Token folders</h2>
+                            </div>
                             {error && <span className="text-red-400 text-sm">{error}</span>}
                         </div>
                         {filteredFolders.length === 0 ? (
-                            <div className="text-gray-400 bg-white/5 border border-white/10 rounded-xl p-6 text-center">
-                                No folders matched your search.
+                            <div className="rounded-2xl border border-dashed border-white/15 p-10 text-center text-gray-400">
+                                No folders matched your search criteria.
                             </div>
                         ) : (
                             filteredFolders.map(folder => renderFolderCard(folder))
@@ -474,31 +527,25 @@ export default function AdminDashboardFixed() {
                     </div>
 
                     <div className="space-y-6">
-                        <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
-                            <h3 className="text-xl font-bold text-white mb-4">Quick Stats</h3>
-                            <div className="space-y-3">
-                                <div className="flex justify-between items-center">
-                                    <span className="text-gray-400 text-sm">Total Allocated</span>
-                                    <span className="text-white font-bold">{formatNumber(summary.totalAllocated)} NYAX</span>
-                                </div>
-                                <div className="flex justify-between items-center">
-                                    <span className="text-gray-400 text-sm">Total Members</span>
-                                    <span className="text-yellow-400 font-bold">{formatNumber(summary.totalMembers)}</span>
-                                </div>
-                                <div className="flex justify-between items-center">
-                                    <span className="text-gray-400 text-sm">Folders</span>
-                                    <span className="text-green-400 font-bold">{summary.folderCount}</span>
-                                </div>
+                        <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+                            <h3 className="text-lg font-semibold mb-4">Platform telemetry</h3>
+                            <div className="space-y-3 text-sm text-gray-300">
+                                <div className="flex justify-between"><span>Total allocated</span><span className="text-white font-semibold">{formatNumber(summary.totalAllocated)} NYAX</span></div>
+                                <div className="flex justify-between"><span>Total members</span><span className="text-yellow-300 font-semibold">{formatNumber(summary.totalMembers)}</span></div>
+                                <div className="flex justify-between"><span>Folders live</span><span className="text-green-300 font-semibold">{summary.folderCount}</span></div>
                             </div>
                         </div>
 
                         {selectedFolderId && membersByFolder[selectedFolderId] && (
-                            <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
-                                <h3 className="text-xl font-bold text-white mb-4">Folder Members</h3>
+                            <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+                                <div className="flex items-center justify-between mb-3">
+                                    <h3 className="text-lg font-semibold">Folder members</h3>
+                                    <span className="text-xs text-gray-400">#{selectedFolderId}</span>
+                                </div>
                                 <div className="space-y-2 max-h-64 overflow-auto pr-1">
                                     {membersByFolder[selectedFolderId]!.map(member => (
-                                        <div key={member.account} className="flex items-center justify-between text-sm text-gray-300 border-b border-white/10 pb-1">
-                                            <span className="font-mono">{member.account.slice(0, 6)}...{member.account.slice(-4)}</span>
+                                        <div key={member.account} className="flex items-center justify-between text-sm text-gray-200 border-b border-white/10 pb-1">
+                                            <span className="font-mono text-xs">{member.account.slice(0, 6)}...{member.account.slice(-4)}</span>
                                             <div className="flex items-center gap-2">
                                                 <span className="text-purple-300">{formatNumber(member.unlockedAmount)} NYAX</span>
                                                 <button
