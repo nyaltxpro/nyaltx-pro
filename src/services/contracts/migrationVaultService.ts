@@ -2,10 +2,13 @@ import { ethers } from 'ethers';
 import { CONTRACT_ABIS, CONTRACT_ADDRESSES } from './config';
 import { ContractError, LegacyDepositEvent, LegacyDepositResult, MigrationVaultStats } from './types';
 
+const ERC20_ABI = ['function allowance(address owner, address spender) view returns (uint256)'];
+
 export class MigrationVaultService {
   private provider: ethers.Provider;
   private signer?: ethers.Signer;
   private contract: ethers.Contract;
+  private legacyToken?: ethers.Contract;
 
   constructor(provider: ethers.Provider, signer?: ethers.Signer) {
     if (!CONTRACT_ADDRESSES.legacyMigrationVault) {
@@ -19,6 +22,14 @@ export class MigrationVaultService {
       CONTRACT_ABIS.legacyMigrationVault,
       signer || provider
     );
+
+    if (CONTRACT_ADDRESSES.legacyToken) {
+      this.legacyToken = new ethers.Contract(
+        CONTRACT_ADDRESSES.legacyToken,
+        ERC20_ABI,
+        signer || provider
+      );
+    }
   }
 
   async getStats(): Promise<MigrationVaultStats> {
@@ -41,18 +52,26 @@ export class MigrationVaultService {
     this.ensureSigner('deposit legacy tokens');
 
     const amountWei = ethers.parseEther(amount);
-    const tx = await this.contract.depositLegacy(amountWei, beneficiary ?? ethers.ZeroAddress);
-    const receipt = await tx.wait();
+    const signerAddress = await this.signer!.getAddress();
+    await this.ensureDepositPreconditions(signerAddress, amountWei);
 
-    const legacyDeposit = this.extractLegacyDepositFromReceipt(receipt);
-    const minted = legacyDeposit
-      ? ethers.formatEther(legacyDeposit.governanceMinted)
-      : await this.estimateMintedAmount(amount);
+    try {
+      const tx = await this.contract.depositLegacy(amountWei, beneficiary ?? ethers.ZeroAddress);
+      const receipt = await tx.wait();
 
-    return {
-      txHash: receipt.hash,
-      mintedAmount: minted,
-    };
+      const legacyDeposit = this.extractLegacyDepositFromReceipt(receipt);
+      const minted = legacyDeposit
+        ? ethers.formatEther(legacyDeposit.governanceMinted)
+        : await this.estimateMintedAmount(amount);
+
+      return {
+        txHash: receipt.hash,
+        mintedAmount: minted,
+      };
+    } catch (error) {
+      const message = this.describeDepositError(error);
+      throw new Error(message);
+    }
   }
 
   async getRecentDeposits(limit = 10, lookbackBlocks = 100_000): Promise<LegacyDepositEvent[]> {
@@ -137,6 +156,28 @@ export class MigrationVaultService {
     return ethers.formatEther(minted);
   }
 
+  private async ensureDepositPreconditions(owner: string, amountWei: bigint) {
+    if (amountWei <= BigInt(0)) {
+      throw new Error('Enter an amount greater than zero.');
+    }
+
+    const depositsEnabled = await this.contract.depositsEnabled();
+    if (!depositsEnabled) {
+      throw new Error('Legacy deposits are currently disabled by governance.');
+    }
+
+    if (this.legacyToken) {
+      try {
+        const allowance = await this.legacyToken.allowance(owner, this.contract.target as string);
+        if (allowance < amountWei) {
+          throw new Error('Approve the legacy vault to spend your legacy NYAX before depositing.');
+        }
+      } catch (error) {
+        console.error('Failed to read legacy token allowance', error);
+      }
+    }
+  }
+
   private extractLegacyDepositFromReceipt(receipt: ethers.TransactionReceipt) {
     for (const log of receipt.logs) {
       try {
@@ -157,6 +198,23 @@ export class MigrationVaultService {
     }
 
     return null;
+  }
+
+  private describeDepositError(error: any): string {
+    if (!error) {
+      return 'Deposit failed for an unknown reason. Check your allowance and try again.';
+    }
+
+    if (typeof error.message === 'string' && error.message.includes('missing revert data')) {
+      return 'Transaction simulation failed. Ensure you have approved the vault and that deposits are enabled.';
+    }
+
+    if (error.reason) {
+      return `Vault reverted: ${error.reason}`;
+    }
+
+    const handled = this.handleError(error);
+    return handled.message || 'Deposit failed. Check your allowance and try again.';
   }
 
   private ensureSigner(action: string) {
