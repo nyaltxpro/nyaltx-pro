@@ -2,22 +2,8 @@
 import { useDAOService } from '@/hooks/useDAOService';
 import { useMigrationVault } from '@/hooks/useMigrationVault';
 import { GovernanceStats, ProposalData, StakingStats, TreasuryTransfer } from '@/services/contracts/types';
-import { CheckCircle, Coins, Shield, TrendingUp, Users, XCircle } from 'lucide-react';
+import { Activity, ArrowUpRight, CheckCircle, Clock, Coins, Globe, Layers, Shield, TrendingUp, Users, XCircle } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
-import {
-    Bar,
-    BarChart,
-    CartesianGrid,
-    Cell,
-    Line,
-    LineChart,
-    Pie,
-    PieChart,
-    ResponsiveContainer,
-    Tooltip,
-    XAxis,
-    YAxis,
-} from 'recharts';
 import { useAccount } from 'wagmi';
 
 type TabId = 'overview' | 'proposals' | 'transfers' | 'deposit';
@@ -45,6 +31,15 @@ const formatTimeFromTimestamp = (timestamp: number) => {
     if (diffHours < 24) return `${diffHours}h ago`;
     const diffDays = Math.floor(diffHours / 24);
     return `${diffDays}d ago`;
+};
+
+const formatBlocksToTime = (blocks?: number) => {
+    if (!blocks) return '—';
+    const seconds = blocks * 12; // assuming 12s block time
+    if (seconds < 60) return `${Math.round(seconds)}s`;
+    if (seconds < 3600) return `${Math.round(seconds / 60)}m`;
+    if (seconds < 86400) return `${(seconds / 3600).toFixed(1)}h`;
+    return `${(seconds / 86400).toFixed(1)}d`;
 };
 
 export default function NYALTXGovernance() {
@@ -143,37 +138,46 @@ export default function NYALTXGovernance() {
         return { totalSupply, stakedTokens, circulatingSupply, holders };
     }, [tokenMetrics, stakingStats, governanceStats]);
 
-    const tokenDistribution = useMemo(() => {
-        const total = overview.totalSupply || 1;
-        const staked = overview.stakedTokens;
-        const circulating = overview.circulatingSupply;
-        const treasury = Math.max(total - staked - circulating, 0);
-        const locked = Math.max(total - (staked + circulating + treasury), 0);
+    const participationStats = useMemo(() => {
+        const stakingRate = overview.totalSupply ? (overview.stakedTokens / overview.totalSupply) * 100 : 0;
+        const circulationRate = overview.totalSupply ? (overview.circulatingSupply / overview.totalSupply) * 100 : 0;
+        const quorumVotes = Number(governanceStats?.quorumVotes ?? 0);
+        const thresholdVotes = Number(governanceStats?.proposalThreshold ?? 0);
+
         return [
-            { name: 'Staked', value: (staked / total) * 100, color: '#3b82f6' },
-            { name: 'Circulating', value: (circulating / total) * 100, color: '#8b5cf6' },
-            { name: 'Treasury', value: (treasury / total) * 100, color: '#10b981' },
-            { name: 'Locked', value: (locked / total) * 100, color: '#f59e0b' },
+            {
+                label: 'Staking participation',
+                value: stakingRate,
+                suffix: '% of supply',
+                accent: 'from-blue-500 to-cyan-400',
+                max: 100,
+            },
+            {
+                label: 'Circulating release',
+                value: circulationRate,
+                suffix: '% unlocked',
+                accent: 'from-purple-500 to-pink-500',
+                max: 100,
+            },
+            {
+                label: 'Quorum requirement',
+                value: quorumVotes,
+                suffix: 'votes needed',
+                accent: 'from-emerald-500 to-lime-400',
+                max: Math.max(quorumVotes * 1.5, quorumVotes || 1),
+            },
+            {
+                label: 'Proposal threshold',
+                value: thresholdVotes,
+                suffix: 'votes to submit',
+                accent: 'from-orange-500 to-amber-400',
+                max: Math.max(thresholdVotes * 1.5, thresholdVotes || 1),
+            },
         ];
-    }, [overview]);
+    }, [overview, governanceStats]);
 
-    const votingPowerData = [
-        { range: '0-100', holders: 8240 },
-        { range: '100-1K', holders: 3120 },
-        { range: '1K-10K', holders: 1180 },
-        { range: '10K-100K', holders: 267 },
-        { range: '100K+', holders: 40 },
-    ];
-
-    const volumeData = [
-        { day: 'Mon', volume: 45000 },
-        { day: 'Tue', volume: 52000 },
-        { day: 'Wed', volume: 48000 },
-        { day: 'Thu', volume: 61000 },
-        { day: 'Fri', volume: 58000 },
-        { day: 'Sat', volume: 43000 },
-        { day: 'Sun', volume: 39000 },
-    ];
+    const proposalPreview = useMemo(() => proposals.slice(0, 3), [proposals]);
+    const transferPreview = useMemo(() => transfers.slice(0, 3), [transfers]);
 
     const tabs: TabId[] = ['overview', 'proposals', 'transfers', 'deposit'];
 
@@ -217,7 +221,7 @@ export default function NYALTXGovernance() {
                 </div>
 
                 {/* Navigation */}
-                <div className="flex gap-4 mb-6 border-b border-gray-700 pb-2">
+                <div className="flex gap-4 mb-6   pb-2">
                     {tabs.map((tab) => (
                         <button
                             key={tab}
@@ -234,98 +238,203 @@ export default function NYALTXGovernance() {
 
                 {/* Overview Tab */}
                 {activeTab === 'overview' && (
-                    <div className="space-y-6">
-                        {/* Stats Grid */}
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <div className="bg-gray-800/50 backdrop-blur rounded-xl p-6 border border-gray-700">
-                                <div className="flex items-center justify-between mb-2">
-                                    <span className="text-gray-400">Total Supply</span>
-                                    <Coins className="text-blue-400" size={20} />
+                    <div className="space-y-8">
+                        <div className="rounded-3xl bg-linear-to-br from-indigo-600/30 via-purple-600/20 to-blue-500/20 border border-white/10 p-6 sm:p-8">
+                            <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+                                <div>
+                                    <p className="text-xs uppercase tracking-[0.2em] text-indigo-200/80 mb-2">Governance Overview</p>
+                                    <h2 className="text-3xl sm:text-4xl font-semibold">A living, breathing treasury directed by its holders.</h2>
+                                    <p className="text-gray-200/70 mt-2 max-w-2xl">
+                                        Monitor protocol health, track treasury movements, and jump into active proposals
+                                        without leaving this command surface.
+                                    </p>
                                 </div>
-                                <p className="text-3xl font-bold">{formatNumber(overview.totalSupply)}</p>
-                                <p className="text-sm text-gray-400 mt-1">Max supply: {formatNumber(tokenMetrics?.maxSupply)}</p>
-                            </div>
-
-                            <div className="bg-gray-800/50 backdrop-blur rounded-xl p-6 border border-gray-700">
-                                <div className="flex items-center justify-between mb-2">
-                                    <span className="text-gray-400">Circulating</span>
-                                    <Shield className="text-slate-300" size={20} />
+                                <div className="grid grid-cols-2 gap-4 w-full md:w-auto md:min-w-[260px]">
+                                    <div className="rounded-2xl bg-black/30 border border-white/10 p-4">
+                                        <p className="text-xs text-gray-300">Active proposals</p>
+                                        <p className="text-3xl font-semibold mt-1">{governanceStats?.activeProposals ?? 0}</p>
+                                        <span className="text-xs text-emerald-300 inline-flex items-center gap-1 mt-2">
+                                            <Activity size={14} /> Live voting
+                                        </span>
+                                    </div>
+                                    <div className="rounded-2xl bg-black/30 border border-white/10 p-4">
+                                        <p className="text-xs text-gray-300">Treasury streams</p>
+                                        <p className="text-3xl font-semibold mt-1">{transferPreview.length}</p>
+                                        <span className="text-xs text-blue-300 inline-flex items-center gap-1 mt-2">
+                                            <Globe size={14} /> Last 24h
+                                        </span>
+                                    </div>
                                 </div>
-                                <p className="text-3xl font-bold">{formatNumber(overview.circulatingSupply)}</p>
-                                <p className="text-sm text-gray-400 mt-1">{formatNumber((overview.circulatingSupply / (overview.totalSupply || 1)) * 100)}% released</p>
-                            </div>
-
-                            <div className="bg-gray-800/50 backdrop-blur rounded-xl p-6 border border-gray-700">
-                                <div className="flex items-center justify-between mb-2">
-                                    <span className="text-gray-400">Staked Tokens</span>
-                                    <TrendingUp className="text-green-400" size={20} />
-                                </div>
-                                <p className="text-3xl font-bold">{formatNumber(overview.stakedTokens)}</p>
-                                <p className="text-sm text-green-400 mt-1">
-                                    {formatNumber((overview.stakedTokens / (overview.totalSupply || 1)) * 100)}% of supply
-                                </p>
-                            </div>
-
-                            <div className="bg-gray-800/50 backdrop-blur rounded-xl p-6 border border-gray-700">
-                                <div className="flex items-center justify-between mb-2">
-                                    <span className="text-gray-400">Token Holders</span>
-                                    <Users className="text-purple-400" size={20} />
-                                </div>
-                                <p className="text-3xl font-bold">{formatNumber(overview.holders, 0)}</p>
                             </div>
                         </div>
 
-                        {/* Charts */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="bg-gray-800/50 backdrop-blur rounded-xl p-6 border border-gray-700">
-                                <h3 className="text-xl font-semibold mb-4">Token Distribution</h3>
-                                <ResponsiveContainer width="100%" height={250}>
-                                    <PieChart>
-                                        <Pie
-                                            data={tokenDistribution}
-                                            cx="50%"
-                                            cy="50%"
-                                            labelLine={false}
-                                            label={({ name, value }: any) => `${name}: ${value}%`}
-                                            outerRadius={80}
-                                            fill="#8884d8"
-                                            dataKey="value"
-                                        >
-                                            {tokenDistribution.map((entry, index) => (
-                                                <Cell key={`cell-${index}`} fill={entry.color} />
-                                            ))}
-                                        </Pie>
-                                        <Tooltip />
-                                    </PieChart>
-                                </ResponsiveContainer>
+                        <div className="grid gap-4 md:grid-cols-4">
+                            <div className="rounded-2xl bg-gray-900/50 border border-gray-800/60 p-5">
+                                <div className="flex items-center justify-between text-sm text-gray-400">
+                                    <span>Total supply</span>
+                                    <Coins className="text-blue-300" size={18} />
+                                </div>
+                                <p className="text-3xl font-semibold mt-2">{formatNumber(overview.totalSupply)}</p>
+                                <p className="text-xs text-gray-500 mt-1">Max {formatNumber(tokenMetrics?.maxSupply)}</p>
                             </div>
-
-                            <div className="bg-gray-800/50 backdrop-blur rounded-xl p-6 border border-gray-700">
-                                <h3 className="text-xl font-semibold mb-4">7-Day Transfer Volume</h3>
-                                <ResponsiveContainer width="100%" height={250}>
-                                    <LineChart data={volumeData}>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                                        <XAxis dataKey="day" stroke="#9ca3af" />
-                                        <YAxis stroke="#9ca3af" />
-                                        <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: 'none' }} />
-                                        <Line type="monotone" dataKey="volume" stroke="#8b5cf6" strokeWidth={2} />
-                                    </LineChart>
-                                </ResponsiveContainer>
+                            <div className="rounded-2xl bg-gray-900/50 border border-gray-800/60 p-5">
+                                <div className="flex items-center justify-between text-sm text-gray-400">
+                                    <span>Circulating</span>
+                                    <Shield className="text-purple-300" size={18} />
+                                </div>
+                                <p className="text-3xl font-semibold mt-2">{formatNumber(overview.circulatingSupply)}</p>
+                                <p className="text-xs text-gray-500 mt-1">{formatNumber((overview.circulatingSupply / (overview.totalSupply || 1)) * 100)}% released</p>
+                            </div>
+                            <div className="rounded-2xl bg-gray-900/50 border border-gray-800/60 p-5">
+                                <div className="flex items-center justify-between text-sm text-gray-400">
+                                    <span>Staked value</span>
+                                    <TrendingUp className="text-emerald-300" size={18} />
+                                </div>
+                                <p className="text-3xl font-semibold mt-2">{formatNumber(overview.stakedTokens)}</p>
+                                <p className="text-xs text-emerald-400 mt-1">{formatNumber((overview.stakedTokens / (overview.totalSupply || 1)) * 100)}% of supply</p>
+                            </div>
+                            <div className="rounded-2xl bg-gray-900/50 border border-gray-800/60 p-5">
+                                <div className="flex items-center justify-between text-sm text-gray-400">
+                                    <span>Token holders</span>
+                                    <Users className="text-pink-300" size={18} />
+                                </div>
+                                <p className="text-3xl font-semibold mt-2">{formatNumber(overview.holders, 0)}</p>
+                                <p className="text-xs text-gray-500 mt-1">wallets with voting power</p>
                             </div>
                         </div>
 
-                        {/* Voting Power Distribution */}
-                        <div className="bg-gray-800/50 backdrop-blur rounded-xl p-6 border border-gray-700">
-                            <h3 className="text-xl font-semibold mb-4">Voting Power Distribution</h3>
-                            <ResponsiveContainer width="100%" height={300}>
-                                <BarChart data={votingPowerData}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                                    <XAxis dataKey="range" stroke="#9ca3af" />
-                                    <YAxis stroke="#9ca3af" />
-                                    <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: 'none' }} />
-                                    <Bar dataKey="holders" fill="#3b82f6" />
-                                </BarChart>
-                            </ResponsiveContainer>
+                        <div className="rounded-3xl bg-gray-900/60 border border-gray-800/80 p-6">
+                            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                <div>
+                                    <p className="text-xs uppercase tracking-[0.2em] text-gray-400">Participation snapshot</p>
+                                    <h3 className="text-xl font-semibold">How the community is positioned right now</h3>
+                                </div>
+                                <span className="text-sm text-gray-400 flex items-center gap-2">
+                                    <Layers size={16} /> Updated {formatTimeFromTimestamp(Math.floor(Date.now() / 1000))}
+                                </span>
+                            </div>
+                            <div className="mt-6 grid gap-6 lg:grid-cols-2">
+                                {participationStats.map((stat) => {
+                                    const progress = stat.max ? Math.min((stat.value / stat.max) * 100, 100) : 0;
+                                    return (
+                                        <div key={stat.label} className="space-y-3">
+                                            <div className="flex items-center justify-between text-sm">
+                                                <div>
+                                                    <p className="text-gray-300">{stat.label}</p>
+                                                    <span className="text-xs text-gray-500">{stat.suffix}</span>
+                                                </div>
+                                                <span className="text-lg font-semibold">{formatNumber(stat.value)}</span>
+                                            </div>
+                                            <div className="h-2 rounded-full bg-gray-800 overflow-hidden">
+                                                <div
+                                                    className={`h-full rounded-full bg-linear ${stat.accent}`}
+                                                    style={{ width: `${progress}%` }}
+                                                />
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        <div className="grid gap-6 lg:grid-cols-2">
+                            <div className="rounded-3xl bg-gray-900/60 border border-gray-800/80 p-6">
+                                <div className="flex items-center justify-between mb-4">
+                                    <div>
+                                        <p className="text-xs uppercase tracking-[0.2em] text-gray-400">Governance pulse</p>
+                                        <h3 className="text-xl font-semibold">Latest proposals</h3>
+                                    </div>
+                                    <button
+                                        onClick={() => setActiveTab('proposals')}
+                                        className="text-sm text-indigo-300 hover:text-white inline-flex items-center gap-2"
+                                    >
+                                        View all <ArrowUpRight size={16} />
+                                    </button>
+                                </div>
+                                <div className="space-y-4">
+                                    {proposalPreview.length === 0 ? (
+                                        <p className="text-sm text-gray-500">No proposals found yet.</p>
+                                    ) : (
+                                        proposalPreview.map((proposal) => (
+                                            <div key={proposal.id} className="p-4 rounded-2xl bg-black/30 border border-white/5">
+                                                <div className="flex items-center justify-between mb-3">
+                                                    <span className={`text-xs font-semibold px-3 py-1 rounded-full bg-white/5`}>{proposal.status}</span>
+                                                    <span className="text-xs text-gray-400">Ends block {proposal.endBlock}</span>
+                                                </div>
+                                                <h4 className="font-semibold text-lg mb-2">{proposal.title}</h4>
+                                                <div className="flex items-center justify-between text-sm text-gray-400">
+                                                    <span className="text-emerald-300">For {formatNumber(parseFloat(proposal.forVotes) || 0)}</span>
+                                                    <span className="text-rose-300">Against {formatNumber(parseFloat(proposal.againstVotes) || 0)}</span>
+                                                </div>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="rounded-3xl bg-gray-900/60 border border-gray-800/80 p-6">
+                                <div className="flex items-center justify-between mb-4">
+                                    <div>
+                                        <p className="text-xs uppercase tracking-[0.2em] text-gray-400">Treasury moments</p>
+                                        <h3 className="text-xl font-semibold">Recent transfers</h3>
+                                    </div>
+                                    <button
+                                        onClick={() => setActiveTab('transfers')}
+                                        className="text-sm text-indigo-300 hover:text-white inline-flex items-center gap-2"
+                                    >
+                                        View ledger <ArrowUpRight size={16} />
+                                    </button>
+                                </div>
+                                <div className="space-y-4">
+                                    {transferPreview.length === 0 ? (
+                                        <p className="text-sm text-gray-500">No treasury activity recorded.</p>
+                                    ) : (
+                                        transferPreview.map((transfer) => (
+                                            <div key={`${transfer.txHash}-${transfer.blockNumber}`} className="p-4 rounded-2xl bg-black/30 border border-white/5">
+                                                <div className="flex items-center justify-between text-sm text-gray-400">
+                                                    <span>{transfer.category || 'General'}</span>
+                                                    <span className="font-mono text-xs">{transfer.to.slice(0, 6)}...{transfer.to.slice(-4)}</span>
+                                                </div>
+                                                <p className="text-2xl font-semibold mt-2">{formatNumber(transfer.amount)} NYAX</p>
+                                                <p className="text-xs text-gray-500 mt-1">{formatTimeFromTimestamp(transfer.timestamp)}</p>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="rounded-3xl bg-gray-900/60 border border-gray-800/80 p-6">
+                            <div className="flex flex-col gap-2 mb-6">
+                                <p className="text-xs uppercase tracking-[0.2em] text-gray-400">Protocol constants</p>
+                                <h3 className="text-xl font-semibold">Key governance parameters</h3>
+                            </div>
+                            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                                <div className="p-4 rounded-2xl bg-black/30 border border-white/5">
+                                    <Clock size={18} className="text-indigo-300 mb-3" />
+                                    <p className="text-sm text-gray-400">Voting delay</p>
+                                    <p className="text-xl font-semibold">{governanceStats?.votingDelay ?? 0} blocks</p>
+                                    <p className="text-xs text-gray-500">~{formatBlocksToTime(governanceStats?.votingDelay)}</p>
+                                </div>
+                                <div className="p-4 rounded-2xl bg-black/30 border border-white/5">
+                                    <Activity size={18} className="text-emerald-300 mb-3" />
+                                    <p className="text-sm text-gray-400">Voting period</p>
+                                    <p className="text-xl font-semibold">{governanceStats?.votingPeriod ?? 0} blocks</p>
+                                    <p className="text-xs text-gray-500">~{formatBlocksToTime(governanceStats?.votingPeriod)}</p>
+                                </div>
+                                <div className="p-4 rounded-2xl bg-black/30 border border-white/5">
+                                    <Coins size={18} className="text-amber-300 mb-3" />
+                                    <p className="text-sm text-gray-400">Proposal threshold</p>
+                                    <p className="text-xl font-semibold">{formatNumber(governanceStats?.proposalThreshold ?? '0')}</p>
+                                    <p className="text-xs text-gray-500">votes required to submit</p>
+                                </div>
+                                <div className="p-4 rounded-2xl bg-black/30 border border-white/5">
+                                    <Shield size={18} className="text-blue-300 mb-3" />
+                                    <p className="text-sm text-gray-400">Quorum</p>
+                                    <p className="text-xl font-semibold">{formatNumber(governanceStats?.quorumVotes ?? '0')}</p>
+                                    <p className="text-xs text-gray-500">votes to ratify</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 )}
@@ -458,76 +567,131 @@ export default function NYALTXGovernance() {
 
                 {/* Legacy Deposit Tab */}
                 {activeTab === 'deposit' && (
-                    <div className="max-w-2xl mx-auto">
-                        <div className="bg-gray-800/50 backdrop-blur rounded-xl p-8 border border-gray-700">
-                            <h2 className="text-2xl font-bold mb-2">Legacy Token Deposit</h2>
-                            <p className="text-gray-400 mb-6">
-                                Deposit your legacy NYALTX tokens into the new governance system. No restrictions apply.
-                            </p>
-
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-semibold mb-2">Beneficiary Address</label>
-                                    <input
-                                        type="text"
-                                        placeholder="0x..."
-                                        value={legacyDeposit.beneficiary}
-                                        onChange={(e) => setLegacyDeposit(prev => ({ ...prev, beneficiary: e.target.value }))}
-                                        className="w-full px-4 py-3 bg-gray-900 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
-                                    />
+                    <div className="max-w-5xl mx-auto">
+                        <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+                            <div className="rounded-3xl border border-white/10 bg-gray-900/60 p-8 shadow-2xl shadow-indigo-900/20">
+                                <div className="flex flex-col gap-3 mb-8">
+                                    <div className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-indigo-200/70">
+                                        <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" /> Legacy vault
+                                    </div>
+                                    <h2 className="text-3xl font-semibold">Deposit legacy NYAX into the on-chain vault</h2>
+                                    <p className="text-gray-400">
+                                        Seamlessly migrate historical balances into the upgraded governance system. Deposits
+                                        settle instantly and unlock voting weight using the conversion rate shown.
+                                    </p>
+                                    <div className="flex flex-wrap gap-3 text-xs">
+                                        <span className={`px-3 py-1 rounded-full border ${isConnected ? 'border-emerald-400/40 text-emerald-300' : 'border-red-400/40 text-red-300'}`}>
+                                            {isConnected ? 'Wallet connected' : 'Connect wallet to deposit'}
+                                        </span>
+                                        <span className="px-3 py-1 rounded-full border border-indigo-300/40 text-indigo-200">
+                                            Conversion ratio: {vaultStats?.conversionRatio ?? '1.0'}x
+                                        </span>
+                                    </div>
                                 </div>
 
-                                <div>
-                                    <label className="block text-sm font-semibold mb-2">Amount</label>
-                                    <input
-                                        type="number"
-                                        placeholder="Enter amount"
-                                        value={legacyDeposit.amount}
-                                        onChange={(e) => setLegacyDeposit(prev => ({ ...prev, amount: e.target.value }))}
-                                        className="w-full px-4 py-3 bg-gray-900 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
-                                    />
-                                </div>
-
-                                <button
-                                    className="w-full px-6 py-3 bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-lg font-semibold transition-all transform hover:scale-105 disabled:opacity-50"
-                                    onClick={handleLegacyDeposit}
-                                    disabled={!isConnected || vaultPending}
-                                >
-                                    {vaultPending ? 'Processing...' : 'Deposit Legacy Tokens'}
-                                </button>
-
-                                {legacyDeposit.status === 'success' && (
-                                    <div className="flex flex-col gap-2 p-4 bg-green-500/20 border border-green-500 rounded-lg">
-                                        <div className="flex items-center gap-2">
-                                            <CheckCircle className="text-green-400" size={20} />
-                                            <span className="text-green-400 font-semibold">Deposit successful!</span>
+                                <div className="space-y-6">
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-semibold text-white/80">Beneficiary address</label>
+                                        <div className="rounded-2xl border border-white/10 bg-black/40 focus-within:border-indigo-400/70">
+                                            <input
+                                                type="text"
+                                                placeholder="0x0000..."
+                                                value={legacyDeposit.beneficiary}
+                                                onChange={(e) => setLegacyDeposit(prev => ({ ...prev, beneficiary: e.target.value }))}
+                                                className="w-full bg-transparent px-4 py-3 text-sm text-white placeholder:text-gray-500 focus:outline-none"
+                                            />
                                         </div>
-                                        {legacyDeposit.txHash && (
-                                            <a
-                                                href={`https://sepolia.etherscan.io/tx/${legacyDeposit.txHash}`}
-                                                target="_blank"
-                                                rel="noreferrer"
-                                                className="text-xs text-green-300 underline"
-                                            >
-                                                View transaction
-                                            </a>
-                                        )}
+                                        <p className="text-xs text-gray-500">Defaults to your connected wallet if left blank.</p>
                                     </div>
-                                )}
 
-                                {legacyDeposit.status === 'error' && (
-                                    <div className="flex items-center gap-2 p-4 bg-red-500/20 border border-red-500 rounded-lg">
-                                        <XCircle className="text-red-400" size={20} />
-                                        <span className="text-red-400 font-semibold">{vaultError || 'Please fill in all fields'}</span>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-semibold text-white/80">Deposit amount</label>
+                                        <div className="rounded-2xl border border-white/10 bg-black/40 focus-within:border-indigo-400/70">
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                placeholder="Enter NYAX to deposit"
+                                                value={legacyDeposit.amount}
+                                                onChange={(e) => setLegacyDeposit(prev => ({ ...prev, amount: e.target.value }))}
+                                                className="w-full bg-transparent px-4 py-3 text-sm text-white placeholder:text-gray-500 focus:outline-none"
+                                            />
+                                        </div>
+                                        <div className="flex items-center justify-between text-xs text-gray-500">
+                                            <span>Legacy vault allowance is unlimited.</span>
+                                            <button
+                                                type="button"
+                                                className="text-indigo-300 hover:text-white"
+                                                onClick={() => setLegacyDeposit(prev => ({ ...prev, amount: '0' }))}
+                                            >
+                                                Reset amount
+                                            </button>
+                                        </div>
                                     </div>
-                                )}
+
+                                    <button
+                                        className="w-full rounded-2xl bg-linear-to-r from-blue-500 via-indigo-500 to-purple-500 px-6 py-4 text-sm font-semibold uppercase tracking-wide transition-all duration-150 hover:scale-[1.01] focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300 disabled:opacity-50"
+                                        onClick={handleLegacyDeposit}
+                                        disabled={!isConnected || vaultPending}
+                                    >
+                                        {vaultPending ? 'Processing deposit…' : 'Confirm deposit'}
+                                    </button>
+
+                                    {legacyDeposit.status === 'success' && (
+                                        <div className="rounded-2xl border border-emerald-400/40 bg-emerald-400/10 p-4 text-sm text-emerald-200">
+                                            <div className="flex items-center gap-2 font-semibold text-emerald-300">
+                                                <CheckCircle size={18} /> Deposit successful
+                                            </div>
+                                            {legacyDeposit.txHash && (
+                                                <a
+                                                    href={`https://sepolia.etherscan.io/tx/${legacyDeposit.txHash}`}
+                                                    target="_blank"
+                                                    rel="noreferrer"
+                                                    className="mt-2 inline-flex items-center text-xs text-emerald-200/80 underline"
+                                                >
+                                                    View transaction
+                                                </a>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {legacyDeposit.status === 'error' && (
+                                        <div className="rounded-2xl border border-red-400/40 bg-red-400/10 p-4 text-sm text-red-200">
+                                            <div className="flex items-center gap-2 font-semibold text-red-300">
+                                                <XCircle size={18} /> {vaultError || 'Please fill in all required fields'}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
 
-                            <div className="mt-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-                                <p className="text-sm text-blue-300">
-                                    <strong>Note:</strong> Legacy deposits are processed immediately with no restrictions.
-                                    Once deposited, your tokens will be eligible for governance participation at a {vaultStats?.conversionRatio ?? '1'}x ratio.
-                                </p>
+                            <div className="rounded-3xl border border-white/10 bg-linear-to-br from-indigo-900/40 via-slate-900/60 to-black/80 p-8 text-sm text-gray-300">
+                                <div className="mb-6">
+                                    <p className="text-xs uppercase tracking-[0.25em] text-indigo-200/80">How it works</p>
+                                    <h3 className="text-2xl font-semibold text-white mt-2">Migration safety checklist</h3>
+                                    <p className="text-gray-400 mt-2">Protect governance continuity while moving legacy balances on-chain.</p>
+                                </div>
+                                <div className="space-y-6">
+                                    <div className="rounded-2xl border border-white/5 bg-white/5 p-4">
+                                        <p className="text-xs text-gray-400 mb-1">Step 1</p>
+                                        <h4 className="font-semibold text-white mb-1">Connect the original wallet</h4>
+                                        <p className="text-gray-400">Only the owner of legacy tokens can authorize the deposit.</p>
+                                    </div>
+                                    <div className="rounded-2xl border border-white/5 bg-white/5 p-4">
+                                        <p className="text-xs text-gray-400 mb-1">Step 2</p>
+                                        <h4 className="font-semibold text-white mb-1">Set beneficiary + amount</h4>
+                                        <p className="text-gray-400">Send to yourself or delegate governance power to another address.</p>
+                                    </div>
+                                    <div className="rounded-2xl border border-white/5 bg-white/5 p-4">
+                                        <p className="text-xs text-gray-400 mb-1">Step 3</p>
+                                        <h4 className="font-semibold text-white mb-1">Confirm onchain & monitor TX</h4>
+                                        <p className="text-gray-400">Deposits finalize immediately. Voting weight updates after confirmation.</p>
+                                    </div>
+                                    <div className="rounded-2xl border border-indigo-400/20 bg-indigo-400/10 p-4">
+                                        <p className="text-xs text-indigo-200 mb-1">Vault status</p>
+                                        <h4 className="text-lg font-semibold text-white">Ready for deposits</h4>
+                                        <p className="text-indigo-100/80">Last sync {formatTimeFromTimestamp(Math.floor(Date.now() / 1000))}</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
