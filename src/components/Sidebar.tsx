@@ -102,11 +102,7 @@ export default function Sidebar({ isMobileMenuOpen, toggleMobileMenu }: SidebarP
     //   text: 'NYAX Sale',
     //   href: '/dashboard/nyax-sale',
     // },
-    {
-      icon: <TargetIcon />,
-      text: 'Governance',
-      href: '/dashboard/governance',
-    },
+
     // {
     //   icon: <GearIcon />,
     //   text: 'Call Data Helper',

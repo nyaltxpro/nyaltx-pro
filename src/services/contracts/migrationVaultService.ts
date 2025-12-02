@@ -57,7 +57,7 @@ export class MigrationVaultService {
       const latestBlock = await this.provider.getBlockNumber();
       const earliestBlock = Math.max(latestBlock - lookbackBlocks, 0);
       const topic = ethers.id('LegacyDeposited(address,uint256,uint256)');
-      const maxRange = 9_500; // stay under RPC 10k range limit
+      const maxRange = 4_000; // stay under RPC 10k range limit with buffer
 
       const collectedLogs: ethers.Log[] = [];
       let toBlock = latestBlock;
@@ -65,7 +65,7 @@ export class MigrationVaultService {
       while (toBlock >= earliestBlock && collectedLogs.length < limit) {
         const rangeStart = Math.max(toBlock - maxRange, earliestBlock);
 
-        const logs = await this.provider.getLogs({
+        const logs = await this.fetchLogsWithRetry({
           address: CONTRACT_ADDRESSES.legacyMigrationVault,
           topics: [topic],
           fromBlock: rangeStart,
@@ -107,6 +107,24 @@ export class MigrationVaultService {
       console.error('Error fetching legacy deposits:', error);
       return [];
     }
+  }
+
+  private async fetchLogsWithRetry(filter: ethers.Filter, attempt = 0): Promise<ethers.Log[]> {
+    try {
+      return await this.provider.getLogs(filter);
+    } catch (error: any) {
+      const isRateLimited = error?.code === -32005 || error?.message?.toLowerCase().includes('too many requests');
+      if (isRateLimited && attempt < 3) {
+        const delayMs = 500 * (attempt + 1);
+        await this.sleep(delayMs);
+        return this.fetchLogsWithRetry(filter, attempt + 1);
+      }
+      throw error;
+    }
+  }
+
+  private async sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   private async estimateMintedAmount(amount: string): Promise<string> {
