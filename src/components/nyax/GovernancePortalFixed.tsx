@@ -210,7 +210,7 @@ export default function NYALTXGovernance() {
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="mb-8">
-                    <h1 className="text-4xl font-bold mb-2 bg-linear-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                    <h1 className="text-4xl font-bold mb-2  text-white">
                         NYALTX Governance
                     </h1>
                     <p className="text-gray-400">Decentralized governance for token holders</p>
@@ -222,8 +222,8 @@ export default function NYALTXGovernance() {
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
-                            className={`px-4 py-2 rounded-t-lg transition-all ${activeTab === tab
-                                ? 'bg-purple-600 text-white'
+                            className={`px-4 py-2 rounded-full transition-all ${activeTab === tab
+                                ? 'bg-white text-blue-600'
                                 : 'text-gray-400 hover:text-white hover:bg-gray-800'
                                 }`}
                         >
