@@ -4,6 +4,7 @@ import { useMigrationVault } from '@/hooks/useMigrationVault';
 import { GovernanceStats, ProposalData, StakingStats, TreasuryTransfer } from '@/services/contracts/types';
 import { Activity, ArrowUpRight, CheckCircle, Clock, Coins, Globe, Layers, Shield, TrendingUp, Users, XCircle } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
+import { Area, AreaChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { useAccount } from 'wagmi';
 
 type TabId = 'overview' | 'proposals' | 'transfers' | 'deposit';
@@ -179,6 +180,26 @@ export default function NYALTXGovernance() {
     const proposalPreview = useMemo(() => proposals.slice(0, 3), [proposals]);
     const transferPreview = useMemo(() => transfers.slice(0, 3), [transfers]);
 
+    const tokenDistribution = useMemo(() => {
+        const total = overview.totalSupply || 1;
+        const staked = overview.stakedTokens;
+        const circulating = overview.circulatingSupply;
+        const treasury = Math.max(total - staked - circulating, 0);
+        return [
+            { label: 'Circulating', value: circulating, color: '#a855f7' },
+            { label: 'Staked', value: staked, color: '#22d3ee' },
+            { label: 'Treasury', value: treasury, color: '#34d399' },
+        ];
+    }, [overview]);
+
+    const activitySparkline = useMemo(() => {
+        return proposals.slice(0, 7).map((proposal, index) => ({
+            label: `#${proposal.id}`,
+            votes: Number(proposal.forVotes) + Number(proposal.againstVotes),
+            order: proposals.length - index,
+        })).reverse();
+    }, [proposals]);
+
     const tabs: TabId[] = ['overview', 'proposals', 'transfers', 'deposit'];
 
     useEffect(() => {
@@ -334,6 +355,108 @@ export default function NYALTXGovernance() {
                                         </div>
                                     );
                                 })}
+                            </div>
+                        </div>
+
+                        <div className="grid gap-6 lg:grid-cols-2">
+                            <div className="rounded-3xl bg-gray-900/60 border border-gray-800/80 p-6">
+                                <div className="flex items-center justify-between mb-4">
+                                    <div>
+                                        <p className="text-xs uppercase tracking-[0.2em] text-gray-400">Supply allocation</p>
+                                        <h3 className="text-xl font-semibold">Token distribution</h3>
+                                    </div>
+                                    <span className="text-xs text-gray-500">Real-time</span>
+                                </div>
+                                <div className="h-72">
+                                    <ResponsiveContainer>
+                                        <PieChart>
+                                            <Pie
+                                                data={tokenDistribution}
+                                                dataKey="value"
+                                                nameKey="label"
+                                                innerRadius={60}
+                                                outerRadius={100}
+                                                paddingAngle={6}
+                                                stroke="none"
+                                            >
+                                                {tokenDistribution.map((entry) => (
+                                                    <Cell key={entry.label} fill={entry.color} />
+                                                ))}
+                                            </Pie>
+                                            <Tooltip
+                                                contentStyle={{
+                                                    backgroundColor: '#0f172a',
+                                                    border: '1px solid rgba(255,255,255,0.08)',
+                                                    borderRadius: '0.75rem',
+                                                }}
+                                                formatter={(value: number, name: string) => [
+                                                    `${formatNumber(value)} NYAX`,
+                                                    name,
+                                                ]}
+                                            />
+                                        </PieChart>
+                                    </ResponsiveContainer>
+                                </div>
+                                <div className="mt-4 grid grid-cols-3 gap-3 text-center text-sm text-gray-400">
+                                    {tokenDistribution.map((segment) => (
+                                        <div key={segment.label} className="rounded-xl border border-white/5 bg-white/5 p-3">
+                                            <p className="text-xs uppercase tracking-wide text-gray-500">{segment.label}</p>
+                                            <p className="text-lg font-semibold text-white">{formatNumber(segment.value)}</p>
+                                            <p className="text-xs text-gray-500">{formatNumber((segment.value / (overview.totalSupply || 1)) * 100)}%</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="rounded-3xl bg-gray-900/60 border border-gray-800/80 p-6">
+                                <div className="flex items-center justify-between mb-4">
+                                    <div>
+                                        <p className="text-xs uppercase tracking-[0.2em] text-gray-400">Proposal energy</p>
+                                        <h3 className="text-xl font-semibold">Recent voting volume</h3>
+                                    </div>
+                                    <button
+                                        onClick={() => setActiveTab('proposals')}
+                                        className="text-xs text-indigo-300 hover:text-white"
+                                    >
+                                        View details
+                                    </button>
+                                </div>
+                                <div className="h-72">
+                                    <ResponsiveContainer>
+                                        <AreaChart data={activitySparkline} margin={{ left: -10, right: 0, top: 10, bottom: 0 }}>
+                                            <defs>
+                                                <linearGradient id="proposalVotes" x1="0" y1="0" x2="0" y2="1">
+                                                    <stop offset="5%" stopColor="#6366f1" stopOpacity={0.8} />
+                                                    <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                                                </linearGradient>
+                                            </defs>
+                                            <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" vertical={false} />
+                                            <XAxis dataKey="label" stroke="#6b7280" tickLine={false} axisLine={false} fontSize={12} />
+                                            <YAxis stroke="#6b7280" tickLine={false} axisLine={false} fontSize={12} />
+                                            <Tooltip
+                                                contentStyle={{
+                                                    backgroundColor: '#0f172a',
+                                                    border: '1px solid rgba(255,255,255,0.08)',
+                                                    borderRadius: '0.75rem',
+                                                }}
+                                                formatter={(value: number) => `${formatNumber(value)} votes`}
+                                            />
+                                            <Area type="monotone" dataKey="votes" stroke="#818cf8" fill="url(#proposalVotes)" strokeWidth={2} />
+                                        </AreaChart>
+                                    </ResponsiveContainer>
+                                </div>
+                                <div className="mt-4 flex items-center justify-between text-sm text-gray-400">
+                                    <div>
+                                        <p className="text-xs uppercase tracking-[0.2em] text-gray-500">Peak turnout</p>
+                                        <p className="text-white text-lg font-semibold">
+                                            {formatNumber(Math.max(...activitySparkline.map((d) => d.votes), 0))} votes
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs uppercase tracking-[0.2em] text-gray-500">Sample window</p>
+                                        <p className="text-white text-lg font-semibold">{activitySparkline.length} latest props</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
