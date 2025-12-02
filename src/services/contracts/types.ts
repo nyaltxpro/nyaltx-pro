@@ -67,6 +67,15 @@ export interface LegacyDepositResult {
   mintedAmount: string;
 }
 
+export interface LegacyDepositEvent {
+  account: string;
+  legacyAmount: string;
+  governanceMinted: string;
+  blockNumber: number;
+  timestamp: number;
+  txHash: string;
+}
+
 export interface TreasuryBridgeInfo {
   treasuryMultisig: string;
   timelockController: string;

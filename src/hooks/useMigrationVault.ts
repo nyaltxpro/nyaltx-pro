@@ -1,4 +1,4 @@
-import { LegacyDepositResult, MigrationVaultStats } from '@/services/contracts/types';
+import { LegacyDepositEvent, LegacyDepositResult, MigrationVaultStats } from '@/services/contracts/types';
 import { useCallback, useEffect, useState } from 'react';
 import { useDAOService } from './useDAOService';
 
@@ -10,6 +10,7 @@ export function useMigrationVault() {
   const [actionPending, setActionPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastDeposit, setLastDeposit] = useState<LegacyDepositResult | null>(null);
+  const [recentDeposits, setRecentDeposits] = useState<LegacyDepositEvent[]>([]);
 
   const refresh = useCallback(async () => {
     if (!daoService) return;
@@ -17,7 +18,9 @@ export function useMigrationVault() {
     setError(null);
     try {
       const vaultStats = await daoService.migrationVault.getStats();
+      const deposits = await daoService.migrationVault.getRecentDeposits();
       setStats(vaultStats);
+      setRecentDeposits(deposits);
     } catch (err) {
       console.error('Failed to load migration stats', err);
       setError(err instanceof Error ? err.message : 'Failed to load migration stats');
@@ -56,6 +59,7 @@ export function useMigrationVault() {
     actionPending,
     error: error || serviceError,
     lastDeposit,
+    recentDeposits,
     refresh,
     depositLegacy,
   };

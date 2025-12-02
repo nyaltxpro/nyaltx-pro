@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 import { CONTRACT_ABIS, CONTRACT_ADDRESSES } from './config';
-import { ContractError, LegacyDepositResult, MigrationVaultStats } from './types';
+import { ContractError, LegacyDepositEvent, LegacyDepositResult, MigrationVaultStats } from './types';
 
 export class MigrationVaultService {
   private provider: ethers.Provider;
@@ -50,6 +50,52 @@ export class MigrationVaultService {
       txHash: receipt.hash,
       mintedAmount: minted,
     };
+  }
+
+  async getRecentDeposits(limit = 10, lookbackBlocks = 100_000): Promise<LegacyDepositEvent[]> {
+    try {
+      const latestBlock = await this.provider.getBlockNumber();
+      const fromBlock = Math.max(latestBlock - lookbackBlocks, 0);
+      const topic = ethers.id('LegacyDeposited(address,uint256,uint256)');
+
+      const logs = await this.provider.getLogs({
+        address: CONTRACT_ADDRESSES.legacyMigrationVault,
+        topics: [topic],
+        fromBlock,
+        toBlock: latestBlock,
+      });
+
+      const recentLogs = logs.slice(-limit);
+
+      const events = await Promise.all(
+        recentLogs
+          .reverse()
+          .map(async (log) => {
+            const parsed = this.contract.interface.parseLog(log);
+            if (!parsed) return null;
+            const block = await this.provider.getBlock(log.blockNumber);
+            const { account, legacyAmount, governanceMinted } = parsed.args as unknown as {
+              account: string;
+              legacyAmount: bigint;
+              governanceMinted: bigint;
+            };
+
+            return {
+              account,
+              legacyAmount: ethers.formatEther(legacyAmount),
+              governanceMinted: ethers.formatEther(governanceMinted),
+              blockNumber: log.blockNumber,
+              timestamp: Number(block?.timestamp ?? 0),
+              txHash: log.transactionHash,
+            } satisfies LegacyDepositEvent;
+          })
+      );
+
+      return events.filter((entry): entry is LegacyDepositEvent => Boolean(entry));
+    } catch (error) {
+      console.error('Error fetching legacy deposits:', error);
+      return [];
+    }
   }
 
   private async estimateMintedAmount(amount: string): Promise<string> {
