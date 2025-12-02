@@ -1,38 +1,130 @@
 'use client'
-import { CheckCircle, Coins, TrendingUp, Users, XCircle } from 'lucide-react';
-import { useState } from 'react';
-import { Bar, BarChart, CartesianGrid, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { useDAOService } from '@/hooks/useDAOService';
+import { useMigrationVault } from '@/hooks/useMigrationVault';
+import { GovernanceStats, ProposalData, StakingStats } from '@/services/contracts/types';
+import { CheckCircle, Coins, Shield, TrendingUp, Users, XCircle } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import {
+    Bar,
+    BarChart,
+    CartesianGrid,
+    Cell,
+    Line,
+    LineChart,
+    Pie,
+    PieChart,
+    ResponsiveContainer,
+    Tooltip,
+    XAxis,
+    YAxis,
+} from 'recharts';
+import { useAccount } from 'wagmi';
+
+type TabId = 'overview' | 'proposals' | 'transfers' | 'deposit';
+
+type TokenMetrics = {
+    totalSupply: string;
+    maxSupply: string;
+};
+
+const formatNumber = (value: number | string | null | undefined, decimals = 2) => {
+    if (value === null || value === undefined) return '0';
+    const numeric = typeof value === 'string' ? Number(value) : value;
+    if (!Number.isFinite(numeric)) return '0';
+    return new Intl.NumberFormat('en-US', { maximumFractionDigits: decimals }).format(numeric);
+};
 
 export default function NYALTXGovernance() {
-    const [activeTab, setActiveTab] = useState('overview');
-    const [proposals, setProposals] = useState([
-        { id: 1, title: 'Increase staking rewards', status: 'active', votesFor: 15420, votesAgainst: 8340, ends: '2d 5h', quorum: 65 },
-        { id: 2, title: 'Update treasury allocation', status: 'passed', votesFor: 22100, votesAgainst: 5200, ends: 'Ended', quorum: 85 },
-        { id: 3, title: 'New partnership proposal', status: 'active', votesFor: 9800, votesAgainst: 12400, ends: '5d 12h', quorum: 45 },
-        { id: 4, title: 'Governance parameter change', status: 'pending', votesFor: 0, votesAgainst: 0, ends: 'Starts in 1d', quorum: 0 },
-    ]);
+    const { address, isConnected } = useAccount();
+    const { daoService, isLoading: daoLoading, error: daoError } = useDAOService();
+    const { stats: vaultStats, depositLegacy, loading: vaultLoading, actionPending: vaultPending, error: vaultError } = useMigrationVault();
 
-    const [transfers, setTransfers] = useState([
+    const [activeTab, setActiveTab] = useState<TabId>('overview');
+    const [legacyDeposit, setLegacyDeposit] = useState({ amount: '', beneficiary: address ?? '', status: null as 'success' | 'error' | null, txHash: '' });
+    const [proposals, setProposals] = useState<ProposalData[]>([]);
+    const [governanceStats, setGovernanceStats] = useState<GovernanceStats | null>(null);
+    const [stakingStats, setStakingStats] = useState<StakingStats | null>(null);
+    const [tokenMetrics, setTokenMetrics] = useState<TokenMetrics | null>(null);
+
+    const [transfers] = useState([
         { id: 1, from: '0x742d...a8f3', to: '0x9c21...4b7e', amount: 1500, timestamp: '2 mins ago', type: 'transfer' },
         { id: 2, from: '0x1a3c...2f91', to: 'Treasury', amount: 5000, timestamp: '15 mins ago', type: 'stake' },
         { id: 3, from: '0x8e4d...6c2a', to: '0x7f1b...3d9e', amount: 750, timestamp: '1 hour ago', type: 'transfer' },
         { id: 4, from: 'Treasury', to: '0x5d2e...8a4c', amount: 2200, timestamp: '3 hours ago', type: 'reward' },
     ]);
 
-    const [legacyDeposit, setLegacyDeposit] = useState<any>({
-        address: '',
-        amount: '',
-        status: null
-    });
+    useEffect(() => {
+        if (!daoService) return;
+        let cancelled = false;
+        const loadGovernance = async () => {
+            try {
+                const [stats, proposalList] = await Promise.all([
+                    daoService.governance.getGovernanceStats(),
+                    daoService.governance.getAllProposals(),
+                ]);
+                if (!cancelled) {
+                    setGovernanceStats(stats);
+                    setProposals(proposalList);
+                }
+            } catch (error) {
+                console.error('Failed to load governance data', error);
+            }
+        };
+        loadGovernance();
+        return () => {
+            cancelled = true;
+        };
+    }, [daoService]);
 
-    const stats = {
-        totalSupply: 1000000,
-        circulatingSupply: 750000,
-        stakedTokens: 425000,
-        holders: 12847,
-        activeProposals: 2,
-        avgVoterTurnout: 58
-    };
+    useEffect(() => {
+        if (!daoService) return;
+        let cancelled = false;
+        const loadStaking = async () => {
+            try {
+                const stats = await daoService.staking.getStats();
+                if (!cancelled) setStakingStats(stats);
+            } catch (error) {
+                console.error('Failed to load staking stats', error);
+            }
+        };
+        const loadTokenInfo = async () => {
+            try {
+                const info = await daoService.treasury.getTokenInfo();
+                if (!cancelled) {
+                    setTokenMetrics({ totalSupply: info.totalSupply, maxSupply: info.maxSupply });
+                }
+            } catch (error) {
+                console.error('Failed to fetch token info', error);
+            }
+        };
+        loadStaking();
+        loadTokenInfo();
+        return () => {
+            cancelled = true;
+        };
+    }, [daoService]);
+
+    const overview = useMemo(() => {
+        const totalSupply = parseFloat(tokenMetrics?.totalSupply ?? '0');
+        const stakedTokens = parseFloat(stakingStats?.totalStaked ?? '0');
+        const circulatingSupply = Math.max(totalSupply - stakedTokens, 0);
+        const holders = governanceStats?.totalVoters ?? 0;
+        return { totalSupply, stakedTokens, circulatingSupply, holders };
+    }, [tokenMetrics, stakingStats, governanceStats]);
+
+    const tokenDistribution = useMemo(() => {
+        const total = overview.totalSupply || 1;
+        const staked = overview.stakedTokens;
+        const circulating = overview.circulatingSupply;
+        const treasury = Math.max(total - staked - circulating, 0);
+        const locked = Math.max(total - (staked + circulating + treasury), 0);
+        return [
+            { name: 'Staked', value: (staked / total) * 100, color: '#3b82f6' },
+            { name: 'Circulating', value: (circulating / total) * 100, color: '#8b5cf6' },
+            { name: 'Treasury', value: (treasury / total) * 100, color: '#10b981' },
+            { name: 'Locked', value: (locked / total) * 100, color: '#f59e0b' },
+        ];
+    }, [overview]);
 
     const votingPowerData = [
         { range: '0-100', holders: 8240 },
@@ -40,13 +132,6 @@ export default function NYALTXGovernance() {
         { range: '1K-10K', holders: 1180 },
         { range: '10K-100K', holders: 267 },
         { range: '100K+', holders: 40 },
-    ];
-
-    const tokenDistribution = [
-        { name: 'Staked', value: 42.5, color: '#3b82f6' },
-        { name: 'Circulating', value: 32.5, color: '#8b5cf6' },
-        { name: 'Treasury', value: 15, color: '#10b981' },
-        { name: 'Locked', value: 10, color: '#f59e0b' },
     ];
 
     const volumeData = [
@@ -59,17 +144,24 @@ export default function NYALTXGovernance() {
         { day: 'Sun', volume: 39000 },
     ];
 
-    const handleLegacyDeposit = () => {
-        if (!legacyDeposit.address || !legacyDeposit.amount) {
-            setLegacyDeposit({ ...legacyDeposit, status: 'error' });
+    const tabs: TabId[] = ['overview', 'proposals', 'transfers', 'deposit'];
+
+    useEffect(() => {
+        setLegacyDeposit(prev => ({ ...prev, beneficiary: address ?? '' }));
+    }, [address]);
+
+    const handleLegacyDeposit = async () => {
+        if (!legacyDeposit.amount) {
+            setLegacyDeposit(prev => ({ ...prev, status: 'error' }));
             return;
         }
-
-        // Simulate deposit
-        setLegacyDeposit({ ...legacyDeposit, status: 'success' });
-        setTimeout(() => {
-            setLegacyDeposit({ address: '', amount: '', status: null });
-        }, 3000);
+        try {
+            const result = await depositLegacy(legacyDeposit.amount, legacyDeposit.beneficiary || address || undefined);
+            setLegacyDeposit({ amount: '', beneficiary: address ?? '', status: 'success', txHash: result.txHash });
+        } catch (error) {
+            console.error('Deposit failed', error);
+            setLegacyDeposit(prev => ({ ...prev, status: 'error' }));
+        }
     };
 
     const getStatusColor = (status: any) => {
@@ -83,11 +175,11 @@ export default function NYALTXGovernance() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white p-6">
+        <div className="min-h-screen bg-linear-to-br from-slate-900 via-purple-900 to-slate-900 text-white p-6">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="mb-8">
-                    <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                    <h1 className="text-4xl font-bold mb-2 bg-linear-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
                         NYALTX Governance
                     </h1>
                     <p className="text-gray-400">Decentralized governance for token holders</p>
@@ -95,7 +187,7 @@ export default function NYALTXGovernance() {
 
                 {/* Navigation */}
                 <div className="flex gap-4 mb-6 border-b border-gray-700 pb-2">
-                    {['overview', 'proposals', 'transfers', 'deposit'].map((tab) => (
+                    {tabs.map((tab) => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
@@ -113,13 +205,23 @@ export default function NYALTXGovernance() {
                 {activeTab === 'overview' && (
                     <div className="space-y-6">
                         {/* Stats Grid */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div className="bg-gray-800/50 backdrop-blur rounded-xl p-6 border border-gray-700">
                                 <div className="flex items-center justify-between mb-2">
                                     <span className="text-gray-400">Total Supply</span>
                                     <Coins className="text-blue-400" size={20} />
                                 </div>
-                                <p className="text-3xl font-bold">{stats.totalSupply.toLocaleString()}</p>
+                                <p className="text-3xl font-bold">{formatNumber(overview.totalSupply)}</p>
+                                <p className="text-sm text-gray-400 mt-1">Max supply: {formatNumber(tokenMetrics?.maxSupply)}</p>
+                            </div>
+
+                            <div className="bg-gray-800/50 backdrop-blur rounded-xl p-6 border border-gray-700">
+                                <div className="flex items-center justify-between mb-2">
+                                    <span className="text-gray-400">Circulating</span>
+                                    <Shield className="text-slate-300" size={20} />
+                                </div>
+                                <p className="text-3xl font-bold">{formatNumber(overview.circulatingSupply)}</p>
+                                <p className="text-sm text-gray-400 mt-1">{formatNumber((overview.circulatingSupply / (overview.totalSupply || 1)) * 100)}% released</p>
                             </div>
 
                             <div className="bg-gray-800/50 backdrop-blur rounded-xl p-6 border border-gray-700">
@@ -127,9 +229,9 @@ export default function NYALTXGovernance() {
                                     <span className="text-gray-400">Staked Tokens</span>
                                     <TrendingUp className="text-green-400" size={20} />
                                 </div>
-                                <p className="text-3xl font-bold">{stats.stakedTokens.toLocaleString()}</p>
+                                <p className="text-3xl font-bold">{formatNumber(overview.stakedTokens)}</p>
                                 <p className="text-sm text-green-400 mt-1">
-                                    {((stats.stakedTokens / stats.totalSupply) * 100).toFixed(1)}% of supply
+                                    {formatNumber((overview.stakedTokens / (overview.totalSupply || 1)) * 100)}% of supply
                                 </p>
                             </div>
 
@@ -138,7 +240,7 @@ export default function NYALTXGovernance() {
                                     <span className="text-gray-400">Token Holders</span>
                                     <Users className="text-purple-400" size={20} />
                                 </div>
-                                <p className="text-3xl font-bold">{stats.holders.toLocaleString()}</p>
+                                <p className="text-3xl font-bold">{formatNumber(overview.holders, 0)}</p>
                             </div>
                         </div>
 
@@ -213,23 +315,33 @@ export default function NYALTXGovernance() {
                                         <p className="text-gray-400 text-sm">Proposal #{proposal.id}</p>
                                     </div>
                                     <div className="text-right">
-                                        <p className="text-sm text-gray-400">Time remaining</p>
-                                        <p className="font-semibold">{proposal.ends}</p>
+                                        <p className="text-sm text-gray-400">Ends at block</p>
+                                        <p className="font-semibold">{proposal.endBlock}</p>
                                     </div>
                                 </div>
 
                                 <div className="space-y-3">
                                     <div>
                                         <div className="flex justify-between text-sm mb-1">
-                                            <span className="text-green-400">For: {proposal.votesFor.toLocaleString()}</span>
-                                            <span className="text-red-400">Against: {proposal.votesAgainst.toLocaleString()}</span>
+                                            <span className="text-green-400">For: {formatNumber(parseFloat(proposal.forVotes))}</span>
+                                            <span className="text-red-400">Against: {formatNumber(parseFloat(proposal.againstVotes))}</span>
                                         </div>
                                         <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
                                             <div
-                                                className="h-full bg-gradient-to-r from-green-500 to-red-500"
+                                                className="h-full bg-linear-to-r from-green-500 to-red-500"
                                                 style={{
                                                     width: '100%',
-                                                    background: `linear-gradient(to right, #10b981 ${(proposal.votesFor / (proposal.votesFor + proposal.votesAgainst)) * 100}%, #ef4444 ${(proposal.votesFor / (proposal.votesFor + proposal.votesAgainst)) * 100}%)`
+                                                    background: `linear-gradient(to right, #10b981 ${(() => {
+                                                        const forVotes = parseFloat(proposal.forVotes);
+                                                        const againstVotes = parseFloat(proposal.againstVotes);
+                                                        const total = forVotes + againstVotes || 1;
+                                                        return (forVotes / total) * 100;
+                                                    })()}%, #ef4444 ${(() => {
+                                                        const forVotes = parseFloat(proposal.forVotes);
+                                                        const againstVotes = parseFloat(proposal.againstVotes);
+                                                        const total = forVotes + againstVotes || 1;
+                                                        return (forVotes / total) * 100;
+                                                    })()}%)`
                                                 }}
                                             />
                                         </div>
@@ -237,7 +349,7 @@ export default function NYALTXGovernance() {
 
                                     <div className="flex justify-between items-center">
                                         <span className="text-sm text-gray-400">
-                                            Quorum: {proposal.quorum}% {proposal.quorum >= 50 ? '✓' : ''}
+                                            Quorum target: {formatNumber(governanceStats?.quorumVotes ?? '0')} votes
                                         </span>
                                         {proposal.status === 'active' && (
                                             <div className="flex gap-2">
@@ -304,12 +416,12 @@ export default function NYALTXGovernance() {
 
                             <div className="space-y-4">
                                 <div>
-                                    <label className="block text-sm font-semibold mb-2">Legacy Token Address</label>
+                                    <label className="block text-sm font-semibold mb-2">Beneficiary Address</label>
                                     <input
                                         type="text"
                                         placeholder="0x..."
-                                        value={legacyDeposit.address}
-                                        onChange={(e) => setLegacyDeposit({ ...legacyDeposit, address: e.target.value })}
+                                        value={legacyDeposit.beneficiary}
+                                        onChange={(e) => setLegacyDeposit(prev => ({ ...prev, beneficiary: e.target.value }))}
                                         className="w-full px-4 py-3 bg-gray-900 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
                                     />
                                 </div>
@@ -320,29 +432,42 @@ export default function NYALTXGovernance() {
                                         type="number"
                                         placeholder="Enter amount"
                                         value={legacyDeposit.amount}
-                                        onChange={(e) => setLegacyDeposit({ ...legacyDeposit, amount: e.target.value })}
+                                        onChange={(e) => setLegacyDeposit(prev => ({ ...prev, amount: e.target.value }))}
                                         className="w-full px-4 py-3 bg-gray-900 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
                                     />
                                 </div>
 
                                 <button
+                                    className="w-full px-6 py-3 bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-lg font-semibold transition-all transform hover:scale-105 disabled:opacity-50"
                                     onClick={handleLegacyDeposit}
-                                    className="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-lg font-semibold transition-all transform hover:scale-105"
+                                    disabled={!isConnected || vaultPending}
                                 >
-                                    Deposit Legacy Tokens
+                                    {vaultPending ? 'Processing...' : 'Deposit Legacy Tokens'}
                                 </button>
 
                                 {legacyDeposit.status === 'success' && (
-                                    <div className="flex items-center gap-2 p-4 bg-green-500/20 border border-green-500 rounded-lg">
-                                        <CheckCircle className="text-green-400" size={20} />
-                                        <span className="text-green-400 font-semibold">Deposit successful!</span>
+                                    <div className="flex flex-col gap-2 p-4 bg-green-500/20 border border-green-500 rounded-lg">
+                                        <div className="flex items-center gap-2">
+                                            <CheckCircle className="text-green-400" size={20} />
+                                            <span className="text-green-400 font-semibold">Deposit successful!</span>
+                                        </div>
+                                        {legacyDeposit.txHash && (
+                                            <a
+                                                href={`https://sepolia.etherscan.io/tx/${legacyDeposit.txHash}`}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="text-xs text-green-300 underline"
+                                            >
+                                                View transaction
+                                            </a>
+                                        )}
                                     </div>
                                 )}
 
                                 {legacyDeposit.status === 'error' && (
                                     <div className="flex items-center gap-2 p-4 bg-red-500/20 border border-red-500 rounded-lg">
                                         <XCircle className="text-red-400" size={20} />
-                                        <span className="text-red-400 font-semibold">Please fill in all fields</span>
+                                        <span className="text-red-400 font-semibold">{vaultError || 'Please fill in all fields'}</span>
                                     </div>
                                 )}
                             </div>
@@ -350,7 +475,7 @@ export default function NYALTXGovernance() {
                             <div className="mt-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
                                 <p className="text-sm text-blue-300">
                                     <strong>Note:</strong> Legacy deposits are processed immediately with no restrictions.
-                                    Once deposited, your tokens will be eligible for governance participation.
+                                    Once deposited, your tokens will be eligible for governance participation at a {vaultStats?.conversionRatio ?? '1'}x ratio.
                                 </p>
                             </div>
                         </div>

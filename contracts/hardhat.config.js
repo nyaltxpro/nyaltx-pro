@@ -69,14 +69,17 @@ module.exports = {
     },
   },
   etherscan: {
-    apiKey: {
-      mainnet: process.env.ETHERSCAN_API_KEY,
-      sepolia: process.env.ETHERSCAN_API_KEY,
-      polygon: process.env.POLYGONSCAN_API_KEY,
-      bsc: process.env.BSCSCAN_API_KEY,
-      arbitrumOne: process.env.ARBISCAN_API_KEY,
-      optimisticEthereum: process.env.OPTIMISM_API_KEY,
-    },
+    apiKey: process.env.ETHERSCAN_API_KEY || '',
+    customChains: [
+      {
+        network: 'sepolia',
+        chainId: 11155111,
+        urls: {
+          apiURL: 'https://api-sepolia.etherscan.io/api',
+          browserURL: 'https://sepolia.etherscan.io',
+        },
+      },
+    ],
   },
   gasReporter: {
     enabled: process.env.REPORT_GAS !== undefined,

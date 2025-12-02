@@ -53,41 +53,32 @@ export class GovernanceService {
 
   async getProposal(proposalId: string): Promise<ProposalData | null> {
     try {
-      const details = await this.governorContract.getProposalDetails(proposalId);
-      const [proposer, eta, startBlock, endBlock, forVotes, againstVotes, abstainVotes, isEmergency, isFastTrack, currentState] = details;
-      
-      // Get proposal description and other details from events
-      const filter = this.governorContract.filters.ProposalCreated(proposalId);
-      const events = await this.governorContract.queryFilter(filter);
-      
-      if (events.length === 0) return null;
-      
-      const event = events[0] as ethers.EventLog;
-      const { targets, values, calldatas, description } = event.args;
-      const normalizedValues = Array.isArray(values)
-        ? values
-        : typeof values === 'function'
-        ? Array.from(values())
-        : Array.from(values ?? []);
-      
+      const proposal = await this.governorContract.proposals(proposalId);
+      if (proposal.state === 0) return null;
+
+      const [againstVotes, forVotes, abstainVotes] = await this.governorContract.proposalVotes(proposalId);
+      const startBlock = await this.governorContract.proposalSnapshot(proposalId);
+      const endBlock = await this.governorContract.proposalDeadline(proposalId);
+      const eta = await this.governorContract.proposalEta(proposalId);
+
       return {
         id: proposalId,
-        title: this.extractTitle(description),
-        description,
-        proposer,
-        status: this.mapProposalState(currentState),
+        title: this.extractTitle(proposal.description),
+        description: proposal.description,
+        proposer: proposal.proposer,
+        status: this.mapProposalState(proposal.state),
         forVotes: ethers.formatEther(forVotes),
         againstVotes: ethers.formatEther(againstVotes),
         abstainVotes: ethers.formatEther(abstainVotes),
         startBlock: Number(startBlock),
         endBlock: Number(endBlock),
         eta: Number(eta),
-        isEmergency,
-        isFastTrack,
-        category: this.extractCategory(description),
-        targets,
-        values: normalizedValues.map((v: bigint) => v.toString()),
-        calldatas,
+        isEmergency: false,
+        isFastTrack: false,
+        category: this.extractCategory(proposal.description),
+        targets: proposal.targets,
+        values: proposal.values.map((v: bigint) => v.toString()),
+        calldatas: proposal.calldatas,
       };
     } catch (error) {
       console.error('Error fetching proposal:', error);
@@ -97,15 +88,9 @@ export class GovernanceService {
 
   async getAllProposals(): Promise<ProposalData[]> {
     try {
-      const filter = this.governorContract.filters.ProposalCreated();
-      const events = await this.governorContract.queryFilter(filter);
-      
+      const proposalCount = await this.governorContract.proposalCount();
       const proposals = await Promise.all(
-        events.map(async (event) => {
-          const eventLog = event as ethers.EventLog;
-          const proposalId = eventLog.args[0].toString();
-          return this.getProposal(proposalId);
-        })
+        Array.from({ length: proposalCount.toNumber() }, (_, i) => this.getProposal((i + 1).toString()))
       );
       
       return proposals.filter((p): p is ProposalData => p !== null);
@@ -224,7 +209,7 @@ export class GovernanceService {
         this.tokenContract.totalSupply()
       ]);
 
-      const quorumVotes = await this.governorContract.quorum(currentBlock - 1);
+      const quorumVotes = await this.governorContract.quorumVotes();
       const allProposals = await this.getAllProposals();
       const activeProposals = allProposals.filter(p => p.status === 'active');
 

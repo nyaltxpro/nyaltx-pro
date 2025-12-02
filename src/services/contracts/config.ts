@@ -84,7 +84,7 @@ export const CONTRACT_ABIS = {
   ],
   
   nyaxGovernor: [
-    // Governor functions
+    // Core Governor view/pure functions
     'function name() view returns (string)',
     'function version() view returns (string)',
     'function COUNTING_MODE() view returns (string)',
@@ -92,35 +92,50 @@ export const CONTRACT_ABIS = {
     'function state(uint256 proposalId) view returns (uint8)',
     'function proposalSnapshot(uint256 proposalId) view returns (uint256)',
     'function proposalDeadline(uint256 proposalId) view returns (uint256)',
+    'function proposalEta(uint256 proposalId) view returns (uint256)',
     'function proposalThreshold() view returns (uint256)',
-    'function getVotes(address account, uint256 blockNumber) view returns (uint256)',
-    'function getVotesWithParams(address account, uint256 blockNumber, bytes params) view returns (uint256)',
-    'function castVote(uint256 proposalId, uint8 support) returns (uint256)',
-    'function castVoteWithReason(uint256 proposalId, uint8 support, string reason) returns (uint256)',
-    'function castVoteBySig(uint256 proposalId, uint8 support, uint256 nonce, uint256 expiry, uint8 v, bytes32 r, bytes32 s) returns (uint256)',
-    'function propose(address[] targets, uint256[] values, bytes[] calldatas, string description) returns (uint256)',
-    'function execute(address[] targets, uint256[] values, bytes[] calldatas, bytes32 descriptionHash) payable returns (uint256)',
-    'function cancel(address[] targets, uint256[] values, bytes[] calldatas, bytes32 descriptionHash) returns (uint256)',
-    'function proposalVotes(uint256 proposalId) view returns (uint256 againstVotes, uint256 forVotes, uint256 abstainVotes)',
-    'function hasVoted(uint256 proposalId, address account) view returns (bool)',
-    
-    // NYAX Governor specific functions
-    'function proposeEmergency(address[] targets, uint256[] values, bytes[] calldatas, string description) returns (uint256)',
-    'function enableFastTrack(uint256 proposalId)',
-    'function isEmergencyProposal(uint256 proposalId) view returns (bool)',
-    'function isFastTrackEnabled(uint256 proposalId) view returns (bool)',
-    'function getProposalDetails(uint256 proposalId) view returns (address proposer, uint256 eta, uint256 startBlock, uint256 endBlock, uint256 forVotes, uint256 againstVotes, uint256 abstainVotes, bool isEmergency, bool isFastTrack, uint8 currentState)',
     'function votingDelay() view returns (uint256)',
     'function votingPeriod() view returns (uint256)',
     'function quorum(uint256 blockNumber) view returns (uint256)',
-    
+    'function quorumNumerator() view returns (uint256)',
+    'function quorumDenominator() view returns (uint256)',
+
+    // Proposal interactions
+    'function propose(address[] targets, uint256[] values, bytes[] calldatas, string description) returns (uint256)',
+    'function cancel(address[] targets, uint256[] values, bytes[] calldatas, bytes32 descriptionHash) returns (uint256)',
+    'function queue(address[] targets, uint256[] values, bytes[] calldatas, bytes32 descriptionHash) returns (uint256)',
+    'function execute(address[] targets, uint256[] values, bytes[] calldatas, bytes32 descriptionHash) payable returns (uint256)',
+    'function proposalVotes(uint256 proposalId) view returns (uint256 againstVotes, uint256 forVotes, uint256 abstainVotes)',
+    'function hasVoted(uint256 proposalId, address account) view returns (bool)',
+
+    // Voting helpers
+    'function castVote(uint256 proposalId, uint8 support) returns (uint256)',
+    'function castVoteWithReason(uint256 proposalId, uint8 support, string reason) returns (uint256)',
+    'function castVoteBySig(uint256 proposalId, uint8 support, uint256 nonce, uint256 expiry, uint8 v, bytes32 r, bytes32 s) returns (uint256)',
+    'function castVoteWithReasonAndParams(uint256 proposalId, uint8 support, string reason, bytes params) returns (uint256)',
+    'function castVoteWithReasonAndParamsBySig(uint256 proposalId, uint8 support, string reason, bytes params, bytes signature) returns (uint256)',
+    'function getVotes(address account, uint256 timepoint) view returns (uint256)',
+    'function getVotesWithParams(address account, uint256 timepoint, bytes params) view returns (uint256)',
+
+    // Admin setters
+    'function setVotingDelay(uint48 newVotingDelay)',
+    'function setVotingPeriod(uint32 newVotingPeriod)',
+    'function setProposalThreshold(uint256 newProposalThreshold)',
+    'function updateQuorumNumerator(uint256 newQuorumNumerator)',
+    'function updateTimelock(address newTimelock)',
+
     // Events
     'event ProposalCreated(uint256 proposalId, address proposer, address[] targets, uint256[] values, string[] signatures, bytes[] calldatas, uint256 startBlock, uint256 endBlock, string description)',
     'event ProposalCanceled(uint256 proposalId)',
     'event ProposalExecuted(uint256 proposalId)',
+    'event ProposalQueued(uint256 proposalId, uint256 etaSeconds)',
     'event VoteCast(address indexed voter, uint256 proposalId, uint8 support, uint256 weight, string reason)',
-    'event EmergencyProposalCreated(uint256 proposalId, string description)',
-    'event FastTrackEnabled(uint256 proposalId)',
+    'event VoteCastWithReason(address indexed voter, uint256 proposalId, uint8 support, uint256 weight, string reason)',
+    'event VotingDelaySet(uint256 oldVotingDelay, uint256 newVotingDelay)',
+    'event VotingPeriodSet(uint256 oldVotingPeriod, uint256 newVotingPeriod)',
+    'event ProposalThresholdSet(uint256 oldProposalThreshold, uint256 newProposalThreshold)',
+    'event QuorumNumeratorUpdated(uint256 oldQuorumNumerator, uint256 newQuorumNumerator)',
+    'event TimelockChange(address oldTimelock, address newTimelock)',
   ],
   
   treasury: [

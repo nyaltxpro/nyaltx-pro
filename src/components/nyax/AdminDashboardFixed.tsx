@@ -30,6 +30,8 @@ const describePermissions = (mask: number) =>
 const TOOL_BUTTON_CLASSES =
     'flex flex-col items-center gap-2 p-4 bg-white/5 rounded-lg border border-white/10 text-gray-300 text-sm hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed';
 
+type ActiveTab = 'folders' | 'staking';
+
 export default function AdminDashboardFixed() {
     const {
         folders,
