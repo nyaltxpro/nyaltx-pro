@@ -4,23 +4,22 @@ import { useCallback, useEffect, useState } from "react";
 import { useAccount, useWalletClient } from "wagmi";
 
 import { DAOService, createDAOService } from "@/services/contracts";
-import {
-  GovernanceStats,
-  ProposalData,
-  TreasuryStats,
-  VotingPower,
-} from "@/services/contracts/types";
+import { GovernanceStats, LegacyDepositEvent, MigrationVaultStats, ProposalData, TreasuryStats, VotingPower } from '@/services/contracts/types';
 
 type DaoHookState = {
   daoService: DAOService | null;
   isLoading: boolean;
   error: string | null;
+  vaultStats: MigrationVaultStats | null;
+  vaultDeposits: LegacyDepositEvent[];
 };
 
 const INITIAL_STATE: DaoHookState = {
   daoService: null,
   isLoading: true,
   error: null,
+  vaultStats: null,
+  vaultDeposits: [],
 };
 
 let cachedDAOService: DAOService | null = null;
@@ -75,11 +74,11 @@ export function useDAOService() {
         }
       }
 
-      setState({ daoService: service, isLoading: false, error: null });
+      setState({ daoService: service, isLoading: false, error: null, vaultStats: null, vaultDeposits: [] });
     } catch (err) {
       console.error("Failed to initialize DAO service:", err);
       const message = err instanceof Error ? err.message : "Unable to connect to DAO service";
-      setState({ daoService: null, isLoading: false, error: message });
+      setState({ daoService: null, isLoading: false, error: message, vaultStats: null, vaultDeposits: [] });
     }
   }, []);
 
@@ -107,12 +106,33 @@ export function useDAOService() {
     syncSigner();
   }, [state.daoService, walletClient]);
 
+  const fetchVault = useCallback(async () => {
+    if (!state.daoService) return;
+    try {
+      const [mvStats, deposits] = await Promise.all([
+        state.daoService.migrationVault.getStats(),
+        state.daoService.migrationVault.getRecentDeposits(),
+      ]);
+      setState((prev) => ({ ...prev, vaultStats: mvStats, vaultDeposits: deposits }));
+    } catch (error) {
+      console.error('Error fetching migration vault data:', error);
+    }
+  }, [state.daoService]);
+
+  useEffect(() => {
+    if (!state.isLoading && state.daoService) {
+      fetchVault();
+    }
+  }, [state.isLoading, state.daoService, fetchVault]);
+
   return {
     daoService: state.daoService,
     isLoading: state.isLoading,
     error: state.error,
     isConnected,
     address,
+    vaultStats: state.vaultStats,
+    vaultDeposits: state.vaultDeposits,
   };
 }
 

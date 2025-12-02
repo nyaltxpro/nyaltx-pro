@@ -47,7 +47,7 @@ export default function NYALTXGovernance() {
     const { address, isConnected } = useAccount();
     const chainId = useChainId();
     const { daoService, isLoading: daoLoading, error: daoError } = useDAOService();
-    const { stats: vaultStats, depositLegacy, loading: vaultLoading, actionPending: vaultPending, error: vaultError } = useMigrationVault();
+    const { stats: vaultStats, depositLegacy, loading: vaultLoading, actionPending: vaultPending, error: vaultError, recentDeposits } = useMigrationVault();
 
     const [activeTab, setActiveTab] = useState<TabId>('overview');
     const [legacyDeposit, setLegacyDeposit] = useState({ amount: '', beneficiary: address ?? '', status: null as 'success' | 'error' | null, txHash: '', message: '' });
@@ -622,10 +622,10 @@ export default function NYALTXGovernance() {
                                 <div className="flex items-start justify-between mb-4">
                                     <div>
                                         <div className="flex items-center gap-3 mb-2">
-                                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(proposal.status)} bg-opacity-20 ${getStatusColor(proposal.status).replace('bg-', 'text-')}`}>
+                                            {/* <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(proposal.status)} bg-opacity-20 ${getStatusColor(proposal.status).replace('bg-', 'text-')}`}>
                                                 {proposal.status.toUpperCase()}
-                                            </span>
-                                            <h3 className="text-xl font-semibold">{proposal.title}</h3>
+                                            </span> */}
+                                            <h3 className="text-xl font-semibold">{proposal.description}</h3>
                                         </div>
                                         <p className="text-gray-400 text-sm">Proposal #{proposal.id}</p>
                                     </div>
@@ -735,6 +735,56 @@ export default function NYALTXGovernance() {
                                         ))}
                                     </tbody>
                                 </table>
+                            )}
+                        </div>
+
+                        <div className="border-t border-gray-700 bg-gray-900/40">
+                            <div className="flex items-center justify-between px-6 py-4">
+                                <div>
+                                    <p className="text-xs uppercase tracking-[0.3em] text-gray-500">Legacy vault</p>
+                                    <h3 className="text-lg font-semibold text-white">Recent migration deposits</h3>
+                                </div>
+                                <span className="text-xs text-gray-400">Showing {recentDeposits.length || 0} entries</span>
+                            </div>
+
+                            {recentDeposits.length === 0 ? (
+                                <div className="px-6 pb-6 text-sm text-gray-400">No legacy deposits recorded in the selected window.</div>
+                            ) : (
+                                <div className="overflow-x-auto">
+                                    <table className="w-full">
+                                        <thead className="bg-gray-900/60">
+                                            <tr>
+                                                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wide">Account</th>
+                                                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wide">Legacy amount</th>
+                                                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wide">NYAX minted</th>
+                                                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wide">Block</th>
+                                                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wide">Time</th>
+                                                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wide">Explorer</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-800">
+                                            {recentDeposits.map((deposit) => (
+                                                <tr key={deposit.txHash} className="hover:bg-gray-800/40 transition-colors">
+                                                    <td className="px-6 py-4 text-sm font-mono text-gray-200">{deposit.account.slice(0, 6)}...{deposit.account.slice(-4)}</td>
+                                                    <td className="px-6 py-4 text-sm text-gray-100">{formatNumber(deposit.legacyAmount)} LEGACY</td>
+                                                    <td className="px-6 py-4 text-sm text-emerald-300">{formatNumber(deposit.governanceMinted)} NYAX</td>
+                                                    <td className="px-6 py-4 text-sm text-gray-400">#{deposit.blockNumber}</td>
+                                                    <td className="px-6 py-4 text-sm text-gray-400">{formatTimeFromTimestamp(deposit.timestamp)}</td>
+                                                    <td className="px-6 py-4 text-sm">
+                                                        <a
+                                                            href={`https://sepolia.etherscan.io/tx/${deposit.txHash}`}
+                                                            target="_blank"
+                                                            rel="noreferrer"
+                                                            className="text-indigo-300 hover:text-white"
+                                                        >
+                                                            View
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
                             )}
                         </div>
                     </div>
