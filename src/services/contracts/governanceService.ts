@@ -64,7 +64,7 @@ export class GovernanceService {
       const ids: bigint[] = await this.governorContract.getAllProposalIds();
       if (!ids.length) return [];
 
-      const selected = ids.slice(-limit).reverse();
+      const selected = [...ids.slice(-limit)].reverse();
       const proposals = await Promise.all(
         selected.map(async (id) => {
           const proposalId = id.toString();

@@ -44,7 +44,10 @@ export class MigrationVaultService {
     const tx = await this.contract.depositLegacy(amountWei, beneficiary ?? ethers.ZeroAddress);
     const receipt = await tx.wait();
 
-    const minted = await this.estimateMintedAmount(amount);
+    const legacyDeposit = this.extractLegacyDepositFromReceipt(receipt);
+    const minted = legacyDeposit
+      ? ethers.formatEther(legacyDeposit.governanceMinted)
+      : await this.estimateMintedAmount(amount);
 
     return {
       txHash: receipt.hash,
@@ -132,6 +135,28 @@ export class MigrationVaultService {
     const amountWei = ethers.parseEther(amount);
     const minted = (amountWei * ratio) / ethers.parseUnits('1', 18);
     return ethers.formatEther(minted);
+  }
+
+  private extractLegacyDepositFromReceipt(receipt: ethers.TransactionReceipt) {
+    for (const log of receipt.logs) {
+      try {
+        const parsed = this.contract.interface.parseLog(log);
+        if (parsed && parsed.name === 'LegacyDeposited') {
+          const { account, legacyAmount, governanceMinted } = parsed.args as unknown as {
+            account: string;
+            legacyAmount: bigint;
+            governanceMinted: bigint;
+          };
+
+          return { account, legacyAmount, governanceMinted };
+        }
+      } catch (error) {
+        // Ignore logs that do not belong to the legacy vault contract
+        continue;
+      }
+    }
+
+    return null;
   }
 
   private ensureSigner(action: string) {
