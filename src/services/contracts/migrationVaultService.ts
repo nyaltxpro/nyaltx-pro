@@ -55,17 +55,28 @@ export class MigrationVaultService {
   async getRecentDeposits(limit = 10, lookbackBlocks = 100_000): Promise<LegacyDepositEvent[]> {
     try {
       const latestBlock = await this.provider.getBlockNumber();
-      const fromBlock = Math.max(latestBlock - lookbackBlocks, 0);
+      const earliestBlock = Math.max(latestBlock - lookbackBlocks, 0);
       const topic = ethers.id('LegacyDeposited(address,uint256,uint256)');
+      const maxRange = 9_500; // stay under RPC 10k range limit
 
-      const logs = await this.provider.getLogs({
-        address: CONTRACT_ADDRESSES.legacyMigrationVault,
-        topics: [topic],
-        fromBlock,
-        toBlock: latestBlock,
-      });
+      const collectedLogs: ethers.Log[] = [];
+      let toBlock = latestBlock;
 
-      const recentLogs = logs.slice(-limit);
+      while (toBlock >= earliestBlock && collectedLogs.length < limit) {
+        const rangeStart = Math.max(toBlock - maxRange, earliestBlock);
+
+        const logs = await this.provider.getLogs({
+          address: CONTRACT_ADDRESSES.legacyMigrationVault,
+          topics: [topic],
+          fromBlock: rangeStart,
+          toBlock,
+        });
+
+        collectedLogs.unshift(...logs); // maintain chronological order
+        toBlock = rangeStart > 0 ? rangeStart - 1 : -1;
+      }
+
+      const recentLogs = collectedLogs.slice(-limit);
 
       const events = await Promise.all(
         recentLogs
