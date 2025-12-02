@@ -55,6 +55,8 @@ export class TreasuryService {
         toBlock: latestBlock,
       });
 
+      console.log(logs)
+
       const recentLogs = logs.slice(-limit);
 
       const transfers = await Promise.all(
@@ -262,6 +264,7 @@ export class TreasuryService {
     remainingMintable: string;
     treasury: string;
     transfersEnabled: boolean;
+    paused: boolean;
   }> {
     try {
       const [
@@ -272,7 +275,8 @@ export class TreasuryService {
         maxSupply,
         remainingMintable,
         treasury,
-        transfersEnabled
+        transfersEnabled,
+        paused
       ] = await Promise.all([
         this.tokenContract.name(),
         this.tokenContract.symbol(),
@@ -281,7 +285,8 @@ export class TreasuryService {
         this.tokenContract.MAX_SUPPLY(),
         this.tokenContract.remainingMintableSupply(),
         this.tokenContract.treasury(),
-        this.tokenContract.transfersEnabled()
+        this.tokenContract.transfersEnabled(),
+        this.tokenContract.paused()
       ]);
 
       return {
@@ -293,6 +298,7 @@ export class TreasuryService {
         remainingMintable: ethers.formatEther(remainingMintable),
         treasury,
         transfersEnabled,
+        paused,
       };
     } catch (error) {
       console.error('Error fetching token info:', error);
@@ -305,6 +311,7 @@ export class TreasuryService {
         remainingMintable: '0',
         treasury: ethers.ZeroAddress,
         transfersEnabled: false,
+        paused: false,
       };
     }
   }
@@ -313,6 +320,52 @@ export class TreasuryService {
     try {
       if (!this.signer) throw new Error('Signer required for toggling transfers');
       const tx = await this.tokenContract.setTransfersEnabled(enabled);
+      const receipt = await tx.wait();
+      return receipt.hash;
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
+  async pauseToken(): Promise<string> {
+    try {
+      if (!this.signer) throw new Error('Signer required to pause token');
+      const tx = await this.tokenContract.pause();
+      const receipt = await tx.wait();
+      return receipt.hash;
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
+  async unpauseToken(): Promise<string> {
+    try {
+      if (!this.signer) throw new Error('Signer required to unpause token');
+      const tx = await this.tokenContract.unpause();
+      const receipt = await tx.wait();
+      return receipt.hash;
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
+  async mintGovernanceTokens(to: string, amount: string): Promise<string> {
+    try {
+      if (!this.signer) throw new Error('Signer required for minting');
+      const amountWei = ethers.parseEther(amount);
+      const tx = await this.tokenContract.mint(to, amountWei);
+      const receipt = await tx.wait();
+      return receipt.hash;
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
+  async burnGovernanceTokens(from: string, amount: string): Promise<string> {
+    try {
+      if (!this.signer) throw new Error('Signer required for burning');
+      const amountWei = ethers.parseEther(amount);
+      const tx = await this.tokenContract.burn(from, amountWei);
       const receipt = await tx.wait();
       return receipt.hash;
     } catch (error) {

@@ -155,6 +155,7 @@ export interface TokenInfo {
   remainingMintable: string;
   treasury: string;
   transfersEnabled: boolean;
+  paused: boolean;
 }
 
 export interface VotingPower {

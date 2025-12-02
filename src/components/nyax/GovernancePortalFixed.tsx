@@ -5,7 +5,7 @@ import { GovernanceStats, ProposalData, StakingStats, TreasuryTransfer } from '@
 import { Activity, ArrowUpRight, CheckCircle, Clock, Coins, Globe, Layers, Shield, TrendingUp, Users, XCircle } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { Area, AreaChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { useAccount } from 'wagmi';
+import { useAccount, useChainId } from 'wagmi';
 
 type TabId = 'overview' | 'proposals' | 'transfers' | 'deposit';
 
@@ -45,11 +45,12 @@ const formatBlocksToTime = (blocks?: number) => {
 
 export default function NYALTXGovernance() {
     const { address, isConnected } = useAccount();
+    const chainId = useChainId();
     const { daoService, isLoading: daoLoading, error: daoError } = useDAOService();
     const { stats: vaultStats, depositLegacy, loading: vaultLoading, actionPending: vaultPending, error: vaultError } = useMigrationVault();
 
     const [activeTab, setActiveTab] = useState<TabId>('overview');
-    const [legacyDeposit, setLegacyDeposit] = useState({ amount: '', beneficiary: address ?? '', status: null as 'success' | 'error' | null, txHash: '' });
+    const [legacyDeposit, setLegacyDeposit] = useState({ amount: '', beneficiary: address ?? '', status: null as 'success' | 'error' | null, txHash: '', message: '' });
     const [proposals, setProposals] = useState<ProposalData[]>([]);
     const [governanceStats, setGovernanceStats] = useState<GovernanceStats | null>(null);
     const [stakingStats, setStakingStats] = useState<StakingStats | null>(null);
@@ -200,23 +201,43 @@ export default function NYALTXGovernance() {
         })).reverse();
     }, [proposals]);
 
+    const REQUIRED_CHAIN_ID = 11155111; // Ethereum Sepolia
+    const onRequiredNetwork = chainId === REQUIRED_CHAIN_ID;
     const tabs: TabId[] = ['overview', 'proposals', 'transfers', 'deposit'];
 
     useEffect(() => {
         setLegacyDeposit(prev => ({ ...prev, beneficiary: address ?? '' }));
     }, [address]);
 
+    const getDepositErrorMessage = (error: unknown) => {
+        if (typeof error === 'object' && error !== null && 'code' in error) {
+            const err = error as { code?: string | number; message?: string };
+            if (err.code === 'ACTION_REJECTED') return 'Transaction rejected in wallet.';
+            if (err.code === 'CALL_EXCEPTION') return 'Deposit reverted. Check allowance and amount, then try again.';
+        }
+        return 'Deposit failed. Please try again.';
+    };
+
     const handleLegacyDeposit = async () => {
-        if (!legacyDeposit.amount) {
-            setLegacyDeposit(prev => ({ ...prev, status: 'error' }));
+        if (!isConnected) {
+            setLegacyDeposit(prev => ({ ...prev, status: 'error', message: 'Connect your wallet to deposit legacy NYAX.' }));
+            return;
+        }
+        if (!onRequiredNetwork) {
+            setLegacyDeposit(prev => ({ ...prev, status: 'error', message: 'Switch to Ethereum Sepolia (chain ID 11155111) to deposit.' }));
+            return;
+        }
+        const amountValue = Number(legacyDeposit.amount);
+        if (!legacyDeposit.amount || !Number.isFinite(amountValue) || amountValue <= 0) {
+            setLegacyDeposit(prev => ({ ...prev, status: 'error', message: 'Enter an amount greater than zero.' }));
             return;
         }
         try {
             const result = await depositLegacy(legacyDeposit.amount, legacyDeposit.beneficiary || address || undefined);
-            setLegacyDeposit({ amount: '', beneficiary: address ?? '', status: 'success', txHash: result.txHash });
+            setLegacyDeposit({ amount: '', beneficiary: address ?? '', status: 'success', txHash: result.txHash, message: '' });
         } catch (error) {
             console.error('Deposit failed', error);
-            setLegacyDeposit(prev => ({ ...prev, status: 'error' }));
+            setLegacyDeposit(prev => ({ ...prev, status: 'error', message: getDepositErrorMessage(error) }));
         }
     };
 

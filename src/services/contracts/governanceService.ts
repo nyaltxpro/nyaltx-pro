@@ -31,14 +31,11 @@ export class GovernanceService {
     values: string[],
     calldatas: string[],
     description: string,
-    isEmergency = false
+    _isEmergency = false
   ): Promise<string> {
     try {
       if (!this.signer) throw new Error('Signer required for creating proposals');
-      
-      const tx = isEmergency 
-        ? await this.governorContract.proposeEmergency(targets, values, calldatas, description)
-        : await this.governorContract.propose(targets, values, calldatas, description);
+      const tx = await this.governorContract.propose(targets, values, calldatas, description);
       
       const receipt = await tx.wait();
       const event = receipt.logs.find((log: ethers.Log) => 
@@ -53,48 +50,9 @@ export class GovernanceService {
 
   async getProposal(proposalId: string): Promise<ProposalData | null> {
     try {
-      const filter = this.governorContract.filters.ProposalCreated(BigInt(proposalId));
-      const events = await this.governorContract.queryFilter(filter);
-      if (events.length === 0) return null;
-
-      const event = events[0] as ethers.EventLog;
-      const { proposer, targets, values, calldatas, description } = event.args as unknown as {
-        proposalId: bigint;
-        proposer: string;
-        targets: string[];
-        values: bigint[];
-        signatures: string[];
-        calldatas: string[];
-        startBlock: bigint;
-        endBlock: bigint;
-        description: string;
-      };
-
-      const [againstVotes, forVotes, abstainVotes] = await this.governorContract.proposalVotes(proposalId);
-      const startBlock = await this.governorContract.proposalSnapshot(proposalId);
-      const endBlock = await this.governorContract.proposalDeadline(proposalId);
-      const eta = await this.governorContract.proposalEta(proposalId).catch(() => BigInt(0));
-      const statusRaw = await this.governorContract.state(proposalId);
-
-      return {
-        id: proposalId,
-        title: this.extractTitle(description),
-        description,
-        proposer,
-        status: this.mapProposalState(Number(statusRaw)),
-        forVotes: ethers.formatEther(forVotes),
-        againstVotes: ethers.formatEther(againstVotes),
-        abstainVotes: ethers.formatEther(abstainVotes),
-        startBlock: Number(startBlock),
-        endBlock: Number(endBlock),
-        eta: Number(eta),
-        isEmergency: false,
-        isFastTrack: false,
-        category: this.extractCategory(description),
-        targets,
-        values: values.map((v) => v.toString()),
-        calldatas,
-      };
+      const details = await this.governorContract.getFullProposalDetails(BigInt(proposalId));
+      const description = await this.fetchProposalDescription(proposalId);
+      return await this.buildProposalData(proposalId, description, details);
     } catch (error) {
       console.error('Error fetching proposal:', error);
       return null;
@@ -103,20 +61,22 @@ export class GovernanceService {
 
   async getAllProposals(limit = 50): Promise<ProposalData[]> {
     try {
-      const filter = this.governorContract.filters.ProposalCreated();
-      const events = (await this.governorContract.queryFilter(filter)) as ethers.EventLog[];
-      if (events.length === 0) return [];
+      const ids: bigint[] = await this.governorContract.getAllProposalIds();
+      if (!ids.length) return [];
 
-      const recentEvents = events.slice(-limit);
+      const selected = ids.slice(-limit).reverse();
       const proposals = await Promise.all(
-        recentEvents
-          .reverse()
-          .map(async (event) => {
-            const args = event.args as unknown as { proposalId: bigint };
-            const id = args?.proposalId ?? (event.topics?.[1] ? BigInt(event.topics[1]) : null);
-            if (!id) return null;
-            return this.getProposal(id.toString());
-          })
+        selected.map(async (id) => {
+          const proposalId = id.toString();
+          try {
+            const details = await this.governorContract.getFullProposalDetails(id);
+            const description = await this.fetchProposalDescription(proposalId);
+            return await this.buildProposalData(proposalId, description, details);
+          } catch (err) {
+            console.error('Error decoding proposal', err);
+            return null;
+          }
+        })
       );
 
       return proposals.filter((p): p is ProposalData => p !== null);
@@ -271,6 +231,76 @@ export class GovernanceService {
   private extractCategory(description: string): string {
     const categoryMatch = description.match(/Category:\s*(\w+)/i);
     return categoryMatch ? categoryMatch[1] : 'general';
+  }
+
+  private async fetchProposalDescription(proposalId: string): Promise<string> {
+    try {
+      const filter = this.governorContract.filters.ProposalCreated(BigInt(proposalId));
+      const events = await this.governorContract.queryFilter(filter);
+      if (events.length === 0) return 'Proposal description unavailable';
+      const event = events[0] as ethers.EventLog;
+      const args = event.args as unknown as { description: string };
+      return args?.description ?? 'Proposal description unavailable';
+    } catch (error) {
+      console.error('Failed to fetch proposal description', error);
+      return 'Proposal description unavailable';
+    }
+  }
+
+  private async buildProposalData(
+    proposalId: string,
+    description: string,
+    details: [
+      string,
+      string[],
+      bigint[],
+      string[],
+      string,
+      bigint,
+      bigint,
+      bigint,
+      bigint,
+      bigint,
+      number
+    ]
+  ): Promise<ProposalData> {
+    const [
+      proposer,
+      targets,
+      values,
+      calldatas,
+      descriptionHash,
+      snapshotBlock,
+      deadlineBlock,
+      forVotes,
+      againstVotes,
+      abstainVotes,
+      stateOrdinal
+    ] = details;
+
+    const eta = await this.governorContract
+      .proposalEta(BigInt(proposalId))
+      .catch(() => BigInt(0));
+
+    return {
+      id: proposalId,
+      title: this.extractTitle(description),
+      description,
+      proposer,
+      status: this.mapProposalState(Number(stateOrdinal)),
+      forVotes: ethers.formatEther(forVotes),
+      againstVotes: ethers.formatEther(againstVotes),
+      abstainVotes: ethers.formatEther(abstainVotes),
+      startBlock: Number(snapshotBlock),
+      endBlock: Number(deadlineBlock),
+      eta: Number(eta),
+      isEmergency: false,
+      isFastTrack: false,
+      category: this.extractCategory(description),
+      targets,
+      values: values.map((v) => v.toString()),
+      calldatas,
+    };
   }
 
   private mapProposalState(state: number): ProposalData['status'] {

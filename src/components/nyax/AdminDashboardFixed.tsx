@@ -6,7 +6,7 @@ import { useFolderRegistry } from '@/hooks/useFolderRegistry';
 import { FolderInfo } from '@/services/contracts/types';
 import { useAppKitAccount } from '@reown/appkit/react';
 import { CalendarClock, Filter, Gavel, KeySquare, Loader2, Lock, Plus, Search, Shield, UserPlus2 } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAccount } from 'wagmi';
 
 const DAY_IN_SECONDS = 86_400;
@@ -94,6 +94,12 @@ export default function AdminDashboardFixed() {
     const [transfersEnabled, setTransfersEnabledState] = useState<boolean | null>(null);
     const [transfersLoading, setTransfersLoading] = useState(false);
     const [transfersError, setTransfersError] = useState<string | null>(null);
+    const [tokenMetrics, setTokenMetrics] = useState({ paused: null as boolean | null, totalSupply: '0', maxSupply: '0', remainingMintable: '0' });
+    const [mintForm, setMintForm] = useState({ to: '', amount: '' });
+    const [burnForm, setBurnForm] = useState({ from: '', amount: '' });
+    const [tokenActionLoading, setTokenActionLoading] = useState(false);
+    const [tokenGovernorMessage, setTokenGovernorMessage] = useState<string | null>(null);
+    const [tokenGovernorError, setTokenGovernorError] = useState<string | null>(null);
 
     const selectedFolder = useMemo(
         () => folders.find(folder => folder.id === selectedFolderId) ?? null,
@@ -112,28 +118,29 @@ export default function AdminDashboardFixed() {
         }
     }, [selectedFolderId, membersByFolder, fetchMembers]);
 
-    useEffect(() => {
+    const refreshTokenInfo = useCallback(async () => {
         if (!daoService) return;
-        let cancelled = false;
-        const loadTransfersState = async () => {
-            try {
-                const info = await daoService.treasury.getTokenInfo();
-                if (!cancelled) {
-                    setTransfersEnabledState(info.transfersEnabled ?? null);
-                    setTransfersError(null);
-                }
-            } catch (err) {
-                if (!cancelled) {
-                    console.error('Failed to load transfer settings', err);
-                    setTransfersError('Unable to load transfer status.');
-                }
-            }
-        };
-        loadTransfersState();
-        return () => {
-            cancelled = true;
-        };
+        try {
+            const info = await daoService.treasury.getTokenInfo();
+            setTransfersEnabledState(info.transfersEnabled ?? null);
+            setTokenMetrics({
+                paused: info.paused ?? null,
+                totalSupply: info.totalSupply ?? '0',
+                maxSupply: info.maxSupply ?? '0',
+                remainingMintable: info.remainingMintable ?? '0',
+            });
+            setTransfersError(null);
+            setTokenGovernorError(null);
+        } catch (err) {
+            console.error('Failed to load token status', err);
+            setTransfersError('Unable to load transfer status.');
+            setTokenGovernorError('Unable to load NYAX token metrics.');
+        }
     }, [daoService]);
+
+    useEffect(() => {
+        refreshTokenInfo();
+    }, [refreshTokenInfo]);
 
     const handleSelectFolder = (folderId: number) => {
         setSelectedFolderId(prev => (prev === folderId ? null : folderId));
@@ -187,7 +194,7 @@ export default function AdminDashboardFixed() {
         setTransfersError(null);
         try {
             await daoService.treasury.setTokenTransfersEnabled(!transfersEnabled);
-            setTransfersEnabledState(prev => (prev === null ? null : !prev));
+            await refreshTokenInfo();
             setFormError(null);
         } catch (err) {
             console.error('Failed to toggle transfers', err);
@@ -197,12 +204,103 @@ export default function AdminDashboardFixed() {
         }
     };
 
-    const openAllocationModal = () => {
-        if (!selectedFolder) {
+    const handleTokenPauseToggle = async () => {
+        if (!isConnected) {
+            setFormError('Connect a wallet to manage NYAX token state.');
+            return;
+        }
+        if (!daoService || tokenMetrics.paused === null) return;
+        setTokenActionLoading(true);
+        setTokenGovernorMessage(null);
+        setTokenGovernorError(null);
+        try {
+            if (tokenMetrics.paused) {
+                await daoService.treasury.unpauseToken();
+            } else {
+                await daoService.treasury.pauseToken();
+            }
+            await refreshTokenInfo();
+            setTokenGovernorMessage(tokenMetrics.paused ? 'NYAX transfers resumed.' : 'NYAX token paused.');
+        } catch (err) {
+            console.error('Failed to toggle pause', err);
+            setTokenGovernorError(err instanceof Error ? err.message : 'Failed to toggle token pause');
+        } finally {
+            setTokenActionLoading(false);
+        }
+    };
+
+    const handleMintTokens = async () => {
+        if (!isConnected) {
+            setFormError('Connect a wallet to mint tokens.');
+            return;
+        }
+        if (!daoService) return;
+        if (!mintForm.to.trim() || !mintForm.amount.trim()) {
+            setTokenGovernorError('Recipient address and amount are required to mint.');
+            return;
+        }
+        const amountValue = Number(mintForm.amount);
+        if (!Number.isFinite(amountValue) || amountValue <= 0) {
+            setTokenGovernorError('Enter a valid mint amount.');
+            return;
+        }
+        setTokenActionLoading(true);
+        setTokenGovernorMessage(null);
+        setTokenGovernorError(null);
+        try {
+            await daoService.treasury.mintGovernanceTokens(mintForm.to.trim(), mintForm.amount.trim());
+            setMintForm({ to: '', amount: '' });
+            await refreshTokenInfo();
+            setTokenGovernorMessage('Mint transaction submitted.');
+        } catch (err) {
+            console.error('Failed to mint tokens', err);
+            setTokenGovernorError(err instanceof Error ? err.message : 'Mint transaction failed');
+        } finally {
+            setTokenActionLoading(false);
+        }
+    };
+
+    const handleBurnTokens = async () => {
+        if (!isConnected) {
+            setFormError('Connect a wallet to burn tokens.');
+            return;
+        }
+        if (!daoService) return;
+        if (!burnForm.from.trim() || !burnForm.amount.trim()) {
+            setTokenGovernorError('Source address and amount are required to burn.');
+            return;
+        }
+        const amountValue = Number(burnForm.amount);
+        if (!Number.isFinite(amountValue) || amountValue <= 0) {
+            setTokenGovernorError('Enter a valid burn amount.');
+            return;
+        }
+        setTokenActionLoading(true);
+        setTokenGovernorMessage(null);
+        setTokenGovernorError(null);
+        try {
+            await daoService.treasury.burnGovernanceTokens(burnForm.from.trim(), burnForm.amount.trim());
+            setBurnForm({ from: '', amount: '' });
+            await refreshTokenInfo();
+            setTokenGovernorMessage('Burn transaction submitted.');
+        } catch (err) {
+            console.error('Failed to burn tokens', err);
+            setTokenGovernorError(err instanceof Error ? err.message : 'Burn transaction failed');
+        } finally {
+            setTokenActionLoading(false);
+        }
+    };
+
+    const openAllocationModal = (folderOverride?: FolderInfo) => {
+        const targetFolder = folderOverride ?? selectedFolder;
+        if (!targetFolder) {
             setFormError('Select a folder first');
             return;
         }
-        setAllocationForm(prev => ({ ...prev, folderId: selectedFolder.id }));
+        if (!folderOverride) {
+            setSelectedFolderId(targetFolder.id);
+        }
+        setAllocationForm(prev => ({ ...prev, folderId: targetFolder.id }));
         setFormError(null);
         setShowAllocationModal(true);
     };
@@ -413,6 +511,19 @@ export default function AdminDashboardFixed() {
                         )}
                     </div>
                 </div>
+
+                <div className="mt-4 flex flex-wrap gap-3">
+                    <button
+                        onClick={e => {
+                            e.stopPropagation();
+                            openAllocationModal(folder);
+                        }}
+                        disabled={!isConnected}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-emerald-400/40 text-emerald-200 text-sm hover:bg-emerald-500/10 disabled:opacity-40"
+                    >
+                        <UserPlus2 className="w-4 h-4" /> Allocate tokens
+                    </button>
+                </div>
             </div>
         );
     };
@@ -469,7 +580,7 @@ export default function AdminDashboardFixed() {
                                 </button>
                                 <button
                                     className="flex-1 min-w-[140px] px-5 py-3 rounded-2xl border border-emerald-400/40 text-emerald-200 hover:bg-emerald-500/10 transition disabled:opacity-40"
-                                    onClick={openAllocationModal}
+                                    onClick={() => openAllocationModal()}
                                     disabled={!selectedFolder || !isConnected || loading}
                                 >
                                     <div className="flex items-center justify-center gap-2">
@@ -525,7 +636,7 @@ export default function AdminDashboardFixed() {
                             <Loader2 className="w-5 h-5" />
                             Refresh Data
                         </button>
-                        <button className={TOOL_BUTTON_CLASSES} onClick={openAllocationModal} disabled={!selectedFolder || !isConnected || loading}>
+                        <button className={TOOL_BUTTON_CLASSES} onClick={() => openAllocationModal()} disabled={!selectedFolder || !isConnected || loading}>
                             <UserPlus2 className="w-5 h-5" />
                             Allocations
                         </button>
@@ -560,7 +671,7 @@ export default function AdminDashboardFixed() {
                         <div className="flex flex-col gap-3 min-w-[240px]">
                             <button
                                 className="px-5 py-3 rounded-2xl bg-linear-to-r from-indigo-500 to-purple-500 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-                                onClick={openAllocationModal}
+                                onClick={() => openAllocationModal()}
                                 disabled={!selectedFolder || !isConnected || loading}
                             >
                                 Start allocation

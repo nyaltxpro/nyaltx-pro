@@ -1,13 +1,12 @@
-import { ContractAddresses } from './types';
 
 // Contract addresses - Update these with deployed contract addresses
-export const CONTRACT_ADDRESSES: ContractAddresses = {
+export const CONTRACT_ADDRESSES: any = {
   nyaxToken: process.env.NEXT_NYAX_TOKEN_ADDRESS || '0xa879282ad7097f2503A4D128b807546e79A88F2f',
   legacyToken: process.env.NEXT_PUBLIC_LEGACY_TOKEN_ADDRESS || '0xe75B4240053FC34c5c5751Ab0282190149dfC4Be',
   legacyMigrationVault: process.env.NEXT_PUBLIC_LEGACY_MIGRATION_VAULT_ADDRESS || '0x0b8963BaD0B5331852D5FA5d15661317Cb96a40B',
   staking: process.env.NEXT_PUBLIC_STAKING_ADDRESS || '0xA6518003fb0F4062e370C21b5f5096F9d88bcDfE',
   folderRegistry: process.env.NEXT_PUBLIC_FOLDER_REGISTRY_ADDRESS || '0x9b8209dA26ab232C1F6Caa30Ddcf3B6fA0394C34',
-  nyaxGovernor: process.env.NEXT_PUBLIC_NYAX_GOVERNOR_ADDRESS || '0xD69743C1b6Ee9Ab46922993b282D3BA7dd093086',
+  nyaxGovernor: "0xb852Be5B249EC7DF065351FBDfC14A5A1520eC93",
   timelock: process.env.NEXT_PUBLIC_TIMELOCK_ADDRESS || '0xa17B822F9D0A26C20BDe453F0e566a2D2787E851',
   treasury: process.env.NEXT_PUBLIC_TREASURY_ADDRESS || '0x7ab3eBb87afa9A921d0770Fa304F20Fc8D2a4763',
   multisig: process.env.NEXT_PUBLIC_MULTISIG_ADDRESS || '0x5cD8aD5E36324C386b6F62Ce2374aa3F3f8Ae0aD',
@@ -43,6 +42,7 @@ export const CONTRACT_ABIS = {
     'function transfersEnabled() view returns (bool)',
     'function blacklisted(address) view returns (bool)',
     'function remainingMintableSupply() view returns (uint256)',
+    'function paused() view returns (bool)',
     'function mint(address to, uint256 amount)',
     'function burn(address from, uint256 amount)',
     'function burnSelf(uint256 amount)',
@@ -107,6 +107,11 @@ export const CONTRACT_ABIS = {
     'function execute(address[] targets, uint256[] values, bytes[] calldatas, bytes32 descriptionHash) payable returns (uint256)',
     'function proposalVotes(uint256 proposalId) view returns (uint256 againstVotes, uint256 forVotes, uint256 abstainVotes)',
     'function hasVoted(uint256 proposalId, address account) view returns (bool)',
+    'function getAllProposalIds() view returns (uint256[])',
+    'function getProposalData(uint256 proposalId) view returns (address proposer,uint256 snapshotBlock,uint256 deadlineBlock,uint256 forVotes,uint256 againstVotes,uint256 abstainVotes,uint8 stateOrdinal)',
+    'function getFullProposalDetails(uint256 proposalId) view returns (address proposer,address[] targets,uint256[] values,bytes[] calldatas,bytes32 descriptionHash,uint256 snapshotBlock,uint256 deadlineBlock,uint256 forVotes,uint256 againstVotes,uint256 abstainVotes,uint8 stateOrdinal)',
+    'function getProposalDescriptionHash(uint256 proposalId) view returns (bytes32)',
+    'function getProposalPayload(uint256 proposalId) view returns (address[] targets,uint256[] values,bytes[] calldatas)',
 
     // Voting helpers
     'function castVote(uint256 proposalId, uint8 support) returns (uint256)',

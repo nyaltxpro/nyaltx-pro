@@ -1,11 +1,11 @@
 import { ethers } from 'ethers';
 import { CONSTANTS, CONTRACT_ABIS, CONTRACT_ADDRESSES } from './config';
 import {
-    GovernanceStats,
-    TokenInfo,
-    TreasuryCategory,
-    TreasuryStats,
-    VotingPower
+  GovernanceStats,
+  TokenInfo,
+  TreasuryCategory,
+  TreasuryStats,
+  VotingPower
 } from './types';
 
 export class DAOService {
@@ -91,7 +91,7 @@ export class DAOService {
   async getTokenInfo(): Promise<TokenInfo> {
     const contract = this.getNYAXTokenContract();
     
-    const [name, symbol, decimals, totalSupply, maxSupply, remainingMintable, treasury, transfersEnabled] = await Promise.all([
+    const [name, symbol, decimals, totalSupply, maxSupply, remainingMintable, treasury, transfersEnabled, paused] = await Promise.all([
       contract.name(),
       contract.symbol(),
       contract.decimals(),
@@ -99,7 +99,8 @@ export class DAOService {
       contract.MAX_SUPPLY(),
       contract.remainingMintableSupply(),
       contract.treasury(),
-      contract.transfersEnabled()
+      contract.transfersEnabled(),
+      contract.paused()
     ]);
 
     return {
@@ -110,7 +111,8 @@ export class DAOService {
       maxSupply: ethers.formatEther(maxSupply),
       remainingMintable: ethers.formatEther(remainingMintable),
       treasury,
-      transfersEnabled
+      transfersEnabled,
+      paused
     };
   }
 
@@ -145,6 +147,18 @@ export class DAOService {
     if (!this.signer) throw new Error('Signer required for setting transfers');
     const contract = this.getNYAXTokenContract(true);
     return await contract.setTransfersEnabled(enabled);
+  }
+
+  async pauseToken(): Promise<ethers.ContractTransactionResponse> {
+    if (!this.signer) throw new Error('Signer required to pause token');
+    const contract = this.getNYAXTokenContract(true);
+    return await contract.pause();
+  }
+
+  async unpauseToken(): Promise<ethers.ContractTransactionResponse> {
+    if (!this.signer) throw new Error('Signer required to unpause token');
+    const contract = this.getNYAXTokenContract(true);
+    return await contract.unpause();
   }
 
   async setBlacklisted(account: string, isBlacklisted: boolean): Promise<ethers.ContractTransactionResponse> {
