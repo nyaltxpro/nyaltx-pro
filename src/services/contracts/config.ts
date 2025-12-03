@@ -62,26 +62,7 @@ export const CONTRACT_ABIS = {
     'event TokensBurned(address indexed from, uint256 amount)',
   ],
 
-  legacyMigrationVault: [
-    // View functions
-    'function conversionRatio() view returns (uint256)',
-    'function depositsEnabled() view returns (bool)',
-    'function legacyToken() view returns (address)',
-    'function governanceToken() view returns (address)',
-
-    // Admin functions
-    'function setConversionRatio(uint256 ratio)',
-    'function setDepositsEnabled(bool enabled)',
-    'function authorizeMigrationContract(bool authorized)',
-
-    // Core user function
-    'function depositLegacy(uint256 amount, address beneficiary) returns (uint256 minted)',
-
-    // Events
-    'event LegacyDeposited(address indexed account, uint256 legacyAmount, uint256 governanceMinted)',
-    'event ConversionRatioUpdated(uint256 ratio)',
-    'event DepositsToggled(bool enabled)',
-  ],
+  legacyMigrationVault: [{"inputs":[{"internalType":"contract IERC20","name":"legacy","type":"address"},{"internalType":"contract NYALTXGovernanceToken","name":"gov","type":"address"},{"internalType":"uint256","name":"ratio","type":"uint256"},{"internalType":"address","name":"admin","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[{"internalType":"address","name":"owner","type":"address"}],"name":"OwnableInvalidOwner","type":"error"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"OwnableUnauthorizedAccount","type":"error"},{"inputs":[],"name":"ReentrancyGuardReentrantCall","type":"error"},{"inputs":[{"internalType":"address","name":"token","type":"address"}],"name":"SafeERC20FailedOperation","type":"error"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"ratio","type":"uint256"}],"name":"ConversionRatioUpdated","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"bool","name":"enabled","type":"bool"}],"name":"DepositsToggled","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"account","type":"address"},{"indexed":false,"internalType":"uint256","name":"legacyAmount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"governanceMinted","type":"uint256"}],"name":"LegacyDeposited","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferStarted","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"inputs":[],"name":"acceptOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"bool","name":"authorized","type":"bool"}],"name":"authorizeMigrationContract","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"conversionRatio","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"address","name":"beneficiary","type":"address"}],"name":"depositLegacy","outputs":[{"internalType":"uint256","name":"minted","type":"uint256"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"depositsEnabled","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"governanceToken","outputs":[{"internalType":"contract NYALTXGovernanceToken","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"legacyToken","outputs":[{"internalType":"contract IERC20","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"pendingOwner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"ratio","type":"uint256"}],"name":"setConversionRatio","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"bool","name":"enabled","type":"bool"}],"name":"setDepositsEnabled","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"}],
   
   nyaxGovernor: [
     // Core Governor view/pure functions
