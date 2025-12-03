@@ -8,11 +8,17 @@ const LEGACY_TOKEN_ABI = [
   'function balanceOf(address account) view returns (uint256)',
 ];
 
+type LegacyTokenContract = ethers.Contract & {
+  allowance(owner: string, spender: string): Promise<bigint>;
+  approve(spender: string, amount: bigint): Promise<ethers.TransactionResponse>;
+  balanceOf(account: string): Promise<bigint>;
+};
+
 export class MigrationVaultService {
   private provider: ethers.Provider;
   private signer?: ethers.Signer;
   private contract: ethers.Contract;
-  private legacyToken?: ethers.Contract;
+  private legacyToken?: LegacyTokenContract;
 
   constructor(provider: ethers.Provider, signer?: ethers.Signer) {
     if (!CONTRACT_ADDRESSES.legacyMigrationVault) {
@@ -32,7 +38,7 @@ export class MigrationVaultService {
         CONTRACT_ADDRESSES.legacyToken,
         LEGACY_TOKEN_ABI,
         signer || provider
-      );
+      ) as LegacyTokenContract;
     }
   }
 
