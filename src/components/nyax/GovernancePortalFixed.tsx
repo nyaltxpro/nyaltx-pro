@@ -252,7 +252,7 @@ export default function NYALTXGovernance() {
     };
 
     return (
-        <div className="min-h-screen bg-linear-to-br from-[#05060d] via-[#070b1a] to-[#09090e] text-white px-4 py-8">
+        <div className="min-h-screen  text-white px-4 py-8">
             <div className="max-w-7xl mx-auto space-y-8">
                 {/* Header */}
                 <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl px-6 py-8 sm:px-8 sm:py-10 shadow-[0_25px_70px_rgba(7,13,30,0.55)]">
