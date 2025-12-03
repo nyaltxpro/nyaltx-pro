@@ -3,7 +3,6 @@
 import { useDAOService } from '@/hooks/useDAOService';
 import { useMigrationVault } from '@/hooks/useMigrationVault';
 import { GovernanceStats, ProposalData, StakingStats, TreasuryTransfer } from '@/services/contracts/types';
-import { ethers } from 'ethers';
 import { Activity, ArrowUpRight, CheckCircle, Clock, Coins, FilePlus2, Globe, Layers, Plus, Shield, Trash2, TrendingUp, Users, XCircle } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Area, AreaChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
@@ -873,7 +872,7 @@ export default function NYALTXGovernance() {
                                                 {proposal.status.toUpperCase()}
                                             </span> */}
                                             <h3 className="text-xl font-semibold">
-                                                {ethers.decodeBytes32String(proposal.description)}</h3>
+                                                {proposal.description}</h3>
                                         </div>
                                         <p className="text-gray-400 text-sm">Proposal #{proposal.id}</p>
                                     </div>
