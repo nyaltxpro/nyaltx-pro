@@ -428,6 +428,15 @@ export default function AdminDashboardFixed() {
         }
     };
 
+    const handleFolderLockAction = async (folderId: number, lock: boolean) => {
+        try {
+            await setFolderLockState(folderId, lock);
+            setFormError(null);
+        } catch (err) {
+            setFormError(err instanceof Error ? err.message : 'Failed to update lock state');
+        }
+    };
+
     const handleRevoke = async (folderId: number, account: string) => {
         try {
             await revokeAllocation(folderId, account);
@@ -761,6 +770,17 @@ export default function AdminDashboardFixed() {
                         className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-blue-400/40 text-blue-200 text-sm hover:bg-blue-500/10 disabled:opacity-40"
                     >
                         <KeySquare className="w-4 h-4" /> Edit folder
+                    </button>
+                    <button
+                        onClick={async e => {
+                            e.stopPropagation();
+                            await handleFolderLockAction(folder.id, !folder.locked);
+                        }}
+                        disabled={!isConnected || loading}
+                        className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl border text-sm hover:bg-white/10 disabled:opacity-40 ${folder.locked ? 'border-green-400/40 text-green-200' : 'border-red-400/40 text-red-200'}`}
+                    >
+                        <Lock className="w-4 h-4" />
+                        {folder.locked ? 'Unlock tokens' : 'Lock tokens'}
                     </button>
                 </div>
             </div>
