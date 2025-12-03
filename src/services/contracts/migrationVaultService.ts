@@ -2,7 +2,7 @@ import { ethers } from 'ethers';
 import { CONTRACT_ABIS, CONTRACT_ADDRESSES } from './config';
 import { ContractError, LegacyDepositEvent, LegacyDepositResult, MigrationVaultStats } from './types';
 
-const ERC20_ABI = ['function allowance(address owner, address spender) view returns (uint256)'];
+const ERC20_ABI = CONTRACT_ABIS.legacyMigrationVault
 
 export class MigrationVaultService {
   private provider: ethers.Provider;
