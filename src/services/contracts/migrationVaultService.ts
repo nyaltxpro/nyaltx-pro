@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 import { CONTRACT_ABIS, CONTRACT_ADDRESSES } from './config';
-import { ContractError, LegacyDepositEvent, LegacyDepositResult, MigrationVaultStats } from './types';
+import { ContractError, LegacyDepositEvent, MigrationVaultStats } from './types';
 
 const ERC20_ABI = CONTRACT_ABIS.legacyMigrationVault
 
@@ -48,7 +48,7 @@ export class MigrationVaultService {
     };
   }
 
-  async depositLegacy(amount: string, beneficiary?: string): Promise<LegacyDepositResult> {
+  async depositLegacy(amount: string, beneficiary?: string): Promise<any> {
     this.ensureSigner('deposit legacy tokens');
 
     const amountWei = ethers.parseEther(amount);
@@ -56,21 +56,23 @@ export class MigrationVaultService {
     await this.ensureDepositPreconditions(signerAddress, amountWei);
 
     try {
-      const tx = await this.contract.depositLegacy(amountWei, beneficiary ?? ethers.ZeroAddress);
+      console.log("in function")
+      const tx = await this.contract.depositLegacy(amountWei, beneficiary);
       const receipt = await tx.wait();
 
-      const legacyDeposit = this.extractLegacyDepositFromReceipt(receipt);
-      const minted = legacyDeposit
-        ? ethers.formatEther(legacyDeposit.governanceMinted)
-        : await this.estimateMintedAmount(amount);
+      // const legacyDeposit = this.extractLegacyDepositFromReceipt(receipt);
+      // const minted = legacyDeposit
+      //   ? ethers.formatEther(legacyDeposit.governanceMinted)
+      //   : await this.estimateMintedAmount(amount);
 
       return {
         txHash: receipt.hash,
-        mintedAmount: minted,
+        // mintedAmount: minted,
       };
     } catch (error) {
-      const message = this.describeDepositError(error);
-      throw new Error(message);
+      // const message = this.describeDepositError(error);
+      // throw new Error(message);
+      console.log(error)
     }
   }
 
