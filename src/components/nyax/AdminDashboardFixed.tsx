@@ -531,7 +531,7 @@ export default function AdminDashboardFixed() {
 
 
     return (
-        <div className="min-h-screen bg-linear-to-br from-[#05060d] via-[#0b1120] to-[#111] text-white">
+        <div className="min-h-screen  text-white">
             <div className="max-w-7xl mx-auto space-y-10 px-4 py-10">
                 <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-8 lg:p-10 shadow-[0_25px_80px_rgba(8,19,44,0.45)]">
                     <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
