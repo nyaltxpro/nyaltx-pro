@@ -4,7 +4,7 @@ import Image, { ImageProps } from 'next/image';
 
 const CRYPTOCURRENCY_ICON_PATHS = {
     abstract: '/chains/abstract.webp',
-    algorand: '/chains/algorand.webp',
+    algorand: '/algorand.png',
     apechain: '/chains/apechain.webp',
     aptos: '/chains/aptos.svg',
     arbitrum: '/chains/arbitrum.svg',
@@ -91,6 +91,7 @@ const CRYPTOCURRENCY_ICON_PATHS = {
     unichain: '/chains/unichain.webp',
     vana: '/chains/vana.webp',
     velas: '/chains/velas.svg',
+    vechain: '/vechain.png',
     venom: '/chains/venom.webp',
     worldchain: '/chains/worldchain.webp',
     xrpl: '/chains/xrpl.webp',

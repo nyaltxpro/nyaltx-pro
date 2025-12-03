@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
-import { FiChevronDown } from 'react-icons/fi';
 import Image from 'next/image';
+import React, { useState } from 'react';
+import { FiChevronDown } from 'react-icons/fi';
 
 // Define the blockchain networks with their respective image paths
 const blockchainNetworks = [
   { id: 'ethereum', name: 'Ethereum', imagePath: '/ethereum.svg' },
+  { id: 'algorand', name: 'Algorand', imagePath: '/algorand.png' },
   { id: 'bsc', name: 'Binance Smart Chain', imagePath: '/bsc.svg' },
   { id: 'polygon', name: 'Polygon', imagePath: '/polygon.svg' },
   { id: 'arbitrum', name: 'Arbitrum', imagePath: '/arbitrum.svg' },
@@ -23,6 +24,7 @@ const blockchainNetworks = [
   { id: 'metis', name: 'Metis', imagePath: '/metis.svg' },
   { id: 'moonbeam', name: 'Moonbeam', imagePath: '/moonbeam.svg' },
   { id: 'scroll', name: 'Scroll', imagePath: '/scroll.svg' },
+  { id: 'vechain', name: 'VeChain', imagePath: '/vechain.png' },
 ];
 
 interface AllChainsDropdownProps {

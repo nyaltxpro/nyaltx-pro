@@ -52,6 +52,7 @@ contract FolderRegistry is AccessControl, ReentrancyGuard {
         uint32 defaultPermissions;
         VestingTemplate template;
         uint256 totalAllocated;
+        bool locked;
         bool exists;
     }
 
@@ -70,6 +71,7 @@ contract FolderRegistry is AccessControl, ReentrancyGuard {
 
     event FolderCreated(uint256 indexed folderId, string name, uint32 permissions);
     event FolderUpdated(uint256 indexed folderId, uint32 permissions, VestingTemplate template);
+    event FolderLockStateChanged(uint256 indexed folderId, bool locked);
     event AllocationSet(uint256 indexed folderId, address indexed account, uint256 amount, VestingSchedule vesting, uint32 permissions);
     event AllocationClaimed(uint256 indexed folderId, address indexed account, uint256 amount);
     event AllocationRevoked(uint256 indexed folderId, address indexed account);
@@ -90,6 +92,7 @@ contract FolderRegistry is AccessControl, ReentrancyGuard {
             defaultPermissions: permissions,
             template: template,
             totalAllocated: 0,
+            locked: false,
             exists: true
         });
         emit FolderCreated(folderId, name, permissions);
@@ -106,6 +109,13 @@ contract FolderRegistry is AccessControl, ReentrancyGuard {
         emit FolderUpdated(folderId, permissions, template);
     }
 
+    function setFolderLocked(uint256 folderId, bool locked) external onlyRole(MANAGER_ROLE) {
+        Folder storage folder = folders[folderId];
+        require(folder.exists, "missing");
+        folder.locked = locked;
+        emit FolderLockStateChanged(folderId, locked);
+    }
+
     function setAllocation(
         uint256 folderId,
         address account,
@@ -115,8 +125,8 @@ contract FolderRegistry is AccessControl, ReentrancyGuard {
     ) external onlyRole(MANAGER_ROLE) {
         Folder storage folder = folders[folderId];
         require(folder.exists, "missing");
+        require(!folder.locked, "locked");
         require(account != address(0), "account zero");
-
         Allocation storage allocation = _allocations[folderId][account];
         if (!allocation.exists) {
             allocation.exists = true;
@@ -131,6 +141,8 @@ contract FolderRegistry is AccessControl, ReentrancyGuard {
     }
 
     function claim(uint256 folderId, address account, uint256 amount) external onlyRole(MANAGER_ROLE) {
+        Folder storage folder = folders[folderId];
+        require(!folder.locked, "locked");
         Allocation storage allocation = _allocations[folderId][account];
         require(allocation.exists, "missing");
         uint256 unlocked = unlockedTokens(folderId, account, uint64(block.timestamp));

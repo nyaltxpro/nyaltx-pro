@@ -198,6 +198,13 @@ export const CONTRACT_ABIS = {
     'function revoke(uint256 folderId, address account)'
   ],
   
+  treasuryBridge: [
+    'function TREASURY_CONTROLLER_ROLE() view returns (bytes32)',
+    'function transferTreasuryToken(address token, address to, uint256 amount, bytes32 referenceId)',
+    'function transferTreasuryETH(address to, uint256 amount, bytes32 referenceId)',
+    'event TreasuryTransfer(address indexed token, address indexed to, uint256 amount, bytes32 referenceId)'
+  ],
+  
   staking: [
     'function MIN_LOCK() view returns (uint64)',
     'function MAX_LOCK() view returns (uint64)',

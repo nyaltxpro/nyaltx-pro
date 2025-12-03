@@ -6,6 +6,7 @@ import { GovernanceService } from './governanceService';
 import { MigrationVaultService } from './migrationVaultService';
 import { MultisigService } from './multisigService';
 import { StakingService } from './stakingService';
+import { TreasuryBridgeService } from './treasuryBridgeService';
 import { TreasuryService } from './treasuryService';
 import { VestingService } from './vestingService';
 
@@ -20,6 +21,7 @@ export class DAOService {
   public folders: FolderRegistryService;
   public staking: StakingService;
   public migrationVault: MigrationVaultService;
+  public treasuryBridge: TreasuryBridgeService;
 
   constructor(provider: ethers.Provider, signer?: ethers.Signer) {
     this.provider = provider;
@@ -33,6 +35,7 @@ export class DAOService {
     this.folders = new FolderRegistryService(provider, signer);
     this.staking = new StakingService(provider, signer);
     this.migrationVault = new MigrationVaultService(provider, signer);
+    this.treasuryBridge = new TreasuryBridgeService(provider, signer);
   }
 
   // Factory method to create DAO service with Web3 provider
@@ -72,6 +75,7 @@ export class DAOService {
     this.folders = new FolderRegistryService(this.provider, this.signer);
     this.staking = new StakingService(this.provider, this.signer);
     this.migrationVault = new MigrationVaultService(this.provider, this.signer);
+    this.treasuryBridge = new TreasuryBridgeService(this.provider, this.signer);
   }
 
   // Utility methods

@@ -135,6 +135,25 @@ export function useFolderRegistry() {
     [daoService, fetchFolders, fetchMembers]
   );
 
+  const setFolderLockState = useCallback(
+    async (folderId: number, locked: boolean) => {
+      if (!daoService) throw new Error('DAO service not initialized');
+      setActionPending(true);
+      setError(null);
+      try {
+        await daoService.folders.setFolderLocked(folderId, locked);
+        await fetchFolders();
+      } catch (err) {
+        console.error('Failed to update folder lock state', err);
+        setError(err instanceof Error ? err.message : 'Failed to update lock state');
+        throw err;
+      } finally {
+        setActionPending(false);
+      }
+    },
+    [daoService, fetchFolders]
+  );
+
   useEffect(() => {
     if (!serviceLoading && daoService) {
       fetchFolders();
@@ -164,5 +183,6 @@ export function useFolderRegistry() {
     updateFolder,
     setFolderAllocation,
     revokeAllocation,
+    setFolderLockState,
   };
 }

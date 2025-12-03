@@ -2262,8 +2262,8 @@
       ]
     },
     "/Users/mac/CascadeProjects/2048/contracts/contracts/FolderRegistery.sol": {
-      "lastModificationDate": 1764465447522,
-      "contentHash": "fb8aea7456b6028d220356c06ad09361",
+      "lastModificationDate": 1764736251017,
+      "contentHash": "f65f409f8b8c024403cfb39f1b750c52",
       "sourceName": "contracts/FolderRegistery.sol",
       "solcConfig": {
         "version": "0.8.25",
@@ -2645,8 +2645,8 @@
       ]
     },
     "/Users/mac/CascadeProjects/2048/contracts/contracts/NyaltxStaking.sol": {
-      "lastModificationDate": 1764457844002,
-      "contentHash": "6130ed6019bdf4eb3ba728511daeadbe",
+      "lastModificationDate": 1764716938814,
+      "contentHash": "3076bcc8b2cc2689a3170170d90ec9ac",
       "sourceName": "contracts/NyaltxStaking.sol",
       "solcConfig": {
         "version": "0.8.25",

@@ -51,6 +51,7 @@ export class FolderRegistryService {
         duration: Number(data.template.duration),
         revocable: Boolean(data.template.revocable),
       },
+      locked: Boolean(data.locked),
       exists: data.exists,
       members,
     };
@@ -124,6 +125,13 @@ export class FolderRegistryService {
   async revokeAllocation(folderId: number, account: string): Promise<string> {
     this.ensureSigner('revoke allocation');
     const tx = await this.contract.revoke(folderId, account);
+    const receipt = await tx.wait();
+    return receipt.hash;
+  }
+
+  async setFolderLocked(folderId: number, locked: boolean): Promise<string> {
+    this.ensureSigner(locked ? 'lock folder' : 'unlock folder');
+    const tx = await this.contract.setFolderLocked(folderId, locked);
     const receipt = await tx.wait();
     return receipt.hash;
   }

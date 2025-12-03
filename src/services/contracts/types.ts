@@ -29,6 +29,7 @@ export interface FolderInfo {
   defaultPermissions: number;
   totalAllocated: string;
   template: FolderTemplate;
+  locked: boolean;
   exists: boolean;
   members: string[];
 }
