@@ -1,9 +1,11 @@
 'use client'
+
 import { useDAOService } from '@/hooks/useDAOService';
 import { useMigrationVault } from '@/hooks/useMigrationVault';
 import { GovernanceStats, ProposalData, StakingStats, TreasuryTransfer } from '@/services/contracts/types';
-import { Activity, ArrowUpRight, CheckCircle, Clock, Coins, Globe, Layers, Shield, TrendingUp, Users, XCircle } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { ethers } from 'ethers';
+import { Activity, ArrowUpRight, CheckCircle, Clock, Coins, FilePlus2, Globe, Layers, Plus, Shield, Trash2, TrendingUp, Users, XCircle } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Area, AreaChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { useAccount, useChainId } from 'wagmi';
 
@@ -12,6 +14,12 @@ type TabId = 'overview' | 'proposals' | 'transfers' | 'deposit';
 type TokenMetrics = {
     totalSupply: string;
     maxSupply: string;
+};
+
+type ProposalAction = {
+    target: string;
+    value: string;
+    calldata: string;
 };
 
 const formatNumber = (value: number | string | null | undefined, decimals = 2) => {
@@ -58,29 +66,33 @@ export default function NYALTXGovernance() {
     const [transfers, setTransfers] = useState<TreasuryTransfer[]>([]);
     const [transfersLoading, setTransfersLoading] = useState(false);
     const [transfersError, setTransfersError] = useState<string | null>(null);
+    const [showProposalForm, setShowProposalForm] = useState(false);
+    const [proposalTitle, setProposalTitle] = useState('');
+    const [proposalDescription, setProposalDescription] = useState('');
+    const [proposalActions, setProposalActions] = useState<ProposalAction[]>([{ target: '', value: '0', calldata: '0x' }]);
+    const [proposalSubmitting, setProposalSubmitting] = useState(false);
+    const [proposalAlert, setProposalAlert] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+    const [votingProposalId, setVotingProposalId] = useState<string | null>(null);
+    const [voteFeedback, setVoteFeedback] = useState<Record<string, { type: 'success' | 'error'; message: string } | null>>({});
+
+    const refreshGovernanceData = useCallback(async () => {
+        if (!daoService) return;
+        try {
+            const [stats, proposalList] = await Promise.all([
+                daoService.governance.getGovernanceStats(),
+                daoService.governance.getAllProposals(),
+            ]);
+            setGovernanceStats(stats);
+            setProposals(proposalList);
+        } catch (error) {
+            console.error('Failed to load governance data', error);
+        }
+    }, [daoService]);
 
     useEffect(() => {
         if (!daoService) return;
-        let cancelled = false;
-        const loadGovernance = async () => {
-            try {
-                const [stats, proposalList] = await Promise.all([
-                    daoService.governance.getGovernanceStats(),
-                    daoService.governance.getAllProposals(),
-                ]);
-                if (!cancelled) {
-                    setGovernanceStats(stats);
-                    setProposals(proposalList);
-                }
-            } catch (error) {
-                console.error('Failed to load governance data', error);
-            }
-        };
-        loadGovernance();
-        return () => {
-            cancelled = true;
-        };
-    }, [daoService]);
+        refreshGovernanceData();
+    }, [daoService, refreshGovernanceData]);
 
     useEffect(() => {
         if (!daoService) return;
@@ -209,6 +221,18 @@ export default function NYALTXGovernance() {
         setLegacyDeposit(prev => ({ ...prev, beneficiary: address ?? '' }));
     }, [address]);
 
+    const addProposalAction = useCallback(() => {
+        setProposalActions((prev) => [...prev, { target: '', value: '0', calldata: '0x' }]);
+    }, []);
+
+    const removeProposalAction = useCallback((index: number) => {
+        setProposalActions((prev) => (prev.length === 1 ? prev : prev.filter((_, i) => i !== index)));
+    }, []);
+
+    const updateProposalAction = useCallback((index: number, field: keyof ProposalAction, value: string) => {
+        setProposalActions((prev) => prev.map((action, i) => (i === index ? { ...action, [field]: value } : action)));
+    }, []);
+
     const getDepositErrorMessage = (error: unknown) => {
         if (typeof error === 'object' && error !== null && 'code' in error) {
             const err = error as { code?: string | number; message?: string };
@@ -217,6 +241,89 @@ export default function NYALTXGovernance() {
         }
         return 'Deposit failed. Please try again.';
     };
+
+    const handleCreateProposal = useCallback(async () => {
+        if (!daoService) {
+            setProposalAlert({ type: 'error', message: 'DAO service not initialized yet.' });
+            return;
+        }
+        if (!isConnected) {
+            setProposalAlert({ type: 'error', message: 'Connect your wallet to submit proposals.' });
+            return;
+        }
+        if (!onRequiredNetwork) {
+            setProposalAlert({ type: 'error', message: 'Switch to Ethereum Sepolia (chain ID 11155111) to submit proposals.' });
+            return;
+        }
+        if (!proposalTitle.trim() || !proposalDescription.trim()) {
+            setProposalAlert({ type: 'error', message: 'Title and description are required.' });
+            return;
+        }
+        if (proposalActions.some((action) => !action.target.trim())) {
+            setProposalAlert({ type: 'error', message: 'Each action needs a target contract address.' });
+            return;
+        }
+
+        setProposalSubmitting(true);
+        setProposalAlert(null);
+
+        try {
+            const targets = proposalActions.map((action) => action.target.trim());
+            const values = proposalActions.map((action) => (action.value.trim() ? action.value.trim() : '0'));
+            const calldatas = proposalActions.map((action) => {
+                const data = action.calldata.trim();
+                if (!data) return '0x';
+                return data.startsWith('0x') ? data : `0x${data}`;
+            });
+            const formattedDescription = `# ${proposalTitle.trim()}\n\n${proposalDescription.trim()}`;
+
+            const proposalId = await daoService.governance.createProposal(targets, values, calldatas, formattedDescription);
+            setProposalAlert({ type: 'success', message: proposalId ? `Proposal submitted (ID: ${proposalId})` : 'Proposal submitted successfully.' });
+            setProposalTitle('');
+            setProposalDescription('');
+            setProposalActions([{ target: '', value: '0', calldata: '0x' }]);
+            await refreshGovernanceData();
+        } catch (error) {
+            console.error('Failed to create proposal', error);
+            const message = error instanceof Error ? error.message : 'Failed to create proposal. Please try again.';
+            setProposalAlert({ type: 'error', message });
+        } finally {
+            setProposalSubmitting(false);
+        }
+    }, [daoService, isConnected, onRequiredNetwork, proposalTitle, proposalDescription, proposalActions, refreshGovernanceData]);
+
+    const handleVote = useCallback(
+        async (proposalId: string, support: 0 | 1 | 2) => {
+            if (!daoService) {
+                setVoteFeedback((prev) => ({ ...prev, [proposalId]: { type: 'error', message: 'DAO service not initialized yet.' } }));
+                return;
+            }
+            if (!isConnected) {
+                setVoteFeedback((prev) => ({ ...prev, [proposalId]: { type: 'error', message: 'Connect your wallet to vote.' } }));
+                return;
+            }
+            if (!onRequiredNetwork) {
+                setVoteFeedback((prev) => ({ ...prev, [proposalId]: { type: 'error', message: 'Switch to Ethereum Sepolia (chain ID 11155111) to vote.' } }));
+                return;
+            }
+
+            setVotingProposalId(proposalId);
+            setVoteFeedback((prev) => ({ ...prev, [proposalId]: null }));
+
+            try {
+                await daoService.governance.castVote(proposalId, support);
+                setVoteFeedback((prev) => ({ ...prev, [proposalId]: { type: 'success', message: 'Vote submitted successfully.' } }));
+                await refreshGovernanceData();
+            } catch (error) {
+                console.error('Failed to cast vote', error);
+                const message = error instanceof Error ? error.message : 'Failed to cast vote. Please try again.';
+                setVoteFeedback((prev) => ({ ...prev, [proposalId]: { type: 'error', message } }));
+            } finally {
+                setVotingProposalId(null);
+            }
+        },
+        [daoService, isConnected, onRequiredNetwork, refreshGovernanceData]
+    );
 
     const handleLegacyDeposit = async () => {
         if (!isConnected) {
@@ -617,6 +724,146 @@ export default function NYALTXGovernance() {
                 {/* Proposals Tab */}
                 {activeTab === 'proposals' && (
                     <div className="space-y-4">
+                        <div className="rounded-3xl bg-gray-900/60 border border-white/10 p-6 shadow-2xl shadow-indigo-900/10">
+                            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                                <div>
+                                    <div className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-indigo-200/70">
+                                        <FilePlus2 size={14} /> Create Proposal
+                                    </div>
+                                    <h3 className="text-2xl font-semibold mt-2">Push a new governance action on-chain</h3>
+                                    <p className="text-sm text-gray-400 mt-1 max-w-2xl">
+                                        Draft callable payloads, bundle multiple targets, and broadcast through the NYALTX governor contract.
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={() => setShowProposalForm((prev) => !prev)}
+                                    className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition ${showProposalForm ? 'bg-white text-indigo-600 shadow-lg' : 'bg-white/10 text-white hover:bg-white/20'}`}
+                                >
+                                    <Plus size={16} /> {showProposalForm ? 'Hide builder' : 'Open builder'}
+                                </button>
+                            </div>
+
+                            {proposalAlert && (
+                                <div
+                                    className={`mt-6 rounded-2xl border p-4 text-sm ${proposalAlert.type === 'success'
+                                        ? 'border-emerald-400/40 bg-emerald-400/10 text-emerald-200'
+                                        : 'border-red-400/40 bg-red-400/10 text-red-200'
+                                        }`}
+                                >
+                                    {proposalAlert.message}
+                                </div>
+                            )}
+
+                            {showProposalForm && (
+                                <div className="mt-6 space-y-6">
+                                    <div>
+                                        <label className="text-xs uppercase tracking-[0.3em] text-gray-400">Proposal title</label>
+                                        <input
+                                            type="text"
+                                            value={proposalTitle}
+                                            onChange={(e) => setProposalTitle(e.target.value)}
+                                            placeholder="Add a descriptive title"
+                                            className="mt-2 w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white placeholder:text-gray-500 focus:border-indigo-400/70 focus:outline-none"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-xs uppercase tracking-[0.3em] text-gray-400">Description</label>
+                                        <textarea
+                                            value={proposalDescription}
+                                            onChange={(e) => setProposalDescription(e.target.value)}
+                                            placeholder="Explain the motivation, execution steps, and impact. Markdown encouraged."
+                                            rows={4}
+                                            className="mt-2 w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white placeholder:text-gray-500 focus:border-indigo-400/70 focus:outline-none"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Actions</p>
+                                                <p className="text-sm text-gray-500">Each action is a single contract call.</p>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={addProposalAction}
+                                                className="inline-flex items-center gap-2 rounded-full border border-white/10 px-3 py-1.5 text-xs text-white hover:bg-white/10"
+                                            >
+                                                <Plus size={14} /> Add action
+                                            </button>
+                                        </div>
+
+                                        {proposalActions.map((action, index) => (
+                                            <div key={`proposal-action-${index}`} className="rounded-2xl border border-white/10 bg-black/30 p-4 space-y-3">
+                                                <div className="flex items-center justify-between text-sm text-gray-400">
+                                                    <span>Action {index + 1}</span>
+                                                    {proposalActions.length > 1 && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => removeProposalAction(index)}
+                                                            className="text-red-400 hover:text-red-300"
+                                                        >
+                                                            <Trash2 size={16} />
+                                                        </button>
+                                                    )}
+                                                </div>
+                                                <div className="grid gap-3 md:grid-cols-3">
+                                                    <div className="space-y-2">
+                                                        <label className="text-xs text-gray-400">Target contract</label>
+                                                        <input
+                                                            type="text"
+                                                            value={action.target}
+                                                            onChange={(e) => updateProposalAction(index, 'target', e.target.value)}
+                                                            placeholder="0x..."
+                                                            className="w-full rounded-xl border border-white/10 bg-gray-900/40 px-3 py-2 text-sm text-white placeholder:text-gray-500 focus:border-indigo-400/70 focus:outline-none"
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <label className="text-xs text-gray-400">ETH value</label>
+                                                        <input
+                                                            type="text"
+                                                            value={action.value}
+                                                            onChange={(e) => updateProposalAction(index, 'value', e.target.value)}
+                                                            placeholder="0"
+                                                            className="w-full rounded-xl border border-white/10 bg-gray-900/40 px-3 py-2 text-sm text-white placeholder:text-gray-500 focus:border-indigo-400/70 focus:outline-none"
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <label className="text-xs text-gray-400">Calldata</label>
+                                                        <input
+                                                            type="text"
+                                                            value={action.calldata}
+                                                            onChange={(e) => updateProposalAction(index, 'calldata', e.target.value)}
+                                                            placeholder="0x"
+                                                            className="w-full rounded-xl border border-white/10 bg-gray-900/40 px-3 py-2 text-sm text-white placeholder:text-gray-500 focus:border-indigo-400/70 focus:outline-none"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    <button
+                                        type="button"
+                                        onClick={handleCreateProposal}
+                                        disabled={proposalSubmitting}
+                                        className="w-full rounded-2xl bg-linear-to-r from-indigo-500 via-blue-500 to-purple-500 px-6 py-3 text-sm font-semibold uppercase tracking-wide transition disabled:opacity-60"
+                                    >
+                                        {proposalSubmitting ? 'Submitting...' : 'Create proposal'}
+                                    </button>
+
+                                    {!isConnected && (
+                                        <div className="rounded-2xl border border-yellow-400/40 bg-yellow-400/10 p-4 text-sm text-yellow-200">
+                                            Connect your wallet to create proposals.
+                                        </div>
+                                    )}
+                                    {!onRequiredNetwork && isConnected && (
+                                        <div className="rounded-2xl border border-orange-400/40 bg-orange-400/10 p-4 text-sm text-orange-200">
+                                            Switch to Ethereum Sepolia (chain ID 11155111) to submit this proposal.
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
                         {proposals.map((proposal) => (
                             <div key={proposal.id} className="bg-gray-800/50 backdrop-blur rounded-xl p-6 border border-gray-700">
                                 <div className="flex items-start justify-between mb-4">
@@ -625,7 +872,8 @@ export default function NYALTXGovernance() {
                                             {/* <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(proposal.status)} bg-opacity-20 ${getStatusColor(proposal.status).replace('bg-', 'text-')}`}>
                                                 {proposal.status.toUpperCase()}
                                             </span> */}
-                                            <h3 className="text-xl font-semibold">{proposal.description}</h3>
+                                            <h3 className="text-xl font-semibold">
+                                                {ethers.decodeBytes32String(proposal.description)}</h3>
                                         </div>
                                         <p className="text-gray-400 text-sm">Proposal #{proposal.id}</p>
                                     </div>
@@ -668,15 +916,33 @@ export default function NYALTXGovernance() {
                                         </span>
                                         {proposal.status === 'active' && (
                                             <div className="flex gap-2">
-                                                <button className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-sm font-semibold transition-colors">
-                                                    Vote For
+                                                <button
+                                                    className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-sm font-semibold transition-colors disabled:opacity-60"
+                                                    onClick={() => handleVote(proposal.id, 1)}
+                                                    disabled={votingProposalId === proposal.id}
+                                                >
+                                                    {votingProposalId === proposal.id ? 'Voting…' : 'Vote For'}
                                                 </button>
-                                                <button className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-sm font-semibold transition-colors">
-                                                    Vote Against
+                                                <button
+                                                    className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-sm font-semibold transition-colors disabled:opacity-60"
+                                                    onClick={() => handleVote(proposal.id, 0)}
+                                                    disabled={votingProposalId === proposal.id}
+                                                >
+                                                    {votingProposalId === proposal.id ? 'Voting…' : 'Vote Against'}
                                                 </button>
                                             </div>
                                         )}
                                     </div>
+                                    {voteFeedback[proposal.id] && (
+                                        <p
+                                            className={`text-xs mt-2 ${voteFeedback[proposal.id]?.type === 'success'
+                                                ? 'text-emerald-300'
+                                                : 'text-red-300'
+                                                }`}
+                                        >
+                                            {voteFeedback[proposal.id]?.message}
+                                        </p>
+                                    )}
                                 </div>
                             </div>
                         ))}
