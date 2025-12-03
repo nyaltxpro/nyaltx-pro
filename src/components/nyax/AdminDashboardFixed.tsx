@@ -543,7 +543,7 @@ export default function AdminDashboardFixed() {
                                 </span>
                             )}
 
-                            <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-6">
+                            {/* <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-6">
                                 <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                                     <div className="space-y-2">
                                         <h2 className="text-2xl font-semibold flex items-center gap-3">
@@ -698,7 +698,7 @@ export default function AdminDashboardFixed() {
                                         </div>
                                     )}
                                 </div>
-                            </div>
+                            </div> */}
                         </h3>
                         <p className="text-gray-400 text-sm">{memberCount} token holders</p>
                     </div>
