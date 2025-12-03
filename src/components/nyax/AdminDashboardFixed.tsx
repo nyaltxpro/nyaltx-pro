@@ -659,7 +659,7 @@ export default function AdminDashboardFixed() {
                     </div>
                 </div>
 
-                <div className="rounded-3xl border border-white/10 bg-black/30 backdrop-blur-xl p-6">
+                {/* <div className="rounded-3xl border border-white/10 bg-black/30 backdrop-blur-xl p-6">
                     <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
                         <div>
                             <p className="text-xs uppercase tracking-[0.4em] text-gray-400">Allocations</p>
@@ -700,7 +700,7 @@ export default function AdminDashboardFixed() {
                             <p className="mt-1">Confirm the transaction, then sync members to view the latest balances.</p>
                         </div>
                     </div>
-                </div>
+                </div> */}
 
                 <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-6">
                     <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
