@@ -1,11 +1,11 @@
-import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { verifyMessage } from 'viem';
 import { AdminCookie, signAdminJWT } from '@/lib/adminAuth';
+import { cookies } from 'next/headers';
+import { NextResponse } from 'next/server';
+import { verifyMessage } from 'viem';
 
 function getAllowedAdminAddresses(): string[] {
   const csv =
-    '0x77B6321d2888aa62f2A42620852FEe8eeDcfA77b,0x81ba7b98e49014bff22f811e9405640bc2b39cc0';
+    '0xda791a424b294a594D81b09A86531CB1Dcf6b932,0x81ba7b98e49014bff22f811e9405640bc2b39cc0';
   return csv
     .split(',')
     .map(s => s.trim().toLowerCase())

@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useAccount } from 'wagmi';
 import { RegisteredToken } from '@/types/token';
+import { useEffect, useState } from 'react';
+import { useAccount } from 'wagmi';
 
 const ADMIN_ADDRESSES = [
-  '0x77b6321d2888aa62f2a42620852fee8eedcfa77b',
+  '0xda791a424b294a594D81b09A86531CB1Dcf6b932',
   '0x81ba7b98e49014bff22f811e9405640bc2b39cc0',
 ];
 
