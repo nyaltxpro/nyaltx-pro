@@ -285,7 +285,7 @@ export class GovernanceService {
     return {
       id: proposalId,
       title: this.extractTitle(description),
-      description:descriptionHash,
+      description,
       proposer,
       status: this.mapProposalState(Number(stateOrdinal)),
       forVotes: ethers.formatEther(forVotes),

@@ -1,8 +1,12 @@
 import { ethers } from 'ethers';
 import { CONTRACT_ABIS, CONTRACT_ADDRESSES } from './config';
-import { ContractError, LegacyDepositEvent, MigrationVaultStats } from './types';
+import { ContractError, LegacyDepositEvent, LegacyDepositResult, MigrationVaultStats } from './types';
 
-const ERC20_ABI = CONTRACT_ABIS.legacyMigrationVault
+const LEGACY_TOKEN_ABI = [
+  'function allowance(address owner, address spender) view returns (uint256)',
+  'function approve(address spender, uint256 amount) returns (bool)',
+  'function balanceOf(address account) view returns (uint256)',
+];
 
 export class MigrationVaultService {
   private provider: ethers.Provider;
@@ -26,7 +30,7 @@ export class MigrationVaultService {
     if (CONTRACT_ADDRESSES.legacyToken) {
       this.legacyToken = new ethers.Contract(
         CONTRACT_ADDRESSES.legacyToken,
-        ERC20_ABI,
+        LEGACY_TOKEN_ABI,
         signer || provider
       );
     }
@@ -48,7 +52,7 @@ export class MigrationVaultService {
     };
   }
 
-  async depositLegacy(amount: string, beneficiary?: string): Promise<any> {
+  async depositLegacy(amount: string, beneficiary?: string): Promise<LegacyDepositResult> {
     this.ensureSigner('deposit legacy tokens');
 
     const amountWei = ethers.parseEther(amount);
@@ -56,23 +60,21 @@ export class MigrationVaultService {
     await this.ensureDepositPreconditions(signerAddress, amountWei);
 
     try {
-      console.log("in function")
-      const tx = await this.contract.depositLegacy(amountWei, beneficiary);
+      const tx = await this.contract.depositLegacy(amountWei, beneficiary ?? signerAddress);
       const receipt = await tx.wait();
 
-      // const legacyDeposit = this.extractLegacyDepositFromReceipt(receipt);
-      // const minted = legacyDeposit
-      //   ? ethers.formatEther(legacyDeposit.governanceMinted)
-      //   : await this.estimateMintedAmount(amount);
+      const legacyDeposit = this.extractLegacyDepositFromReceipt(receipt);
+      const minted = legacyDeposit
+        ? ethers.formatEther(legacyDeposit.governanceMinted)
+        : await this.estimateMintedAmount(amount);
 
       return {
         txHash: receipt.hash,
-        // mintedAmount: minted,
+        mintedAmount: minted,
       };
     } catch (error) {
-      // const message = this.describeDepositError(error);
-      // throw new Error(message);
-      console.log(error)
+      const message = this.describeDepositError(error);
+      throw new Error(message);
     }
   }
 
@@ -168,16 +170,24 @@ export class MigrationVaultService {
       throw new Error('Legacy deposits are currently disabled by governance.');
     }
 
-    if (this.legacyToken) {
-      try {
-        const allowance = await this.legacyToken.allowance(owner, this.contract.target as string);
-        if (allowance < amountWei) {
-          throw new Error('Approve the legacy vault to spend your legacy NYAX before depositing.');
-        }
-      } catch (error) {
-        console.error('Failed to read legacy token allowance', error);
-      }
+    await this.ensureSufficientAllowance(owner, amountWei);
+  }
+
+  private async ensureSufficientAllowance(owner: string, amountWei: bigint) {
+    if (!this.legacyToken) {
+      throw new Error('Legacy token contract not configured.');
     }
+
+    const allowance = await this.legacyToken.allowance(owner, this.contract.target as string);
+    if (allowance >= amountWei) return;
+
+    if (!this.signer) {
+      throw new Error('Signer required to approve legacy tokens. Connect a wallet first.');
+    }
+
+    const legacyWithSigner = this.legacyToken.connect(this.signer);
+    const approvalTx = await legacyWithSigner.approve(this.contract.target as string, amountWei);
+    await approvalTx.wait();
   }
 
   private extractLegacyDepositFromReceipt(receipt: ethers.TransactionReceipt) {
