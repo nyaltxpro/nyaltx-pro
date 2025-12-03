@@ -235,12 +235,19 @@ export class GovernanceService {
 
   private async fetchProposalDescription(proposalId: string): Promise<string> {
     try {
-      const filter = this.governorContract.filters.ProposalCreated(BigInt(proposalId));
+      const filter = this.governorContract.filters.ProposalCreated();
       const events = await this.governorContract.queryFilter(filter);
-      if (events.length === 0) return 'Proposal description unavailable';
-      const event = events[0] as ethers.EventLog;
-      const args = event.args as unknown as { description: string };
-      return args?.description ?? 'Proposal description unavailable';
+      const targetId = BigInt(proposalId);
+
+      for (const evt of events) {
+        const event = evt as ethers.EventLog;
+        const args = event.args as unknown as { proposalId?: bigint; description?: string };
+        if (args?.proposalId === targetId) {
+          return args.description ?? 'Proposal description unavailable';
+        }
+      }
+
+      return 'Proposal description unavailable';
     } catch (error) {
       console.error('Failed to fetch proposal description', error);
       return 'Proposal description unavailable';
