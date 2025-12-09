@@ -3,11 +3,13 @@
 import ConnectWalletButton from '@/components/ConnectWalletButton';
 import { useDAOService } from '@/hooks/useDAOService';
 import { useFolderRegistry } from '@/hooks/useFolderRegistry';
+import { CONTRACT_ABIS, CONTRACT_ADDRESSES } from '@/services/contracts';
 import { FolderInfo, MultisigTransaction } from '@/services/contracts/types';
 import { useAppKitAccount } from '@reown/appkit/react';
+import { ethers } from 'ethers';
 import { CalendarClock, Filter, Gavel, KeySquare, Loader2, Lock, Plus, Search, Shield, UserPlus2 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useAccount } from 'wagmi';
+import { useAccount, useChainId } from 'wagmi';
 
 const DAY_IN_SECONDS = 86_400;
 const PERMISSION_FLAGS = [
@@ -17,6 +19,27 @@ const PERMISSION_FLAGS = [
     { bit: 1 << 3, label: 'Transfer' },
     { bit: 1 << 4, label: 'Admin' },
     { bit: 1 << 5, label: 'Multisig Required' },
+];
+
+type ProposalAction = {
+    target: string;
+    value: string;
+    calldata: string;
+};
+
+const TOKEN_FUNCTION_PRESETS = [
+    {
+        key: 'enableTransfers',
+        label: 'NYAX: Enable transfers',
+        functionName: 'setTransfersEnabled',
+        args: [true],
+    },
+    {
+        key: 'disableTransfers',
+        label: 'NYAX: Disable transfers',
+        functionName: 'setTransfersEnabled',
+        args: [false],
+    },
 ];
 
 const formatNumber = (value: string | number) => {
@@ -55,6 +78,7 @@ export default function AdminDashboardFixed() {
     const { isConnected: isEvmConnected } = useAccount();
     const { isConnected: isAppKitConnected } = useAppKitAccount();
     const isConnected = isEvmConnected || isAppKitConnected;
+    const chainId = useChainId();
 
     const [searchValue, setSearchValue] = useState('');
     const [showAddModal, setShowAddModal] = useState(false);
@@ -87,11 +111,10 @@ export default function AdminDashboardFixed() {
     const [proposalForm, setProposalForm] = useState({
         title: '',
         description: '',
-        targets: '',
-        values: '',
-        calldatas: '',
     });
-    const [proposalResult, setProposalResult] = useState<string | null>(null);
+    const [proposalActions, setProposalActions] = useState<ProposalAction[]>([{ target: '', value: '0', calldata: '0x' }]);
+    const [proposalSubmitting, setProposalSubmitting] = useState(false);
+    const [proposalAlert, setProposalAlert] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
     const [selectedFolderId, setSelectedFolderId] = useState<number | null>(null);
     const [transfersEnabled, setTransfersEnabledState] = useState<boolean | null>(null);
@@ -115,6 +138,19 @@ export default function AdminDashboardFixed() {
     const [multisigTransactions, setMultisigTransactions] = useState<MultisigTransaction[]>([]);
     const [multisigStatus, setMultisigStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
     const [multisigLoading, setMultisigLoading] = useState(false);
+
+    const nyaxTokenAddress = CONTRACT_ADDRESSES.nyaxToken ?? '';
+    const nyaxTokenInterface = useMemo(() => {
+        try {
+            return new ethers.Interface(CONTRACT_ABIS.nyaxToken ?? []);
+        } catch (error) {
+            console.error('Failed to init NYAX token interface', error);
+            return null;
+        }
+    }, []);
+
+    const REQUIRED_CHAIN_ID = 11155111;
+    const onRequiredNetwork = chainId === REQUIRED_CHAIN_ID;
 
     const refreshMultisigTransactions = useCallback(async () => {
         if (!daoService) return;
@@ -445,45 +481,94 @@ export default function AdminDashboardFixed() {
         }
     };
 
-    const parseCommaOrNewline = (value: string) =>
-        value
-            .split(/[,\n]/)
-            .map(entry => entry.trim())
-            .filter(Boolean);
+    const addProposalAction = () => {
+        setProposalActions(prev => [...prev, { target: '', value: '0', calldata: '0x' }]);
+    };
+
+    const removeProposalAction = (index: number) => {
+        setProposalActions(prev => (prev.length === 1 ? prev : prev.filter((_, i) => i !== index)));
+    };
+
+    const updateProposalAction = (index: number, field: keyof ProposalAction, value: string) => {
+        setProposalActions(prev => prev.map((action, i) => (i === index ? { ...action, [field]: value } : action)));
+    };
+
+    const applyTokenFunctionPreset = (index: number, key: string) => {
+        const preset = TOKEN_FUNCTION_PRESETS.find(entry => entry.key === key);
+        if (!preset) return;
+        if (!nyaxTokenAddress) {
+            setProposalAlert({ type: 'error', message: 'NYAX token address not configured.' });
+            return;
+        }
+        if (!nyaxTokenInterface) {
+            setProposalAlert({ type: 'error', message: 'Unable to encode NYAX token function.' });
+            return;
+        }
+        try {
+            const data = nyaxTokenInterface.encodeFunctionData(preset.functionName, preset.args);
+            setProposalActions(prev =>
+                prev.map((action, i) =>
+                    i === index
+                        ? {
+                            ...action,
+                            target: nyaxTokenAddress,
+                            value: '0',
+                            calldata: data,
+                        }
+                        : action,
+                ),
+            );
+            setProposalAlert(null);
+        } catch (error) {
+            console.error('Failed to apply token preset', error);
+            setProposalAlert({ type: 'error', message: 'Failed to encode NYAX token calldata.' });
+        }
+    };
 
     const handleCreateProposal = async () => {
         if (!isConnected) {
-            setFormError('Connect a wallet to submit proposals.');
+            setProposalAlert({ type: 'error', message: 'Connect a wallet to submit proposals.' });
             return;
         }
         if (!daoService) {
-            setFormError('DAO service unavailable. Try reloading.');
+            setProposalAlert({ type: 'error', message: 'DAO service unavailable. Try reloading.' });
+            return;
+        }
+        if (!onRequiredNetwork) {
+            setProposalAlert({ type: 'error', message: 'Switch to Ethereum Sepolia (chain ID 11155111) to submit proposals.' });
             return;
         }
         if (!proposalForm.title.trim() || !proposalForm.description.trim()) {
-            setFormError('Title and description are required.');
+            setProposalAlert({ type: 'error', message: 'Title and description are required.' });
             return;
         }
-        const targets = parseCommaOrNewline(proposalForm.targets);
-        const values = parseCommaOrNewline(proposalForm.values);
-        const calldatas = parseCommaOrNewline(proposalForm.calldatas);
+        if (proposalActions.some(action => !action.target.trim())) {
+            setProposalAlert({ type: 'error', message: 'Each action needs a target contract address.' });
+            return;
+        }
 
-        if (!(targets.length && targets.length === values.length && values.length === calldatas.length)) {
-            setFormError('Targets, values, and calldatas must have the same count.');
-            return;
-        }
+        setProposalSubmitting(true);
+        setProposalAlert(null);
 
         try {
-            setFormError(null);
-            setProposalResult(null);
-            const description = `${proposalForm.title.trim()}\n\n${proposalForm.description.trim()}`;
+            const targets = proposalActions.map(action => action.target.trim());
+            const values = proposalActions.map(action => (action.value.trim() ? action.value.trim() : '0'));
+            const calldatas = proposalActions.map(action => {
+                const data = action.calldata.trim();
+                if (!data) return '0x';
+                return data.startsWith('0x') ? data : `0x${data}`;
+            });
+            const description = `# ${proposalForm.title.trim()}\n\n${proposalForm.description.trim()}`;
             const proposalId = await daoService.governance.createProposal(targets, values, calldatas, description);
-            setProposalResult(proposalId);
-            setProposalForm({ title: '', description: '', targets: '', values: '', calldatas: '' });
+            setProposalAlert({ type: 'success', message: proposalId ? `Proposal submitted (ID: ${proposalId})` : 'Proposal submitted successfully.' });
+            setProposalForm({ title: '', description: '' });
+            setProposalActions([{ target: '', value: '0', calldata: '0x' }]);
             setShowProposalModal(false);
         } catch (err) {
             const message = err instanceof Error ? err.message : 'Failed to create proposal';
-            setFormError(message);
+            setProposalAlert({ type: 'error', message });
+        } finally {
+            setProposalSubmitting(false);
         }
     };
 
@@ -1479,81 +1564,159 @@ export default function AdminDashboardFixed() {
 
                 {showProposalModal && (
                     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-                        <div className="bg-slate-900 rounded-xl p-8 border border-white/20 max-w-3xl w-full mx-4 space-y-4">
+                        <div className="bg-slate-900 rounded-2xl p-8 border border-white/20 max-w-4xl w-full mx-4 space-y-5">
                             <div className="flex items-center justify-between">
-                                <h3 className="text-2xl font-bold text-white flex items-center gap-2">
-                                    <Gavel className="w-6 h-6 text-purple-300" />
-                                    Submit Governance Proposal
-                                </h3>
+                                <div>
+                                    <p className="text-xs uppercase tracking-[0.35em] text-purple-300/70">Governance</p>
+                                    <h3 className="text-2xl font-bold text-white flex items-center gap-2 mt-1">
+                                        <Gavel className="w-6 h-6 text-purple-300" />
+                                        Draft proposal payload
+                                    </h3>
+                                </div>
                                 <button className="text-gray-400 hover:text-white" onClick={() => setShowProposalModal(false)}>
                                     ✕
                                 </button>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                            {proposalAlert && (
+                                <div
+                                    className={`rounded-2xl border px-4 py-3 text-sm ${proposalAlert.type === 'success'
+                                        ? 'border-emerald-400/40 bg-emerald-400/10 text-emerald-200'
+                                        : 'border-red-400/40 bg-red-400/10 text-red-200'
+                                        }`}
+                                >
+                                    {proposalAlert.message}
+                                </div>
+                            )}
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                 <div>
-                                    <label className="text-gray-400 text-sm mb-2 block">Title</label>
+                                    <label className="text-gray-400 text-sm mb-2 block">Proposal title</label>
                                     <input
                                         type="text"
                                         value={proposalForm.title}
                                         onChange={e => setProposalForm(prev => ({ ...prev, title: e.target.value }))}
-                                        className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white"
+                                        placeholder="Enable transfers, upgrade contracts…"
+                                        className="w-full px-4 py-3 bg-white/10 rounded-xl border border-white/20 text-white"
                                     />
                                 </div>
                                 <div>
-                                    <label className="text-gray-400 text-sm mb-2 block">Targets (comma or newline separated)</label>
+                                    <label className="text-gray-400 text-sm mb-2 block">Description</label>
                                     <textarea
-                                        value={proposalForm.targets}
-                                        onChange={e => setProposalForm(prev => ({ ...prev, targets: e.target.value }))}
-                                        className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white min-h-[110px]"
+                                        value={proposalForm.description}
+                                        onChange={e => setProposalForm(prev => ({ ...prev, description: e.target.value }))}
+                                        rows={4}
+                                        placeholder="Explain motivation, execution steps, and expected results. Markdown supported."
+                                        className="w-full px-4 py-3 bg-white/10 rounded-xl border border-white/20 text-white"
                                     />
                                 </div>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="text-gray-400 text-sm mb-2 block">Values (wei, comma/newline separated)</label>
-                                    <textarea
-                                        value={proposalForm.values}
-                                        onChange={e => setProposalForm(prev => ({ ...prev, values: e.target.value }))}
-                                        className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white min-h-[110px]"
-                                        placeholder="0,0,0"
-                                    />
+
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Actions</p>
+                                        <p className="text-sm text-gray-500">Each action represents one contract call bundled inside the proposal.</p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={addProposalAction}
+                                        className="inline-flex items-center gap-2 rounded-full border border-white/15 px-3 py-1.5 text-xs text-white hover:bg-white/10"
+                                    >
+                                        <Plus size={14} /> Add action
+                                    </button>
                                 </div>
-                                <div>
-                                    <label className="text-gray-400 text-sm mb-2 block">Calldatas (hex, comma/newline separated)</label>
-                                    <textarea
-                                        value={proposalForm.calldatas}
-                                        onChange={e => setProposalForm(prev => ({ ...prev, calldatas: e.target.value }))}
-                                        className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white min-h-[110px]"
-                                        placeholder="0x..."
-                                    />
-                                </div>
+
+                                {proposalActions.map((action, index) => (
+                                    <div key={`proposal-action-${index}`} className="rounded-2xl border border-white/10 bg-black/30 p-4 space-y-4">
+                                        <div className="flex items-center justify-between text-sm text-gray-400">
+                                            <span>Action {index + 1}</span>
+                                            {proposalActions.length > 1 && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeProposalAction(index)}
+                                                    className="text-red-400 hover:text-red-300"
+                                                >
+                                                    Remove
+                                                </button>
+                                            )}
+                                        </div>
+                                        <div>
+                                            <label className="text-xs text-gray-400">Quick presets</label>
+                                            <select
+                                                defaultValue=""
+                                                onChange={event => {
+                                                    const presetKey = event.target.value;
+                                                    if (!presetKey) return;
+                                                    applyTokenFunctionPreset(index, presetKey);
+                                                    event.currentTarget.value = '';
+                                                }}
+                                                className="mt-1 w-full rounded-xl border border-white/10 bg-gray-900/40 px-3 py-2 text-sm text-white"
+                                            >
+                                                <option value="" disabled>
+                                                    Use NYAX token function…
+                                                </option>
+                                                {TOKEN_FUNCTION_PRESETS.map(preset => (
+                                                    <option key={preset.key} value={preset.key}>
+                                                        {preset.label}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div className="grid gap-3 md:grid-cols-3">
+                                            <div className="space-y-2">
+                                                <label className="text-xs text-gray-400">Target contract</label>
+                                                <input
+                                                    type="text"
+                                                    value={action.target}
+                                                    onChange={e => updateProposalAction(index, 'target', e.target.value)}
+                                                    placeholder="0x…"
+                                                    className="w-full rounded-xl border border-white/10 bg-gray-900/40 px-3 py-2 text-sm text-white"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-xs text-gray-400">ETH value</label>
+                                                <input
+                                                    type="text"
+                                                    value={action.value}
+                                                    onChange={e => updateProposalAction(index, 'value', e.target.value)}
+                                                    placeholder="0"
+                                                    className="w-full rounded-xl border border-white/10 bg-gray-900/40 px-3 py-2 text-sm text-white"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-xs text-gray-400">Calldata</label>
+                                                <input
+                                                    type="text"
+                                                    value={action.calldata}
+                                                    onChange={e => updateProposalAction(index, 'calldata', e.target.value)}
+                                                    placeholder="0x"
+                                                    className="w-full rounded-xl border border-white/10 bg-gray-900/40 px-3 py-2 text-sm text-white"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
-                            <div>
-                                <label className="text-gray-400 text-sm mb-2 block">Proposal Description</label>
-                                <textarea
-                                    value={proposalForm.description}
-                                    onChange={e => setProposalForm(prev => ({ ...prev, description: e.target.value }))}
-                                    className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white min-h-[140px]"
-                                    placeholder="Explain the rationale, execution steps, and expected impact."
-                                />
-                            </div>
-                            {formError && <p className="text-red-400 text-sm">{formError}</p>}
-                            {proposalResult && (
-                                <p className="text-green-400 text-sm">
-                                    Proposal submitted! ID: {proposalResult}
-                                </p>
-                            )}
-                            <div className="flex gap-3">
-                                <button className="flex-1 px-4 py-3 bg-white/10 text-white rounded-lg" onClick={() => setShowProposalModal(false)}>
-                                    Cancel
-                                </button>
+
+                            <div className="flex flex-col gap-3">
                                 <button
-                                    className="flex-1 px-4 py-3 bg-purple-600 text-white rounded-lg disabled:opacity-50"
+                                    className="w-full px-4 py-3 rounded-2xl bg-linear-to-r from-indigo-500 via-blue-500 to-purple-500 font-semibold disabled:opacity-50"
                                     onClick={handleCreateProposal}
-                                    disabled={actionPending || !isConnected}
+                                    disabled={proposalSubmitting || !isConnected}
                                 >
-                                    Submit Proposal
+                                    {proposalSubmitting ? 'Submitting…' : 'Create proposal'}
                                 </button>
+                                {!isConnected && (
+                                    <div className="rounded-2xl border border-yellow-400/40 bg-yellow-400/10 p-4 text-sm text-yellow-200">
+                                        Connect your wallet to create proposals.
+                                    </div>
+                                )}
+                                {!onRequiredNetwork && isConnected && (
+                                    <div className="rounded-2xl border border-orange-400/40 bg-orange-400/10 p-4 text-sm text-orange-200">
+                                        Switch to Ethereum Sepolia (chain ID 11155111) to submit this proposal.
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
