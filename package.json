@@ -24,6 +24,7 @@
     "tina:dev": "tinacms dev"
   },
   "dependencies": {
+    "@metamask/sdk": "^0.33.1",
     "@paypal/react-paypal-js": "^8.9.1",
     "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-dialog": "^1.1.15",
@@ -66,7 +67,6 @@
     "axios": "^1.11.0",
     "bs58": "^6.0.0",
     "country-flag-icons": "^1.5.21",
-    "@metamask/sdk": "^0.33.1",
     "cryptocurrency-icons": "^0.18.1",
     "dotenv": "^17.2.2",
     "ethers": "^6.15.0",
