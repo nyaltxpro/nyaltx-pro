@@ -7,7 +7,7 @@ import { CONTRACT_ABIS, CONTRACT_ADDRESSES } from '@/services/contracts';
 import { FolderInfo, MultisigTransaction } from '@/services/contracts/types';
 import { useAppKitAccount } from '@reown/appkit/react';
 import { ethers } from 'ethers';
-import { CalendarClock, Filter, Gavel, KeySquare, Loader2, Lock, Plus, Search, Shield, UserPlus2 } from 'lucide-react';
+import { Filter, Gavel, KeySquare, Loader2, Lock, Plus, Search, Shield, UserPlus2 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAccount, useChainId } from 'wagmi';
 
@@ -1053,7 +1053,7 @@ export default function AdminDashboardFixed() {
                             <Loader2 className="w-5 h-5" />
                             Refresh Data
                         </button>
-                        <button className={TOOL_BUTTON_CLASSES} onClick={() => openAllocationModal()} disabled={!selectedFolder || !isConnected || loading}>
+                        {/* <button className={TOOL_BUTTON_CLASSES} onClick={() => openAllocationModal()} disabled={!selectedFolder || !isConnected || loading}>
                             <UserPlus2 className="w-5 h-5" />
                             Allocations
                         </button>
@@ -1064,15 +1064,15 @@ export default function AdminDashboardFixed() {
                         <button className={TOOL_BUTTON_CLASSES} onClick={openVestingModal} disabled={!selectedFolder || !isConnected || loading}>
                             <CalendarClock className="w-5 h-5" />
                             Vesting Template
-                        </button>
-                        <button
+                        </button> */}
+                        {/* <button
                             className={TOOL_BUTTON_CLASSES}
                             onClick={() => handleLockToggle(selectedFolder?.locked ? 'unlock' : 'lock')}
                             disabled={!selectedFolder || !isConnected || loading}
                         >
                             <Lock className="w-5 h-5" />
                             {selectedFolder?.locked ? 'Unlock Folder' : 'Lock Folder'}
-                        </button>
+                        </button> */}
                     </div>
                 </div>
 
