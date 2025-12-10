@@ -9,7 +9,7 @@ import { useAppKitAccount } from '@reown/appkit/react';
 import { ethers } from 'ethers';
 import { Filter, Gavel, KeySquare, Loader2, Lock, Plus, Search, Shield, UserPlus2 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useAccount, useChainId } from 'wagmi';
+import { useAccount, useChainId, useSwitchChain } from 'wagmi';
 
 const DAY_IN_SECONDS = 86_400;
 const PERMISSION_FLAGS = [
@@ -79,6 +79,7 @@ export default function AdminDashboardFixed() {
     const { isConnected: isAppKitConnected } = useAppKitAccount();
     const isConnected = isEvmConnected || isAppKitConnected;
     const chainId = useChainId();
+    const { switchChainAsync, isPending: isSwitchingChain } = useSwitchChain();
 
     const [searchValue, setSearchValue] = useState('');
     const [showAddModal, setShowAddModal] = useState(false);
@@ -212,11 +213,45 @@ export default function AdminDashboardFixed() {
         setFormError(null);
     };
 
+    const handleSwitchNetwork = useCallback(async () => {
+        if (onRequiredNetwork) return true;
+        try {
+            await switchChainAsync({ chainId: REQUIRED_CHAIN_ID });
+            return true;
+        } catch (error) {
+            console.error('Failed to switch to Sepolia', error);
+            return false;
+        }
+    }, [onRequiredNetwork, switchChainAsync]);
+
+    useEffect(() => {
+        if (isConnected && !onRequiredNetwork) {
+            handleSwitchNetwork();
+        }
+    }, [isConnected, onRequiredNetwork, handleSwitchNetwork]);
+
+    const ensureSepolia = useCallback(
+        async (onFailure?: (message: string) => void) => {
+            if (!isConnected) return false;
+            if (onRequiredNetwork) return true;
+
+            const switched = await handleSwitchNetwork();
+            if (!switched) {
+                onFailure?.('Switch to Ethereum Sepolia (chain ID 11155111) to continue.');
+                return false;
+            }
+            return true;
+        },
+        [handleSwitchNetwork, isConnected, onRequiredNetwork]
+    );
+
     const handleCreateFolder = async () => {
         if (!isConnected) {
             setFormError('Connect a wallet before creating folders.');
             return;
         }
+        const onNetwork = await ensureSepolia(setFormError);
+        if (!onNetwork) return;
         if (!newFolderName.trim()) {
             setFormError('Folder name is required');
             return;
@@ -254,6 +289,8 @@ export default function AdminDashboardFixed() {
             setFormError('Connect a wallet to manage token transfers.');
             return;
         }
+        const onNetwork = await ensureSepolia(setFormError);
+        if (!onNetwork) return;
         if (!daoService || transfersEnabled === null) return;
         setTransfersLoading(true);
         setTransfersError(null);
@@ -274,6 +311,8 @@ export default function AdminDashboardFixed() {
             setFormError('Connect a wallet to manage NYAX token state.');
             return;
         }
+        const onNetwork = await ensureSepolia(setFormError);
+        if (!onNetwork) return;
         if (!daoService || tokenMetrics.paused === null) return;
         setTokenActionLoading(true);
         setTokenGovernorMessage(null);
@@ -299,6 +338,8 @@ export default function AdminDashboardFixed() {
             setFormError('Connect a wallet to mint tokens.');
             return;
         }
+        const onNetwork = await ensureSepolia(setTokenGovernorError);
+        if (!onNetwork) return;
         if (!daoService) return;
         if (!mintForm.to.trim() || !mintForm.amount.trim()) {
             setTokenGovernorError('Recipient address and amount are required to mint.');
@@ -330,6 +371,8 @@ export default function AdminDashboardFixed() {
             setFormError('Connect a wallet to burn tokens.');
             return;
         }
+        const onNetwork = await ensureSepolia(setTokenGovernorError);
+        if (!onNetwork) return;
         if (!daoService) return;
         if (!burnForm.from.trim() || !burnForm.amount.trim()) {
             setTokenGovernorError('Source address and amount are required to burn.');
@@ -371,6 +414,7 @@ export default function AdminDashboardFixed() {
     };
 
     const handleSetAllocation = async () => {
+        if (!await ensureSepolia(setFormError)) return;
         if (!allocationForm.folderId || !allocationForm.account || !allocationForm.amount) {
             setFormError('Folder, address, and amount are required');
             return;
@@ -412,6 +456,7 @@ export default function AdminDashboardFixed() {
 
     const handlePermissionsUpdate = async () => {
         if (!permissionsForm.folderId) return;
+        if (!await ensureSepolia(setFormError)) return;
         try {
             await updateFolder(permissionsForm.folderId, { permissions: Number(permissionsForm.permissions || '0') });
             setShowPermissionsModal(false);
@@ -437,6 +482,7 @@ export default function AdminDashboardFixed() {
 
     const handleVestingUpdate = async () => {
         if (!vestingForm.folderId) return;
+        if (!await ensureSepolia(setFormError)) return;
         try {
             await updateFolder(vestingForm.folderId, {
                 template: {
@@ -456,6 +502,7 @@ export default function AdminDashboardFixed() {
             setFormError('Select a folder first');
             return;
         }
+        if (!await ensureSepolia(setFormError)) return;
         try {
             await setFolderLockState(selectedFolder.id, mode === 'lock');
             setFormError(null);
@@ -465,6 +512,7 @@ export default function AdminDashboardFixed() {
     };
 
     const handleFolderLockAction = async (folderId: number, lock: boolean) => {
+        if (!await ensureSepolia(setFormError)) return;
         try {
             await setFolderLockState(folderId, lock);
             setFormError(null);
@@ -474,6 +522,7 @@ export default function AdminDashboardFixed() {
     };
 
     const handleRevoke = async (folderId: number, account: string) => {
+        if (!await ensureSepolia(setFormError)) return;
         try {
             await revokeAllocation(folderId, account);
         } catch (err) {
@@ -534,8 +583,7 @@ export default function AdminDashboardFixed() {
             setProposalAlert({ type: 'error', message: 'DAO service unavailable. Try reloading.' });
             return;
         }
-        if (!onRequiredNetwork) {
-            setProposalAlert({ type: 'error', message: 'Switch to Ethereum Sepolia (chain ID 11155111) to submit proposals.' });
+        if (!await ensureSepolia((msg) => setProposalAlert({ type: 'error', message: msg }))) {
             return;
         }
         if (!proposalForm.title.trim() || !proposalForm.description.trim()) {
@@ -877,7 +925,7 @@ export default function AdminDashboardFixed() {
     return (
         <div className="min-h-screen  text-white">
             <div className="max-w-7xl mx-auto space-y-10 px-4 py-10">
-                <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-8 lg:p-10 shadow-[0_25px_80px_rgba(8,19,44,0.45)]">
+                <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl px-6 py-8 sm:px-8 sm:py-10 shadow-[0_25px_70px_rgba(7,13,30,0.55)]">
                     <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
                         <div className="space-y-4">
                             <div className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.4em] text-indigo-200/70">
@@ -890,14 +938,14 @@ export default function AdminDashboardFixed() {
                                     Inspired by the nyaltx.pro admin interface, this surface keeps mission critical actions within reach.
                                 </p>
                             </div>
-                            <div className="flex flex-wrap items-center gap-3 text-xs">
-                                <span className={`flex items-center gap-2 rounded-full px-4 py-1.5 border ${isConnected ? 'border-emerald-400/40 text-emerald-200' : 'border-red-400/40 text-red-200'}`}>
+                            <div className="flex flex-wrap gap-3 text-xs">
+                                <span className={`flex items-center gap-2 rounded-full px-4 py-1.5 border ${isConnected ? 'border-emerald-400/40 text-emerald-200' : 'border-red-400/30 text-red-200'}`}>
                                     <span className={`h-2 w-2 rounded-full ${isConnected ? 'bg-emerald-400' : 'bg-red-400'}`} />
-                                    {isConnected ? 'Admin wallet connected' : 'Connect wallet to enable controls'}
+                                    {isConnected ? 'Wallet connected' : 'Connect wallet to act'}
                                 </span>
-                                <span className="flex items-center gap-2 rounded-full border border-white/15 px-4 py-1.5 text-slate-200">
-                                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                                    Registry sync {loading ? 'in progress' : 'up to date'}
+                                <span className={`flex items-center gap-2 rounded-full px-4 py-1.5 border ${onRequiredNetwork ? 'border-indigo-400/40 text-indigo-100' : 'border-amber-400/40 text-amber-100'}`}>
+                                    <span className={`h-2 w-2 rounded-full ${onRequiredNetwork ? 'bg-indigo-400' : 'bg-amber-400'}`} />
+                                    {onRequiredNetwork ? 'Sepolia network detected' : 'Switch to Sepolia to transact'}
                                 </span>
                             </div>
                         </div>
@@ -955,6 +1003,21 @@ export default function AdminDashboardFixed() {
                 {!isConnected && (
                     <div className="rounded-2xl border border-yellow-500/30 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-200">
                         Wallet connection is required to create, edit, or revoke allocations.
+                    </div>
+                )}
+                {isConnected && !onRequiredNetwork && (
+                    <div className="rounded-2xl border border-amber-300/40 bg-amber-400/10 px-4 py-4 text-sm text-amber-100 flex flex-col gap-3">
+                        <div className="font-semibold text-amber-200">Action required: switch to Ethereum Sepolia</div>
+                        <p>Admin tools execute against Sepolia contracts. Please switch your wallet network before changing folders, minting, or submitting proposals.</p>
+                        <div>
+                            <button
+                                onClick={handleSwitchNetwork}
+                                disabled={isSwitchingChain}
+                                className="rounded-full bg-amber-400 px-5 py-2 text-sm font-semibold text-slate-900 transition hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-70"
+                            >
+                                {isSwitchingChain ? 'Switching…' : 'Switch to Sepolia'}
+                            </button>
+                        </div>
                     </div>
                 )}
 

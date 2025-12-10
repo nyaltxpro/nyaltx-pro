@@ -8,7 +8,7 @@ import { ethers } from 'ethers';
 import { Activity, ArrowUpRight, CheckCircle, Clock, Coins, FilePlus2, Globe, Layers, Plus, Shield, Trash2, TrendingUp, Users, XCircle } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Area, AreaChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { useAccount, useChainId } from 'wagmi';
+import { useAccount, useChainId, useSwitchChain } from 'wagmi';
 
 type TabId = 'overview' | 'proposals' | 'transfers' | 'deposit';
 
@@ -70,6 +70,7 @@ const formatBlocksToTime = (blocks?: number) => {
 export default function NYALTXGovernance() {
     const { address, isConnected } = useAccount();
     const chainId = useChainId();
+    const { switchChainAsync, isPending: isSwitching } = useSwitchChain();
     const { daoService, isLoading: daoLoading, error: daoError } = useDAOService();
     const { stats: vaultStats, depositLegacy, loading: vaultLoading, actionPending: vaultPending, error: vaultError, recentDeposits } = useMigrationVault();
 
@@ -301,6 +302,23 @@ export default function NYALTXGovernance() {
         return 'Deposit failed. Please try again.';
     };
 
+    const handleSwitchNetwork = useCallback(async () => {
+        if (onRequiredNetwork) return true;
+        try {
+            await switchChainAsync({ chainId: REQUIRED_CHAIN_ID });
+            return true;
+        } catch (error) {
+            console.error('Failed to switch to Sepolia', error);
+            return false;
+        }
+    }, [onRequiredNetwork, switchChainAsync]);
+
+    useEffect(() => {
+        if (isConnected && !onRequiredNetwork) {
+            handleSwitchNetwork();
+        }
+    }, [isConnected, onRequiredNetwork, handleSwitchNetwork]);
+
     const handleCreateProposal = useCallback(async () => {
         if (!daoService) {
             setProposalAlert({ type: 'error', message: 'DAO service not initialized yet.' });
@@ -311,8 +329,11 @@ export default function NYALTXGovernance() {
             return;
         }
         if (!onRequiredNetwork) {
-            setProposalAlert({ type: 'error', message: 'Switch to Ethereum Sepolia (chain ID 11155111) to submit proposals.' });
-            return;
+            const switched = await handleSwitchNetwork();
+            if (!switched) {
+                setProposalAlert({ type: 'error', message: 'Switch to Ethereum Sepolia (chain ID 11155111) to submit proposals.' });
+                return;
+            }
         }
         if (!proposalTitle.trim() || !proposalDescription.trim()) {
             setProposalAlert({ type: 'error', message: 'Title and description are required.' });
@@ -362,8 +383,11 @@ export default function NYALTXGovernance() {
                 return;
             }
             if (!onRequiredNetwork) {
-                setVoteFeedback((prev) => ({ ...prev, [proposalId]: { type: 'error', message: 'Switch to Ethereum Sepolia (chain ID 11155111) to vote.' } }));
-                return;
+                const switched = await handleSwitchNetwork();
+                if (!switched) {
+                    setVoteFeedback((prev) => ({ ...prev, [proposalId]: { type: 'error', message: 'Switch to Ethereum Sepolia (chain ID 11155111) to vote.' } }));
+                    return;
+                }
             }
 
             setVotingProposalId(proposalId);
@@ -390,8 +414,11 @@ export default function NYALTXGovernance() {
             return;
         }
         if (!onRequiredNetwork) {
-            setLegacyDeposit(prev => ({ ...prev, status: 'error', message: 'Switch to Ethereum Sepolia (chain ID 11155111) to deposit.' }));
-            return;
+            const switched = await handleSwitchNetwork();
+            if (!switched) {
+                setLegacyDeposit(prev => ({ ...prev, status: 'error', message: 'Switch to Ethereum Sepolia (chain ID 11155111) to deposit.' }));
+                return;
+            }
         }
         const amountValue = Number(legacyDeposit.amount);
         if (!legacyDeposit.amount || !Number.isFinite(amountValue) || amountValue <= 0) {
@@ -426,6 +453,23 @@ export default function NYALTXGovernance() {
                         <div className="space-y-4">
                             <div className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.4em] text-indigo-200/80">
                                 <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" /> NYAX DAO
+                                {!onRequiredNetwork && isConnected && (
+                                    <div className="mt-6 flex flex-col gap-3 rounded-2xl border border-amber-300/40 bg-amber-400/10 p-4 text-sm text-amber-100">
+                                        <div className="font-semibold text-amber-200">Action required: switch to Ethereum Sepolia</div>
+                                        <p className="text-amber-100/90">
+                                            Governa contracts are deployed on Sepolia. Please switch your wallet network before submitting proposals, voting, or executing transactions.
+                                        </p>
+                                        <div>
+                                            <button
+                                                onClick={handleSwitchNetwork}
+                                                disabled={isSwitching}
+                                                className="rounded-full bg-amber-400 px-5 py-2 text-sm font-semibold text-slate-900 transition hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-70"
+                                            >
+                                                {isSwitching ? 'Switching…' : 'Switch to Sepolia'}
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                             <div>
                                 <h1 className="text-4xl font-semibold">NYALTX Governance Command Surface</h1>
@@ -438,9 +482,9 @@ export default function NYALTXGovernance() {
                                     <span className={`h-2 w-2 rounded-full ${isConnected ? 'bg-emerald-400' : 'bg-red-400'}`} />
                                     {isConnected ? 'Wallet connected' : 'Connect wallet to act'}
                                 </span>
-                                <span className="flex items-center gap-2 rounded-full border border-white/10 px-4 py-1.5 text-slate-200">
-                                    <Activity className="w-3.5 h-3.5 text-emerald-300" />
-                                    {governanceStats?.activeProposals ?? 0} active proposals
+                                <span className={`flex items-center gap-2 rounded-full px-4 py-1.5 border ${onRequiredNetwork ? 'border-indigo-400/40 text-indigo-100' : 'border-amber-400/40 text-amber-100'}`}>
+                                    <span className={`h-2 w-2 rounded-full ${onRequiredNetwork ? 'bg-indigo-400' : 'bg-amber-400'}`} />
+                                    {onRequiredNetwork ? 'Sepolia network detected' : 'Switch to Sepolia to transact'}
                                 </span>
                             </div>
                         </div>
