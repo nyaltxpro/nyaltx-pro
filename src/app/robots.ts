@@ -12,6 +12,7 @@ export default function robots(): MetadataRoute.Robots {
           '/about-us',
           '/contact',
           '/pricing',
+          '/create-token',
           '/dashboard',
           '/logo.png',
           '/favicon.ico',

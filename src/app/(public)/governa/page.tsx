@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 
-import './pages.css'
+import './page.css'
 
 export const metadata: Metadata = {
     title: 'Governa Pro | Institutional Blockchain Governance',
