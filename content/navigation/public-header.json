@@ -55,6 +55,11 @@
           "href": "/whitepaper",
           "enabled": true
         },
+           {
+          "label": "Governa",
+          "href": "/governa",
+          "enabled": true
+        },
         {
           "label": "Blog",
           "href": "/blog"
