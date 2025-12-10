@@ -32,6 +32,7 @@ export default function PublicHeader() {
         { label: 'Team', href: '/team', enabled: true },
         { label: 'Our News', href: '/news', enabled: true },
         { label: 'Whitepaper', href: '/whitepaper', enabled: true },
+        { label: 'Governa', href: '/governa', enabled: true },
       ],
     },
   ];

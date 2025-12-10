@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 
+import Image from 'next/image'
 import './page.css'
 
 export const metadata: Metadata = {
@@ -29,15 +31,25 @@ const page = () => {
             <div className="container">
                 <nav>
                     <div className="logo">governa.pro</div>
-                    <button className="cta-button">Get Started</button>
+                    <Link href="/dashboard/governance" className="cta-button">
+                        Get Started
+                    </Link>
                 </nav>
 
                 <section className="hero">
                     <div className="floating-cards">
-                        <div className="float-card"></div>
-                        <div className="float-card"></div>
-                        <div className="float-card"></div>
-                        <div className="float-card"></div>
+                        <div className="float-card">
+                            <Image src="/nyaltxpro.png" alt="Governa Pro" width={80} height={60} />
+                        </div>
+                        <div className="float-card">
+                            <Image src="/nyaltxpro.png" alt="Governa Pro" width={200} height={60} />
+                        </div>
+                        <div className="float-card">
+                            <Image src="/nyaltxpro.png" alt="Governa Pro" width={160} height={60} />
+                        </div>
+                        <div className="float-card">
+                            <Image src="/nyaltxpro.png" alt="Governa Pro" width={60} height={60} />
+                        </div>
                     </div>
                     <h1>Institutional Blockchain<br />Governance Made Simple</h1>
                     <p>Transform your protocol with transparent, efficient governance that attracts investors and empowers your community</p>
