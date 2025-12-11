@@ -904,7 +904,7 @@ export default function AdminDashboardFixed() {
                     >
                         <KeySquare className="w-4 h-4" /> Edit folder
                     </button>
-                    <button
+                    {/* <button
                         onClick={async e => {
                             e.stopPropagation();
                             await handleFolderLockAction(folder.id, !folder.locked);
@@ -914,7 +914,7 @@ export default function AdminDashboardFixed() {
                     >
                         <Lock className="w-4 h-4" />
                         {folder.locked ? 'Unlock tokens' : 'Lock tokens'}
-                    </button>
+                    </button> */}
                 </div>
             </div>
         );
