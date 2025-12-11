@@ -2,6 +2,400 @@
   "version": "3.4",
   "log": [
     {
+      "@openzeppelin/contracts/access/Ownable.sol:Ownable": {
+        "src": "@openzeppelin/contracts/access/Ownable.sol:20",
+        "inherit": [
+          "@openzeppelin/contracts/utils/Context.sol:Context"
+        ],
+        "libraries": [],
+        "methods": [
+          "owner()",
+          "renounceOwnership()",
+          "transferOwnership(address)"
+        ],
+        "linkReferences": [],
+        "errors": [
+          {
+            "kind": "constructor",
+            "contract": "Ownable",
+            "src": "@openzeppelin/contracts/access/Ownable.sol:38"
+          }
+        ],
+        "layout": {
+          "storage": [
+            {
+              "label": "_owner",
+              "offset": 0,
+              "slot": "0",
+              "type": "t_address",
+              "contract": "Ownable",
+              "src": "@openzeppelin/contracts/access/Ownable.sol:21"
+            }
+          ],
+          "types": {
+            "t_address": {
+              "label": "address",
+              "numberOfBytes": "20"
+            }
+          },
+          "layoutVersion": "1.2",
+          "flat": true,
+          "namespaces": {}
+        },
+        "solcVersion": "0.8.25"
+      },
+      "@openzeppelin/contracts/access/Ownable2Step.sol:Ownable2Step": {
+        "src": "@openzeppelin/contracts/access/Ownable2Step.sol:25",
+        "inherit": [
+          "@openzeppelin/contracts/access/Ownable.sol:Ownable",
+          "@openzeppelin/contracts/utils/Context.sol:Context"
+        ],
+        "libraries": [],
+        "methods": [
+          "pendingOwner()",
+          "transferOwnership(address)",
+          "acceptOwnership()"
+        ],
+        "linkReferences": [],
+        "errors": [],
+        "layout": {
+          "storage": [
+            {
+              "label": "_owner",
+              "offset": 0,
+              "slot": "0",
+              "type": "t_address",
+              "contract": "Ownable",
+              "src": "@openzeppelin/contracts/access/Ownable.sol:21"
+            },
+            {
+              "label": "_pendingOwner",
+              "offset": 0,
+              "slot": "1",
+              "type": "t_address",
+              "contract": "Ownable2Step",
+              "src": "@openzeppelin/contracts/access/Ownable2Step.sol:26"
+            }
+          ],
+          "types": {
+            "t_address": {
+              "label": "address",
+              "numberOfBytes": "20"
+            }
+          },
+          "layoutVersion": "1.2",
+          "flat": true,
+          "namespaces": {}
+        },
+        "solcVersion": "0.8.25"
+      },
+      "@openzeppelin/contracts/interfaces/IERC1363.sol:IERC1363": {
+        "src": "@openzeppelin/contracts/interfaces/IERC1363.sol:16",
+        "inherit": [
+          "@openzeppelin/contracts/utils/introspection/IERC165.sol:IERC165",
+          "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20"
+        ],
+        "libraries": [],
+        "methods": [
+          "transferAndCall(address,uint256)",
+          "transferAndCall(address,uint256,bytes)",
+          "transferFromAndCall(address,address,uint256)",
+          "transferFromAndCall(address,address,uint256,bytes)",
+          "approveAndCall(address,uint256)",
+          "approveAndCall(address,uint256,bytes)"
+        ],
+        "linkReferences": [],
+        "errors": [],
+        "layout": {
+          "storage": [],
+          "types": {},
+          "layoutVersion": "1.2",
+          "flat": false,
+          "namespaces": {}
+        },
+        "solcVersion": "0.8.25"
+      },
+      "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20": {
+        "src": "@openzeppelin/contracts/token/ERC20/IERC20.sol:9",
+        "inherit": [],
+        "libraries": [],
+        "methods": [
+          "totalSupply()",
+          "balanceOf(address)",
+          "transfer(address,uint256)",
+          "allowance(address,address)",
+          "approve(address,uint256)",
+          "transferFrom(address,address,uint256)"
+        ],
+        "linkReferences": [],
+        "errors": [],
+        "layout": {
+          "storage": [],
+          "types": {},
+          "layoutVersion": "1.2",
+          "flat": false,
+          "namespaces": {}
+        },
+        "solcVersion": "0.8.25"
+      },
+      "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol:SafeERC20": {
+        "src": "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol:18",
+        "version": {
+          "withMetadata": "f83131ac8562b1e9c798d943f7b78b95ccd7812c089f2cfd8faa916d57695877",
+          "withoutMetadata": "95d40a2c1c3f26a6a79fd4d364874e56c7fd721151816483687512865903c157",
+          "linkedWithoutMetadata": "95d40a2c1c3f26a6a79fd4d364874e56c7fd721151816483687512865903c157"
+        },
+        "inherit": [],
+        "libraries": [],
+        "methods": [],
+        "linkReferences": [],
+        "errors": [],
+        "layout": {
+          "storage": [],
+          "types": {},
+          "layoutVersion": "1.2",
+          "flat": false,
+          "namespaces": {}
+        },
+        "solcVersion": "0.8.25"
+      },
+      "@openzeppelin/contracts/utils/Context.sol:Context": {
+        "src": "@openzeppelin/contracts/utils/Context.sol:16",
+        "inherit": [],
+        "libraries": [],
+        "methods": [],
+        "linkReferences": [],
+        "errors": [],
+        "layout": {
+          "storage": [],
+          "types": {},
+          "layoutVersion": "1.2",
+          "flat": false,
+          "namespaces": {}
+        },
+        "solcVersion": "0.8.25"
+      },
+      "@openzeppelin/contracts/utils/introspection/IERC165.sol:IERC165": {
+        "src": "@openzeppelin/contracts/utils/introspection/IERC165.sol:15",
+        "inherit": [],
+        "libraries": [],
+        "methods": [
+          "supportsInterface(bytes4)"
+        ],
+        "linkReferences": [],
+        "errors": [],
+        "layout": {
+          "storage": [],
+          "types": {},
+          "layoutVersion": "1.2",
+          "flat": false,
+          "namespaces": {}
+        },
+        "solcVersion": "0.8.25"
+      },
+      "contracts/Treasury.sol:INYAXToken": {
+        "src": "contracts/Treasury.sol:8",
+        "inherit": [
+          "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20"
+        ],
+        "libraries": [],
+        "methods": [
+          "mint(address,uint256)",
+          "burn(uint256)"
+        ],
+        "linkReferences": [],
+        "errors": [],
+        "layout": {
+          "storage": [],
+          "types": {},
+          "layoutVersion": "1.2",
+          "flat": false,
+          "namespaces": {}
+        },
+        "solcVersion": "0.8.25"
+      },
+      "contracts/Treasury.sol:Treasury": {
+        "src": "contracts/Treasury.sol:17",
+        "version": {
+          "withMetadata": "0d0347f583e3c1525b88f618a7feb06d0a96b00f9e39098392cfccfacdf69316",
+          "withoutMetadata": "4749917bb25808995dea782acb02d0816cef047d359b33829efbfda996592c37",
+          "linkedWithoutMetadata": "4749917bb25808995dea782acb02d0816cef047d359b33829efbfda996592c37"
+        },
+        "inherit": [
+          "@openzeppelin/contracts/access/Ownable2Step.sol:Ownable2Step",
+          "@openzeppelin/contracts/access/Ownable.sol:Ownable",
+          "@openzeppelin/contracts/utils/Context.sol:Context"
+        ],
+        "libraries": [
+          "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol:SafeERC20"
+        ],
+        "methods": [
+          "(address,address,address)",
+          "setCategoryWallet(string,address,uint256)",
+          "removeCategory(string)",
+          "categoryWallet(string)",
+          "categoryAllocation(string)",
+          "categoryDistributed(string)",
+          "categoryExists(string)",
+          "getCategories()",
+          "getCategoryInfo(string)",
+          "getTotalAllocation()",
+          "mintToTreasury(uint256,string)",
+          "mintTo(address,uint256,string,string)",
+          "burnFromTreasury(uint256,string)",
+          "transferTo(address,uint256,string,string)",
+          "multisigTransfer(address,uint256,string,string)",
+          "getTreasuryBalance()",
+          "requiresMultisig(uint256)",
+          "setMultisig(address)",
+          "emergencyRecoverERC20(address,uint256)",
+          "emergencyRecoverETH(uint256)",
+          "()"
+        ],
+        "linkReferences": [],
+        "errors": [
+          {
+            "kind": "constructor",
+            "contract": "Treasury",
+            "src": "contracts/Treasury.sol:52"
+          },
+          {
+            "kind": "state-variable-immutable",
+            "name": "nyax",
+            "src": "contracts/Treasury.sol:30"
+          }
+        ],
+        "layout": {
+          "storage": [
+            {
+              "label": "_owner",
+              "offset": 0,
+              "slot": "0",
+              "type": "t_address",
+              "contract": "Ownable",
+              "src": "@openzeppelin/contracts/access/Ownable.sol:21"
+            },
+            {
+              "label": "_pendingOwner",
+              "offset": 0,
+              "slot": "1",
+              "type": "t_address",
+              "contract": "Ownable2Step",
+              "src": "@openzeppelin/contracts/access/Ownable2Step.sol:26"
+            },
+            {
+              "label": "multisig",
+              "offset": 0,
+              "slot": "2",
+              "type": "t_address",
+              "contract": "Treasury",
+              "src": "contracts/Treasury.sol:31"
+            },
+            {
+              "label": "_categoryList",
+              "offset": 0,
+              "slot": "3",
+              "type": "t_array(t_string_storage)dyn_storage",
+              "contract": "Treasury",
+              "src": "contracts/Treasury.sol:33"
+            },
+            {
+              "label": "_categories",
+              "offset": 0,
+              "slot": "4",
+              "type": "t_mapping(t_bytes32,t_struct(Category)943_storage)",
+              "contract": "Treasury",
+              "src": "contracts/Treasury.sol:34"
+            },
+            {
+              "label": "_categoryIndex",
+              "offset": 0,
+              "slot": "5",
+              "type": "t_mapping(t_bytes32,t_uint256)",
+              "contract": "Treasury",
+              "src": "contracts/Treasury.sol:35"
+            },
+            {
+              "label": "totalAllocation",
+              "offset": 0,
+              "slot": "6",
+              "type": "t_uint256",
+              "contract": "Treasury",
+              "src": "contracts/Treasury.sol:37"
+            }
+          ],
+          "types": {
+            "t_address": {
+              "label": "address",
+              "numberOfBytes": "20"
+            },
+            "t_array(t_string_storage)dyn_storage": {
+              "label": "string[]",
+              "numberOfBytes": "32"
+            },
+            "t_bool": {
+              "label": "bool",
+              "numberOfBytes": "1"
+            },
+            "t_bytes32": {
+              "label": "bytes32",
+              "numberOfBytes": "32"
+            },
+            "t_mapping(t_bytes32,t_struct(Category)943_storage)": {
+              "label": "mapping(bytes32 => struct Treasury.Category)",
+              "numberOfBytes": "32"
+            },
+            "t_mapping(t_bytes32,t_uint256)": {
+              "label": "mapping(bytes32 => uint256)",
+              "numberOfBytes": "32"
+            },
+            "t_string_storage": {
+              "label": "string",
+              "numberOfBytes": "32"
+            },
+            "t_struct(Category)943_storage": {
+              "label": "struct Treasury.Category",
+              "members": [
+                {
+                  "label": "wallet",
+                  "type": "t_address",
+                  "offset": 0,
+                  "slot": "0"
+                },
+                {
+                  "label": "allocation",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "1"
+                },
+                {
+                  "label": "distributed",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "2"
+                },
+                {
+                  "label": "exists",
+                  "type": "t_bool",
+                  "offset": 0,
+                  "slot": "3"
+                }
+              ],
+              "numberOfBytes": "128"
+            },
+            "t_uint256": {
+              "label": "uint256",
+              "numberOfBytes": "32"
+            }
+          },
+          "layoutVersion": "1.2",
+          "flat": true,
+          "namespaces": {}
+        },
+        "solcVersion": "0.8.25"
+      }
+    },
+    {
       "@openzeppelin/contracts/access/AccessControl.sol:AccessControl": {
         "src": "@openzeppelin/contracts/access/AccessControl.sol:49",
         "inherit": [

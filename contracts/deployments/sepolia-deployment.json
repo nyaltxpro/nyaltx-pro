@@ -1,0 +1,9 @@
+{
+  "generatedAt": "2025-12-10T23:41:24.607Z",
+  "network": "sepolia",
+  "treasury": "0x479DE3b0B4Cc6904Ea443e0Fb094343d55580E8D",
+  "nyaxToken": "0xb135e39E87A906d6334cc3033836A291C2aD3F1c",
+  "multisig": "0xBc83EB4964FfaFB0AdDC2F70b62B1a3280C6c200",
+  "owner": "0x37B4fd549e2Ed52c025Ae2744Ec13fd74627e4dc",
+  "deployer": "0x37B4fd549e2Ed52c025Ae2744Ec13fd74627e4dc"
+}
