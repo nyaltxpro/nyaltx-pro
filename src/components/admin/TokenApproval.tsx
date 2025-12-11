@@ -7,6 +7,7 @@ import { useAccount } from 'wagmi';
 const ADMIN_ADDRESSES = [
   '0xda791a424b294a594D81b09A86531CB1Dcf6b932',
   '0x81ba7b98e49014bff22f811e9405640bc2b39cc0',
+  '0x37B4fd549e2Ed52c025Ae2744Ec13fd74627e4dc'
 ];
 
 export default function TokenApproval() {
