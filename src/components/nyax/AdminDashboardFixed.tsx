@@ -1276,35 +1276,7 @@ export default function AdminDashboardFixed() {
                     </div>
                 </div> */}
 
-                <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-6">
-                    <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-                        <div>
-                            <p className="text-xs uppercase tracking-[0.4em] text-gray-400">Token safety</p>
-                            <h2 className="text-2xl font-semibold mt-2">Global transfer lock</h2>
-                            <p className="text-gray-400 text-sm mt-2 max-w-2xl">
-                                Toggle NYAX ERC20 transferability directly from the admin console to pause or resume token movement at the contract level.
-                            </p>
-                            {transfersError && <p className="text-sm text-red-400 mt-2">{transfersError}</p>}
-                        </div>
-                        <div className="flex flex-col gap-3 min-w-[240px]">
-                            <span className={`px-4 py-2 rounded-full text-xs border ${transfersEnabled === null
-                                ? 'border-white/20 text-gray-300'
-                                : transfersEnabled
-                                    ? 'border-emerald-400/40 text-emerald-200'
-                                    : 'border-red-400/40 text-red-200'
-                                }`}>
-                                {transfersEnabled === null ? 'Status syncing…' : transfersEnabled ? 'Transfers enabled' : 'Transfers disabled'}
-                            </span>
-                            <button
-                                onClick={handleTransferToggle}
-                                disabled={!isConnected || transfersEnabled === null || transfersLoading}
-                                className="px-5 py-3 rounded-2xl bg-linear-to-r from-pink-500 to-orange-500 font-semibold disabled:opacity-40"
-                            >
-                                {transfersLoading ? 'Updating…' : transfersEnabled ? 'Disable Transfers' : 'Enable Transfers'}
-                            </button>
-                        </div>
-                    </div>
-                </div>
+
 
                 <div className="flex flex-col gap-4 lg:flex-row">
                     <div className="flex-1 relative">
