@@ -18,3 +18,5 @@ npx hardhat run scripts/deploy-governance-stack.js --network sepolia
 npx hardhat run scripts/deploy-nyaltx-governance-token.js --network sepolia
 # 10 Folder Regsitery
 npx hardhat run scripts/deploy-folder-registry.js --network sepolia
+
+npx hardhat run scripts/deploy-treasury.js --network sepolia

@@ -5,7 +5,7 @@ import { useMigrationVault } from '@/hooks/useMigrationVault';
 import { CONTRACT_ABIS, CONTRACT_ADDRESSES } from '@/services/contracts';
 import { GovernanceStats, ProposalData, StakingStats, TreasuryTransfer } from '@/services/contracts/types';
 import { ethers } from 'ethers';
-import { Activity, ArrowUpRight, CheckCircle, Clock, Coins, FilePlus2, Globe, Layers, Plus, Shield, Trash2, TrendingUp, Users, XCircle } from 'lucide-react';
+import { Activity, ArrowUpRight, CheckCircle, Clock, Coins, Globe, Layers, Shield, TrendingUp, Users, XCircle } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Area, AreaChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { useAccount, useChainId, useSwitchChain } from 'wagmi';
@@ -827,7 +827,9 @@ export default function NYALTXGovernance() {
                 {/* Proposals Tab */}
                 {activeTab === 'proposals' && (
                     <div className="space-y-4">
-                        <div className="rounded-3xl bg-gray-900/60 border border-white/10 p-6 shadow-2xl shadow-indigo-900/10">
+
+
+                        {/* <div className="rounded-3xl bg-gray-900/60 border border-white/10 p-6 shadow-2xl shadow-indigo-900/10">
                             <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                                 <div>
                                     <div className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-indigo-200/70">
@@ -988,7 +990,8 @@ export default function NYALTXGovernance() {
                                     )}
                                 </div>
                             )}
-                        </div>
+                        </div> */}
+
                         {proposals.map((proposal) => (
                             <div key={proposal.id} className="bg-gray-800/50 backdrop-blur rounded-xl p-6 border border-gray-700">
                                 <div className="flex items-start justify-between mb-4">
