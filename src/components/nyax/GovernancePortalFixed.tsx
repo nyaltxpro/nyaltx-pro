@@ -100,6 +100,14 @@ export default function NYALTXGovernance() {
         totalHolders: bigint;
     } | null>(null);
     const [factoryStatsLoading, setFactoryStatsLoading] = useState(false);
+    const [tokenInfo, setTokenInfo] = useState<{
+        totalSupply: string;
+        maxSupply: string;
+        name: string;
+        symbol: string;
+        decimals: number;
+    } | null>(null);
+    const [tokenInfoLoading, setTokenInfoLoading] = useState(false);
     const [showProposalForm, setShowProposalForm] = useState(false);
     const [proposalTitle, setProposalTitle] = useState('');
     const [proposalDescription, setProposalDescription] = useState('');
@@ -258,9 +266,47 @@ export default function NYALTXGovernance() {
         };
     }, []);
 
+    useEffect(() => {
+        let cancelled = false;
+        const loadTokenInfo = async () => {
+            setTokenInfoLoading(true);
+            try {
+                console.log('Loading governance token info...');
+                if (!window.ethereum) {
+                    console.warn('MetaMask not detected');
+                    if (!cancelled) setTokenInfo(null);
+                    return;
+                }
+                const provider = new ethers.BrowserProvider(window.ethereum as any);
+                console.log('Provider created for token info');
+
+                if (!daoService) {
+                    console.warn('DAO service not available');
+                    if (!cancelled) setTokenInfo(null);
+                    return;
+                }
+
+                const info = await daoService.governance.getTokenInfo();
+                console.log('Token info fetched:', info);
+
+                if (!cancelled) setTokenInfo(info);
+            } catch (error) {
+                console.error('Failed to load token info', error);
+                if (!cancelled) setTokenInfo(null);
+            } finally {
+                if (!cancelled) setTokenInfoLoading(false);
+            }
+        };
+        loadTokenInfo();
+        return () => {
+            cancelled = true;
+        };
+    }, [daoService]);
+
     const overview = useMemo(() => {
         console.log('Factory stats in useMemo:', factoryStats);
-        const totalSupply = factoryStats ? Number(factoryStats.totalSupply) : parseFloat(tokenMetrics?.totalSupply ?? '0');
+        console.log('Token info in useMemo:', tokenInfo);
+        const totalSupply = parseFloat(tokenInfo?.totalSupply ?? '0');
         const stakedTokens = factoryStats ? Number(factoryStats.stakedValue) : parseFloat(stakingStats?.totalStaked ?? '0');
         const circulatingSupply = factoryStats ? Number(factoryStats.circulating) : Math.max(totalSupply - stakedTokens, 0);
         const holders = factoryStats ? Number(factoryStats.totalHolders) : (governanceStats?.totalVoters ?? 0);
@@ -268,7 +314,7 @@ export default function NYALTXGovernance() {
         console.log('Formatted values:', { totalSupply, stakedTokens, circulatingSupply, holders });
 
         return { totalSupply, stakedTokens, circulatingSupply, holders };
-    }, [factoryStats, tokenMetrics, stakingStats, governanceStats]);
+    }, [factoryStats, tokenInfo, stakingStats, governanceStats]);
 
     const participationStats = useMemo(() => {
         const stakingRate = overview.totalSupply ? (overview.stakedTokens / overview.totalSupply) * 100 : 0;
@@ -592,7 +638,7 @@ export default function NYALTXGovernance() {
                             <div className="rounded-2xl border border-white/10 bg-black/30 p-4 text-sm text-gray-400">
                                 <p className="uppercase tracking-[0.3em] text-[10px] text-gray-500">Total supply</p>
                                 <p className="text-2xl font-semibold text-white mt-1">{formatNumber(overview.totalSupply)}</p>
-                                <p className="text-xs">Max {formatNumber(tokenMetrics?.maxSupply)}</p>
+                                <p className="text-xs">Max {tokenInfoLoading ? '...' : formatNumber(tokenInfo?.maxSupply)}</p>
                             </div>
                             <div className="rounded-2xl border border-white/10 bg-black/30 p-4 text-sm text-gray-400">
                                 <p className="uppercase tracking-[0.3em] text-[10px] text-gray-500">Staked</p>
@@ -662,7 +708,7 @@ export default function NYALTXGovernance() {
                                 <p className="text-3xl font-semibold mt-2">
                                     {factoryStatsLoading ? '...' : formatNumber(overview.totalSupply)}
                                 </p>
-                                <p className="text-xs text-gray-500 mt-1">Max {formatNumber(tokenMetrics?.maxSupply)}</p>
+                                <p className="text-xs text-gray-500 mt-1">Max {tokenInfoLoading ? '...' : formatNumber(tokenInfo?.maxSupply)}</p>
                             </div>
                             <div className="rounded-2xl bg-gray-900/50 border border-gray-800/60 p-5">
                                 <div className="flex items-center justify-between text-sm text-gray-400">

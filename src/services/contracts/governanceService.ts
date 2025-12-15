@@ -407,6 +407,71 @@ export class GovernanceService {
     });
   }
 
+  // Token Service Methods
+  async getTokenInfo(): Promise<{
+    totalSupply: string;
+    maxSupply: string;
+    name: string;
+    symbol: string;
+    decimals: number;
+  }> {
+    try {
+      const [totalSupply, maxSupply, name, symbol, decimals] = await Promise.all([
+        this.tokenContract.totalSupply(),
+        this.tokenContract.maxSupply(),
+        this.tokenContract.name(),
+        this.tokenContract.symbol(),
+        this.tokenContract.decimals()
+      ]);
+
+      return {
+        totalSupply: ethers.formatEther(totalSupply),
+        maxSupply: ethers.formatEther(maxSupply),
+        name,
+        symbol,
+        decimals: Number(decimals)
+      };
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
+  async getTotalSupply(): Promise<string> {
+    try {
+      const totalSupply = await this.tokenContract.totalSupply();
+      return ethers.formatEther(totalSupply);
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
+  async getMaxSupply(): Promise<string> {
+    try {
+      const maxSupply = await this.tokenContract.maxSupply();
+      return ethers.formatEther(maxSupply);
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
+  async getTokenBalance(address: string): Promise<string> {
+    try {
+      const balance = await this.tokenContract.balanceOf(address);
+      return ethers.formatEther(balance);
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
+  async getTokenDecimals(): Promise<number> {
+    try {
+      const decimals = await this.tokenContract.decimals();
+      return Number(decimals);
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
   // Cleanup
   removeAllListeners() {
     this.governorContract.removeAllListeners();
