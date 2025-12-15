@@ -276,6 +276,14 @@ export default function NYALTXGovernance() {
         const quorumVotes = Number(governanceStats?.quorumVotes ?? 0);
         const thresholdVotes = Number(governanceStats?.proposalThreshold ?? 0);
 
+        console.log('Participation stats calculation:', {
+            stakingRate,
+            circulationRate,
+            quorumVotes,
+            thresholdVotes,
+            overview
+        });
+
         return [
             {
                 label: 'Staking participation',
@@ -295,7 +303,7 @@ export default function NYALTXGovernance() {
                 label: 'Quorum requirement',
                 value: quorumVotes,
                 suffix: 'votes needed',
-                accent: 'from-emerald-500 to-lime-400',
+                accent: 'from-green-500 to-emerald-400',
                 max: Math.max(quorumVotes * 1.5, quorumVotes || 1),
             },
             {
@@ -705,6 +713,7 @@ export default function NYALTXGovernance() {
                             <div className="mt-6 grid gap-6 lg:grid-cols-2">
                                 {participationStats.map((stat) => {
                                     const progress = stat.max ? Math.min((stat.value / stat.max) * 100, 100) : 0;
+                                    console.log('Rendering stat:', { stat, progress, formattedValue: formatNumber(stat.value) });
                                     return (
                                         <div key={stat.label} className="space-y-3">
                                             <div className="flex items-center justify-between text-sm">
@@ -716,7 +725,7 @@ export default function NYALTXGovernance() {
                                             </div>
                                             <div className="h-2 rounded-full bg-gray-800 overflow-hidden">
                                                 <div
-                                                    className={`h-full rounded-full bg-linear ${stat.accent}`}
+                                                    className={`h-full rounded-full bg-linear-to-r ${stat.accent}`}
                                                     style={{ width: `${progress}%` }}
                                                 />
                                             </div>
