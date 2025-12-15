@@ -15,10 +15,12 @@ export interface TreasuryStats {
 
 export class TreasuryService {
   private provider: ethers.BrowserProvider;
+  private signer?: ethers.Signer;
   private contract: ethers.Contract;
 
-  constructor(provider: ethers.BrowserProvider) {
+  constructor(provider: ethers.BrowserProvider, signer?: ethers.Signer) {
     this.provider = provider;
+    this.signer = signer;
     const address = CONTRACT_ADDRESSES.treasury;
     const abi = CONTRACT_ABIS.treasury;
     
@@ -26,7 +28,7 @@ export class TreasuryService {
       throw new Error('Treasury address not configured');
     }
     
-    this.contract = new ethers.Contract(address, abi, provider);
+    this.contract = new ethers.Contract(address, abi, signer || provider);
   }
 
   // Get contract with signer for write operations
