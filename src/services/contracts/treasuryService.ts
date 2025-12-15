@@ -210,9 +210,9 @@ export class TreasuryService {
     });
   }
 
-  removeAllListeners() {
-    this.contract.removeAllListeners();
-  }
+  // removeAllListeners() {
+  //   this.contract.removeAllListeners();
+  // }
 
   // Event Listeners
   onFolderApproved(callback: (folder: string, event: any) => void) {
