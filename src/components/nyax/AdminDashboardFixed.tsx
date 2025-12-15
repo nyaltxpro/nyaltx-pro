@@ -109,6 +109,7 @@ export default function AdminDashboardFixed() {
     const [vestingForm, setVestingForm] = useState({ folderId: 0, cliff: '0', duration: '365', revocable: true });
     const [folderEditForm, setFolderEditForm] = useState({ folderId: 0, permissions: '', cliffDays: '0', durationDays: '365', revocable: true });
     const [showProposalModal, setShowProposalModal] = useState(false);
+    const [showBridgeModal, setShowBridgeModal] = useState(false);
     const [proposalForm, setProposalForm] = useState({
         title: '',
         description: '',
@@ -1175,91 +1176,19 @@ export default function AdminDashboardFixed() {
                             </h2>
                             <p className="text-gray-400 text-sm">Send ERC20 from the governance treasury bridge into a folder escrow.</p>
                         </div>
-                        {bridgeStatus && (
-                            <span className={`px-4 py-1.5 rounded-full text-sm border ${bridgeStatus.type === 'success' ? 'border-emerald-400/40 text-emerald-200' : 'border-red-400/40 text-red-200'}`}>
-                                {bridgeStatus.message}
-                            </span>
-                        )}
+                        <button
+                            onClick={() => setShowBridgeModal(true)}
+                            disabled={!isConnected}
+                            className="px-6 py-3 rounded-2xl bg-linear-to-r from-green-500 to-emerald-600 font-semibold text-white disabled:opacity-40 hover:from-green-600 hover:to-emerald-700 transition-all"
+                        >
+                            Open Treasury Bridge
+                        </button>
                     </div>
-                    <div className="mt-6 grid gap-4 md:grid-cols-2">
-                        <div className="space-y-3">
-                            <label className="text-sm text-gray-400">Token Address</label>
-                            <input
-                                type="text"
-                                placeholder="0x..."
-                                value={bridgeForm.tokenAddress}
-                                onChange={e => setBridgeForm(prev => ({ ...prev, tokenAddress: e.target.value }))}
-                                className="w-full px-4 py-3 rounded-xl border border-white/10 bg-black/30 text-white"
-                            />
+                    {bridgeStatus && (
+                        <div className={`mt-4 px-4 py-3 rounded-xl border ${bridgeStatus.type === 'success' ? 'border-emerald-400/40 bg-emerald-400/10 text-emerald-200' : 'border-red-400/40 bg-red-400/10 text-red-200'}`}>
+                            {bridgeStatus.message}
                         </div>
-                        <div className="space-y-3">
-                            <label className="text-sm text-gray-400">Folder Address / Receiver</label>
-                            <input
-                                type="text"
-                                placeholder="0x..."
-                                value={bridgeForm.folderAddress}
-                                onChange={e => setBridgeForm(prev => ({ ...prev, folderAddress: e.target.value }))}
-                                className="w-full px-4 py-3 rounded-xl border border-white/10 bg-black/30 text-white"
-                            />
-                        </div>
-                        <div className="space-y-3">
-                            <label className="text-sm text-gray-400">Amount</label>
-                            <input
-                                type="number"
-                                value={bridgeForm.amount}
-                                onChange={e => setBridgeForm(prev => ({ ...prev, amount: e.target.value }))}
-                                placeholder="1000"
-                                className="w-full px-4 py-3 rounded-xl border border-white/10 bg-black/30 text-white"
-                            />
-                        </div>
-                        <div className="space-y-3">
-                            <label className="text-sm text-gray-400">Reference ID</label>
-                            <input
-                                type="text"
-                                value={bridgeForm.referenceId}
-                                onChange={e => setBridgeForm(prev => ({ ...prev, referenceId: e.target.value }))}
-                                placeholder="e.g. FOLDER-01"
-                                className="w-full px-4 py-3 rounded-xl border border-white/10 bg-black/30 text-white"
-                            />
-                        </div>
-                    </div>
-                    <button
-                        onClick={async () => {
-                            if (!daoService) {
-                                setBridgeStatus({ type: 'error', message: 'DAO service not ready' });
-                                return;
-                            }
-                            if (!bridgeForm.tokenAddress || !bridgeForm.folderAddress || !bridgeForm.amount || !bridgeForm.referenceId) {
-                                setBridgeStatus({ type: 'error', message: 'Complete all treasury fields' });
-                                return;
-                            }
-                            setBridgeLoading(true);
-                            setBridgeStatus(null);
-                            try {
-                                const tx = await daoService.treasuryBridge?.transferTreasuryToken(
-                                    bridgeForm.tokenAddress,
-                                    bridgeForm.folderAddress,
-                                    bridgeForm.amount,
-                                    bridgeForm.referenceId,
-                                );
-                                if (tx?.wait) {
-                                    await tx.wait();
-                                }
-                                setBridgeStatus({ type: 'success', message: 'Funding transaction submitted' });
-                                setBridgeForm({ tokenAddress: '', folderAddress: '', amount: '', referenceId: '' });
-                            } catch (err) {
-                                console.error('Bridge transfer failed', err);
-                                const message = err instanceof Error ? err.message : 'Bridge transfer failed';
-                                setBridgeStatus({ type: 'error', message });
-                            } finally {
-                                setBridgeLoading(false);
-                            }
-                        }}
-                        disabled={bridgeLoading || !isConnected}
-                        className="mt-6 w-full px-4 py-3 rounded-2xl bg-linear-to-r from-green-500 to-emerald-600 font-semibold disabled:opacity-40"
-                    >
-                        {bridgeLoading ? 'Sending…' : 'Fund Folder via Treasury Bridge'}
-                    </button>
+                    )}
                 </div>
                 {/* <div className="rounded-3xl border border-white/10 bg-black/30 backdrop-blur-xl p-6">
                     <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
