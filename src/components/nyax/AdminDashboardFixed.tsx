@@ -1145,6 +1145,14 @@ export default function AdminDashboardFixed() {
                                 <PlusIcon className="w-4 h-4" /> Fund Folder
                             </div>
                         </button>
+                        <button
+                            className="flex-1 min-w-[140px] px-5 py-3 rounded-2xl border border-white/20 text-white/80 hover:bg-white/10 transition"
+
+                        >
+                            <div className="flex items-center justify-center gap-2">
+                                <PlusIcon className="w-4 h-4" /> Pause NYAX Token
+                            </div>
+                        </button>
                         {/* <button className={TOOL_BUTTON_CLASSES} onClick={() => openAllocationModal()} disabled={!selectedFolder || !isConnected || loading}>
                             <UserPlus2 className="w-5 h-5" />
                             Allocations
