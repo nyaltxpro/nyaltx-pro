@@ -967,37 +967,11 @@ export default function AdminDashboardFixed() {
                                     disabled={!isConnected || loading}
                                 >
                                     <div className="flex items-center justify-center gap-2">
-                                        <Gavel className="w-4 h-4" /> Proposal
+                                        <Gavel className="w-4 h-4" /> Create Proposal
                                     </div>
                                 </button>
-                                <button
-                                    className="flex-1 min-w-[140px] px-5 py-3 rounded-2xl border border-white/20 text-white/80 hover:bg-white/10 transition"
-                                    onClick={() => setShowProposalModal(true)}
-                                    disabled={!isConnected || loading}
-                                >
-                                    <div className="flex items-center justify-center gap-2">
-                                        <Gavel className="w-4 h-4" /> Pause Treasury
-                                    </div>
-                                </button>
-                                <button
-                                    className="flex-1 min-w-[140px] px-5 py-3 rounded-2xl border border-white/20 text-white/80 hover:bg-white/10 transition"
-                                    onClick={() => setShowProposalModal(true)}
-                                    disabled={!isConnected || loading}
-                                >
-                                    <div className="flex items-center justify-center gap-2">
-                                        <Gavel className="w-4 h-4" /> Pause Folder
-                                    </div>
-                                </button>
-                                <button
-                                    className="flex-1 min-w-[140px] px-5 py-3 rounded-2xl border border-white/20 text-white/80 hover:bg-white/10 transition"
-                                    onClick={() => setShowProposalModal(true)}
-                                    disabled={!isConnected || loading}
-                                >
-                                    <div className="flex items-center justify-center gap-2">
-                                        <Gavel className="w-4 h-4" /> Fund Folder
-                                    </div>
-                                </button>
-                                <button
+
+                                {/* <button
                                     className="flex-1 min-w-[140px] px-5 py-3 rounded-2xl border border-emerald-400/40 text-emerald-200 hover:bg-emerald-500/10 transition disabled:opacity-40"
                                     onClick={() => openAllocationModal()}
                                     disabled={!selectedFolder || !isConnected || loading}
@@ -1005,7 +979,7 @@ export default function AdminDashboardFixed() {
                                     <div className="flex items-center justify-center gap-2">
                                         <UserPlus2 className="w-4 h-4" /> Allocation
                                     </div>
-                                </button>
+                                </button> */}
                             </div>
                             <p className="text-xs text-gray-400">{selectedFolder ? `Allocations armed for ${selectedFolder.name}` : 'Select a folder card below to unlock allocation tooling.'}</p>
                         </div>
@@ -1142,6 +1116,33 @@ export default function AdminDashboardFixed() {
                         <button className={TOOL_BUTTON_CLASSES} onClick={refresh} disabled={loading}>
                             <Loader2 className="w-5 h-5" />
                             Refresh Data
+                        </button>
+                        <button
+                            className="flex-1 min-w-[140px] px-5 py-3 rounded-2xl border border-white/20 text-white/80 hover:bg-white/10 transition"
+                            onClick={() => setShowProposalModal(true)}
+                            disabled={!isConnected || loading}
+                        >
+                            <div className="flex items-center justify-center gap-2">
+                                <Gavel className="w-4 h-4" /> Pause Treasury
+                            </div>
+                        </button>
+                        <button
+                            className="flex-1 min-w-[140px] px-5 py-3 rounded-2xl border border-white/20 text-white/80 hover:bg-white/10 transition"
+                            onClick={() => setShowProposalModal(true)}
+                            disabled={!isConnected || loading}
+                        >
+                            <div className="flex items-center justify-center gap-2">
+                                <Gavel className="w-4 h-4" /> Pause Folder
+                            </div>
+                        </button>
+                        <button
+                            className="flex-1 min-w-[140px] px-5 py-3 rounded-2xl border border-white/20 text-white/80 hover:bg-white/10 transition"
+                            onClick={() => setShowProposalModal(true)}
+                            disabled={!isConnected || loading}
+                        >
+                            <div className="flex items-center justify-center gap-2">
+                                <Gavel className="w-4 h-4" /> Fund Folder
+                            </div>
                         </button>
                         {/* <button className={TOOL_BUTTON_CLASSES} onClick={() => openAllocationModal()} disabled={!selectedFolder || !isConnected || loading}>
                             <UserPlus2 className="w-5 h-5" />
