@@ -8,10 +8,13 @@ export const CONTRACT_ADDRESSES: any = {
   folderRegistry: process.env.NEXT_PUBLIC_FOLDER_REGISTRY_ADDRESS || '0x9b8209dA26ab232C1F6Caa30Ddcf3B6fA0394C34',
   nyaxGovernor: "0xb852Be5B249EC7DF065351FBDfC14A5A1520eC93",
   timelock: process.env.NEXT_PUBLIC_TIMELOCK_ADDRESS || '0xa17B822F9D0A26C20BDe453F0e566a2D2787E851',
-  treasury: process.env.NEXT_PUBLIC_TREASURY_ADDRESS || '0x7ab3eBb87afa9A921d0770Fa304F20Fc8D2a4763',
+  treasury: '0x0b3b1889aF013680b906F7df9Bd3311Fc660F677',
   multisig: process.env.NEXT_PUBLIC_MULTISIG_ADDRESS || '0x5cD8aD5E36324C386b6F62Ce2374aa3F3f8Ae0aD',
   vestingFactory: process.env.NEXT_PUBLIC_VESTING_FACTORY_ADDRESS || '',
   treasuryBridge: process.env.NEXT_PUBLIC_TREASURY_BRIDGE_ADDRESS || '0x7ab3eBb87afa9A921d0770Fa304F20Fc8D2a4763',
+  folderEscrow: process.env.NEXT_PUBLIC_FOLDER_ESCROW_ADDRESS || '',
+  folderEscrowFactory: '0xFD5B1233c2AE4Ac9e953619ECb28C2C4042aF6C7',
+
 };
 
 // Contract ABIs - Import from generated files or define here

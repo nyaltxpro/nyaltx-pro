@@ -20,7 +20,7 @@ export class FolderRegistryFactoryService {
 
   constructor(provider: ethers.BrowserProvider) {
     this.provider = provider;
-    const address = CONTRACT_ADDRESSES.folderRegistry;
+    const address = CONTRACT_ADDRESSES.folderEscrowFactory;
     const abi = CONTRACT_ABIS.folderRegisteryFactory;
     
     if (!address) {
