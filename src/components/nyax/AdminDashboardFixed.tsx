@@ -1370,6 +1370,143 @@ export default function AdminDashboardFixed() {
                     </div>
                 )}
 
+
+                {showBridgeModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
+                        <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl border border-white/20 bg-gradient-to-br from-gray-900 via-black to-gray-900 p-8 shadow-2xl">
+                            <div className="mb-6 flex items-start justify-between">
+                                <div>
+                                    <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Treasury Operations</p>
+                                    <h2 className="mt-1 text-2xl font-bold text-white">Treasury → Folder</h2>
+                                </div>
+                                <button onClick={() => setShowBridgeModal(false)} className="text-gray-400 hover:text-white">
+                                    ✕
+                                </button>
+                            </div>
+
+                            {bridgeStatus && (
+                                <div className={`mb-4 rounded-xl border p-4 ${bridgeStatus.type === 'success'
+                                    ? 'border-green-400/40 bg-green-400/10 text-green-200'
+                                    : 'border-red-400/40 bg-red-400/10 text-red-200'
+                                    }`}>
+                                    {bridgeStatus.message}
+                                </div>
+                            )}
+
+                            <div className="space-y-6">
+                                <div>
+                                    <label className="text-xs text-gray-400">Token Address</label>
+                                    <input
+                                        type="text"
+                                        value={bridgeForm.tokenAddress}
+                                        onChange={e => setBridgeForm(prev => ({ ...prev, tokenAddress: e.target.value }))}
+                                        placeholder="0x... (ERC20 token contract)"
+                                        className="mt-1 w-full px-4 py-3 bg-white/10 rounded-xl border border-white/20 text-white"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="text-xs text-gray-400">Folder Address</label>
+                                    <input
+                                        type="text"
+                                        value={bridgeForm.folderAddress}
+                                        onChange={e => setBridgeForm(prev => ({ ...prev, folderAddress: e.target.value }))}
+                                        placeholder="0x... (destination folder contract)"
+                                        className="mt-1 w-full px-4 py-3 bg-white/10 rounded-xl border border-white/20 text-white"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="text-xs text-gray-400">Amount</label>
+                                    <input
+                                        type="text"
+                                        value={bridgeForm.amount}
+                                        onChange={e => setBridgeForm(prev => ({ ...prev, amount: e.target.value }))}
+                                        placeholder="Token amount to bridge"
+                                        className="mt-1 w-full px-4 py-3 bg-white/10 rounded-xl border border-white/20 text-white"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="text-xs text-gray-400">Reference ID (optional)</label>
+                                    <input
+                                        type="text"
+                                        value={bridgeForm.referenceId}
+                                        onChange={e => setBridgeForm(prev => ({ ...prev, referenceId: e.target.value }))}
+                                        placeholder="Transaction reference or memo"
+                                        className="mt-1 w-full px-4 py-3 bg-white/10 rounded-xl border border-white/20 text-white"
+                                    />
+                                </div>
+
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={() => setShowBridgeModal(false)}
+                                        className="flex-1 px-4 py-3 rounded-2xl border border-white/20 text-white hover:bg-white/10"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={async () => {
+                                            if (!isConnected) {
+                                                setBridgeStatus({ type: 'error', message: 'Connect wallet to bridge tokens' });
+                                                return;
+                                            }
+
+                                            if (!await ensureSepolia((msg) => setBridgeStatus({ type: 'error', message: msg }))) {
+                                                return;
+                                            }
+
+                                            if (!bridgeForm.tokenAddress || !bridgeForm.folderAddress || !bridgeForm.amount) {
+                                                setBridgeStatus({ type: 'error', message: 'Token address, folder address, and amount required' });
+                                                return;
+                                            }
+
+                                            setBridgeLoading(true);
+                                            setBridgeStatus(null);
+
+                                            try {
+                                                if (!daoService) {
+                                                    throw new Error('DAO service unavailable');
+                                                }
+
+                                                // await daoService.treasury.fundFolder(
+                                                //     bridgeForm.tokenAddress,
+                                                //     bridgeForm.folderAddress,
+                                                //     bridgeForm.amount
+                                                // );
+
+                                                setBridgeStatus({
+                                                    type: 'success',
+                                                    message: `Successfully bridged ${bridgeForm.amount} tokens to folder`
+                                                });
+
+                                                setBridgeForm({ tokenAddress: '', folderAddress: '', amount: '', referenceId: '' });
+
+                                                setTimeout(() => {
+                                                    setShowBridgeModal(false);
+                                                    refresh();
+                                                }, 2000);
+                                            } catch (err) {
+                                                console.error('Bridge failed', err);
+                                                setBridgeStatus({
+                                                    type: 'error',
+                                                    message: err instanceof Error ? err.message : 'Bridge transaction failed'
+                                                });
+                                            } finally {
+                                                setBridgeLoading(false);
+                                            }
+                                        }}
+                                        disabled={bridgeLoading || !isConnected}
+                                        className="flex-1 px-4 py-3 rounded-2xl bg-linear-to-r from-green-500 to-emerald-600 font-semibold disabled:opacity-40"
+                                    >
+                                        {bridgeLoading ? 'Bridging...' : 'Execute Bridge'}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {showAllocationModal && (
                     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
                         <div className="bg-slate-900 rounded-xl p-8 border border-white/20 max-w-lg w-full mx-4 space-y-4">
@@ -1711,6 +1848,7 @@ export default function AdminDashboardFixed() {
                                 )}
                             </div>
                         </div>
+
                     </div>
                 )}
             </div>
