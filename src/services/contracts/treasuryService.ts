@@ -14,11 +14,11 @@ export interface TreasuryStats {
 }
 
 export class TreasuryService {
-  private provider: ethers.BrowserProvider;
+  private provider: ethers.Provider;
   private signer?: ethers.Signer;
   private contract: ethers.Contract;
 
-  constructor(provider: ethers.BrowserProvider, signer?: ethers.Signer) {
+  constructor(provider: ethers.Provider, signer?: ethers.Signer) {
     this.provider = provider;
     this.signer = signer;
     const address = CONTRACT_ADDRESSES.treasury;
