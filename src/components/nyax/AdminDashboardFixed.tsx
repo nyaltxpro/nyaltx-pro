@@ -951,8 +951,9 @@ export default function AdminDashboardFixed() {
                             </div>
                         </div>
                         <div className="flex flex-col gap-3 w-full max-w-sm">
-                            {!isConnected && <ConnectWalletButton className="bg-purple-600 hover:bg-purple-700" />}
+
                             <div className="flex gap-3 flex-wrap">
+                                {!isConnected && <ConnectWalletButton className="flex-1 min-w-[140px] px-5 py-3 rounded-2xl bg-linear-to-r from-indigo-500 to-purple-500 font-semibold disabled:opacity-50 disabled:cursor-not-allowed" />}
                                 <button
                                     onClick={() => setShowAddModal(true)}
                                     disabled={!isConnected}
