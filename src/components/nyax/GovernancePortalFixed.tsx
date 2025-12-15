@@ -229,14 +229,21 @@ export default function NYALTXGovernance() {
         const loadFactoryStats = async () => {
             setFactoryStatsLoading(true);
             try {
+                console.log('Loading factory stats...');
                 if (!window.ethereum) {
                     console.warn('MetaMask not detected');
                     if (!cancelled) setFactoryStats(null);
                     return;
                 }
                 const provider = new ethers.BrowserProvider(window.ethereum as any);
+                console.log('Provider created');
+
                 const factoryService = getFolderRegistryFactoryService(provider);
+                console.log('Factory service created');
+
                 const stats = await factoryService.getAllTokenStats();
+                console.log('Factory stats fetched:', stats);
+
                 if (!cancelled) setFactoryStats(stats);
             } catch (error) {
                 console.error('Failed to load factory stats', error);

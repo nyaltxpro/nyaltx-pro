@@ -48,19 +48,47 @@ export class FolderRegistryFactoryService {
 
   // Token Statistics
   async getTotalSupply(): Promise<bigint> {
-    return await this.contract.totalSupply();
+    try {
+      const result = await this.contract.totalSupply();
+      console.log('getTotalSupply result:', result);
+      return result;
+    } catch (error) {
+      console.error('Error in getTotalSupply:', error);
+      throw error;
+    }
   }
 
   async getCirculating(): Promise<bigint> {
-    return await this.contract.circulating();
+    try {
+      const result = await this.contract.circulating();
+      console.log('getCirculating result:', result);
+      return result;
+    } catch (error) {
+      console.error('Error in getCirculating:', error);
+      throw error;
+    }
   }
 
   async getStakedValue(): Promise<bigint> {
-    return await this.contract.stakedValue();
+    try {
+      const result = await this.contract.stakedValue();
+      console.log('getStakedValue result:', result);
+      return result;
+    } catch (error) {
+      console.error('Error in getStakedValue:', error);
+      throw error;
+    }
   }
 
   async getTotalHolders(): Promise<bigint> {
-    return await this.contract.totalHolders();
+    try {
+      const result = await this.contract.totalHolders();
+      console.log('getTotalHolders result:', result);
+      return result;
+    } catch (error) {
+      console.error('Error in getTotalHolders:', error);
+      throw error;
+    }
   }
 
   async getAllTokenStats(): Promise<TokenStats> {
