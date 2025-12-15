@@ -989,6 +989,15 @@ export default function AdminDashboardFixed() {
                                     </div>
                                 </button>
                                 <button
+                                    className="flex-1 min-w-[140px] px-5 py-3 rounded-2xl border border-white/20 text-white/80 hover:bg-white/10 transition"
+                                    onClick={() => setShowProposalModal(true)}
+                                    disabled={!isConnected || loading}
+                                >
+                                    <div className="flex items-center justify-center gap-2">
+                                        <Gavel className="w-4 h-4" /> Fund Folder
+                                    </div>
+                                </button>
+                                <button
                                     className="flex-1 min-w-[140px] px-5 py-3 rounded-2xl border border-emerald-400/40 text-emerald-200 hover:bg-emerald-500/10 transition disabled:opacity-40"
                                     onClick={() => openAllocationModal()}
                                     disabled={!selectedFolder || !isConnected || loading}
