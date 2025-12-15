@@ -124,42 +124,6 @@ export const CONTRACT_ABIS = {
     'event TimelockChange(address oldTimelock, address newTimelock)',
   ],
   
-  treasury: [
-    // Treasury functions
-    'function nyax() view returns (address)',
-    'function multisig() view returns (address)',
-    'function categoryWallet(string) view returns (address)',
-    'function categoryAllocation(string) view returns (uint256)',
-    'function categoryDistributed(string) view returns (uint256)',
-    'function categoryExists(string) view returns (bool)',
-    'function categories(uint256) view returns (string)',
-    'function BASIS_POINTS() view returns (uint256)',
-    'function MULTISIG_THRESHOLD() view returns (uint256)',
-    
-    'function setCategoryWallet(string category, address wallet, uint256 allocation)',
-    'function removeCategory(string category)',
-    'function transferTo(address to, uint256 amount, string reason, string category)',
-    'function multisigTransfer(address to, uint256 amount, string reason, string category)',
-    'function mintToTreasury(uint256 amount, string reason)',
-    'function mintTo(address to, uint256 amount, string reason, string category)',
-    'function burnFromTreasury(uint256 amount, string reason)',
-    'function setMultisig(address _multisig)',
-    
-    'function getCategoryInfo(string category) view returns (address wallet, uint256 allocation, uint256 distributed, uint256 remaining)',
-    'function getCategories() view returns (string[])',
-    'function getTreasuryBalance() view returns (uint256)',
-    'function getTotalAllocation() view returns (uint256)',
-    'function requiresMultisig(uint256 amount) pure returns (bool)',
-    
-    // Events
-    'event CategorySet(string indexed category, address indexed wallet, uint256 allocation)',
-    'event CategoryRemoved(string indexed category)',
-    'event TransferExecuted(address indexed to, uint256 amount, string reason, string category)',
-    'event MultisigTransferExecuted(address indexed to, uint256 amount, string reason, string category)',
-    'event TokensMinted(address indexed to, uint256 amount, string reason)',
-    'event TokensBurned(uint256 amount, string reason)',
-  ],
-  
   multisig: [
     // MultiSig functions
     'function threshold() view returns (uint256)',
@@ -271,6 +235,143 @@ export const CONTRACT_ABIS = {
     'event MilestoneAdded(bytes32 indexed scheduleId, uint256 timestamp, uint256 percentage, string description)',
     'event MilestoneReleased(bytes32 indexed scheduleId, uint256 amount, string description)',
   ],
+
+  folderRegisteryFactory: [
+    // Constructor
+    'constructor(address governance)',
+    
+    // Public constants
+    'function GOVERNANCE_ROLE() view returns (bytes32)',
+    
+    // Folder Creation
+    'function createFolder(string name, address token, address folderAdmin) returns (address)',
+    
+    // Token Statistics
+    'function totalSupply() view returns (uint256 total)',
+    'function circulating() view returns (uint256 totalClaimed)',
+    'function stakedValue() view returns (uint256 totalLocked)',
+    'function totalHolders() view returns (uint256 holders)',
+    
+    // Views
+    'function getFolderByName(string name) view returns (address)',
+    'function getAllFolders() view returns (address[])',
+    'function totalFolders() view returns (uint256)',
+    
+    // Mappings
+    'function folderByNameHash(bytes32) view returns (address)',
+    'function folderInfo(address) view returns (string name, address folder, uint256 createdAt)',
+    'function allFolders(uint256) view returns (address)',
+    
+    // Access Control
+    'function hasRole(bytes32 role, address account) view returns (bool)',
+    'function getRoleAdmin(bytes32 role) view returns (bytes32)',
+    'function grantRole(bytes32 role, address account)',
+    'function revokeRole(bytes32 role, address account)',
+    'function renounceRole(bytes32 role, address account)',
+    
+    // Events
+    'event FolderCreated(string name, address indexed folder, address indexed token)',
+    'event RoleGranted(bytes32 indexed role, address indexed account, address indexed sender)',
+    'event RoleRevoked(bytes32 indexed role, address indexed account, address indexed sender)',
+  ],
+
+  folderEscrow: [
+    // Constructor
+    'constructor(address _token, address admin, string _folderName, address _registry)',
+    
+    // Public constants
+    'function FOLDER_ADMIN_ROLE() view returns (bytes32)',
+    'function token() view returns (address)',
+    'function folderName() view returns (string)',
+    'function registry() view returns (address)',
+    
+    // Beneficiary Management
+    'function addBeneficiary(address wallet, uint256 totalAllocation, uint256 start, uint256 cliff, uint256 duration)',
+    'function pauseBeneficiary(address wallet)',
+    'function resumeBeneficiary(address wallet)',
+    'function cancelBeneficiary(address wallet)',
+    
+    // Claiming
+    'function claim()',
+    
+    // Vesting Calculation
+    'function _vestedAmount(address wallet) view returns (uint256)',
+    
+    // Views
+    'function getBeneficiaries() view returns (address[])',
+    'function getBeneficiaryInfo(address wallet) view returns (uint256 totalAllocation, uint256 claimed, uint256 start, uint256 cliff, uint256 duration, bool paused, bool cancelled)',
+    
+    // Mappings
+    'function beneficiaries(address) view returns (uint256 totalAllocation, uint256 claimed, uint256 start, uint256 cliff, uint256 duration, bool paused, bool cancelled)',
+    'function beneficiaryList(uint256) view returns (address)',
+    
+    // Folder Controls
+    'function pauseFolder()',
+    'function unpauseFolder()',
+    'function paused() view returns (bool)',
+    
+    // Access Control
+    'function hasRole(bytes32 role, address account) view returns (bool)',
+    'function getRoleAdmin(bytes32 role) view returns (bytes32)',
+    'function grantRole(bytes32 role, address account)',
+    'function revokeRole(bytes32 role, address account)',
+    'function renounceRole(bytes32 role, address account)',
+    
+    // Events
+    'event BeneficiaryAdded(address wallet, uint256 amount, uint256 start, uint256 cliff, uint256 duration)',
+    'event Claimed(address wallet, uint256 amount)',
+    'event BeneficiaryPaused(address wallet)',
+    'event BeneficiaryResumed(address wallet)',
+    'event BeneficiaryCancelled(address wallet)',
+    'event RoleGranted(bytes32 indexed role, address indexed account, address indexed sender)',
+    'event RoleRevoked(bytes32 indexed role, address indexed account, address indexed sender)',
+    'event Paused(address account)',
+    'event Unpaused(address account)',
+  ],
+
+  treasury: [
+    // Constructor
+    'constructor(address _token, address governance)',
+    
+    // Public constants
+    'function TREASURY_ADMIN_ROLE() view returns (bytes32)',
+    'function GOVERNANCE_ROLE() view returns (bytes32)',
+    'function token() view returns (address)',
+    
+    // Folder Management
+    'function approveFolder(address folder)',
+    'function removeFolder(address folder)',
+    'function approvedFolders(address) view returns (bool)',
+    'function folders(uint256) view returns (address)',
+    'function getFolders() view returns (address[])',
+    
+    // Treasury Actions
+    'function sendToFolder(address folder, uint256 amount)',
+    
+    // Emergency Controls
+    'function pauseTreasury()',
+    'function unpauseTreasury()',
+    'function paused() view returns (bool)',
+    
+    // Views
+    'function treasuryBalance() view returns (uint256)',
+    
+    // Access Control
+    'function hasRole(bytes32 role, address account) view returns (bool)',
+    'function getRoleAdmin(bytes32 role) view returns (bytes32)',
+    'function grantRole(bytes32 role, address account)',
+    'function revokeRole(bytes32 role, address account)',
+    'function renounceRole(bytes32 role, address account)',
+    
+    // Events
+    'event FolderApproved(address folder)',
+    'event FolderRemoved(address folder)',
+    'event TokensSentToFolder(address indexed folder, uint256 amount)',
+    'event RoleGranted(bytes32 indexed role, address indexed account, address indexed sender)',
+    'event RoleRevoked(bytes32 indexed role, address indexed account, address indexed sender)',
+    'event Paused(address account)',
+    'event Unpaused(address account)',
+  ]
 };
 
 // Network configuration

@@ -1,429 +1,294 @@
 import { ethers } from 'ethers';
 import { CONTRACT_ABIS, CONTRACT_ADDRESSES } from './config';
-import { ContractError, TreasuryCategory, TreasuryStats, TreasuryTransfer } from './types';
+
+export interface FolderInfo {
+  address: string;
+  approved: boolean;
+}
+
+export interface TreasuryStats {
+  treasuryBalance: string;
+  totalFolders: number;
+  approvedFolders: number;
+  isPaused: boolean;
+}
 
 export class TreasuryService {
-  private provider: ethers.Provider;
-  private signer?: ethers.Signer;
-  private treasuryContract: ethers.Contract;
-  private tokenContract: ethers.Contract;
+  private provider: ethers.BrowserProvider;
+  private contract: ethers.Contract;
 
-  constructor(provider: ethers.Provider, signer?: ethers.Signer) {
+  constructor(provider: ethers.BrowserProvider) {
     this.provider = provider;
-    this.signer = signer;
+    const address = CONTRACT_ADDRESSES.treasury;
+    const abi = CONTRACT_ABIS.treasury;
     
-    this.treasuryContract = new ethers.Contract(
-      CONTRACT_ADDRESSES.treasury,
-      CONTRACT_ABIS.treasury,
-      signer || provider
+    if (!address) {
+      throw new Error('Treasury address not configured');
+    }
+    
+    this.contract = new ethers.Contract(address, abi, provider);
+  }
+
+  // Get contract with signer for write operations
+  getContractWithSigner(signer: ethers.Signer): ethers.Contract {
+    return this.contract.connect(signer) as ethers.Contract;
+  }
+
+  // Public constants
+  async getTreasuryAdminRole(): Promise<string> {
+    return await this.contract.TREASURY_ADMIN_ROLE();
+  }
+
+  async getGovernanceRole(): Promise<string> {
+    return await this.contract.GOVERNANCE_ROLE();
+  }
+
+  async getToken(): Promise<string> {
+    return await this.contract.token();
+  }
+
+  // Folder Management
+  async approveFolder(folder: string, signer: ethers.Signer): Promise<ethers.ContractTransaction> {
+    const contractWithSigner = this.getContractWithSigner(signer);
+    return await contractWithSigner.approveFolder(folder);
+  }
+
+  async removeFolder(folder: string, signer: ethers.Signer): Promise<ethers.ContractTransaction> {
+    const contractWithSigner = this.getContractWithSigner(signer);
+    return await contractWithSigner.removeFolder(folder);
+  }
+
+  async isFolderApproved(folder: string): Promise<boolean> {
+    return await this.contract.approvedFolders(folder);
+  }
+
+  async getFolderByIndex(index: number): Promise<string> {
+    return await this.contract.folders(index);
+  }
+
+  async getFolders(): Promise<string[]> {
+    return await this.contract.getFolders();
+  }
+
+  async getTotalFolders(): Promise<number> {
+    const folders = await this.getFolders();
+    return folders.length;
+  }
+
+  async getApprovedFolders(): Promise<FolderInfo[]> {
+    const allFolders = await this.getFolders();
+    const approvedFolders = await Promise.all(
+      allFolders.map(async (folderAddress) => {
+        const approved = await this.isFolderApproved(folderAddress);
+        return {
+          address: folderAddress,
+          approved
+        };
+      })
     );
-    
-    this.tokenContract = new ethers.Contract(
-      CONTRACT_ADDRESSES.nyaxToken,
-      CONTRACT_ABIS.nyaxToken,
-      signer || provider
-    );
+    return approvedFolders.filter(folder => folder.approved);
   }
 
-  // Category Management
-  async setCategoryWallet(
-    category: string,
-    wallet: string,
-    allocation: number
-  ): Promise<string> {
-    try {
-      if (!this.signer) throw new Error('Signer required for setting category wallet');
-      
-      const tx = await this.treasuryContract.setCategoryWallet(category, wallet, allocation);
-      const receipt = await tx.wait();
-      return receipt.hash;
-    } catch (error) {
-      throw this.handleError(error);
-    }
+  // Treasury Actions
+  async sendToFolder(
+    folder: string,
+    amount: bigint,
+    signer: ethers.Signer
+  ): Promise<ethers.ContractTransaction> {
+    const contractWithSigner = this.getContractWithSigner(signer);
+    return await contractWithSigner.sendToFolder(folder, amount);
   }
 
-  async getRecentTransfers(limit = 10, lookbackBlocks = 50_000): Promise<TreasuryTransfer[]> {
-    try {
-      const latestBlock = await this.provider.getBlockNumber();
-      const fromBlock = Math.max(latestBlock - lookbackBlocks, 0);
-      const topic = ethers.id('TransferExecuted(address,uint256,string,string)');
-
-      const logs = await this.provider.getLogs({
-        address: CONTRACT_ADDRESSES.treasury,
-        topics: [topic],
-        fromBlock,
-        toBlock: latestBlock,
-      });
-
-      console.log(logs)
-
-      const recentLogs = logs.slice(-limit);
-
-      const transfers = await Promise.all(
-        recentLogs
-          .reverse()
-          .map(async (log) => {
-            const parsed = this.treasuryContract.interface.parseLog(log);
-            const block = await this.provider.getBlock(log.blockNumber);
-            if (!parsed) return null;
-            const { to, amount, reason, category } = parsed.args as unknown as {
-              to: string;
-              amount: bigint;
-              reason: string;
-              category: string;
-            };
-
-            return {
-              txHash: log.transactionHash,
-              to,
-              amount: ethers.formatEther(amount),
-              reason,
-              category,
-              blockNumber: log.blockNumber,
-              timestamp: Number(block?.timestamp ?? 0),
-            } satisfies TreasuryTransfer;
-          })
-      );
-
-      return transfers.filter((entry): entry is TreasuryTransfer => Boolean(entry));
-    } catch (error) {
-      console.error('Error fetching recent transfers:', error);
-      return [];
-    }
+  // Emergency Controls
+  async pauseTreasury(signer: ethers.Signer): Promise<ethers.ContractTransaction> {
+    const contractWithSigner = this.getContractWithSigner(signer);
+    return await contractWithSigner.pauseTreasury();
   }
 
-  async removeCategory(category: string): Promise<string> {
-    try {
-      if (!this.signer) throw new Error('Signer required for removing category');
-      
-      const tx = await this.treasuryContract.removeCategory(category);
-      const receipt = await tx.wait();
-      return receipt.hash;
-    } catch (error) {
-      throw this.handleError(error);
-    }
+  async unpauseTreasury(signer: ethers.Signer): Promise<ethers.ContractTransaction> {
+    const contractWithSigner = this.getContractWithSigner(signer);
+    return await contractWithSigner.unpauseTreasury();
   }
 
-  async getCategory(category: string): Promise<TreasuryCategory | null> {
-    try {
-      const exists = await this.treasuryContract.categoryExists(category);
-      if (!exists) return null;
-
-      const [wallet, allocation, distributed, remaining] = await this.treasuryContract.getCategoryInfo(category);
-      
-      return {
-        name: category,
-        wallet,
-        allocation: Number(allocation),
-        distributed: ethers.formatEther(distributed),
-        remaining: ethers.formatEther(remaining),
-      };
-    } catch (error) {
-      console.error('Error fetching category:', error);
-      return null;
-    }
+  async isPaused(): Promise<boolean> {
+    return await this.contract.paused();
   }
 
-  async getAllCategories(): Promise<TreasuryCategory[]> {
-    try {
-      const categoryNames = await this.treasuryContract.getCategories();
-      
-      const categories = await Promise.all(
-        categoryNames.map(async (name: string) => this.getCategory(name))
-      );
-      
-      return categories.filter((c): c is TreasuryCategory => c !== null);
-    } catch (error) {
-      console.error('Error fetching categories:', error);
-      return [];
-    }
+  // Views
+  async getTreasuryBalance(): Promise<bigint> {
+    return await this.contract.treasuryBalance();
   }
 
-  // Token Operations
-  async transferTo(
-    to: string,
-    amount: string,
-    reason: string,
-    category: string
-  ): Promise<string> {
-    try {
-      if (!this.signer) throw new Error('Signer required for transfers');
-      
-      const amountWei = ethers.parseEther(amount);
-      const tx = await this.treasuryContract.transferTo(to, amountWei, reason, category);
-      const receipt = await tx.wait();
-      return receipt.hash;
-    } catch (error) {
-      throw this.handleError(error);
-    }
+  async getTreasuryBalanceFormatted(): Promise<string> {
+    const balance = await this.getTreasuryBalance();
+    return ethers.formatEther(balance);
   }
 
-  async mintToTreasury(amount: string, reason: string): Promise<string> {
-    try {
-      if (!this.signer) throw new Error('Signer required for minting');
-      
-      const amountWei = ethers.parseEther(amount);
-      const tx = await this.treasuryContract.mintToTreasury(amountWei, reason);
-      const receipt = await tx.wait();
-      return receipt.hash;
-    } catch (error) {
-      throw this.handleError(error);
-    }
+  // Access Control
+  async hasRole(role: string, account: string): Promise<boolean> {
+    return await this.contract.hasRole(role, account);
   }
 
-  async mintTo(
-    to: string,
-    amount: string,
-    reason: string,
-    category: string
-  ): Promise<string> {
-    try {
-      if (!this.signer) throw new Error('Signer required for minting');
-      
-      const amountWei = ethers.parseEther(amount);
-      const tx = await this.treasuryContract.mintTo(to, amountWei, reason, category);
-      const receipt = await tx.wait();
-      return receipt.hash;
-    } catch (error) {
-      throw this.handleError(error);
-    }
+  async getRoleAdmin(role: string): Promise<string> {
+    return await this.contract.getRoleAdmin(role);
   }
 
-  async burnFromTreasury(amount: string, reason: string): Promise<string> {
-    try {
-      if (!this.signer) throw new Error('Signer required for burning');
-      
-      const amountWei = ethers.parseEther(amount);
-      const tx = await this.treasuryContract.burnFromTreasury(amountWei, reason);
-      const receipt = await tx.wait();
-      return receipt.hash;
-    } catch (error) {
-      throw this.handleError(error);
-    }
+  async grantRole(role: string, account: string, signer: ethers.Signer): Promise<ethers.ContractTransaction> {
+    const contractWithSigner = this.getContractWithSigner(signer);
+    return await contractWithSigner.grantRole(role, account);
   }
 
-  // Treasury Stats
-  async getTreasuryStats(): Promise<TreasuryStats> {
-    try {
-      const [
-        balance,
-        totalAllocation,
-        categories,
-        multisigThreshold
-      ] = await Promise.all([
-        this.treasuryContract.getTreasuryBalance(),
-        this.treasuryContract.getTotalAllocation(),
-        this.treasuryContract.getCategories(),
-        this.treasuryContract.MULTISIG_THRESHOLD()
-      ]);
-
-      return {
-        totalBalance: ethers.formatEther(balance),
-        totalAllocated: Number(totalAllocation),
-        categoriesCount: categories.length,
-        multisigThreshold: ethers.formatEther(multisigThreshold),
-      };
-    } catch (error) {
-      console.error('Error fetching treasury stats:', error);
-      return {
-        totalBalance: '0',
-        totalAllocated: 0,
-        categoriesCount: 0,
-        multisigThreshold: '0',
-      };
-    }
+  async revokeRole(role: string, account: string, signer: ethers.Signer): Promise<ethers.ContractTransaction> {
+    const contractWithSigner = this.getContractWithSigner(signer);
+    return await contractWithSigner.revokeRole(role, account);
   }
 
-  async getTreasuryBalance(): Promise<string> {
-    try {
-      const balance = await this.treasuryContract.getTreasuryBalance();
-      return ethers.formatEther(balance);
-    } catch (error) {
-      console.error('Error fetching treasury balance:', error);
-      return '0';
-    }
-  }
-
-  async requiresMultisig(amount: string): Promise<boolean> {
-    try {
-      const amountWei = ethers.parseEther(amount);
-      return await this.treasuryContract.requiresMultisig(amountWei);
-    } catch (error) {
-      console.error('Error checking multisig requirement:', error);
-      return false;
-    }
-  }
-
-  // Token Info
-  async getTokenInfo(): Promise<{
-    name: string;
-    symbol: string;
-    decimals: number;
-    totalSupply: string;
-    maxSupply: string;
-    remainingMintable: string;
-    treasury: string;
-    transfersEnabled: boolean;
-    paused: boolean;
-  }> {
-    try {
-      const [
-        name,
-        symbol,
-        decimals,
-        totalSupply,
-        maxSupply,
-        remainingMintable,
-        treasury,
-        transfersEnabled,
-        paused
-      ] = await Promise.all([
-        this.tokenContract.name(),
-        this.tokenContract.symbol(),
-        this.tokenContract.decimals(),
-        this.tokenContract.totalSupply(),
-        this.tokenContract.MAX_SUPPLY(),
-        this.tokenContract.remainingMintableSupply(),
-        this.tokenContract.treasury(),
-        this.tokenContract.transfersEnabled(),
-        this.tokenContract.paused()
-      ]);
-
-      return {
-        name,
-        symbol,
-        decimals: Number(decimals),
-        totalSupply: ethers.formatEther(totalSupply),
-        maxSupply: ethers.formatEther(maxSupply),
-        remainingMintable: ethers.formatEther(remainingMintable),
-        treasury,
-        transfersEnabled,
-        paused,
-      };
-    } catch (error) {
-      console.error('Error fetching token info:', error);
-      return {
-        name: 'NYAX',
-        symbol: 'NYAX',
-        decimals: 18,
-        totalSupply: '0',
-        maxSupply: '0',
-        remainingMintable: '0',
-        treasury: ethers.ZeroAddress,
-        transfersEnabled: false,
-        paused: false,
-      };
-    }
-  }
-
-  async setTokenTransfersEnabled(enabled: boolean): Promise<string> {
-    try {
-      if (!this.signer) throw new Error('Signer required for toggling transfers');
-      const tx = await this.tokenContract.setTransfersEnabled(enabled);
-      const receipt = await tx.wait();
-      return receipt.hash;
-    } catch (error) {
-      throw this.handleError(error);
-    }
-  }
-
-  async pauseToken(): Promise<string> {
-    try {
-      if (!this.signer) throw new Error('Signer required to pause token');
-      const tx = await this.tokenContract.pause();
-      const receipt = await tx.wait();
-      return receipt.hash;
-    } catch (error) {
-      throw this.handleError(error);
-    }
-  }
-
-  async unpauseToken(): Promise<string> {
-    try {
-      if (!this.signer) throw new Error('Signer required to unpause token');
-      const tx = await this.tokenContract.unpause();
-      const receipt = await tx.wait();
-      return receipt.hash;
-    } catch (error) {
-      throw this.handleError(error);
-    }
-  }
-
-  async mintGovernanceTokens(to: string, amount: string): Promise<string> {
-    try {
-      if (!this.signer) throw new Error('Signer required for minting');
-      const amountWei = ethers.parseEther(amount);
-      const tx = await this.tokenContract.mint(to, amountWei);
-      const receipt = await tx.wait();
-      return receipt.hash;
-    } catch (error) {
-      throw this.handleError(error);
-    }
-  }
-
-  async burnGovernanceTokens(from: string, amount: string): Promise<string> {
-    try {
-      if (!this.signer) throw new Error('Signer required for burning');
-      const amountWei = ethers.parseEther(amount);
-      const tx = await this.tokenContract.burn(from, amountWei);
-      const receipt = await tx.wait();
-      return receipt.hash;
-    } catch (error) {
-      throw this.handleError(error);
-    }
-  }
-
-  // Utility Methods
-  private handleError(error: any): ContractError {
-    if (error.code === 'CALL_EXCEPTION') {
-      return {
-        code: 'CALL_EXCEPTION',
-        message: error.reason || 'Contract call failed',
-        data: error.data,
-      };
-    }
-    
-    if (error.code === 'INSUFFICIENT_FUNDS') {
-      return {
-        code: 'INSUFFICIENT_FUNDS',
-        message: 'Insufficient funds for transaction',
-      };
-    }
-    
-    return {
-      code: 'UNKNOWN_ERROR',
-      message: error.message || 'An unknown error occurred',
-      data: error,
-    };
+  async renounceRole(role: string, account: string, signer: ethers.Signer): Promise<ethers.ContractTransaction> {
+    const contractWithSigner = this.getContractWithSigner(signer);
+    return await contractWithSigner.renounceRole(role, account);
   }
 
   // Event Listeners
-  onCategorySet(callback: (category: string, wallet: string, allocation: number) => void) {
-    this.treasuryContract.on('CategorySet', (category, wallet, allocation) => {
-      callback(category, wallet, Number(allocation));
+  onFolderApproved(callback: (folder: string, event: any) => void) {
+    this.contract.on('FolderApproved', (folder, event) => {
+      callback(folder, event);
     });
   }
 
-  onTransferExecuted(callback: (to: string, amount: string, reason: string, category: string) => void) {
-    this.treasuryContract.on('TransferExecuted', (to, amount, reason, category) => {
-      callback(to, ethers.formatEther(amount), reason, category);
+  onFolderRemoved(callback: (folder: string, event: any) => void) {
+    this.contract.on('FolderRemoved', (folder, event) => {
+      callback(folder, event);
     });
   }
 
-  onTokensMinted(callback: (to: string, amount: string, reason: string) => void) {
-    this.treasuryContract.on('TokensMinted', (to, amount, reason) => {
-      callback(to, ethers.formatEther(amount), reason);
+  onTokensSentToFolder(callback: (folder: string, amount: bigint, event: any) => void) {
+    this.contract.on('TokensSentToFolder', (folder, amount, event) => {
+      callback(folder, amount, event);
     });
   }
 
-  onTokensBurned(callback: (amount: string, reason: string) => void) {
-    this.treasuryContract.on('TokensBurned', (amount, reason) => {
-      callback(ethers.formatEther(amount), reason);
+  onRoleGranted(callback: (role: string, account: string, sender: string, event: any) => void) {
+    this.contract.on('RoleGranted', (role, account, sender, event) => {
+      callback(role, account, sender, event);
     });
+  }
+
+  onRoleRevoked(callback: (role: string, account: string, sender: string, event: any) => void) {
+    this.contract.on('RoleRevoked', (role, account, sender, event) => {
+      callback(role, account, sender, event);
+    });
+  }
+
+  onPaused(callback: (account: string, event: any) => void) {
+    this.contract.on('Paused', (account, event) => {
+      callback(account, event);
+    });
+  }
+
+  onUnpaused(callback: (account: string, event: any) => void) {
+    this.contract.on('Unpaused', (account, event) => {
+      callback(account, event);
+    });
+  }
+
+  // Utility Methods
+  async getTreasuryStats(): Promise<TreasuryStats> {
+    const [balance, folders, approvedFolders, isPaused] = await Promise.all([
+      this.getTreasuryBalanceFormatted(),
+      this.getTotalFolders(),
+      this.getApprovedFolders(),
+      this.isPaused()
+    ]);
+
+    return {
+      treasuryBalance: balance,
+      totalFolders: folders,
+      approvedFolders: approvedFolders.length,
+      isPaused
+    };
+  }
+
+  async canSendToFolder(folder: string, amount: bigint): Promise<{ canSend: boolean; reason?: string }> {
+    try {
+      // Check if folder is approved
+      const isApproved = await this.isFolderApproved(folder);
+      if (!isApproved) {
+        return { canSend: false, reason: 'Folder is not approved' };
+      }
+
+      // Check if treasury is paused
+      const paused = await this.isPaused();
+      if (paused) {
+        return { canSend: false, reason: 'Treasury is paused' };
+      }
+
+      // Check if amount is valid
+      if (amount <= 0) {
+        return { canSend: false, reason: 'Invalid amount' };
+      }
+
+      // Check treasury balance
+      const balance = await this.getTreasuryBalance();
+      if (balance < amount) {
+        return { canSend: false, reason: 'Insufficient treasury balance' };
+      }
+
+      return { canSend: true };
+    } catch (error) {
+      return { canSend: false, reason: 'Error checking conditions' };
+    }
+  }
+
+  async checkPermissions(account: string): Promise<{
+    isTreasuryAdmin: boolean;
+    isGovernance: boolean;
+    canApproveFolders: boolean;
+    canSendTokens: boolean;
+    canPauseTreasury: boolean;
+  }> {
+    const [treasuryAdminRole, governanceRole] = await Promise.all([
+      this.getTreasuryAdminRole(),
+      this.getGovernanceRole()
+    ]);
+
+    const [isTreasuryAdmin, isGovernance] = await Promise.all([
+      this.hasRole(treasuryAdminRole, account),
+      this.hasRole(governanceRole, account)
+    ]);
+
+    return {
+      isTreasuryAdmin,
+      isGovernance,
+      canApproveFolders: isTreasuryAdmin,
+      canSendTokens: isGovernance,
+      canPauseTreasury: isTreasuryAdmin
+    };
+  }
+
+  // Get contract address
+  getContractAddress(): string {
+    return CONTRACT_ADDRESSES.treasury;
+  }
+
+  // Get contract instance
+  getContract(): ethers.Contract {
+    return this.contract;
   }
 
   // Cleanup
   removeAllListeners() {
-    this.treasuryContract.removeAllListeners();
+    this.contract.removeAllListeners();
   }
 }
+
+// Singleton instance
+let treasuryService: TreasuryService | null = null;
+
+export const getTreasuryService = (provider: ethers.BrowserProvider): TreasuryService => {
+  if (!treasuryService) {
+    treasuryService = new TreasuryService(provider);
+  }
+  return treasuryService;
+};
+
+export default TreasuryService;

@@ -3,9 +3,11 @@
 import { useDAOService } from '@/hooks/useDAOService';
 import { useMigrationVault } from '@/hooks/useMigrationVault';
 import { CONTRACT_ABIS, CONTRACT_ADDRESSES } from '@/services/contracts';
+import { getFolderRegistryFactoryService } from '@/services/contracts/folderRegistryFactoryService';
+import { getTreasuryService } from '@/services/contracts/treasuryService';
 import { GovernanceStats, ProposalData, StakingStats, TreasuryTransfer } from '@/services/contracts/types';
 import { ethers } from 'ethers';
-import { Activity, ArrowUpRight, CheckCircle, Clock, Coins, Globe, Layers, Shield, TrendingUp, Users, XCircle } from 'lucide-react';
+import { Activity, ArrowUpRight, CheckCircle, Clock, Coins, Layers, Shield, TrendingUp, Users, XCircle } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Area, AreaChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { useAccount, useChainId, useSwitchChain } from 'wagmi';
@@ -89,6 +91,15 @@ export default function NYALTXGovernance() {
     const [transfers, setTransfers] = useState<TreasuryTransfer[]>([]);
     const [transfersLoading, setTransfersLoading] = useState(false);
     const [transfersError, setTransfersError] = useState<string | null>(null);
+    const [treasuryBalance, setTreasuryBalance] = useState<string>('0');
+    const [treasuryBalanceLoading, setTreasuryBalanceLoading] = useState(false);
+    const [factoryStats, setFactoryStats] = useState<{
+        totalSupply: bigint;
+        circulating: bigint;
+        stakedValue: bigint;
+        totalHolders: bigint;
+    } | null>(null);
+    const [factoryStatsLoading, setFactoryStatsLoading] = useState(false);
     const [showProposalForm, setShowProposalForm] = useState(false);
     const [proposalTitle, setProposalTitle] = useState('');
     const [proposalDescription, setProposalDescription] = useState('');
@@ -136,63 +147,117 @@ export default function NYALTXGovernance() {
         refreshGovernanceData();
     }, [daoService, refreshGovernanceData]);
 
-    useEffect(() => {
-        if (!daoService) return;
-        let cancelled = false;
-        const loadStaking = async () => {
-            try {
-                const stats = await daoService.staking.getStats();
-                if (!cancelled) setStakingStats(stats);
-            } catch (error) {
-                console.error('Failed to load staking stats', error);
-            }
-        };
-        const loadTokenInfo = async () => {
-            try {
-                const info = await daoService.treasury.getTokenInfo();
-                if (!cancelled) {
-                    setTokenMetrics({ totalSupply: info.totalSupply, maxSupply: info.maxSupply });
-                }
-            } catch (error) {
-                console.error('Failed to fetch token info', error);
-            }
-        };
-        loadStaking();
-        loadTokenInfo();
-        return () => {
-            cancelled = true;
-        };
-    }, [daoService]);
+    // useEffect(() => {
+    //     if (!daoService) return;
+    //     let cancelled = false;
+    //     const loadStaking = async () => {
+    //         try {
+    //             const stats = await daoService.staking.getStats();
+    //             if (!cancelled) setStakingStats(stats);
+    //         } catch (error) {
+    //             console.error('Failed to load staking stats', error);
+    //         }
+    //     };
+    //     const loadTokenInfo = async () => {
+    //         try {
+    //             const info = await daoService.treasury.getTokenInfo();
+    //             if (!cancelled) {
+    //                 setTokenMetrics({ totalSupply: info.totalSupply, maxSupply: info.maxSupply });
+    //             }
+    //         } catch (error) {
+    //             console.error('Failed to fetch token info', error);
+    //         }
+    //     };
+    //     loadStaking();
+    //     loadTokenInfo();
+    //     return () => {
+    //         cancelled = true;
+    //     };
+    // }, [daoService]);
+
+    // useEffect(() => {
+    //     if (!daoService) return;
+    //     let cancelled = false;
+    //     const loadTransfers = async () => {
+    //         setTransfersLoading(true);
+    //         setTransfersError(null);
+    //         try {
+    //             const recent = await daoService.treasury.getRecentTransfers(15, 75_000);
+    //             if (!cancelled) setTransfers(recent);
+    //         } catch (error) {
+    //             console.error('Failed to load transfers', error);
+    //             if (!cancelled) setTransfersError('Unable to load recent transfers.');
+    //         } finally {
+    //             if (!cancelled) setTransfersLoading(false);
+    //         }
+    //     };
+    //     loadTransfers();
+    //     return () => {
+    //         cancelled = true;
+    //     };
+    // }, [daoService]);
 
     useEffect(() => {
-        if (!daoService) return;
         let cancelled = false;
-        const loadTransfers = async () => {
-            setTransfersLoading(true);
-            setTransfersError(null);
+        const loadTreasuryBalance = async () => {
+            setTreasuryBalanceLoading(true);
             try {
-                const recent = await daoService.treasury.getRecentTransfers(15, 75_000);
-                if (!cancelled) setTransfers(recent);
+                if (!window.ethereum) {
+                    console.warn('MetaMask not detected');
+                    if (!cancelled) setTreasuryBalance('0');
+                    return;
+                }
+                const provider = new ethers.BrowserProvider(window.ethereum as any);
+                const treasuryService = getTreasuryService(provider);
+                const balance = await treasuryService.getTreasuryBalanceFormatted();
+                if (!cancelled) setTreasuryBalance(balance);
             } catch (error) {
-                console.error('Failed to load transfers', error);
-                if (!cancelled) setTransfersError('Unable to load recent transfers.');
+                console.error('Failed to load treasury balance', error);
+                if (!cancelled) setTreasuryBalance('0');
             } finally {
-                if (!cancelled) setTransfersLoading(false);
+                if (!cancelled) setTreasuryBalanceLoading(false);
             }
         };
-        loadTransfers();
+        loadTreasuryBalance();
         return () => {
             cancelled = true;
         };
-    }, [daoService]);
+    }, []);
+
+    useEffect(() => {
+        let cancelled = false;
+        const loadFactoryStats = async () => {
+            setFactoryStatsLoading(true);
+            try {
+                if (!window.ethereum) {
+                    console.warn('MetaMask not detected');
+                    if (!cancelled) setFactoryStats(null);
+                    return;
+                }
+                const provider = new ethers.BrowserProvider(window.ethereum as any);
+                const factoryService = getFolderRegistryFactoryService(provider);
+                const stats = await factoryService.getAllTokenStats();
+                if (!cancelled) setFactoryStats(stats);
+            } catch (error) {
+                console.error('Failed to load factory stats', error);
+                if (!cancelled) setFactoryStats(null);
+            } finally {
+                if (!cancelled) setFactoryStatsLoading(false);
+            }
+        };
+        loadFactoryStats();
+        return () => {
+            cancelled = true;
+        };
+    }, []);
 
     const overview = useMemo(() => {
-        const totalSupply = parseFloat(tokenMetrics?.totalSupply ?? '0');
-        const stakedTokens = parseFloat(stakingStats?.totalStaked ?? '0');
-        const circulatingSupply = Math.max(totalSupply - stakedTokens, 0);
-        const holders = governanceStats?.totalVoters ?? 0;
+        const totalSupply = factoryStats ? Number(ethers.formatEther(factoryStats.totalSupply)) : parseFloat(tokenMetrics?.totalSupply ?? '0');
+        const stakedTokens = factoryStats ? Number(ethers.formatEther(factoryStats.stakedValue)) : parseFloat(stakingStats?.totalStaked ?? '0');
+        const circulatingSupply = factoryStats ? Number(ethers.formatEther(factoryStats.circulating)) : Math.max(totalSupply - stakedTokens, 0);
+        const holders = factoryStats ? Number(factoryStats.totalHolders) : (governanceStats?.totalVoters ?? 0);
         return { totalSupply, stakedTokens, circulatingSupply, holders };
-    }, [tokenMetrics, stakingStats, governanceStats]);
+    }, [factoryStats, tokenMetrics, stakingStats, governanceStats]);
 
     const participationStats = useMemo(() => {
         const stakingRate = overview.totalSupply ? (overview.stakedTokens / overview.totalSupply) * 100 : 0;
@@ -558,9 +623,11 @@ export default function NYALTXGovernance() {
                                     </div>
                                     <div className="rounded-2xl bg-black/30 border border-white/10 p-4">
                                         <p className="text-xs text-gray-300">Treasury streams</p>
-                                        <p className="text-3xl font-semibold mt-1">{transferPreview.length}</p>
+                                        <p className="text-3xl font-semibold mt-1">
+                                            {treasuryBalanceLoading ? '...' : formatNumber(treasuryBalance)}
+                                        </p>
                                         <span className="text-xs text-blue-300 inline-flex items-center gap-1 mt-2">
-                                            <Globe size={14} /> Last 24h
+                                            <Coins size={14} /> NYAX tokens
                                         </span>
                                     </div>
                                 </div>
@@ -573,7 +640,9 @@ export default function NYALTXGovernance() {
                                     <span>Total supply</span>
                                     <Coins className="text-blue-300" size={18} />
                                 </div>
-                                <p className="text-3xl font-semibold mt-2">{formatNumber(overview.totalSupply)}</p>
+                                <p className="text-3xl font-semibold mt-2">
+                                    {factoryStatsLoading ? '...' : formatNumber(overview.totalSupply)}
+                                </p>
                                 <p className="text-xs text-gray-500 mt-1">Max {formatNumber(tokenMetrics?.maxSupply)}</p>
                             </div>
                             <div className="rounded-2xl bg-gray-900/50 border border-gray-800/60 p-5">
@@ -581,23 +650,33 @@ export default function NYALTXGovernance() {
                                     <span>Circulating</span>
                                     <Shield className="text-purple-300" size={18} />
                                 </div>
-                                <p className="text-3xl font-semibold mt-2">{formatNumber(overview.circulatingSupply)}</p>
-                                <p className="text-xs text-gray-500 mt-1">{formatNumber((overview.circulatingSupply / (overview.totalSupply || 1)) * 100)}% released</p>
+                                <p className="text-3xl font-semibold mt-2">
+                                    {factoryStatsLoading ? '...' : formatNumber(overview.circulatingSupply)}
+                                </p>
+                                <p className="text-xs text-gray-500 mt-1">
+                                    {factoryStatsLoading ? '...' : formatNumber((overview.circulatingSupply / (overview.totalSupply || 1)) * 100)}% released
+                                </p>
                             </div>
                             <div className="rounded-2xl bg-gray-900/50 border border-gray-800/60 p-5">
                                 <div className="flex items-center justify-between text-sm text-gray-400">
                                     <span>Staked value</span>
                                     <TrendingUp className="text-emerald-300" size={18} />
                                 </div>
-                                <p className="text-3xl font-semibold mt-2">{formatNumber(overview.stakedTokens)}</p>
-                                <p className="text-xs text-emerald-400 mt-1">{formatNumber((overview.stakedTokens / (overview.totalSupply || 1)) * 100)}% of supply</p>
+                                <p className="text-3xl font-semibold mt-2">
+                                    {factoryStatsLoading ? '...' : formatNumber(overview.stakedTokens)}
+                                </p>
+                                <p className="text-xs text-emerald-400 mt-1">
+                                    {factoryStatsLoading ? '...' : formatNumber((overview.stakedTokens / (overview.totalSupply || 1)) * 100)}% of supply
+                                </p>
                             </div>
                             <div className="rounded-2xl bg-gray-900/50 border border-gray-800/60 p-5">
                                 <div className="flex items-center justify-between text-sm text-gray-400">
                                     <span>Token holders</span>
                                     <Users className="text-pink-300" size={18} />
                                 </div>
-                                <p className="text-3xl font-semibold mt-2">{formatNumber(overview.holders, 0)}</p>
+                                <p className="text-3xl font-semibold mt-2">
+                                    {factoryStatsLoading ? '...' : formatNumber(overview.holders, 0)}
+                                </p>
                                 <p className="text-xs text-gray-500 mt-1">wallets with voting power</p>
                             </div>
                         </div>

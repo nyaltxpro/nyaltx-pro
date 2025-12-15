@@ -1,9 +1,10 @@
 {
-  "generatedAt": "2025-12-10T23:41:24.607Z",
+  "generatedAt": "2025-12-15T15:09:12.973Z",
   "network": "sepolia",
-  "treasury": "0x479DE3b0B4Cc6904Ea443e0Fb094343d55580E8D",
-  "nyaxToken": "0xb135e39E87A906d6334cc3033836A291C2aD3F1c",
-  "multisig": "0xBc83EB4964FfaFB0AdDC2F70b62B1a3280C6c200",
-  "owner": "0x37B4fd549e2Ed52c025Ae2744Ec13fd74627e4dc",
-  "deployer": "0x37B4fd549e2Ed52c025Ae2744Ec13fd74627e4dc"
+  "contractName": "Treasury",
+  "address": "0x0b3b1889aF013680b906F7df9Bd3311Fc660F677",
+  "deployer": "0x37B4fd549e2Ed52c025Ae2744Ec13fd74627e4dc",
+  "token": "0xa879282ad7097f2503A4D128b807546e79A88F2f",
+  "governance": "0x37B4fd549e2Ed52c025Ae2744Ec13fd74627e4dc",
+  "transactionHash": "0x899fd56145b8994293aaeb736669097df1bf584010d8e71296a15b2b6b22d7cf"
 }

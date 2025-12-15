@@ -3,12 +3,14 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
-import "@openzeppelin/contracts/security/Pausable.sol";
+import "@openzeppelin/contracts/utils/Pausable.sol";
 
 contract FolderEscrow is AccessControl, Pausable {
     bytes32 public constant FOLDER_ADMIN_ROLE = keccak256("FOLDER_ADMIN_ROLE");
 
-    IERC20 public token;
+    IERC20 public immutable token;
+    string public folderName;
+    address public immutable registry;
 
     struct Beneficiary {
         uint256 totalAllocation;
@@ -20,20 +22,41 @@ contract FolderEscrow is AccessControl, Pausable {
         bool cancelled;
     }
 
+    // Mapping of wallet -> Beneficiary
     mapping(address => Beneficiary) public beneficiaries;
 
+    // Array of beneficiary addresses
+    address[] public beneficiaryList;
+
+    // ------------------------
+    // Events
+    // ------------------------
     event BeneficiaryAdded(address wallet, uint256 amount, uint256 start, uint256 cliff, uint256 duration);
     event Claimed(address wallet, uint256 amount);
     event BeneficiaryPaused(address wallet);
     event BeneficiaryResumed(address wallet);
     event BeneficiaryCancelled(address wallet);
 
-    constructor(IERC20 _token, address admin) {
+    // ------------------------
+    // Constructor
+    // ------------------------
+    constructor(
+        IERC20 _token,
+        address admin,
+        string memory _folderName,
+        address _registry
+    ) {
         token = _token;
-        _setupRole(DEFAULT_ADMIN_ROLE, admin);
-        _setupRole(FOLDER_ADMIN_ROLE, admin);
+        folderName = _folderName;
+        registry = _registry;
+
+        _grantRole(DEFAULT_ADMIN_ROLE, admin);
+        _grantRole(FOLDER_ADMIN_ROLE, admin);
     }
 
+    // ------------------------
+    // Beneficiary Management
+    // ------------------------
     function addBeneficiary(
         address wallet,
         uint256 totalAllocation,
@@ -41,32 +64,23 @@ contract FolderEscrow is AccessControl, Pausable {
         uint256 cliff,
         uint256 duration
     ) external onlyRole(FOLDER_ADMIN_ROLE) {
+        require(wallet != address(0), "Invalid wallet");
+        require(totalAllocation > 0, "Allocation cannot be zero");
         require(beneficiaries[wallet].totalAllocation == 0, "Already exists");
-        beneficiaries[wallet] = Beneficiary(totalAllocation, 0, start, cliff, duration, false, false);
+
+        beneficiaries[wallet] = Beneficiary(
+            totalAllocation,
+            0,
+            start,
+            cliff,
+            duration,
+            false,
+            false
+        );
+
+        beneficiaryList.push(wallet);
+
         emit BeneficiaryAdded(wallet, totalAllocation, start, cliff, duration);
-    }
-
-    function claim() external whenNotPaused {
-        Beneficiary storage b = beneficiaries[msg.sender];
-        require(!b.paused, "Paused");
-        require(!b.cancelled, "Cancelled");
-        require(block.timestamp >= b.start + b.cliff, "Cliff not reached");
-
-        uint256 vested = _vestedAmount(msg.sender);
-        uint256 claimable = vested - b.claimed;
-        require(claimable > 0, "Nothing to claim");
-
-        b.claimed += claimable;
-        token.transfer(msg.sender, claimable);
-        emit Claimed(msg.sender, claimable);
-    }
-
-    function _vestedAmount(address wallet) public view returns (uint256) {
-        Beneficiary memory b = beneficiaries[wallet];
-        if (block.timestamp < b.start + b.cliff) return 0;
-        uint256 elapsed = block.timestamp - b.start;
-        if (elapsed >= b.duration) return b.totalAllocation;
-        return (b.totalAllocation * elapsed) / b.duration;
     }
 
     function pauseBeneficiary(address wallet) external onlyRole(FOLDER_ADMIN_ROLE) {
@@ -84,6 +98,69 @@ contract FolderEscrow is AccessControl, Pausable {
         emit BeneficiaryCancelled(wallet);
     }
 
+    // ------------------------
+    // Claiming
+    // ------------------------
+    function claim() external whenNotPaused {
+        Beneficiary storage b = beneficiaries[msg.sender];
+        require(!b.paused, "Beneficiary paused");
+        require(!b.cancelled, "Beneficiary cancelled");
+        require(block.timestamp >= b.start + b.cliff, "Cliff not reached");
+
+        uint256 vested = _vestedAmount(msg.sender);
+        uint256 claimable = vested - b.claimed;
+        require(claimable > 0, "Nothing to claim");
+
+        b.claimed += claimable;
+        token.transfer(msg.sender, claimable);
+
+        emit Claimed(msg.sender, claimable);
+    }
+
+    // ------------------------
+    // Vesting Calculation
+    // ------------------------
+    function _vestedAmount(address wallet) public view returns (uint256) {
+        Beneficiary memory b = beneficiaries[wallet];
+        if (block.timestamp < b.start + b.cliff) return 0;
+
+        uint256 elapsed = block.timestamp - b.start;
+        if (elapsed >= b.duration) return b.totalAllocation;
+
+        return (b.totalAllocation * elapsed) / b.duration;
+    }
+
+    // ------------------------
+    // Views
+    // ------------------------
+    function getBeneficiaries() external view returns (address[] memory) {
+        return beneficiaryList;
+    }
+
+    function getBeneficiaryInfo(address wallet) external view returns (
+        uint256 totalAllocation,
+        uint256 claimed,
+        uint256 start,
+        uint256 cliff,
+        uint256 duration,
+        bool paused,
+        bool cancelled
+    ) {
+        Beneficiary memory b = beneficiaries[wallet];
+        return (
+            b.totalAllocation,
+            b.claimed,
+            b.start,
+            b.cliff,
+            b.duration,
+            b.paused,
+            b.cancelled
+        );
+    }
+
+    // ------------------------
+    // Pause Folder
+    // ------------------------
     function pauseFolder() external onlyRole(FOLDER_ADMIN_ROLE) {
         _pause();
     }

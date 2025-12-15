@@ -5,23 +5,22 @@ async function deployTreasury(overrides = {}) {
   const { ethers, network } = hre;
   const [deployer] = await ethers.getSigners();
 
-  const nyaxToken =
-    overrides.nyaxToken || requireEnv("NYALTX_GOVERNANCE_TOKEN_ADDRESS");
-  const multisig =
-    overrides.multisig || requireEnv("TREASURY_MULTISIG_ADDRESS");
-  const owner =
-    overrides.owner ||
-    getAddressFromEnv("TREASURY_ADMIN_ADDRESS", deployer.address);
+  const token =
+    overrides.token || requireEnv("NYALTX_GOVERNANCE_TOKEN_ADDRESS");
+  const governance = deployer.address;
+
+  if (!token) {
+    throw new Error("Missing token address for Treasury deployment");
+  }
 
   console.log("====================================================");
   console.log(`[${network.name}] Deploying Treasury`);
-  console.log(`Deployer: ${deployer.address}`);
-  console.log(`NYAX Token: ${nyaxToken}`);
-  console.log(`Multisig:   ${multisig}`);
-  console.log(`Owner:      ${owner}`);
+  console.log(`Deployer:   ${deployer.address}`);
+  console.log(`Token:     ${token}`);
+  console.log(`Governance: ${governance}`);
 
   const TreasuryFactory = await ethers.getContractFactory("Treasury");
-  const treasury = await TreasuryFactory.deploy(nyaxToken, multisig, owner);
+  const treasury = await TreasuryFactory.deploy(token, governance);
   await treasury.waitForDeployment();
 
   const treasuryAddress = await treasury.getAddress();
@@ -29,11 +28,12 @@ async function deployTreasury(overrides = {}) {
   console.log("====================================================\n");
 
   saveDeployment(network.name, {
-    treasury: treasuryAddress,
-    nyaxToken,
-    multisig,
-    owner,
+    contractName: "Treasury",
+    address: treasuryAddress,
     deployer: deployer.address,
+    token,
+    governance,
+    transactionHash: treasury.deploymentTransaction().hash,
   });
 
   return treasury;
