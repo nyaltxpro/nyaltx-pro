@@ -108,6 +108,13 @@ export default function NYALTXGovernance() {
         decimals: number;
     } | null>(null);
     const [tokenInfoLoading, setTokenInfoLoading] = useState(false);
+    const [recentTransfers, setRecentTransfers] = useState<Array<{
+        folder: string;
+        amount: string;
+        blockNumber: number;
+        transactionHash: string;
+        timestamp: number;
+    }>>([]);
     const [showProposalForm, setShowProposalForm] = useState(false);
     const [proposalTitle, setProposalTitle] = useState('');
     const [proposalDescription, setProposalDescription] = useState('');
@@ -298,6 +305,43 @@ export default function NYALTXGovernance() {
             }
         };
         loadTokenInfo();
+        return () => {
+            cancelled = true;
+        };
+    }, [daoService]);
+
+    useEffect(() => {
+        let cancelled = false;
+        const loadRecentTransfers = async () => {
+            setTransfersLoading(true);
+            try {
+                console.log('Loading recent treasury transfers...');
+                if (!window.ethereum) {
+                    console.warn('MetaMask not detected');
+                    if (!cancelled) setRecentTransfers([]);
+                    return;
+                }
+                const provider = new ethers.BrowserProvider(window.ethereum as any);
+                console.log('Provider created for transfers');
+
+                if (!daoService) {
+                    console.warn('DAO service not available');
+                    if (!cancelled) setRecentTransfers([]);
+                    return;
+                }
+
+                const transfers = await daoService.treasury.getRecentTransfers(10);
+                console.log('Recent transfers fetched:', transfers);
+
+                if (!cancelled) setRecentTransfers(transfers);
+            } catch (error) {
+                console.error('Failed to load recent transfers', error);
+                if (!cancelled) setRecentTransfers([]);
+            } finally {
+                if (!cancelled) setTransfersLoading(false);
+            }
+        };
+        loadRecentTransfers();
         return () => {
             cancelled = true;
         };
@@ -932,14 +976,18 @@ export default function NYALTXGovernance() {
                                     </button>
                                 </div>
                                 <div className="space-y-4">
-                                    {transferPreview.length === 0 ? (
+                                    {transfersLoading ? (
+                                        <div className="flex items-center justify-center py-8">
+                                            <div className="text-sm text-gray-400">Loading treasury transfers...</div>
+                                        </div>
+                                    ) : recentTransfers.length === 0 ? (
                                         <p className="text-sm text-gray-500">No treasury activity recorded.</p>
                                     ) : (
-                                        transferPreview.map((transfer) => (
-                                            <div key={`${transfer.txHash}-${transfer.blockNumber}`} className="p-4 rounded-2xl bg-black/30 border border-white/5">
+                                        recentTransfers.map((transfer) => (
+                                            <div key={`${transfer.transactionHash}-${transfer.blockNumber}`} className="p-4 rounded-2xl bg-black/30 border border-white/5">
                                                 <div className="flex items-center justify-between text-sm text-gray-400">
-                                                    <span>{transfer.category || 'General'}</span>
-                                                    <span className="font-mono text-xs">{transfer.to.slice(0, 6)}...{transfer.to.slice(-4)}</span>
+                                                    <span>Tokens Sent to Folder</span>
+                                                    <span className="font-mono text-xs">{transfer.folder.slice(0, 6)}...{transfer.folder.slice(-4)}</span>
                                                 </div>
                                                 <p className="text-2xl font-semibold mt-2">{formatNumber(transfer.amount)} NYAX</p>
                                                 <p className="text-xs text-gray-500 mt-1">{formatTimeFromTimestamp(transfer.timestamp)}</p>

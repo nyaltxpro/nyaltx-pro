@@ -148,6 +148,72 @@ export class TreasuryService {
     return await contractWithSigner.renounceRole(role, account);
   }
 
+  // Event Handling
+  async getTokensSentToFolderEvents(fromBlock?: number, toBlock?: number): Promise<Array<{
+    folder: string;
+    amount: string;
+    blockNumber: number;
+    transactionHash: string;
+  }>> {
+    try {
+      const filter = this.contract.filters.TokensSentToFolder();
+      const events = await this.contract.queryFilter(filter, fromBlock, toBlock);
+      
+      return events.map(event => {
+        const eventLog = event as any; // Type assertion for EventLog
+        return {
+          folder: eventLog.args?.folder || '',
+          amount: ethers.formatEther(eventLog.args?.amount || BigInt(0)),
+          blockNumber: event.blockNumber,
+          transactionHash: event.transactionHash
+        };
+      });
+    } catch (error) {
+      console.error('Failed to fetch TokensSentToFolder events:', error);
+      return [];
+    }
+  }
+
+  async getRecentTransfers(limit: number = 10): Promise<Array<{
+    folder: string;
+    amount: string;
+    blockNumber: number;
+    transactionHash: string;
+    timestamp: number;
+  }>> {
+    try {
+      const latestBlock = await this.provider.getBlockNumber();
+      const fromBlock = Math.max(0, latestBlock - 1000); // Check last 1000 blocks
+      const events = await this.getTokensSentToFolderEvents(fromBlock, latestBlock);
+      
+      // Get timestamps for each event
+      const eventsWithTimestamps = await Promise.all(
+        events.slice(0, limit).map(async (event) => {
+          const block = await this.provider.getBlock(event.blockNumber);
+          return {
+            ...event,
+            timestamp: block?.timestamp || 0
+          };
+        })
+      );
+      
+      return eventsWithTimestamps.sort((a, b) => b.timestamp - a.timestamp);
+    } catch (error) {
+      console.error('Failed to fetch recent transfers:', error);
+      return [];
+    }
+  }
+
+  onTokensSentToFolder(callback: (folder: string, amount: string, event: any) => void) {
+    this.contract.on('TokensSentToFolder', (folder, amount, event) => {
+      callback(folder, ethers.formatEther(amount), event);
+    });
+  }
+
+  removeAllListeners() {
+    this.contract.removeAllListeners();
+  }
+
   // Event Listeners
   onFolderApproved(callback: (folder: string, event: any) => void) {
     this.contract.on('FolderApproved', (folder, event) => {
@@ -158,12 +224,6 @@ export class TreasuryService {
   onFolderRemoved(callback: (folder: string, event: any) => void) {
     this.contract.on('FolderRemoved', (folder, event) => {
       callback(folder, event);
-    });
-  }
-
-  onTokensSentToFolder(callback: (folder: string, amount: bigint, event: any) => void) {
-    this.contract.on('TokensSentToFolder', (folder, amount, event) => {
-      callback(folder, amount, event);
     });
   }
 
