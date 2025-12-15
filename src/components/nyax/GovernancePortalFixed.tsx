@@ -259,10 +259,14 @@ export default function NYALTXGovernance() {
     }, []);
 
     const overview = useMemo(() => {
+        console.log('Factory stats in useMemo:', factoryStats);
         const totalSupply = factoryStats ? Number(ethers.formatEther(factoryStats.totalSupply)) : parseFloat(tokenMetrics?.totalSupply ?? '0');
         const stakedTokens = factoryStats ? Number(ethers.formatEther(factoryStats.stakedValue)) : parseFloat(stakingStats?.totalStaked ?? '0');
         const circulatingSupply = factoryStats ? Number(ethers.formatEther(factoryStats.circulating)) : Math.max(totalSupply - stakedTokens, 0);
         const holders = factoryStats ? Number(factoryStats.totalHolders) : (governanceStats?.totalVoters ?? 0);
+
+        console.log('Formatted values:', { totalSupply, stakedTokens, circulatingSupply, holders });
+
         return { totalSupply, stakedTokens, circulatingSupply, holders };
     }, [factoryStats, tokenMetrics, stakingStats, governanceStats]);
 
