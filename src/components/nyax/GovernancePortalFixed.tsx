@@ -273,8 +273,8 @@ export default function NYALTXGovernance() {
     const participationStats = useMemo(() => {
         const stakingRate = overview.totalSupply ? (overview.stakedTokens / overview.totalSupply) * 100 : 0;
         const circulationRate = overview.totalSupply ? (overview.circulatingSupply / overview.totalSupply) * 100 : 0;
-        const quorumVotes = Number(governanceStats?.quorumVotes ?? 0);
-        const thresholdVotes = Number(governanceStats?.proposalThreshold ?? 0);
+        const quorumVotes = Number(governanceParameters?.quorumVotes ?? 0);
+        const thresholdVotes = Number(governanceParameters?.proposalThreshold ?? 0);
 
         console.log('Participation stats calculation:', {
             stakingRate,
