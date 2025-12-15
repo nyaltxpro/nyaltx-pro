@@ -1181,7 +1181,7 @@ export default function AdminDashboardFixed() {
                             disabled={!isConnected}
                             className="px-6 py-3 rounded-2xl bg-linear-to-r from-green-500 to-emerald-600 font-semibold text-white disabled:opacity-40 hover:from-green-600 hover:to-emerald-700 transition-all"
                         >
-                            Open Treasury Bridge
+                            Fund Folders
                         </button>
                     </div>
                     {bridgeStatus && (
