@@ -164,4 +164,21 @@ export class FolderRegistryService {
       data: error,
     };
   }
+
+  // Pause/Unpause Controls
+  async pauseFolder(signer: ethers.Signer): Promise<ethers.ContractTransaction> {
+    this.ensureSigner('pause folder');
+    const contractWithSigner = this.contract.connect(signer) as ethers.Contract;
+    return await contractWithSigner.pauseFolder();
+  }
+
+  async unpauseFolder(signer: ethers.Signer): Promise<ethers.ContractTransaction> {
+    this.ensureSigner('unpause folder');
+    const contractWithSigner = this.contract.connect(signer) as ethers.Contract;
+    return await contractWithSigner.unpauseFolder();
+  }
+
+  async isFolderPaused(): Promise<boolean> {
+    return await this.contract.paused();
+  }
 }

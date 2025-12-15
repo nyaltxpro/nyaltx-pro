@@ -49,6 +49,31 @@ export class TreasuryService {
     return await this.contract.token();
   }
 
+  async getTokenInfo(): Promise<{
+    transfersEnabled: boolean;
+    paused: boolean;
+    totalSupply: string;
+    maxSupply: string;
+    remainingMintable: string;
+  }> {
+    const [transfersEnabled, paused, totalSupply, maxSupply] = await Promise.all([
+      this.contract.transfersEnabled(),
+      this.contract.paused(),
+      this.contract.totalSupply(),
+      this.contract.maxSupply()
+    ]);
+
+    const remainingMintable = maxSupply - totalSupply;
+
+    return {
+      transfersEnabled,
+      paused,
+      totalSupply: ethers.formatEther(totalSupply),
+      maxSupply: ethers.formatEther(maxSupply),
+      remainingMintable: ethers.formatEther(remainingMintable)
+    };
+  }
+
   // Folder Management
   async approveFolder(folder: string, signer: ethers.Signer): Promise<ethers.ContractTransaction> {
     const contractWithSigner = this.getContractWithSigner(signer);
@@ -114,6 +139,53 @@ export class TreasuryService {
 
   async isPaused(): Promise<boolean> {
     return await this.contract.paused();
+  }
+
+  // Token Transfer Controls
+  async setTokenTransfersEnabled(enabled: boolean, signer?: ethers.Signer): Promise<ethers.ContractTransaction> {
+    const actualSigner = signer || this.signer;
+    if (!actualSigner) {
+      throw new Error('Signer is required for setTokenTransfersEnabled');
+    }
+    const contractWithSigner = this.getContractWithSigner(actualSigner);
+    return await contractWithSigner.setTokenTransfersEnabled(enabled);
+  }
+
+  async pauseToken(signer?: ethers.Signer): Promise<ethers.ContractTransaction> {
+    const actualSigner = signer || this.signer;
+    if (!actualSigner) {
+      throw new Error('Signer is required for pauseToken');
+    }
+    const contractWithSigner = this.getContractWithSigner(actualSigner);
+    return await contractWithSigner.pauseToken();
+  }
+
+  async unpauseToken(signer?: ethers.Signer): Promise<ethers.ContractTransaction> {
+    const actualSigner = signer || this.signer;
+    if (!actualSigner) {
+      throw new Error('Signer is required for unpauseToken');
+    }
+    const contractWithSigner = this.getContractWithSigner(actualSigner);
+    return await contractWithSigner.unpauseToken();
+  }
+
+  // Token Minting/Burning
+  async mintGovernanceTokens(to: string, amount: string, signer?: ethers.Signer): Promise<ethers.ContractTransaction> {
+    const actualSigner = signer || this.signer;
+    if (!actualSigner) {
+      throw new Error('Signer is required for mintGovernanceTokens');
+    }
+    const contractWithSigner = this.getContractWithSigner(actualSigner);
+    return await contractWithSigner.mint(to, ethers.parseEther(amount));
+  }
+
+  async burnGovernanceTokens(from: string, amount: string, signer?: ethers.Signer): Promise<ethers.ContractTransaction> {
+    const actualSigner = signer || this.signer;
+    if (!actualSigner) {
+      throw new Error('Signer is required for burnGovernanceTokens');
+    }
+    const contractWithSigner = this.getContractWithSigner(actualSigner);
+    return await contractWithSigner.burn(from, ethers.parseEther(amount));
   }
 
   // Views

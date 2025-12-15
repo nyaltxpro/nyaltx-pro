@@ -333,7 +333,7 @@ export class FolderEscrowService {
 
   // Get contract address
   getContractAddress(): string {
-    return this.contract.address;
+    return this.contract.target as string;
   }
 
   // Get contract instance

@@ -87,6 +87,8 @@ export default function AdminDashboardFixed() {
     const [showPermissionsModal, setShowPermissionsModal] = useState(false);
     const [showVestingModal, setShowVestingModal] = useState(false);
     const [showFolderEditModal, setShowFolderEditModal] = useState(false);
+    const [showApproveFolderModal, setShowApproveFolderModal] = useState(false);
+    const [showSendToFolderModal, setShowSendToFolderModal] = useState(false);
     const [formError, setFormError] = useState<string | null>(null);
 
     const [newFolderName, setNewFolderName] = useState('');
@@ -108,6 +110,13 @@ export default function AdminDashboardFixed() {
     const [permissionsForm, setPermissionsForm] = useState({ folderId: 0, permissions: '' });
     const [vestingForm, setVestingForm] = useState({ folderId: 0, cliff: '0', duration: '365', revocable: true });
     const [folderEditForm, setFolderEditForm] = useState({ folderId: 0, permissions: '', cliffDays: '0', durationDays: '365', revocable: true });
+
+    // Approve Folder Form
+    const [approveFolderForm, setApproveFolderForm] = useState({ folderAddress: '' });
+
+    // Send to Folder Form
+    const [sendToFolderForm, setSendToFolderForm] = useState({ folderAddress: '', amount: '' });
+
     const [showProposalModal, setShowProposalModal] = useState(false);
     const [showBridgeModal, setShowBridgeModal] = useState(false);
     const [proposalForm, setProposalForm] = useState({
@@ -140,6 +149,13 @@ export default function AdminDashboardFixed() {
     const [multisigTransactions, setMultisigTransactions] = useState<MultisigTransaction[]>([]);
     const [multisigStatus, setMultisigStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
     const [multisigLoading, setMultisigLoading] = useState(false);
+
+    // Pause Controls State
+    const [treasuryPaused, setTreasuryPaused] = useState<boolean | null>(null);
+    const [folderPaused, setFolderPaused] = useState<boolean | null>(null);
+    const [tokenPaused, setTokenPaused] = useState<boolean | null>(null);
+    const [pauseLoading, setPauseLoading] = useState<string | null>(null);
+    const [pauseError, setPauseError] = useState<string | null>(null);
 
     const nyaxTokenAddress = CONTRACT_ADDRESSES.nyaxToken ?? '';
     const nyaxTokenInterface = useMemo(() => {
@@ -296,7 +312,8 @@ export default function AdminDashboardFixed() {
         setTransfersLoading(true);
         setTransfersError(null);
         try {
-            await daoService.treasury.setTokenTransfersEnabled(!transfersEnabled);
+            const signer = daoService.getSigner();
+            await daoService.treasury.setTokenTransfersEnabled(!transfersEnabled, signer);
             await refreshTokenInfo();
             setFormError(null);
         } catch (err) {
@@ -319,10 +336,11 @@ export default function AdminDashboardFixed() {
         setTokenGovernorMessage(null);
         setTokenGovernorError(null);
         try {
+            const signer = daoService.getSigner();
             if (tokenMetrics.paused) {
-                await daoService.treasury.unpauseToken();
+                await daoService.treasury.unpauseToken(signer);
             } else {
-                await daoService.treasury.pauseToken();
+                await daoService.treasury.pauseToken(signer);
             }
             await refreshTokenInfo();
             setTokenGovernorMessage(tokenMetrics.paused ? 'NYAX transfers resumed.' : 'NYAX token paused.');
@@ -355,7 +373,8 @@ export default function AdminDashboardFixed() {
         setTokenGovernorMessage(null);
         setTokenGovernorError(null);
         try {
-            await daoService.treasury.mintGovernanceTokens(mintForm.to.trim(), mintForm.amount.trim());
+            const signer = daoService.getSigner();
+            await daoService.treasury.mintGovernanceTokens(mintForm.to.trim(), mintForm.amount.trim(), signer);
             setMintForm({ to: '', amount: '' });
             await refreshTokenInfo();
             setTokenGovernorMessage('Mint transaction submitted.');
@@ -388,7 +407,8 @@ export default function AdminDashboardFixed() {
         setTokenGovernorMessage(null);
         setTokenGovernorError(null);
         try {
-            await daoService.treasury.burnGovernanceTokens(burnForm.from.trim(), burnForm.amount.trim());
+            const signer = daoService.getSigner();
+            await daoService.treasury.burnGovernanceTokens(burnForm.from.trim(), burnForm.amount.trim(), signer);
             setBurnForm({ from: '', amount: '' });
             await refreshTokenInfo();
             setTokenGovernorMessage('Burn transaction submitted.');
@@ -397,6 +417,125 @@ export default function AdminDashboardFixed() {
             setTokenGovernorError(err instanceof Error ? err.message : 'Burn transaction failed');
         } finally {
             setTokenActionLoading(false);
+        }
+    };
+
+    // Pause Controls Functions
+    const refreshPauseStatus = useCallback(async () => {
+        if (!daoService) return;
+        try {
+            const [treasuryStatus, folderStatus, tokenStatus] = await Promise.all([
+                daoService.treasury.isPaused(),
+                daoService.folders.isFolderPaused(),
+                daoService.governance.isTokenPaused()
+            ]);
+            setTreasuryPaused(treasuryStatus);
+            setFolderPaused(folderStatus);
+            setTokenPaused(tokenStatus);
+            setPauseError(null);
+        } catch (err) {
+            console.error('Failed to load pause status', err);
+            setPauseError('Unable to load pause status');
+        }
+    }, [daoService]);
+
+    useEffect(() => {
+        refreshPauseStatus();
+    }, [refreshPauseStatus]);
+
+    const handleTreasuryPause = async () => {
+        if (!isConnected) {
+            setPauseError('Connect wallet to manage treasury pause state');
+            return;
+        }
+        const onNetwork = await ensureSepolia(setPauseError);
+        if (!onNetwork) return;
+        if (!daoService || treasuryPaused === null) return;
+
+        const signer = daoService.getSigner();
+        if (!signer) {
+            setPauseError('No signer available');
+            return;
+        }
+
+        setPauseLoading('treasury');
+        setPauseError(null);
+        try {
+            if (treasuryPaused) {
+                await daoService.treasury.unpauseTreasury(signer);
+            } else {
+                await daoService.treasury.pauseTreasury(signer);
+            }
+            await refreshPauseStatus();
+        } catch (err) {
+            console.error('Failed to toggle treasury pause', err);
+            setPauseError(err instanceof Error ? err.message : 'Failed to toggle treasury pause');
+        } finally {
+            setPauseLoading(null);
+        }
+    };
+
+    const handleFolderPause = async () => {
+        if (!isConnected) {
+            setPauseError('Connect wallet to manage folder pause state');
+            return;
+        }
+        const onNetwork = await ensureSepolia(setPauseError);
+        if (!onNetwork) return;
+        if (!daoService || folderPaused === null) return;
+
+        const signer = daoService.getSigner();
+        if (!signer) {
+            setPauseError('No signer available');
+            return;
+        }
+
+        setPauseLoading('folder');
+        setPauseError(null);
+        try {
+            if (folderPaused) {
+                await daoService.folders.unpauseFolder(signer);
+            } else {
+                await daoService.folders.pauseFolder(signer);
+            }
+            await refreshPauseStatus();
+        } catch (err) {
+            console.error('Failed to toggle folder pause', err);
+            setPauseError(err instanceof Error ? err.message : 'Failed to toggle folder pause');
+        } finally {
+            setPauseLoading(null);
+        }
+    };
+
+    const handleTokenPause = async () => {
+        if (!isConnected) {
+            setPauseError('Connect wallet to manage token pause state');
+            return;
+        }
+        const onNetwork = await ensureSepolia(setPauseError);
+        if (!onNetwork) return;
+        if (!daoService || tokenPaused === null) return;
+
+        const signer = daoService.getSigner();
+        if (!signer) {
+            setPauseError('No signer available');
+            return;
+        }
+
+        setPauseLoading('token');
+        setPauseError(null);
+        try {
+            if (tokenPaused) {
+                await daoService.governance.pauseToken(signer);
+            } else {
+                await daoService.governance.pauseToken(signer);
+            }
+            await refreshPauseStatus();
+        } catch (err) {
+            console.error('Failed to toggle token pause', err);
+            setPauseError(err instanceof Error ? err.message : 'Failed to toggle token pause');
+        } finally {
+            setPauseLoading(null);
         }
     };
 
@@ -442,6 +581,59 @@ export default function AdminDashboardFixed() {
             setShowAllocationModal(false);
         } catch (err) {
             setFormError(err instanceof Error ? err.message : 'Failed to set allocation');
+        }
+    };
+
+    const handleApproveFolder = async () => {
+        if (!await ensureSepolia(setFormError)) return;
+        if (!approveFolderForm.folderAddress) {
+            setFormError('Folder address is required');
+            return;
+        }
+
+        try {
+            if (!daoService) {
+                throw new Error('DAO service unavailable');
+            }
+
+            const signer = daoService.getSigner();
+            if (!signer) {
+                throw new Error('Signer is required for approve folder');
+            }
+
+            await daoService.treasury.approveFolder(approveFolderForm.folderAddress, signer);
+            setFormError(null);
+            setShowApproveFolderModal(false);
+            setApproveFolderForm({ folderAddress: '' });
+        } catch (err) {
+            setFormError(err instanceof Error ? err.message : 'Failed to approve folder');
+        }
+    };
+
+    const handleSendToFolder = async () => {
+        if (!await ensureSepolia(setFormError)) return;
+        if (!sendToFolderForm.folderAddress || !sendToFolderForm.amount) {
+            setFormError('Folder address and amount are required');
+            return;
+        }
+
+        try {
+            if (!daoService) {
+                throw new Error('DAO service unavailable');
+            }
+
+            const signer = daoService.getSigner();
+            if (!signer) {
+                throw new Error('Signer is required for send to folder');
+            }
+
+            const amount = ethers.parseEther(sendToFolderForm.amount);
+            await daoService.treasury.sendToFolder(sendToFolderForm.folderAddress, amount, signer);
+            setFormError(null);
+            setShowSendToFolderModal(false);
+            setSendToFolderForm({ folderAddress: '', amount: '' });
+        } catch (err) {
+            setFormError(err instanceof Error ? err.message : 'Failed to send to folder');
         }
     };
 
@@ -1003,8 +1195,120 @@ export default function AdminDashboardFixed() {
                     </div>
                 </div>
 
+                {/* Pause Controls Section */}
+                <div className="rounded-2xl border border-white/10 bg-black/30 p-6">
+                    <div className="flex items-center justify-between mb-6">
+                        <div>
+                            <h2 className="text-2xl font-bold text-white">System Pause Controls</h2>
+                            <p className="text-gray-400 text-sm mt-1">Manage pause states for Treasury, Folder Registry, and NYAX Token</p>
+                        </div>
+                        <button
+                            onClick={refreshPauseStatus}
+                            disabled={pauseLoading !== null}
+                            className="px-4 py-2 rounded-lg border border-white/20 text-white/80 hover:bg-white/10 transition disabled:opacity-50"
+                        >
+                            {pauseLoading ? 'Refreshing...' : 'Refresh Status'}
+                        </button>
+                    </div>
+
+                    {pauseError && (
+                        <div className="mb-4 rounded-xl border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+                            {pauseError}
+                        </div>
+                    )}
+
+                    <div className="grid gap-4 md:grid-cols-3">
+                        {/* Treasury Pause Control */}
+                        <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+                            <div className="flex items-center justify-between mb-3">
+                                <h3 className="font-semibold text-white">Treasury</h3>
+                                <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium ${treasuryPaused === null ? 'bg-gray-500/20 text-gray-300' :
+                                    treasuryPaused ? 'bg-red-500/20 text-red-300' : 'bg-green-500/20 text-green-300'
+                                    }`}>
+                                    <span className={`h-2 w-2 rounded-full ${treasuryPaused === null ? 'bg-gray-400' :
+                                        treasuryPaused ? 'bg-red-400' : 'bg-green-400'
+                                        }`} />
+                                    {treasuryPaused === null ? 'Unknown' : treasuryPaused ? 'Paused' : 'Active'}
+                                </span>
+                            </div>
+                            <p className="text-gray-400 text-sm mb-4">
+                                Controls treasury token transfers and operations
+                            </p>
+                            <button
+                                onClick={handleTreasuryPause}
+                                disabled={pauseLoading === 'treasury' || treasuryPaused === null || !isConnected}
+                                className={`w-full px-4 py-2 rounded-lg border font-medium transition disabled:opacity-50 disabled:cursor-not-allowed ${treasuryPaused
+                                    ? 'border-green-400/40 text-green-200 hover:bg-green-500/10'
+                                    : 'border-red-400/40 text-red-200 hover:bg-red-500/10'
+                                    }`}
+                            >
+                                {pauseLoading === 'treasury' ? 'Processing...' :
+                                    treasuryPaused ? 'Unpause Treasury' : 'Pause Treasury'}
+                            </button>
+                        </div>
+
+                        {/* Folder Registry Pause Control */}
+                        <div className="rounded-xl border border-white /10 bg-white/5 p-4">
+                            <div className="flex items-center justify-between mb-3">
+                                <h3 className="font-semibold text-white">Folder Registry</h3>
+                                <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium ${folderPaused === null ? 'bg-gray-500/20 text-gray-300' :
+                                    folderPaused ? 'bg-red-500/20 text-red-300' : 'bg-green-500/20 text-green-300'
+                                    }`}>
+                                    <span className={`h-2 w-2 rounded-full ${folderPaused === null ? 'bg-gray-400' :
+                                        folderPaused ? 'bg-red-400' : 'bg-green-400'
+                                        }`} />
+                                    {folderPaused === null ? 'Unknown' : folderPaused ? 'Paused' : 'Active'}
+                                </span>
+                            </div>
+                            <p className="text-gray-400 text-sm mb-4">
+                                Controls folder creation and management operations
+                            </p>
+                            <button
+                                onClick={handleFolderPause}
+                                disabled={pauseLoading === 'folder' || folderPaused === null || !isConnected}
+                                className={`w-full px-4 py-2 rounded-lg border font-medium transition disabled:opacity-50 disabled:cursor-not-allowed ${folderPaused
+                                    ? 'border-green-400/40 text-green-200 hover:bg-green-500/10'
+                                    : 'border-red-400/40 text-red-200 hover:bg-red-500/10'
+                                    }`}
+                            >
+                                {pauseLoading === 'folder' ? 'Processing...' :
+                                    folderPaused ? 'Unpause Folders' : 'Pause Folders'}
+                            </button>
+                        </div>
+
+                        {/* NYAX Token Pause Control */}
+                        <div className="rounded-xl border border-white /10 bg-white/5 p-4">
+                            <div className="flex items-center justify-between mb-3">
+                                <h3 className="font-semibold text-white">NYAX Token</h3>
+                                <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium ${tokenPaused === null ? 'bg-gray-500/20 text-gray-300' :
+                                    tokenPaused ? 'bg-red-500/20 text-red-300' : 'bg-green-500/20 text-green-300'
+                                    }`}>
+                                    <span className={`h-2 w-2 rounded-full ${tokenPaused === null ? 'bg-gray-400' :
+                                        tokenPaused ? 'bg-red-400' : 'bg-green-400'
+                                        }`} />
+                                    {tokenPaused === null ? 'Unknown' : tokenPaused ? 'Paused' : 'Active'}
+                                </span>
+                            </div>
+                            <p className="text-gray-400 text-sm mb-4">
+                                Controls NYAX token transfers and token operations
+                            </p>
+                            <button
+                                onClick={handleTokenPause}
+                                disabled={pauseLoading === 'token' || tokenPaused === null || !isConnected}
+                                className={`w-full px-4 py-2 rounded-lg border font-medium transition disabled:opacity-50 disabled:cursor-not-allowed ${tokenPaused
+                                    ? 'border-green-400/40 text-green-200 hover:bg-green-500/10'
+                                    : 'border-red-400/40 text-red-200 hover:bg-red-500/10'
+                                    }`}
+                            >
+                                {pauseLoading === 'token' ? 'Processing...' :
+                                    tokenPaused ? 'Unpause Token' : 'Pause Token'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 {!isConnected && (
-                    <div className="rounded-2xl border border-yellow-500/30 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-200">
+                    <div className={`rounded-2xl border border-yellow-500 /30 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-200`}>
                         Wallet connection is required to create, edit, or revoke allocations.
                     </div>
                 )}
@@ -1148,10 +1452,38 @@ export default function AdminDashboardFixed() {
                         </button>
                         <button
                             className="flex-1 min-w-[140px] px-5 py-3 rounded-2xl border border-white/20 text-white/80 hover:bg-white/10 transition"
-
+                            onClick={() => setShowAllocationModal(true)}
+                            disabled={!isConnected || loading}
                         >
                             <div className="flex items-center justify-center gap-2">
-                                <PlusIcon className="w-4 h-4" /> Pause NYAX Token
+                                <UserPlus2 className="w-4 h-4" /> Manage Beneficiaries
+                            </div>
+                        </button>
+                        <button
+                            className="flex-1 min-w-[140px] px-5 py-3 rounded-2xl border border-white/20 text-white/80 hover:bg-white/10 transition"
+                            onClick={() => setShowApproveFolderModal(true)}
+                            disabled={!isConnected || loading}
+                        >
+                            <div className="flex items-center justify-center gap-2">
+                                <Plus className="w-4 h-4" /> Approve Folder
+                            </div>
+                        </button>
+                        <button
+                            className="flex-1 min-w-[140px] px-5 py-3 rounded-2xl border border-white/20 text-white/80 hover:bg-white/10 transition"
+                            onClick={() => setShowSendToFolderModal(true)}
+                            disabled={!isConnected || loading}
+                        >
+                            <div className="flex items-center justify-center gap-2">
+                                <Shield className="w-4 h-4" /> Send to Folder
+                            </div>
+                        </button>
+                        <button
+                            className="flex-1 min-w-[140px] px-5 py-3 rounded-2xl border border-white/20 text-white/80 hover:bg-white/10 transition"
+                            onClick={() => setShowProposalModal(true)}
+                            disabled={!isConnected || loading}
+                        >
+                            <div className="flex items-center justify-center gap-2">
+                                <Lock className="w-4 h-4" /> Pause NYAX Token
                             </div>
                         </button>
                         {/* <button className={TOOL_BUTTON_CLASSES} onClick={() => openAllocationModal()} disabled={!selectedFolder || !isConnected || loading}>
@@ -1604,6 +1936,78 @@ export default function AdminDashboardFixed() {
                     </div>
                 )}
 
+                {showApproveFolderModal && (
+                    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+                        <div className="bg-slate-900 rounded-xl p-8 border border-white/20 max-w-md w-full mx-4 space-y-4">
+                            <h3 className="text-2xl font-bold text-white">Approve Folder</h3>
+                            <div>
+                                <label className="text-gray-400 text-sm mb-2 block">Folder Address</label>
+                                <input
+                                    type="text"
+                                    value={approveFolderForm.folderAddress}
+                                    onChange={e => setApproveFolderForm(prev => ({ ...prev, folderAddress: e.target.value }))}
+                                    placeholder="0x..."
+                                    className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white"
+                                />
+                            </div>
+                            {formError && <p className="text-red-400 text-sm">{formError}</p>}
+                            <div className="flex gap-3">
+                                <button className="flex-1 px-4 py-3 bg-white/10 text-white rounded-lg" onClick={() => setShowApproveFolderModal(false)}>
+                                    Cancel
+                                </button>
+                                <button
+                                    className="flex-1 px-4 py-3 bg-green-600 text-white rounded-lg disabled:opacity-50"
+                                    onClick={handleApproveFolder}
+                                    disabled={actionPending || !isConnected}
+                                >
+                                    {actionPending ? 'Approving...' : 'Approve Folder'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {showSendToFolderModal && (
+                    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+                        <div className="bg-slate-900 rounded-xl p-8 border border-white/20 max-w-md w-full mx-4 space-y-4">
+                            <h3 className="text-2xl font-bold text-white">Send to Folder</h3>
+                            <div>
+                                <label className="text-gray-400 text-sm mb-2 block">Folder Address</label>
+                                <input
+                                    type="text"
+                                    value={sendToFolderForm.folderAddress}
+                                    onChange={e => setSendToFolderForm(prev => ({ ...prev, folderAddress: e.target.value }))}
+                                    placeholder="0x..."
+                                    className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white"
+                                />
+                            </div>
+                            <div>
+                                <label className="text-gray-400 text-sm mb-2 block">Amount (NYAX)</label>
+                                <input
+                                    type="text"
+                                    value={sendToFolderForm.amount}
+                                    onChange={e => setSendToFolderForm(prev => ({ ...prev, amount: e.target.value }))}
+                                    placeholder="Amount to send"
+                                    className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white"
+                                />
+                            </div>
+                            {formError && <p className="text-red-400 text-sm">{formError}</p>}
+                            <div className="flex gap-3">
+                                <button className="flex-1 px-4 py-3 bg-white/10 text-white rounded-lg" onClick={() => setShowSendToFolderModal(false)}>
+                                    Cancel
+                                </button>
+                                <button
+                                    className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg disabled:opacity-50"
+                                    onClick={handleSendToFolder}
+                                    disabled={actionPending || !isConnected}
+                                >
+                                    {actionPending ? 'Sending...' : 'Send Tokens'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {showPermissionsModal && (
                     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
                         <div className="bg-slate-900 rounded-xl p-8 border border-white/20 max-w-md w-full mx-4 space-y-4">
@@ -1862,5 +2266,7 @@ export default function AdminDashboardFixed() {
                 )}
             </div>
         </div>
+
+
     );
 }

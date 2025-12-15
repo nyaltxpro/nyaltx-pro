@@ -89,6 +89,11 @@ export class DAOService {
     }
   }
 
+  // Get the current signer
+  getSigner(): ethers.Signer | undefined {
+    return this.signer;
+  }
+
   async getNetwork(): Promise<ethers.Network | null> {
     try {
       return await this.provider.getNetwork();

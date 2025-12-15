@@ -472,6 +472,17 @@ export class GovernanceService {
     }
   }
 
+  // Token Pause/Unpause Controls
+  async pauseToken(signer: ethers.Signer): Promise<ethers.ContractTransaction> {
+    if (!signer) throw new Error('Signer required for pausing token');
+    const tokenContractWithSigner = this.tokenContract.connect(signer) as ethers.Contract;
+    return await tokenContractWithSigner.togglePause();
+  }
+
+  async isTokenPaused(): Promise<boolean> {
+    return await this.tokenContract.paused();
+  }
+
   // Cleanup
   removeAllListeners() {
     this.governorContract.removeAllListeners();
