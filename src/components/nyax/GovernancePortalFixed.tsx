@@ -272,11 +272,11 @@ export default function NYALTXGovernance() {
             setTokenInfoLoading(true);
             try {
                 console.log('Loading governance token info...');
-                if (!window.ethereum) {
-                    console.warn('MetaMask not detected');
-                    if (!cancelled) setTokenInfo(null);
-                    return;
-                }
+                // if (!window.ethereum) {
+                //     console.warn('MetaMask not detected');
+                //     if (!cancelled) setTokenInfo(null);
+                //     return;
+                // }
                 const provider = new ethers.BrowserProvider(window.ethereum as any);
                 console.log('Provider created for token info');
 

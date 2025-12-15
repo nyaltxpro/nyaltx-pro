@@ -418,7 +418,7 @@ export class GovernanceService {
     try {
       const [totalSupply, maxSupply, name, symbol, decimals] = await Promise.all([
         this.tokenContract.totalSupply(),
-        this.tokenContract.maxSupply(),
+        this.tokenContract.MAX_SUPPLY(),
         this.tokenContract.name(),
         this.tokenContract.symbol(),
         this.tokenContract.decimals()
@@ -447,7 +447,7 @@ export class GovernanceService {
 
   async getMaxSupply(): Promise<string> {
     try {
-      const maxSupply = await this.tokenContract.maxSupply();
+      const maxSupply = await this.tokenContract.MAX_SUPPLY();
       return ethers.formatEther(maxSupply);
     } catch (error) {
       throw this.handleError(error);
