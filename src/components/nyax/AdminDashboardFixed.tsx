@@ -7,7 +7,7 @@ import { CONTRACT_ABIS, CONTRACT_ADDRESSES } from '@/services/contracts';
 import { FolderInfo, MultisigTransaction } from '@/services/contracts/types';
 import { useAppKitAccount } from '@reown/appkit/react';
 import { ethers } from 'ethers';
-import { Filter, Gavel, KeySquare, Loader2, Lock, Plus, Search, Shield, UserPlus2 } from 'lucide-react';
+import { Filter, Gavel, KeySquare, Loader2, Lock, Plus, PlusIcon, Search, Shield, UserPlus2 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAccount, useChainId, useSwitchChain } from 'wagmi';
 
@@ -1124,7 +1124,7 @@ export default function AdminDashboardFixed() {
                             disabled={!isConnected || loading}
                         >
                             <div className="flex items-center justify-center gap-2">
-                                <Gavel className="w-4 h-4" /> Pause Treasury
+                                <Lock className="w-4 h-4" /> Pause Treasury
                             </div>
                         </button>
                         <button
@@ -1133,7 +1133,7 @@ export default function AdminDashboardFixed() {
                             disabled={!isConnected || loading}
                         >
                             <div className="flex items-center justify-center gap-2">
-                                <Gavel className="w-4 h-4" /> Pause Folder
+                                <Lock className="w-4 h-4" /> Pause Folder
                             </div>
                         </button>
                         <button
@@ -1142,7 +1142,7 @@ export default function AdminDashboardFixed() {
                             disabled={!isConnected || loading}
                         >
                             <div className="flex items-center justify-center gap-2">
-                                <Gavel className="w-4 h-4" /> Fund Folder
+                                <PlusIcon className="w-4 h-4" /> Fund Folder
                             </div>
                         </button>
                         {/* <button className={TOOL_BUTTON_CLASSES} onClick={() => openAllocationModal()} disabled={!selectedFolder || !isConnected || loading}>
