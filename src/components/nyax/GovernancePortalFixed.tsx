@@ -551,7 +551,7 @@ export default function NYALTXGovernance() {
                                 <div className="grid grid-cols-2 gap-4 w-full md:w-auto md:min-w-[260px]">
                                     <div className="rounded-2xl bg-black/30 border border-white/10 p-4">
                                         <p className="text-xs text-gray-300">Active proposals</p>
-                                        <p className="text-3xl font-semibold mt-1">{governanceStats?.activeProposals ?? 0}</p>
+                                        <p className="text-3xl font-semibold mt-1">{proposalPreview.length ?? 0}</p>
                                         <span className="text-xs text-emerald-300 inline-flex items-center gap-1 mt-2">
                                             <Activity size={14} /> Live voting
                                         </span>
