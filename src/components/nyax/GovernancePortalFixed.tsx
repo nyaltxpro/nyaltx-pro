@@ -80,6 +80,12 @@ export default function NYALTXGovernance() {
     const [governanceStats, setGovernanceStats] = useState<GovernanceStats | null>(null);
     const [stakingStats, setStakingStats] = useState<StakingStats | null>(null);
     const [tokenMetrics, setTokenMetrics] = useState<TokenMetrics | null>(null);
+    const [governanceParameters, setGovernanceParameters] = useState<{
+        votingDelay: number;
+        votingPeriod: number;
+        proposalThreshold: string;
+        quorumVotes: string;
+    } | null>(null);
     const [transfers, setTransfers] = useState<TreasuryTransfer[]>([]);
     const [transfersLoading, setTransfersLoading] = useState(false);
     const [transfersError, setTransfersError] = useState<string | null>(null);
@@ -104,12 +110,22 @@ export default function NYALTXGovernance() {
     const refreshGovernanceData = useCallback(async () => {
         if (!daoService) return;
         try {
-            const [stats, proposalList] = await Promise.all([
+            const [stats, proposalList, votingDelay, votingPeriod, proposalThreshold, quorumVotes] = await Promise.all([
                 daoService.governance.getGovernanceStats(),
                 daoService.governance.getAllProposals(),
+                daoService.governance.getVotingDelay(),
+                daoService.governance.getVotingPeriod(),
+                daoService.governance.getProposalThreshold(),
+                daoService.governance.getQuorumVotes(),
             ]);
             setGovernanceStats(stats);
             setProposals(proposalList);
+            setGovernanceParameters({
+                votingDelay,
+                votingPeriod,
+                proposalThreshold,
+                quorumVotes,
+            });
         } catch (error) {
             console.error('Failed to load governance data', error);
         }
@@ -798,25 +814,25 @@ export default function NYALTXGovernance() {
                                 <div className="p-4 rounded-2xl bg-black/30 border border-white/5">
                                     <Clock size={18} className="text-indigo-300 mb-3" />
                                     <p className="text-sm text-gray-400">Voting delay</p>
-                                    <p className="text-xl font-semibold">{governanceStats?.votingDelay ?? 0} blocks</p>
-                                    <p className="text-xs text-gray-500">~{formatBlocksToTime(governanceStats?.votingDelay)}</p>
+                                    <p className="text-xl font-semibold">{governanceParameters?.votingDelay ?? 0} blocks</p>
+                                    <p className="text-xs text-gray-500">~{formatBlocksToTime(governanceParameters?.votingDelay)}</p>
                                 </div>
                                 <div className="p-4 rounded-2xl bg-black/30 border border-white/5">
                                     <Activity size={18} className="text-emerald-300 mb-3" />
                                     <p className="text-sm text-gray-400">Voting period</p>
-                                    <p className="text-xl font-semibold">{governanceStats?.votingPeriod ?? 0} blocks</p>
-                                    <p className="text-xs text-gray-500">~{formatBlocksToTime(governanceStats?.votingPeriod)}</p>
+                                    <p className="text-xl font-semibold">{governanceParameters?.votingPeriod ?? 0} blocks</p>
+                                    <p className="text-xs text-gray-500">~{formatBlocksToTime(governanceParameters?.votingPeriod)}</p>
                                 </div>
                                 <div className="p-4 rounded-2xl bg-black/30 border border-white/5">
                                     <Coins size={18} className="text-amber-300 mb-3" />
                                     <p className="text-sm text-gray-400">Proposal threshold</p>
-                                    <p className="text-xl font-semibold">{formatNumber(governanceStats?.proposalThreshold ?? '0')}</p>
+                                    <p className="text-xl font-semibold">{formatNumber(governanceParameters?.proposalThreshold ?? '0')}</p>
                                     <p className="text-xs text-gray-500">votes required to submit</p>
                                 </div>
                                 <div className="p-4 rounded-2xl bg-black/30 border border-white/5">
                                     <Shield size={18} className="text-blue-300 mb-3" />
                                     <p className="text-sm text-gray-400">Quorum</p>
-                                    <p className="text-xl font-semibold">{formatNumber(governanceStats?.quorumVotes ?? '0')}</p>
+                                    <p className="text-xl font-semibold">{formatNumber(governanceParameters?.quorumVotes ?? '0')}</p>
                                     <p className="text-xs text-gray-500">votes to ratify</p>
                                 </div>
                             </div>

@@ -178,6 +178,47 @@ export class GovernanceService {
     }
   }
 
+  // Governance Parameters
+  async getVotingDelay(): Promise<number> {
+    try {
+      const votingDelay = await this.governorContract.votingDelay();
+      return Number(votingDelay);
+    } catch (error) {
+      console.error('Error fetching voting delay:', error);
+      return 0;
+    }
+  }
+
+  async getVotingPeriod(): Promise<number> {
+    try {
+      const votingPeriod = await this.governorContract.votingPeriod();
+      return Number(votingPeriod);
+    } catch (error) {
+      console.error('Error fetching voting period:', error);
+      return 0;
+    }
+  }
+
+  async getProposalThreshold(): Promise<string> {
+    try {
+      const proposalThreshold = await this.governorContract.proposalThreshold();
+      return ethers.formatEther(proposalThreshold);
+    } catch (error) {
+      console.error('Error fetching proposal threshold:', error);
+      return '0';
+    }
+  }
+
+  async getQuorumVotes(): Promise<string> {
+    try {
+      const quorumVotes = await this.governorContract.quorumVotes();
+      return ethers.formatEther(quorumVotes);
+    } catch (error) {
+      console.error('Error fetching quorum votes:', error);
+      return '0';
+    }
+  }
+
   // Governance Stats
   async getGovernanceStats(): Promise<GovernanceStats> {
     try {
