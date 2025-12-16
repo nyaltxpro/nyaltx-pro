@@ -2136,13 +2136,13 @@ export default function AdminDashboardFixed() {
                         <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
                             <h3 className="text-lg font-semibold mb-4">Platform telemetry</h3>
                             <div className="space-y-3 text-sm text-gray-300">
-                                <div className="flex justify-between">
+                                {/* <div className="flex justify-between">
                                     <span>Allocated NYAX</span>
                                     <div className="text-right">
                                         <span className="text-white font-semibold">{formatNumber(summary.totalAllocated)} NYAX</span>
                                         <div className="text-xs text-green-400">Real-time</div>
                                     </div>
-                                </div>
+                                </div> */}
                                 <div className="flex justify-between">
                                     <span>Active members</span>
                                     <div className="text-right">
