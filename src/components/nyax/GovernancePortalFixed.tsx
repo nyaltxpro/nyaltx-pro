@@ -413,13 +413,13 @@ export default function NYALTXGovernance() {
         const total = overview.totalSupply || 1;
         const staked = overview.stakedTokens;
         const circulating = overview.circulatingSupply;
-        const treasury = Math.max(total - staked - circulating, 0);
+        const treasury = treasuryBalance || 0;
         return [
             { label: 'Circulating', value: circulating, color: '#a855f7' },
             { label: 'Staked', value: staked, color: '#22d3ee' },
             { label: 'Treasury', value: treasury, color: '#34d399' },
         ];
-    }, [overview]);
+    }, [overview, treasuryBalance]);
 
     const activitySparkline = useMemo(() => {
         return proposals.slice(0, 7).map((proposal, index) => ({
@@ -869,7 +869,7 @@ export default function NYALTXGovernance() {
                                         <div key={segment.label} className="rounded-xl border border-white/5 bg-white/5 p-3">
                                             <p className="text-xs uppercase tracking-wide text-gray-500">{segment.label}</p>
                                             <p className="text-lg font-semibold text-white break-words overflow-hidden">{formatNumber(segment.value)}</p>
-                                            <p className="text-xs text-gray-500 break-words">{formatNumber((segment.value / (overview.totalSupply || 1)) * 100)}%</p>
+                                            <p className="text-xs text-gray-500 break-words">{formatNumber((Number(segment.value) / (overview.totalSupply || 1)) * 100)}%</p>
                                         </div>
                                     ))}
                                 </div>
