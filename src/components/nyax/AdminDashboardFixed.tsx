@@ -1285,7 +1285,7 @@ export default function AdminDashboardFixed() {
                         </div>
 
                         {/* Folder Registry Pause Control */}
-                        <div className="rounded-xl border border-white /10 bg-white/5 p-4">
+                        {/* <div className="rounded-xl border border-white /10 bg-white/5 p-4">
                             <div className="flex items-center justify-between mb-3">
                                 <h3 className="font-semibold text-white">Folder Registry</h3>
                                 <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium ${folderPaused === null ? 'bg-gray-500/20 text-gray-300' :
@@ -1311,10 +1311,10 @@ export default function AdminDashboardFixed() {
                                 {pauseLoading === 'folder' ? 'Processing...' :
                                     folderPaused ? 'Unpause Folders' : 'Pause Folders'}
                             </button>
-                        </div>
+                        </div> */}
 
                         {/* NYAX Token Pause Control */}
-                        <div className="rounded-xl border border-white /10 bg-white/5 p-4">
+                        {/* <div className="rounded-xl border border-white /10 bg-white/5 p-4">
                             <div className="flex items-center justify-between mb-3">
                                 <h3 className="font-semibold text-white">NYAX Token</h3>
                                 <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium ${tokenPaused === null ? 'bg-gray-500/20 text-gray-300' :
@@ -1340,7 +1340,7 @@ export default function AdminDashboardFixed() {
                                 {pauseLoading === 'token' ? 'Processing...' :
                                     tokenPaused ? 'Unpause Token' : 'Pause Token'}
                             </button>
-                        </div>
+                        </div> */}
                     </div>
                 </div>
 
