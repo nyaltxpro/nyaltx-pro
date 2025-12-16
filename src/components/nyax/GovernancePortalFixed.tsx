@@ -732,7 +732,7 @@ export default function NYALTXGovernance() {
                                     </div>
                                     <div className="rounded-2xl bg-black/30 border border-white/10 p-4">
                                         <p className="text-xs text-gray-300">Treasury streams</p>
-                                        <p className="text-3xl font-semibold mt-1">
+                                        <p className="text-3xl font-semibold mt-2 break-all overflow-hidden text-ellipsis">
                                             {treasuryBalanceLoading ? '...' : formatNumber(treasuryBalance)}
                                         </p>
                                         <span className="text-xs text-blue-300 inline-flex items-center gap-1 mt-2">
