@@ -1770,7 +1770,7 @@ export default function AdminDashboardFixed() {
                                         {card.icon && <span>{card.icon}</span>}
                                         {card.label}
                                     </p>
-                                    <p className="text-2xl font-semibold mt-2">{card.value}</p>
+                                    <p className="text-2xl font-semibold mt-2 break-words overflow-wrap-anywhere">{card.value}</p>
                                     <span className={`inline-flex mt-3 px-3 py-1 rounded-full text-xs ${card.accent}`}>
                                         {card.badge}
                                     </span>
