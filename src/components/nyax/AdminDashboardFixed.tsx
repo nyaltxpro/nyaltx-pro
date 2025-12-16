@@ -1764,13 +1764,13 @@ export default function AdminDashboardFixed() {
                                 </button>
                             </div>
                         </div>
-                        {filteredFolders.length === 0 ? (
+                        {/* {filteredFolders.length === 0 ? (
                             <div className="rounded-2xl border border-dashed border-white/15 p-10 text-center text-gray-400">
                                 No folders matched your search criteria.
                             </div>
                         ) : (
                             filteredFolders.map(folder => renderFolderCard(folder))
-                        )}
+                        )} */}
                     </div>
 
                     <div className="space-y-6">
