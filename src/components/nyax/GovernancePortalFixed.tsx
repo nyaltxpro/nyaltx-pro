@@ -868,8 +868,8 @@ export default function NYALTXGovernance() {
                                     {tokenDistribution.map((segment) => (
                                         <div key={segment.label} className="rounded-xl border border-white/5 bg-white/5 p-3">
                                             <p className="text-xs uppercase tracking-wide text-gray-500">{segment.label}</p>
-                                            <p className="text-lg font-semibold text-white">{formatNumber(segment.value)}</p>
-                                            <p className="text-xs text-gray-500">{formatNumber((segment.value / (overview.totalSupply || 1)) * 100)}%</p>
+                                            <p className="text-lg font-semibold text-white break-words overflow-hidden">{formatNumber(segment.value)}</p>
+                                            <p className="text-xs text-gray-500 break-words">{formatNumber((segment.value / (overview.totalSupply || 1)) * 100)}%</p>
                                         </div>
                                     ))}
                                 </div>
