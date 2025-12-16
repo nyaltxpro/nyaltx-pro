@@ -569,7 +569,7 @@ export default function AdminDashboardFixed() {
         setPauseError(null);
         try {
             if (tokenPaused) {
-                await daoService.governance.pauseToken(signer);
+                await daoService.governance.unpauseToken(signer);
             } else {
                 await daoService.governance.pauseToken(signer);
             }
