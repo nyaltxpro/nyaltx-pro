@@ -58,7 +58,7 @@ type ActiveTab = 'folders' | 'staking';
 
 export default function AdminDashboardFixed() {
     const {
-        folders,
+
         membersByFolder,
         loading,
         actionPending,
@@ -189,48 +189,22 @@ export default function AdminDashboardFixed() {
     }, [daoService]);
 
     const selectedFolder = useMemo(
-        () => folders.find(folder => folder.id === selectedFolderId) ?? null,
-        [folders, selectedFolderId]
+        () => factoryFolders.find((folder, index) => index === selectedFolderId) ?? null,
+        [factoryFolders, selectedFolderId]
     );
 
-    const filteredFolders = useMemo(() => {
-        if (!searchValue.trim()) return folders;
-        const query = searchValue.toLowerCase();
-        return folders.filter(folder => folder.name.toLowerCase().includes(query));
-    }, [folders, searchValue]);
-
-    // Create a combined list of folders for rendering
-    const allFoldersForDisplay = useMemo(() => {
-        // If we have factory folders, use those, otherwise fall back to original folders
-        if (factoryFolders.length > 0) {
-            return factoryFolders.map((folder, index) => ({
-                id: index,
-                name: folder.name || `Folder ${index + 1}`, // Use contract name or fallback
-                defaultPermissions: 3, // Default permissions for factory folders
-                totalAllocated: '0', // Will be populated later
-                template: {
-                    cliff: 30, // Default cliff period
-                    duration: 365, // Default duration
-                    revocable: true // Default revocable setting
-                },
-                locked: false,
-                exists: true, // Factory folders exist by definition
-                members: [], // Will be populated later if needed
-                address: folder.address,
-                createdAt: Number(folder.createdAt),
-                allocations: [],
-                permissions: 3,
-                totalClaimed: '0'
-            }));
-        }
-        return folders;
-    }, [factoryFolders, folders]);
-
     const filteredDisplayFolders = useMemo(() => {
-        if (!searchValue.trim()) return allFoldersForDisplay;
+        if (!searchValue.trim()) return factoryFolders;
         const query = searchValue.toLowerCase();
-        return allFoldersForDisplay.filter(folder => folder.name.toLowerCase().includes(query));
-    }, [allFoldersForDisplay, searchValue]);
+        return factoryFolders.filter(folder => folder.name.toLowerCase().includes(query));
+    }, [factoryFolders, searchValue]);
+
+
+
+
+
+
+
 
     useEffect(() => {
         if (selectedFolderId !== null && !membersByFolder[selectedFolderId]) {
@@ -659,7 +633,7 @@ export default function AdminDashboardFixed() {
             const duration = BigInt(Number(allocationForm.durationDays || '365') * 86400); // DAY_IN_SECONDS
 
             // Check if this is a factory folder by looking up the folder address
-            const folder = allFoldersForDisplay.find(f => f.id === allocationForm.folderId);
+            const folder = factoryFolders.find(f => f.id === allocationForm.folderId);
             if (!folder) {
                 throw new Error('Folder not found');
             }
@@ -1479,7 +1453,7 @@ export default function AdminDashboardFixed() {
                             </div>
                         ) : (
                             <div className="grid gap-4">
-                                {filteredDisplayFolders.map(folder => renderFolderCard(folder))}
+                                {factoryFolders.map(folder => renderFolderCard(folder))}
                             </div>
                         )}
 
@@ -1731,11 +1705,7 @@ export default function AdminDashboardFixed() {
                                                     throw new Error('DAO service unavailable');
                                                 }
 
-                                                // await daoService.treasury.fundFolder(
-                                                //     bridgeForm.tokenAddress,
-                                                //     bridgeForm.folderAddress,
-                                                //     bridgeForm.amount
-                                                // );
+
 
                                                 setBridgeStatus({
                                                     type: 'success',
@@ -1773,8 +1743,8 @@ export default function AdminDashboardFixed() {
                     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
                         <div className="bg-slate-900 rounded-xl p-8 border border-white/20 max-w-2xl w-full mx-4 space-y-6">
                             <div>
-                                <h3 className="text-2xl font-bold text-white">Add Beneficiary</h3>
-                                <p className="text-gray-400 text-sm mt-2">Add a new beneficiary to a folder with vesting schedule</p>
+                                <h3 className="text-2xl font-bold text-white">Add Wallet</h3>
+                                <p className="text-gray-400 text-sm mt-2">Add a new Wallet to a folder with vesting schedule</p>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1787,9 +1757,9 @@ export default function AdminDashboardFixed() {
                                             className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white"
                                         >
                                             <option value={0}>Select a folder</option>
-                                            {allFoldersForDisplay.map(folder => (
+                                            {factoryFolders.map(folder => (
                                                 <option key={folder.id} value={folder.id}>
-                                                    {folder.name || 'Unnamed Folder'} (ID: {folder.id})
+                                                    {folder.name || 'Unnamed Folder'} (ID: {folder.address})
                                                 </option>
                                             ))}
                                         </select>
