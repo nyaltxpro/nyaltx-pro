@@ -766,15 +766,15 @@ export default function NYALTXGovernance() {
                                     {factoryStatsLoading ? '...' : formatNumber((overview.circulatingSupply / (overview.totalSupply || 1)) * 100)}% released
                                 </p>
                             </div>
-                            <div className="rounded-2xl bg-gray-900/50 border border-gray-800/60 p-5">
+                            <div className="rounded-2xl bg-gray-900/50 border border-gray-800/60 p-5 overflow-hidden">
                                 <div className="flex items-center justify-between text-sm text-gray-400">
                                     <span>Staked value</span>
                                     <TrendingUp className="text-emerald-300" size={18} />
                                 </div>
-                                <p className="text-3xl font-semibold mt-2 break-words overflow-hidden">
+                                <p className="text-3xl font-semibold mt-2 break-all overflow-hidden text-ellipsis">
                                     {factoryStatsLoading ? '...' : formatNumber(overview.stakedTokens)}
                                 </p>
-                                <p className="text-xs text-emerald-400 mt-1 break-words">
+                                <p className="text-xs text-emerald-400 mt-1 break-all overflow-hidden">
                                     {factoryStatsLoading ? '...' : formatNumber((overview.stakedTokens / (overview.totalSupply || 1)) * 100)}% of supply
                                 </p>
                             </div>
