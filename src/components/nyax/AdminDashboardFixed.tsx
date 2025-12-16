@@ -1655,6 +1655,26 @@ export default function AdminDashboardFixed() {
                             </div>
                         </div>
 
+                        {filteredDisplayFolders.length === 0 ? (
+                            <div className="rounded-2xl border border-dashed border-white/15 p-10 text-center text-gray-400">
+                                {factoryFolders.length === 0 ? (
+                                    <div>
+                                        <p className="mb-2">No folders loaded yet</p>
+                                        <p className="text-sm">Click "Load Factory Folders" to fetch folders from the factory service</p>
+                                    </div>
+                                ) : (
+                                    <div>
+                                        <p className="mb-2">No folders matched your search criteria</p>
+                                        <p className="text-sm">Try adjusting your search filters</p>
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <div className="grid gap-4">
+                                {filteredDisplayFolders.map(folder => renderFolderCard(folder))}
+                            </div>
+                        )}
+
                     </div>
 
                     <div className="space-y-6">
