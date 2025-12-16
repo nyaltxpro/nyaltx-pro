@@ -91,6 +91,10 @@ export default function AdminDashboardFixed() {
     const [showSendToFolderModal, setShowSendToFolderModal] = useState(false);
     const [formError, setFormError] = useState<string | null>(null);
 
+    // Factory folders state
+    const [factoryFolders, setFactoryFolders] = useState<any[]>([]);
+    const [permissionsLoading, setPermissionsLoading] = useState(false);
+
     // Treasury balance state
     const [treasuryBalance, setTreasuryBalance] = useState<string | null>(null);
     const [treasuryBalanceLoading, setTreasuryBalanceLoading] = useState(false);
@@ -195,6 +199,39 @@ export default function AdminDashboardFixed() {
         const query = searchValue.toLowerCase();
         return folders.filter(folder => folder.name.toLowerCase().includes(query));
     }, [folders, searchValue]);
+
+    // Create a combined list of folders for rendering
+    const allFoldersForDisplay = useMemo(() => {
+        // If we have factory folders, use those, otherwise fall back to original folders
+        if (factoryFolders.length > 0) {
+            return factoryFolders.map((folder, index) => ({
+                id: index,
+                name: folder.name,
+                defaultPermissions: 3, // Default permissions for factory folders
+                totalAllocated: '0', // Will be populated later
+                template: {
+                    cliff: 30, // Default cliff period
+                    duration: 365, // Default duration
+                    revocable: true // Default revocable setting
+                },
+                locked: false,
+                exists: true, // Factory folders exist by definition
+                members: [], // Will be populated later if needed
+                address: folder.address,
+                createdAt: Number(folder.createdAt),
+                allocations: [],
+                permissions: 3,
+                totalClaimed: '0'
+            }));
+        }
+        return folders;
+    }, [factoryFolders, folders]);
+
+    const filteredDisplayFolders = useMemo(() => {
+        if (!searchValue.trim()) return allFoldersForDisplay;
+        const query = searchValue.toLowerCase();
+        return allFoldersForDisplay.filter(folder => folder.name.toLowerCase().includes(query));
+    }, [allFoldersForDisplay, searchValue]);
 
     useEffect(() => {
         if (selectedFolderId !== null && !membersByFolder[selectedFolderId]) {
@@ -721,46 +758,6 @@ export default function AdminDashboardFixed() {
         }
     };
 
-    const handleShowNewFolders = async () => {
-        if (!daoService) {
-            setFormError('DAO service unavailable');
-            return;
-        }
-
-        try {
-            // Use the new folder factory service
-            const allFolders = await daoService.folderFactory.getAllFolders();
-            console.log('New Factory Folders:', allFolders);
-
-            // Get detailed folder information
-            const folderDetails = await daoService.folderFactory.getFoldersWithDetails();
-            console.log('Folder Details:', folderDetails);
-
-            setFormError(`Found ${allFolders.length} folders from factory service`);
-        } catch (err) {
-            setFormError(err instanceof Error ? err.message : 'Failed to get factory folders');
-        }
-    };
-
-    const handleShowFactoryFolderDetails = async () => {
-        if (!daoService) {
-            setFormError('DAO service unavailable');
-            return;
-        }
-
-        try {
-            // Get detailed folder information from factory service
-            const folderDetails = await daoService.folderFactory.getFoldersWithDetails();
-            console.log('Factory Folder Details:', folderDetails);
-
-            // Update the folders state with factory service data
-            // This would require updating the folder data structure to match factory service format
-            setFormError(`Loaded ${folderDetails.length} folder details from factory service`);
-        } catch (err) {
-            setFormError(err instanceof Error ? err.message : 'Failed to get factory folder details');
-        }
-    };
-
     const loadFactoryFolders = async () => {
         if (!daoService) {
             setFormError('DAO service unavailable');
@@ -768,19 +765,45 @@ export default function AdminDashboardFixed() {
         }
 
         try {
-            // Get folders from factory service instead of old service
-            const factoryFolders = await daoService.folderFactory.getAllFolders();
-            console.log('Loading folders from factory service:', factoryFolders);
+            // Get folders from factory service
+            const factoryFoldersList = await daoService.folderFactory.getAllFolders();
+            console.log('Loading folders from factory service:', factoryFoldersList);
 
             // Get detailed folder information
             const folderDetails = await daoService.folderFactory.getFoldersWithDetails();
             console.log('Factory folder details:', folderDetails);
 
-            // Note: This would require updating the folder data structure
-            // For now, we'll keep the existing folder display but indicate it's using factory service
-            setFormError(`Loaded ${factoryFolders.length} folders from factory service`);
+            // Update factory folders state
+            setFactoryFolders(folderDetails);
+            setFormError(`Loaded ${factoryFoldersList.length} folders from factory service`);
         } catch (err) {
+            console.error('Failed to load factory folders:', err);
             setFormError(err instanceof Error ? err.message : 'Failed to load factory folders');
+        }
+    };
+
+    const handlePermissionsUpdate = async () => {
+        if (!daoService) {
+            setFormError('DAO service unavailable');
+            return;
+        }
+
+        try {
+            setPermissionsLoading(true);
+            setFormError(null);
+
+            // Use the updateFolder function from useFolderRegistry hook
+            await updateFolder(permissionsForm.folderId, {
+                permissions: Number(permissionsForm.permissions)
+            });
+
+            setShowPermissionsModal(false);
+            setPermissionsForm({ folderId: 0, permissions: '' });
+            refresh();
+        } catch (err) {
+            setFormError(err instanceof Error ? err.message : 'Failed to update permissions');
+        } finally {
+            setPermissionsLoading(false);
         }
     };
 
@@ -1570,11 +1593,11 @@ export default function AdminDashboardFixed() {
                             <Loader2 className="w-5 h-5" />
                             Refresh Data
                         </button>
-                        <button className={TOOL_BUTTON_CLASSES} onClick={handleShowNewFolders} disabled={!isConnected || loading}>
+                        <button className={TOOL_BUTTON_CLASSES} onClick={loadFactoryFolders} disabled={!isConnected || loading}>
                             <Search className="w-5 h-5" />
                             New Folders
                         </button>
-                        <button className={TOOL_BUTTON_CLASSES} onClick={handleShowFactoryFolderDetails} disabled={!isConnected || loading}>
+                        <button className={TOOL_BUTTON_CLASSES} onClick={loadFactoryFolders} disabled={!isConnected || loading}>
                             <Shield className="w-5 h-5" />
                             Folder Details
                         </button>
@@ -1764,13 +1787,13 @@ export default function AdminDashboardFixed() {
                                 </button>
                             </div>
                         </div>
-                        {/* {filteredFolders.length === 0 ? (
+                        {filteredDisplayFolders.length === 0 ? (
                             <div className="rounded-2xl border border-dashed border-white/15 p-10 text-center text-gray-400">
                                 No folders matched your search criteria.
                             </div>
                         ) : (
-                            filteredFolders.map(folder => renderFolderCard(folder))
-                        )} */}
+                            filteredDisplayFolders.map(folder => renderFolderCard(folder))
+                        )}
                     </div>
 
                     <div className="space-y-6">
@@ -2230,9 +2253,9 @@ export default function AdminDashboardFixed() {
                                 <button
                                     className="flex-1 px-4 py-3 bg-purple-600 text-white rounded-lg disabled:opacity-50"
                                     onClick={handlePermissionsUpdate}
-                                    disabled={actionPending || !isConnected}
+                                    disabled={permissionsLoading || !isConnected}
                                 >
-                                    {actionPending ? 'Saving...' : 'Update Permissions'}
+                                    {permissionsLoading ? 'Saving...' : 'Update Permissions'}
                                 </button>
                             </div>
                         </div>
