@@ -1452,10 +1452,21 @@ export default function AdminDashboardFixed() {
             id: folder.id,
             totalAllocated: folder.totalAllocated,
             totalVested: folder.totalVested,
+            totalVestedType: typeof folder.totalVested,
+            totalVestedIsZero: folder.totalVested === '0' || folder.totalVested === '0.0',
             totalClaimed: folder.totalClaimed,
             beneficiaryCount: folder.beneficiaryCount,
             address: folder.address
         });
+
+        // Additional check for vested amount display
+        if (!folder.totalVested || folder.totalVested === '0' || folder.totalVested === '0.0') {
+            console.warn(`⚠️ Folder ${folder.name} has zero or missing totalVested!`, {
+                totalVested: folder.totalVested,
+                hasAddress: !!folder.address,
+                beneficiaryCount: folder.beneficiaryCount
+            });
+        }
 
         return (
             <div
@@ -1604,7 +1615,7 @@ export default function AdminDashboardFixed() {
                                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                                             </svg>
-                                            Beneficiaries
+                                            Wallets
                                         </span>
                                     )}
                                 </button>
@@ -1614,12 +1625,12 @@ export default function AdminDashboardFixed() {
 
                     {beneficiaryVestings[folder.id] && beneficiaryVestings[folder.id].length > 0 && (
                         <div className="mt-3 space-y-2 max-h-60 overflow-y-auto">
-                            <div className="text-sm font-semibold text-gray-300 mb-2">Beneficiaries:</div>
+                            <div className="text-sm font-semibold text-gray-300 mb-2">Wallets ({beneficiaryVestings[folder.id].length}):</div>
                             {beneficiaryVestings[folder.id].map((vesting, idx) => (
                                 <div key={idx} className="bg-white/5 rounded-lg p-3 space-y-1">
                                     <div className="flex items-center justify-between">
-                                        <span className="text-xs text-gray-400 font-mono">
-                                            {vesting.address.slice(0, 6)}...{vesting.address.slice(-4)}
+                                        <span className="text-xs text-gray-400 font-mono break-all">
+                                            {vesting.address}
                                         </span>
                                         <div className="flex gap-1">
                                             {vesting.paused && (
