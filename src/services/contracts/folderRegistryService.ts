@@ -35,6 +35,10 @@ export class FolderRegistryService {
     return folders.filter((folder): folder is FolderInfo => folder !== null);
   }
 
+  async getAllFolders(): Promise<FolderInfo[]> {
+    return await this.getFolders();
+  }
+
   async getFolder(folderId: number): Promise<FolderInfo | null> {
     const data = await this.contract.folders(folderId);
     if (!data || !data.exists) return null;

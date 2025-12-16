@@ -1,7 +1,9 @@
 // Main service aggregator for DAO contracts
 import { ethers } from 'ethers';
+import { BeneficiaryService } from './beneficiaryService';
 import { CONTRACT_ADDRESSES, NETWORK_CONFIG } from './config';
 import { FolderRegistryService } from './folderRegistryService';
+import { FoldersService } from './foldersService';
 import { GovernanceService } from './governanceService';
 import { MigrationVaultService } from './migrationVaultService';
 import { MultisigService } from './multisigService';
@@ -19,9 +21,11 @@ export class DAOService {
   public vesting: VestingService;
   public multisig: MultisigService;
   public folders: FolderRegistryService;
+  public tokenFolders: FoldersService;
   public staking: StakingService;
   public migrationVault: MigrationVaultService;
   public treasuryBridge: TreasuryBridgeService;
+  public beneficiary: BeneficiaryService;
 
   constructor(provider: ethers.Provider, signer?: ethers.Signer) {
     this.provider = provider;
@@ -36,6 +40,10 @@ export class DAOService {
     this.staking = new StakingService(provider, signer);
     this.migrationVault = new MigrationVaultService(provider, signer);
     this.treasuryBridge = new TreasuryBridgeService(provider, signer);
+    
+    // Initialize specialized services with dependencies
+    this.beneficiary = new BeneficiaryService(provider, signer, this.folders);
+    this.tokenFolders = new FoldersService(provider, signer, this.folders);
   }
 
   // Factory method to create DAO service with Web3 provider

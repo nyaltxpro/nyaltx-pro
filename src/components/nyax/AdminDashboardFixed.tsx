@@ -422,20 +422,51 @@ export default function AdminDashboardFixed() {
 
     // Pause Controls Functions
     const refreshPauseStatus = useCallback(async () => {
-        if (!daoService) return;
+        if (!daoService) {
+            setPauseError('DAO service not available');
+            return;
+        }
+
         try {
-            const [treasuryStatus, folderStatus, tokenStatus] = await Promise.all([
-                daoService.treasury.isPaused(),
-                daoService.folders.isFolderPaused(),
-                daoService.governance.isTokenPaused()
-            ]);
+            console.log('Refreshing pause status...');
+
+            // Check each service individually for better error handling
+            let treasuryStatus = false;
+            let folderStatus = false;
+            let tokenStatus = false;
+
+            try {
+                treasuryStatus = await daoService.treasury.isPaused();
+                console.log('Treasury status:', treasuryStatus);
+            } catch (err) {
+                console.error('Failed to get treasury status:', err);
+                treasuryStatus = false;
+            }
+
+            try {
+                folderStatus = await daoService.folders.isFolderPaused();
+                console.log('Folder status:', folderStatus);
+            } catch (err) {
+                console.error('Failed to get folder status:', err);
+                folderStatus = false;
+            }
+
+            try {
+                tokenStatus = await daoService.governance.isTokenPaused();
+                console.log('Token status:', tokenStatus);
+            } catch (err) {
+                console.error('Failed to get token status:', err);
+                tokenStatus = false;
+            }
+
             setTreasuryPaused(treasuryStatus);
             setFolderPaused(folderStatus);
             setTokenPaused(tokenStatus);
             setPauseError(null);
+            console.log('Pause status updated successfully');
         } catch (err) {
             console.error('Failed to load pause status', err);
-            setPauseError('Unable to load pause status');
+            setPauseError('Unable to load pause status: ' + (err instanceof Error ? err.message : 'Unknown error'));
         }
     }, [daoService]);
 
@@ -559,28 +590,41 @@ export default function AdminDashboardFixed() {
             setFormError('Folder, address, and amount are required');
             return;
         }
-        const start = allocationForm.startDate
-            ? Math.floor(new Date(allocationForm.startDate).getTime() / 1000)
-            : Math.floor(Date.now() / 1000);
-        const schedule = {
-            start,
-            cliff: Number(allocationForm.cliffDays || '0') * DAY_IN_SECONDS,
-            duration: Number(allocationForm.durationDays || '0') * DAY_IN_SECONDS,
-            revocable: true,
-        };
 
         try {
-            await setFolderAllocation({
+            if (!daoService) {
+                throw new Error('DAO service unavailable');
+            }
+
+            const signer = daoService.getSigner();
+            if (!signer) {
+                throw new Error('Signer is required for beneficiary operations');
+            }
+
+            // Use the new beneficiary service to add beneficiary
+            await daoService.beneficiary.addBeneficiary({
                 folderId: allocationForm.folderId,
                 account: allocationForm.account,
                 amount: allocationForm.amount,
-                schedule,
-                permissions: allocationForm.permissions ? Number(allocationForm.permissions) : undefined,
+                startDate: allocationForm.startDate || '',
+                cliffDays: allocationForm.cliffDays || '0',
+                durationDays: allocationForm.durationDays || '365',
+                permissions: allocationForm.permissions || '0',
             });
+
             setFormError(null);
             setShowAllocationModal(false);
+            setAllocationForm({
+                folderId: 0,
+                account: '',
+                amount: '',
+                startDate: '',
+                cliffDays: '0',
+                durationDays: '365',
+                permissions: '',
+            });
         } catch (err) {
-            setFormError(err instanceof Error ? err.message : 'Failed to set allocation');
+            setFormError(err instanceof Error ? err.message : 'Failed to add beneficiary');
         }
     };
 
@@ -634,6 +678,22 @@ export default function AdminDashboardFixed() {
             setSendToFolderForm({ folderAddress: '', amount: '' });
         } catch (err) {
             setFormError(err instanceof Error ? err.message : 'Failed to send to folder');
+        }
+    };
+
+    const handleShowTokenFolders = async () => {
+        if (!daoService) {
+            setFormError('DAO service unavailable');
+            return;
+        }
+
+        try {
+            const tokenFolders = await daoService.tokenFolders.getTokenFolders();
+            console.log('Token Folders:', tokenFolders);
+            // You can display these folders in UI or update state
+            setFormError(`Found ${tokenFolders.length} token folders`);
+        } catch (err) {
+            setFormError(err instanceof Error ? err.message : 'Failed to get token folders');
         }
     };
 
@@ -1443,7 +1503,7 @@ export default function AdminDashboardFixed() {
                         </button>
                         <button
                             className="flex-1 min-w-[140px] px-5 py-3 rounded-2xl border border-white/20 text-white/80 hover:bg-white/10 transition"
-                            onClick={() => setShowProposalModal(true)}
+                            onClick={() => setShowSendToFolderModal(true)}
                             disabled={!isConnected || loading}
                         >
                             <div className="flex items-center justify-center gap-2">
@@ -1851,7 +1911,8 @@ export default function AdminDashboardFixed() {
                 {showAllocationModal && (
                     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
                         <div className="bg-slate-900 rounded-xl p-8 border border-white/20 max-w-lg w-full mx-4 space-y-4">
-                            <h3 className="text-2xl font-bold text-white">Manage Holder Allocation</h3>
+                            <h3 className="text-2xl font-bold text-white">Manage Beneficiaries</h3>
+                            <p className="text-gray-400 text-sm">Add new beneficiaries to folders with allocation schedules</p>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="text-gray-400 text-sm mb-2 block">Folder ID</label>
@@ -1861,6 +1922,7 @@ export default function AdminDashboardFixed() {
                                         onChange={e => setAllocationForm(prev => ({ ...prev, folderId: Number(e.target.value) }))}
                                         className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white"
                                     />
+                                    <p className="text-gray-500 text-xs mt-1">Target folder for beneficiary</p>
                                 </div>
                                 <div>
                                     <label className="text-gray-400 text-sm mb-2 block">Amount (NYAX)</label>
@@ -1870,16 +1932,19 @@ export default function AdminDashboardFixed() {
                                         onChange={e => setAllocationForm(prev => ({ ...prev, amount: e.target.value }))}
                                         className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white"
                                     />
+                                    <p className="text-gray-500 text-xs mt-1">Token allocation amount</p>
                                 </div>
                             </div>
                             <div>
-                                <label className="text-gray-400 text-sm mb-2 block">Recipient Address</label>
+                                <label className="text-gray-400 text-sm mb-2 block">Beneficiary Address</label>
                                 <input
                                     type="text"
                                     value={allocationForm.account}
                                     onChange={e => setAllocationForm(prev => ({ ...prev, account: e.target.value }))}
+                                    placeholder="0x..."
                                     className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white"
                                 />
+                                <p className="text-gray-500 text-xs mt-1">Wallet address of the beneficiary</p>
                             </div>
                             <div className="grid grid-cols-3 gap-4">
                                 <div>
@@ -1918,6 +1983,7 @@ export default function AdminDashboardFixed() {
                                     onChange={e => setAllocationForm(prev => ({ ...prev, permissions: e.target.value }))}
                                     className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white"
                                 />
+                                <p className="text-gray-500 text-xs mt-1">Bit mask for folder permissions (e.g., 7 for View+Vote+Propose)</p>
                             </div>
                             {formError && <p className="text-red-400 text-sm">{formError}</p>}
                             <div className="flex gap-3">
@@ -1929,7 +1995,7 @@ export default function AdminDashboardFixed() {
                                     onClick={handleSetAllocation}
                                     disabled={actionPending || !isConnected}
                                 >
-                                    {actionPending ? 'Saving...' : 'Save Allocation'}
+                                    {actionPending ? 'Adding Beneficiary...' : 'Add Beneficiary'}
                                 </button>
                             </div>
                         </div>
@@ -1970,7 +2036,8 @@ export default function AdminDashboardFixed() {
                 {showSendToFolderModal && (
                     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
                         <div className="bg-slate-900 rounded-xl p-8 border border-white/20 max-w-md w-full mx-4 space-y-4">
-                            <h3 className="text-2xl font-bold text-white">Send to Folder</h3>
+                            <h3 className="text-2xl font-bold text-white">Fund Folder</h3>
+                            <p className="text-gray-400 text-sm">Send NYAX tokens from treasury to an approved folder</p>
                             <div>
                                 <label className="text-gray-400 text-sm mb-2 block">Folder Address</label>
                                 <input
@@ -1980,6 +2047,7 @@ export default function AdminDashboardFixed() {
                                     placeholder="0x..."
                                     className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white"
                                 />
+                                <p className="text-gray-500 text-xs mt-1">Enter the approved folder contract address</p>
                             </div>
                             <div>
                                 <label className="text-gray-400 text-sm mb-2 block">Amount (NYAX)</label>
@@ -1990,6 +2058,7 @@ export default function AdminDashboardFixed() {
                                     placeholder="Amount to send"
                                     className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white"
                                 />
+                                <p className="text-gray-500 text-xs mt-1">Amount of NYAX tokens to transfer</p>
                             </div>
                             {formError && <p className="text-red-400 text-sm">{formError}</p>}
                             <div className="flex gap-3">
@@ -1997,11 +2066,11 @@ export default function AdminDashboardFixed() {
                                     Cancel
                                 </button>
                                 <button
-                                    className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg disabled:opacity-50"
+                                    className="flex-1 px-4 py-3 bg-green-600 text-white rounded-lg disabled:opacity-50"
                                     onClick={handleSendToFolder}
                                     disabled={actionPending || !isConnected}
                                 >
-                                    {actionPending ? 'Sending...' : 'Send Tokens'}
+                                    {actionPending ? 'Funding...' : 'Fund Folder'}
                                 </button>
                             </div>
                         </div>
