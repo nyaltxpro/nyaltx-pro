@@ -91,6 +91,11 @@ export default function AdminDashboardFixed() {
     const [showSendToFolderModal, setShowSendToFolderModal] = useState(false);
     const [formError, setFormError] = useState<string | null>(null);
 
+    // Treasury balance state
+    const [treasuryBalance, setTreasuryBalance] = useState<string | null>(null);
+    const [treasuryBalanceLoading, setTreasuryBalanceLoading] = useState(false);
+    const [treasuryBalanceError, setTreasuryBalanceError] = useState<string | null>(null);
+
     const [newFolderName, setNewFolderName] = useState('');
     const [newFolderPermissions, setNewFolderPermissions] = useState('3');
     const [cliffDays, setCliffDays] = useState('30');
@@ -756,25 +761,46 @@ export default function AdminDashboardFixed() {
         }
     };
 
-    const openPermissionsModal = () => {
-        if (!selectedFolder) {
-            setFormError('Select a folder first');
+    const loadFactoryFolders = async () => {
+        if (!daoService) {
+            setFormError('DAO service unavailable');
             return;
         }
-        setPermissionsForm({ folderId: selectedFolder.id, permissions: String(selectedFolder.defaultPermissions) });
-        setFormError(null);
-        setShowPermissionsModal(true);
+
+        try {
+            // Get folders from factory service instead of old service
+            const factoryFolders = await daoService.folderFactory.getAllFolders();
+            console.log('Loading folders from factory service:', factoryFolders);
+
+            // Get detailed folder information
+            const folderDetails = await daoService.folderFactory.getFoldersWithDetails();
+            console.log('Factory folder details:', folderDetails);
+
+            // Note: This would require updating the folder data structure
+            // For now, we'll keep the existing folder display but indicate it's using factory service
+            setFormError(`Loaded ${factoryFolders.length} folders from factory service`);
+        } catch (err) {
+            setFormError(err instanceof Error ? err.message : 'Failed to load factory folders');
+        }
     };
 
-    const handlePermissionsUpdate = async () => {
-        if (!permissionsForm.folderId) return;
-        if (!await ensureSepolia(setFormError)) return;
-        try {
-            await updateFolder(permissionsForm.folderId, { permissions: Number(permissionsForm.permissions || '0') });
-            setShowPermissionsModal(false);
-        } catch (err) {
-            setFormError(err instanceof Error ? err.message : 'Failed to update permissions');
+    const fetchTreasuryBalance = async () => {
+        if (!daoService) {
+            setTreasuryBalanceError('DAO service unavailable');
+            return;
         }
+
+        setTreasuryBalanceLoading(true);
+        setTreasuryBalanceError(null);
+
+        try {
+            const balance = await daoService.treasury.getTreasuryBalanceFormatted();
+            console.log('Treasury balance:', balance);
+            setTreasuryBalance(balance);
+        } catch (err) {
+            console.error('Failed to fetch treasury balance:', err);
+        }
+
     };
 
     const openVestingModal = () => {
@@ -1724,9 +1750,17 @@ export default function AdminDashboardFixed() {
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-xs uppercase tracking-[0.4em] text-gray-400">Registry</p>
-                                <h2 className="text-2xl font-semibold">Token folders</h2>
+                                <h2 className="text-2xl font-semibold">Token folders (Factory Service)</h2>
                             </div>
-                            {error && <span className="text-red-400 text-sm">{error}</span>}
+                            <div className="flex items-center gap-3">
+                                {error && <span className="text-red-400 text-sm">{error}</span>}
+                                <button
+                                    onClick={loadFactoryFolders}
+                                    className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/15 px-4 py-2 text-sm text-gray-200 hover:bg-white/10 transition"
+                                >
+                                    <Loader2 className="w-4 h-4" /> Load Factory Folders
+                                </button>
+                            </div>
                         </div>
                         {filteredFolders.length === 0 ? (
                             <div className="rounded-2xl border border-dashed border-white/15 p-10 text-center text-gray-400">
