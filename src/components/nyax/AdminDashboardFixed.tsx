@@ -1220,129 +1220,20 @@ export default function AdminDashboardFixed() {
                         {[
                             { label: 'Allocated NYAX', value: `${formatNumber(summary.totalAllocated)} NYAX`, accent: 'bg-indigo-500/20 text-indigo-200' },
                             { label: 'Active members', value: formatNumber(summary.totalMembers), accent: 'bg-emerald-500/15 text-emerald-200' },
-                            { label: 'Folders live', value: summary.folderCount, accent: 'bg-blue-500/15 text-blue-200' },
-                            { label: 'Action queue', value: `${filteredFolders.length} folders`, accent: 'bg-purple-500/15 text-purple-200' },
+                            { label: 'Folders live', value: factoryFolders.length || summary.folderCount, accent: 'bg-blue-500/15 text-blue-200' },
+                            { label: 'Action queue', value: `${filteredDisplayFolders.length} folders`, accent: 'bg-purple-500/15 text-purple-200' },
                         ].map(card => (
                             <div key={card.label} className="rounded-2xl border border-white/10 bg-black/30 p-5">
                                 <p className="text-xs uppercase tracking-[0.25em] text-gray-400">{card.label}</p>
                                 <p className="text-2xl font-semibold mt-2">{card.value}</p>
-                                <span className={`inline-flex mt-3 px-3 py-1 rounded-full text-xs ${card.accent}`}>{card.label === 'Action queue' ? 'Live folders in view' : 'Real-time'}</span>
+                                <span className={`inline-flex mt-3 px-3 py-1 rounded-full text-xs ${card.accent}`}>
+                                    {card.label === 'Action queue' ? 'Live folders in view' : card.label === 'Folders live' && factoryFolders.length > 0 ? 'Factory service' : 'Real-time'}
+                                </span>
                             </div>
                         ))}
                     </div>
                 </div>
 
-                {/* Pause Controls Section */}
-                <div className="rounded-2xl border border-white/10 bg-black/30 p-6">
-                    <div className="flex items-center justify-between mb-6">
-                        <div>
-                            <h2 className="text-2xl font-bold text-white">System Pause Controls</h2>
-                            <p className="text-gray-400 text-sm mt-1">Manage pause states for Treasury, Folder Registry, and NYAX Token</p>
-                        </div>
-                        <button
-                            onClick={refreshPauseStatus}
-                            disabled={pauseLoading !== null}
-                            className="px-4 py-2 rounded-lg border border-white/20 text-white/80 hover:bg-white/10 transition disabled:opacity-50"
-                        >
-                            {pauseLoading ? 'Refreshing...' : 'Refresh Status'}
-                        </button>
-                    </div>
-
-                    {pauseError && (
-                        <div className="mb-4 rounded-xl border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
-                            {pauseError}
-                        </div>
-                    )}
-
-                    <div className="grid gap-4 md:grid-cols-3">
-                        {/* Treasury Pause Control */}
-                        <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-                            <div className="flex items-center justify-between mb-3">
-                                <h3 className="font-semibold text-white">Treasury</h3>
-                                <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium ${treasuryPaused === null ? 'bg-gray-500/20 text-gray-300' :
-                                    treasuryPaused ? 'bg-red-500/20 text-red-300' : 'bg-green-500/20 text-green-300'
-                                    }`}>
-                                    <span className={`h-2 w-2 rounded-full ${treasuryPaused === null ? 'bg-gray-400' :
-                                        treasuryPaused ? 'bg-red-400' : 'bg-green-400'
-                                        }`} />
-                                    {treasuryPaused === null ? 'Unknown' : treasuryPaused ? 'Paused' : 'Active'}
-                                </span>
-                            </div>
-                            <p className="text-gray-400 text-sm mb-4">
-                                Controls treasury token transfers and operations
-                            </p>
-                            <button
-                                onClick={handleTreasuryPause}
-                                disabled={pauseLoading === 'treasury' || treasuryPaused === null || !isConnected}
-                                className={`w-full px-4 py-2 rounded-lg border font-medium transition disabled:opacity-50 disabled:cursor-not-allowed ${treasuryPaused
-                                    ? 'border-green-400/40 text-green-200 hover:bg-green-500/10'
-                                    : 'border-red-400/40 text-red-200 hover:bg-red-500/10'
-                                    }`}
-                            >
-                                {pauseLoading === 'treasury' ? 'Processing...' :
-                                    treasuryPaused ? 'Unpause Treasury' : 'Pause Treasury'}
-                            </button>
-                        </div>
-
-                        {/* Folder Registry Pause Control */}
-                        {/* <div className="rounded-xl border border-white /10 bg-white/5 p-4">
-                            <div className="flex items-center justify-between mb-3">
-                                <h3 className="font-semibold text-white">Folder Registry</h3>
-                                <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium ${folderPaused === null ? 'bg-gray-500/20 text-gray-300' :
-                                    folderPaused ? 'bg-red-500/20 text-red-300' : 'bg-green-500/20 text-green-300'
-                                    }`}>
-                                    <span className={`h-2 w-2 rounded-full ${folderPaused === null ? 'bg-gray-400' :
-                                        folderPaused ? 'bg-red-400' : 'bg-green-400'
-                                        }`} />
-                                    {folderPaused === null ? 'Unknown' : folderPaused ? 'Paused' : 'Active'}
-                                </span>
-                            </div>
-                            <p className="text-gray-400 text-sm mb-4">
-                                Controls folder creation and management operations
-                            </p>
-                            <button
-                                onClick={handleFolderPause}
-                                disabled={pauseLoading === 'folder' || folderPaused === null || !isConnected}
-                                className={`w-full px-4 py-2 rounded-lg border font-medium transition disabled:opacity-50 disabled:cursor-not-allowed ${folderPaused
-                                    ? 'border-green-400/40 text-green-200 hover:bg-green-500/10'
-                                    : 'border-red-400/40 text-red-200 hover:bg-red-500/10'
-                                    }`}
-                            >
-                                {pauseLoading === 'folder' ? 'Processing...' :
-                                    folderPaused ? 'Unpause Folders' : 'Pause Folders'}
-                            </button>
-                        </div> */}
-
-                        {/* NYAX Token Pause Control */}
-                        {/* <div className="rounded-xl border border-white /10 bg-white/5 p-4">
-                            <div className="flex items-center justify-between mb-3">
-                                <h3 className="font-semibold text-white">NYAX Token</h3>
-                                <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium ${tokenPaused === null ? 'bg-gray-500/20 text-gray-300' :
-                                    tokenPaused ? 'bg-red-500/20 text-red-300' : 'bg-green-500/20 text-green-300'
-                                    }`}>
-                                    <span className={`h-2 w-2 rounded-full ${tokenPaused === null ? 'bg-gray-400' :
-                                        tokenPaused ? 'bg-red-400' : 'bg-green-400'
-                                        }`} />
-                                    {tokenPaused === null ? 'Unknown' : tokenPaused ? 'Paused' : 'Active'}
-                                </span>
-                            </div>
-                            <p className="text-gray-400 text-sm mb-4">
-                                Controls NYAX token transfers and token operations
-                            </p>
-                            <button
-                                onClick={handleTokenPause}
-                                disabled={pauseLoading === 'token' || tokenPaused === null || !isConnected}
-                                className={`w-full px-4 py-2 rounded-lg border font-medium transition disabled:opacity-50 disabled:cursor-not-allowed ${tokenPaused
-                                    ? 'border-green-400/40 text-green-200 hover:bg-green-500/10'
-                                    : 'border-red-400/40 text-red-200 hover:bg-red-500/10'
-                                    }`}
-                            >
-                                {pauseLoading === 'token' ? 'Processing...' :
-                                    tokenPaused ? 'Unpause Token' : 'Pause Token'}
-                            </button>
-                        </div> */}
-                    </div>
-                </div>
 
                 {!isConnected && (
                     <div className={`rounded-2xl border border-yellow-500 /30 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-200`}>
@@ -1460,13 +1351,18 @@ export default function AdminDashboardFixed() {
                             <Loader2 className="w-5 h-5" />
                             Refresh Data
                         </button>
-                        <button className={TOOL_BUTTON_CLASSES} onClick={loadFactoryFolders} disabled={!isConnected || loading}>
-                            <Search className="w-5 h-5" />
-                            New Folders
-                        </button>
-                        <button className={TOOL_BUTTON_CLASSES} onClick={loadFactoryFolders} disabled={!isConnected || loading}>
-                            <Shield className="w-5 h-5" />
-                            Folder Details
+
+
+                        <button
+                            onClick={handleTreasuryPause}
+                            disabled={pauseLoading === 'treasury' || treasuryPaused === null || !isConnected}
+                            className={`w-full px-4 py-2 rounded-lg border font-medium transition disabled:opacity-50 disabled:cursor-not-allowed ${treasuryPaused
+                                ? 'border-green-400/40 text-green-200 hover:bg-green-500/10'
+                                : 'border-red-400/40 text-red-200 hover:bg-red-500/10'
+                                }`}
+                        >
+                            {pauseLoading === 'treasury' ? 'Processing...' :
+                                treasuryPaused ? 'Unpause Treasury' : 'Pause Treasury'}
                         </button>
                         {/* <button
                             className="flex-1 min-w-[140px] px-5 py-3 rounded-2xl border border-white/20 text-white/80 hover:bg-white/10 transition"
@@ -1561,9 +1457,15 @@ export default function AdminDashboardFixed() {
                                 <Shield className="w-5 h-5 text-green-300" /> Treasury → Folder Funding
                             </h2>
                             <p className="text-gray-400 text-sm">Send ERC20 from the governance treasury bridge into a folder escrow.</p>
+                            {treasuryBalance && (
+                                <div className="flex items-center gap-2 mt-2">
+                                    <span className="text-gray-400 text-sm">Treasury Balance:</span>
+                                    <span className="text-white font-semibold">{formatNumber(treasuryBalance)} NYAX</span>
+                                </div>
+                            )}
                         </div>
                         <button
-                            onClick={() => setShowBridgeModal(true)}
+                            onClick={() => setShowSendToFolderModal(true)}
                             disabled={!isConnected}
                             className="px-6 py-3 rounded-2xl bg-linear-to-r from-green-500 to-emerald-600 font-semibold text-white disabled:opacity-40 hover:from-green-600 hover:to-emerald-700 transition-all"
                         >
@@ -1681,9 +1583,34 @@ export default function AdminDashboardFixed() {
                         <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
                             <h3 className="text-lg font-semibold mb-4">Platform telemetry</h3>
                             <div className="space-y-3 text-sm text-gray-300">
-                                <div className="flex justify-between"><span>Total allocated</span><span className="text-white font-semibold">{formatNumber(summary.totalAllocated)} NYAX</span></div>
-                                <div className="flex justify-between"><span>Total members</span><span className="text-yellow-300 font-semibold">{formatNumber(summary.totalMembers)}</span></div>
-                                <div className="flex justify-between"><span>Folders live</span><span className="text-green-300 font-semibold">{summary.folderCount}</span></div>
+                                <div className="flex justify-between">
+                                    <span>Allocated NYAX</span>
+                                    <div className="text-right">
+                                        <span className="text-white font-semibold">{formatNumber(summary.totalAllocated)} NYAX</span>
+                                        <div className="text-xs text-green-400">Real-time</div>
+                                    </div>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span>Active members</span>
+                                    <div className="text-right">
+                                        <span className="text-yellow-300 font-semibold">{formatNumber(summary.totalMembers)}</span>
+                                        <div className="text-xs text-green-400">Real-time</div>
+                                    </div>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span>Folders live</span>
+                                    <div className="text-right">
+                                        <span className="text-green-300 font-semibold">{factoryFolders.length || summary.folderCount}</span>
+                                        <div className="text-xs text-green-400">Real-time</div>
+                                    </div>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span>Action queue</span>
+                                    <div className="text-right">
+                                        <span className="text-blue-300 font-semibold">{factoryFolders.length || summary.folderCount} folders</span>
+                                        <div className="text-xs text-green-400">Real-time</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
