@@ -1483,7 +1483,7 @@ export default function AdminDashboardFixed() {
                             <Loader2 className="w-5 h-5" />
                             Refresh Data
                         </button>
-                        <button
+                        {/* <button
                             className="flex-1 min-w-[140px] px-5 py-3 rounded-2xl border border-white/20 text-white/80 hover:bg-white/10 transition"
                             onClick={() => setShowProposalModal(true)}
                             disabled={!isConnected || loading}
@@ -1491,8 +1491,8 @@ export default function AdminDashboardFixed() {
                             <div className="flex items-center justify-center gap-2">
                                 <Lock className="w-4 h-4" /> Pause Treasury
                             </div>
-                        </button>
-                        <button
+                        </button> */}
+                        {/* <button
                             className="flex-1 min-w-[140px] px-5 py-3 rounded-2xl border border-white/20 text-white/80 hover:bg-white/10 transition"
                             onClick={() => setShowProposalModal(true)}
                             disabled={!isConnected || loading}
@@ -1500,7 +1500,7 @@ export default function AdminDashboardFixed() {
                             <div className="flex items-center justify-center gap-2">
                                 <Lock className="w-4 h-4" /> Pause Folder
                             </div>
-                        </button>
+                        </button> */}
                         <button
                             className="flex-1 min-w-[140px] px-5 py-3 rounded-2xl border border-white/20 text-white/80 hover:bg-white/10 transition"
                             onClick={() => setShowSendToFolderModal(true)}
@@ -1537,7 +1537,7 @@ export default function AdminDashboardFixed() {
                                 <Shield className="w-4 h-4" /> Send to Folder
                             </div>
                         </button>
-                        <button
+                        {/* <button
                             className="flex-1 min-w-[140px] px-5 py-3 rounded-2xl border border-white/20 text-white/80 hover:bg-white/10 transition"
                             onClick={() => setShowProposalModal(true)}
                             disabled={!isConnected || loading}
@@ -1545,7 +1545,7 @@ export default function AdminDashboardFixed() {
                             <div className="flex items-center justify-center gap-2">
                                 <Lock className="w-4 h-4" /> Pause NYAX Token
                             </div>
-                        </button>
+                        </button> */}
                         {/* <button className={TOOL_BUTTON_CLASSES} onClick={() => openAllocationModal()} disabled={!selectedFolder || !isConnected || loading}>
                             <UserPlus2 className="w-5 h-5" />
                             Allocations
