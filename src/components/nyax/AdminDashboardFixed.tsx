@@ -205,7 +205,7 @@ export default function AdminDashboardFixed() {
         if (factoryFolders.length > 0) {
             return factoryFolders.map((folder, index) => ({
                 id: index,
-                name: folder.name,
+                name: folder.name || `Folder ${index + 1}`, // Use contract name or fallback
                 defaultPermissions: 3, // Default permissions for factory folders
                 totalAllocated: '0', // Will be populated later
                 template: {
@@ -1081,7 +1081,7 @@ export default function AdminDashboardFixed() {
                 <div className="flex items-center justify-between mb-4">
                     <div>
                         <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                            {folder.name || 'Unnamed Folder'}
+                            {folder.name}
                             {folder.locked && (
                                 <span className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-red-500/20 text-red-200">
                                     <Lock className="w-3 h-3" /> Locked
@@ -1202,15 +1202,7 @@ export default function AdminDashboardFixed() {
                                     </div>
                                 </button>
 
-                                {/* <button
-                                    className="flex-1 min-w-[140px] px-5 py-3 rounded-2xl border border-emerald-400/40 text-emerald-200 hover:bg-emerald-500/10 transition disabled:opacity-40"
-                                    onClick={() => openAllocationModal()}
-                                    disabled={!selectedFolder || !isConnected || loading}
-                                >
-                                    <div className="flex items-center justify-center gap-2">
-                                        <UserPlus2 className="w-4 h-4" /> Allocation
-                                    </div>
-                                </button> */}
+
                             </div>
                             <p className="text-xs text-gray-400">{selectedFolder ? `Allocations armed for ${selectedFolder.name}` : 'Select a folder card below to unlock allocation tooling.'}</p>
                         </div>
@@ -1364,24 +1356,7 @@ export default function AdminDashboardFixed() {
                             {pauseLoading === 'treasury' ? 'Processing...' :
                                 treasuryPaused ? 'Unpause Treasury' : 'Pause Treasury'}
                         </button>
-                        {/* <button
-                            className="flex-1 min-w-[140px] px-5 py-3 rounded-2xl border border-white/20 text-white/80 hover:bg-white/10 transition"
-                            onClick={() => setShowProposalModal(true)}
-                            disabled={!isConnected || loading}
-                        >
-                            <div className="flex items-center justify-center gap-2">
-                                <Lock className="w-4 h-4" /> Pause Treasury
-                            </div>
-                        </button> */}
-                        {/* <button
-                            className="flex-1 min-w-[140px] px-5 py-3 rounded-2xl border border-white/20 text-white/80 hover:bg-white/10 transition"
-                            onClick={() => setShowProposalModal(true)}
-                            disabled={!isConnected || loading}
-                        >
-                            <div className="flex items-center justify-center gap-2">
-                                <Lock className="w-4 h-4" /> Pause Folder
-                            </div>
-                        </button> */}
+
                         <button
                             className="flex-1 min-w-[140px] px-5 py-3 rounded-2xl border border-white/20 text-white/80 hover:bg-white/10 transition"
                             onClick={() => setShowSendToFolderModal(true)}
@@ -1418,35 +1393,7 @@ export default function AdminDashboardFixed() {
                                 <Shield className="w-4 h-4" /> Send to Folder
                             </div>
                         </button>
-                        {/* <button
-                            className="flex-1 min-w-[140px] px-5 py-3 rounded-2xl border border-white/20 text-white/80 hover:bg-white/10 transition"
-                            onClick={() => setShowProposalModal(true)}
-                            disabled={!isConnected || loading}
-                        >
-                            <div className="flex items-center justify-center gap-2">
-                                <Lock className="w-4 h-4" /> Pause NYAX Token
-                            </div>
-                        </button> */}
-                        {/* <button className={TOOL_BUTTON_CLASSES} onClick={() => openAllocationModal()} disabled={!selectedFolder || !isConnected || loading}>
-                            <UserPlus2 className="w-5 h-5" />
-                            Allocations
-                        </button>
-                        <button className={TOOL_BUTTON_CLASSES} onClick={openPermissionsModal} disabled={!selectedFolder || !isConnected || loading}>
-                            <KeySquare className="w-5 h-5" />
-                            Set Permissions
-                        </button>
-                        <button className={TOOL_BUTTON_CLASSES} onClick={openVestingModal} disabled={!selectedFolder || !isConnected || loading}>
-                            <CalendarClock className="w-5 h-5" />
-                            Vesting Template
-                        </button> */}
-                        {/* <button
-                            className={TOOL_BUTTON_CLASSES}
-                            onClick={() => handleLockToggle(selectedFolder?.locked ? 'unlock' : 'lock')}
-                            disabled={!selectedFolder || !isConnected || loading}
-                        >
-                            <Lock className="w-5 h-5" />
-                            {selectedFolder?.locked ? 'Unlock Folder' : 'Lock Folder'}
-                        </button> */}
+
                     </div>
                 </div>
 
@@ -1478,48 +1425,7 @@ export default function AdminDashboardFixed() {
                         </div>
                     )}
                 </div>
-                {/* <div className="rounded-3xl border border-white/10 bg-black/30 backdrop-blur-xl p-6">
-                    <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-                        <div>
-                            <p className="text-xs uppercase tracking-[0.4em] text-gray-400">Allocations</p>
-                            <h2 className="text-2xl font-semibold mt-2">Folder allocation center</h2>
-                            <p className="text-gray-400 text-sm mt-2 max-w-2xl">
-                                Review and assign balances to holders just like on nyax-admin. Select a folder, then trigger the allocation workflow to set vesting, cliffs, and permissions in one pane.
-                            </p>
-                        </div>
-                        <div className="flex flex-col gap-3 min-w-[240px]">
-                            <button
-                                className="px-5 py-3 rounded-2xl bg-linear-to-r from-indigo-500 to-purple-500 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-                                onClick={() => openAllocationModal()}
-                                disabled={!selectedFolder || !isConnected || loading}
-                            >
-                                Start allocation
-                            </button>
-                            <div className="text-xs text-gray-400 rounded-2xl border border-white/10 bg-white/5 p-3">
-                                {selectedFolder
-                                    ? `Ready to assign tokens for ${selectedFolder.name}`
-                                    : 'Choose a folder from the list to unlock allocations'}
-                            </div>
-                        </div>
-                    </div>
-                    <div className="mt-6 grid gap-4 sm:grid-cols-3 text-sm text-gray-400">
-                        <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                            <p className="text-xs uppercase tracking-[0.3em] text-gray-500">Step 1</p>
-                            <p className="text-white font-semibold mt-1">Select a folder</p>
-                            <p className="mt-1">Tap any folder card to focus on that allocation group.</p>
-                        </div>
-                        <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                            <p className="text-xs uppercase tracking-[0.3em] text-gray-500">Step 2</p>
-                            <p className="text-white font-semibold mt-1">Open allocation modal</p>
-                            <p className="mt-1">Press “Start allocation” to configure cliffs, duration, and wallet address.</p>
-                        </div>
-                        <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                            <p className="text-xs uppercase tracking-[0.3em] text-gray-500">Step 3</p>
-                            <p className="text-white font-semibold mt-1">Save & refresh</p>
-                            <p className="mt-1">Confirm the transaction, then sync members to view the latest balances.</p>
-                        </div>
-                    </div>
-                </div> */}
+
 
 
 
