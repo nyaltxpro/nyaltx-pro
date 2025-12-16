@@ -820,6 +820,16 @@ export default function AdminDashboardFixed() {
                         const stats = await folderEscrow.getFolderStats();
                         const isPaused = await folderEscrow.isPaused();
 
+                        console.log(`📊 Folder ${folder.name} Stats:`, {
+                            totalAllocated: ethersLib.formatEther(stats.totalAllocated),
+                            totalVested: ethersLib.formatEther(stats.totalVested),
+                            totalClaimed: ethersLib.formatEther(stats.totalClaimed),
+                            beneficiaryCount: stats.totalBeneficiaries,
+                            vestingPercentage: stats.totalAllocated > 0
+                                ? ((Number(stats.totalVested) / Number(stats.totalAllocated)) * 100).toFixed(2) + '%'
+                                : '0%'
+                        });
+
                         return {
                             id: index,
                             name: folder.name,
@@ -1203,6 +1213,24 @@ export default function AdminDashboardFixed() {
             const vestingCalc = await folderEscrow.calculateVesting(beneficiaryAddress);
             const beneficiaryInfo = await folderEscrow.getBeneficiaryInfo(beneficiaryAddress);
 
+            const currentTime = Math.floor(Date.now() / 1000);
+            const cliffTime = Number(beneficiaryInfo.start) + Number(beneficiaryInfo.cliff);
+            const endTime = Number(beneficiaryInfo.start) + Number(beneficiaryInfo.duration);
+            const elapsed = currentTime - Number(beneficiaryInfo.start);
+            const vestingProgress = elapsed > 0 ? Math.min((elapsed / Number(beneficiaryInfo.duration)) * 100, 100) : 0;
+
+            console.log(`🔍 Beneficiary ${beneficiaryAddress.slice(0, 6)}...${beneficiaryAddress.slice(-4)} Vesting Details:`, {
+                totalAllocation: ethersLib.formatEther(vestingCalc.totalAllocation),
+                vested: ethersLib.formatEther(vestingCalc.vested),
+                claimed: ethersLib.formatEther(vestingCalc.claimed),
+                claimable: ethersLib.formatEther(vestingCalc.claimable),
+                cliffReached: vestingCalc.cliffReached,
+                fullyVested: vestingCalc.fullyVested,
+                vestingProgress: vestingProgress.toFixed(2) + '%',
+                timeUntilCliff: cliffTime > currentTime ? `${Math.floor((cliffTime - currentTime) / 86400)} days` : 'Cliff reached',
+                timeUntilFullyVested: endTime > currentTime ? `${Math.floor((endTime - currentTime) / 86400)} days` : 'Fully vested'
+            });
+
             return {
                 address: beneficiaryAddress,
                 totalAllocation: ethersLib.formatEther(vestingCalc.totalAllocation),
@@ -1340,6 +1368,16 @@ export default function AdminDashboardFixed() {
         };
 
         const vestingProgress = calculateVestingProgress();
+
+        // Debug: Log folder data to verify totalVested is present
+        console.log(`🎴 Rendering Folder Card: ${folder.name}`, {
+            id: folder.id,
+            totalAllocated: folder.totalAllocated,
+            totalVested: folder.totalVested,
+            totalClaimed: folder.totalClaimed,
+            beneficiaryCount: folder.beneficiaryCount,
+            address: folder.address
+        });
 
         return (
             <div
