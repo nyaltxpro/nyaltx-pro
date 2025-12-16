@@ -799,8 +799,10 @@ export default function AdminDashboardFixed() {
             setTreasuryBalance(balance);
         } catch (err) {
             console.error('Failed to fetch treasury balance:', err);
+            setTreasuryBalanceError(err instanceof Error ? err.message : 'Failed to fetch treasury balance');
+        } finally {
+            setTreasuryBalanceLoading(false);
         }
-
     };
 
     const openVestingModal = () => {
