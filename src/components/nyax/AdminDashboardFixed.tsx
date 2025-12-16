@@ -7,7 +7,7 @@ import { CONTRACT_ABIS, CONTRACT_ADDRESSES } from '@/services/contracts';
 import { FolderInfo, MultisigTransaction } from '@/services/contracts/types';
 import { useAppKitAccount } from '@reown/appkit/react';
 import { ethers } from 'ethers';
-import { Filter, Gavel, KeySquare, Loader2, Lock, Plus, PlusIcon, Search, Shield, UserPlus2 } from 'lucide-react';
+import { Filter, Gavel, Loader2, Lock, Plus, PlusIcon, Search, Shield, UserPlus2 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAccount, useChainId, useSwitchChain } from 'wagmi';
 
@@ -1047,243 +1047,40 @@ export default function AdminDashboardFixed() {
                                     <Lock className="w-3 h-3" /> Locked
                                 </span>
                             )}
-
-                            {/* <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-6">
-                                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                                    <div className="space-y-2">
-                                        <h2 className="text-2xl font-semibold flex items-center gap-3">
-                                            <Shield className="w-5 h-5 text-orange-300" /> Treasury Multisig Approvals
-                                        </h2>
-                                        <p className="text-gray-400 text-sm">Submit, approve, and execute multisig transactions controlling treasury flows.</p>
-                                    </div>
-                                    {multisigStatus && (
-                                        <span className={`px-4 py-1.5 rounded-full text-sm border ${multisigStatus.type === 'success' ? 'border-emerald-400/40 text-emerald-200' : 'border-red-400/40 text-red-200'}`}>
-                                            {multisigStatus.message}
-                                        </span>
-                                    )}
-                                </div>
-                                <div className="mt-6 grid gap-4 md:grid-cols-3">
-                                    <div className="space-y-3">
-                                        <label className="text-sm text-gray-400">Destination</label>
-                                        <input
-                                            type="text"
-                                            value={multisigForm.to}
-                                            onChange={e => setMultisigForm(prev => ({ ...prev, to: e.target.value }))}
-                                            placeholder="0x..."
-                                            className="w-full px-4 py-3 rounded-xl border border-white/10 bg-black/30 text-white"
-                                        />
-                                    </div>
-                                    <div className="space-y-3">
-                                        <label className="text-sm text-gray-400">Value (ETH)</label>
-                                        <input
-                                            type="text"
-                                            value={multisigForm.value}
-                                            onChange={e => setMultisigForm(prev => ({ ...prev, value: e.target.value }))}
-                                            placeholder="0"
-                                            className="w-full px-4 py-3 rounded-xl border border-white/10 bg-black/30 text-white"
-                                        />
-                                    </div>
-                                    <div className="space-y-3">
-                                        <label className="text-sm text-gray-400">Calldata (hex)</label>
-                                        <input
-                                            type="text"
-                                            value={multisigForm.data}
-                                            onChange={e => setMultisigForm(prev => ({ ...prev, data: e.target.value }))}
-                                            placeholder="0x"
-                                            className="w-full px-4 py-3 rounded-xl border border-white/10 bg-black/30 text-white"
-                                        />
-                                    </div>
-                                </div>
-                                <div className="mt-4 grid gap-3 md:grid-cols-3">
-                                    <button
-                                        onClick={async () => {
-                                            if (!daoService) {
-                                                setMultisigStatus({ type: 'error', message: 'DAO service unavailable' });
-                                                return;
-                                            }
-                                            if (!multisigForm.to || !multisigForm.data) {
-                                                setMultisigStatus({ type: 'error', message: 'Destination and calldata required' });
-                                                return;
-                                            }
-                                            setMultisigLoading(true);
-                                            try {
-                                                const txIndex = await daoService.multisig.submitTransaction(
-                                                    multisigForm.to,
-                                                    multisigForm.value || '0',
-                                                    multisigForm.data || '0x'
-                                                );
-                                                setMultisigStatus({ type: 'success', message: `Transaction submitted (#${txIndex})` });
-                                                setMultisigForm({ to: '', value: '0', data: '0x' });
-                                                await refreshMultisigTransactions();
-                                            } catch (err) {
-                                                console.error('Submit multisig tx failed', err);
-                                                const message = err instanceof Error ? err.message : 'Submit failed';
-                                                setMultisigStatus({ type: 'error', message });
-                                            } finally {
-                                                setMultisigLoading(false);
-                                            }
-                                        }}
-                                        disabled={multisigLoading || !isConnected}
-                                        className="px-4 py-3 rounded-2xl bg-linear-to-r from-orange-500 to-pink-500 font-semibold disabled:opacity-40"
-                                    >
-                                        {multisigLoading ? 'Submitting…' : 'Submit Transaction'}
-                                    </button>
-                                </div>
-                                <div className="mt-6 space-y-4">
-                                    <div className="flex items-center justify-between">
-                                        <h3 className="text-lg font-semibold">Pending Transactions</h3>
-                                        <button
-                                            onClick={refreshMultisigTransactions}
-                                            className="text-sm text-blue-300 hover:text-blue-200"
-                                        >
-                                            Refresh
-                                        </button>
-                                    </div>
-                                    {multisigTransactions.length === 0 ? (
-                                        <p className="text-sm text-gray-400">No pending multisig transactions.</p>
-                                    ) : (
-                                        <div className="space-y-3">
-                                            {multisigTransactions.map(tx => (
-                                                <div key={tx.id} className="rounded-2xl border border-white/10 bg-black/30 p-4 text-sm text-gray-200">
-                                                    <div className="flex flex-wrap items-center justify-between gap-2">
-                                                        <div>
-                                                            <p className="font-semibold">#{tx.id} → {tx.to.slice(0, 6)}…{tx.to.slice(-4)}</p>
-                                                            <p className="text-xs text-gray-400">Value: {tx.value} ETH · Confirmations: {tx.confirmations}</p>
-                                                        </div>
-                                                        <div className="flex gap-2">
-                                                            <button
-                                                                className="px-3 py-1 rounded-lg border border-emerald-400/40 text-emerald-200 text-xs"
-                                                                onClick={async () => {
-                                                                    if (!daoService) return;
-                                                                    try {
-                                                                        setMultisigLoading(true);
-                                                                        await daoService.multisig.confirmTransaction(tx.id);
-                                                                        setMultisigStatus({ type: 'success', message: `Confirmed #${tx.id}` });
-                                                                        await refreshMultisigTransactions();
-                                                                    } catch (err) {
-                                                                        console.error('Confirm multisig failed', err);
-                                                                        const message = err instanceof Error ? err.message : 'Confirm failed';
-                                                                        setMultisigStatus({ type: 'error', message });
-                                                                    } finally {
-                                                                        setMultisigLoading(false);
-                                                                    }
-                                                                }}
-                                                                disabled={multisigLoading}
-                                                            >
-                                                                Confirm
-                                                            </button>
-                                                            <button
-                                                                className="px-3 py-1 rounded-lg border border-blue-400/40 text-blue-200 text-xs"
-                                                                onClick={async () => {
-                                                                    if (!daoService) return;
-                                                                    try {
-                                                                        setMultisigLoading(true);
-                                                                        await daoService.multisig.executeTransaction(tx.id);
-                                                                        setMultisigStatus({ type: 'success', message: `Executed #${tx.id}` });
-                                                                        await refreshMultisigTransactions();
-                                                                    } catch (err) {
-                                                                        console.error('Execute multisig failed', err);
-                                                                        const message = err instanceof Error ? err.message : 'Execute failed';
-                                                                        setMultisigStatus({ type: 'error', message });
-                                                                    } finally {
-                                                                        setMultisigLoading(false);
-                                                                    }
-                                                                }}
-                                                                disabled={multisigLoading}
-                                                            >
-                                                                Execute
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                    {tx.data !== '0x' && (
-                                                        <p className="mt-2 text-xs text-gray-400 wrap-break-word">Data: {tx.data}</p>
-                                                    )}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            </div> */}
+                            {(folder as any).address && (
+                                <p className="text-gray-400 text-sm font-mono mt-1">
+                                    {(folder as any).address.slice(0, 6)}...{(folder as any).address.slice(-4)}
+                                </p>
+                            )}
                         </h3>
-                        <p className="text-gray-400 text-sm">{memberCount} token holders</p>
-                    </div>
-                    <button
-                        onClick={e => {
-                            e.stopPropagation();
-                            fetchMembers(folder.id);
-                        }}
-                        className="px-3 py-1 text-xs rounded-lg bg-purple-500/20 text-purple-200"
-                    >
-                        Refresh
-                    </button>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                    <div>
-                        <p className="text-gray-400 text-sm mb-1">Total Allocated</p>
-                        <p className="text-white font-bold text-lg">{formatNumber(folder.totalAllocated)} NYAX</p>
-                    </div>
-                    <div>
-                        <p className="text-gray-400 text-sm mb-1">Vesting</p>
-                        <p className="text-gray-200 text-sm">
-                            Cliff {folder.template.cliff / DAY_IN_SECONDS}d · Duration {folder.template.duration / DAY_IN_SECONDS}d
-                        </p>
+                        <div className="text-right">
+                            <div className="text-sm text-gray-400">Members</div>
+                            <div className="text-lg font-semibold text-white">{memberCount}</div>
+                        </div>
                     </div>
                 </div>
 
-                <div>
-                    <p className="text-gray-400 text-sm mb-2">Permissions</p>
-                    <div className="flex flex-wrap gap-2">
-                        {permissions.length === 0 ? (
-                            <span className="px-3 py-1 bg-gray-500/20 text-gray-200 rounded-full text-xs">Default</span>
-                        ) : (
-                            permissions.map(label => (
-                                <span key={label} className="px-3 py-1 bg-purple-500/20 text-purple-300 rounded-full text-xs">
-                                    {label}
-                                </span>
-                            ))
-                        )}
+                <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                        <span className="text-gray-400 text-sm">Permissions</span>
+                        <span className="text-gray-300 text-sm">{permissions.join(', ')}</span>
                     </div>
-                </div>
-
-                <div className="mt-4 flex flex-wrap gap-3">
-                    <button
-                        onClick={e => {
-                            e.stopPropagation();
-                            openAllocationModal(folder);
-                        }}
-                        disabled={!isConnected}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-emerald-400/40 text-emerald-200 text-sm hover:bg-emerald-500/10 disabled:opacity-40"
-                    >
-                        <UserPlus2 className="w-4 h-4" /> Allocate tokens
-                    </button>
-                    <button
-                        onClick={e => {
-                            e.stopPropagation();
-                            openFolderEditModal(folder);
-                        }}
-                        disabled={!isConnected}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-blue-400/40 text-blue-200 text-sm hover:bg-blue-500/10 disabled:opacity-40"
-                    >
-                        <KeySquare className="w-4 h-4" /> Edit folder
-                    </button>
-                    {/* <button
-                        onClick={async e => {
-                            e.stopPropagation();
-                            await handleFolderLockAction(folder.id, !folder.locked);
-                        }}
-                        disabled={!isConnected || loading}
-                        className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl border text-sm hover:bg-white/10 disabled:opacity-40 ${folder.locked ? 'border-green-400/40 text-green-200' : 'border-red-400/40 text-red-200'}`}
-                    >
-                        <Lock className="w-4 h-4" />
-                        {folder.locked ? 'Unlock tokens' : 'Lock tokens'}
-                    </button> */}
+                    <div className="flex items-center justify-between">
+                        <span className="text-gray-400 text-sm">Allocated</span>
+                        <span className="text-white font-semibold">{formatNumber(folder.totalAllocated)} NYAX</span>
+                    </div>
+                    {(folder as any).createdAt && (
+                        <div className="flex items-center justify-between">
+                            <span className="text-gray-400 text-sm">Created</span>
+                            <span className="text-gray-300 text-sm">
+                                {new Date((folder as any).createdAt * 1000).toLocaleDateString()}
+                            </span>
+                        </div>
+                    )}
                 </div>
             </div>
         );
     };
-
-
 
     return (
         <div className="min-h-screen  text-white">
