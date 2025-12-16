@@ -596,21 +596,31 @@ export default function AdminDashboardFixed() {
                 throw new Error('DAO service unavailable');
             }
 
+            if (!daoService.folderEscrow) {
+                throw new Error('FolderEscrow service not available - contract address not configured');
+            }
+
             const signer = daoService.getSigner();
             if (!signer) {
                 throw new Error('Signer is required for beneficiary operations');
             }
 
-            // Use the new beneficiary service to add beneficiary
-            await daoService.beneficiary.addBeneficiary({
-                folderId: allocationForm.folderId,
-                account: allocationForm.account,
-                amount: allocationForm.amount,
-                startDate: allocationForm.startDate || '',
-                cliffDays: allocationForm.cliffDays || '0',
-                durationDays: allocationForm.durationDays || '365',
-                permissions: allocationForm.permissions || '0',
-            });
+            // Use the folderEscrowService to add beneficiary
+            const amount = ethers.parseEther(allocationForm.amount);
+            const start = allocationForm.startDate
+                ? BigInt(Math.floor(new Date(allocationForm.startDate).getTime() / 1000))
+                : BigInt(Math.floor(Date.now() / 1000));
+            const cliff = BigInt(Number(allocationForm.cliffDays || '0') * 86400); // DAY_IN_SECONDS
+            const duration = BigInt(Number(allocationForm.durationDays || '365') * 86400); // DAY_IN_SECONDS
+
+            await daoService.folderEscrow.addBeneficiary(
+                allocationForm.account,
+                amount,
+                start,
+                cliff,
+                duration,
+                signer
+            );
 
             setFormError(null);
             setShowAllocationModal(false);
@@ -694,6 +704,27 @@ export default function AdminDashboardFixed() {
             setFormError(`Found ${tokenFolders.length} token folders`);
         } catch (err) {
             setFormError(err instanceof Error ? err.message : 'Failed to get token folders');
+        }
+    };
+
+    const handleShowNewFolders = async () => {
+        if (!daoService) {
+            setFormError('DAO service unavailable');
+            return;
+        }
+
+        try {
+            // Use the new folder factory service
+            const allFolders = await daoService.folderFactory.getAllFolders();
+            console.log('New Factory Folders:', allFolders);
+
+            // Get detailed folder information
+            const folderDetails = await daoService.folderFactory.getFoldersWithDetails();
+            console.log('Folder Details:', folderDetails);
+
+            setFormError(`Found ${allFolders.length} folders from factory service`);
+        } catch (err) {
+            setFormError(err instanceof Error ? err.message : 'Failed to get factory folders');
         }
     };
 
@@ -1482,6 +1513,10 @@ export default function AdminDashboardFixed() {
                         <button className={TOOL_BUTTON_CLASSES} onClick={refresh} disabled={loading}>
                             <Loader2 className="w-5 h-5" />
                             Refresh Data
+                        </button>
+                        <button className={TOOL_BUTTON_CLASSES} onClick={handleShowNewFolders} disabled={!isConnected || loading}>
+                            <Search className="w-5 h-5" />
+                            New Folders
                         </button>
                         {/* <button
                             className="flex-1 min-w-[140px] px-5 py-3 rounded-2xl border border-white/20 text-white/80 hover:bg-white/10 transition"

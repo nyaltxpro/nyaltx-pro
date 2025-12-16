@@ -2,6 +2,8 @@
 import { ethers } from 'ethers';
 import { BeneficiaryService } from './beneficiaryService';
 import { CONTRACT_ADDRESSES, NETWORK_CONFIG } from './config';
+import { FolderEscrowService } from './folderEscrowService';
+import { FolderRegistryFactoryService } from './folderRegistryFactoryService';
 import { FolderRegistryService } from './folderRegistryService';
 import { FoldersService } from './foldersService';
 import { GovernanceService } from './governanceService';
@@ -21,6 +23,8 @@ export class DAOService {
   public vesting: VestingService;
   public multisig: MultisigService;
   public folders: FolderRegistryService;
+  public folderFactory: FolderRegistryFactoryService;
+  public folderEscrow: FolderEscrowService | null;
   public tokenFolders: FoldersService;
   public staking: StakingService;
   public migrationVault: MigrationVaultService;
@@ -37,6 +41,16 @@ export class DAOService {
     this.vesting = new VestingService(provider, signer);
     this.multisig = new MultisigService(provider, signer);
     this.folders = new FolderRegistryService(provider, signer);
+    this.folderFactory = new FolderRegistryFactoryService(provider as ethers.BrowserProvider);
+    
+    // Initialize folder escrow service if address is available
+    if (CONTRACT_ADDRESSES.folderEscrow) {
+      this.folderEscrow = new FolderEscrowService(CONTRACT_ADDRESSES.folderEscrow, provider as ethers.BrowserProvider);
+    } else {
+      console.warn('FolderEscrow contract address not configured');
+      this.folderEscrow = null as any;
+    }
+    
     this.staking = new StakingService(provider, signer);
     this.migrationVault = new MigrationVaultService(provider, signer);
     this.treasuryBridge = new TreasuryBridgeService(provider, signer);
