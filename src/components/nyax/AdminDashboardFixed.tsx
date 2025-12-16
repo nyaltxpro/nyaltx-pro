@@ -108,6 +108,15 @@ export default function AdminDashboardFixed() {
     const [factoryLoading, setFactoryLoading] = useState(false);
     const [permissionsLoading, setPermissionsLoading] = useState(false);
 
+    // Token statistics from FolderFactory
+    const [tokenStats, setTokenStats] = useState<{
+        totalSupply: string;
+        circulating: string;
+        stakedValue: string;
+        totalHolders: string;
+    } | null>(null);
+    const [tokenStatsLoading, setTokenStatsLoading] = useState(false);
+
     // Treasury balance state
     const [treasuryBalance, setTreasuryBalance] = useState<string | null>(null);
     const [treasuryBalanceLoading, setTreasuryBalanceLoading] = useState(false);
@@ -713,6 +722,29 @@ export default function AdminDashboardFixed() {
         }
     };
 
+    const loadTokenStats = async () => {
+        if (!daoService) {
+            console.warn('DAO service unavailable for loading token stats');
+            return;
+        }
+
+        setTokenStatsLoading(true);
+        try {
+            const stats = await daoService.folderFactory.getAllTokenStats();
+            setTokenStats({
+                totalSupply: ethers.formatEther(stats.totalSupply),
+                circulating: ethers.formatEther(stats.circulating),
+                stakedValue: ethers.formatEther(stats.stakedValue),
+                totalHolders: stats.totalHolders.toString()
+            });
+            console.log('Token stats loaded from FolderFactory:', stats);
+        } catch (err) {
+            console.error('Failed to load token stats from FolderFactory:', err);
+        } finally {
+            setTokenStatsLoading(false);
+        }
+    };
+
     const loadFactoryFolders = async () => {
         if (!daoService) {
             console.warn('DAO service unavailable for loading factory folders');
@@ -729,21 +761,55 @@ export default function AdminDashboardFixed() {
             const folderDetails = await daoService.folderFactory.getFoldersWithDetails();
             console.log('Factory folder details:', folderDetails);
 
-            // Map to FactoryFolder format with basic info
-            const enhancedFolders: FactoryFolder[] = folderDetails.map((folder: any, index: number) => ({
-                id: index,
-                name: folder.name,
-                address: folder.address,
-                createdAt: Number(folder.createdAt),
-                totalAllocated: '0',
-                totalClaimed: '0',
-                totalVested: '0',
-                isPaused: false,
-                beneficiaryCount: 0
-            }));
+            // Enhance with escrow stats for each folder
+            const enhancedFolders: FactoryFolder[] = await Promise.all(
+                folderDetails.map(async (folder: any, index: number) => {
+                    try {
+                        // Import FolderEscrowService dynamically
+                        const { FolderEscrowService } = await import('@/services/contracts/folderEscrowService');
+                        const { ethers: ethersLib } = await import('ethers');
+
+                        // Create provider for read operations
+                        const provider = new ethersLib.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL || 'https://sepolia.infura.io/v3/YOUR_INFURA_KEY');
+                        const folderEscrow = new FolderEscrowService(folder.address, provider as any);
+
+                        // Get folder stats
+                        const stats = await folderEscrow.getFolderStats();
+                        const isPaused = await folderEscrow.isPaused();
+
+                        return {
+                            id: index,
+                            name: folder.name,
+                            address: folder.address,
+                            createdAt: Number(folder.createdAt),
+                            totalAllocated: ethersLib.formatEther(stats.totalAllocated),
+                            totalClaimed: ethersLib.formatEther(stats.totalClaimed),
+                            totalVested: ethersLib.formatEther(stats.totalVested),
+                            isPaused: isPaused,
+                            beneficiaryCount: stats.totalBeneficiaries
+                        };
+                    } catch (err) {
+                        console.error(`Failed to load stats for folder ${folder.name}:`, err);
+                        return {
+                            id: index,
+                            name: folder.name,
+                            address: folder.address,
+                            createdAt: Number(folder.createdAt),
+                            totalAllocated: '0',
+                            totalClaimed: '0',
+                            totalVested: '0',
+                            isPaused: false,
+                            beneficiaryCount: 0
+                        };
+                    }
+                })
+            );
 
             setFactoryFolders(enhancedFolders);
-            console.log(`Successfully loaded ${enhancedFolders.length} folders from factory`);
+            console.log(`Successfully loaded ${enhancedFolders.length} folders from factory with stats`);
+
+            // Also load token statistics
+            await loadTokenStats();
         } catch (err) {
             console.error('Failed to load factory folders:', err);
             setFormError(err instanceof Error ? err.message : 'Failed to load factory folders');
@@ -928,6 +994,156 @@ export default function AdminDashboardFixed() {
         } catch (error) {
             console.error('Failed to apply token preset', error);
             setProposalAlert({ type: 'error', message: 'Failed to encode NYAX token calldata.' });
+        }
+    };
+
+    const handlePauseBeneficiary = async (folderAddress: string, beneficiaryAddress: string) => {
+        if (!await ensureSepolia(setFormError)) return;
+        if (!daoService) {
+            setFormError('DAO service unavailable');
+            return;
+        }
+
+        try {
+            const signer = daoService.getSigner();
+            if (!signer) {
+                throw new Error('Signer required');
+            }
+
+            const { FolderEscrowService } = await import('@/services/contracts/folderEscrowService');
+            const { ethers: ethersLib } = await import('ethers');
+
+            const ethereum = (window as any).ethereum;
+            if (!ethereum) throw new Error('No Ethereum provider found');
+
+            const browserProvider = new ethersLib.BrowserProvider(ethereum);
+            const folderEscrow = new FolderEscrowService(folderAddress, browserProvider);
+
+            await folderEscrow.pauseBeneficiary(beneficiaryAddress, signer);
+            await loadFactoryFolders();
+            setFormError(null);
+        } catch (err) {
+            setFormError(err instanceof Error ? err.message : 'Failed to pause beneficiary');
+        }
+    };
+
+    const handleResumeBeneficiary = async (folderAddress: string, beneficiaryAddress: string) => {
+        if (!await ensureSepolia(setFormError)) return;
+        if (!daoService) {
+            setFormError('DAO service unavailable');
+            return;
+        }
+
+        try {
+            const signer = daoService.getSigner();
+            if (!signer) {
+                throw new Error('Signer required');
+            }
+
+            const { FolderEscrowService } = await import('@/services/contracts/folderEscrowService');
+            const { ethers: ethersLib } = await import('ethers');
+
+            const ethereum = (window as any).ethereum;
+            if (!ethereum) throw new Error('No Ethereum provider found');
+
+            const browserProvider = new ethersLib.BrowserProvider(ethereum);
+            const folderEscrow = new FolderEscrowService(folderAddress, browserProvider);
+
+            await folderEscrow.resumeBeneficiary(beneficiaryAddress, signer);
+            await loadFactoryFolders();
+            setFormError(null);
+        } catch (err) {
+            setFormError(err instanceof Error ? err.message : 'Failed to resume beneficiary');
+        }
+    };
+
+    const handleCancelBeneficiary = async (folderAddress: string, beneficiaryAddress: string) => {
+        if (!await ensureSepolia(setFormError)) return;
+        if (!daoService) {
+            setFormError('DAO service unavailable');
+            return;
+        }
+
+        try {
+            const signer = daoService.getSigner();
+            if (!signer) {
+                throw new Error('Signer required');
+            }
+
+            const { FolderEscrowService } = await import('@/services/contracts/folderEscrowService');
+            const { ethers: ethersLib } = await import('ethers');
+
+            const ethereum = (window as any).ethereum;
+            if (!ethereum) throw new Error('No Ethereum provider found');
+
+            const browserProvider = new ethersLib.BrowserProvider(ethereum);
+            const folderEscrow = new FolderEscrowService(folderAddress, browserProvider);
+
+            await folderEscrow.cancelBeneficiary(beneficiaryAddress, signer);
+            await loadFactoryFolders();
+            setFormError(null);
+        } catch (err) {
+            setFormError(err instanceof Error ? err.message : 'Failed to cancel beneficiary');
+        }
+    };
+
+    const handlePauseFolder = async (folderAddress: string) => {
+        if (!await ensureSepolia(setFormError)) return;
+        if (!daoService) {
+            setFormError('DAO service unavailable');
+            return;
+        }
+
+        try {
+            const signer = daoService.getSigner();
+            if (!signer) {
+                throw new Error('Signer required');
+            }
+
+            const { FolderEscrowService } = await import('@/services/contracts/folderEscrowService');
+            const { ethers: ethersLib } = await import('ethers');
+
+            const ethereum = (window as any).ethereum;
+            if (!ethereum) throw new Error('No Ethereum provider found');
+
+            const browserProvider = new ethersLib.BrowserProvider(ethereum);
+            const folderEscrow = new FolderEscrowService(folderAddress, browserProvider);
+
+            await folderEscrow.pauseFolder(signer);
+            await loadFactoryFolders();
+            setFormError(null);
+        } catch (err) {
+            setFormError(err instanceof Error ? err.message : 'Failed to pause folder');
+        }
+    };
+
+    const handleUnpauseFolder = async (folderAddress: string) => {
+        if (!await ensureSepolia(setFormError)) return;
+        if (!daoService) {
+            setFormError('DAO service unavailable');
+            return;
+        }
+
+        try {
+            const signer = daoService.getSigner();
+            if (!signer) {
+                throw new Error('Signer required');
+            }
+
+            const { FolderEscrowService } = await import('@/services/contracts/folderEscrowService');
+            const { ethers: ethersLib } = await import('ethers');
+
+            const ethereum = (window as any).ethereum;
+            if (!ethereum) throw new Error('No Ethereum provider found');
+
+            const browserProvider = new ethersLib.BrowserProvider(ethereum);
+            const folderEscrow = new FolderEscrowService(folderAddress, browserProvider);
+
+            await folderEscrow.unpauseFolder(signer);
+            await loadFactoryFolders();
+            setFormError(null);
+        } catch (err) {
+            setFormError(err instanceof Error ? err.message : 'Failed to unpause folder');
         }
     };
 
