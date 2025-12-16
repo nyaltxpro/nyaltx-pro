@@ -1041,16 +1041,30 @@ export default function AdminDashboardFixed() {
                 <div className="flex items-center justify-between mb-4">
                     <div>
                         <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                            {folder.name}
+                            {folder.name || 'Unnamed Folder'}
                             {folder.locked && (
                                 <span className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-red-500/20 text-red-200">
                                     <Lock className="w-3 h-3" /> Locked
                                 </span>
                             )}
                             {(folder as any).address && (
-                                <p className="text-gray-400 text-sm font-mono mt-1">
-                                    {(folder as any).address.slice(0, 6)}...{(folder as any).address.slice(-4)}
-                                </p>
+                                <div className="flex items-center gap-2 mt-1">
+                                    <p className="text-gray-400 text-sm font-mono">
+                                        {(folder as any).address.slice(0, 6)}...{(folder as any).address.slice(-4)}
+                                    </p>
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            navigator.clipboard.writeText((folder as any).address);
+                                        }}
+                                        className="text-gray-400 hover:text-white transition-colors"
+                                        title="Copy address"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                        </svg>
+                                    </button>
+                                </div>
                             )}
                         </h3>
                         <div className="text-right">
