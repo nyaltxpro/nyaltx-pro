@@ -568,11 +568,8 @@ export default function AdminDashboardFixed() {
         setPauseLoading('token');
         setPauseError(null);
         try {
-            if (tokenPaused) {
-                await daoService.governance.unpauseToken(signer);
-            } else {
-                await daoService.governance.pauseToken(signer);
-            }
+            // The pauseToken method internally calls togglePause(), so we use it for both pause and unpause
+            await daoService.governance.pauseToken(signer);
             await refreshPauseStatus();
         } catch (err) {
             console.error('Failed to toggle token pause', err);
