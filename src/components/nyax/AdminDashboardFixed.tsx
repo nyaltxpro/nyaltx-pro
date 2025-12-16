@@ -45,6 +45,21 @@ const TOKEN_FUNCTION_PRESETS = [
 const formatNumber = (value: string | number) => {
     const numeric = typeof value === 'string' ? Number(value) : value;
     if (!Number.isFinite(numeric)) return '0';
+
+    // Show 0 for actual zero
+    if (numeric === 0) return '0';
+
+    // Handle very small non-zero numbers with more decimal places
+    if (numeric > 0 && numeric < 0.01) {
+        // Show up to 18 decimal places for small amounts (to handle wei precision)
+        return numeric.toFixed(18).replace(/\.?0+$/, '');
+    }
+
+    // Handle very large numbers with scientific notation
+    if (numeric >= 1e9) {
+        return numeric.toExponential(2);
+    }
+
     return new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(numeric);
 };
 
