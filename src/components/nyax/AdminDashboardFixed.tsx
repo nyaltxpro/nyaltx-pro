@@ -92,7 +92,20 @@ export default function AdminDashboardFixed() {
     const [formError, setFormError] = useState<string | null>(null);
 
     // Factory folders state
-    const [factoryFolders, setFactoryFolders] = useState<any[]>([]);
+    interface FactoryFolder {
+        id: number;
+        name: string;
+        address: string;
+        createdAt: number;
+        totalAllocated: string;
+        totalClaimed?: string;
+        totalVested?: string;
+        isPaused?: boolean;
+        beneficiaryCount?: number;
+        defaultPermissions?: number;
+    }
+    const [factoryFolders, setFactoryFolders] = useState<FactoryFolder[]>([]);
+    const [factoryLoading, setFactoryLoading] = useState(false);
     const [permissionsLoading, setPermissionsLoading] = useState(false);
 
     // Treasury balance state
@@ -235,6 +248,13 @@ export default function AdminDashboardFixed() {
     useEffect(() => {
         refreshTokenInfo();
     }, [refreshTokenInfo]);
+
+    // Load factory folders on mount and when daoService changes
+    useEffect(() => {
+        if (daoService && !factoryLoading) {
+            loadFactoryFolders();
+        }
+    }, [daoService]);
 
     useEffect(() => {
         refreshMultisigTransactions();
@@ -629,8 +649,8 @@ export default function AdminDashboardFixed() {
             const start = allocationForm.startDate
                 ? BigInt(Math.floor(new Date(allocationForm.startDate).getTime() / 1000))
                 : BigInt(Math.floor(Date.now() / 1000));
-            const cliff = BigInt(Number(allocationForm.cliffDays || '0') * 86400); // DAY_IN_SECONDS
-            const duration = BigInt(Number(allocationForm.durationDays || '365') * 86400); // DAY_IN_SECONDS
+            const cliff = BigInt(Number(allocationForm.cliffDays || '0') * 86400);
+            const duration = BigInt(Number(allocationForm.durationDays || '365') * 86400);
 
             // Check if this is a factory folder by looking up the folder address
             const folder = factoryFolders.find(f => f.id === allocationForm.folderId);
@@ -638,22 +658,31 @@ export default function AdminDashboardFixed() {
                 throw new Error('Folder not found');
             }
 
-            // For factory folders, interact directly with the folder contract
-            if ((folder as any).address) {
-                // Create a contract instance for the specific folder
-                const folderContract = new ethers.Contract(
-                    (folder as any).address,
-                    CONTRACT_ABIS.folderEscrow,
-                    signer
-                );
+            // For factory folders, interact directly with the folder contract using FolderEscrowService
+            if (folder.address) {
+                // Import and create FolderEscrowService for this specific folder
+                const { FolderEscrowService } = await import('@/services/contracts/folderEscrowService');
+                const { ethers: ethersLib } = await import('ethers');
 
-                await folderContract.addBeneficiary(
+                const ethereum = (window as any).ethereum;
+                if (!ethereum) {
+                    throw new Error('No Ethereum provider found');
+                }
+
+                const browserProvider = new ethersLib.BrowserProvider(ethereum);
+                const folderEscrow = new FolderEscrowService(folder.address, browserProvider);
+
+                await folderEscrow.addBeneficiary(
                     allocationForm.account,
                     amount,
                     start,
                     cliff,
-                    duration
+                    duration,
+                    signer
                 );
+
+                // Refresh folder stats after adding beneficiary
+                await loadFactoryFolders();
             } else {
                 // Fallback to old service for non-factory folders
                 if (!daoService.folderEscrow) {
@@ -669,7 +698,6 @@ export default function AdminDashboardFixed() {
                     signer
                 );
             }
-
             setFormError(null);
             setShowAllocationModal(false);
             setAllocationForm({
@@ -682,6 +710,86 @@ export default function AdminDashboardFixed() {
             });
         } catch (err) {
             setFormError(err instanceof Error ? err.message : 'Failed to add beneficiary');
+        }
+    };
+
+    const loadFactoryFolders = async () => {
+        if (!daoService) {
+            console.warn('DAO service unavailable for loading factory folders');
+            return;
+        }
+
+        setFactoryLoading(true);
+        try {
+            // Get folders from factory service
+            const factoryFoldersList = await daoService.folderFactory.getAllFolders();
+            console.log('Loading folders from factory service:', factoryFoldersList);
+
+            // Get detailed folder information
+            const folderDetails = await daoService.folderFactory.getFoldersWithDetails();
+            console.log('Factory folder details:', folderDetails);
+
+            // Map to FactoryFolder format with basic info
+            const enhancedFolders: FactoryFolder[] = folderDetails.map((folder: any, index: number) => ({
+                id: index,
+                name: folder.name,
+                address: folder.address,
+                createdAt: Number(folder.createdAt),
+                totalAllocated: '0',
+                totalClaimed: '0',
+                totalVested: '0',
+                isPaused: false,
+                beneficiaryCount: 0
+            }));
+
+            setFactoryFolders(enhancedFolders);
+            console.log(`Successfully loaded ${enhancedFolders.length} folders from factory`);
+        } catch (err) {
+            console.error('Failed to load factory folders:', err);
+            setFormError(err instanceof Error ? err.message : 'Failed to load factory folders');
+        } finally {
+            setFactoryLoading(false);
+        }
+    };
+
+    const handleFolderUpdate = async () => {
+        if (!folderEditForm.folderId) {
+            setFormError('Folder ID missing.');
+            return;
+        }
+        const permissions = Number(folderEditForm.permissions || '0');
+        if (!Number.isFinite(permissions)) {
+            setFormError('Enter a numeric permissions mask.');
+            return;
+        }
+        const cliffSeconds = Number(folderEditForm.cliffDays || '0') * DAY_IN_SECONDS;
+        const durationSeconds = Number(folderEditForm.durationDays || '0') * DAY_IN_SECONDS;
+        if (cliffSeconds < 0 || durationSeconds < 0) {
+            setFormError('Cliff and duration must be non-negative.');
+            return;
+        }
+        try {
+            setFormError(null);
+            await updateFolder(folderEditForm.folderId, {
+                permissions,
+                template: {
+                    cliff: cliffSeconds,
+                    duration: durationSeconds,
+                    revocable: folderEditForm.revocable,
+                },
+            });
+            setShowFolderEditModal(false);
+        } catch (err) {
+            setFormError(err instanceof Error ? err.message : 'Failed to update folder');
+        }
+    };
+
+    const handleRevoke = async (folderId: number, account: string) => {
+        if (!await ensureSepolia(setFormError)) return;
+        try {
+            await revokeAllocation(folderId, account);
+        } catch (err) {
+            setFormError(err instanceof Error ? err.message : 'Failed to revoke allocation');
         }
     };
 
@@ -738,46 +846,6 @@ export default function AdminDashboardFixed() {
         }
     };
 
-    const handleShowTokenFolders = async () => {
-        if (!daoService) {
-            setFormError('DAO service unavailable');
-            return;
-        }
-
-        try {
-            const tokenFolders = await daoService.tokenFolders.getTokenFolders();
-            console.log('Token Folders:', tokenFolders);
-            // You can display these folders in UI or update state
-            setFormError(`Found ${tokenFolders.length} token folders`);
-        } catch (err) {
-            setFormError(err instanceof Error ? err.message : 'Failed to get token folders');
-        }
-    };
-
-    const loadFactoryFolders = async () => {
-        if (!daoService) {
-            setFormError('DAO service unavailable');
-            return;
-        }
-
-        try {
-            // Get folders from factory service
-            const factoryFoldersList = await daoService.folderFactory.getAllFolders();
-            console.log('Loading folders from factory service:', factoryFoldersList);
-
-            // Get detailed folder information
-            const folderDetails = await daoService.folderFactory.getFoldersWithDetails();
-            console.log('Factory folder details:', folderDetails);
-
-            // Update factory folders state
-            setFactoryFolders(folderDetails);
-            setFormError(`Loaded ${factoryFoldersList.length} folders from factory service`);
-        } catch (err) {
-            console.error('Failed to load factory folders:', err);
-            setFormError(err instanceof Error ? err.message : 'Failed to load factory folders');
-        }
-    };
-
     const handlePermissionsUpdate = async () => {
         if (!daoService) {
             setFormError('DAO service unavailable');
@@ -788,7 +856,6 @@ export default function AdminDashboardFixed() {
             setPermissionsLoading(true);
             setFormError(null);
 
-            // Use the updateFolder function from useFolderRegistry hook
             await updateFolder(permissionsForm.folderId, {
                 permissions: Number(permissionsForm.permissions)
             });
@@ -801,42 +868,6 @@ export default function AdminDashboardFixed() {
         } finally {
             setPermissionsLoading(false);
         }
-    };
-
-    const fetchTreasuryBalance = async () => {
-        if (!daoService) {
-            setTreasuryBalanceError('DAO service unavailable');
-            return;
-        }
-
-        setTreasuryBalanceLoading(true);
-        setTreasuryBalanceError(null);
-
-        try {
-            const balance = await daoService.treasury.getTreasuryBalanceFormatted();
-            console.log('Treasury balance:', balance);
-            setTreasuryBalance(balance);
-        } catch (err) {
-            console.error('Failed to fetch treasury balance:', err);
-            setTreasuryBalanceError(err instanceof Error ? err.message : 'Failed to fetch treasury balance');
-        } finally {
-            setTreasuryBalanceLoading(false);
-        }
-    };
-
-    const openVestingModal = () => {
-        if (!selectedFolder) {
-            setFormError('Select a folder first');
-            return;
-        }
-        setVestingForm({
-            folderId: selectedFolder.id,
-            cliff: String(selectedFolder.template.cliff / DAY_IN_SECONDS),
-            duration: String(selectedFolder.template.duration / DAY_IN_SECONDS),
-            revocable: selectedFolder.template.revocable,
-        });
-        setFormError(null);
-        setShowVestingModal(true);
     };
 
     const handleVestingUpdate = async () => {
@@ -853,39 +884,6 @@ export default function AdminDashboardFixed() {
             setShowVestingModal(false);
         } catch (err) {
             setFormError(err instanceof Error ? err.message : 'Failed to update vesting template');
-        }
-    };
-
-    const handleLockToggle = async (mode: 'lock' | 'unlock') => {
-        if (!selectedFolder) {
-            setFormError('Select a folder first');
-            return;
-        }
-        if (!await ensureSepolia(setFormError)) return;
-        try {
-            await setFolderLockState(selectedFolder.id, mode === 'lock');
-            setFormError(null);
-        } catch (err) {
-            setFormError(err instanceof Error ? err.message : 'Failed to update lock state');
-        }
-    };
-
-    const handleFolderLockAction = async (folderId: number, lock: boolean) => {
-        if (!await ensureSepolia(setFormError)) return;
-        try {
-            await setFolderLockState(folderId, lock);
-            setFormError(null);
-        } catch (err) {
-            setFormError(err instanceof Error ? err.message : 'Failed to update lock state');
-        }
-    };
-
-    const handleRevoke = async (folderId: number, account: string) => {
-        if (!await ensureSepolia(setFormError)) return;
-        try {
-            await revokeAllocation(folderId, account);
-        } catch (err) {
-            setFormError(err instanceof Error ? err.message : 'Failed to revoke allocation');
         }
     };
 
@@ -979,58 +977,14 @@ export default function AdminDashboardFixed() {
         }
     };
 
-    const openFolderEditModal = (folder: FolderInfo) => {
-        setFolderEditForm({
-            folderId: folder.id,
-            permissions: String(folder.defaultPermissions),
-            cliffDays: String(Math.floor(folder.template.cliff / DAY_IN_SECONDS)),
-            durationDays: String(Math.floor(folder.template.duration / DAY_IN_SECONDS)),
-            revocable: folder.template.revocable,
-        });
-        setFormError(null);
-        setShowFolderEditModal(true);
-    };
-
-    const handleFolderUpdate = async () => {
-        if (!folderEditForm.folderId) {
-            setFormError('Folder ID missing.');
-            return;
-        }
-        const permissions = Number(folderEditForm.permissions || '0');
-        if (!Number.isFinite(permissions)) {
-            setFormError('Enter a numeric permissions mask.');
-            return;
-        }
-        const cliffSeconds = Number(folderEditForm.cliffDays || '0') * DAY_IN_SECONDS;
-        const durationSeconds = Number(folderEditForm.durationDays || '0') * DAY_IN_SECONDS;
-        if (cliffSeconds < 0 || durationSeconds < 0) {
-            setFormError('Cliff and duration must be non-negative.');
-            return;
-        }
-        try {
-            setFormError(null);
-            await updateFolder(folderEditForm.folderId, {
-                permissions,
-                template: {
-                    cliff: cliffSeconds,
-                    duration: durationSeconds,
-                    revocable: folderEditForm.revocable,
-                },
-            });
-            setShowFolderEditModal(false);
-        } catch (err) {
-            setFormError(err instanceof Error ? err.message : 'Failed to update folder');
-        }
-    };
-
-    const renderFolderCard = (folder: FolderInfo) => {
-        const memberCount = membersByFolder[folder.id]?.length ?? folder.members.length;
-        const permissions = describePermissions(folder.defaultPermissions);
+    const renderFolderCard = (folder: FactoryFolder) => {
+        const memberCount = membersByFolder[folder.id]?.length ?? 0;
+        const permissions = describePermissions(folder.defaultPermissions || 0);
 
         // Calculate vesting progress
         const calculateVestingProgress = () => {
-            const totalAllocated = parseFloat(folder.totalAllocated) || 0;
-            const totalClaimed = parseFloat((folder as any).totalClaimed || '0') || 0;
+            const totalAllocated = parseFloat(folder.totalAllocated || '0') || 0;
+            const totalClaimed = parseFloat(folder.totalClaimed || '0') || 0;
 
             if (totalAllocated === 0) return { percentage: 0, vested: 0, total: 0 };
 
@@ -1056,20 +1010,20 @@ export default function AdminDashboardFixed() {
                     <div>
                         <h3 className="text-xl font-bold text-white flex items-center gap-2">
                             {folder.name}
-                            {folder.locked && (
+                            {folder.isPaused && (
                                 <span className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-red-500/20 text-red-200">
                                     <Lock className="w-3 h-3" /> Locked
                                 </span>
                             )}
-                            {(folder as any).address && (
+                            {folder.address && (
                                 <div className="flex items-center gap-2 mt-1">
                                     <p className="text-gray-400 text-sm font-mono">
-                                        {(folder as any).address.slice(0, 6)}...{(folder as any).address.slice(-4)}
+                                        {folder.address.slice(0, 6)}...{folder.address.slice(-4)}
                                     </p>
                                     <button
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            navigator.clipboard.writeText((folder as any).address);
+                                            navigator.clipboard.writeText(folder.address);
                                         }}
                                         className="text-gray-400 hover:text-white transition-colors"
                                         title="Copy address"
@@ -1083,16 +1037,12 @@ export default function AdminDashboardFixed() {
                         </h3>
                         <div className="text-right">
                             <div className="text-sm text-gray-400">Members</div>
-                            <div className="text-lg font-semibold text-white">{memberCount}</div>
+                            <div className="text-lg font-semibold text-white">{folder.beneficiaryCount}</div>
                         </div>
                     </div>
                 </div>
 
                 <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                        <span className="text-gray-400 text-sm">Permissions</span>
-                        <span className="text-gray-300 text-sm">{permissions.join(', ')}</span>
-                    </div>
                     <div className="flex items-center justify-between">
                         <span className="text-gray-400 text-sm">Allocated</span>
                         <span className="text-white font-semibold">{formatNumber(folder.totalAllocated)} NYAX</span>
@@ -1113,11 +1063,11 @@ export default function AdminDashboardFixed() {
                             <span>{formatNumber(vestingProgress.total.toString())} NYAX total</span>
                         </div>
                     </div>
-                    {(folder as any).createdAt && (
+                    {folder.createdAt && (
                         <div className="flex items-center justify-between">
                             <span className="text-gray-400 text-sm">Created</span>
                             <span className="text-gray-300 text-sm">
-                                {new Date((folder as any).createdAt * 1000).toLocaleDateString()}
+                                {new Date(folder.createdAt * 1000).toLocaleDateString()}
                             </span>
                         </div>
                     )}
@@ -1186,7 +1136,7 @@ export default function AdminDashboardFixed() {
                         {[
                             { label: 'Allocated NYAX', value: `${formatNumber(summary.totalAllocated)} NYAX`, accent: 'bg-indigo-500/20 text-indigo-200' },
                             { label: 'Active members', value: formatNumber(summary.totalMembers), accent: 'bg-emerald-500/15 text-emerald-200' },
-                            { label: 'Folders live', value: factoryFolders.length || summary.folderCount, accent: 'bg-blue-500/15 text-blue-200' },
+                            { label: 'Folders live', value: factoryFolders.length > 0 ? factoryFolders.length : summary.folderCount, accent: 'bg-blue-500/15 text-blue-200' },
                             { label: 'Action queue', value: `${filteredDisplayFolders.length} folders`, accent: 'bg-purple-500/15 text-purple-200' },
                         ].map(card => (
                             <div key={card.label} className="rounded-2xl border border-white/10 bg-black/30 p-5">
@@ -1313,8 +1263,15 @@ export default function AdminDashboardFixed() {
                             <Plus className="w-5 h-5" />
                             Create Folder
                         </button>
-                        <button className={TOOL_BUTTON_CLASSES} onClick={refresh} disabled={loading}>
-                            <Loader2 className="w-5 h-5" />
+                        <button
+                            className={TOOL_BUTTON_CLASSES}
+                            onClick={() => {
+                                refresh();
+                                loadFactoryFolders();
+                            }}
+                            disabled={loading || factoryLoading}
+                        >
+                            <Loader2 className={`w-5 h-5 ${(loading || factoryLoading) ? 'animate-spin' : ''}`} />
                             Refresh Data
                         </button>
 
