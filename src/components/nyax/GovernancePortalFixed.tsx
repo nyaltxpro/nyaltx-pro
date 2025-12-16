@@ -687,7 +687,7 @@ export default function NYALTXGovernance() {
                             <div className="rounded-2xl border border-white/10 bg-black/30 p-4 text-sm text-gray-400">
                                 <p className="uppercase tracking-[0.3em] text-[10px] text-gray-500">Staked</p>
                                 <p className="text-2xl font-semibold text-white mt-1">{formatNumber(overview.stakedTokens)}</p>
-                                <p className="text-xs">{formatNumber((overview.stakedTokens / (overview.totalSupply || 1)) * 100)}% locked</p>
+                                <p className="text-xs break-words overflow-hidden text-ellipsis">{formatNumber((overview.stakedTokens / (overview.totalSupply || 1)) * 100)}% locked</p>
                             </div>
                         </div>
                     </div>
