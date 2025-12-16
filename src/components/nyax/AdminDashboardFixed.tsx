@@ -754,7 +754,7 @@ export default function AdminDashboardFixed() {
         setTreasuryBalanceLoading(true);
         setTreasuryBalanceError(null);
         try {
-            const balance = await daoService.treasury.getTreasuryBalance();
+            const balance = await daoService.treasury.getTreasuryBalanceFormatted();
             setTreasuryBalance(balance);
             console.log('Treasury balance loaded:', balance);
         } catch (err) {
