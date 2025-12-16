@@ -204,25 +204,40 @@ export default function AdminDashboardFixed() {
     const allFoldersForDisplay = useMemo(() => {
         // If we have factory folders, use those, otherwise fall back to original folders
         if (factoryFolders.length > 0) {
-            return factoryFolders.map((folder, index) => ({
-                id: index,
-                name: folder.name,
-                defaultPermissions: 3, // Default permissions for factory folders
-                totalAllocated: '0', // Will be populated later
-                template: {
-                    cliff: 30, // Default cliff period
-                    duration: 365, // Default duration
-                    revocable: true // Default revocable setting
-                },
-                locked: false,
-                exists: true, // Factory folders exist by definition
-                members: [], // Will be populated later if needed
-                address: folder.address,
-                createdAt: Number(folder.createdAt),
-                allocations: [],
-                permissions: 3,
-                totalClaimed: '0'
-            }));
+            const mappedFolders = factoryFolders.map((folder, index) => {
+                const mapped = {
+                    id: index,
+                    name: folder.name,
+                    defaultPermissions: 3, // Default permissions for factory folders
+                    totalAllocated: '0', // Will be populated later
+                    template: {
+                        cliff: 30, // Default cliff period
+                        duration: 365, // Default duration
+                        revocable: true // Default revocable setting
+                    },
+                    locked: false,
+                    exists: true, // Factory folders exist by definition
+                    members: [], // Will be populated later if needed
+                    address: folder.address,
+                    createdAt: Number(folder.createdAt),
+                    allocations: [],
+                    permissions: 3,
+                    totalClaimed: '0'
+                };
+
+                // Debug: Log the mapping process
+                console.log(`Mapping folder ${index}:`, {
+                    originalName: folder.name,
+                    mappedName: mapped.name,
+                    originalNameType: typeof folder.name,
+                    mappedNameType: typeof mapped.name,
+                    hasOriginalName: !!folder.name,
+                    hasMappedName: !!mapped.name
+                });
+
+                return mapped;
+            });
+            return mappedFolders;
         }
         return folders;
     }, [factoryFolders, folders]);
@@ -647,16 +662,11 @@ export default function AdminDashboardFixed() {
                 throw new Error('DAO service unavailable');
             }
 
-            if (!daoService.folderEscrow) {
-                throw new Error('FolderEscrow service not available - contract address not configured');
-            }
-
             const signer = daoService.getSigner();
             if (!signer) {
                 throw new Error('Signer is required for beneficiary operations');
             }
 
-            // Use the folderEscrowService to add beneficiary
             const amount = ethers.parseEther(allocationForm.amount);
             const start = allocationForm.startDate
                 ? BigInt(Math.floor(new Date(allocationForm.startDate).getTime() / 1000))
@@ -664,14 +674,43 @@ export default function AdminDashboardFixed() {
             const cliff = BigInt(Number(allocationForm.cliffDays || '0') * 86400); // DAY_IN_SECONDS
             const duration = BigInt(Number(allocationForm.durationDays || '365') * 86400); // DAY_IN_SECONDS
 
-            await daoService.folderEscrow.addBeneficiary(
-                allocationForm.account,
-                amount,
-                start,
-                cliff,
-                duration,
-                signer
-            );
+            // Check if this is a factory folder by looking up the folder address
+            const folder = allFoldersForDisplay.find(f => f.id === allocationForm.folderId);
+            if (!folder) {
+                throw new Error('Folder not found');
+            }
+
+            // For factory folders, interact directly with the folder contract
+            if ((folder as any).address) {
+                // Create a contract instance for the specific folder
+                const folderContract = new ethers.Contract(
+                    (folder as any).address,
+                    CONTRACT_ABIS.folderEscrow,
+                    signer
+                );
+
+                await folderContract.addBeneficiary(
+                    allocationForm.account,
+                    amount,
+                    start,
+                    cliff,
+                    duration
+                );
+            } else {
+                // Fallback to old service for non-factory folders
+                if (!daoService.folderEscrow) {
+                    throw new Error('FolderEscrow service not available - contract address not configured');
+                }
+
+                await daoService.folderEscrow.addBeneficiary(
+                    allocationForm.account,
+                    amount,
+                    start,
+                    cliff,
+                    duration,
+                    signer
+                );
+            }
 
             setFormError(null);
             setShowAllocationModal(false);
@@ -772,6 +811,17 @@ export default function AdminDashboardFixed() {
             // Get detailed folder information
             const folderDetails = await daoService.folderFactory.getFoldersWithDetails();
             console.log('Factory folder details:', folderDetails);
+
+            // Debug: Check individual folder names
+            folderDetails.forEach((folder, index) => {
+                console.log(`Folder ${index}:`, {
+                    name: folder.name,
+                    address: folder.address,
+                    hasName: !!folder.name,
+                    nameType: typeof folder.name,
+                    nameLength: folder.name?.length
+                });
+            });
 
             // Update factory folders state
             setFactoryFolders(folderDetails);
@@ -1031,6 +1081,24 @@ export default function AdminDashboardFixed() {
         const memberCount = membersByFolder[folder.id]?.length ?? folder.members.length;
         const permissions = describePermissions(folder.defaultPermissions);
 
+        // Calculate vesting progress
+        const calculateVestingProgress = () => {
+            const totalAllocated = parseFloat(folder.totalAllocated) || 0;
+            const totalClaimed = parseFloat((folder as any).totalClaimed || '0') || 0;
+
+            if (totalAllocated === 0) return { percentage: 0, vested: 0, total: 0 };
+
+            const percentage = totalAllocated > 0 ? (totalClaimed / totalAllocated) * 100 : 0;
+
+            return {
+                percentage: Math.min(percentage, 100),
+                vested: totalClaimed,
+                total: totalAllocated
+            };
+        };
+
+        const vestingProgress = calculateVestingProgress();
+
         return (
             <div
                 key={folder.id}
@@ -1082,6 +1150,22 @@ export default function AdminDashboardFixed() {
                     <div className="flex items-center justify-between">
                         <span className="text-gray-400 text-sm">Allocated</span>
                         <span className="text-white font-semibold">{formatNumber(folder.totalAllocated)} NYAX</span>
+                    </div>
+                    <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                            <span className="text-gray-400 text-sm">Vesting Progress</span>
+                            <span className="text-gray-300 text-sm">{vestingProgress.percentage.toFixed(1)}%</span>
+                        </div>
+                        <div className="w-full bg-gray-700 rounded-full h-2">
+                            <div
+                                className="bg-green-500 h-2 rounded-full transition-all duration-300"
+                                style={{ width: `${vestingProgress.percentage}%` }}
+                            ></div>
+                        </div>
+                        <div className="flex justify-between text-xs text-gray-400">
+                            <span>{formatNumber(vestingProgress.vested.toString())} NYAX vested</span>
+                            <span>{formatNumber(vestingProgress.total.toString())} NYAX total</span>
+                        </div>
                     </div>
                     {(folder as any).createdAt && (
                         <div className="flex items-center justify-between">
@@ -1598,13 +1682,7 @@ export default function AdminDashboardFixed() {
                                 </button>
                             </div>
                         </div>
-                        {filteredDisplayFolders.length === 0 ? (
-                            <div className="rounded-2xl border border-dashed border-white/15 p-10 text-center text-gray-400">
-                                No folders matched your search criteria.
-                            </div>
-                        ) : (
-                            filteredDisplayFolders.map(folder => renderFolderCard(folder))
-                        )}
+
                     </div>
 
                     <div className="space-y-6">
