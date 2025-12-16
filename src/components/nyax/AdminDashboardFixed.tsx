@@ -118,6 +118,9 @@ export default function AdminDashboardFixed() {
         isPaused?: boolean;
         beneficiaryCount?: number;
         defaultPermissions?: number;
+        vestingStart?: number;
+        vestingCliff?: number;
+        vestingDuration?: number;
     }
     const [factoryFolders, setFactoryFolders] = useState<FactoryFolder[]>([]);
     const [factoryLoading, setFactoryLoading] = useState(false);
@@ -855,6 +858,21 @@ export default function AdminDashboardFixed() {
                         const stats = await folderEscrow.getFolderStats();
                         const isPaused = await folderEscrow.isPaused();
 
+                        // Get vesting time information from first beneficiary (if any)
+                        let vestingStart = 0;
+                        let vestingCliff = 0;
+                        let vestingDuration = 0;
+                        if (beneficiaries.length > 0) {
+                            try {
+                                const firstBeneficiaryInfo = await folderEscrow.getBeneficiaryInfo(beneficiaries[0]);
+                                vestingStart = Number(firstBeneficiaryInfo.start);
+                                vestingCliff = Number(firstBeneficiaryInfo.cliff);
+                                vestingDuration = Number(firstBeneficiaryInfo.duration);
+                            } catch (err) {
+                                console.warn(`Could not fetch vesting time info for ${folder.name}:`, err);
+                            }
+                        }
+
                         console.log(`📊 Folder ${folder.name} Stats:`, {
                             totalAllocated: ethersLib.formatEther(stats.totalAllocated),
                             totalVested: ethersLib.formatEther(totalVestedBigInt),
@@ -863,6 +881,9 @@ export default function AdminDashboardFixed() {
                             vestingPercentage: stats.totalAllocated > 0
                                 ? ((Number(totalVestedBigInt) / Number(stats.totalAllocated)) * 100).toFixed(2) + '%'
                                 : '0%',
+                            vestingStart,
+                            vestingCliff,
+                            vestingDuration,
                             beneficiaryDetails: beneficiaryVestingDetails
                         });
 
@@ -875,7 +896,10 @@ export default function AdminDashboardFixed() {
                             totalClaimed: ethersLib.formatEther(stats.totalClaimed),
                             totalVested: ethersLib.formatEther(totalVestedBigInt),
                             isPaused: isPaused,
-                            beneficiaryCount: stats.totalBeneficiaries
+                            beneficiaryCount: stats.totalBeneficiaries,
+                            vestingStart,
+                            vestingCliff,
+                            vestingDuration
                         };
                     } catch (err) {
                         console.error(`Failed to load stats for folder ${folder.name}:`, err);
@@ -888,7 +912,10 @@ export default function AdminDashboardFixed() {
                             totalClaimed: '0',
                             totalVested: '0',
                             isPaused: false,
-                            beneficiaryCount: 0
+                            beneficiaryCount: 0,
+                            vestingStart: 0,
+                            vestingCliff: 0,
+                            vestingDuration: 0
                         };
                     }
                 })
@@ -1444,19 +1471,67 @@ export default function AdminDashboardFixed() {
         const memberCount = membersByFolder[folder.id]?.length ?? 0;
         const permissions = describePermissions(folder.defaultPermissions || 0);
 
-        // Calculate vesting progress
+        // Calculate vesting progress based on time
         const calculateVestingProgress = () => {
             const totalAllocated = parseFloat(folder.totalAllocated || '0') || 0;
             const totalClaimed = parseFloat(folder.totalClaimed || '0') || 0;
 
-            if (totalAllocated === 0) return { percentage: 0, vested: 0, total: 0 };
+            if (totalAllocated === 0) return { percentage: 0, vested: 0, total: 0, timeRemaining: 'N/A', status: 'No allocation' };
 
+            // Time-based vesting progress
+            if (folder.vestingStart && folder.vestingDuration && folder.vestingDuration > 0) {
+                const currentTime = Math.floor(Date.now() / 1000);
+                const vestingStart = folder.vestingStart;
+                const vestingDuration = folder.vestingDuration;
+                const vestingEnd = vestingStart + vestingDuration;
+                const cliffEnd = vestingStart + (folder.vestingCliff || 0);
+
+                // Calculate elapsed time since vesting started
+                const elapsed = Math.max(0, currentTime - vestingStart);
+                const timeRemaining = Math.max(0, vestingEnd - currentTime);
+
+                // Calculate percentage based on time
+                let percentage = 0;
+                let status = '';
+
+                if (currentTime < vestingStart) {
+                    percentage = 0;
+                    status = 'Not started';
+                } else if (currentTime < cliffEnd) {
+                    percentage = 0;
+                    status = 'In cliff period';
+                } else if (currentTime >= vestingEnd) {
+                    percentage = 100;
+                    status = 'Fully vested';
+                } else {
+                    percentage = Math.min(100, (elapsed / vestingDuration) * 100);
+                    status = 'Vesting';
+                }
+
+                // Format time remaining
+                const daysRemaining = Math.floor(timeRemaining / 86400);
+                const hoursRemaining = Math.floor((timeRemaining % 86400) / 3600);
+                const timeRemainingStr = timeRemaining > 0
+                    ? `${daysRemaining}d ${hoursRemaining}h`
+                    : 'Complete';
+
+                return {
+                    percentage: Math.min(percentage, 100),
+                    vested: totalClaimed,
+                    total: totalAllocated,
+                    timeRemaining: timeRemainingStr,
+                    status
+                };
+            }
+
+            // Fallback to amount-based calculation if no time info
             const percentage = totalAllocated > 0 ? (totalClaimed / totalAllocated) * 100 : 0;
-
             return {
                 percentage: Math.min(percentage, 100),
                 vested: totalClaimed,
-                total: totalAllocated
+                total: totalAllocated,
+                timeRemaining: 'N/A',
+                status: 'Amount-based'
             };
         };
 
@@ -1528,15 +1603,15 @@ export default function AdminDashboardFixed() {
 
                 <div className="space-y-3">
                     <div className="grid grid-cols-2 gap-3">
-                        <div className="bg-white/5 rounded-lg p-3">
-                            <div className="text-xs text-gray-400 mb-1">Total Allocated</div>
-                            <div className="text-lg font-bold text-white">{formatNumber(folder.totalAllocated)}</div>
-                            <div className="text-xs text-gray-500">NYAX</div>
+                        <div className="bg-purple-500/10 rounded-lg p-3">
+                            <div className="text-xs text-purple-400 mb-1">Treasury Funding</div>
+                            <div className="text-lg font-bold text-purple-300">{formatNumber(folder.totalAllocated)}</div>
+                            <div className="text-xs text-purple-500">NYAX sent to folder</div>
                         </div>
-                        <div className="bg-green-500/10 rounded-lg p-3">
-                            <div className="text-xs text-green-400 mb-1">Vested Amount</div>
-                            <div className="text-lg font-bold text-green-300">{formatNumber(folder.totalVested || '0')}</div>
-                            <div className="text-xs text-green-500">NYAX</div>
+                        <div className="bg-white/5 rounded-lg p-3">
+                            <div className="text-xs text-gray-400 mb-1">Beneficiary Allocations</div>
+                            <div className="text-lg font-bold text-white">{formatNumber(folder.totalVested || '0')}</div>
+                            <div className="text-xs text-gray-500">NYAX allocated</div>
                         </div>
                     </div>
 
@@ -1565,6 +1640,10 @@ export default function AdminDashboardFixed() {
                                 className="bg-green-500 h-2 rounded-full transition-all duration-300"
                                 style={{ width: `${vestingProgress.percentage}%` }}
                             ></div>
+                        </div>
+                        <div className="flex items-center justify-between text-xs">
+                            <span className="text-gray-500">{vestingProgress.status}</span>
+                            <span className="text-gray-500">Time remaining: {vestingProgress.timeRemaining}</span>
                         </div>
                     </div>
 
