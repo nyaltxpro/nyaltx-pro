@@ -273,22 +273,31 @@ export default function AdminDashboardFixed() {
             setFormError('Folder name is required');
             return;
         }
-        const permissionsMask = Number(newFolderPermissions);
-        if (Number.isNaN(permissionsMask)) {
-            setFormError('Permissions mask must be numeric');
+        if (!daoService) {
+            setFormError('DAO service unavailable');
             return;
         }
 
         try {
-            await createFolder({
-                name: newFolderName.trim(),
-                permissions: permissionsMask,
-                template: {
-                    cliff: Number(cliffDays || '0') * DAY_IN_SECONDS,
-                    duration: Number(durationDays || '0') * DAY_IN_SECONDS,
-                    revocable: newFolderRevocable,
-                },
-            });
+            const signer = daoService.getSigner();
+            if (!signer) {
+                throw new Error('Signer is required for folder creation');
+            }
+
+            // Get the connected wallet address as default folder admin
+            const folderAdmin = await signer.getAddress();
+
+            // Use NYAX token address as default (you can make this configurable)
+            const tokenAddress = CONTRACT_ADDRESSES.nyaxToken;
+
+            // Use the folderRegistryFactoryService to create folder
+            await daoService.folderFactory.createFolder(
+                newFolderName.trim(),
+                tokenAddress,
+                folderAdmin,
+                signer
+            );
+
             setNewFolderName('');
             setNewFolderPermissions('3');
             setCliffDays('30');
@@ -296,6 +305,9 @@ export default function AdminDashboardFixed() {
             setNewFolderRevocable(true);
             setFormError(null);
             setShowAddModal(false);
+
+            // Refresh folders after creation
+            refresh();
         } catch (err) {
             setFormError(err instanceof Error ? err.message : 'Failed to create folder');
         }
@@ -725,6 +737,25 @@ export default function AdminDashboardFixed() {
             setFormError(`Found ${allFolders.length} folders from factory service`);
         } catch (err) {
             setFormError(err instanceof Error ? err.message : 'Failed to get factory folders');
+        }
+    };
+
+    const handleShowFactoryFolderDetails = async () => {
+        if (!daoService) {
+            setFormError('DAO service unavailable');
+            return;
+        }
+
+        try {
+            // Get detailed folder information from factory service
+            const folderDetails = await daoService.folderFactory.getFoldersWithDetails();
+            console.log('Factory Folder Details:', folderDetails);
+
+            // Update the folders state with factory service data
+            // This would require updating the folder data structure to match factory service format
+            setFormError(`Loaded ${folderDetails.length} folder details from factory service`);
+        } catch (err) {
+            setFormError(err instanceof Error ? err.message : 'Failed to get factory folder details');
         }
     };
 
@@ -1517,6 +1548,10 @@ export default function AdminDashboardFixed() {
                         <button className={TOOL_BUTTON_CLASSES} onClick={handleShowNewFolders} disabled={!isConnected || loading}>
                             <Search className="w-5 h-5" />
                             New Folders
+                        </button>
+                        <button className={TOOL_BUTTON_CLASSES} onClick={handleShowFactoryFolderDetails} disabled={!isConnected || loading}>
+                            <Shield className="w-5 h-5" />
+                            Folder Details
                         </button>
                         {/* <button
                             className="flex-1 min-w-[140px] px-5 py-3 rounded-2xl border border-white/20 text-white/80 hover:bg-white/10 transition"
