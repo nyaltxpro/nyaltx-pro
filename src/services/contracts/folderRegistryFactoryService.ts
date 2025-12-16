@@ -126,7 +126,13 @@ export class FolderRegistryFactoryService {
   }
 
   async getFolderInfo(folderAddress: string): Promise<FolderInfo> {
-    return await this.contract.folderInfo(folderAddress);
+    const result = await this.contract.folderInfo(folderAddress);
+    // Contract returns a tuple: [name, folder, createdAt]
+    return {
+      name: result[0] || result.name || '',
+      folder: result[1] || result.folder || folderAddress,
+      createdAt: result[2] || result.createdAt || BigInt(0)
+    };
   }
 
   async getFolderByIndex(index: number): Promise<string> {
@@ -184,21 +190,29 @@ export class FolderRegistryFactoryService {
   // Utility Methods
   async getFoldersWithDetails(): Promise<Array<FolderInfo & { address: string }>> {
     const allFolders = await this.getAllFolders();
+    console.log('getAllFolders returned:', allFolders);
+    
     const foldersWithDetails = await Promise.all(
       allFolders.map(async (address) => {
         const info = await this.getFolderInfo(address);
+        console.log(`Folder ${address} info:`, info);
         return {
-          ...info,
+          name: info.name,
+          folder: info.folder,
+          createdAt: info.createdAt,
           address
         };
       })
     );
+    
+    console.log('getFoldersWithDetails final result:', foldersWithDetails);
     return foldersWithDetails;
   }
 
   async checkFolderExists(name: string): Promise<boolean> {
     try {
       const folderAddress = await this.getFolderByName(name);
+      console.log('getFolderByName returned:', folderAddress);
       return folderAddress !== ethers.ZeroAddress;
     } catch (error) {
       return false;

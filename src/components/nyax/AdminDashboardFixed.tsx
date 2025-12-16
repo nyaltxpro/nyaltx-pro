@@ -117,6 +117,22 @@ export default function AdminDashboardFixed() {
     } | null>(null);
     const [tokenStatsLoading, setTokenStatsLoading] = useState(false);
 
+    // Beneficiary vesting details
+    interface BeneficiaryVesting {
+        address: string;
+        totalAllocation: string;
+        claimed: string;
+        vested: string;
+        claimable: string;
+        isClaimable: boolean;
+        cliffReached: boolean;
+        fullyVested: boolean;
+        paused: boolean;
+        cancelled: boolean;
+    }
+    const [beneficiaryVestings, setBeneficiaryVestings] = useState<Record<string, BeneficiaryVesting[]>>({});
+    const [vestingLoading, setVestingLoading] = useState(false);
+
     // Treasury balance state
     const [treasuryBalance, setTreasuryBalance] = useState<string | null>(null);
     const [treasuryBalanceLoading, setTreasuryBalanceLoading] = useState(false);
@@ -262,6 +278,13 @@ export default function AdminDashboardFixed() {
     useEffect(() => {
         if (daoService && !factoryLoading) {
             loadFactoryFolders();
+        }
+    }, [daoService]);
+
+    // Load treasury balance on mount and when daoService changes
+    useEffect(() => {
+        if (daoService && !treasuryBalanceLoading) {
+            loadTreasuryBalance();
         }
     }, [daoService]);
 
@@ -722,6 +745,26 @@ export default function AdminDashboardFixed() {
         }
     };
 
+    const loadTreasuryBalance = async () => {
+        if (!daoService) {
+            console.warn('DAO service unavailable for loading treasury balance');
+            return;
+        }
+
+        setTreasuryBalanceLoading(true);
+        setTreasuryBalanceError(null);
+        try {
+            const balance = await daoService.treasury.getTreasuryBalanceFormatted();
+            setTreasuryBalance(balance);
+            console.log('Treasury balance loaded:', balance);
+        } catch (err) {
+            console.error('Failed to load treasury balance:', err);
+            setTreasuryBalanceError(err instanceof Error ? err.message : 'Failed to load treasury balance');
+        } finally {
+            setTreasuryBalanceLoading(false);
+        }
+    };
+
     const loadTokenStats = async () => {
         if (!daoService) {
             console.warn('DAO service unavailable for loading token stats');
@@ -1147,6 +1190,89 @@ export default function AdminDashboardFixed() {
         }
     };
 
+    const calculateVestedAmount = async (folderAddress: string, beneficiaryAddress: string): Promise<BeneficiaryVesting | null> => {
+        try {
+            const { FolderEscrowService } = await import('@/services/contracts/folderEscrowService');
+            const { ethers: ethersLib } = await import('ethers');
+
+            // Create provider for read operations
+            const provider = new ethersLib.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL || 'https://sepolia.infura.io/v3/YOUR_INFURA_KEY');
+            const folderEscrow = new FolderEscrowService(folderAddress, provider as any);
+
+            // Get vesting calculation
+            const vestingCalc = await folderEscrow.calculateVesting(beneficiaryAddress);
+            const beneficiaryInfo = await folderEscrow.getBeneficiaryInfo(beneficiaryAddress);
+
+            return {
+                address: beneficiaryAddress,
+                totalAllocation: ethersLib.formatEther(vestingCalc.totalAllocation),
+                claimed: ethersLib.formatEther(vestingCalc.claimed),
+                vested: ethersLib.formatEther(vestingCalc.vested),
+                claimable: ethersLib.formatEther(vestingCalc.claimable),
+                isClaimable: vestingCalc.isClaimable,
+                cliffReached: vestingCalc.cliffReached,
+                fullyVested: vestingCalc.fullyVested,
+                paused: beneficiaryInfo.paused,
+                cancelled: beneficiaryInfo.cancelled
+            };
+        } catch (err) {
+            console.error(`Failed to calculate vested amount for ${beneficiaryAddress}:`, err);
+            return null;
+        }
+    };
+
+    const loadBeneficiaryVestings = async (folderAddress: string, folderId: number) => {
+        try {
+            setVestingLoading(true);
+            const { FolderEscrowService } = await import('@/services/contracts/folderEscrowService');
+            const { ethers: ethersLib } = await import('ethers');
+
+            // Create provider for read operations
+            const provider = new ethersLib.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL || 'https://sepolia.infura.io/v3/YOUR_INFURA_KEY');
+            const folderEscrow = new FolderEscrowService(folderAddress, provider as any);
+
+            // Get all beneficiaries
+            const beneficiaries = await folderEscrow.getBeneficiaries();
+            console.log(`Loading vesting info for ${beneficiaries.length} beneficiaries in folder ${folderId}`);
+
+            // Calculate vesting for each beneficiary
+            const vestings = await Promise.all(
+                beneficiaries.map(async (beneficiaryAddr) => {
+                    return await calculateVestedAmount(folderAddress, beneficiaryAddr);
+                })
+            );
+
+            // Filter out nulls and update state
+            const validVestings = vestings.filter((v): v is BeneficiaryVesting => v !== null);
+            setBeneficiaryVestings(prev => ({
+                ...prev,
+                [folderId]: validVestings
+            }));
+
+            console.log(`Loaded vesting info for ${validVestings.length} beneficiaries`);
+        } catch (err) {
+            console.error('Failed to load beneficiary vestings:', err);
+        } finally {
+            setVestingLoading(false);
+        }
+    };
+
+    const getVestedAmountForBeneficiary = async (folderAddress: string, beneficiaryAddress: string): Promise<string> => {
+        try {
+            const { FolderEscrowService } = await import('@/services/contracts/folderEscrowService');
+            const { ethers: ethersLib } = await import('ethers');
+
+            const provider = new ethersLib.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL || 'https://sepolia.infura.io/v3/YOUR_INFURA_KEY');
+            const folderEscrow = new FolderEscrowService(folderAddress, provider as any);
+
+            const vestedAmount = await folderEscrow.getVestedAmount(beneficiaryAddress);
+            return ethersLib.formatEther(vestedAmount);
+        } catch (err) {
+            console.error('Failed to get vested amount:', err);
+            return '0';
+        }
+    };
+
     const handleCreateProposal = async () => {
         if (!isConnected) {
             setProposalAlert({ type: 'error', message: 'Connect a wallet to submit proposals.' });
@@ -1259,10 +1385,34 @@ export default function AdminDashboardFixed() {
                 </div>
 
                 <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                        <span className="text-gray-400 text-sm">Allocated</span>
-                        <span className="text-white font-semibold">{formatNumber(folder.totalAllocated)} NYAX</span>
+                    <div className="grid grid-cols-2 gap-3">
+                        <div className="bg-white/5 rounded-lg p-3">
+                            <div className="text-xs text-gray-400 mb-1">Total Allocated</div>
+                            <div className="text-lg font-bold text-white">{formatNumber(folder.totalAllocated)}</div>
+                            <div className="text-xs text-gray-500">NYAX</div>
+                        </div>
+                        <div className="bg-green-500/10 rounded-lg p-3">
+                            <div className="text-xs text-green-400 mb-1">Vested Amount</div>
+                            <div className="text-lg font-bold text-green-300">{formatNumber(folder.totalVested || '0')}</div>
+                            <div className="text-xs text-green-500">NYAX</div>
+                        </div>
                     </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                        <div className="bg-blue-500/10 rounded-lg p-3">
+                            <div className="text-xs text-blue-400 mb-1">Claimed</div>
+                            <div className="text-lg font-bold text-blue-300">{formatNumber(folder.totalClaimed || '0')}</div>
+                            <div className="text-xs text-blue-500">NYAX</div>
+                        </div>
+                        <div className="bg-purple-500/10 rounded-lg p-3">
+                            <div className="text-xs text-purple-400 mb-1">Claimable</div>
+                            <div className="text-lg font-bold text-purple-300">
+                                {formatNumber((parseFloat(folder.totalVested || '0') - parseFloat(folder.totalClaimed || '0')).toString())}
+                            </div>
+                            <div className="text-xs text-purple-500">NYAX</div>
+                        </div>
+                    </div>
+
                     <div className="space-y-2">
                         <div className="flex items-center justify-between">
                             <span className="text-gray-400 text-sm">Vesting Progress</span>
@@ -1274,17 +1424,125 @@ export default function AdminDashboardFixed() {
                                 style={{ width: `${vestingProgress.percentage}%` }}
                             ></div>
                         </div>
-                        <div className="flex justify-between text-xs text-gray-400">
-                            <span>{formatNumber(vestingProgress.vested.toString())} NYAX vested</span>
-                            <span>{formatNumber(vestingProgress.total.toString())} NYAX total</span>
-                        </div>
                     </div>
-                    {folder.createdAt && (
-                        <div className="flex items-center justify-between">
-                            <span className="text-gray-400 text-sm">Created</span>
-                            <span className="text-gray-300 text-sm">
-                                {new Date(folder.createdAt * 1000).toLocaleDateString()}
-                            </span>
+
+                    <div className="flex items-center justify-between pt-2 border-t border-white/10">
+                        <span className="text-gray-400 text-sm">Created</span>
+                        <span className="text-gray-300 text-sm">
+                            {folder.createdAt ? new Date(folder.createdAt * 1000).toLocaleDateString() : 'N/A'}
+                        </span>
+                    </div>
+
+                    {folder.address && (
+                        <div className="space-y-2">
+                            <div className="grid grid-cols-2 gap-2">
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        if (folder.isPaused) {
+                                            handleUnpauseFolder(folder.address);
+                                        } else {
+                                            handlePauseFolder(folder.address);
+                                        }
+                                    }}
+                                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${folder.isPaused
+                                        ? 'bg-green-500/20 hover:bg-green-500/30 text-green-200'
+                                        : 'bg-red-500/20 hover:bg-red-500/30 text-red-200'
+                                        }`}
+                                >
+                                    {folder.isPaused ? (
+                                        <span className="flex items-center justify-center gap-1">
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            Unpause
+                                        </span>
+                                    ) : (
+                                        <span className="flex items-center justify-center gap-1">
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            Pause
+                                        </span>
+                                    )}
+                                </button>
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        loadBeneficiaryVestings(folder.address, folder.id);
+                                    }}
+                                    disabled={vestingLoading}
+                                    className="px-4 py-2 bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-200 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+                                >
+                                    {vestingLoading ? (
+                                        <span className="flex items-center justify-center gap-1">
+                                            <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                            Loading
+                                        </span>
+                                    ) : (
+                                        <span className="flex items-center justify-center gap-1">
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                            </svg>
+                                            Beneficiaries
+                                        </span>
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {beneficiaryVestings[folder.id] && beneficiaryVestings[folder.id].length > 0 && (
+                        <div className="mt-3 space-y-2 max-h-60 overflow-y-auto">
+                            <div className="text-sm font-semibold text-gray-300 mb-2">Beneficiaries:</div>
+                            {beneficiaryVestings[folder.id].map((vesting, idx) => (
+                                <div key={idx} className="bg-white/5 rounded-lg p-3 space-y-1">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-xs text-gray-400 font-mono">
+                                            {vesting.address.slice(0, 6)}...{vesting.address.slice(-4)}
+                                        </span>
+                                        <div className="flex gap-1">
+                                            {vesting.paused && (
+                                                <span className="text-xs px-2 py-0.5 bg-red-500/20 text-red-300 rounded">Paused</span>
+                                            )}
+                                            {vesting.cancelled && (
+                                                <span className="text-xs px-2 py-0.5 bg-gray-500/20 text-gray-300 rounded">Cancelled</span>
+                                            )}
+                                            {vesting.fullyVested && (
+                                                <span className="text-xs px-2 py-0.5 bg-green-500/20 text-green-300 rounded">Fully Vested</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-4 gap-2 text-xs">
+                                        <div>
+                                            <div className="text-gray-500">Allocated</div>
+                                            <div className="text-white font-semibold">{parseFloat(vesting.totalAllocation).toFixed(2)}</div>
+                                        </div>
+                                        <div>
+                                            <div className="text-green-500">Vested</div>
+                                            <div className="text-green-300 font-semibold">{parseFloat(vesting.vested).toFixed(2)}</div>
+                                        </div>
+                                        <div>
+                                            <div className="text-blue-500">Claimed</div>
+                                            <div className="text-blue-300 font-semibold">{parseFloat(vesting.claimed).toFixed(2)}</div>
+                                        </div>
+                                        <div>
+                                            <div className="text-purple-500">Claimable</div>
+                                            <div className="text-purple-300 font-semibold">{parseFloat(vesting.claimable).toFixed(2)}</div>
+                                        </div>
+                                    </div>
+                                    {vesting.isClaimable && (
+                                        <div className="text-xs text-green-400 mt-1">✓ Ready to claim</div>
+                                    )}
+                                    {!vesting.cliffReached && (
+                                        <div className="text-xs text-yellow-400 mt-1">⏳ Cliff not reached</div>
+                                    )}
+                                </div>
+                            ))}
                         </div>
                     )}
                 </div>
@@ -1348,18 +1606,22 @@ export default function AdminDashboardFixed() {
                         </div>
                     </div>
 
-                    <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
                         {[
+                            { label: 'Treasury Balance', value: treasuryBalanceLoading ? 'Loading...' : treasuryBalanceError ? 'Error' : treasuryBalance ? `${formatNumber(treasuryBalance)} NYAX` : 'N/A', accent: 'bg-green-500/20 text-green-200', icon: '💰' },
                             { label: 'Allocated NYAX', value: `${formatNumber(summary.totalAllocated)} NYAX`, accent: 'bg-indigo-500/20 text-indigo-200' },
                             { label: 'Active members', value: formatNumber(summary.totalMembers), accent: 'bg-emerald-500/15 text-emerald-200' },
                             { label: 'Folders live', value: factoryFolders.length > 0 ? factoryFolders.length : summary.folderCount, accent: 'bg-blue-500/15 text-blue-200' },
                             { label: 'Action queue', value: `${filteredDisplayFolders.length} folders`, accent: 'bg-purple-500/15 text-purple-200' },
                         ].map(card => (
                             <div key={card.label} className="rounded-2xl border border-white/10 bg-black/30 p-5">
-                                <p className="text-xs uppercase tracking-[0.25em] text-gray-400">{card.label}</p>
+                                <p className="text-xs uppercase tracking-[0.25em] text-gray-400 flex items-center gap-2">
+                                    {card.icon && <span>{card.icon}</span>}
+                                    {card.label}
+                                </p>
                                 <p className="text-2xl font-semibold mt-2">{card.value}</p>
                                 <span className={`inline-flex mt-3 px-3 py-1 rounded-full text-xs ${card.accent}`}>
-                                    {card.label === 'Action queue' ? 'Live folders in view' : card.label === 'Folders live' && factoryFolders.length > 0 ? 'Factory service' : 'Real-time'}
+                                    {card.label === 'Treasury Balance' ? 'Live balance' : card.label === 'Action queue' ? 'Live folders in view' : card.label === 'Folders live' && factoryFolders.length > 0 ? 'Factory service' : 'Real-time'}
                                 </span>
                             </div>
                         ))}
@@ -1484,10 +1746,11 @@ export default function AdminDashboardFixed() {
                             onClick={() => {
                                 refresh();
                                 loadFactoryFolders();
+                                loadTreasuryBalance();
                             }}
-                            disabled={loading || factoryLoading}
+                            disabled={loading || factoryLoading || treasuryBalanceLoading}
                         >
-                            <Loader2 className={`w-5 h-5 ${(loading || factoryLoading) ? 'animate-spin' : ''}`} />
+                            <Loader2 className={`w-5 h-5 ${(loading || factoryLoading || treasuryBalanceLoading) ? 'animate-spin' : ''}`} />
                             Refresh Data
                         </button>
 
