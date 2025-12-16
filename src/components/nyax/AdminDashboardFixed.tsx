@@ -1813,61 +1813,82 @@ export default function AdminDashboardFixed() {
 
                 {showAddModal && (
                     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-                        <div className="bg-slate-900 rounded-xl p-8 border border-white/20 max-w-md w-full mx-4 space-y-4">
-                            <h3 className="text-2xl font-bold text-white">Create New Folder</h3>
+                        <div className="bg-slate-900 rounded-xl p-8 border border-white/20 max-w-md w-full mx-4 space-y-6">
                             <div>
-                                <label className="text-gray-400 text-sm mb-2 block">Folder Name</label>
-                                <input
-                                    type="text"
-                                    value={newFolderName}
-                                    onChange={e => setNewFolderName(e.target.value)}
-                                    className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white"
-                                />
+                                <h3 className="text-2xl font-bold text-white mb-2">Create New Folder</h3>
+                                <p className="text-gray-400 text-sm">Create a new folder using the FolderFactory contract</p>
                             </div>
-                            <div>
-                                <label className="text-gray-400 text-sm mb-2 block">Permissions Mask</label>
-                                <input
-                                    type="number"
-                                    value={newFolderPermissions}
-                                    onChange={e => setNewFolderPermissions(e.target.value)}
-                                    className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white"
-                                />
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
+
+                            {/* Basic Information */}
+                            <div className="space-y-4">
                                 <div>
-                                    <label className="text-gray-400 text-sm mb-2 block">Cliff (days)</label>
+                                    <label className="text-gray-400 text-sm mb-2 block">Folder Name *</label>
                                     <input
-                                        type="number"
-                                        value={cliffDays}
-                                        onChange={e => setCliffDays(e.target.value)}
-                                        className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white"
+                                        type="text"
+                                        value={newFolderName}
+                                        onChange={e => setNewFolderName(e.target.value)}
+                                        placeholder="Enter folder name..."
+                                        className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white placeholder-gray-500"
                                     />
+                                    <p className="text-gray-500 text-xs mt-1">Descriptive name for the folder</p>
                                 </div>
+
                                 <div>
-                                    <label className="text-gray-400 text-sm mb-2 block">Duration (days)</label>
-                                    <input
-                                        type="number"
-                                        value={durationDays}
-                                        onChange={e => setDurationDays(e.target.value)}
-                                        className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white"
-                                    />
+                                    <label className="text-gray-400 text-sm mb-2 block">Token Contract *</label>
+                                    <div className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white">
+                                        <span className="text-gray-300">NYAX Token</span>
+                                        <span className="text-gray-500 text-xs ml-2 font-mono">{CONTRACT_ADDRESSES.nyaxToken?.slice(0, 6)}...{CONTRACT_ADDRESSES.nyaxToken?.slice(-4)}</span>
+                                    </div>
+                                    <p className="text-gray-500 text-xs mt-1">Token used for folder allocations</p>
+                                </div>
+
+                                <div>
+                                    <label className="text-gray-400 text-sm mb-2 block">Folder Admin *</label>
+                                    <div className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white">
+                                        <span className="text-gray-300">Connected Wallet</span>
+                                    </div>
+                                    <p className="text-gray-500 text-xs mt-1">Your wallet will be set as folder administrator</p>
                                 </div>
                             </div>
-                            <label className="flex items-center gap-2 text-gray-300 text-sm">
-                                <input type="checkbox" checked={newFolderRevocable} onChange={e => setNewFolderRevocable(e.target.checked)} className="accent-purple-500" />
-                                Revocable schedule
-                            </label>
-                            {formError && <p className="text-red-400 text-sm">{formError}</p>}
-                            <div className="flex gap-3">
-                                <button className="flex-1 px-4 py-3 bg-white/10 text-white rounded-lg" onClick={() => setShowAddModal(false)}>
+
+                            {/* Contract Information */}
+                            <div className="space-y-4">
+                                <h4 className="text-white font-medium mb-3">Contract Information</h4>
+                                <div className="p-4 bg-white/5 rounded-lg border border-white/10 space-y-3">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-gray-300 text-sm">Factory Contract</span>
+                                        <span className="text-gray-400 text-xs font-mono">{CONTRACT_ADDRESSES.folderEscrowFactory?.slice(0, 6)}...{CONTRACT_ADDRESSES.folderEscrowFactory?.slice(-4)}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-gray-300 text-sm">Network</span>
+                                        <span className="text-blue-400 text-xs">Sepolia Testnet</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-gray-300 text-sm">Governance Required</span>
+                                        <span className="text-yellow-400 text-xs">Yes</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {formError && (
+                                <div className="rounded-lg border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+                                    {formError}
+                                </div>
+                            )}
+
+                            <div className="flex gap-3 pt-4">
+                                <button
+                                    className="flex-1 px-4 py-3 bg-white/10 text-white rounded-lg hover:bg-white/20 transition"
+                                    onClick={() => setShowAddModal(false)}
+                                >
                                     Cancel
                                 </button>
                                 <button
-                                    className="flex-1 px-4 py-3 bg-purple-600 text-white rounded-lg disabled:opacity-50"
+                                    className="flex-1 px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
                                     onClick={handleCreateFolder}
-                                    disabled={actionPending || !isConnected}
+                                    disabled={actionPending || !isConnected || !newFolderName.trim()}
                                 >
-                                    {actionPending ? 'Creating...' : 'Create'}
+                                    {actionPending ? 'Creating...' : 'Create Folder'}
                                 </button>
                             </div>
                         </div>
