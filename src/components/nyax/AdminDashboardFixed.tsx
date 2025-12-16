@@ -204,40 +204,25 @@ export default function AdminDashboardFixed() {
     const allFoldersForDisplay = useMemo(() => {
         // If we have factory folders, use those, otherwise fall back to original folders
         if (factoryFolders.length > 0) {
-            const mappedFolders = factoryFolders.map((folder, index) => {
-                const mapped = {
-                    id: index,
-                    name: folder.name,
-                    defaultPermissions: 3, // Default permissions for factory folders
-                    totalAllocated: '0', // Will be populated later
-                    template: {
-                        cliff: 30, // Default cliff period
-                        duration: 365, // Default duration
-                        revocable: true // Default revocable setting
-                    },
-                    locked: false,
-                    exists: true, // Factory folders exist by definition
-                    members: [], // Will be populated later if needed
-                    address: folder.address,
-                    createdAt: Number(folder.createdAt),
-                    allocations: [],
-                    permissions: 3,
-                    totalClaimed: '0'
-                };
-
-                // Debug: Log the mapping process
-                console.log(`Mapping folder ${index}:`, {
-                    originalName: folder.name,
-                    mappedName: mapped.name,
-                    originalNameType: typeof folder.name,
-                    mappedNameType: typeof mapped.name,
-                    hasOriginalName: !!folder.name,
-                    hasMappedName: !!mapped.name
-                });
-
-                return mapped;
-            });
-            return mappedFolders;
+            return factoryFolders.map((folder, index) => ({
+                id: index,
+                name: folder.name,
+                defaultPermissions: 3, // Default permissions for factory folders
+                totalAllocated: '0', // Will be populated later
+                template: {
+                    cliff: 30, // Default cliff period
+                    duration: 365, // Default duration
+                    revocable: true // Default revocable setting
+                },
+                locked: false,
+                exists: true, // Factory folders exist by definition
+                members: [], // Will be populated later if needed
+                address: folder.address,
+                createdAt: Number(folder.createdAt),
+                allocations: [],
+                permissions: 3,
+                totalClaimed: '0'
+            }));
         }
         return folders;
     }, [factoryFolders, folders]);
@@ -811,17 +796,6 @@ export default function AdminDashboardFixed() {
             // Get detailed folder information
             const folderDetails = await daoService.folderFactory.getFoldersWithDetails();
             console.log('Factory folder details:', folderDetails);
-
-            // Debug: Check individual folder names
-            folderDetails.forEach((folder, index) => {
-                console.log(`Folder ${index}:`, {
-                    name: folder.name,
-                    address: folder.address,
-                    hasName: !!folder.name,
-                    nameType: typeof folder.name,
-                    nameLength: folder.name?.length
-                });
-            });
 
             // Update factory folders state
             setFactoryFolders(folderDetails);
