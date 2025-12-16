@@ -754,7 +754,7 @@ export default function AdminDashboardFixed() {
         setTreasuryBalanceLoading(true);
         setTreasuryBalanceError(null);
         try {
-            const balance = await daoService.treasury.getTreasuryBalanceFormatted();
+            const balance = await daoService.treasury.getTreasuryBalance();
             setTreasuryBalance(balance);
             console.log('Treasury balance loaded:', balance);
         } catch (err) {
@@ -1951,12 +1951,18 @@ export default function AdminDashboardFixed() {
                                 <Shield className="w-5 h-5 text-green-300" /> Treasury → Folder Funding
                             </h2>
                             <p className="text-gray-400 text-sm">Send ERC20 from the governance treasury bridge into a folder escrow.</p>
-                            {treasuryBalance && (
-                                <div className="flex items-center gap-2 mt-2">
-                                    <span className="text-gray-400 text-sm">Treasury Balance:</span>
+                            <div className="flex items-center gap-2 mt-2">
+                                <span className="text-gray-400 text-sm">Treasury Balance:</span>
+                                {treasuryBalanceLoading ? (
+                                    <span className="text-yellow-300 font-semibold">Loading...</span>
+                                ) : treasuryBalanceError ? (
+                                    <span className="text-red-300 font-semibold">Error loading balance</span>
+                                ) : treasuryBalance ? (
                                     <span className="text-white font-semibold">{formatNumber(treasuryBalance)} NYAX</span>
-                                </div>
-                            )}
+                                ) : (
+                                    <span className="text-gray-400 font-semibold">0 NYAX</span>
+                                )}
+                            </div>
                         </div>
                         <button
                             onClick={() => setShowSendToFolderModal(true)}

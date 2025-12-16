@@ -114,7 +114,7 @@ export class FolderEscrowService {
     ]);
 
     const claimable = vestedAmount - beneficiaryInfo.claimed;
-    const currentTime = BigInt(Date.now() / 1000);
+    const currentTime = BigInt(Math.floor(Date.now() / 1000));
     const cliffTime = beneficiaryInfo.start + beneficiaryInfo.cliff;
     const endTime = beneficiaryInfo.start + beneficiaryInfo.duration;
 
