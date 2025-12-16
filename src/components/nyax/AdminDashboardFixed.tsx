@@ -1397,7 +1397,7 @@ export default function AdminDashboardFixed() {
                             disabled={!isConnected || loading}
                         >
                             <div className="flex items-center justify-center gap-2">
-                                <UserPlus2 className="w-4 h-4" /> Manage Beneficiaries
+                                <UserPlus2 className="w-4 h-4" /> Add Wallets to Folder
                             </div>
                         </button>
                         <button
