@@ -771,10 +771,10 @@ export default function NYALTXGovernance() {
                                     <span>Staked value</span>
                                     <TrendingUp className="text-emerald-300" size={18} />
                                 </div>
-                                <p className="text-3xl font-semibold mt-2">
+                                <p className="text-3xl font-semibold mt-2 break-words overflow-hidden">
                                     {factoryStatsLoading ? '...' : formatNumber(overview.stakedTokens)}
                                 </p>
-                                <p className="text-xs text-emerald-400 mt-1">
+                                <p className="text-xs text-emerald-400 mt-1 break-words">
                                     {factoryStatsLoading ? '...' : formatNumber((overview.stakedTokens / (overview.totalSupply || 1)) * 100)}% of supply
                                 </p>
                             </div>
