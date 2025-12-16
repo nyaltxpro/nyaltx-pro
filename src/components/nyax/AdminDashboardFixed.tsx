@@ -1604,12 +1604,12 @@ export default function AdminDashboardFixed() {
                 <div className="space-y-3">
                     <div className="grid grid-cols-2 gap-3">
                         <div className="bg-purple-500/10 rounded-lg p-3">
-                            <div className="text-xs text-purple-400 mb-1">Treasury Funding</div>
+                            <div className="text-xs text-purple-400 mb-1">Total Allocations</div>
                             <div className="text-lg font-bold text-purple-300">{formatNumber(folder.totalAllocated)}</div>
                             <div className="text-xs text-purple-500">NYAX sent to folder</div>
                         </div>
                         <div className="bg-white/5 rounded-lg p-3">
-                            <div className="text-xs text-gray-400 mb-1">Beneficiary Allocations</div>
+                            <div className="text-xs text-gray-400 mb-1">Vested Amount</div>
                             <div className="text-lg font-bold text-white">{formatNumber(folder.totalVested || '0')}</div>
                             <div className="text-xs text-gray-500">NYAX allocated</div>
                         </div>
