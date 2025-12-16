@@ -113,7 +113,6 @@ export default function AdminDashboardFixed() {
         startDate: '',
         cliffDays: '0',
         durationDays: '365',
-        permissions: '',
     });
 
     const [permissionsForm, setPermissionsForm] = useState({ folderId: 0, permissions: '' });
@@ -706,7 +705,6 @@ export default function AdminDashboardFixed() {
                 startDate: '',
                 cliffDays: '0',
                 durationDays: '365',
-                permissions: '',
             });
         } catch (err) {
             setFormError(err instanceof Error ? err.message : 'Failed to add beneficiary');
@@ -1920,90 +1918,113 @@ export default function AdminDashboardFixed() {
 
                 {showAllocationModal && (
                     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-                        <div className="bg-slate-900 rounded-xl p-8 border border-white/20 max-w-lg w-full mx-4 space-y-4">
-                            <h3 className="text-2xl font-bold text-white">Manage Beneficiaries</h3>
-                            <p className="text-gray-400 text-sm">Add new beneficiaries to folders with allocation schedules</p>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="text-gray-400 text-sm mb-2 block">Folder ID</label>
-                                    <input
-                                        type="number"
-                                        value={allocationForm.folderId}
-                                        onChange={e => setAllocationForm(prev => ({ ...prev, folderId: Number(e.target.value) }))}
-                                        className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white"
-                                    />
-                                    <p className="text-gray-500 text-xs mt-1">Target folder for beneficiary</p>
-                                </div>
-                                <div>
-                                    <label className="text-gray-400 text-sm mb-2 block">Amount (NYAX)</label>
-                                    <input
-                                        type="text"
-                                        value={allocationForm.amount}
-                                        onChange={e => setAllocationForm(prev => ({ ...prev, amount: e.target.value }))}
-                                        className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white"
-                                    />
-                                    <p className="text-gray-500 text-xs mt-1">Token allocation amount</p>
-                                </div>
-                            </div>
+                        <div className="bg-slate-900 rounded-xl p-8 border border-white/20 max-w-2xl w-full mx-4 space-y-6">
                             <div>
-                                <label className="text-gray-400 text-sm mb-2 block">Beneficiary Address</label>
-                                <input
-                                    type="text"
-                                    value={allocationForm.account}
-                                    onChange={e => setAllocationForm(prev => ({ ...prev, account: e.target.value }))}
-                                    placeholder="0x..."
-                                    className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white"
-                                />
-                                <p className="text-gray-500 text-xs mt-1">Wallet address of the beneficiary</p>
+                                <h3 className="text-2xl font-bold text-white">Add Beneficiary</h3>
+                                <p className="text-gray-400 text-sm mt-2">Add a new beneficiary to a folder with vesting schedule</p>
                             </div>
-                            <div className="grid grid-cols-3 gap-4">
-                                <div>
-                                    <label className="text-gray-400 text-sm mb-2 block">Start Date</label>
-                                    <input
-                                        type="date"
-                                        value={allocationForm.startDate}
-                                        onChange={e => setAllocationForm(prev => ({ ...prev, startDate: e.target.value }))}
-                                        className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white"
-                                    />
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="text-gray-400 text-sm mb-2 block">Folder</label>
+                                        <select
+                                            value={allocationForm.folderId}
+                                            onChange={e => setAllocationForm(prev => ({ ...prev, folderId: Number(e.target.value) }))}
+                                            className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white"
+                                        >
+                                            <option value={0}>Select a folder</option>
+                                            {allFoldersForDisplay.map(folder => (
+                                                <option key={folder.id} value={folder.id}>
+                                                    {folder.name || 'Unnamed Folder'} (ID: {folder.id})
+                                                </option>
+                                            ))}
+                                        </select>
+                                        <p className="text-gray-500 text-xs mt-1">Target folder for beneficiary</p>
+                                    </div>
+
+                                    <div>
+                                        <label className="text-gray-400 text-sm mb-2 block">Beneficiary Address</label>
+                                        <input
+                                            type="text"
+                                            value={allocationForm.account}
+                                            onChange={e => setAllocationForm(prev => ({ ...prev, account: e.target.value }))}
+                                            placeholder="0x..."
+                                            className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white"
+                                        />
+                                        <p className="text-gray-500 text-xs mt-1">Wallet address of the beneficiary</p>
+                                    </div>
+
+                                    <div>
+                                        <label className="text-gray-400 text-sm mb-2 block">Amount (NYAX)</label>
+                                        <input
+                                            type="text"
+                                            value={allocationForm.amount}
+                                            onChange={e => setAllocationForm(prev => ({ ...prev, amount: e.target.value }))}
+                                            placeholder="1000"
+                                            className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white"
+                                        />
+                                        <p className="text-gray-500 text-xs mt-1">Token allocation amount</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <label className="text-gray-400 text-sm mb-2 block">Cliff (days)</label>
-                                    <input
-                                        type="number"
-                                        value={allocationForm.cliffDays}
-                                        onChange={e => setAllocationForm(prev => ({ ...prev, cliffDays: e.target.value }))}
-                                        className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="text-gray-400 text-sm mb-2 block">Duration (days)</label>
-                                    <input
-                                        type="number"
-                                        value={allocationForm.durationDays}
-                                        onChange={e => setAllocationForm(prev => ({ ...prev, durationDays: e.target.value }))}
-                                        className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white"
-                                    />
+
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="text-gray-400 text-sm mb-2 block">Start Date</label>
+                                        <input
+                                            type="date"
+                                            value={allocationForm.startDate}
+                                            onChange={e => setAllocationForm(prev => ({ ...prev, startDate: e.target.value }))}
+                                            className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white"
+                                        />
+                                        <p className="text-gray-500 text-xs mt-1">Vesting start date (optional)</p>
+                                    </div>
+
+                                    <div>
+                                        <label className="text-gray-400 text-sm mb-2 block">Cliff Period (days)</label>
+                                        <input
+                                            type="number"
+                                            value={allocationForm.cliffDays}
+                                            onChange={e => setAllocationForm(prev => ({ ...prev, cliffDays: e.target.value }))}
+                                            placeholder="0"
+                                            min="0"
+                                            className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white"
+                                        />
+                                        <p className="text-gray-500 text-xs mt-1">Days before vesting begins</p>
+                                    </div>
+
+                                    <div>
+                                        <label className="text-gray-400 text-sm mb-2 block">Duration (days)</label>
+                                        <input
+                                            type="number"
+                                            value={allocationForm.durationDays}
+                                            onChange={e => setAllocationForm(prev => ({ ...prev, durationDays: e.target.value }))}
+                                            placeholder="365"
+                                            min="1"
+                                            className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white"
+                                        />
+                                        <p className="text-gray-500 text-xs mt-1">Total vesting duration</p>
+                                    </div>
                                 </div>
                             </div>
-                            <div>
-                                <label className="text-gray-400 text-sm mb-2 block">Permissions Mask (optional)</label>
-                                <input
-                                    type="number"
-                                    value={allocationForm.permissions}
-                                    onChange={e => setAllocationForm(prev => ({ ...prev, permissions: e.target.value }))}
-                                    className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white"
-                                />
-                                <p className="text-gray-500 text-xs mt-1">Bit mask for folder permissions (e.g., 7 for View+Vote+Propose)</p>
-                            </div>
-                            {formError && <p className="text-red-400 text-sm">{formError}</p>}
-                            <div className="flex gap-3">
-                                <button className="flex-1 px-4 py-3 bg-white/10 text-white rounded-lg" onClick={() => setShowAllocationModal(false)}>
+
+                            {formError && (
+                                <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3">
+                                    <p className="text-red-400 text-sm">{formError}</p>
+                                </div>
+                            )}
+
+                            <div className="flex gap-3 pt-4">
+                                <button
+                                    className="flex-1 px-4 py-3 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors"
+                                    onClick={() => setShowAllocationModal(false)}
+                                >
                                     Cancel
                                 </button>
                                 <button
-                                    className="flex-1 px-4 py-3 bg-purple-600 text-white rounded-lg disabled:opacity-50"
+                                    className="flex-1 px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                     onClick={handleSetAllocation}
-                                    disabled={actionPending || !isConnected}
+                                    disabled={actionPending || !isConnected || !allocationForm.folderId || !allocationForm.account || !allocationForm.amount}
                                 >
                                     {actionPending ? 'Adding Beneficiary...' : 'Add Beneficiary'}
                                 </button>
