@@ -816,18 +816,39 @@ export default function AdminDashboardFixed() {
                         const provider = new ethersLib.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL || 'https://sepolia.infura.io/v3/YOUR_INFURA_KEY');
                         const folderEscrow = new FolderEscrowService(folder.address, provider as any);
 
-                        // Get folder stats
+                        // Get all beneficiaries first
+                        const beneficiaries = await folderEscrow.getBeneficiaries();
+                        console.log(`👥 Folder ${folder.name} has ${beneficiaries.length} beneficiaries:`, beneficiaries);
+
+                        // Calculate totalVested by summing individual vested amounts
+                        let totalVestedBigInt = BigInt(0);
+                        const beneficiaryVestingDetails = [];
+
+                        for (const beneficiaryAddr of beneficiaries) {
+                            const vestedAmount = await folderEscrow.getVestedAmount(beneficiaryAddr);
+                            totalVestedBigInt += vestedAmount;
+                            beneficiaryVestingDetails.push({
+                                address: beneficiaryAddr,
+                                vested: ethersLib.formatEther(vestedAmount)
+                            });
+                            console.log(`  💰 ${beneficiaryAddr}: ${ethersLib.formatEther(vestedAmount)} NYAX vested`);
+                        }
+
+                        console.log(`📊 Total Vested (calculated): ${ethersLib.formatEther(totalVestedBigInt)} NYAX`);
+
+                        // Get folder stats for other metrics
                         const stats = await folderEscrow.getFolderStats();
                         const isPaused = await folderEscrow.isPaused();
 
                         console.log(`📊 Folder ${folder.name} Stats:`, {
                             totalAllocated: ethersLib.formatEther(stats.totalAllocated),
-                            totalVested: ethersLib.formatEther(stats.totalVested),
+                            totalVested: ethersLib.formatEther(totalVestedBigInt),
                             totalClaimed: ethersLib.formatEther(stats.totalClaimed),
                             beneficiaryCount: stats.totalBeneficiaries,
                             vestingPercentage: stats.totalAllocated > 0
-                                ? ((Number(stats.totalVested) / Number(stats.totalAllocated)) * 100).toFixed(2) + '%'
-                                : '0%'
+                                ? ((Number(totalVestedBigInt) / Number(stats.totalAllocated)) * 100).toFixed(2) + '%'
+                                : '0%',
+                            beneficiaryDetails: beneficiaryVestingDetails
                         });
 
                         return {
@@ -837,7 +858,7 @@ export default function AdminDashboardFixed() {
                             createdAt: Number(folder.createdAt),
                             totalAllocated: ethersLib.formatEther(stats.totalAllocated),
                             totalClaimed: ethersLib.formatEther(stats.totalClaimed),
-                            totalVested: ethersLib.formatEther(stats.totalVested),
+                            totalVested: ethersLib.formatEther(totalVestedBigInt),
                             isPaused: isPaused,
                             beneficiaryCount: stats.totalBeneficiaries
                         };
@@ -1141,6 +1162,14 @@ export default function AdminDashboardFixed() {
     };
 
     const handlePauseFolder = async (folderAddress: string) => {
+        if (!folderAddress) {
+            console.error('❌ No folder address provided for pause');
+            setFormError('Folder address is required');
+            return;
+        }
+
+        console.log('⏸️ Attempting to pause folder:', folderAddress);
+
         if (!await ensureSepolia(setFormError)) return;
         if (!daoService) {
             setFormError('DAO service unavailable');
@@ -1150,7 +1179,7 @@ export default function AdminDashboardFixed() {
         try {
             const signer = daoService.getSigner();
             if (!signer) {
-                throw new Error('Signer required');
+                throw new Error('Signer required - please connect your wallet');
             }
 
             const { FolderEscrowService } = await import('@/services/contracts/folderEscrowService');
@@ -1162,15 +1191,33 @@ export default function AdminDashboardFixed() {
             const browserProvider = new ethersLib.BrowserProvider(ethereum);
             const folderEscrow = new FolderEscrowService(folderAddress, browserProvider);
 
-            await folderEscrow.pauseFolder(signer);
+            console.log('⏸️ Calling pauseFolder on contract...');
+            const tx = await folderEscrow.pauseFolder(signer);
+            console.log('⏸️ Transaction sent:', tx);
+
+            if (tx && typeof tx === 'object' && 'wait' in tx) {
+                await (tx as any).wait();
+            }
+            console.log('✅ Folder paused successfully');
+
             await loadFactoryFolders();
             setFormError(null);
+            alert('Folder paused successfully!');
         } catch (err) {
+            console.error('❌ Failed to pause folder:', err);
             setFormError(err instanceof Error ? err.message : 'Failed to pause folder');
         }
     };
 
     const handleUnpauseFolder = async (folderAddress: string) => {
+        if (!folderAddress) {
+            console.error('❌ No folder address provided for unpause');
+            setFormError('Folder address is required');
+            return;
+        }
+
+        console.log('▶️ Attempting to unpause folder:', folderAddress);
+
         if (!await ensureSepolia(setFormError)) return;
         if (!daoService) {
             setFormError('DAO service unavailable');
@@ -1180,7 +1227,7 @@ export default function AdminDashboardFixed() {
         try {
             const signer = daoService.getSigner();
             if (!signer) {
-                throw new Error('Signer required');
+                throw new Error('Signer required - please connect your wallet');
             }
 
             const { FolderEscrowService } = await import('@/services/contracts/folderEscrowService');
@@ -1192,10 +1239,20 @@ export default function AdminDashboardFixed() {
             const browserProvider = new ethersLib.BrowserProvider(ethereum);
             const folderEscrow = new FolderEscrowService(folderAddress, browserProvider);
 
-            await folderEscrow.unpauseFolder(signer);
+            console.log('▶️ Calling unpauseFolder on contract...');
+            const tx = await folderEscrow.unpauseFolder(signer);
+            console.log('▶️ Transaction sent:', tx);
+
+            if (tx && typeof tx === 'object' && 'wait' in tx) {
+                await (tx as any).wait();
+            }
+            console.log('✅ Folder unpaused successfully');
+
             await loadFactoryFolders();
             setFormError(null);
+            alert('Folder unpaused successfully!');
         } catch (err) {
+            console.error('❌ Failed to unpause folder:', err);
             setFormError(err instanceof Error ? err.message : 'Failed to unpause folder');
         }
     };
@@ -1250,6 +1307,13 @@ export default function AdminDashboardFixed() {
     };
 
     const loadBeneficiaryVestings = async (folderAddress: string, folderId: number) => {
+        if (!folderAddress) {
+            console.error('❌ No folder address provided for loading beneficiaries');
+            return;
+        }
+
+        console.log(`👥 Loading beneficiaries for folder ${folderId} at address ${folderAddress}`);
+
         try {
             setVestingLoading(true);
             const { FolderEscrowService } = await import('@/services/contracts/folderEscrowService');
@@ -1260,12 +1324,24 @@ export default function AdminDashboardFixed() {
             const folderEscrow = new FolderEscrowService(folderAddress, provider as any);
 
             // Get all beneficiaries
+            console.log('👥 Fetching beneficiaries from contract...');
             const beneficiaries = await folderEscrow.getBeneficiaries();
-            console.log(`Loading vesting info for ${beneficiaries.length} beneficiaries in folder ${folderId}`);
+            console.log(`👥 Found ${beneficiaries.length} beneficiaries:`, beneficiaries);
+
+            if (beneficiaries.length === 0) {
+                console.warn('⚠️ No beneficiaries found in this folder');
+                setBeneficiaryVestings(prev => ({
+                    ...prev,
+                    [folderId]: []
+                }));
+                return;
+            }
 
             // Calculate vesting for each beneficiary
+            console.log('👥 Calculating vesting details for each beneficiary...');
             const vestings = await Promise.all(
                 beneficiaries.map(async (beneficiaryAddr) => {
+                    console.log(`  → Processing ${beneficiaryAddr}`);
                     return await calculateVestedAmount(folderAddress, beneficiaryAddr);
                 })
             );
@@ -1277,9 +1353,11 @@ export default function AdminDashboardFixed() {
                 [folderId]: validVestings
             }));
 
-            console.log(`Loaded vesting info for ${validVestings.length} beneficiaries`);
+            console.log(`✅ Successfully loaded vesting info for ${validVestings.length}/${beneficiaries.length} beneficiaries`);
+            console.log('👥 Beneficiary vesting data:', validVestings);
         } catch (err) {
-            console.error('Failed to load beneficiary vestings:', err);
+            console.error('❌ Failed to load beneficiary vestings:', err);
+            alert(`Failed to load beneficiaries: ${err instanceof Error ? err.message : 'Unknown error'}`);
         } finally {
             setVestingLoading(false);
         }
@@ -1645,24 +1723,34 @@ export default function AdminDashboardFixed() {
                     </div>
 
                     <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-                        {[
-                            { label: 'Treasury Balance', value: treasuryBalanceLoading ? 'Loading...' : treasuryBalanceError ? 'Error' : treasuryBalance ? `${formatNumber(treasuryBalance)} NYAX` : 'N/A', accent: 'bg-green-500/20 text-green-200', icon: '💰' },
-                            { label: 'Allocated NYAX', value: `${formatNumber(summary.totalAllocated)} NYAX`, accent: 'bg-indigo-500/20 text-indigo-200' },
-                            { label: 'Active members', value: formatNumber(summary.totalMembers), accent: 'bg-emerald-500/15 text-emerald-200' },
-                            { label: 'Folders live', value: factoryFolders.length > 0 ? factoryFolders.length : summary.folderCount, accent: 'bg-blue-500/15 text-blue-200' },
-                            { label: 'Action queue', value: `${filteredDisplayFolders.length} folders`, accent: 'bg-purple-500/15 text-purple-200' },
-                        ].map(card => (
-                            <div key={card.label} className="rounded-2xl border border-white/10 bg-black/30 p-5">
-                                <p className="text-xs uppercase tracking-[0.25em] text-gray-400 flex items-center gap-2">
-                                    {card.icon && <span>{card.icon}</span>}
-                                    {card.label}
-                                </p>
-                                <p className="text-2xl font-semibold mt-2">{card.value}</p>
-                                <span className={`inline-flex mt-3 px-3 py-1 rounded-full text-xs ${card.accent}`}>
-                                    {card.label === 'Treasury Balance' ? 'Live balance' : card.label === 'Action queue' ? 'Live folders in view' : card.label === 'Folders live' && factoryFolders.length > 0 ? 'Factory service' : 'Real-time'}
-                                </span>
-                            </div>
-                        ))}
+                        {(() => {
+                            // Calculate totals from factory folders
+                            const factoryTotalAllocated = factoryFolders.reduce((sum, folder) =>
+                                sum + parseFloat(folder.totalAllocated || '0'), 0
+                            );
+                            const factoryTotalMembers = factoryFolders.reduce((sum, folder) =>
+                                sum + (folder.beneficiaryCount || 0), 0
+                            );
+
+                            return [
+                                { label: 'Treasury Balance', value: treasuryBalanceLoading ? 'Loading...' : treasuryBalanceError ? 'Error' : treasuryBalance ? `${formatNumber(treasuryBalance)} NYAX` : 'N/A', accent: 'bg-green-500/20 text-green-200', icon: '💰', badge: 'Live balance' },
+                                { label: 'Allocated NYAX', value: `${formatNumber(factoryTotalAllocated.toString())} NYAX`, accent: 'bg-indigo-500/20 text-indigo-200', badge: 'Factory service' },
+                                { label: 'Active members', value: formatNumber(factoryTotalMembers.toString()), accent: 'bg-emerald-500/15 text-emerald-200', badge: 'Factory service' },
+                                { label: 'Folders live', value: factoryFolders.length, accent: 'bg-blue-500/15 text-blue-200', badge: 'Factory service' },
+                                { label: 'Action queue', value: `${filteredDisplayFolders.length} folders`, accent: 'bg-purple-500/15 text-purple-200', badge: 'Live folders in view' },
+                            ].map(card => (
+                                <div key={card.label} className="rounded-2xl border border-white/10 bg-black/30 p-5">
+                                    <p className="text-xs uppercase tracking-[0.25em] text-gray-400 flex items-center gap-2">
+                                        {card.icon && <span>{card.icon}</span>}
+                                        {card.label}
+                                    </p>
+                                    <p className="text-2xl font-semibold mt-2">{card.value}</p>
+                                    <span className={`inline-flex mt-3 px-3 py-1 rounded-full text-xs ${card.accent}`}>
+                                        {card.badge}
+                                    </span>
+                                </div>
+                            ));
+                        })()}
                     </div>
                 </div>
 
