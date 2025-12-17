@@ -228,6 +228,103 @@ export class FolderRegistryFactoryService {
   getContract(): ethers.Contract {
     return this.contract;
   }
+
+  // Vesting-related methods for user claims
+  async getFolderCount(): Promise<number> {
+    const folderRegistryContract = new ethers.Contract(
+      CONTRACT_ADDRESSES.folderRegistry,
+      CONTRACT_ABIS.folderRegistry,
+      this.provider
+    );
+    const count = await folderRegistryContract.folderCount();
+    return Number(count);
+  }
+
+  async getFolder(folderId: number): Promise<any> {
+    const folderRegistryContract = new ethers.Contract(
+      CONTRACT_ADDRESSES.folderRegistry,
+      CONTRACT_ABIS.folderRegistry,
+      this.provider
+    );
+    const data = await folderRegistryContract.folders(folderId);
+    if (!data || !data.exists) return null;
+
+    const members: string[] = await folderRegistryContract.folderMembers(folderId);
+
+    return {
+      id: folderId,
+      name: data.name,
+      defaultPermissions: Number(data.defaultPermissions),
+      totalAllocated: ethers.formatEther(data.totalAllocated),
+      template: {
+        cliff: Number(data.template.cliff),
+        duration: Number(data.template.duration),
+        revocable: Boolean(data.template.revocable),
+      },
+      locked: Boolean(data.locked),
+      exists: data.exists,
+      members,
+    };
+  }
+
+  async getAllocation(folderId: number, account: string): Promise<any> {
+    const folderRegistryContract = new ethers.Contract(
+      CONTRACT_ADDRESSES.folderRegistry,
+      CONTRACT_ABIS.folderRegistry,
+      this.provider
+    );
+    
+    // Get allocation data - this requires reading from the contract's internal mapping
+    // We'll need to call unlockedTokens and permissionsOf to get the data
+    try {
+      const permissions = await folderRegistryContract.permissionsOf(folderId, account);
+      const timestamp = Math.floor(Date.now() / 1000);
+      const unlocked = await folderRegistryContract.unlockedTokens(folderId, account, timestamp);
+      
+      // Note: We can't directly read the full allocation struct from the contract
+      // This is a limitation of the current contract design
+      // We return what we can access
+      return {
+        exists: Number(permissions) > 0 || unlocked > BigInt(0),
+        amount: ethers.formatEther(unlocked), // This is an approximation
+        claimed: '0', // We can't read this directly
+        permissions: Number(permissions),
+        vesting: {
+          start: 0, // We can't read this directly
+          cliff: 0,
+          duration: 0,
+          revocable: false,
+          revoked: false,
+        }
+      };
+    } catch (error) {
+      return null;
+    }
+  }
+
+  async getUnlockedTokens(folderId: number, account: string): Promise<bigint> {
+    const folderRegistryContract = new ethers.Contract(
+      CONTRACT_ADDRESSES.folderRegistry,
+      CONTRACT_ABIS.folderRegistry,
+      this.provider
+    );
+    const timestamp = Math.floor(Date.now() / 1000);
+    return await folderRegistryContract.unlockedTokens(folderId, account, timestamp);
+  }
+
+  async claimAllocation(folderId: number, account: string, amount: string): Promise<string> {
+    const signer = await this.provider.getSigner();
+    const folderRegistryContract = new ethers.Contract(
+      CONTRACT_ADDRESSES.folderRegistry,
+      CONTRACT_ABIS.folderRegistry,
+      signer
+    );
+    
+    const amountWei = ethers.parseEther(amount);
+    const tx = await folderRegistryContract.claim(folderId, account, amountWei);
+    const receipt = await tx.wait();
+    return receipt.hash;
+  }
 }
 
 // Singleton instance

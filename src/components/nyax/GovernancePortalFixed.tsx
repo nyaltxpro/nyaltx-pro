@@ -11,8 +11,9 @@ import { Activity, ArrowUpRight, CheckCircle, Clock, Coins, Layers, Shield, Tren
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Area, AreaChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { useAccount, useChainId, useSwitchChain } from 'wagmi';
+import VestingClaims from './VestingClaims';
 
-type TabId = 'overview' | 'proposals' | 'transfers' | 'deposit';
+type TabId = 'overview' | 'proposals' | 'transfers' | 'deposit' | 'vesting';
 
 type TokenMetrics = {
     totalSupply: string;
@@ -431,7 +432,7 @@ export default function NYALTXGovernance() {
 
     const REQUIRED_CHAIN_ID = 11155111; // Ethereum Sepolia
     const onRequiredNetwork = chainId === REQUIRED_CHAIN_ID;
-    const tabs: TabId[] = ['overview', 'proposals', 'transfers', 'deposit'];
+    const tabs: TabId[] = ['overview', 'proposals', 'transfers', 'deposit', 'vesting'];
 
     useEffect(() => {
         setLegacyDeposit(prev => ({ ...prev, beneficiary: address ?? '' }));
@@ -1522,6 +1523,13 @@ export default function NYALTXGovernance() {
                                 </div>
                             </div>
                         </div>
+                    </div>
+                )}
+
+                {/* Vesting Claims Tab */}
+                {activeTab === 'vesting' && (
+                    <div className="max-w-7xl mx-auto">
+                        <VestingClaims />
                     </div>
                 )}
             </div>
