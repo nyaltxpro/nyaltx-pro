@@ -178,6 +178,23 @@ contract FolderRegistry is AccessControl, ReentrancyGuard {
         return allocation.permissions;
     }
 
+    function getAllocation(uint256 folderId, address account) public view returns (
+        uint256 amount,
+        uint256 claimed,
+        VestingSchedule memory vesting,
+        uint32 permissions,
+        bool exists
+    ) {
+        Allocation storage allocation = _allocations[folderId][account];
+        return (
+            allocation.amount,
+            allocation.claimed,
+            allocation.vesting,
+            allocation.permissions,
+            allocation.exists
+        );
+    }
+
     function folderMembers(uint256 folderId) external view returns (address[] memory) {
         return _folderMembers[folderId].values();
     }

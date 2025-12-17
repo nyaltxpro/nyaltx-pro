@@ -1,5 +1,6 @@
 'use client'
 
+import { createFolderEscrowService } from '@/services/contracts/folderEscrowService';
 import { getFolderRegistryFactoryService } from '@/services/contracts/folderRegistryFactoryService';
 import { ethers } from 'ethers';
 import { Calendar, CheckCircle, Clock, Coins, Lock, TrendingUp, Unlock } from 'lucide-react';
@@ -18,6 +19,10 @@ interface VestingAllocation {
     revocable: boolean;
     revoked: boolean;
     permissions: number;
+    contractType: 'registry' | 'escrow';
+    contractAddress?: string;
+    paused?: boolean;
+    cancelled?: boolean;
 }
 
 const formatNumber = (value: string | number, decimals = 2) => {
@@ -85,44 +90,93 @@ export default function VestingClaims() {
             const signer = await provider.getSigner();
             const factoryService = getFolderRegistryFactoryService(provider);
 
-            // Get folder count
-            const folderCount = await factoryService.getFolderCount();
-            console.log('Total folders:', folderCount);
-
             const userAllocations: VestingAllocation[] = [];
 
-            // Check each folder for user allocations
-            for (let folderId = 1; folderId <= folderCount; folderId++) {
-                try {
-                    const folder = await factoryService.getFolder(folderId);
-                    if (!folder || !folder.exists) continue;
+            // 1. Load allocations from FolderRegistry
+            try {
+                const folderCount = await factoryService.getFolderCount();
+                console.log('Total FolderRegistry folders:', folderCount);
 
-                    // Check if user has allocation in this folder
-                    const members = folder.members || [];
-                    if (!members.includes(address)) continue;
+                for (let folderId = 1; folderId <= folderCount; folderId++) {
+                    try {
+                        const folder = await factoryService.getFolder(folderId);
+                        if (!folder || !folder.exists) continue;
 
-                    // Get user's allocation details
-                    const unlockedAmount = await factoryService.getUnlockedTokens(folderId, address);
-                    const allocation = await factoryService.getAllocation(folderId, address);
+                        const members = folder.members || [];
+                        if (!members.includes(address)) continue;
 
-                    if (allocation && allocation.exists) {
-                        userAllocations.push({
-                            folderId,
-                            folderName: folder.name,
-                            totalAmount: allocation.amount,
-                            claimedAmount: allocation.claimed,
-                            unlockedAmount: ethers.formatEther(unlockedAmount),
-                            vestingStart: allocation.vesting.start,
-                            vestingCliff: allocation.vesting.cliff,
-                            vestingDuration: allocation.vesting.duration,
-                            revocable: allocation.vesting.revocable,
-                            revoked: allocation.vesting.revoked,
-                            permissions: allocation.permissions,
-                        });
+                        const allocation = await factoryService.getAllocation(folderId, address);
+
+                        if (allocation && allocation.exists) {
+                            const unlockedAmount = await factoryService.getUnlockedTokens(folderId, address);
+
+                            userAllocations.push({
+                                folderId,
+                                folderName: folder.name,
+                                totalAmount: allocation.amount,
+                                claimedAmount: allocation.claimed,
+                                unlockedAmount: ethers.formatEther(unlockedAmount),
+                                vestingStart: allocation.vesting.start,
+                                vestingCliff: allocation.vesting.cliff,
+                                vestingDuration: allocation.vesting.duration,
+                                revocable: allocation.vesting.revocable,
+                                revoked: allocation.vesting.revoked,
+                                permissions: allocation.permissions,
+                                contractType: 'registry',
+                            });
+                        }
+                    } catch (err) {
+                        console.error(`Error loading FolderRegistry folder ${folderId}:`, err);
                     }
-                } catch (err) {
-                    console.error(`Error loading folder ${folderId}:`, err);
                 }
+            } catch (err) {
+                console.error('Error loading FolderRegistry allocations:', err);
+            }
+
+            // 2. Load allocations from FolderEscrow contracts
+            try {
+                // Get all folder escrow contracts from the factory
+                const allFolders = await factoryService.getAllFolders();
+                console.log('Total FolderEscrow folders:', allFolders.length);
+
+                for (const folderAddress of allFolders) {
+                    try {
+                        const escrowService = createFolderEscrowService(folderAddress, provider);
+
+                        // Check if user is a beneficiary
+                        const beneficiaries = await escrowService.getBeneficiaries();
+                        if (!beneficiaries.includes(address)) continue;
+
+                        // Get beneficiary info and vesting calculation
+                        const [beneficiaryInfo, vestingCalc, folderName] = await Promise.all([
+                            escrowService.getBeneficiaryInfo(address),
+                            escrowService.calculateVesting(address),
+                            escrowService.getFolderName()
+                        ]);
+
+                        userAllocations.push({
+                            folderId: userAllocations.length + 1, // Use index as ID for escrow
+                            folderName: folderName || 'Escrow Folder',
+                            totalAmount: ethers.formatEther(beneficiaryInfo.totalAllocation),
+                            claimedAmount: ethers.formatEther(beneficiaryInfo.claimed),
+                            unlockedAmount: ethers.formatEther(vestingCalc.vested),
+                            vestingStart: Number(beneficiaryInfo.start),
+                            vestingCliff: Number(beneficiaryInfo.cliff),
+                            vestingDuration: Number(beneficiaryInfo.duration),
+                            revocable: false,
+                            revoked: beneficiaryInfo.cancelled,
+                            permissions: 0,
+                            contractType: 'escrow',
+                            contractAddress: folderAddress,
+                            paused: beneficiaryInfo.paused,
+                            cancelled: beneficiaryInfo.cancelled,
+                        });
+                    } catch (err) {
+                        console.error(`Error loading FolderEscrow ${folderAddress}:`, err);
+                    }
+                }
+            } catch (err) {
+                console.error('Error loading FolderEscrow allocations:', err);
             }
 
             setAllocations(userAllocations);
@@ -171,14 +225,28 @@ export default function VestingClaims() {
 
             const provider = new ethers.BrowserProvider(window.ethereum as any);
             const signer = await provider.getSigner();
-            const factoryService = getFolderRegistryFactoryService(provider);
 
-            // Claim the unlocked tokens
-            const txHash = await factoryService.claimAllocation(
-                allocation.folderId,
-                address!,
-                claimableAmount.toString()
-            );
+            let txHash: string;
+
+            if (allocation.contractType === 'escrow') {
+                // Claim from FolderEscrow contract
+                if (!allocation.contractAddress) {
+                    throw new Error('Escrow contract address not found');
+                }
+
+                const escrowService = createFolderEscrowService(allocation.contractAddress, provider);
+                const tx = await escrowService.claim(signer);
+                console.log('Escrow claim transaction submitted:', tx);
+                txHash = 'Transaction submitted successfully';
+            } else {
+                // Claim from FolderRegistry contract
+                const factoryService = getFolderRegistryFactoryService(provider);
+                txHash = await factoryService.claimAllocation(
+                    allocation.folderId,
+                    address!,
+                    claimableAmount.toString()
+                );
+            }
 
             console.log('Claim transaction:', txHash);
             setClaimSuccess({ folderId: allocation.folderId, amount: claimableAmount.toString() });

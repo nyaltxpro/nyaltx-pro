@@ -274,30 +274,33 @@ export class FolderRegistryFactoryService {
       this.provider
     );
     
-    // Get allocation data - this requires reading from the contract's internal mapping
-    // We'll need to call unlockedTokens and permissionsOf to get the data
     try {
-      const permissions = await folderRegistryContract.permissionsOf(folderId, account);
-      const timestamp = Math.floor(Date.now() / 1000);
-      const unlocked = await folderRegistryContract.unlockedTokens(folderId, account, timestamp);
+      // Call the new getAllocation function that returns complete allocation data
+      const result = await folderRegistryContract.getAllocation(folderId, account);
       
-      // Note: We can't directly read the full allocation struct from the contract
-      // This is a limitation of the current contract design
-      // We return what we can access
+      // Result is a tuple: [amount, claimed, vesting, permissions, exists]
+      const [amount, claimed, vesting, permissions, exists] = result;
+      
+      if (!exists) {
+        return null;
+      }
+      
       return {
-        exists: Number(permissions) > 0 || unlocked > BigInt(0),
-        amount: ethers.formatEther(unlocked), // This is an approximation
-        claimed: '0', // We can't read this directly
+        exists: exists,
+        amount: ethers.formatEther(amount),
+        claimed: ethers.formatEther(claimed),
         permissions: Number(permissions),
         vesting: {
-          start: 0, // We can't read this directly
-          cliff: 0,
-          duration: 0,
-          revocable: false,
-          revoked: false,
+          start: Number(vesting.start),
+          cliff: Number(vesting.cliff),
+          duration: Number(vesting.duration),
+          revocable: Boolean(vesting.revocable),
+          revoked: Boolean(vesting.revoked),
+          revokedAt: Number(vesting.revokedAt),
         }
       };
     } catch (error) {
+      console.error(`Error getting allocation for folder ${folderId}, account ${account}:`, error);
       return null;
     }
   }

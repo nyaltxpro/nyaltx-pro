@@ -158,6 +158,7 @@ export const CONTRACT_ABIS = {
     'function permissionsOf(uint256 folderId, address account) view returns (uint32)',
     'function unlockedTokens(uint256 folderId, address account, uint64 timestamp) view returns (uint256)',
     'function folderMembers(uint256 folderId) view returns (address[])',
+    'function getAllocation(uint256 folderId, address account) view returns (uint256 amount, uint256 claimed, tuple(uint64 start, uint64 cliff, uint64 duration, bool revocable, bool revoked, uint64 revokedAt) vesting, uint32 permissions, bool exists)',
     'function createFolder(string name, uint32 permissions, tuple(uint64 cliff, uint64 duration, bool revocable) template) returns (uint256)',
     'function updateFolder(uint256 folderId, uint32 permissions, tuple(uint64 cliff, uint64 duration, bool revocable) template)',
     'function setAllocation(uint256 folderId, address account, uint256 amount, tuple(uint64 start, uint64 cliff, uint64 duration, bool revocable, bool revoked, uint64 revokedAt) schedule, uint32 permissions)',
