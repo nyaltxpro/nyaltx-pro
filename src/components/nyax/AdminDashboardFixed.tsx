@@ -167,7 +167,7 @@ export default function AdminDashboardFixed() {
     const [newFolderRevocable, setNewFolderRevocable] = useState(true);
 
     const [allocationForm, setAllocationForm] = useState({
-        folderId: 0,
+        folderId: -1,
         account: '',
         walletName: '',
         amount: '',
@@ -685,7 +685,7 @@ export default function AdminDashboardFixed() {
 
     const handleSetAllocation = async () => {
         if (!await ensureSepolia(setFormError)) return;
-        if (!allocationForm.folderId || !allocationForm.account || !allocationForm.amount) {
+        if (allocationForm.folderId === -1 || !allocationForm.account || !allocationForm.amount) {
             setFormError('Folder, address, and amount are required');
             return;
         }
@@ -758,7 +758,7 @@ export default function AdminDashboardFixed() {
             setFormError(null);
             setShowAllocationModal(false);
             setAllocationForm({
-                folderId: 0,
+                folderId: -1,
                 account: '',
                 walletName: '',
                 amount: '',
@@ -2457,7 +2457,7 @@ export default function AdminDashboardFixed() {
                                             onChange={e => setAllocationForm(prev => ({ ...prev, folderId: Number(e.target.value) }))}
                                             className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white"
                                         >
-                                            <option value={0}>Select a folder</option>
+                                            <option value={-1}>Select a folder</option>
                                             {factoryFolders.map(folder => (
                                                 <option key={folder.id} value={folder.id}>
                                                     {folder.name || 'Unnamed Folder'} (ID: {folder.address})
