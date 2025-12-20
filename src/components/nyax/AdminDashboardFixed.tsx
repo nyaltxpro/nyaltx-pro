@@ -1314,6 +1314,63 @@ export default function AdminDashboardFixed() {
         }
     };
 
+    const calculateVestedAmountById = async (folderAddress: string, beneficiaryId: number): Promise<BeneficiaryVesting | null> => {
+        try {
+            const { FolderEscrowService } = await import('@/services/contracts/folderEscrowService');
+            const { ethers: ethersLib } = await import('ethers');
+
+            // Create provider for read operations
+            const provider = new ethersLib.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL || 'https://sepolia.infura.io/v3/YOUR_INFURA_KEY');
+            const folderEscrow = new FolderEscrowService(folderAddress, provider as any);
+
+            // Get beneficiary data by ID
+            const beneficiary = await folderEscrow.getBeneficiaryById(beneficiaryId);
+
+            // Calculate vested amount for this specific beneficiary entry
+            const vestedAmount = await folderEscrow.getVestedAmount(beneficiaryId);
+
+            const currentTime = Math.floor(Date.now() / 1000);
+            const cliffTime = Number(beneficiary.start) + Number(beneficiary.cliff);
+            const endTime = Number(beneficiary.start) + Number(beneficiary.duration);
+            const elapsed = currentTime - Number(beneficiary.start);
+
+            // Calculate claimable amount (vested - claimed)
+            const claimable = vestedAmount > beneficiary.claimed ? vestedAmount - beneficiary.claimed : BigInt(0);
+            const isClaimable = claimable > 0 && currentTime >= cliffTime && !beneficiary.paused && !beneficiary.cancelled;
+            const cliffReached = currentTime >= cliffTime;
+            const fullyVested = currentTime >= endTime;
+
+            console.log(`🔍 Beneficiary ID ${beneficiaryId} (${beneficiary.wallet.slice(0, 6)}...${beneficiary.wallet.slice(-4)}) Vesting Details:`, {
+                totalAllocation: ethersLib.formatEther(beneficiary.totalAllocation),
+                vested: ethersLib.formatEther(vestedAmount),
+                claimed: ethersLib.formatEther(beneficiary.claimed),
+                claimable: ethersLib.formatEther(claimable),
+                cliffReached,
+                fullyVested,
+                paused: beneficiary.paused,
+                cancelled: beneficiary.cancelled
+            });
+
+            return {
+                beneficiaryId: beneficiaryId,
+                address: beneficiary.wallet,
+                walletName: beneficiary.walletName,
+                totalAllocation: ethersLib.formatEther(beneficiary.totalAllocation),
+                claimed: ethersLib.formatEther(beneficiary.claimed),
+                vested: ethersLib.formatEther(vestedAmount),
+                claimable: ethersLib.formatEther(claimable),
+                isClaimable: isClaimable,
+                cliffReached: cliffReached,
+                fullyVested: fullyVested,
+                paused: beneficiary.paused,
+                cancelled: beneficiary.cancelled
+            };
+        } catch (err) {
+            console.error(`Failed to calculate vested amount for beneficiary ID ${beneficiaryId}:`, err);
+            return null;
+        }
+    };
+
     const calculateVestedAmount = async (folderAddress: string, beneficiaryAddress: string): Promise<BeneficiaryVesting | null> => {
         try {
             const { FolderEscrowService } = await import('@/services/contracts/folderEscrowService');
@@ -1406,12 +1463,12 @@ export default function AdminDashboardFixed() {
                 return;
             }
 
-            // Calculate vesting for each beneficiary
-            console.log('👥 Calculating vesting details for each beneficiary...');
+            // Calculate vesting for each beneficiary entry by ID
+            console.log('👥 Calculating vesting details for each beneficiary entry...');
             const vestings = await Promise.all(
                 beneficiaries.map(async (beneficiary) => {
                     console.log(`  → Processing ${beneficiary.wallet} (ID: ${beneficiary.id})`);
-                    return await calculateVestedAmount(folderAddress, beneficiary.wallet);
+                    return await calculateVestedAmountById(folderAddress, Number(beneficiary.id));
                 })
             );
 
