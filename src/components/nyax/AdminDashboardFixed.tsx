@@ -121,7 +121,7 @@ export default function AdminDashboardFixed() {
         vestingStart?: number;
         vestingCliff?: number;
         vestingDuration?: number;
-
+        folderBalance?: string;
     }
     const [factoryFolders, setFactoryFolders] = useState<FactoryFolder[]>([]);
     const [factoryLoading, setFactoryLoading] = useState(false);
@@ -866,6 +866,11 @@ export default function AdminDashboardFixed() {
                         const stats = await folderEscrow.getFolderStats();
                         const isPaused = await folderEscrow.isPaused();
 
+                        // Get folder balance
+                        const folderBalanceBigInt = await folderEscrow.getFolderBalance();
+                        const folderBalance = ethersLib.formatEther(folderBalanceBigInt);
+                        console.log(`💰 Folder ${folder.name} Balance: ${folderBalance} NYAX`);
+
                         // Get vesting time information from first beneficiary (if any)
                         let vestingStart = 0;
                         let vestingCliff = 0;
@@ -907,7 +912,8 @@ export default function AdminDashboardFixed() {
                             beneficiaryCount: stats.totalBeneficiaries,
                             vestingStart,
                             vestingCliff,
-                            vestingDuration
+                            vestingDuration,
+                            folderBalance: folderBalance
                         };
                     } catch (err) {
                         console.error(`Failed to load stats for folder ${folder.name}:`, err);
@@ -1617,19 +1623,27 @@ export default function AdminDashboardFixed() {
                             <div className="text-lg font-bold text-purple-300">{formatNumber(folder.totalAllocated)}</div>
                             <div className="text-xs text-purple-500">NYAX sent to folder</div>
                         </div>
+                        <div className="bg-green-500/10 rounded-lg p-3">
+                            <div className="text-xs text-green-400 mb-1">Folder Balance</div>
+                            <div className="text-lg font-bold text-green-300">{formatNumber(folder.folderBalance || '0')}</div>
+                            <div className="text-xs text-green-500">NYAX in escrow</div>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
                         <div className="bg-white/5 rounded-lg p-3">
                             <div className="text-xs text-gray-400 mb-1">Vested Amount</div>
                             <div className="text-lg font-bold text-white">{formatNumber(folder.totalVested || '0')}</div>
                             <div className="text-xs text-gray-500">NYAX allocated</div>
                         </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3">
                         <div className="bg-blue-500/10 rounded-lg p-3">
                             <div className="text-xs text-blue-400 mb-1">Claimed</div>
                             <div className="text-lg font-bold text-blue-300">{formatNumber(folder.totalClaimed || '0')}</div>
                             <div className="text-xs text-blue-500">NYAX</div>
                         </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-3">
                         <div className="bg-purple-500/10 rounded-lg p-3">
                             <div className="text-xs text-purple-400 mb-1">Claimable</div>
                             <div className="text-lg font-bold text-purple-300">
