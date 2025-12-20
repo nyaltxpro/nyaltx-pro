@@ -2560,7 +2560,7 @@ export default function AdminDashboardFixed() {
                                 <button
                                     className="flex-1 px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                     onClick={handleSetAllocation}
-                                    disabled={actionPending || !isConnected || !allocationForm.folderId || !allocationForm.account || !allocationForm.amount}
+                                    disabled={actionPending || !isConnected || allocationForm.folderId === -1 || !allocationForm.account || !allocationForm.amount}
                                 >
                                     {actionPending ? 'Adding Beneficiary...' : 'Add Beneficiary'}
                                 </button>
