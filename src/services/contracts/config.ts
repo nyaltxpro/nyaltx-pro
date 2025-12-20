@@ -8,12 +8,12 @@ export const CONTRACT_ADDRESSES: any = {
   folderRegistry: process.env.NEXT_PUBLIC_FOLDER_REGISTRY_ADDRESS || '0x9b8209dA26ab232C1F6Caa30Ddcf3B6fA0394C34',
   nyaxGovernor: "0xb852Be5B249EC7DF065351FBDfC14A5A1520eC93",
   timelock: process.env.NEXT_PUBLIC_TIMELOCK_ADDRESS || '0xa17B822F9D0A26C20BDe453F0e566a2D2787E851',
-  treasury: '0x0b3b1889aF013680b906F7df9Bd3311Fc660F677',
+  treasury: '0x817716Ad67Cda88aC23F9dAd446d3826f818D155',
   multisig: process.env.NEXT_PUBLIC_MULTISIG_ADDRESS || '0x5cD8aD5E36324C386b6F62Ce2374aa3F3f8Ae0aD',
   vestingFactory: process.env.NEXT_PUBLIC_VESTING_FACTORY_ADDRESS || '',
   treasuryBridge: process.env.NEXT_PUBLIC_TREASURY_BRIDGE_ADDRESS || '0x7ab3eBb87afa9A921d0770Fa304F20Fc8D2a4763',
   folderEscrow: process.env.NEXT_PUBLIC_FOLDER_ESCROW_ADDRESS || '',
-  folderEscrowFactory: '0xFD5B1233c2AE4Ac9e953619ECb28C2C4042aF6C7',
+  folderEscrowFactory: '0x283b56eB46c9cfdFef64EC122E0dA89140508110',
 
 };
 
@@ -288,12 +288,14 @@ export const CONTRACT_ABIS = {
     'function token() view returns (address)',
     'function folderName() view returns (string)',
     'function registry() view returns (address)',
+    'function folderBalance() view returns (uint256)',
     
     // Beneficiary Management
-    'function addBeneficiary(address wallet, uint256 totalAllocation, uint256 start, uint256 cliff, uint256 duration)',
+    'function addBeneficiary(address wallet, uint256 totalAllocation, uint256 start, uint256 cliff, uint256 duration, string walletName)',
     'function pauseBeneficiary(address wallet)',
     'function resumeBeneficiary(address wallet)',
     'function cancelBeneficiary(address wallet)',
+    'function updateWalletName(address wallet, string newName)',
     
     // Claiming
     'function claim()',
@@ -303,16 +305,20 @@ export const CONTRACT_ABIS = {
     
     // Views
     'function getBeneficiaries() view returns (address[])',
-    'function getBeneficiaryInfo(address wallet) view returns (uint256 totalAllocation, uint256 claimed, uint256 start, uint256 cliff, uint256 duration, bool paused, bool cancelled)',
+    'function getBeneficiaryInfo(address wallet) view returns (uint256 totalAllocation, uint256 claimed, uint256 start, uint256 cliff, uint256 duration, bool paused, bool cancelled, string walletName)',
+    'function getWalletByName(string walletName) view returns (address)',
+    'function getFolderBalance() view returns (uint256)',
     
     // Mappings
-    'function beneficiaries(address) view returns (uint256 totalAllocation, uint256 claimed, uint256 start, uint256 cliff, uint256 duration, bool paused, bool cancelled)',
+    'function beneficiaries(address) view returns (uint256 totalAllocation, uint256 claimed, uint256 start, uint256 cliff, uint256 duration, bool paused, bool cancelled, string walletName)',
     'function beneficiaryList(uint256) view returns (address)',
+    'function walletByNameHash(bytes32) view returns (address)',
     
     // Folder Controls
     'function pauseFolder()',
     'function unpauseFolder()',
     'function paused() view returns (bool)',
+    'function trackFunding(uint256 amount)',
     
     // Access Control
     'function hasRole(bytes32 role, address account) view returns (bool)',
@@ -322,11 +328,13 @@ export const CONTRACT_ABIS = {
     'function renounceRole(bytes32 role, address account)',
     
     // Events
-    'event BeneficiaryAdded(address wallet, uint256 amount, uint256 start, uint256 cliff, uint256 duration)',
+    'event BeneficiaryAdded(address wallet, string walletName, uint256 amount, uint256 start, uint256 cliff, uint256 duration)',
     'event Claimed(address wallet, uint256 amount)',
     'event BeneficiaryPaused(address wallet)',
     'event BeneficiaryResumed(address wallet)',
     'event BeneficiaryCancelled(address wallet)',
+    'event FolderFunded(uint256 amount, uint256 newBalance)',
+    'event WalletNameUpdated(address wallet, string oldName, string newName)',
     'event RoleGranted(bytes32 indexed role, address indexed account, address indexed sender)',
     'event RoleRevoked(bytes32 indexed role, address indexed account, address indexed sender)',
     'event Paused(address account)',
@@ -348,6 +356,7 @@ export const CONTRACT_ABIS = {
     'function approvedFolders(address) view returns (bool)',
     'function folders(uint256) view returns (address)',
     'function getFolders() view returns (address[])',
+    'function folderBalances(address) view returns (uint256)',
     
     // Treasury Actions
     'function sendToFolder(address folder, uint256 amount)',
@@ -359,6 +368,8 @@ export const CONTRACT_ABIS = {
     
     // Views
     'function treasuryBalance() view returns (uint256)',
+    'function getFolderBalance(address folder) view returns (uint256)',
+    'function getAllFolderBalances() view returns (address[], uint256[])',
     
     // Access Control
     'function hasRole(bytes32 role, address account) view returns (bool)',
@@ -370,7 +381,7 @@ export const CONTRACT_ABIS = {
     // Events
     'event FolderApproved(address folder)',
     'event FolderRemoved(address folder)',
-    'event TokensSentToFolder(address indexed folder, uint256 amount)',
+    'event TokensSentToFolder(address indexed folder, uint256 amount, uint256 totalSent)',
     'event RoleGranted(bytes32 indexed role, address indexed account, address indexed sender)',
     'event RoleRevoked(bytes32 indexed role, address indexed account, address indexed sender)',
     'event Paused(address account)',

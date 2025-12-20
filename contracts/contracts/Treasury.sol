@@ -16,10 +16,13 @@ contract Treasury is AccessControl, Pausable {
     // Approved FolderEscrow contracts
     mapping(address => bool) public approvedFolders;
     address[] public folders;
+    
+    // Track total amount sent to each folder
+    mapping(address => uint256) public folderBalances;
 
     event FolderApproved(address folder);
     event FolderRemoved(address folder);
-    event TokensSentToFolder(address indexed folder, uint256 amount);
+    event TokensSentToFolder(address indexed folder, uint256 amount, uint256 totalSent);
 
     constructor(IERC20 _token, address governance) {
         token = _token;
@@ -64,8 +67,10 @@ contract Treasury is AccessControl, Pausable {
         require(approvedFolders[folder], "Folder not approved");
         require(amount > 0, "Invalid amount");
 
+        folderBalances[folder] += amount;
         token.safeTransfer(folder, amount);
-        emit TokensSentToFolder(folder, amount);
+        
+        emit TokensSentToFolder(folder, amount, folderBalances[folder]);
     }
 
     // -----------------------
@@ -96,5 +101,17 @@ contract Treasury is AccessControl, Pausable {
 
     function treasuryBalance() external view returns (uint256) {
         return token.balanceOf(address(this));
+    }
+
+    function getFolderBalance(address folder) external view returns (uint256) {
+        return folderBalances[folder];
+    }
+
+    function getAllFolderBalances() external view returns (address[] memory, uint256[] memory) {
+        uint256[] memory balances = new uint256[](folders.length);
+        for (uint256 i = 0; i < folders.length; i++) {
+            balances[i] = folderBalances[folders[i]];
+        }
+        return (folders, balances);
     }
 }

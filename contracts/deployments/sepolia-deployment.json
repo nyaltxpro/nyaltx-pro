@@ -1,10 +1,9 @@
 {
-  "generatedAt": "2025-12-15T15:09:12.973Z",
+  "generatedAt": "2025-12-20T16:51:06.084Z",
   "network": "sepolia",
-  "contractName": "Treasury",
-  "address": "0x0b3b1889aF013680b906F7df9Bd3311Fc660F677",
+  "contractName": "FolderRegistryFactory",
+  "address": "0x283b56eB46c9cfdFef64EC122E0dA89140508110",
   "deployer": "0x37B4fd549e2Ed52c025Ae2744Ec13fd74627e4dc",
-  "token": "0xa879282ad7097f2503A4D128b807546e79A88F2f",
   "governance": "0x37B4fd549e2Ed52c025Ae2744Ec13fd74627e4dc",
-  "transactionHash": "0x899fd56145b8994293aaeb736669097df1bf584010d8e71296a15b2b6b22d7cf"
+  "transactionHash": "0x41e56331f4d179773e5678c8837b2f24a543c727825996efd4446acc7cc3952f"
 }

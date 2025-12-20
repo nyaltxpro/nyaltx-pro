@@ -38,6 +38,7 @@ export interface FolderMemberInfo {
   account: string;
   permissions: number;
   unlockedAmount: string;
+  walletName?: string;
 }
 
 export interface StakingPosition {

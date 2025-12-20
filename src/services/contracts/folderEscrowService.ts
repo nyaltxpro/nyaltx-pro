@@ -19,6 +19,7 @@ export interface BeneficiaryInfo {
   duration: bigint;
   paused: boolean;
   cancelled: boolean;
+  walletName?: string;
 }
 
 export interface VestingCalculation {
@@ -68,6 +69,10 @@ export class FolderEscrowService {
     return await this.contract.registry();
   }
 
+  async getFolderBalance(): Promise<bigint> {
+    return await this.contract.getFolderBalance();
+  }
+
   // Beneficiary Management
   async addBeneficiary(
     wallet: string,
@@ -75,10 +80,11 @@ export class FolderEscrowService {
     start: bigint,
     cliff: bigint,
     duration: bigint,
+    walletName: string,
     signer: ethers.Signer
   ): Promise<ethers.ContractTransaction> {
     const contractWithSigner = this.getContractWithSigner(signer);
-    return await contractWithSigner.addBeneficiary(wallet, totalAllocation, start, cliff, duration);
+    return await contractWithSigner.addBeneficiary(wallet, totalAllocation, start, cliff, duration, walletName);
   }
 
   async pauseBeneficiary(wallet: string, signer: ethers.Signer): Promise<ethers.ContractTransaction> {
@@ -94,6 +100,11 @@ export class FolderEscrowService {
   async cancelBeneficiary(wallet: string, signer: ethers.Signer): Promise<ethers.ContractTransaction> {
     const contractWithSigner = this.getContractWithSigner(signer);
     return await contractWithSigner.cancelBeneficiary(wallet);
+  }
+
+  async updateWalletName(wallet: string, newName: string, signer: ethers.Signer): Promise<ethers.ContractTransaction> {
+    const contractWithSigner = this.getContractWithSigner(signer);
+    return await contractWithSigner.updateWalletName(wallet, newName);
   }
 
   // Claiming
@@ -143,8 +154,13 @@ export class FolderEscrowService {
       cliff: result[3],
       duration: result[4],
       paused: result[5],
-      cancelled: result[6]
+      cancelled: result[6],
+      walletName: result[7] || undefined
     };
+  }
+
+  async getWalletByName(walletName: string): Promise<string> {
+    return await this.contract.getWalletByName(walletName);
   }
 
   // Mappings
@@ -205,9 +221,21 @@ export class FolderEscrowService {
   }
 
   // Event Listeners
-  onBeneficiaryAdded(callback: (wallet: string, amount: bigint, start: bigint, cliff: bigint, duration: bigint, event: any) => void) {
-    this.contract.on('BeneficiaryAdded', (wallet, amount, start, cliff, duration, event) => {
-      callback(wallet, amount, start, cliff, duration, event);
+  onBeneficiaryAdded(callback: (wallet: string, walletName: string, amount: bigint, start: bigint, cliff: bigint, duration: bigint, event: any) => void) {
+    this.contract.on('BeneficiaryAdded', (wallet, walletName, amount, start, cliff, duration, event) => {
+      callback(wallet, walletName, amount, start, cliff, duration, event);
+    });
+  }
+
+  onFolderFunded(callback: (amount: bigint, newBalance: bigint, event: any) => void) {
+    this.contract.on('FolderFunded', (amount, newBalance, event) => {
+      callback(amount, newBalance, event);
+    });
+  }
+
+  onWalletNameUpdated(callback: (wallet: string, oldName: string, newName: string, event: any) => void) {
+    this.contract.on('WalletNameUpdated', (wallet, oldName, newName, event) => {
+      callback(wallet, oldName, newName, event);
     });
   }
 

@@ -141,6 +141,20 @@ export class TreasuryService {
     return await this.contract.paused();
   }
 
+  // Balance Tracking
+  async getFolderBalance(folder: string): Promise<string> {
+    const balance = await this.contract.getFolderBalance(folder);
+    return ethers.formatEther(balance);
+  }
+
+  async getAllFolderBalances(): Promise<{ folders: string[]; balances: string[] }> {
+    const [folders, balances] = await this.contract.getAllFolderBalances();
+    return {
+      folders,
+      balances: balances.map((b: bigint) => ethers.formatEther(b))
+    };
+  }
+
   // Token Transfer Controls
   async setTokenTransfersEnabled(enabled: boolean, signer?: ethers.Signer): Promise<ethers.ContractTransaction> {
     const actualSigner = signer || this.signer;

@@ -165,6 +165,7 @@ export default function AdminDashboardFixed() {
     const [allocationForm, setAllocationForm] = useState({
         folderId: 0,
         account: '',
+        walletName: '',
         amount: '',
         startDate: '',
         cliffDays: '0',
@@ -728,6 +729,7 @@ export default function AdminDashboardFixed() {
                     start,
                     cliff,
                     duration,
+                    allocationForm.walletName || 'Unnamed Wallet',
                     signer
                 );
 
@@ -745,6 +747,7 @@ export default function AdminDashboardFixed() {
                     start,
                     cliff,
                     duration,
+                    allocationForm.walletName || 'Unnamed Wallet',
                     signer
                 );
             }
@@ -753,6 +756,7 @@ export default function AdminDashboardFixed() {
             setAllocationForm({
                 folderId: 0,
                 account: '',
+                walletName: '',
                 amount: '',
                 startDate: '',
                 cliffDays: '0',
@@ -2449,6 +2453,18 @@ export default function AdminDashboardFixed() {
                                             className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white"
                                         />
                                         <p className="text-gray-500 text-xs mt-1">Wallet address of the beneficiary</p>
+                                    </div>
+
+                                    <div>
+                                        <label className="text-gray-400 text-sm mb-2 block">Wallet Name</label>
+                                        <input
+                                            type="text"
+                                            value={allocationForm.walletName}
+                                            onChange={e => setAllocationForm(prev => ({ ...prev, walletName: e.target.value }))}
+                                            placeholder="John Doe - Founder"
+                                            className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white"
+                                        />
+                                        <p className="text-gray-500 text-xs mt-1">Human-readable name for this wallet</p>
                                     </div>
 
                                     <div>

@@ -20,6 +20,7 @@ contract FolderEscrow is AccessControl, Pausable {
         uint256 duration;
         bool paused;
         bool cancelled;
+        string walletName;
     }
 
     // Mapping of wallet -> Beneficiary
@@ -28,14 +29,22 @@ contract FolderEscrow is AccessControl, Pausable {
     // Array of beneficiary addresses
     address[] public beneficiaryList;
 
+    // Mapping of wallet name hash -> wallet address
+    mapping(bytes32 => address) public walletByNameHash;
+
+    // Mapping to track folder balance (total tokens received from treasury)
+    uint256 public folderBalance;
+
     // ------------------------
     // Events
     // ------------------------
-    event BeneficiaryAdded(address wallet, uint256 amount, uint256 start, uint256 cliff, uint256 duration);
+    event BeneficiaryAdded(address wallet, string walletName, uint256 amount, uint256 start, uint256 cliff, uint256 duration);
     event Claimed(address wallet, uint256 amount);
     event BeneficiaryPaused(address wallet);
     event BeneficiaryResumed(address wallet);
     event BeneficiaryCancelled(address wallet);
+    event FolderFunded(uint256 amount, uint256 newBalance);
+    event WalletNameUpdated(address wallet, string oldName, string newName);
 
     // ------------------------
     // Constructor
@@ -62,11 +71,16 @@ contract FolderEscrow is AccessControl, Pausable {
         uint256 totalAllocation,
         uint256 start,
         uint256 cliff,
-        uint256 duration
+        uint256 duration,
+        string calldata walletName
     ) external onlyRole(FOLDER_ADMIN_ROLE) {
         require(wallet != address(0), "Invalid wallet");
         require(totalAllocation > 0, "Allocation cannot be zero");
+        require(bytes(walletName).length > 0, "Wallet name required");
         require(beneficiaries[wallet].totalAllocation == 0, "Already exists");
+
+        bytes32 nameHash = keccak256(abi.encodePacked(walletName));
+        require(walletByNameHash[nameHash] == address(0), "Wallet name already used");
 
         beneficiaries[wallet] = Beneficiary(
             totalAllocation,
@@ -75,12 +89,14 @@ contract FolderEscrow is AccessControl, Pausable {
             cliff,
             duration,
             false,
-            false
+            false,
+            walletName
         );
 
         beneficiaryList.push(wallet);
+        walletByNameHash[nameHash] = wallet;
 
-        emit BeneficiaryAdded(wallet, totalAllocation, start, cliff, duration);
+        emit BeneficiaryAdded(wallet, walletName, totalAllocation, start, cliff, duration);
     }
 
     function pauseBeneficiary(address wallet) external onlyRole(FOLDER_ADMIN_ROLE) {
@@ -144,7 +160,8 @@ contract FolderEscrow is AccessControl, Pausable {
         uint256 cliff,
         uint256 duration,
         bool paused,
-        bool cancelled
+        bool cancelled,
+        string memory walletName
     ) {
         Beneficiary memory b = beneficiaries[wallet];
         return (
@@ -154,8 +171,41 @@ contract FolderEscrow is AccessControl, Pausable {
             b.cliff,
             b.duration,
             b.paused,
-            b.cancelled
+            b.cancelled,
+            b.walletName
         );
+    }
+
+    function getWalletByName(string calldata walletName) external view returns (address) {
+        bytes32 nameHash = keccak256(abi.encodePacked(walletName));
+        return walletByNameHash[nameHash];
+    }
+
+    function updateWalletName(address wallet, string calldata newName) external onlyRole(FOLDER_ADMIN_ROLE) {
+        require(beneficiaries[wallet].totalAllocation > 0, "Wallet not found");
+        require(bytes(newName).length > 0, "Name cannot be empty");
+
+        bytes32 newNameHash = keccak256(abi.encodePacked(newName));
+        require(walletByNameHash[newNameHash] == address(0), "Name already used");
+
+        string memory oldName = beneficiaries[wallet].walletName;
+        bytes32 oldNameHash = keccak256(abi.encodePacked(oldName));
+        
+        delete walletByNameHash[oldNameHash];
+        walletByNameHash[newNameHash] = wallet;
+        beneficiaries[wallet].walletName = newName;
+
+        emit WalletNameUpdated(wallet, oldName, newName);
+    }
+
+    function getFolderBalance() external view returns (uint256) {
+        return token.balanceOf(address(this));
+    }
+
+    function trackFunding(uint256 amount) external {
+        require(msg.sender == address(token) || hasRole(FOLDER_ADMIN_ROLE, msg.sender), "Unauthorized");
+        folderBalance += amount;
+        emit FolderFunded(amount, folderBalance);
     }
 
     // ------------------------

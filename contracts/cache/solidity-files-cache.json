@@ -2261,57 +2261,6 @@
         "SafeERC20"
       ]
     },
-    "/Users/mac/CascadeProjects/2048/contracts/contracts/FolderRegistery.sol": {
-      "lastModificationDate": 1764736251017,
-      "contentHash": "f65f409f8b8c024403cfb39f1b750c52",
-      "sourceName": "contracts/FolderRegistery.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "evmVersion": "cancun",
-          "viaIR": true,
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata",
-                "storageLayout"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "@openzeppelin/contracts/token/ERC20/ERC20.sol",
-        "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol",
-        "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol",
-        "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
-        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
-        "@openzeppelin/contracts/access/Ownable2Step.sol",
-        "@openzeppelin/contracts/access/AccessControl.sol",
-        "@openzeppelin/contracts/utils/Pausable.sol",
-        "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
-        "@openzeppelin/contracts/utils/math/Math.sol",
-        "@openzeppelin/contracts/utils/math/SafeCast.sol",
-        "@openzeppelin/contracts/utils/structs/EnumerableSet.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.24"
-      ],
-      "artifacts": [
-        "FolderRegistry"
-      ]
-    },
     "/Users/mac/CascadeProjects/2048/contracts/node_modules/@openzeppelin/contracts/utils/Pausable.sol": {
       "lastModificationDate": 1763997439680,
       "contentHash": "0d47b53e10b1985efbb396f937626279",
@@ -2593,57 +2542,6 @@
         "ERC20Burnable"
       ]
     },
-    "/Users/mac/CascadeProjects/2048/contracts/contracts/TreasuryBridge.sol": {
-      "lastModificationDate": 1764587579379,
-      "contentHash": "3f9df0b6be9909df4e5a6bee660652a6",
-      "sourceName": "contracts/TreasuryBridge.sol",
-      "solcConfig": {
-        "version": "0.8.25",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "evmVersion": "cancun",
-          "viaIR": true,
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata",
-                "storageLayout"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "@openzeppelin/contracts/token/ERC20/ERC20.sol",
-        "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol",
-        "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol",
-        "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
-        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
-        "@openzeppelin/contracts/access/Ownable2Step.sol",
-        "@openzeppelin/contracts/access/AccessControl.sol",
-        "@openzeppelin/contracts/utils/Pausable.sol",
-        "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
-        "@openzeppelin/contracts/utils/math/Math.sol",
-        "@openzeppelin/contracts/utils/math/SafeCast.sol",
-        "@openzeppelin/contracts/utils/structs/EnumerableSet.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.24"
-      ],
-      "artifacts": [
-        "TreasuryBridge"
-      ]
-    },
     "/Users/mac/CascadeProjects/2048/contracts/contracts/NyaltxStaking.sol": {
       "lastModificationDate": 1764716938814,
       "contentHash": "3076bcc8b2cc2689a3170170d90ec9ac",
@@ -2909,8 +2807,8 @@
       ]
     },
     "/Users/mac/CascadeProjects/2048/contracts/contracts/Treasury.sol": {
-      "lastModificationDate": 1765811124902,
-      "contentHash": "fa9869fa5ab384fbae92f8783c0f1172",
+      "lastModificationDate": 1766225719323,
+      "contentHash": "0db6f0316a66ee5b1f3dfc3936b06f1a",
       "sourceName": "contracts/Treasury.sol",
       "solcConfig": {
         "version": "0.8.25",
@@ -2951,8 +2849,8 @@
       ]
     },
     "/Users/mac/CascadeProjects/2048/contracts/contracts/FolderEscrow.sol": {
-      "lastModificationDate": 1765809947897,
-      "contentHash": "a1353c1f292daf08393cf0db334ae3d3",
+      "lastModificationDate": 1766225704159,
+      "contentHash": "b2fa252b3c19d7685721daf46b420813",
       "sourceName": "contracts/FolderEscrow.sol",
       "solcConfig": {
         "version": "0.8.25",
@@ -2993,8 +2891,8 @@
       ]
     },
     "/Users/mac/CascadeProjects/2048/contracts/contracts/FolderFactory.sol": {
-      "lastModificationDate": 1765811143140,
-      "contentHash": "0cd86c86098afe63bf988f58755c651e",
+      "lastModificationDate": 1766226642735,
+      "contentHash": "72b5951a67b3bd99c042668eb509dbbd",
       "sourceName": "contracts/FolderFactory.sol",
       "solcConfig": {
         "version": "0.8.25",

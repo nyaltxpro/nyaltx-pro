@@ -59,7 +59,7 @@ contract FolderRegistryFactory is AccessControl {
             FolderEscrow folder = FolderEscrow(allFolders[i]);
             address[] memory beneficiaries = folder.getBeneficiaries();
             for (uint j = 0; j < beneficiaries.length; j++) {
-                (, uint256 claimed,,,,,) = folder.beneficiaries(beneficiaries[j]);
+                (, uint256 claimed,,,,,,) = folder.beneficiaries(beneficiaries[j]);
                 total += claimed + folder._vestedAmount(beneficiaries[j]) - claimed;
             }
         }
@@ -70,7 +70,7 @@ contract FolderRegistryFactory is AccessControl {
             FolderEscrow folder = FolderEscrow(allFolders[i]);
             address[] memory beneficiaries = folder.getBeneficiaries();
             for (uint j = 0; j < beneficiaries.length; j++) {
-                (, uint256 claimed,,,,,) = folder.beneficiaries(beneficiaries[j]);
+                (, uint256 claimed,,,,,,) = folder.beneficiaries(beneficiaries[j]);
                 totalClaimed += claimed;
             }
         }
@@ -81,7 +81,7 @@ contract FolderRegistryFactory is AccessControl {
             FolderEscrow folder = FolderEscrow(allFolders[i]);
             address[] memory beneficiaries = folder.getBeneficiaries();
             for (uint j = 0; j < beneficiaries.length; j++) {
-                (, uint256 claimed,,,,,) = folder.beneficiaries(beneficiaries[j]);
+                (, uint256 claimed,,,,,,) = folder.beneficiaries(beneficiaries[j]);
                 uint256 vested = folder._vestedAmount(beneficiaries[j]);
                 totalLocked += vested - claimed;
             }
