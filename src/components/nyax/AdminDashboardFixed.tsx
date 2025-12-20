@@ -121,6 +121,7 @@ export default function AdminDashboardFixed() {
         vestingStart?: number;
         vestingCliff?: number;
         vestingDuration?: number;
+
     }
     const [factoryFolders, setFactoryFolders] = useState<FactoryFolder[]>([]);
     const [factoryLoading, setFactoryLoading] = useState(false);
@@ -138,6 +139,7 @@ export default function AdminDashboardFixed() {
     // Beneficiary vesting details
     interface BeneficiaryVesting {
         address: string;
+        walletName?: string;
         totalAllocation: string;
         claimed: string;
         vested: string;
@@ -149,6 +151,8 @@ export default function AdminDashboardFixed() {
         cancelled: boolean;
     }
     const [beneficiaryVestings, setBeneficiaryVestings] = useState<Record<string, BeneficiaryVesting[]>>({});
+    const [folderBalances, setFolderBalances] = useState<Record<string, string>>({});
+    const [folderBalancesLoading, setFolderBalancesLoading] = useState(false);
     const [vestingLoading, setVestingLoading] = useState(false);
 
     // Treasury balance state
@@ -1336,6 +1340,7 @@ export default function AdminDashboardFixed() {
 
             return {
                 address: beneficiaryAddress,
+                walletName: beneficiaryInfo.walletName,
                 totalAllocation: ethersLib.formatEther(vestingCalc.totalAllocation),
                 claimed: ethersLib.formatEther(vestingCalc.claimed),
                 vested: ethersLib.formatEther(vestingCalc.vested),
@@ -1726,6 +1731,11 @@ export default function AdminDashboardFixed() {
                             <div className="text-sm font-semibold text-gray-300 mb-2">Wallets ({beneficiaryVestings[folder.id].length}):</div>
                             {beneficiaryVestings[folder.id].map((vesting, idx) => (
                                 <div key={idx} className="bg-white/5 rounded-lg p-3 space-y-1">
+                                    {vesting.walletName && (
+                                        <div className="text-sm font-semibold text-white mb-1">
+                                            {vesting.walletName}
+                                        </div>
+                                    )}
                                     <div className="flex items-center justify-between">
                                         <span className="text-xs text-gray-400 font-mono break-all">
                                             {vesting.address}
