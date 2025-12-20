@@ -13,6 +13,8 @@ contract FolderEscrow is AccessControl, Pausable {
     address public immutable registry;
 
     struct Beneficiary {
+        uint256 id;
+        address wallet;
         uint256 totalAllocation;
         uint256 claimed;
         uint256 start;
@@ -23,14 +25,17 @@ contract FolderEscrow is AccessControl, Pausable {
         string walletName;
     }
 
-    // Mapping of wallet -> Beneficiary
-    mapping(address => Beneficiary) public beneficiaries;
+    // Array of all beneficiaries (supports multiple entries per wallet)
+    Beneficiary[] public beneficiaries;
 
-    // Array of beneficiary addresses
-    address[] public beneficiaryList;
+    // Mapping of wallet -> array of beneficiary IDs
+    mapping(address => uint256[]) public walletToBeneficiaryIds;
 
-    // Mapping of wallet name hash -> wallet address
-    mapping(bytes32 => address) public walletByNameHash;
+    // Mapping of wallet name hash -> beneficiary ID
+    mapping(bytes32 => uint256) public walletByNameHash;
+
+    // Counter for beneficiary IDs
+    uint256 public nextBeneficiaryId;
 
     // Mapping to track folder balance (total tokens received from treasury)
     uint256 public folderBalance;
@@ -77,12 +82,20 @@ contract FolderEscrow is AccessControl, Pausable {
         require(wallet != address(0), "Invalid wallet");
         require(totalAllocation > 0, "Allocation cannot be zero");
         require(bytes(walletName).length > 0, "Wallet name required");
-        require(beneficiaries[wallet].totalAllocation == 0, "Already exists");
 
         bytes32 nameHash = keccak256(abi.encodePacked(walletName));
-        require(walletByNameHash[nameHash] == address(0), "Wallet name already used");
+        require(walletByNameHash[nameHash] == 0, "Wallet name already used");
 
-        beneficiaries[wallet] = Beneficiary(
+        // Check that total allocations don't exceed folder balance
+        uint256 currentTotalAllocated = _getTotalAllocated();
+        uint256 folderTokenBalance = token.balanceOf(address(this));
+        require(currentTotalAllocated + totalAllocation <= folderTokenBalance, "Insufficient folder balance");
+
+        uint256 beneficiaryId = nextBeneficiaryId++;
+
+        beneficiaries.push(Beneficiary(
+            beneficiaryId,
+            wallet,
             totalAllocation,
             0,
             start,
@@ -91,53 +104,69 @@ contract FolderEscrow is AccessControl, Pausable {
             false,
             false,
             walletName
-        );
+        ));
 
-        beneficiaryList.push(wallet);
-        walletByNameHash[nameHash] = wallet;
+        walletToBeneficiaryIds[wallet].push(beneficiaryId);
+        walletByNameHash[nameHash] = beneficiaryId;
 
         emit BeneficiaryAdded(wallet, walletName, totalAllocation, start, cliff, duration);
     }
 
-    function pauseBeneficiary(address wallet) external onlyRole(FOLDER_ADMIN_ROLE) {
-        beneficiaries[wallet].paused = true;
-        emit BeneficiaryPaused(wallet);
+    function pauseBeneficiary(uint256 beneficiaryId) external onlyRole(FOLDER_ADMIN_ROLE) {
+        require(beneficiaryId < beneficiaries.length, "Invalid beneficiary ID");
+        beneficiaries[beneficiaryId].paused = true;
+        emit BeneficiaryPaused(beneficiaries[beneficiaryId].wallet);
     }
 
-    function resumeBeneficiary(address wallet) external onlyRole(FOLDER_ADMIN_ROLE) {
-        beneficiaries[wallet].paused = false;
-        emit BeneficiaryResumed(wallet);
+    function resumeBeneficiary(uint256 beneficiaryId) external onlyRole(FOLDER_ADMIN_ROLE) {
+        require(beneficiaryId < beneficiaries.length, "Invalid beneficiary ID");
+        beneficiaries[beneficiaryId].paused = false;
+        emit BeneficiaryResumed(beneficiaries[beneficiaryId].wallet);
     }
 
-    function cancelBeneficiary(address wallet) external onlyRole(FOLDER_ADMIN_ROLE) {
-        beneficiaries[wallet].cancelled = true;
-        emit BeneficiaryCancelled(wallet);
+    function cancelBeneficiary(uint256 beneficiaryId) external onlyRole(FOLDER_ADMIN_ROLE) {
+        require(beneficiaryId < beneficiaries.length, "Invalid beneficiary ID");
+        beneficiaries[beneficiaryId].cancelled = true;
+        emit BeneficiaryCancelled(beneficiaries[beneficiaryId].wallet);
     }
 
     // ------------------------
     // Claiming
     // ------------------------
     function claim() external whenNotPaused {
-        Beneficiary storage b = beneficiaries[msg.sender];
-        require(!b.paused, "Beneficiary paused");
-        require(!b.cancelled, "Beneficiary cancelled");
-        require(block.timestamp >= b.start + b.cliff, "Cliff not reached");
+        uint256[] memory beneficiaryIds = walletToBeneficiaryIds[msg.sender];
+        require(beneficiaryIds.length > 0, "No beneficiary entries");
 
-        uint256 vested = _vestedAmount(msg.sender);
-        uint256 claimable = vested - b.claimed;
-        require(claimable > 0, "Nothing to claim");
+        uint256 totalClaimable = 0;
 
-        b.claimed += claimable;
-        token.transfer(msg.sender, claimable);
+        for (uint256 i = 0; i < beneficiaryIds.length; i++) {
+            uint256 beneficiaryId = beneficiaryIds[i];
+            Beneficiary storage b = beneficiaries[beneficiaryId];
 
-        emit Claimed(msg.sender, claimable);
+            if (b.paused || b.cancelled) continue;
+            if (block.timestamp < b.start + b.cliff) continue;
+
+            uint256 vested = _vestedAmount(beneficiaryId);
+            uint256 claimable = vested - b.claimed;
+
+            if (claimable > 0) {
+                b.claimed += claimable;
+                totalClaimable += claimable;
+            }
+        }
+
+        require(totalClaimable > 0, "Nothing to claim");
+        token.transfer(msg.sender, totalClaimable);
+
+        emit Claimed(msg.sender, totalClaimable);
     }
 
     // ------------------------
     // Vesting Calculation
     // ------------------------
-    function _vestedAmount(address wallet) public view returns (uint256) {
-        Beneficiary memory b = beneficiaries[wallet];
+    function _vestedAmount(uint256 beneficiaryId) public view returns (uint256) {
+        require(beneficiaryId < beneficiaries.length, "Invalid beneficiary ID");
+        Beneficiary memory b = beneficiaries[beneficiaryId];
         if (block.timestamp < b.start + b.cliff) return 0;
 
         uint256 elapsed = block.timestamp - b.start;
@@ -147,10 +176,57 @@ contract FolderEscrow is AccessControl, Pausable {
     }
 
     // ------------------------
+    // Internal Helper Functions
+    // ------------------------
+    function _getTotalAllocated() internal view returns (uint256) {
+        uint256 total = 0;
+        for (uint256 i = 0; i < beneficiaries.length; i++) {
+            total += beneficiaries[i].totalAllocation;
+        }
+        return total;
+    }
+
+    // ------------------------
     // Views
     // ------------------------
-    function getBeneficiaries() external view returns (address[] memory) {
-        return beneficiaryList;
+    function getTotalAllocated() external view returns (uint256) {
+        return _getTotalAllocated();
+    }
+
+    function getBeneficiaryCount() external view returns (uint256) {
+        return beneficiaries.length;
+    }
+
+    function getBeneficiaryById(uint256 beneficiaryId) external view returns (
+        uint256 id,
+        address wallet,
+        uint256 totalAllocation,
+        uint256 claimed,
+        uint256 start,
+        uint256 cliff,
+        uint256 duration,
+        bool paused,
+        bool cancelled,
+        string memory walletName
+    ) {
+        require(beneficiaryId < beneficiaries.length, "Invalid beneficiary ID");
+        Beneficiary memory b = beneficiaries[beneficiaryId];
+        return (
+            b.id,
+            b.wallet,
+            b.totalAllocation,
+            b.claimed,
+            b.start,
+            b.cliff,
+            b.duration,
+            b.paused,
+            b.cancelled,
+            b.walletName
+        );
+    }
+
+    function getBeneficiaryIdsByWallet(address wallet) external view returns (uint256[] memory) {
+        return walletToBeneficiaryIds[wallet];
     }
 
     function getBeneficiaryInfo(address wallet) external view returns (
@@ -163,7 +239,11 @@ contract FolderEscrow is AccessControl, Pausable {
         bool cancelled,
         string memory walletName
     ) {
-        Beneficiary memory b = beneficiaries[wallet];
+        uint256[] memory beneficiaryIds = walletToBeneficiaryIds[wallet];
+        require(beneficiaryIds.length > 0, "No beneficiary entries");
+        
+        // Return info for the first beneficiary entry (for backward compatibility)
+        Beneficiary memory b = beneficiaries[beneficiaryIds[0]];
         return (
             b.totalAllocation,
             b.claimed,
@@ -176,26 +256,26 @@ contract FolderEscrow is AccessControl, Pausable {
         );
     }
 
-    function getWalletByName(string calldata walletName) external view returns (address) {
+    function getWalletByName(string calldata walletName) external view returns (uint256) {
         bytes32 nameHash = keccak256(abi.encodePacked(walletName));
         return walletByNameHash[nameHash];
     }
 
-    function updateWalletName(address wallet, string calldata newName) external onlyRole(FOLDER_ADMIN_ROLE) {
-        require(beneficiaries[wallet].totalAllocation > 0, "Wallet not found");
+    function updateWalletName(uint256 beneficiaryId, string calldata newName) external onlyRole(FOLDER_ADMIN_ROLE) {
+        require(beneficiaryId < beneficiaries.length, "Invalid beneficiary ID");
         require(bytes(newName).length > 0, "Name cannot be empty");
 
         bytes32 newNameHash = keccak256(abi.encodePacked(newName));
-        require(walletByNameHash[newNameHash] == address(0), "Name already used");
+        require(walletByNameHash[newNameHash] == 0, "Name already used");
 
-        string memory oldName = beneficiaries[wallet].walletName;
+        string memory oldName = beneficiaries[beneficiaryId].walletName;
         bytes32 oldNameHash = keccak256(abi.encodePacked(oldName));
         
         delete walletByNameHash[oldNameHash];
-        walletByNameHash[newNameHash] = wallet;
-        beneficiaries[wallet].walletName = newName;
+        walletByNameHash[newNameHash] = beneficiaryId;
+        beneficiaries[beneficiaryId].walletName = newName;
 
-        emit WalletNameUpdated(wallet, oldName, newName);
+        emit WalletNameUpdated(beneficiaries[beneficiaryId].wallet, oldName, newName);
     }
 
     function getFolderBalance() external view returns (uint256) {

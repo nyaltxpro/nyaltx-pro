@@ -2849,8 +2849,8 @@
       ]
     },
     "/Users/mac/CascadeProjects/2048/contracts/contracts/FolderEscrow.sol": {
-      "lastModificationDate": 1766225704159,
-      "contentHash": "b2fa252b3c19d7685721daf46b420813",
+      "lastModificationDate": 1766255560603,
+      "contentHash": "292ef716a8824fef8dcec511b23ebf9a",
       "sourceName": "contracts/FolderEscrow.sol",
       "solcConfig": {
         "version": "0.8.25",
@@ -2891,8 +2891,8 @@
       ]
     },
     "/Users/mac/CascadeProjects/2048/contracts/contracts/FolderFactory.sol": {
-      "lastModificationDate": 1766226642735,
-      "contentHash": "72b5951a67b3bd99c042668eb509dbbd",
+      "lastModificationDate": 1766255769584,
+      "contentHash": "08a914028d8a9938f46a3b77e5769334",
       "sourceName": "contracts/FolderFactory.sol",
       "solcConfig": {
         "version": "0.8.25",

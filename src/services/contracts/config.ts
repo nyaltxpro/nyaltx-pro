@@ -13,7 +13,7 @@ export const CONTRACT_ADDRESSES: any = {
   vestingFactory: process.env.NEXT_PUBLIC_VESTING_FACTORY_ADDRESS || '',
   treasuryBridge: process.env.NEXT_PUBLIC_TREASURY_BRIDGE_ADDRESS || '0x7ab3eBb87afa9A921d0770Fa304F20Fc8D2a4763',
   folderEscrow: process.env.NEXT_PUBLIC_FOLDER_ESCROW_ADDRESS || '',
-  folderEscrowFactory: '0x283b56eB46c9cfdFef64EC122E0dA89140508110',
+  folderEscrowFactory: '0x97E354A506f22a233AD47C19138Abed1d8934925',
 
 };
 
@@ -289,30 +289,34 @@ export const CONTRACT_ABIS = {
     'function folderName() view returns (string)',
     'function registry() view returns (address)',
     'function folderBalance() view returns (uint256)',
+    'function nextBeneficiaryId() view returns (uint256)',
     
     // Beneficiary Management
     'function addBeneficiary(address wallet, uint256 totalAllocation, uint256 start, uint256 cliff, uint256 duration, string walletName)',
-    'function pauseBeneficiary(address wallet)',
-    'function resumeBeneficiary(address wallet)',
-    'function cancelBeneficiary(address wallet)',
-    'function updateWalletName(address wallet, string newName)',
+    'function pauseBeneficiary(uint256 beneficiaryId)',
+    'function resumeBeneficiary(uint256 beneficiaryId)',
+    'function cancelBeneficiary(uint256 beneficiaryId)',
+    'function updateWalletName(uint256 beneficiaryId, string newName)',
     
     // Claiming
     'function claim()',
     
     // Vesting Calculation
-    'function _vestedAmount(address wallet) view returns (uint256)',
+    'function _vestedAmount(uint256 beneficiaryId) view returns (uint256)',
     
     // Views
-    'function getBeneficiaries() view returns (address[])',
+    'function getTotalAllocated() view returns (uint256)',
+    'function getBeneficiaryCount() view returns (uint256)',
+    'function getBeneficiaryById(uint256 beneficiaryId) view returns (uint256 id, address wallet, uint256 totalAllocation, uint256 claimed, uint256 start, uint256 cliff, uint256 duration, bool paused, bool cancelled, string walletName)',
+    'function getBeneficiaryIdsByWallet(address wallet) view returns (uint256[])',
     'function getBeneficiaryInfo(address wallet) view returns (uint256 totalAllocation, uint256 claimed, uint256 start, uint256 cliff, uint256 duration, bool paused, bool cancelled, string walletName)',
-    'function getWalletByName(string walletName) view returns (address)',
+    'function getWalletByName(string walletName) view returns (uint256)',
     'function getFolderBalance() view returns (uint256)',
     
     // Mappings
-    'function beneficiaries(address) view returns (uint256 totalAllocation, uint256 claimed, uint256 start, uint256 cliff, uint256 duration, bool paused, bool cancelled, string walletName)',
-    'function beneficiaryList(uint256) view returns (address)',
-    'function walletByNameHash(bytes32) view returns (address)',
+    'function beneficiaries(uint256) view returns (uint256 id, address wallet, uint256 totalAllocation, uint256 claimed, uint256 start, uint256 cliff, uint256 duration, bool paused, bool cancelled, string walletName)',
+    'function walletToBeneficiaryIds(address, uint256) view returns (uint256)',
+    'function walletByNameHash(bytes32) view returns (uint256)',
     
     // Folder Controls
     'function pauseFolder()',

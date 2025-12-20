@@ -2,6 +2,8 @@ import { ethers } from 'ethers';
 import { CONTRACT_ABIS } from './config';
 
 export interface Beneficiary {
+  id: bigint;
+  wallet: string;
   totalAllocation: bigint;
   claimed: bigint;
   start: bigint;
@@ -9,6 +11,7 @@ export interface Beneficiary {
   duration: bigint;
   paused: boolean;
   cancelled: boolean;
+  walletName: string;
 }
 
 export interface BeneficiaryInfo {
@@ -73,6 +76,10 @@ export class FolderEscrowService {
     return await this.contract.getFolderBalance();
   }
 
+  async getTotalAllocated(): Promise<bigint> {
+    return await this.contract.getTotalAllocated();
+  }
+
   // Beneficiary Management
   async addBeneficiary(
     wallet: string,
@@ -87,24 +94,24 @@ export class FolderEscrowService {
     return await contractWithSigner.addBeneficiary(wallet, totalAllocation, start, cliff, duration, walletName);
   }
 
-  async pauseBeneficiary(wallet: string, signer: ethers.Signer): Promise<ethers.ContractTransaction> {
+  async pauseBeneficiary(beneficiaryId: number, signer: ethers.Signer): Promise<ethers.ContractTransaction> {
     const contractWithSigner = this.getContractWithSigner(signer);
-    return await contractWithSigner.pauseBeneficiary(wallet);
+    return await contractWithSigner.pauseBeneficiary(beneficiaryId);
   }
 
-  async resumeBeneficiary(wallet: string, signer: ethers.Signer): Promise<ethers.ContractTransaction> {
+  async resumeBeneficiary(beneficiaryId: number, signer: ethers.Signer): Promise<ethers.ContractTransaction> {
     const contractWithSigner = this.getContractWithSigner(signer);
-    return await contractWithSigner.resumeBeneficiary(wallet);
+    return await contractWithSigner.resumeBeneficiary(beneficiaryId);
   }
 
-  async cancelBeneficiary(wallet: string, signer: ethers.Signer): Promise<ethers.ContractTransaction> {
+  async cancelBeneficiary(beneficiaryId: number, signer: ethers.Signer): Promise<ethers.ContractTransaction> {
     const contractWithSigner = this.getContractWithSigner(signer);
-    return await contractWithSigner.cancelBeneficiary(wallet);
+    return await contractWithSigner.cancelBeneficiary(beneficiaryId);
   }
 
-  async updateWalletName(wallet: string, newName: string, signer: ethers.Signer): Promise<ethers.ContractTransaction> {
+  async updateWalletName(beneficiaryId: number, newName: string, signer: ethers.Signer): Promise<ethers.ContractTransaction> {
     const contractWithSigner = this.getContractWithSigner(signer);
-    return await contractWithSigner.updateWalletName(wallet, newName);
+    return await contractWithSigner.updateWalletName(beneficiaryId, newName);
   }
 
   // Claiming
@@ -114,14 +121,26 @@ export class FolderEscrowService {
   }
 
   // Vesting Calculation
-  async getVestedAmount(wallet: string): Promise<bigint> {
-    return await this.contract._vestedAmount(wallet);
+  async getVestedAmount(beneficiaryId: number): Promise<bigint> {
+    return await this.contract._vestedAmount(beneficiaryId);
+  }
+
+  async getVestedAmountForWallet(wallet: string): Promise<bigint> {
+    const beneficiaryIds = await this.getBeneficiaryIdsByWallet(wallet);
+    if (beneficiaryIds.length === 0) return BigInt(0);
+    
+    let totalVested = BigInt(0);
+    for (const id of beneficiaryIds) {
+      const vested = await this.getVestedAmount(Number(id));
+      totalVested += vested;
+    }
+    return totalVested;
   }
 
   async calculateVesting(wallet: string): Promise<VestingCalculation> {
     const [beneficiaryInfo, vestedAmount] = await Promise.all([
       this.getBeneficiaryInfo(wallet),
-      this.getVestedAmount(wallet)
+      this.getVestedAmountForWallet(wallet)
     ]);
 
     const claimable = vestedAmount - beneficiaryInfo.claimed;
@@ -141,8 +160,41 @@ export class FolderEscrowService {
   }
 
   // Views
-  async getBeneficiaries(): Promise<string[]> {
-    return await this.contract.getBeneficiaries();
+  async getBeneficiaryCount(): Promise<number> {
+    const count = await this.contract.getBeneficiaryCount();
+    return Number(count);
+  }
+
+  async getBeneficiaryById(beneficiaryId: number): Promise<Beneficiary> {
+    const result = await this.contract.getBeneficiaryById(beneficiaryId);
+    return {
+      id: result[0],
+      wallet: result[1],
+      totalAllocation: result[2],
+      claimed: result[3],
+      start: result[4],
+      cliff: result[5],
+      duration: result[6],
+      paused: result[7],
+      cancelled: result[8],
+      walletName: result[9]
+    };
+  }
+
+  async getBeneficiaryIdsByWallet(wallet: string): Promise<bigint[]> {
+    return await this.contract.getBeneficiaryIdsByWallet(wallet);
+  }
+
+  async getAllBeneficiaries(): Promise<Beneficiary[]> {
+    const count = await this.getBeneficiaryCount();
+    const beneficiaries: Beneficiary[] = [];
+    
+    for (let i = 0; i < count; i++) {
+      const beneficiary = await this.getBeneficiaryById(i);
+      beneficiaries.push(beneficiary);
+    }
+    
+    return beneficiaries;
   }
 
   async getBeneficiaryInfo(wallet: string): Promise<BeneficiaryInfo> {
@@ -159,26 +211,26 @@ export class FolderEscrowService {
     };
   }
 
-  async getWalletByName(walletName: string): Promise<string> {
-    return await this.contract.getWalletByName(walletName);
+  async getBeneficiaryIdByName(walletName: string): Promise<number> {
+    const id = await this.contract.getWalletByName(walletName);
+    return Number(id);
   }
 
-  // Mappings
-  async getBeneficiary(wallet: string): Promise<Beneficiary> {
-    const result = await this.contract.beneficiaries(wallet);
+  // Direct contract mappings
+  async getBeneficiaryFromMapping(beneficiaryId: number): Promise<Beneficiary> {
+    const result = await this.contract.beneficiaries(beneficiaryId);
     return {
-      totalAllocation: result[0],
-      claimed: result[1],
-      start: result[2],
-      cliff: result[3],
-      duration: result[4],
-      paused: result[5],
-      cancelled: result[6]
+      id: result[0],
+      wallet: result[1],
+      totalAllocation: result[2],
+      claimed: result[3],
+      start: result[4],
+      cliff: result[5],
+      duration: result[6],
+      paused: result[7],
+      cancelled: result[8],
+      walletName: result[9]
     };
-  }
-
-  async getBeneficiaryByIndex(index: number): Promise<string> {
-    return await this.contract.beneficiaryList(index);
   }
 
   // Folder Controls
@@ -277,9 +329,10 @@ export class FolderEscrowService {
 
   // Utility Methods
   async getAllBeneficiariesWithVesting(): Promise<Array<{ wallet: string; info: BeneficiaryInfo; vesting: VestingCalculation }>> {
-    const beneficiaries = await this.getBeneficiaries();
+    const beneficiaries = await this.getAllBeneficiaries();
+    const uniqueWallets = [...new Set(beneficiaries.map(b => b.wallet))];
     const beneficiariesWithVesting = await Promise.all(
-      beneficiaries.map(async (wallet) => {
+      uniqueWallets.map(async (wallet: string) => {
         const [info, vesting] = await Promise.all([
           this.getBeneficiaryInfo(wallet),
           this.calculateVesting(wallet)
@@ -294,36 +347,23 @@ export class FolderEscrowService {
     return beneficiariesWithVesting;
   }
 
-  async getTotalAllocated(): Promise<bigint> {
-    const beneficiaries = await this.getBeneficiaries();
-    let total = BigInt(0);
-    
-    for (const wallet of beneficiaries) {
-      const info = await this.getBeneficiaryInfo(wallet);
-      total += info.totalAllocation;
-    }
-    
-    return total;
-  }
-
   async getTotalClaimed(): Promise<bigint> {
-    const beneficiaries = await this.getBeneficiaries();
+    const beneficiaries = await this.getAllBeneficiaries();
     let total = BigInt(0);
     
-    for (const wallet of beneficiaries) {
-      const info = await this.getBeneficiaryInfo(wallet);
-      total += info.claimed;
+    for (const beneficiary of beneficiaries) {
+      total += beneficiary.claimed;
     }
     
     return total;
   }
 
   async getTotalVested(): Promise<bigint> {
-    const beneficiaries = await this.getBeneficiaries();
+    const beneficiaries = await this.getAllBeneficiaries();
     let total = BigInt(0);
     
-    for (const wallet of beneficiaries) {
-      const vested = await this.getVestedAmount(wallet);
+    for (const beneficiary of beneficiaries) {
+      const vested = await this.getVestedAmount(Number(beneficiary.id));
       total += vested;
     }
     
@@ -342,8 +382,8 @@ export class FolderEscrowService {
     totalVested: bigint;
     isPaused: boolean;
   }> {
-    const [beneficiaries, totalAllocated, totalClaimed, totalVested, isPaused] = await Promise.all([
-      this.getBeneficiaries(),
+    const [beneficiaryCount, totalAllocated, totalClaimed, totalVested, isPaused] = await Promise.all([
+      this.getBeneficiaryCount(),
       this.getTotalAllocated(),
       this.getTotalClaimed(),
       this.getTotalVested(),
@@ -351,7 +391,7 @@ export class FolderEscrowService {
     ]);
 
     return {
-      totalBeneficiaries: beneficiaries.length,
+      totalBeneficiaries: beneficiaryCount,
       totalAllocated,
       totalClaimed,
       totalVested,

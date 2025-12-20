@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2025-12-20T16:51:06.084Z",
+  "generatedAt": "2025-12-20T18:37:29.104Z",
   "network": "sepolia",
   "contractName": "FolderRegistryFactory",
-  "address": "0x283b56eB46c9cfdFef64EC122E0dA89140508110",
+  "address": "0x97E354A506f22a233AD47C19138Abed1d8934925",
   "deployer": "0x37B4fd549e2Ed52c025Ae2744Ec13fd74627e4dc",
   "governance": "0x37B4fd549e2Ed52c025Ae2744Ec13fd74627e4dc",
-  "transactionHash": "0x41e56331f4d179773e5678c8837b2f24a543c727825996efd4446acc7cc3952f"
+  "transactionHash": "0x07af64757fcdeed91c8cec149d80809475b62b699d4aa5b8853405168b6b1ed7"
 }

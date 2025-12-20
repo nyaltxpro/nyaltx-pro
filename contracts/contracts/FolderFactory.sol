@@ -57,10 +57,10 @@ contract FolderRegistryFactory is AccessControl {
     function totalSupply() external view returns (uint256 total) {
         for (uint i = 0; i < allFolders.length; i++) {
             FolderEscrow folder = FolderEscrow(allFolders[i]);
-            address[] memory beneficiaries = folder.getBeneficiaries();
-            for (uint j = 0; j < beneficiaries.length; j++) {
-                (, uint256 claimed,,,,,,) = folder.beneficiaries(beneficiaries[j]);
-                total += claimed + folder._vestedAmount(beneficiaries[j]) - claimed;
+            uint256 beneficiaryCount = folder.getBeneficiaryCount();
+            for (uint j = 0; j < beneficiaryCount; j++) {
+                uint256 vested = folder._vestedAmount(j);
+                total += vested;
             }
         }
     }
@@ -68,9 +68,9 @@ contract FolderRegistryFactory is AccessControl {
     function circulating() external view returns (uint256 totalClaimed) {
         for (uint i = 0; i < allFolders.length; i++) {
             FolderEscrow folder = FolderEscrow(allFolders[i]);
-            address[] memory beneficiaries = folder.getBeneficiaries();
-            for (uint j = 0; j < beneficiaries.length; j++) {
-                (, uint256 claimed,,,,,,) = folder.beneficiaries(beneficiaries[j]);
+            uint256 beneficiaryCount = folder.getBeneficiaryCount();
+            for (uint j = 0; j < beneficiaryCount; j++) {
+                (,,, uint256 claimed,,,,,,) = folder.beneficiaries(j);
                 totalClaimed += claimed;
             }
         }
@@ -79,10 +79,10 @@ contract FolderRegistryFactory is AccessControl {
     function stakedValue() external view returns (uint256 totalLocked) {
         for (uint i = 0; i < allFolders.length; i++) {
             FolderEscrow folder = FolderEscrow(allFolders[i]);
-            address[] memory beneficiaries = folder.getBeneficiaries();
-            for (uint j = 0; j < beneficiaries.length; j++) {
-                (, uint256 claimed,,,,,,) = folder.beneficiaries(beneficiaries[j]);
-                uint256 vested = folder._vestedAmount(beneficiaries[j]);
+            uint256 beneficiaryCount = folder.getBeneficiaryCount();
+            for (uint j = 0; j < beneficiaryCount; j++) {
+                (,,, uint256 claimed,,,,,,) = folder.beneficiaries(j);
+                uint256 vested = folder._vestedAmount(j);
                 totalLocked += vested - claimed;
             }
         }
@@ -91,7 +91,7 @@ contract FolderRegistryFactory is AccessControl {
     function totalHolders() external view returns (uint256 holders) {
         for (uint i = 0; i < allFolders.length; i++) {
             FolderEscrow folder = FolderEscrow(allFolders[i]);
-            holders += folder.getBeneficiaries().length;
+            holders += folder.getBeneficiaryCount();
         }
     }
 
