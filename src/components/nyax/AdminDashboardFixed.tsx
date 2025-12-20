@@ -843,21 +843,21 @@ export default function AdminDashboardFixed() {
                         const folderEscrow = new FolderEscrowService(folder.address, provider as any);
 
                         // Get all beneficiaries first
-                        const beneficiaries = await folderEscrow.getBeneficiaries();
-                        console.log(`👥 Folder ${folder.name} has ${beneficiaries.length} beneficiaries:`, beneficiaries);
+                        const beneficiaries = await folderEscrow.getAllBeneficiaries();
+                        console.log(`👥 Folder ${folder.name} has ${beneficiaries.length} beneficiary entries:`, beneficiaries);
 
                         // Calculate totalVested by summing individual vested amounts
                         let totalVestedBigInt = BigInt(0);
                         const beneficiaryVestingDetails = [];
 
-                        for (const beneficiaryAddr of beneficiaries) {
-                            const vestedAmount = await folderEscrow.getVestedAmount(beneficiaryAddr);
+                        for (const beneficiary of beneficiaries) {
+                            const vestedAmount = await folderEscrow.getVestedAmount(Number(beneficiary.id));
                             totalVestedBigInt += vestedAmount;
                             beneficiaryVestingDetails.push({
-                                address: beneficiaryAddr,
+                                address: beneficiary.wallet,
                                 vested: ethersLib.formatEther(vestedAmount)
                             });
-                            console.log(`  💰 ${beneficiaryAddr}: ${ethersLib.formatEther(vestedAmount)} NYAX vested`);
+                            console.log(`  💰 ${beneficiary.wallet} (ID: ${beneficiary.id}): ${ethersLib.formatEther(vestedAmount)} NYAX vested`);
                         }
 
                         console.log(`📊 Total Vested (calculated): ${ethersLib.formatEther(totalVestedBigInt)} NYAX`);
@@ -877,10 +877,10 @@ export default function AdminDashboardFixed() {
                         let vestingDuration = 0;
                         if (beneficiaries.length > 0) {
                             try {
-                                const firstBeneficiaryInfo = await folderEscrow.getBeneficiaryInfo(beneficiaries[0]);
-                                vestingStart = Number(firstBeneficiaryInfo.start);
-                                vestingCliff = Number(firstBeneficiaryInfo.cliff);
-                                vestingDuration = Number(firstBeneficiaryInfo.duration);
+                                const firstBeneficiary = beneficiaries[0];
+                                vestingStart = Number(firstBeneficiary.start);
+                                vestingCliff = Number(firstBeneficiary.cliff);
+                                vestingDuration = Number(firstBeneficiary.duration);
                             } catch (err) {
                                 console.warn(`Could not fetch vesting time info for ${folder.name}:`, err);
                             }
@@ -1382,8 +1382,8 @@ export default function AdminDashboardFixed() {
 
             // Get all beneficiaries
             console.log('👥 Fetching beneficiaries from contract...');
-            const beneficiaries = await folderEscrow.getBeneficiaries();
-            console.log(`👥 Found ${beneficiaries.length} beneficiaries:`, beneficiaries);
+            const beneficiaries = await folderEscrow.getAllBeneficiaries();
+            console.log(`👥 Found ${beneficiaries.length} beneficiary entries:`, beneficiaries);
 
             if (beneficiaries.length === 0) {
                 console.warn('⚠️ No beneficiaries found in this folder');
@@ -1397,9 +1397,9 @@ export default function AdminDashboardFixed() {
             // Calculate vesting for each beneficiary
             console.log('👥 Calculating vesting details for each beneficiary...');
             const vestings = await Promise.all(
-                beneficiaries.map(async (beneficiaryAddr) => {
-                    console.log(`  → Processing ${beneficiaryAddr}`);
-                    return await calculateVestedAmount(folderAddress, beneficiaryAddr);
+                beneficiaries.map(async (beneficiary) => {
+                    console.log(`  → Processing ${beneficiary.wallet} (ID: ${beneficiary.id})`);
+                    return await calculateVestedAmount(folderAddress, beneficiary.wallet);
                 })
             );
 
