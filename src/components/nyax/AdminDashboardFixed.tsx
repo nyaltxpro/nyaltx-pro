@@ -138,6 +138,7 @@ export default function AdminDashboardFixed() {
 
     // Beneficiary vesting details
     interface BeneficiaryVesting {
+        beneficiaryId?: number;
         address: string;
         walletName?: string;
         totalAllocation: string;
@@ -1127,7 +1128,7 @@ export default function AdminDashboardFixed() {
         }
     };
 
-    const handlePauseBeneficiary = async (folderAddress: string, beneficiaryAddress: string) => {
+    const handlePauseBeneficiary = async (folderAddress: string, beneficiaryId: number) => {
         if (!await ensureSepolia(setFormError)) return;
         if (!daoService) {
             setFormError('DAO service unavailable');
@@ -1149,7 +1150,7 @@ export default function AdminDashboardFixed() {
             const browserProvider = new ethersLib.BrowserProvider(ethereum);
             const folderEscrow = new FolderEscrowService(folderAddress, browserProvider);
 
-            await folderEscrow.pauseBeneficiary(beneficiaryAddress, signer);
+            await folderEscrow.pauseBeneficiary(beneficiaryId, signer);
             await loadFactoryFolders();
             setFormError(null);
         } catch (err) {
@@ -1157,7 +1158,7 @@ export default function AdminDashboardFixed() {
         }
     };
 
-    const handleResumeBeneficiary = async (folderAddress: string, beneficiaryAddress: string) => {
+    const handleResumeBeneficiary = async (folderAddress: string, beneficiaryId: number) => {
         if (!await ensureSepolia(setFormError)) return;
         if (!daoService) {
             setFormError('DAO service unavailable');
@@ -1179,7 +1180,7 @@ export default function AdminDashboardFixed() {
             const browserProvider = new ethersLib.BrowserProvider(ethereum);
             const folderEscrow = new FolderEscrowService(folderAddress, browserProvider);
 
-            await folderEscrow.resumeBeneficiary(beneficiaryAddress, signer);
+            await folderEscrow.resumeBeneficiary(beneficiaryId, signer);
             await loadFactoryFolders();
             setFormError(null);
         } catch (err) {
@@ -1187,7 +1188,7 @@ export default function AdminDashboardFixed() {
         }
     };
 
-    const handleCancelBeneficiary = async (folderAddress: string, beneficiaryAddress: string) => {
+    const handleCancelBeneficiary = async (folderAddress: string, beneficiaryId: number) => {
         if (!await ensureSepolia(setFormError)) return;
         if (!daoService) {
             setFormError('DAO service unavailable');
@@ -1209,7 +1210,7 @@ export default function AdminDashboardFixed() {
             const browserProvider = new ethersLib.BrowserProvider(ethereum);
             const folderEscrow = new FolderEscrowService(folderAddress, browserProvider);
 
-            await folderEscrow.cancelBeneficiary(beneficiaryAddress, signer);
+            await folderEscrow.cancelBeneficiary(beneficiaryId, signer);
             await loadFactoryFolders();
             setFormError(null);
         } catch (err) {
@@ -1322,6 +1323,16 @@ export default function AdminDashboardFixed() {
             const provider = new ethersLib.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL || 'https://sepolia.infura.io/v3/YOUR_INFURA_KEY');
             const folderEscrow = new FolderEscrowService(folderAddress, provider as any);
 
+            // Get beneficiary IDs for this wallet
+            const beneficiaryIds = await folderEscrow.getBeneficiaryIdsByWallet(beneficiaryAddress);
+            if (beneficiaryIds.length === 0) {
+                console.warn(`No beneficiary entries found for ${beneficiaryAddress}`);
+                return null;
+            }
+
+            // Use the first beneficiary ID for this wallet
+            const beneficiaryId = Number(beneficiaryIds[0]);
+
             // Get vesting calculation
             const vestingCalc = await folderEscrow.calculateVesting(beneficiaryAddress);
             const beneficiaryInfo = await folderEscrow.getBeneficiaryInfo(beneficiaryAddress);
@@ -1332,7 +1343,7 @@ export default function AdminDashboardFixed() {
             const elapsed = currentTime - Number(beneficiaryInfo.start);
             const vestingProgress = elapsed > 0 ? Math.min((elapsed / Number(beneficiaryInfo.duration)) * 100, 100) : 0;
 
-            console.log(`🔍 Beneficiary ${beneficiaryAddress.slice(0, 6)}...${beneficiaryAddress.slice(-4)} Vesting Details:`, {
+            console.log(`🔍 Beneficiary ${beneficiaryAddress.slice(0, 6)}...${beneficiaryAddress.slice(-4)} (ID: ${beneficiaryId}) Vesting Details:`, {
                 totalAllocation: ethersLib.formatEther(vestingCalc.totalAllocation),
                 vested: ethersLib.formatEther(vestingCalc.vested),
                 claimed: ethersLib.formatEther(vestingCalc.claimed),
@@ -1345,6 +1356,7 @@ export default function AdminDashboardFixed() {
             });
 
             return {
+                beneficiaryId: beneficiaryId,
                 address: beneficiaryAddress,
                 walletName: beneficiaryInfo.walletName,
                 totalAllocation: ethersLib.formatEther(vestingCalc.totalAllocation),
@@ -1417,22 +1429,6 @@ export default function AdminDashboardFixed() {
             alert(`Failed to load beneficiaries: ${err instanceof Error ? err.message : 'Unknown error'}`);
         } finally {
             setVestingLoading(false);
-        }
-    };
-
-    const getVestedAmountForBeneficiary = async (folderAddress: string, beneficiaryAddress: string): Promise<string> => {
-        try {
-            const { FolderEscrowService } = await import('@/services/contracts/folderEscrowService');
-            const { ethers: ethersLib } = await import('ethers');
-
-            const provider = new ethersLib.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL || 'https://sepolia.infura.io/v3/YOUR_INFURA_KEY');
-            const folderEscrow = new FolderEscrowService(folderAddress, provider as any);
-
-            const vestedAmount = await folderEscrow.getVestedAmount(beneficiaryAddress);
-            return ethersLib.formatEther(vestedAmount);
-        } catch (err) {
-            console.error('Failed to get vested amount:', err);
-            return '0';
         }
     };
 
