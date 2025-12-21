@@ -831,7 +831,7 @@ export default function AdminDashboardFixed() {
             const folderDetails = await daoService.folderFactory.getFoldersWithDetails();
             console.log('Factory folder details:', folderDetails);
 
-            // Enhance with escrow stats for each folder
+            // Enhance with escrow stats for each folder using optimized batch method
             const enhancedFolders: FactoryFolder[] = await Promise.all(
                 folderDetails.map(async (folder: any, index: number) => {
                     try {
@@ -843,62 +843,21 @@ export default function AdminDashboardFixed() {
                         const provider = new ethersLib.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL || 'https://sepolia.infura.io/v3/YOUR_INFURA_KEY');
                         const folderEscrow = new FolderEscrowService(folder.address, provider as any);
 
-                        // Get all beneficiaries first
-                        const beneficiaries = await folderEscrow.getAllBeneficiaries();
-                        console.log(`👥 Folder ${folder.name} has ${beneficiaries.length} beneficiary entries:`, beneficiaries);
+                        // Use optimized method to get all stats in fewer blockchain calls
+                        const stats = await folderEscrow.getFolderStatsOptimized();
 
-                        // Calculate totalVested by summing individual vested amounts
-                        let totalVestedBigInt = BigInt(0);
-                        const beneficiaryVestingDetails = [];
-
-                        for (const beneficiary of beneficiaries) {
-                            const vestedAmount = await folderEscrow.getVestedAmount(Number(beneficiary.id));
-                            totalVestedBigInt += vestedAmount;
-                            beneficiaryVestingDetails.push({
-                                address: beneficiary.wallet,
-                                vested: ethersLib.formatEther(vestedAmount)
-                            });
-                            console.log(`  💰 ${beneficiary.wallet} (ID: ${beneficiary.id}): ${ethersLib.formatEther(vestedAmount)} NYAX vested`);
-                        }
-
-                        console.log(`📊 Total Vested (calculated): ${ethersLib.formatEther(totalVestedBigInt)} NYAX`);
-
-                        // Get folder stats for other metrics
-                        const stats = await folderEscrow.getFolderStats();
-                        const isPaused = await folderEscrow.isPaused();
-
-                        // Get folder balance
-                        const folderBalanceBigInt = await folderEscrow.getFolderBalance();
-                        const folderBalance = ethersLib.formatEther(folderBalanceBigInt);
-                        console.log(`💰 Folder ${folder.name} Balance: ${folderBalance} NYAX`);
-
-                        // Get vesting time information from first beneficiary (if any)
-                        let vestingStart = 0;
-                        let vestingCliff = 0;
-                        let vestingDuration = 0;
-                        if (beneficiaries.length > 0) {
-                            try {
-                                const firstBeneficiary = beneficiaries[0];
-                                vestingStart = Number(firstBeneficiary.start);
-                                vestingCliff = Number(firstBeneficiary.cliff);
-                                vestingDuration = Number(firstBeneficiary.duration);
-                            } catch (err) {
-                                console.warn(`Could not fetch vesting time info for ${folder.name}:`, err);
-                            }
-                        }
-
-                        console.log(`📊 Folder ${folder.name} Stats:`, {
+                        console.log(`📊 Folder ${folder.name} Stats (optimized):`, {
                             totalAllocated: ethersLib.formatEther(stats.totalAllocated),
-                            totalVested: ethersLib.formatEther(totalVestedBigInt),
+                            totalVested: ethersLib.formatEther(stats.totalVested),
                             totalClaimed: ethersLib.formatEther(stats.totalClaimed),
                             beneficiaryCount: stats.totalBeneficiaries,
+                            folderBalance: ethersLib.formatEther(stats.folderBalance),
                             vestingPercentage: stats.totalAllocated > 0
-                                ? ((Number(totalVestedBigInt) / Number(stats.totalAllocated)) * 100).toFixed(2) + '%'
+                                ? ((Number(stats.totalVested) / Number(stats.totalAllocated)) * 100).toFixed(2) + '%'
                                 : '0%',
-                            vestingStart,
-                            vestingCliff,
-                            vestingDuration,
-                            beneficiaryDetails: beneficiaryVestingDetails
+                            vestingStart: stats.vestingStart,
+                            vestingCliff: stats.vestingCliff,
+                            vestingDuration: stats.vestingDuration
                         });
 
                         return {
@@ -908,13 +867,13 @@ export default function AdminDashboardFixed() {
                             createdAt: Number(folder.createdAt),
                             totalAllocated: ethersLib.formatEther(stats.totalAllocated),
                             totalClaimed: ethersLib.formatEther(stats.totalClaimed),
-                            totalVested: ethersLib.formatEther(totalVestedBigInt),
-                            isPaused: isPaused,
+                            totalVested: ethersLib.formatEther(stats.totalVested),
+                            isPaused: stats.isPaused,
                             beneficiaryCount: stats.totalBeneficiaries,
-                            vestingStart,
-                            vestingCliff,
-                            vestingDuration,
-                            folderBalance: folderBalance
+                            vestingStart: stats.vestingStart,
+                            vestingCliff: stats.vestingCliff,
+                            vestingDuration: stats.vestingDuration,
+                            folderBalance: ethersLib.formatEther(stats.folderBalance)
                         };
                     } catch (err) {
                         console.error(`Failed to load stats for folder ${folder.name}:`, err);
@@ -930,7 +889,8 @@ export default function AdminDashboardFixed() {
                             beneficiaryCount: 0,
                             vestingStart: 0,
                             vestingCliff: 0,
-                            vestingDuration: 0
+                            vestingDuration: 0,
+                            folderBalance: '0'
                         };
                     }
                 })

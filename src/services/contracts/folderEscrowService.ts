@@ -399,6 +399,73 @@ export class FolderEscrowService {
     };
   }
 
+  // Optimized method to get all folder data with minimal blockchain calls
+  async getFolderStatsOptimized(): Promise<{
+    totalBeneficiaries: number;
+    totalAllocated: bigint;
+    totalClaimed: bigint;
+    totalVested: bigint;
+    isPaused: boolean;
+    folderBalance: bigint;
+    beneficiaries: Beneficiary[];
+    vestingStart: number;
+    vestingCliff: number;
+    vestingDuration: number;
+  }> {
+    // Fetch all basic data in parallel
+    const [beneficiaryCount, totalAllocated, isPaused, folderBalance] = await Promise.all([
+      this.getBeneficiaryCount(),
+      this.getTotalAllocated(),
+      this.isPaused(),
+      this.getFolderBalance()
+    ]);
+
+    // Get all beneficiaries in parallel
+    const beneficiaries: Beneficiary[] = [];
+    const beneficiaryPromises = [];
+    for (let i = 0; i < beneficiaryCount; i++) {
+      beneficiaryPromises.push(this.getBeneficiaryById(i));
+    }
+    const fetchedBeneficiaries = await Promise.all(beneficiaryPromises);
+    beneficiaries.push(...fetchedBeneficiaries);
+
+    // Calculate totals from beneficiary data (already fetched)
+    let totalClaimed = BigInt(0);
+    let totalVested = BigInt(0);
+    
+    // Get all vested amounts in parallel
+    const vestedPromises = beneficiaries.map(b => this.getVestedAmount(Number(b.id)));
+    const vestedAmounts = await Promise.all(vestedPromises);
+    
+    beneficiaries.forEach((b, index) => {
+      totalClaimed += b.claimed;
+      totalVested += vestedAmounts[index];
+    });
+
+    // Get vesting time info from first beneficiary
+    let vestingStart = 0;
+    let vestingCliff = 0;
+    let vestingDuration = 0;
+    if (beneficiaries.length > 0) {
+      vestingStart = Number(beneficiaries[0].start);
+      vestingCliff = Number(beneficiaries[0].cliff);
+      vestingDuration = Number(beneficiaries[0].duration);
+    }
+
+    return {
+      totalBeneficiaries: beneficiaryCount,
+      totalAllocated,
+      totalClaimed,
+      totalVested,
+      isPaused,
+      folderBalance,
+      beneficiaries,
+      vestingStart,
+      vestingCliff,
+      vestingDuration
+    };
+  }
+
   // Get contract address
   getContractAddress(): string {
     return this.contract.target as string;
