@@ -98,6 +98,7 @@ export default function AdminDashboardFixed() {
 
     const [searchValue, setSearchValue] = useState('');
     const [showAddModal, setShowAddModal] = useState(false);
+    const [localActionPending, setLocalActionPending] = useState(false);
     const [showAllocationModal, setShowAllocationModal] = useState(false);
     const [showPermissionsModal, setShowPermissionsModal] = useState(false);
     const [showVestingModal, setShowVestingModal] = useState(false);
@@ -686,32 +687,77 @@ export default function AdminDashboardFixed() {
 
     const handleSetAllocation = async () => {
         if (!await ensureSepolia(setFormError)) return;
-        if (allocationForm.folderId === -1 || !allocationForm.account || !allocationForm.amount) {
-            setFormError('Folder, address, and amount are required');
+
+        // Comprehensive validation
+        if (allocationForm.folderId === -1) {
+            setFormError('Please select a folder');
             return;
         }
 
+        if (!allocationForm.account) {
+            setFormError('Beneficiary address is required');
+            return;
+        }
+
+        if (!ethers.isAddress(allocationForm.account)) {
+            setFormError('Invalid Ethereum address format');
+            return;
+        }
+
+        if (!allocationForm.amount || isNaN(Number(allocationForm.amount)) || Number(allocationForm.amount) <= 0) {
+            setFormError('Please enter a valid amount greater than 0');
+            return;
+        }
+
+        if (!allocationForm.walletName || allocationForm.walletName.trim() === '') {
+            setFormError('Wallet name is required');
+            return;
+        }
+
+        const cliffDays = Number(allocationForm.cliffDays || '0');
+        const durationDays = Number(allocationForm.durationDays || '365');
+
+        if (isNaN(cliffDays) || cliffDays < 0) {
+            setFormError('Cliff period must be a non-negative number');
+            return;
+        }
+
+        if (isNaN(durationDays) || durationDays <= 0) {
+            setFormError('Duration must be greater than 0');
+            return;
+        }
+
+        setLocalActionPending(true);
+        setFormError(null);
+
         try {
             if (!daoService) {
-                throw new Error('DAO service unavailable');
+                throw new Error('DAO service unavailable. Please refresh the page.');
             }
 
             const signer = daoService.getSigner();
             if (!signer) {
-                throw new Error('Signer is required for beneficiary operations');
+                throw new Error('Wallet signer not available. Please reconnect your wallet.');
             }
 
-            const amount = ethers.parseEther(allocationForm.amount);
+            // Parse amount with error handling
+            let amount: bigint;
+            try {
+                amount = ethers.parseEther(allocationForm.amount);
+            } catch (parseErr) {
+                throw new Error('Invalid amount format. Please enter a valid number.');
+            }
+
             const start = allocationForm.startDate
                 ? BigInt(Math.floor(new Date(allocationForm.startDate).getTime() / 1000))
                 : BigInt(Math.floor(Date.now() / 1000));
-            const cliff = BigInt(Number(allocationForm.cliffDays || '0') * 86400);
-            const duration = BigInt(Number(allocationForm.durationDays || '365') * 86400);
+            const cliff = BigInt(cliffDays * 86400);
+            const duration = BigInt(durationDays * 86400);
 
             // Check if this is a factory folder by looking up the folder address
             const folder = factoryFolders.find(f => f.id === allocationForm.folderId);
             if (!folder) {
-                throw new Error('Folder not found');
+                throw new Error('Selected folder not found. Please refresh and try again.');
             }
 
             // For factory folders, interact directly with the folder contract using FolderEscrowService
@@ -722,21 +768,24 @@ export default function AdminDashboardFixed() {
 
                 const ethereum = (window as any).ethereum;
                 if (!ethereum) {
-                    throw new Error('No Ethereum provider found');
+                    throw new Error('No Ethereum provider found. Please install MetaMask or another Web3 wallet.');
                 }
 
                 const browserProvider = new ethersLib.BrowserProvider(ethereum);
                 const folderEscrow = new FolderEscrowService(folder.address, browserProvider);
 
-                await folderEscrow.addBeneficiary(
+                const tx = await folderEscrow.addBeneficiary(
                     allocationForm.account,
                     amount,
                     start,
                     cliff,
                     duration,
-                    allocationForm.walletName || 'Unnamed Wallet',
+                    allocationForm.walletName.trim(),
                     signer
                 );
+
+                // Transaction submitted
+                console.log('Transaction submitted:', tx);
 
                 // Refresh folder stats after adding beneficiary
                 await loadFactoryFolders();
@@ -746,16 +795,21 @@ export default function AdminDashboardFixed() {
                     throw new Error('FolderEscrow service not available - contract address not configured');
                 }
 
-                await daoService.folderEscrow.addBeneficiary(
+                const tx = await daoService.folderEscrow.addBeneficiary(
                     allocationForm.account,
                     amount,
                     start,
                     cliff,
                     duration,
-                    allocationForm.walletName || 'Unnamed Wallet',
+                    allocationForm.walletName.trim(),
                     signer
                 );
+
+                // Transaction submitted
+                console.log('Transaction submitted:', tx);
             }
+
+            // Success - clear form and close modal
             setFormError(null);
             setShowAllocationModal(false);
             setAllocationForm({
@@ -767,8 +821,31 @@ export default function AdminDashboardFixed() {
                 cliffDays: '0',
                 durationDays: '365',
             });
-        } catch (err) {
-            setFormError(err instanceof Error ? err.message : 'Failed to add beneficiary');
+        } catch (err: any) {
+            console.error('Failed to add beneficiary:', err);
+
+            // Detailed error handling
+            let errorMessage = 'Failed to add beneficiary';
+
+            if (err.code === 'ACTION_REJECTED' || err.code === 4001) {
+                errorMessage = 'Transaction rejected by user';
+            } else if (err.code === 'INSUFFICIENT_FUNDS') {
+                errorMessage = 'Insufficient funds for gas fees';
+            } else if (err.code === 'NETWORK_ERROR') {
+                errorMessage = 'Network error. Please check your connection and try again.';
+            } else if (err.message?.includes('user rejected')) {
+                errorMessage = 'Transaction rejected by user';
+            } else if (err.message?.includes('insufficient funds')) {
+                errorMessage = 'Insufficient funds for gas fees';
+            } else if (err.message?.includes('nonce')) {
+                errorMessage = 'Transaction nonce error. Please try again.';
+            } else if (err.message) {
+                errorMessage = err.message;
+            }
+
+            setFormError(errorMessage);
+        } finally {
+            setLocalActionPending(false);
         }
     };
 
@@ -978,28 +1055,90 @@ export default function AdminDashboardFixed() {
 
     const handleSendToFolder = async () => {
         if (!await ensureSepolia(setFormError)) return;
-        if (!sendToFolderForm.folderAddress || !sendToFolderForm.amount) {
-            setFormError('Folder address and amount are required');
+
+        // Comprehensive validation
+        if (!sendToFolderForm.folderAddress) {
+            setFormError('Folder address is required');
             return;
         }
 
+        if (!ethers.isAddress(sendToFolderForm.folderAddress)) {
+            setFormError('Invalid folder address format');
+            return;
+        }
+
+        if (!sendToFolderForm.amount || isNaN(Number(sendToFolderForm.amount)) || Number(sendToFolderForm.amount) <= 0) {
+            setFormError('Please enter a valid amount greater than 0');
+            return;
+        }
+
+        setLocalActionPending(true);
+        setFormError(null);
+
         try {
             if (!daoService) {
-                throw new Error('DAO service unavailable');
+                throw new Error('DAO service unavailable. Please refresh the page.');
             }
 
             const signer = daoService.getSigner();
             if (!signer) {
-                throw new Error('Signer is required for send to folder');
+                throw new Error('Wallet signer not available. Please reconnect your wallet.');
             }
 
-            const amount = ethers.parseEther(sendToFolderForm.amount);
-            await daoService.treasury.sendToFolder(sendToFolderForm.folderAddress, amount, signer);
+            // Parse amount with error handling
+            let amount: bigint;
+            try {
+                amount = ethers.parseEther(sendToFolderForm.amount);
+            } catch (parseErr) {
+                throw new Error('Invalid amount format. Please enter a valid number.');
+            }
+
+            // Check if folder is approved
+            const isApproved = await daoService.treasury.isFolderApproved(sendToFolderForm.folderAddress);
+            if (!isApproved) {
+                throw new Error('This folder is not approved. Please approve the folder first.');
+            }
+
+            const tx = await daoService.treasury.sendToFolder(sendToFolderForm.folderAddress, amount, signer);
+
+            // Transaction submitted
+            console.log('Transaction submitted:', tx);
+
+            // Refresh treasury balance and folder stats
+            await loadTreasuryBalance();
+            await loadFactoryFolders();
+
+            // Success - clear form and close modal
             setFormError(null);
             setShowSendToFolderModal(false);
             setSendToFolderForm({ folderAddress: '', amount: '' });
-        } catch (err) {
-            setFormError(err instanceof Error ? err.message : 'Failed to send to folder');
+        } catch (err: any) {
+            console.error('Failed to send to folder:', err);
+
+            // Detailed error handling
+            let errorMessage = 'Failed to send funds to folder';
+
+            if (err.code === 'ACTION_REJECTED' || err.code === 4001) {
+                errorMessage = 'Transaction rejected by user';
+            } else if (err.code === 'INSUFFICIENT_FUNDS') {
+                errorMessage = 'Insufficient funds for gas fees';
+            } else if (err.code === 'NETWORK_ERROR') {
+                errorMessage = 'Network error. Please check your connection and try again.';
+            } else if (err.message?.includes('user rejected')) {
+                errorMessage = 'Transaction rejected by user';
+            } else if (err.message?.includes('insufficient funds')) {
+                errorMessage = 'Insufficient funds for gas fees';
+            } else if (err.message?.includes('not approved')) {
+                errorMessage = 'Folder is not approved. Please approve the folder first.';
+            } else if (err.message?.includes('nonce')) {
+                errorMessage = 'Transaction nonce error. Please try again.';
+            } else if (err.message) {
+                errorMessage = err.message;
+            }
+
+            setFormError(errorMessage);
+        } finally {
+            setLocalActionPending(false);
         }
     };
 
