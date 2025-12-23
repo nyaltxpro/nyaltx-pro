@@ -1029,27 +1029,77 @@ export default function AdminDashboardFixed() {
 
     const handleApproveFolder = async () => {
         if (!await ensureSepolia(setFormError)) return;
+
+        // Comprehensive validation
         if (!approveFolderForm.folderAddress) {
             setFormError('Folder address is required');
             return;
         }
 
+        if (!ethers.isAddress(approveFolderForm.folderAddress)) {
+            setFormError('Invalid folder address format');
+            return;
+        }
+
+        setLocalActionPending(true);
+        setFormError(null);
+
         try {
             if (!daoService) {
-                throw new Error('DAO service unavailable');
+                throw new Error('DAO service unavailable. Please refresh the page.');
             }
 
             const signer = daoService.getSigner();
             if (!signer) {
-                throw new Error('Signer is required for approve folder');
+                throw new Error('Wallet signer not available. Please reconnect your wallet.');
             }
 
-            await daoService.treasury.approveFolder(approveFolderForm.folderAddress, signer);
+            // Check if folder is already approved
+            const isAlreadyApproved = await daoService.treasury.isFolderApproved(approveFolderForm.folderAddress);
+            if (isAlreadyApproved) {
+                throw new Error('This folder is already approved');
+            }
+
+            const tx = await daoService.treasury.approveFolder(approveFolderForm.folderAddress, signer);
+
+            // Transaction submitted
+            console.log('Transaction submitted:', tx);
+
+            // Refresh treasury data
+            await loadTreasuryBalance();
+            await loadFactoryFolders();
+
+            // Success - clear form and close modal
             setFormError(null);
             setShowApproveFolderModal(false);
             setApproveFolderForm({ folderAddress: '' });
-        } catch (err) {
-            setFormError(err instanceof Error ? err.message : 'Failed to approve folder');
+        } catch (err: any) {
+            console.error('Failed to approve folder:', err);
+
+            // Detailed error handling
+            let errorMessage = 'Failed to approve folder';
+
+            if (err.code === 'ACTION_REJECTED' || err.code === 4001) {
+                errorMessage = 'Transaction rejected by user';
+            } else if (err.code === 'INSUFFICIENT_FUNDS') {
+                errorMessage = 'Insufficient funds for gas fees';
+            } else if (err.code === 'NETWORK_ERROR') {
+                errorMessage = 'Network error. Please check your connection and try again.';
+            } else if (err.message?.includes('user rejected')) {
+                errorMessage = 'Transaction rejected by user';
+            } else if (err.message?.includes('insufficient funds')) {
+                errorMessage = 'Insufficient funds for gas fees';
+            } else if (err.message?.includes('already approved')) {
+                errorMessage = 'This folder is already approved';
+            } else if (err.message?.includes('nonce')) {
+                errorMessage = 'Transaction nonce error. Please try again.';
+            } else if (err.message) {
+                errorMessage = err.message;
+            }
+
+            setFormError(errorMessage);
+        } finally {
+            setLocalActionPending(false);
         }
     };
 
