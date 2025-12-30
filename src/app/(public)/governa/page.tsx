@@ -195,7 +195,7 @@ export default async function GovernaPage() {
 
                 <div className="container">
 
-                    <nav>
+                    {/* <nav>
                         {content.nav?.brandHref ? (
                             <Link href={content.nav.brandHref} className="logo">
                                 {content.nav.brandText ?? FALLBACK_CONTENT.nav?.brandText}
@@ -209,7 +209,7 @@ export default async function GovernaPage() {
                                 {content.nav?.ctaText ?? FALLBACK_CONTENT.nav?.ctaText ?? 'Get Started'}
                             </Link>
                         )}
-                    </nav>
+                    </nav> */}
 
                     <section className="hero">
                         <div className="floating-cards">
