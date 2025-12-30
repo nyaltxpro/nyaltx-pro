@@ -1,0 +1,75 @@
+{
+  "slug": "governa",
+  "title": "Governa Pro | Institutional Blockchain Governance",
+  "description": "Governa Pro delivers transparent, investor-ready on-chain governance with institutional workflows, secure voting, and compliance reporting.",
+  "nav": {
+    "brandText": "governa.pro",
+    "brandHref": "/",
+    "ctaText": "Get Started",
+    "ctaHref": "/dashboard/governance"
+  },
+  "hero": {
+    "eyebrow": "Institutional Governance",
+    "heading": "Institutional Blockchain Governance Made Simple",
+    "highlight": "Transparent. Auditable. Investor Ready.",
+    "description": "Transform your protocol with transparent, efficient governance that attracts investors and empowers your community.",
+    "primaryCta": {
+      "label": "Schedule Demo",
+      "href": "/contact"
+    },
+    "secondaryCta": {
+      "label": "Explore Platform",
+      "href": "/dashboard/governance"
+    },
+    "floatingCards": [
+      { "image": "/nyaltxpro.png", "alt": "Governa Pro", "width": 80, "height": 60 },
+      { "image": "/nyaltxpro.png", "alt": "Governa Pro", "width": 200, "height": 60 },
+      { "image": "/nyaltxpro.png", "alt": "Governa Pro", "width": 160, "height": 60 },
+      { "image": "/nyaltxpro.png", "alt": "Governa Pro", "width": 60, "height": 60 }
+    ]
+  },
+  "comparisonSection": {
+    "title": "Why Governance Matters",
+    "withGovernance": {
+      "title": "With Governance",
+      "icon": "✓",
+      "benefits": [
+        { "text": "Attract institutional investors with transparent decision-making processes" },
+        { "text": "Build community trust through democratic participation and voting rights" },
+        { "text": "Increase token utility and holder engagement with governance powers" },
+        { "text": "Demonstrate regulatory compliance through documented governance structures" },
+        { "text": "Enable rapid protocol evolution through community-driven improvements" },
+        { "text": "Create accountability with on-chain voting records and transparency" },
+        { "text": "Distribute decision-making power to reduce centralization risks" }
+      ]
+    },
+    "withoutGovernance": {
+      "title": "Without Governance",
+      "icon": "✕",
+      "benefits": [
+        { "text": "Limited investor visibility into decision-making and protocol direction" },
+        { "text": "No community engagement or voice in critical protocol decisions" },
+        { "text": "Centralized control creates single points of failure and trust issues" },
+        { "text": "Difficulty attracting serious institutional capital without transparency" },
+        { "text": "Slow adaptation to market changes without community input" },
+        { "text": "Reduced token utility leading to lower holder retention" },
+        { "text": "Perception of being centralized undermines blockchain principles" }
+      ]
+    }
+  },
+  "ctaSection": {
+    "title": "Ready to Elevate Your Protocol?",
+    "subtitle": "Join leading institutions implementing transparent blockchain governance",
+    "primaryCta": {
+      "label": "Start Your Governance Journey",
+      "href": "/contact"
+    }
+  },
+  "seo": {
+    "metaTitle": "Governa Pro | Institutional Blockchain Governance",
+    "metaDescription": "Modern on-chain governance infrastructure for protocols that need transparent decision-making and investor confidence.",
+    "twitterTitle": "Governa Pro | Institutional Blockchain Governance",
+    "twitterDescription": "Modern on-chain governance infrastructure for protocols that need transparent decision-making and investor confidence.",
+    "ogImage": "/images/og/governa.png"
+  }
+}

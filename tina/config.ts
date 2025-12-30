@@ -1,6 +1,7 @@
 import { defineConfig } from "tinacms";
 import { aboutUs } from './schema/aboutus';
 import generalStatement from "./schema/generalstatment";
+import governa from "./schema/governa";
 import { legalAdvice } from "./schema/legalAdvice";
 import podcast from "./schema/podcast";
 import pricing from "./schema/pricing";
@@ -45,6 +46,7 @@ export default defineConfig({
       tradeVideos,
       pricing,
       whitepaper,
+      governa,
       {
         name: "navigation",
         label: "Navigation",
