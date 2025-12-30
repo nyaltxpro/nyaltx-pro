@@ -13,7 +13,7 @@ import { Area, AreaChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContaine
 import { useAccount, useChainId, useSwitchChain } from 'wagmi';
 import VestingClaims from './VestingClaims';
 
-type TabId = 'overview' | 'proposals' | 'transfers' | 'deposit' | 'vesting';
+type TabId = 'overview' | 'proposals' | 'transfers' | 'deposit' | 'vesting' | 'folders';
 
 type TokenMetrics = {
     totalSupply: string;
@@ -24,6 +24,23 @@ type ProposalAction = {
     target: string;
     value: string;
     calldata: string;
+};
+
+type FolderSummary = {
+    id: number;
+    name: string;
+    memberCount: number;
+    totalAllocated: number;
+    totalUnlocked: number;
+    totalClaimed: number;
+    claimable: number;
+    progress: number;
+    locked: boolean;
+    template: {
+        cliff: number;
+        duration: number;
+        revocable: boolean;
+    };
 };
 
 const TOKEN_FUNCTION_PRESETS = [
@@ -68,6 +85,17 @@ const formatBlocksToTime = (blocks?: number) => {
     if (seconds < 3600) return `${Math.round(seconds / 60)}m`;
     if (seconds < 86400) return `${(seconds / 3600).toFixed(1)}h`;
     return `${(seconds / 86400).toFixed(1)}d`;
+};
+
+const formatDuration = (seconds?: number) => {
+    if (!seconds) return 'Instant';
+    const days = Math.floor(seconds / 86400);
+    if (days > 0) return `${days}d`;
+    const hours = Math.floor(seconds / 3600);
+    if (hours > 0) return `${hours}h`;
+    const minutes = Math.floor(seconds / 60);
+    if (minutes > 0) return `${minutes}m`;
+    return `${seconds}s`;
 };
 
 export default function NYALTXGovernance() {
@@ -124,6 +152,10 @@ export default function NYALTXGovernance() {
     const [proposalAlert, setProposalAlert] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
     const [votingProposalId, setVotingProposalId] = useState<string | null>(null);
     const [voteFeedback, setVoteFeedback] = useState<Record<string, { type: 'success' | 'error'; message: string } | null>>({});
+    const [folderSummaries, setFolderSummaries] = useState<FolderSummary[]>([]);
+    const [folderSummariesLoading, setFolderSummariesLoading] = useState(false);
+    const [folderSummariesError, setFolderSummariesError] = useState<string | null>(null);
+    const [foldersReloadNonce, setFoldersReloadNonce] = useState(0);
     const nyaxTokenAddress = CONTRACT_ADDRESSES.nyaxToken ?? '';
     const nyaxTokenInterface = useMemo(() => {
         try {
@@ -311,6 +343,81 @@ export default function NYALTXGovernance() {
         };
     }, [daoService]);
 
+    const loadFolderSummaries = useCallback(async () => {
+        setFolderSummariesLoading(true);
+        setFolderSummariesError(null);
+        try {
+            if (!window.ethereum) {
+                throw new Error('Wallet provider not detected. Connect a wallet to load folder data.');
+            }
+            const provider = new ethers.BrowserProvider(window.ethereum as any);
+            const factoryService = getFolderRegistryFactoryService(provider);
+            const folderCount = await factoryService.getFolderCount();
+            const summaries: FolderSummary[] = [];
+
+            for (let folderId = 1; folderId <= folderCount; folderId++) {
+                try {
+                    const folder = await factoryService.getFolder(folderId);
+                    if (!folder || !folder.exists) continue;
+
+                    const members = folder.members ?? [];
+                    let totalUnlocked = 0;
+                    let totalClaimed = 0;
+
+                    for (const account of members) {
+                        const allocation = await factoryService.getAllocation(folderId, account);
+                        if (!allocation || !allocation.exists) continue;
+                        const unlocked = await factoryService.getUnlockedTokens(folderId, account);
+                        const claimedValue = parseFloat(allocation.claimed ?? '0');
+                        totalClaimed += Number.isFinite(claimedValue) ? claimedValue : 0;
+                        totalUnlocked += parseFloat(ethers.formatEther(unlocked));
+                    }
+
+                    const totalAllocated = parseFloat(folder.totalAllocated ?? '0') || 0;
+                    const claimable = Math.max(totalUnlocked - totalClaimed, 0);
+                    const progress = totalAllocated > 0 ? Math.min((totalUnlocked / totalAllocated) * 100, 100) : 0;
+
+                    summaries.push({
+                        id: folderId,
+                        name: folder.name,
+                        memberCount: members.length,
+                        totalAllocated,
+                        totalUnlocked,
+                        totalClaimed,
+                        claimable,
+                        progress,
+                        locked: folder.locked,
+                        template: {
+                            cliff: folder.template?.cliff ?? 0,
+                            duration: folder.template?.duration ?? 0,
+                            revocable: folder.template?.revocable ?? false,
+                        },
+                    });
+                } catch (folderError) {
+                    console.error(`Failed to load folder ${folderId}`, folderError);
+                }
+            }
+
+            setFolderSummaries(summaries);
+        } catch (error) {
+            console.error('Failed to load folder summaries', error);
+            setFolderSummariesError(error instanceof Error ? error.message : 'Failed to load folder data');
+        } finally {
+            setFolderSummariesLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        let cancelled = false;
+        const fetchFolders = async () => {
+            await loadFolderSummaries();
+        };
+        fetchFolders();
+        return () => {
+            cancelled = true;
+        };
+    }, [loadFolderSummaries, foldersReloadNonce]);
+
     useEffect(() => {
         let cancelled = false;
         const loadRecentTransfers = async () => {
@@ -432,7 +539,30 @@ export default function NYALTXGovernance() {
 
     const REQUIRED_CHAIN_ID = 11155111; // Ethereum Sepolia
     const onRequiredNetwork = chainId === REQUIRED_CHAIN_ID;
-    const tabs: TabId[] = ['overview', 'proposals', 'transfers', 'deposit', 'vesting'];
+    const tabs: TabId[] = ['overview', 'proposals', 'transfers', 'deposit', 'vesting', 'folders'];
+
+    const folderStats = useMemo(() => {
+        if (!folderSummaries.length) {
+            return {
+                totalFolders: 0,
+                totalAllocated: 0,
+                totalUnlocked: 0,
+                totalClaimable: 0,
+                totalMembers: 0,
+            };
+        }
+        return folderSummaries.reduce(
+            (acc, folder) => {
+                acc.totalFolders += 1;
+                acc.totalAllocated += folder.totalAllocated || 0;
+                acc.totalUnlocked += folder.totalUnlocked || 0;
+                acc.totalClaimable += folder.claimable || 0;
+                acc.totalMembers += folder.memberCount || 0;
+                return acc;
+            },
+            { totalFolders: 0, totalAllocated: 0, totalUnlocked: 0, totalClaimable: 0, totalMembers: 0 },
+        );
+    }, [folderSummaries]);
 
     useEffect(() => {
         setLegacyDeposit(prev => ({ ...prev, beneficiary: address ?? '' }));
@@ -1394,145 +1524,86 @@ export default function NYALTXGovernance() {
                     </div>
                 )}
 
-                {/* Legacy Deposit Tab */}
-                {activeTab === 'deposit' && (
-                    <div className="max-w-5xl mx-auto">
-                        <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-                            <div className="rounded-3xl border border-white/10 bg-gray-900/60 p-8 shadow-2xl shadow-indigo-900/20">
-                                <div className="flex flex-col gap-3 mb-8">
-                                    <div className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-indigo-200/70">
-                                        <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" /> Legacy vault
-                                    </div>
-                                    <h2 className="text-3xl font-semibold">Deposit legacy NYAX into the on-chain vault</h2>
-                                    <p className="text-gray-400">
-                                        Seamlessly migrate historical balances into the upgraded governance system. Deposits
-                                        settle instantly and unlock voting weight using the conversion rate shown.
-                                    </p>
-                                    <div className="flex flex-wrap gap-3 text-xs">
-                                        <span className={`px-3 py-1 rounded-full border ${isConnected ? 'border-emerald-400/40 text-emerald-300' : 'border-red-400/40 text-red-300'}`}>
-                                            {isConnected ? 'Wallet connected' : 'Connect wallet to deposit'}
-                                        </span>
-                                        <span className="px-3 py-1 rounded-full border border-indigo-300/40 text-indigo-200">
-                                            Conversion ratio: {vaultStats?.conversionRatio ?? '1.0'}x
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-6">
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-semibold text-white/80">Beneficiary address</label>
-                                        <div className="rounded-2xl border border-white/10 bg-black/40 focus-within:border-indigo-400/70">
-                                            <input
-                                                type="text"
-                                                placeholder="0x0000..."
-                                                value={legacyDeposit.beneficiary}
-                                                onChange={(e) => setLegacyDeposit(prev => ({ ...prev, beneficiary: e.target.value }))}
-                                                className="w-full bg-transparent px-4 py-3 text-sm text-white placeholder:text-gray-500 focus:outline-none"
-                                            />
-                                        </div>
-                                        <p className="text-xs text-gray-500">Defaults to your connected wallet if left blank.</p>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-semibold text-white/80">Deposit amount</label>
-                                        <div className="rounded-2xl border border-white/10 bg-black/40 focus-within:border-indigo-400/70">
-                                            <input
-                                                type="number"
-                                                min="0"
-                                                placeholder="Enter NYAX to deposit"
-                                                value={legacyDeposit.amount}
-                                                onChange={(e) => setLegacyDeposit(prev => ({ ...prev, amount: e.target.value }))}
-                                                className="w-full bg-transparent px-4 py-3 text-sm text-white placeholder:text-gray-500 focus:outline-none"
-                                            />
-                                        </div>
-                                        <div className="flex items-center justify-between text-xs text-gray-500">
-                                            <span>Legacy vault allowance is unlimited.</span>
-                                            <button
-                                                type="button"
-                                                className="text-indigo-300 hover:text-white"
-                                                onClick={() => setLegacyDeposit(prev => ({ ...prev, amount: '0' }))}
-                                            >
-                                                Reset amount
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <button
-                                        className="w-full rounded-2xl bg-linear-to-r from-blue-500 via-indigo-500 to-purple-500 px-6 py-4 text-sm font-semibold uppercase tracking-wide transition-all duration-150 hover:scale-[1.01] focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300 disabled:opacity-50"
-                                        onClick={handleLegacyDeposit}
-                                        disabled={!isConnected || vaultPending}
+                xl border border-white/10 bg-white/5 backdrop-blur-xl p-6"
                                     >
-                                        {vaultPending ? 'Processing deposit…' : 'Confirm deposit'}
-                                    </button>
-
-                                    {legacyDeposit.status === 'success' && (
-                                        <div className="rounded-2xl border border-emerald-400/40 bg-emerald-400/10 p-4 text-sm text-emerald-200">
-                                            <div className="flex items-center gap-2 font-semibold text-emerald-300">
-                                                <CheckCircle size={18} /> Deposit successful
-                                            </div>
-                                            {legacyDeposit.txHash && (
-                                                <a
-                                                    href={`https://sepolia.etherscan.io/tx/${legacyDeposit.txHash}`}
-                                                    target="_blank"
-                                                    rel="noreferrer"
-                                                    className="mt-2 inline-flex items-center text-xs text-emerald-200/80 underline"
-                                                >
-                                                    View transaction
-                                                </a>
-                                            )}
-                                        </div>
-                                    )}
-
-                                    {legacyDeposit.status === 'error' && (
-                                        <div className="rounded-2xl border border-red-400/40 bg-red-400/10 p-4 text-sm text-red-200">
-                                            <div className="flex items-center gap-2 font-semibold text-red-300">
-                                                <XCircle size={18} /> {vaultError || 'Please fill in all required fields'}
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-
-                            <div className="rounded-3xl border border-white/10 bg-linear-to-br from-indigo-900/40 via-slate-900/60 to-black/80 p-8 text-sm text-gray-300">
-                                <div className="mb-6">
-                                    <p className="text-xs uppercase tracking-[0.25em] text-indigo-200/80">How it works</p>
-                                    <h3 className="text-2xl font-semibold text-white mt-2">Migration safety checklist</h3>
-                                    <p className="text-gray-400 mt-2">Protect governance continuity while moving legacy balances on-chain.</p>
-                                </div>
-                                <div className="space-y-6">
-                                    <div className="rounded-2xl border border-white/5 bg-white/5 p-4">
-                                        <p className="text-xs text-gray-400 mb-1">Step 1</p>
-                                        <h4 className="font-semibold text-white mb-1">Connect the original wallet</h4>
-                                        <p className="text-gray-400">Only the owner of legacy tokens can authorize the deposit.</p>
-                                    </div>
-                                    <div className="rounded-2xl border border-white/5 bg-white/5 p-4">
-                                        <p className="text-xs text-gray-400 mb-1">Step 2</p>
-                                        <h4 className="font-semibold text-white mb-1">Set beneficiary + amount</h4>
-                                        <p className="text-gray-400">Send to yourself or delegate governance power to another address.</p>
-                                    </div>
-                                    <div className="rounded-2xl border border-white/5 bg-white/5 p-4">
-                                        <p className="text-xs text-gray-400 mb-1">Step 3</p>
-                                        <h4 className="font-semibold text-white mb-1">Confirm onchain & monitor TX</h4>
-                                        <p className="text-gray-400">Deposits finalize immediately. Voting weight updates after confirmation.</p>
-                                    </div>
-                                    <div className="rounded-2xl border border-indigo-400/20 bg-indigo-400/10 p-4">
-                                        <p className="text-xs text-indigo-200 mb-1">Vault status</p>
-                                        <h4 className="text-lg font-semibold text-white">Ready for deposits</h4>
-                                        <p className="text-indigo-100/80">Last sync {formatTimeFromTimestamp(Math.floor(Date.now() / 1000))}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+                    <div>
+                        <h3 className="text-xl font-semibold text-white">{folder.name}</h3>
+                        <p className="text-sm text-gray-400">Folder #{folder.id} · {folder.memberCount} member{folder.memberCount === 1 ? '' : 's'}</p>
                     </div>
-                )}
-
-                {/* Vesting Claims Tab */}
-                {activeTab === 'vesting' && (
-                    <div className="max-w-7xl mx-auto">
-                        <VestingClaims />
+                    <div className="flex flex-wrap gap-2">
+                        {folder.locked && (
+                            <span className="px-3 py-1 rounded-full text-xs bg-red-500/20 text-red-200">
+                                Locked
+                            </span>
+                        )}
+                        {folder.template.revocable && (
+                            <span className="px-3 py-1 rounded-full text-xs bg-amber-500/20 text-amber-200">
+                                Revocable
+                            </span>
+                        )}
+                        {!folder.template.revocable && (
+                            <span className="px-3 py-1 rounded-full text-xs bg-emerald-500/20 text-emerald-200">
+                                Irrevocable
+                            </span>
+                        )}
                     </div>
-                )}
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-4 mt-6">
+                    <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
+                        <p className="text-xs text-gray-500 uppercase mb-1">Allocated</p>
+                        <p className="text-lg font-semibold text-white">{formatNumber(folder.totalAllocated)}</p>
+                    </div>
+                    <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
+                        <p className="text-xs text-gray-500 uppercase mb-1">Unlocked</p>
+                        <p className="text-lg font-semibold text-cyan-300">{formatNumber(folder.totalUnlocked)}</p>
+                    </div>
+                    <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
+                        <p className="text-xs text-gray-500 uppercase mb-1">Claimed</p>
+                        <p className="text-lg font-semibold text-emerald-300">{formatNumber(folder.totalClaimed)}</p>
+                    </div>
+                    <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
+                        <p className="text-xs text-gray-500 uppercase mb-1">Claimable</p>
+                        <p className="text-lg font-semibold text-amber-300">{formatNumber(folder.claimable)}</p>
+                    </div>
+                </div>
+
+                <div className="mt-6">
+                    <div className="flex items-center justify-between text-sm text-gray-400 mb-2">
+                        <span>Vesting progress</span>
+                        <span className="text-white font-semibold">{folder.progress.toFixed(1)}%</span>
+                    </div>
+                    <div className="h-2 rounded-full bg-black/40 overflow-hidden">
+                        <div
+                            className="h-full bg-linear-to-r from-indigo-500 via-purple-500 to-pink-500 transition-all duration-500"
+                            style={{ width: `${folder.progress}%` }}
+                        />
+                    </div>
+                </div>
+
+                <div className="mt-6 grid gap-4 md:grid-cols-3 text-sm text-gray-300">
+                    <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
+                        <p className="text-xs text-gray-500 mb-1">Cliff</p>
+                        <p className="font-semibold">{formatDuration(folder.template.cliff)}</p>
+                    </div>
+                    <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
+                        <p className="text-xs text-gray-500 mb-1">Duration</p>
+                        <p className="font-semibold">{formatDuration(folder.template.duration)}</p>
+                    </div>
+                    <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
+                        <p className="text-xs text-gray-500 mb-1">Unlock state</p>
+                        <p className="font-semibold">{folder.locked ? 'Locked' : 'Active'}</p>
+                    </div>
+                </div>
             </div>
+                                ))}
         </div>
+    )
+}
+                    </div >
+                )}
+            </div >
+        </div >
     );
 }
