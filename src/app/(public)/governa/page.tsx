@@ -190,9 +190,9 @@ export default async function GovernaPage() {
 
     return (
         <main className="governa-page">
-
+            <PublicHeader />
             <div className="container">
-                <PublicHeader />
+
                 <nav>
                     {content.nav?.brandHref ? (
                         <Link href={content.nav.brandHref} className="logo">
