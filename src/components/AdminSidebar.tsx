@@ -36,13 +36,14 @@ interface SidebarItemProps {
 const SidebarItem = ({ icon, text, href, isActive, isExpanded }: SidebarItemProps) => {
   return (
     <motion.div
+      className="w-full"
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       transition={{ type: 'spring', stiffness: 400, damping: 17 }}
     >
       <Link
         href={href}
-        className={`group flex items-center py-3 px-3 mb-2 rounded-lg transition-all duration-200 ${isActive
+        className={`group flex items-center w-full py-3 px-3 mb-2 rounded-lg transition-all duration-200 ${isActive
           ? 'bg-linear-to-r from-[#00b8d8]/20 to-[#00b8d8]/10 text-[#00b8d8] border border-[#00b8d8]/30 shadow-lg backdrop-blur-sm'
           : 'text-gray-300 hover:bg-gray-700/30 hover:text-white hover:border hover:border-gray-600/30 hover:shadow-md hover:backdrop-blur-sm'
           }`}
