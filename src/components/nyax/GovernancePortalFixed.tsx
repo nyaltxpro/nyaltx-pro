@@ -344,10 +344,28 @@ export default function NYALTXGovernance() {
                 return;
             }
 
-            const nameMap = new Map<string, string>();
+            const nameMap = new Map<string, FolderSummary>();
             registryFolders.forEach((folder) => {
                 if (folder?.name) {
-                    nameMap.set(folder.name.toLowerCase(), folder.name);
+                    nameMap.set(folder.name.toLowerCase(), {
+                        id: folder.id,
+                        name: folder.name,
+                        address: undefined,
+                        memberCount: folder.members?.length ?? 0,
+                        totalAllocated: parseFloat(folder.totalAllocated ?? '0') || 0,
+                        totalUnlocked: 0,
+                        totalClaimed: 0,
+                        claimable: 0,
+                        progress: 0,
+                        locked: folder.locked,
+                        folderBalance: 0,
+                        createdAt: undefined,
+                        template: {
+                            cliff: folder.template?.cliff ?? 0,
+                            duration: folder.template?.duration ?? 0,
+                            revocable: folder.template?.revocable ?? false,
+                        },
+                    });
                 }
             });
 
@@ -366,10 +384,12 @@ export default function NYALTXGovernance() {
                         const totalClaimed = parseFloat(ethers.formatEther(stats.totalClaimed));
                         const claimable = Math.max(totalUnlocked - totalClaimed, 0);
                         const progress = totalAllocated > 0 ? Math.min((totalUnlocked / totalAllocated) * 100, 100) : 0;
-                        const canonicalName = detail.name ? nameMap.get(detail.name.toLowerCase()) ?? detail.name : detail.name || `Folder ${index + 1}`;
+                        const matchedFolder = detail.name ? nameMap.get(detail.name.toLowerCase()) : undefined;
+                        const canonicalName = matchedFolder?.name ?? detail.name ?? `Folder ${index + 1}`;
+                        const folderId = matchedFolder?.id ?? index + 1;
 
                         return {
-                            id: detail.id ?? index + 1,
+                            id: folderId,
                             name: canonicalName,
                             address: detail.address,
                             memberCount: stats.totalBeneficiaries,
@@ -382,9 +402,9 @@ export default function NYALTXGovernance() {
                             folderBalance: parseFloat(ethers.formatEther(stats.folderBalance)),
                             createdAt: detail.createdAt ? Number(detail.createdAt) : undefined,
                             template: {
-                                cliff: stats.vestingCliff || 0,
-                                duration: stats.vestingDuration || 0,
-                                revocable: false,
+                                cliff: stats.vestingCliff || matchedFolder?.template.cliff || 0,
+                                duration: stats.vestingDuration || matchedFolder?.template.duration || 0,
+                                revocable: matchedFolder?.template.revocable ?? false,
                             },
                         } as FolderSummary;
                     } catch (folderError) {
@@ -1744,99 +1764,104 @@ export default function NYALTXGovernance() {
                         )}
 
                         {!folderSummariesLoading && folderSummaries.length > 0 && (
-                            <div className="grid gap-6">
+                            <div className="grid gap-4">
                                 {folderSummaries.map((folder) => (
                                     <div
                                         key={folder.id}
-                                        className="rounded-3xl border border-white/15 bg-white/5 backdrop-blur-xl p-6 shadow-[0_20px_60px_rgba(4,7,17,0.45)]"
+                                        className="rounded-2xl border border-white/15 bg-white/5 backdrop-blur-xl p-4 shadow-[0_12px_40px_rgba(4,7,17,0.35)]"
                                     >
-                                        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                                        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                                             <div>
                                                 <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.4em] text-indigo-200/70">
                                                     <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
                                                     Folder #{folder.id}
                                                 </div>
-                                                <h3 className="text-2xl font-semibold text-white mt-2">{folder.name}</h3>
-                                                <p className="text-sm text-gray-400">
+                                                <h3 className="text-xl font-semibold text-white mt-1">{folder.name}</h3>
+                                                <p className="text-xs text-gray-400">
                                                     {folder.memberCount} member{folder.memberCount === 1 ? '' : 's'} tracked from admin console
                                                 </p>
                                             </div>
-                                            <div className="flex flex-wrap gap-2">
+                                            <div className="flex flex-wrap gap-2 text-xs">
                                                 {folder.locked && (
-                                                    <span className="px-3 py-1 rounded-full text-xs bg-red-500/20 text-red-200 border border-red-400/30">
+                                                    <span className="px-2.5 py-0.5 rounded-full bg-red-500/20 text-red-200 border border-red-400/30">
                                                         Locked
                                                     </span>
                                                 )}
                                                 {folder.template.revocable ? (
-                                                    <span className="px-3 py-1 rounded-full text-xs bg-amber-500/20 text-amber-200 border border-amber-400/30">
+                                                    <span className="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-200 border border-amber-400/30">
                                                         Revocable
                                                     </span>
                                                 ) : (
-                                                    <span className="px-3 py-1 rounded-full text-xs bg-emerald-500/20 text-emerald-200 border border-emerald-400/30">
+                                                    <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-200 border border-emerald-400/30">
                                                         Irrevocable
                                                     </span>
                                                 )}
                                             </div>
                                         </div>
 
-                                        <div className="mt-6 space-y-4">
-                                            <div className="grid grid-cols-2 gap-3">
-                                                <div className="bg-purple-500/10 rounded-2xl p-4 border border-purple-400/20">
-                                                    <p className="text-xs uppercase tracking-wide text-purple-200/90 mb-1">Total allocations</p>
-                                                    <p className="text-2xl font-bold text-purple-100">{formatNumber(folder.totalAllocated)}</p>
-                                                    <p className="text-xs text-purple-300 mt-1">NYAX routed to this escrow</p>
+                                        <div className="mt-4 grid grid-cols-2 gap-3">
+                                            {[
+                                                {
+                                                    label: 'Total allocations',
+                                                    value: folder.totalAllocated,
+                                                    accent: 'bg-purple-500/10 border-purple-400/20 text-purple-100',
+                                                    helper: 'NYAX routed',
+                                                },
+                                                {
+                                                    label: 'Unlocked',
+                                                    value: folder.totalUnlocked,
+                                                    accent: 'bg-cyan-500/10 border-cyan-400/20 text-cyan-100',
+                                                    helper: 'Vested so far',
+                                                },
+                                                {
+                                                    label: 'Claimed',
+                                                    value: folder.totalClaimed,
+                                                    accent: 'bg-blue-500/10 border-blue-400/20 text-blue-100',
+                                                    helper: 'Delivered',
+                                                },
+                                                {
+                                                    label: 'Claimable',
+                                                    value: folder.claimable,
+                                                    accent: 'bg-amber-500/10 border-amber-400/20 text-amber-100',
+                                                    helper: 'Ready now',
+                                                },
+                                            ].map((stat) => (
+                                                <div key={stat.label} className={`rounded-2xl border p-3 ${stat.accent}`}>
+                                                    <p className="text-[10px] uppercase tracking-wide text-white/70">{stat.label}</p>
+                                                    <p className="text-xl font-semibold mt-1">{formatNumber(stat.value)}</p>
+                                                    <p className="text-[11px] text-white/70">{stat.helper}</p>
                                                 </div>
-                                                <div className="bg-cyan-500/10 rounded-2xl p-4 border border-cyan-400/20">
-                                                    <p className="text-xs uppercase tracking-wide text-cyan-200/90 mb-1">Unlocked</p>
-                                                    <p className="text-2xl font-bold text-cyan-100">{formatNumber(folder.totalUnlocked)}</p>
-                                                    <p className="text-xs text-cyan-300 mt-1">Lifecycle vested so far</p>
-                                                </div>
-                                            </div>
-
-                                            <div className="grid grid-cols-2 gap-3">
-                                                <div className="bg-blue-500/10 rounded-2xl p-4 border border-blue-400/20">
-                                                    <p className="text-xs uppercase tracking-wide text-blue-200/90 mb-1">Claimed</p>
-                                                    <p className="text-2xl font-bold text-blue-100">{formatNumber(folder.totalClaimed)}</p>
-                                                    <p className="text-xs text-blue-300 mt-1">NYAX delivered to wallets</p>
-                                                </div>
-                                                <div className="bg-amber-500/10 rounded-2xl p-4 border border-amber-400/20">
-                                                    <p className="text-xs uppercase tracking-wide text-amber-200/90 mb-1">Claimable</p>
-                                                    <p className="text-2xl font-bold text-amber-100">{formatNumber(folder.claimable)}</p>
-                                                    <p className="text-xs text-amber-300 mt-1">Ready to unlock</p>
-                                                </div>
-                                            </div>
+                                            ))}
                                         </div>
 
-                                        <div className="mt-6 space-y-2">
-                                            <div className="flex items-center justify-between text-sm text-gray-300">
+                                        <div className="mt-4 space-y-2">
+                                            <div className="flex items-center justify-between text-xs text-gray-300">
                                                 <span>Vesting progress</span>
-                                                <span className="font-semibold text-white">{folder.progress.toFixed(1)}%</span>
+                                                <span className="font-semibold text-white text-sm">{folder.progress.toFixed(1)}%</span>
                                             </div>
-                                            <div className="h-2 rounded-full bg-white/10 overflow-hidden">
+                                            <div className="h-1.5 rounded-full bg-white/10 overflow-hidden">
                                                 <div
                                                     className="h-full rounded-full bg-linear-to-r from-indigo-500 via-purple-500 to-pink-500 transition-all duration-500"
                                                     style={{ width: `${folder.progress}%` }}
                                                 />
                                             </div>
-                                            <div className="flex items-center justify-between text-xs text-gray-400">
-                                                <span>{folder.locked ? 'Token stream paused' : 'Streaming on schedule'}</span>
+                                            <div className="flex items-center justify-between text-[11px] text-gray-400">
+                                                <span>{folder.locked ? 'Paused stream' : 'Streaming on schedule'}</span>
                                                 <span>{folder.template.revocable ? 'Revocable template' : 'Permanent template'}</span>
                                             </div>
                                         </div>
 
-                                        <div className="mt-6 grid gap-4 md:grid-cols-3 text-sm text-gray-300">
-                                            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                                                <p className="text-xs text-gray-400 mb-1">Cliff</p>
-                                                <p className="font-semibold text-white">{formatDuration(folder.template.cliff)}</p>
-                                            </div>
-                                            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                                                <p className="text-xs text-gray-400 mb-1">Duration</p>
-                                                <p className="font-semibold text-white">{formatDuration(folder.template.duration)}</p>
-                                            </div>
-                                            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                                                <p className="text-xs text-gray-400 mb-1">Unlock state</p>
-                                                <p className="font-semibold text-white">{folder.locked ? 'Locked' : 'Active'}</p>
-                                            </div>
+                                        <div className="mt-4 grid gap-3 md:grid-cols-3 text-xs text-gray-300">
+                                            {[
+                                                { label: 'Cliff', value: formatDuration(folder.template.cliff) },
+                                                { label: 'Duration', value: formatDuration(folder.template.duration) },
+                                                { label: 'Unlock state', value: folder.locked ? 'Locked' : 'Active' },
+                                            ].map((item) => (
+                                                <div key={item.label} className="rounded-xl border border-white/10 bg-white/5 p-3">
+                                                    <p className="text-[10px] uppercase tracking-wide text-gray-400">{item.label}</p>
+                                                    <p className="font-semibold text-white text-sm">{item.value}</p>
+                                                </div>
+                                            ))}
                                         </div>
                                     </div>
                                 ))}
