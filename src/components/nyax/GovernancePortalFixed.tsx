@@ -2,7 +2,7 @@
 
 import { useDAOService } from '@/hooks/useDAOService';
 import { useMigrationVault } from '@/hooks/useMigrationVault';
-import { CONTRACT_ABIS, CONTRACT_ADDRESSES } from '@/services/contracts';
+import { CONTRACT_ABIS, CONTRACT_ADDRESSES, NETWORK_CONFIG } from '@/services/contracts';
 import { GovernanceStats, ProposalData, StakingStats, TreasuryTransfer } from '@/services/contracts/types';
 import { ethers } from 'ethers';
 import { Activity, ArrowUpRight, CheckCircle, Clock, Coins, Layers, Shield, TrendingUp, Users, XCircle } from 'lucide-react';
@@ -27,6 +27,7 @@ type ProposalAction = {
 type FolderSummary = {
     id: number;
     name: string;
+    address?: string;
     memberCount: number;
     totalAllocated: number;
     totalUnlocked: number;
@@ -34,6 +35,8 @@ type FolderSummary = {
     claimable: number;
     progress: number;
     locked: boolean;
+    folderBalance: number;
+    createdAt?: number;
     template: {
         cliff: number;
         duration: number;
@@ -329,51 +332,92 @@ export default function NYALTXGovernance() {
         setFolderSummariesError(null);
         try {
             const factoryService = daoService.folderFactory;
-            const folderCount = await factoryService.getFolderCount();
-            const summaries: FolderSummary[] = [];
+            const registryService = daoService.folders;
+            const [registryFolders, folderDetails] = await Promise.all([
+                registryService.getAllFolders().catch(() => []),
+                factoryService.getFoldersWithDetails().catch(() => []),
+            ]);
 
-            for (let folderId = 1; folderId <= folderCount; folderId++) {
+            let FolderEscrowService: typeof import('@/services/contracts/folderEscrowService').FolderEscrowService | null = null;
+            let readOnlyProvider: ethers.JsonRpcProvider | null = null;
+
+            const getEscrowStats = async (address?: string) => {
+                if (!address) return null;
                 try {
-                    const folder = await factoryService.getFolder(folderId);
-                    if (!folder || !folder.exists) continue;
-
-                    const members = folder.members ?? [];
-                    let totalUnlocked = 0;
-                    let totalClaimed = 0;
-
-                    for (const account of members) {
-                        const allocation = await factoryService.getAllocation(folderId, account);
-                        if (!allocation || !allocation.exists) continue;
-                        const unlocked = await factoryService.getUnlockedTokens(folderId, account);
-                        const claimedValue = parseFloat(allocation.claimed ?? '0');
-                        totalClaimed += Number.isFinite(claimedValue) ? claimedValue : 0;
-                        totalUnlocked += parseFloat(ethers.formatEther(unlocked));
+                    if (!FolderEscrowService) {
+                        const module = await import('@/services/contracts/folderEscrowService');
+                        FolderEscrowService = module.FolderEscrowService;
                     }
-
-                    const totalAllocated = parseFloat(folder.totalAllocated ?? '0') || 0;
-                    const claimable = Math.max(totalUnlocked - totalClaimed, 0);
-                    const progress = totalAllocated > 0 ? Math.min((totalUnlocked / totalAllocated) * 100, 100) : 0;
-
-                    summaries.push({
-                        id: folderId,
-                        name: folder.name,
-                        memberCount: members.length,
-                        totalAllocated,
-                        totalUnlocked,
-                        totalClaimed,
-                        claimable,
-                        progress,
-                        locked: folder.locked,
-                        template: {
-                            cliff: folder.template?.cliff ?? 0,
-                            duration: folder.template?.duration ?? 0,
-                            revocable: folder.template?.revocable ?? false,
-                        },
-                    });
-                } catch (folderError) {
-                    console.error(`Failed to load folder ${folderId}`, folderError);
+                    if (!readOnlyProvider) {
+                        const fallbackRpc = process.env.NEXT_PUBLIC_RPC_URL || 'https://sepolia.infura.io/v3/8f6f3d84b5c648babc3f6example';
+                        readOnlyProvider = new ethers.JsonRpcProvider(NETWORK_CONFIG?.rpcUrl || fallbackRpc);
+                    }
+                    const escrow = new FolderEscrowService(address, readOnlyProvider as any);
+                    return await escrow.getFolderStatsOptimized();
+                } catch (err) {
+                    console.error(`Failed to fetch escrow stats for folder ${address}`, err);
+                    return null;
                 }
-            }
+            };
+
+            const summaries = (
+                await Promise.all(
+                    registryFolders.map(async (folder) => {
+                        if (!folder || !folder.exists) return null;
+                        const detail = folderDetails.find(
+                            (entry) => entry?.name && folder.name && entry.name.toLowerCase() === folder.name.toLowerCase()
+                        );
+
+                        const escrowStats = detail?.address ? await getEscrowStats(detail.address) : null;
+
+                        let totalUnlocked = 0;
+                        let totalClaimed = 0;
+                        let memberCount = folder.members?.length ?? 0;
+                        let folderBalance = 0;
+
+                        if (escrowStats) {
+                            totalUnlocked = parseFloat(ethers.formatEther(escrowStats.totalVested));
+                            totalClaimed = parseFloat(ethers.formatEther(escrowStats.totalClaimed));
+                            memberCount = escrowStats.totalBeneficiaries;
+                            folderBalance = parseFloat(ethers.formatEther(escrowStats.folderBalance));
+                        } else {
+                            const members = folder.members ?? [];
+                            for (const account of members) {
+                                const allocation = await factoryService.getAllocation(folder.id, account);
+                                if (!allocation || !allocation.exists) continue;
+                                const unlocked = await factoryService.getUnlockedTokens(folder.id, account);
+                                const claimedValue = parseFloat(allocation.claimed ?? '0');
+                                totalClaimed += Number.isFinite(claimedValue) ? claimedValue : 0;
+                                totalUnlocked += parseFloat(ethers.formatEther(unlocked));
+                            }
+                        }
+
+                        const totalAllocated = parseFloat(folder.totalAllocated ?? '0') || 0;
+                        const claimable = Math.max(totalUnlocked - totalClaimed, 0);
+                        const progress = totalAllocated > 0 ? Math.min((totalUnlocked / totalAllocated) * 100, 100) : 0;
+
+                        return {
+                            id: folder.id,
+                            name: folder.name,
+                            address: detail?.address,
+                            memberCount,
+                            totalAllocated,
+                            totalUnlocked,
+                            totalClaimed,
+                            claimable,
+                            progress,
+                            locked: folder.locked || Boolean(escrowStats?.isPaused),
+                            folderBalance,
+                            createdAt: detail?.createdAt ? Number(detail.createdAt) : undefined,
+                            template: {
+                                cliff: folder.template?.cliff ?? 0,
+                                duration: folder.template?.duration ?? 0,
+                                revocable: folder.template?.revocable ?? false,
+                            },
+                        } as FolderSummary;
+                    })
+                )
+            ).filter((summary): summary is FolderSummary => summary !== null);
 
             setFolderSummaries(summaries);
         } catch (error) {
