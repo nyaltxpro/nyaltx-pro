@@ -1678,25 +1678,25 @@ export default function NYALTXGovernance() {
                             </div>
 
                             <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                                <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
-                                    <p className="text-xs text-gray-400">Total folders</p>
-                                    <p className="text-3xl font-semibold text-white mt-1">{formatNumber(folderStats.totalFolders, 0)}</p>
-                                    <p className="text-xs text-gray-500 mt-1">Active registry entries</p>
+                                <div className="rounded-2xl border border-white/15 bg-white/10 p-4 shadow-inner shadow-black/20">
+                                    <p className="text-xs uppercase tracking-[0.3em] text-indigo-200/80">Total folders</p>
+                                    <p className="text-3xl font-semibold text-white mt-2">{formatNumber(folderStats.totalFolders, 0)}</p>
+                                    <p className="text-xs text-gray-300 mt-1">Active registry entries</p>
                                 </div>
-                                <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
-                                    <p className="text-xs text-gray-400">Total allocated</p>
-                                    <p className="text-3xl font-semibold text-white mt-1">{formatNumber(folderStats.totalAllocated)}</p>
-                                    <p className="text-xs text-gray-500 mt-1">NYAX routed to folders</p>
+                                <div className="rounded-2xl border border-white/15 bg-white/10 p-4 shadow-inner shadow-black/20">
+                                    <p className="text-xs uppercase tracking-[0.3em] text-purple-200/80">Total allocated</p>
+                                    <p className="text-3xl font-semibold text-purple-100 mt-2">{formatNumber(folderStats.totalAllocated)}</p>
+                                    <p className="text-xs text-gray-300 mt-1">NYAX routed to folders</p>
                                 </div>
-                                <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
-                                    <p className="text-xs text-gray-400">Claimable now</p>
-                                    <p className="text-3xl font-semibold text-emerald-300 mt-1">{formatNumber(folderStats.totalClaimable)}</p>
-                                    <p className="text-xs text-gray-500 mt-1">NYAX available to unlock</p>
+                                <div className="rounded-2xl border border-white/15 bg-white/10 p-4 shadow-inner shadow-black/20">
+                                    <p className="text-xs uppercase tracking-[0.3em] text-emerald-200/80">Claimable now</p>
+                                    <p className="text-3xl font-semibold text-emerald-200 mt-2">{formatNumber(folderStats.totalClaimable)}</p>
+                                    <p className="text-xs text-gray-300 mt-1">NYAX available to unlock</p>
                                 </div>
-                                <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
-                                    <p className="text-xs text-gray-400">Wallets covered</p>
-                                    <p className="text-3xl font-semibold text-white mt-1">{formatNumber(folderStats.totalMembers, 0)}</p>
-                                    <p className="text-xs text-gray-500 mt-1">Unique beneficiaries</p>
+                                <div className="rounded-2xl border border-white/15 bg-white/10 p-4 shadow-inner shadow-black/20">
+                                    <p className="text-xs uppercase tracking-[0.3em] text-blue-200/80">Wallets covered</p>
+                                    <p className="text-3xl font-semibold text-white mt-2">{formatNumber(folderStats.totalMembers, 0)}</p>
+                                    <p className="text-xs text-gray-300 mt-1">Unique beneficiaries</p>
                                 </div>
                             </div>
                         </div>
@@ -1729,76 +1729,94 @@ export default function NYALTXGovernance() {
                                 {folderSummaries.map((folder) => (
                                     <div
                                         key={folder.id}
-                                        className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-6"
+                                        className="rounded-3xl border border-white/15 bg-white/5 backdrop-blur-xl p-6 shadow-[0_20px_60px_rgba(4,7,17,0.45)]"
                                     >
-                                        <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+                                        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                                             <div>
-                                                <h3 className="text-xl font-semibold text-white">{folder.name}</h3>
-                                                <p className="text-sm text-gray-400">Folder #{folder.id} · {folder.memberCount} member{folder.memberCount === 1 ? '' : 's'}</p>
+                                                <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.4em] text-indigo-200/70">
+                                                    <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
+                                                    Folder #{folder.id}
+                                                </div>
+                                                <h3 className="text-2xl font-semibold text-white mt-2">{folder.name}</h3>
+                                                <p className="text-sm text-gray-400">
+                                                    {folder.memberCount} member{folder.memberCount === 1 ? '' : 's'} tracked from admin console
+                                                </p>
                                             </div>
                                             <div className="flex flex-wrap gap-2">
                                                 {folder.locked && (
-                                                    <span className="px-3 py-1 rounded-full text-xs bg-red-500/20 text-red-200">
+                                                    <span className="px-3 py-1 rounded-full text-xs bg-red-500/20 text-red-200 border border-red-400/30">
                                                         Locked
                                                     </span>
                                                 )}
-                                                {folder.template.revocable && (
-                                                    <span className="px-3 py-1 rounded-full text-xs bg-amber-500/20 text-amber-200">
+                                                {folder.template.revocable ? (
+                                                    <span className="px-3 py-1 rounded-full text-xs bg-amber-500/20 text-amber-200 border border-amber-400/30">
                                                         Revocable
                                                     </span>
-                                                )}
-                                                {!folder.template.revocable && (
-                                                    <span className="px-3 py-1 rounded-full text-xs bg-emerald-500/20 text-emerald-200">
+                                                ) : (
+                                                    <span className="px-3 py-1 rounded-full text-xs bg-emerald-500/20 text-emerald-200 border border-emerald-400/30">
                                                         Irrevocable
                                                     </span>
                                                 )}
                                             </div>
                                         </div>
 
-                                        <div className="grid gap-4 md:grid-cols-4 mt-6">
-                                            <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
-                                                <p className="text-xs text-gray-500 uppercase mb-1">Allocated</p>
-                                                <p className="text-lg font-semibold text-white">{formatNumber(folder.totalAllocated)}</p>
+                                        <div className="mt-6 space-y-4">
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <div className="bg-purple-500/10 rounded-2xl p-4 border border-purple-400/20">
+                                                    <p className="text-xs uppercase tracking-wide text-purple-200/90 mb-1">Total allocations</p>
+                                                    <p className="text-2xl font-bold text-purple-100">{formatNumber(folder.totalAllocated)}</p>
+                                                    <p className="text-xs text-purple-300 mt-1">NYAX routed to this escrow</p>
+                                                </div>
+                                                <div className="bg-cyan-500/10 rounded-2xl p-4 border border-cyan-400/20">
+                                                    <p className="text-xs uppercase tracking-wide text-cyan-200/90 mb-1">Unlocked</p>
+                                                    <p className="text-2xl font-bold text-cyan-100">{formatNumber(folder.totalUnlocked)}</p>
+                                                    <p className="text-xs text-cyan-300 mt-1">Lifecycle vested so far</p>
+                                                </div>
                                             </div>
-                                            <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
-                                                <p className="text-xs text-gray-500 uppercase mb-1">Unlocked</p>
-                                                <p className="text-lg font-semibold text-cyan-300">{formatNumber(folder.totalUnlocked)}</p>
-                                            </div>
-                                            <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
-                                                <p className="text-xs text-gray-500 uppercase mb-1">Claimed</p>
-                                                <p className="text-lg font-semibold text-emerald-300">{formatNumber(folder.totalClaimed)}</p>
-                                            </div>
-                                            <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
-                                                <p className="text-xs text-gray-500 uppercase mb-1">Claimable</p>
-                                                <p className="text-lg font-semibold text-amber-300">{formatNumber(folder.claimable)}</p>
+
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <div className="bg-blue-500/10 rounded-2xl p-4 border border-blue-400/20">
+                                                    <p className="text-xs uppercase tracking-wide text-blue-200/90 mb-1">Claimed</p>
+                                                    <p className="text-2xl font-bold text-blue-100">{formatNumber(folder.totalClaimed)}</p>
+                                                    <p className="text-xs text-blue-300 mt-1">NYAX delivered to wallets</p>
+                                                </div>
+                                                <div className="bg-amber-500/10 rounded-2xl p-4 border border-amber-400/20">
+                                                    <p className="text-xs uppercase tracking-wide text-amber-200/90 mb-1">Claimable</p>
+                                                    <p className="text-2xl font-bold text-amber-100">{formatNumber(folder.claimable)}</p>
+                                                    <p className="text-xs text-amber-300 mt-1">Ready to unlock</p>
+                                                </div>
                                             </div>
                                         </div>
 
-                                        <div className="mt-6">
-                                            <div className="flex items-center justify-between text-sm text-gray-400 mb-2">
+                                        <div className="mt-6 space-y-2">
+                                            <div className="flex items-center justify-between text-sm text-gray-300">
                                                 <span>Vesting progress</span>
-                                                <span className="text-white font-semibold">{folder.progress.toFixed(1)}%</span>
+                                                <span className="font-semibold text-white">{folder.progress.toFixed(1)}%</span>
                                             </div>
-                                            <div className="h-2 rounded-full bg-black/40 overflow-hidden">
+                                            <div className="h-2 rounded-full bg-white/10 overflow-hidden">
                                                 <div
-                                                    className="h-full bg-linear-to-r from-indigo-500 via-purple-500 to-pink-500 transition-all duration-500"
+                                                    className="h-full rounded-full bg-linear-to-r from-indigo-500 via-purple-500 to-pink-500 transition-all duration-500"
                                                     style={{ width: `${folder.progress}%` }}
                                                 />
+                                            </div>
+                                            <div className="flex items-center justify-between text-xs text-gray-400">
+                                                <span>{folder.locked ? 'Token stream paused' : 'Streaming on schedule'}</span>
+                                                <span>{folder.template.revocable ? 'Revocable template' : 'Permanent template'}</span>
                                             </div>
                                         </div>
 
                                         <div className="mt-6 grid gap-4 md:grid-cols-3 text-sm text-gray-300">
-                                            <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
-                                                <p className="text-xs text-gray-500 mb-1">Cliff</p>
-                                                <p className="font-semibold">{formatDuration(folder.template.cliff)}</p>
+                                            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                                                <p className="text-xs text-gray-400 mb-1">Cliff</p>
+                                                <p className="font-semibold text-white">{formatDuration(folder.template.cliff)}</p>
                                             </div>
-                                            <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
-                                                <p className="text-xs text-gray-500 mb-1">Duration</p>
-                                                <p className="font-semibold">{formatDuration(folder.template.duration)}</p>
+                                            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                                                <p className="text-xs text-gray-400 mb-1">Duration</p>
+                                                <p className="font-semibold text-white">{formatDuration(folder.template.duration)}</p>
                                             </div>
-                                            <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
-                                                <p className="text-xs text-gray-500 mb-1">Unlock state</p>
-                                                <p className="font-semibold">{folder.locked ? 'Locked' : 'Active'}</p>
+                                            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                                                <p className="text-xs text-gray-400 mb-1">Unlock state</p>
+                                                <p className="font-semibold text-white">{folder.locked ? 'Locked' : 'Active'}</p>
                                             </div>
                                         </div>
                                     </div>
