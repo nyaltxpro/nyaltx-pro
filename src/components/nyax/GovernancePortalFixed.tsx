@@ -3,8 +3,6 @@
 import { useDAOService } from '@/hooks/useDAOService';
 import { useMigrationVault } from '@/hooks/useMigrationVault';
 import { CONTRACT_ABIS, CONTRACT_ADDRESSES } from '@/services/contracts';
-import { getFolderRegistryFactoryService } from '@/services/contracts/folderRegistryFactoryService';
-import { getTreasuryService } from '@/services/contracts/treasuryService';
 import { GovernanceStats, ProposalData, StakingStats, TreasuryTransfer } from '@/services/contracts/types';
 import { ethers } from 'ethers';
 import { Activity, ArrowUpRight, CheckCircle, Clock, Coins, Layers, Shield, TrendingUp, Users, XCircle } from 'lucide-react';
@@ -246,18 +244,12 @@ export default function NYALTXGovernance() {
     // }, [daoService]);
 
     useEffect(() => {
+        if (!daoService) return;
         let cancelled = false;
         const loadTreasuryBalance = async () => {
             setTreasuryBalanceLoading(true);
             try {
-                if (!window.ethereum) {
-                    console.warn('MetaMask not detected');
-                    if (!cancelled) setTreasuryBalance('0');
-                    return;
-                }
-                const provider = new ethers.BrowserProvider(window.ethereum as any);
-                const treasuryService = getTreasuryService(provider);
-                const balance = await treasuryService.getTreasuryBalanceFormatted();
+                const balance = await daoService.treasury.getTreasuryBalanceFormatted();
                 if (!cancelled) setTreasuryBalance(balance);
             } catch (error) {
                 console.error('Failed to load treasury balance', error);
@@ -270,28 +262,16 @@ export default function NYALTXGovernance() {
         return () => {
             cancelled = true;
         };
-    }, []);
+    }, [daoService]);
 
     useEffect(() => {
+        if (!daoService) return;
         let cancelled = false;
         const loadFactoryStats = async () => {
             setFactoryStatsLoading(true);
             try {
-                console.log('Loading factory stats...');
-                if (!window.ethereum) {
-                    console.warn('MetaMask not detected');
-                    if (!cancelled) setFactoryStats(null);
-                    return;
-                }
-                const provider = new ethers.BrowserProvider(window.ethereum as any);
-                console.log('Provider created');
-
-                const factoryService = getFolderRegistryFactoryService(provider);
-                console.log('Factory service created');
-
-                const stats = await factoryService.getAllTokenStats();
-                console.log('Factory stats fetched:', stats);
-
+                console.log('Loading factory stats via DAO service...');
+                const stats = await daoService.folderFactory.getAllTokenStats();
                 if (!cancelled) setFactoryStats(stats);
             } catch (error) {
                 console.error('Failed to load factory stats', error);
@@ -304,7 +284,7 @@ export default function NYALTXGovernance() {
         return () => {
             cancelled = true;
         };
-    }, []);
+    }, [daoService]);
 
     useEffect(() => {
         let cancelled = false;
@@ -344,14 +324,11 @@ export default function NYALTXGovernance() {
     }, [daoService]);
 
     const loadFolderSummaries = useCallback(async () => {
+        if (!daoService) return;
         setFolderSummariesLoading(true);
         setFolderSummariesError(null);
         try {
-            if (!window.ethereum) {
-                throw new Error('Wallet provider not detected. Connect a wallet to load folder data.');
-            }
-            const provider = new ethers.BrowserProvider(window.ethereum as any);
-            const factoryService = getFolderRegistryFactoryService(provider);
+            const factoryService = daoService.folderFactory;
             const folderCount = await factoryService.getFolderCount();
             const summaries: FolderSummary[] = [];
 
@@ -405,9 +382,10 @@ export default function NYALTXGovernance() {
         } finally {
             setFolderSummariesLoading(false);
         }
-    }, []);
+    }, [daoService]);
 
     useEffect(() => {
+        if (!daoService) return;
         let cancelled = false;
         const fetchFolders = async () => {
             await loadFolderSummaries();
@@ -416,7 +394,7 @@ export default function NYALTXGovernance() {
         return () => {
             cancelled = true;
         };
-    }, [loadFolderSummaries, foldersReloadNonce]);
+    }, [daoService, loadFolderSummaries, foldersReloadNonce]);
 
     useEffect(() => {
         let cancelled = false;
@@ -817,8 +795,8 @@ export default function NYALTXGovernance() {
                             </div>
                             <div className="rounded-2xl border border-white/10 bg-black/30 p-4 text-sm text-gray-400">
                                 <p className="uppercase tracking-[0.3em] text-[10px] text-gray-500">Staked</p>
-                                <p className="text-2xl font-semibold break-words overflow-hidden text-ellipsis text-white mt-1">{formatNumber(overview.stakedTokens)}</p>
-                                <p className="text-xs break-words overflow-hidden text-ellipsis">{formatNumber((overview.stakedTokens / (overview.totalSupply || 1)) * 100)}% locked</p>
+                                <p className="text-2xl font-semibold wrap-break-word overflow-hidden text-ellipsis text-white mt-1">{formatNumber(overview.stakedTokens)}</p>
+                                <p className="text-xs wrap-break-word overflow-hidden text-ellipsis">{formatNumber((overview.stakedTokens / (overview.totalSupply || 1)) * 100)}% locked</p>
                             </div>
                         </div>
                     </div>
@@ -999,8 +977,8 @@ export default function NYALTXGovernance() {
                                     {tokenDistribution.map((segment) => (
                                         <div key={segment.label} className="rounded-xl border border-white/5 bg-white/5 p-3">
                                             <p className="text-xs uppercase tracking-wide text-gray-500">{segment.label}</p>
-                                            <p className="text-lg font-semibold text-white break-words overflow-hidden">{formatNumber(segment.value)}</p>
-                                            <p className="text-xs text-gray-500 break-words">{formatNumber((Number(segment.value) / (overview.totalSupply || 1)) * 100)}%</p>
+                                            <p className="text-lg font-semibold text-white wrap-break-word overflow-hidden">{formatNumber(segment.value)}</p>
+                                            <p className="text-xs text-gray-500 wrap-break-word">{formatNumber((Number(segment.value) / (overview.totalSupply || 1)) * 100)}%</p>
                                         </div>
                                     ))}
                                 </div>
