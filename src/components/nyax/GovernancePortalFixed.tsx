@@ -333,93 +333,68 @@ export default function NYALTXGovernance() {
         try {
             const factoryService = daoService.folderFactory;
             const registryService = daoService.folders;
-            const [registryFolders, folderDetails] = await Promise.all([
-                registryService.getAllFolders().catch(() => []),
+
+            const [folderDetails, registryFolders] = await Promise.all([
                 factoryService.getFoldersWithDetails().catch(() => []),
+                registryService.getAllFolders().catch(() => []),
             ]);
 
-            let FolderEscrowService: typeof import('@/services/contracts/folderEscrowService').FolderEscrowService | null = null;
-            let readOnlyProvider: ethers.JsonRpcProvider | null = null;
+            if (!folderDetails.length) {
+                setFolderSummaries([]);
+                return;
+            }
 
-            const getEscrowStats = async (address?: string) => {
-                if (!address) return null;
-                try {
-                    if (!FolderEscrowService) {
-                        const module = await import('@/services/contracts/folderEscrowService');
-                        FolderEscrowService = module.FolderEscrowService;
-                    }
-                    if (!readOnlyProvider) {
-                        const fallbackRpc = process.env.NEXT_PUBLIC_RPC_URL || 'https://sepolia.infura.io/v3/8f6f3d84b5c648babc3f6example';
-                        readOnlyProvider = new ethers.JsonRpcProvider(NETWORK_CONFIG?.rpcUrl || fallbackRpc);
-                    }
-                    const escrow = new FolderEscrowService(address, readOnlyProvider as any);
-                    return await escrow.getFolderStatsOptimized();
-                } catch (err) {
-                    console.error(`Failed to fetch escrow stats for folder ${address}`, err);
-                    return null;
+            const nameMap = new Map<string, string>();
+            registryFolders.forEach((folder) => {
+                if (folder?.name) {
+                    nameMap.set(folder.name.toLowerCase(), folder.name);
                 }
-            };
+            });
 
-            const summaries = (
-                await Promise.all(
-                    registryFolders.map(async (folder) => {
-                        if (!folder || !folder.exists) return null;
-                        const detail = folderDetails.find(
-                            (entry) => entry?.name && folder.name && entry.name.toLowerCase() === folder.name.toLowerCase()
-                        );
+            const { FolderEscrowService } = await import('@/services/contracts/folderEscrowService');
+            const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL || NETWORK_CONFIG?.rpcUrl || 'https://sepolia.infura.io/v3/8f6f3d84b5c648babc3f6example';
+            const readOnlyProvider = new ethers.JsonRpcProvider(rpcUrl);
 
-                        const escrowStats = detail?.address ? await getEscrowStats(detail.address) : null;
+            const summaries = await Promise.all(
+                folderDetails.map(async (detail, index) => {
+                    try {
+                        const escrow = new FolderEscrowService(detail.address, readOnlyProvider as any);
+                        const stats = await escrow.getFolderStatsOptimized();
 
-                        let totalUnlocked = 0;
-                        let totalClaimed = 0;
-                        let memberCount = folder.members?.length ?? 0;
-                        let folderBalance = 0;
-
-                        if (escrowStats) {
-                            totalUnlocked = parseFloat(ethers.formatEther(escrowStats.totalVested));
-                            totalClaimed = parseFloat(ethers.formatEther(escrowStats.totalClaimed));
-                            memberCount = escrowStats.totalBeneficiaries;
-                            folderBalance = parseFloat(ethers.formatEther(escrowStats.folderBalance));
-                        } else {
-                            const members = folder.members ?? [];
-                            for (const account of members) {
-                                const allocation = await factoryService.getAllocation(folder.id, account);
-                                if (!allocation || !allocation.exists) continue;
-                                const unlocked = await factoryService.getUnlockedTokens(folder.id, account);
-                                const claimedValue = parseFloat(allocation.claimed ?? '0');
-                                totalClaimed += Number.isFinite(claimedValue) ? claimedValue : 0;
-                                totalUnlocked += parseFloat(ethers.formatEther(unlocked));
-                            }
-                        }
-
-                        const totalAllocated = parseFloat(folder.totalAllocated ?? '0') || 0;
+                        const totalAllocated = parseFloat(ethers.formatEther(stats.totalAllocated));
+                        const totalUnlocked = parseFloat(ethers.formatEther(stats.totalVested));
+                        const totalClaimed = parseFloat(ethers.formatEther(stats.totalClaimed));
                         const claimable = Math.max(totalUnlocked - totalClaimed, 0);
                         const progress = totalAllocated > 0 ? Math.min((totalUnlocked / totalAllocated) * 100, 100) : 0;
+                        const canonicalName = detail.name ? nameMap.get(detail.name.toLowerCase()) ?? detail.name : detail.name || `Folder ${index + 1}`;
 
                         return {
-                            id: folder.id,
-                            name: folder.name,
-                            address: detail?.address,
-                            memberCount,
+                            id: detail.id ?? index + 1,
+                            name: canonicalName,
+                            address: detail.address,
+                            memberCount: stats.totalBeneficiaries,
                             totalAllocated,
                             totalUnlocked,
                             totalClaimed,
                             claimable,
                             progress,
-                            locked: folder.locked || Boolean(escrowStats?.isPaused),
-                            folderBalance,
-                            createdAt: detail?.createdAt ? Number(detail.createdAt) : undefined,
+                            locked: stats.isPaused,
+                            folderBalance: parseFloat(ethers.formatEther(stats.folderBalance)),
+                            createdAt: detail.createdAt ? Number(detail.createdAt) : undefined,
                             template: {
-                                cliff: folder.template?.cliff ?? 0,
-                                duration: folder.template?.duration ?? 0,
-                                revocable: folder.template?.revocable ?? false,
+                                cliff: stats.vestingCliff || 0,
+                                duration: stats.vestingDuration || 0,
+                                revocable: false,
                             },
                         } as FolderSummary;
-                    })
-                )
-            ).filter((summary): summary is FolderSummary => summary !== null);
+                    } catch (folderError) {
+                        console.error(`Failed to load stats for folder ${detail?.address}`, folderError);
+                        return null;
+                    }
+                })
+            );
 
-            setFolderSummaries(summaries);
+            setFolderSummaries(summaries.filter((summary): summary is FolderSummary => Boolean(summary)));
         } catch (error) {
             console.error('Failed to load folder summaries', error);
             setFolderSummariesError(error instanceof Error ? error.message : 'Failed to load folder data');
