@@ -1,10 +1,7 @@
-import PublicHeader from '@/components/PublicHeader';
 import { promises as fs } from 'fs';
 import type { Metadata } from 'next';
-import Image from 'next/image';
-import Link from 'next/link';
 import path from 'path';
-import './page.css';
+// import './page.css';
 
 type CTA = {
     label?: string;
@@ -189,110 +186,111 @@ export default async function GovernaPage() {
     const ctaSection = content.ctaSection ?? FALLBACK_CONTENT.ctaSection;
 
     return (
-        <div className='flex flex-col'>
-            <PublicHeader />
-            <main className="governa-page">
+        <></>
+        // <div className='flex flex-col'>
+        //     <PublicHeader />
+        //     <main className="governa-page">
 
-                <div className="container">
+        //         <div className="container">
 
-                    {/* <nav>
-                        {content.nav?.brandHref ? (
-                            <Link href={content.nav.brandHref} className="logo">
-                                {content.nav.brandText ?? FALLBACK_CONTENT.nav?.brandText}
-                            </Link>
-                        ) : (
-                            <div className="logo">{content.nav?.brandText ?? FALLBACK_CONTENT.nav?.brandText}</div>
-                        )}
+        //             {/* <nav>
+        //                 {content.nav?.brandHref ? (
+        //                     <Link href={content.nav.brandHref} className="logo">
+        //                         {content.nav.brandText ?? FALLBACK_CONTENT.nav?.brandText}
+        //                     </Link>
+        //                 ) : (
+        //                     <div className="logo">{content.nav?.brandText ?? FALLBACK_CONTENT.nav?.brandText}</div>
+        //                 )}
 
-                        {(content.nav?.ctaHref || FALLBACK_CONTENT.nav?.ctaHref) && (
-                            <Link href={content.nav?.ctaHref ?? FALLBACK_CONTENT.nav!.ctaHref!} className="cta-button">
-                                {content.nav?.ctaText ?? FALLBACK_CONTENT.nav?.ctaText ?? 'Get Started'}
-                            </Link>
-                        )}
-                    </nav> */}
+        //                 {(content.nav?.ctaHref || FALLBACK_CONTENT.nav?.ctaHref) && (
+        //                     <Link href={content.nav?.ctaHref ?? FALLBACK_CONTENT.nav!.ctaHref!} className="cta-button">
+        //                         {content.nav?.ctaText ?? FALLBACK_CONTENT.nav?.ctaText ?? 'Get Started'}
+        //                     </Link>
+        //                 )}
+        //             </nav> */}
 
-                    <section className="hero">
-                        <div className="floating-cards">
-                            {(hero?.floatingCards ?? []).map((card, index) => {
-                                if (!card?.image) return null;
-                                return (
-                                    <div className="float-card" key={`${card.image}-${index}`}>
-                                        <Image
-                                            src={card.image}
-                                            alt={card.alt ?? 'Governa Pro'}
-                                            width={card.width ?? 100}
-                                            height={card.height ?? 60}
-                                        />
-                                    </div>
-                                );
-                            })}
-                        </div>
-                        {hero?.eyebrow && <p className="text-sm uppercase tracking-[0.4em] text-gray-400 mb-4">{hero.eyebrow}</p>}
-                        <h1 dangerouslySetInnerHTML={{ __html: hero?.heading?.replace(/\n/g, '<br />') ?? '' }} />
-                        {hero?.description && <p>{hero.description}</p>}
-                        <div className="flex gap-4 justify-center flex-wrap">
-                            {hero?.primaryCta?.href && (
-                                <Link href={hero.primaryCta.href} className="cta-button">
-                                    {hero.primaryCta.label ?? 'Schedule Demo'}
-                                </Link>
-                            )}
-                            {hero?.secondaryCta?.href && (
-                                <Link href={hero.secondaryCta.href} className="cta-button" style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.3)' }}>
-                                    {hero.secondaryCta.label ?? 'Learn More'}
-                                </Link>
-                            )}
-                        </div>
-                    </section>
-                </div>
+        //             <section className="hero">
+        //                 <div className="floating-cards">
+        //                     {(hero?.floatingCards ?? []).map((card, index) => {
+        //                         if (!card?.image) return null;
+        //                         return (
+        //                             <div className="float-card" key={`${card.image}-${index}`}>
+        //                                 <Image
+        //                                     src={card.image}
+        //                                     alt={card.alt ?? 'Governa Pro'}
+        //                                     width={card.width ?? 100}
+        //                                     height={card.height ?? 60}
+        //                                 />
+        //                             </div>
+        //                         );
+        //                     })}
+        //                 </div>
+        //                 {hero?.eyebrow && <p className="text-sm uppercase tracking-[0.4em] text-gray-400 mb-4">{hero.eyebrow}</p>}
+        //                 <h1 dangerouslySetInnerHTML={{ __html: hero?.heading?.replace(/\n/g, '<br />') ?? '' }} />
+        //                 {hero?.description && <p>{hero.description}</p>}
+        //                 <div className="flex gap-4 justify-center flex-wrap">
+        //                     {hero?.primaryCta?.href && (
+        //                         <Link href={hero.primaryCta.href} className="cta-button">
+        //                             {hero.primaryCta.label ?? 'Schedule Demo'}
+        //                         </Link>
+        //                     )}
+        //                     {hero?.secondaryCta?.href && (
+        //                         <Link href={hero.secondaryCta.href} className="cta-button" style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.3)' }}>
+        //                             {hero.secondaryCta.label ?? 'Learn More'}
+        //                         </Link>
+        //                     )}
+        //                 </div>
+        //             </section>
+        //         </div>
 
-                <section className="comparison-section">
-                    <div className="container">
-                        <h2 className="section-title">{comparisonSection?.title}</h2>
+        //         <section className="comparison-section">
+        //             <div className="container">
+        //                 <h2 className="section-title">{comparisonSection?.title}</h2>
 
-                        <div className="comparison-grid">
-                            <div className="comparison-card with-governance">
-                                <div className="card-header">
-                                    <div className="icon with-icon">{comparisonSection?.withGovernance?.icon ?? '✓'}</div>
-                                    <h3 className="card-title">{comparisonSection?.withGovernance?.title ?? 'With Governance'}</h3>
-                                </div>
-                                <ul className="benefit-list">
-                                    {(comparisonSection?.withGovernance?.benefits ?? []).map((benefit, index) => (
-                                        <li key={`with-benefit-${index}`} className="benefit-item">
-                                            {benefit?.text}
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
+        //                 <div className="comparison-grid">
+        //                     <div className="comparison-card with-governance">
+        //                         <div className="card-header">
+        //                             <div className="icon with-icon">{comparisonSection?.withGovernance?.icon ?? '✓'}</div>
+        //                             <h3 className="card-title">{comparisonSection?.withGovernance?.title ?? 'With Governance'}</h3>
+        //                         </div>
+        //                         <ul className="benefit-list">
+        //                             {(comparisonSection?.withGovernance?.benefits ?? []).map((benefit, index) => (
+        //                                 <li key={`with-benefit-${index}`} className="benefit-item">
+        //                                     {benefit?.text}
+        //                                 </li>
+        //                             ))}
+        //                         </ul>
+        //                     </div>
 
-                            <div className="comparison-card without-governance">
-                                <div className="card-header">
-                                    <div className="icon without-icon">{comparisonSection?.withoutGovernance?.icon ?? '✕'}</div>
-                                    <h3 className="card-title">{comparisonSection?.withoutGovernance?.title ?? 'Without Governance'}</h3>
-                                </div>
-                                <ul className="benefit-list">
-                                    {(comparisonSection?.withoutGovernance?.benefits ?? []).map((benefit, index) => (
-                                        <li key={`without-benefit-${index}`} className="benefit-item">
-                                            {benefit?.text}
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+        //                     <div className="comparison-card without-governance">
+        //                         <div className="card-header">
+        //                             <div className="icon without-icon">{comparisonSection?.withoutGovernance?.icon ?? '✕'}</div>
+        //                             <h3 className="card-title">{comparisonSection?.withoutGovernance?.title ?? 'Without Governance'}</h3>
+        //                         </div>
+        //                         <ul className="benefit-list">
+        //                             {(comparisonSection?.withoutGovernance?.benefits ?? []).map((benefit, index) => (
+        //                                 <li key={`without-benefit-${index}`} className="benefit-item">
+        //                                     {benefit?.text}
+        //                                 </li>
+        //                             ))}
+        //                         </ul>
+        //                     </div>
+        //                 </div>
+        //             </div>
+        //         </section>
 
-                <section className="cta-section">
-                    <div className="container">
-                        <h2>{ctaSection?.title}</h2>
-                        {ctaSection?.subtitle && <p>{ctaSection.subtitle}</p>}
-                        {ctaSection?.primaryCta?.href && (
-                            <Link href={ctaSection.primaryCta.href} className="cta-button">
-                                {ctaSection.primaryCta.label ?? 'Start Your Governance Journey'}
-                            </Link>
-                        )}
-                    </div>
-                </section>
-            </main>
-        </div>
+        //         <section className="cta-section">
+        //             <div className="container">
+        //                 <h2>{ctaSection?.title}</h2>
+        //                 {ctaSection?.subtitle && <p>{ctaSection.subtitle}</p>}
+        //                 {ctaSection?.primaryCta?.href && (
+        //                     <Link href={ctaSection.primaryCta.href} className="cta-button">
+        //                         {ctaSection.primaryCta.label ?? 'Start Your Governance Journey'}
+        //                     </Link>
+        //                 )}
+        //             </div>
+        //         </section>
+        //     </main>
+        // </div>
     );
 }
