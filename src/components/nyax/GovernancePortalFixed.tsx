@@ -5,7 +5,7 @@ import { useMigrationVault } from '@/hooks/useMigrationVault';
 import { CONTRACT_ABIS, CONTRACT_ADDRESSES, NETWORK_CONFIG } from '@/services/contracts';
 import { GovernanceStats, ProposalData, StakingStats, TreasuryTransfer } from '@/services/contracts/types';
 import { ethers } from 'ethers';
-import { Activity, ArrowUpRight, CheckCircle, Clock, Coins, Layers, Shield, TrendingUp, Users, XCircle } from 'lucide-react';
+import { ArrowUpRight, CheckCircle, Coins, Layers, Shield, TrendingUp, Users, XCircle } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Area, AreaChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { useAccount, useChainId, useSwitchChain } from 'wagmi';
@@ -860,7 +860,7 @@ export default function NYALTXGovernance() {
                 {/* Overview Tab */}
                 {activeTab === 'overview' && (
                     <div className="space-y-8">
-                        <div className="rounded-3xl bg-linear-to-br from-indigo-600/30 via-purple-600/20 to-blue-500/20 border border-white/10 p-6 sm:p-8">
+                        {/* <div className="rounded-3xl bg-linear-to-br from-indigo-600/30 via-purple-600/20 to-blue-500/20 border border-white/10 p-6 sm:p-8">
                             <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
                                 <div>
                                     <p className="text-xs uppercase tracking-[0.2em] text-indigo-200/80 mb-2">Governance Overview</p>
@@ -889,7 +889,7 @@ export default function NYALTXGovernance() {
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div> */}
 
                         <div className="grid gap-4 md:grid-cols-4">
                             <div className="rounded-2xl bg-gray-900/50 border border-gray-800/60 p-5">
@@ -1146,7 +1146,7 @@ export default function NYALTXGovernance() {
                             </div>
                         </div>
 
-                        <div className="rounded-3xl bg-gray-900/60 border border-gray-800/80 p-6">
+                        {/* <div className="rounded-3xl bg-gray-900/60 border border-gray-800/80 p-6">
                             <div className="flex flex-col gap-2 mb-6">
                                 <p className="text-xs uppercase tracking-[0.2em] text-gray-400">Protocol constants</p>
                                 <h3 className="text-xl font-semibold">Key governance parameters</h3>
@@ -1177,7 +1177,7 @@ export default function NYALTXGovernance() {
                                     <p className="text-xs text-gray-500">votes to ratify</p>
                                 </div>
                             </div>
-                        </div>
+                        </div> */}
                     </div>
                 )}
 
