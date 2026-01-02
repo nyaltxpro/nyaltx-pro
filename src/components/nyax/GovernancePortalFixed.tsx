@@ -5,7 +5,7 @@ import { useMigrationVault } from '@/hooks/useMigrationVault';
 import { CONTRACT_ABIS, CONTRACT_ADDRESSES, NETWORK_CONFIG } from '@/services/contracts';
 import { GovernanceStats, ProposalData, StakingStats, TreasuryTransfer } from '@/services/contracts/types';
 import { ethers } from 'ethers';
-import { ArrowUpRight, CheckCircle, Coins, Layers, Shield, TrendingUp, Users, XCircle } from 'lucide-react';
+import { ArrowUpRight, CheckCircle, Coins, Shield, TrendingUp, Users, XCircle } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Area, AreaChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { useAccount, useChainId, useSwitchChain } from 'wagmi';
@@ -938,7 +938,7 @@ export default function NYALTXGovernance() {
                             </div>
                         </div>
 
-                        <div className="rounded-3xl bg-gray-900/60 border border-gray-800/80 p-6">
+                        {/* <div className="rounded-3xl bg-gray-900/60 border border-gray-800/80 p-6">
                             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                                 <div>
                                     <p className="text-xs uppercase tracking-[0.2em] text-gray-400">Participation snapshot</p>
@@ -971,7 +971,7 @@ export default function NYALTXGovernance() {
                                     );
                                 })}
                             </div>
-                        </div>
+                        </div> */}
 
                         <div className="grid gap-6 lg:grid-cols-2">
                             <div className="rounded-3xl bg-gray-900/60 border border-gray-800/80 p-6">
