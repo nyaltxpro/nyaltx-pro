@@ -143,9 +143,9 @@ export default function VestingClaims() {
                     try {
                         const escrowService = createFolderEscrowService(folderAddress, provider);
 
-                        // Check if user is a beneficiary
-                        const beneficiaries = await escrowService.getBeneficiaries();
-                        if (!beneficiaries.includes(address)) continue;
+                        // Check if user is a beneficiary by checking their beneficiary IDs
+                        const beneficiaryIds = await escrowService.getBeneficiaryIdsByWallet(address);
+                        if (beneficiaryIds.length === 0) continue;
 
                         // Get beneficiary info and vesting calculation
                         const [beneficiaryInfo, vestingCalc, folderName] = await Promise.all([
