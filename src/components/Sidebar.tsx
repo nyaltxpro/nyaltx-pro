@@ -110,7 +110,7 @@ export default function Sidebar({ isMobileMenuOpen, toggleMobileMenu }: SidebarP
     // },
 
     // { icon: <TokensIcon />, text: 'Create Token', href: '/dashboard/create-token' },
-    { icon: <TargetIcon />, text: 'Governance', href: '/dashboard/governance' },
+    // { icon: <TargetIcon />, text: 'Governance', href: '/dashboard/governance' },
     { icon: <PlusIcon />, text: 'Register Token', href: '/pricing' },
 
     { icon: <StarIcon />, text: 'Favorites', href: '/dashboard/favorites' },

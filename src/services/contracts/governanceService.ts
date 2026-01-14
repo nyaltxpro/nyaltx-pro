@@ -320,8 +320,12 @@ export class GovernanceService {
       descriptionHash,
       snapshotBlock,
       deadlineBlock,
-      forVotes,
-      againstVotes,
+      // Note: Contract has a bug where forVotes and againstVotes are swapped in the return
+      // The contract assigns: (againstVotes, forVotes, abstainVotes) = proposalVotes(proposalId)
+      // But returns in signature order: forVotes, againstVotes, abstainVotes
+      // So we swap them here to get correct values
+      againstVotes, // Actually contains forVotes from contract
+      forVotes,     // Actually contains againstVotes from contract
       abstainVotes,
       stateOrdinal
     ] = details;
