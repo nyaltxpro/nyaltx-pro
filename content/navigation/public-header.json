@@ -57,7 +57,7 @@
         },
            {
           "label": "Governa",
-          "href": "/governa",
+          "href": "https://nyaltx-governance.vercel.app/",
           "enabled": true
         },
         {

@@ -27,7 +27,7 @@ export default function PublicHeader() {
       links: [
         { label: 'Blog', href: '/blog', enabled: true },
         { label: 'About Us', href: '/about-us', enabled: true },
-        { label: 'Governa', href: '/governa', enabled: true },
+        { label: 'Governa', href: 'https://nyaltx-governance.vercel.app/', enabled: true },
         { label: 'Venture Group', href: '/venture-group', enabled: true },
         { label: 'Podcast', href: '/podcast', enabled: true },
         { label: 'Team', href: '/team', enabled: true },
