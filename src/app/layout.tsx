@@ -80,34 +80,138 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${poppins.variable} ${roboto.variable}`}>
       <head>
+        {/* Organization Schema */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               '@context': 'https://schema.org',
               '@type': 'Organization',
+              '@id': `${baseUrl}/#organization`,
               name: 'NYALTX',
               url: baseUrl,
-              logo: `${baseUrl}/og-image.png`,
+              logo: {
+                '@type': 'ImageObject',
+                url: `${baseUrl}/og-image.png`,
+                width: 512,
+                height: 512,
+              },
               description: 'Crypto token tracker and DeFi platform for discovering, tracking, and promoting cryptocurrency tokens.',
-              sameAs: ['https://twitter.com/nyaltx', 'https://t.me/nyaltx', 'https://discord.gg/nyaltx'],
+              sameAs: [
+                'https://twitter.com/nyaltx',
+                'https://t.me/nyaltx',
+                'https://discord.gg/nyaltx',
+              ],
+              contactPoint: {
+                '@type': 'ContactPoint',
+                contactType: 'customer service',
+                url: `${baseUrl}/contact`,
+              },
             })
           }}
         />
+        {/* WebSite Schema with SearchAction */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               '@context': 'https://schema.org',
               '@type': 'WebSite',
+              '@id': `${baseUrl}/#website`,
               name: 'NYALTX',
               url: baseUrl,
-              description: 'Crypto token tracker and DeFi platform',
+              description: 'Track meme tokens, view real-time charts, participate in Race to Liberty gamification, and discover trending cryptocurrencies.',
+              publisher: {
+                '@id': `${baseUrl}/#organization`,
+              },
               potentialAction: {
                 '@type': 'SearchAction',
-                target: `${baseUrl}/dashboard/trade?search={search_term_string}`,
+                target: {
+                  '@type': 'EntryPoint',
+                  urlTemplate: `${baseUrl}/dashboard/trade?search={search_term_string}`,
+                },
                 'query-input': 'required name=search_term_string',
               },
+              inLanguage: 'en-US',
+            })
+          }}
+        />
+        {/* SiteNavigationElement for Google Sitelinks */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'ItemList',
+              itemListElement: [
+                {
+                  '@type': 'SiteNavigationElement',
+                  position: 1,
+                  name: 'Dashboard',
+                  description: 'Access your crypto dashboard with real-time token tracking',
+                  url: `${baseUrl}/dashboard`,
+                },
+                {
+                  '@type': 'SiteNavigationElement',
+                  position: 2,
+                  name: 'Pricing',
+                  description: 'View pricing plans for Race to Liberty and boost packs',
+                  url: `${baseUrl}/pricing`,
+                },
+                {
+                  '@type': 'SiteNavigationElement',
+                  position: 3,
+                  name: 'About Us',
+                  description: 'Learn about NYALTX and our mission',
+                  url: `${baseUrl}/about-us`,
+                },
+                {
+                  '@type': 'SiteNavigationElement',
+                  position: 4,
+                  name: 'Contact',
+                  description: 'Get in touch with the NYALTX team',
+                  url: `${baseUrl}/contact`,
+                },
+                {
+                  '@type': 'SiteNavigationElement',
+                  position: 5,
+                  name: 'Whitepaper',
+                  description: 'Read the NYALTX whitepaper and documentation',
+                  url: `${baseUrl}/whitepaper`,
+                },
+                {
+                  '@type': 'SiteNavigationElement',
+                  position: 6,
+                  name: 'Podcast',
+                  description: 'Listen to Off Road with Frank Ferraro podcast',
+                  url: `${baseUrl}/podcast`,
+                },
+              ],
+            })
+          }}
+        />
+        {/* WebPage Schema */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'WebPage',
+              '@id': `${baseUrl}/#webpage`,
+              url: baseUrl,
+              name: 'NYALTX | Crypto Token Tracker & DeFi Platform',
+              description: 'Track meme tokens, view real-time charts, participate in Race to Liberty gamification, and discover trending cryptocurrencies across multiple blockchains.',
+              isPartOf: {
+                '@id': `${baseUrl}/#website`,
+              },
+              about: {
+                '@id': `${baseUrl}/#organization`,
+              },
+              primaryImageOfPage: {
+                '@type': 'ImageObject',
+                url: `${baseUrl}/og-image.png`,
+              },
+              inLanguage: 'en-US',
             })
           }}
         />
