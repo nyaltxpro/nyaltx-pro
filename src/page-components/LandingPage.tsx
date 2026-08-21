@@ -3,7 +3,12 @@
 import Faq from '@/components/Faq';
 import PublicHeader from '@/components/PublicHeader';
 import { useLandingPageContent } from '@/hooks/useTinaContent';
-import { ExchangeIcon, NetworkIcon, TokenIcon, WalletIcon } from '@web3icons/react';
+import {
+    ExchangeIcon,
+    NetworkIcon,
+    TokenIcon,
+    WalletIcon,
+} from '@web3icons/react/dynamic';
 import type { Variants } from 'framer-motion';
 import { animate, motion, useInView } from 'framer-motion';
 import Image from 'next/image';
