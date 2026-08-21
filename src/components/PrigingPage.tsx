@@ -3,7 +3,7 @@
 import PublicHeader from '@/components/PublicHeader';
 import { getNYAXPriceUSD } from '@/utils/nyaxPriceApi';
 import { useAppKit } from '@reown/appkit/react';
-import { TokenETH } from '@web3icons/react';
+import { TokenETH } from '@web3icons/react/dynamic';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
