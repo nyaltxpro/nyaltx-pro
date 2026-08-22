@@ -2,61 +2,88 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   eslint: {
-    // Disable ESLint during builds
     ignoreDuringBuilds: true,
   },
 
   async headers() {
     return [
       {
-        source: '/(.*)', // apply to all routes
+        source: '/(.*)',
         headers: [
           {
             key: 'X-Frame-Options',
-            value: 'ALLOWALL', // allow embedding anywhere
+            value: 'ALLOWALL',
           },
           {
             key: 'Content-Security-Policy',
-            value: "frame-ancestors *;", // optional: modern CSP replacement
+            value: "frame-ancestors *;",
           },
         ],
       },
-    ]
+    ];
   },
-  
+
   typescript: {
-    // Disable TypeScript errors during builds (optional)
     ignoreBuildErrors: true,
   },
-  // Disable static optimization for pages that might call APIs during build
-  // experimental: {
-  //   // Skip static optimization for pages with dynamic content
-  //   skipTrailingSlashRedirect: true,
-  // },
-  // Environment variables for build-time detection
+
   env: {
     NEXT_PHASE: process.env.NEXT_PHASE || '',
   },
-  webpack: (config) => {
-    config.externals.push("pino-pretty", "lokijs", "encoding",'@solana/web3.js', '@solana/wallet-adapter-wallets','@solana/wallet-adapter-react-ui','@reown/appkit-adapter-solana','@reown/appkit-adapter-wagmi');
+
+  // Avoid Next 15 minify plugin crash that masks the real error as
+  // "WebpackError is not a constructor" on large server bundles.
+  experimental: {
+    serverMinification: false,
+    webpackMemoryOptimizations: true,
+    cpus: 1,
+  },
+
+  serverExternalPackages: [
+    'pino-pretty',
+    'lokijs',
+    'encoding',
+  ],
+
+  webpack: (config, { isServer, dev }) => {
+    // Only externalize Node-only packages. Do NOT externalize Solana/Reown
+    // client SDKs — that produces broken bundles and minify failures.
+    if (isServer) {
+      const existing = Array.isArray(config.externals)
+        ? config.externals
+        : config.externals
+          ? [config.externals]
+          : [];
+      config.externals = [
+        ...existing,
+        'pino-pretty',
+        'lokijs',
+        'encoding',
+      ];
+    }
 
     config.resolve.alias = {
       ...(config.resolve.alias || {}),
+      // Optional wagmi Tempo dependency — not installed, must not fail resolve
       accounts: false,
     };
-    
-    // Suppress punycode deprecation warnings
+
+    // Reduce peak memory during production minify on Vercel 2-core builders
+    if (!dev) {
+      config.parallelism = 1;
+    }
+
     config.ignoreWarnings = [
       { module: /node_modules\/punycode/ },
       /Critical dependency: the request of a dependency is an expression/,
     ];
-    
+
     return config;
   },
-  
+
   images: {
     domains: [
-      "coin-images.coingecko.com", 
+      "coin-images.coingecko.com",
       "cryptologos.cc",
       "ipfs.io",
       "gateway.ipfs.io",
@@ -74,7 +101,7 @@ const nextConfig: NextConfig = {
       "logo.moralis.io",
       "cdn.dexscreener.com",
       "dd.dexscreener.com",
-        "assets.tina.io"
+      "assets.tina.io",
     ],
     remotePatterns: [
       {
@@ -169,12 +196,12 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "assets.tina.io", // ✅ Added TinaCMS remote pattern
+        hostname: "assets.tina.io",
         pathname: "/**",
       },
       {
         protocol: "https",
-        hostname: "nyaltx.pro ", // ✅ Added TinaCMS remote pattern
+        hostname: "nyaltx.pro",
         pathname: "/**",
       },
     ],
