@@ -39,6 +39,11 @@ const nextConfig: NextConfig = {
   },
   webpack: (config) => {
     config.externals.push("pino-pretty", "lokijs", "encoding",'@solana/web3.js', '@solana/wallet-adapter-wallets','@solana/wallet-adapter-react-ui','@reown/appkit-adapter-solana','@reown/appkit-adapter-wagmi');
+
+    config.resolve.alias = {
+      ...(config.resolve.alias || {}),
+      accounts: false,
+    };
     
     // Suppress punycode deprecation warnings
     config.ignoreWarnings = [

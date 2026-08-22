@@ -4,10 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "tinacms dev -c \"next dev --turbopack\"",
-    "build": "tinacms build && NODE_OPTIONS=--max-old-space-size=4096 next build --turbopack",
+    "build": "tinacms build && NODE_OPTIONS=--max-old-space-size=4096 next build",
     "prebuild": "if [ \"$TINA_CLOUD_ENABLED\" = \"true\" ]; then tinacms build; else echo 'Skipping Tina build (TINA_CLOUD_ENABLED not true)'; fi",
     "build:tina": "echo 'Skipping Tina build for local development - using static content files'",
-    "build:cloud": "tinacms build && NODE_OPTIONS=--max-old-space-size=4096 next build --turbopack",
+    "build:cloud": "tinacms build && NODE_OPTIONS=--max-old-space-size=4096 next build",
     "start": "next start",
     "lint": "eslint",
     "lint:fix": "eslint --fix",

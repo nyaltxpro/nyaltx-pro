@@ -3,7 +3,6 @@
 import PublicHeader from '@/components/PublicHeader';
 import { getNYAXPriceUSD } from '@/utils/nyaxPriceApi';
 import { useAppKit } from '@reown/appkit/react';
-import { TokenETH } from '@web3icons/react/dynamic';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
@@ -469,7 +468,7 @@ export const PricingPage = ({ tinaData }: any) => {
                                             </div>
                                             <div className="mt-1 grid grid-cols-1 gap-1 text-xs text-gray-400">
                                                 <div className="flex items-center gap-2">
-                                                    <TokenETH />
+                                                    <Image src="/crypto-icons/color/eth.svg" alt="ETH" width={20} height={20} className="opacity-60" />
                                                     <span>ETH est.: {ethAmt ? `${ethAmt.toFixed(5)} ETH` : '—'}</span>
                                                 </div>
                                                 <div className="flex items-center gap-2">
@@ -565,7 +564,7 @@ export const PricingPage = ({ tinaData }: any) => {
 
                                         <div className="mb-4 text-xs text-gray-400 space-y-1">
                                             <div className="flex items-center gap-2">
-                                                <TokenETH className="w-4 h-4" />
+                                                <Image src="/crypto-icons/color/eth.svg" alt="ETH" width={16} height={16} className="opacity-60" />
                                                 <span>ETH: {ethAmt ? `${ethAmt.toFixed(5)} ETH` : '—'}</span>
                                             </div>
                                             <div className="flex items-center gap-2">

@@ -8,7 +8,12 @@ import React from 'react';
 import Faq from '@/components/Faq';
 import PublicHeader from '@/components/PublicHeader';
 import { useLandingPageContent } from '@/hooks/useTinaContent';
-import { ExchangeIcon, NetworkIcon, TokenIcon, WalletIcon } from '@web3icons/react';
+import {
+    ExchangeIcon,
+    NetworkIcon,
+    TokenIcon,
+    WalletIcon,
+} from '@web3icons/react/dynamic';
 import type { Variants } from 'framer-motion';
 const container: Variants = {
     hidden: { opacity: 0 },
