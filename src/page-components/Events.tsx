@@ -7,7 +7,8 @@ import {
     Cross2Icon,
     ExternalLinkIcon,
     EyeOpenIcon,
-    TokensIcon
+    ImageIcon,
+    TokensIcon,
 } from '@radix-ui/react-icons';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
@@ -240,13 +241,17 @@ export default function EventsPage() {
                                 <div
                                     className="relative h-48 overflow-hidden cursor-pointer group/image"
                                     onClick={() =>
-                                        event.proof && setSelectedImage({ src: getProxiedImageUrl(event.proof), title: event.title.en })
+                                        event.proof &&
+                                        setSelectedImage({
+                                            src: getProxiedImageUrl(event.proof),
+                                            title: event.title?.en || 'Event',
+                                        })
                                     }
                                 >
                                     {event.proof && !imageErrors[event.id] ? (
                                         <Image
                                             src={getProxiedImageUrl(event.proof)}
-                                            alt={event.title.en}
+                                            alt={event.title?.en || 'Event'}
                                             fill
                                             className="object-cover transition-transform duration-300 group-hover:scale-105"
                                             onError={() => {
@@ -259,7 +264,7 @@ export default function EventsPage() {
                                                 <ImageIcon className="w-7 h-7 text-gray-400" />
                                             </div>
                                             <span className="mt-2 max-w-[90%] truncate text-xs text-gray-400 px-2 text-center">
-                                                {event.title.en}
+                                                {event.title?.en || 'Event'}
                                             </span>
                                         </div>
                                     )}
@@ -308,7 +313,7 @@ export default function EventsPage() {
                                     </div>
 
                                     <h3 className="text-lg font-bold text-white hover:text-transparent hover:bg-gradient-to-r hover:from-[#00c3ff] hover:to-[#7c3aed] hover:bg-clip-text transition-all duration-300 mb-3 line-clamp-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                                        {event.title.en}
+                                        {event.title?.en || 'Untitled event'}
                                     </h3>
 
                                     {event.description?.en && (
@@ -340,7 +345,7 @@ export default function EventsPage() {
                                                     >
                                                         <div className="flex items-center gap-3">
                                                             <div className="w-8 h-8 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
-                                                                {coin.symbol.charAt(0)}
+                                                                {(coin.symbol || coin.name || '?').charAt(0)}
                                                             </div>
                                                             <div>
                                                                 <div className="text-white font-medium text-sm">{coin.symbol}</div>
