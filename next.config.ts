@@ -102,6 +102,7 @@ const nextConfig: NextConfig = {
       "cdn.dexscreener.com",
       "dd.dexscreener.com",
       "assets.tina.io",
+      "coinmarketcal-share.s3.eu-west-1.amazonaws.com",
     ],
     remotePatterns: [
       {
@@ -197,6 +198,11 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "assets.tina.io",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "coinmarketcal-share.s3.eu-west-1.amazonaws.com",
         pathname: "/**",
       },
       {

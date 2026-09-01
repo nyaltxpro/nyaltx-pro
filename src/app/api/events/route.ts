@@ -4,6 +4,8 @@ export const revalidate = 300;
 
 const API_KEY = process.env.COINMARKETCAL_API_KEY || 'cmc_live_8ec39a5f0ba4914f5efdd7deeb5b7951';
 const BASE_URL = 'https://api.coinmarketcal.com/v2/events';
+const COINS_URL = 'https://api.coinmarketcal.com/v2/coins';
+const CMC_ICON_BASE = 'https://coinmarketcal-share.s3.eu-west-1.amazonaws.com/coins/icons';
 const CACHE_TTL_MS = 5 * 60 * 1000;
 
 type V2Coin = {
@@ -14,6 +16,7 @@ type V2Coin = {
 
 type V2Event = {
   id?: string | number;
+  slug?: string;
   title?: string;
   description?: string | null;
   date?: string;
@@ -22,34 +25,17 @@ type V2Event = {
   displayedDate?: string;
   coins?: V2Coin[];
   impact?: unknown;
+  impactSummary?: string | null;
   sourceUrl?: string | null;
   snapshotUrl?: string | null;
   createdAt?: string | null;
 };
 
-function mapEvent(event: V2Event) {
-  const numericId = Number(event.id);
-  return {
-    id: Number.isFinite(numericId) ? numericId : event.id,
-    title: { en: event.title || 'Untitled event' },
-    coins: (event.coins || []).map(coin => ({
-      id: coin.slug || coin.symbol || coin.name || '',
-      name: coin.name || coin.symbol || '',
-      rank: 0,
-      symbol: (coin.symbol || '').toUpperCase(),
-      fullname: coin.name || coin.symbol || '',
-    })),
-    date_event: event.date || '',
-    can_occur_before: Boolean(event.isEstimated),
-    created_date: event.createdAt || '',
-    displayed_date: event.displayedDate || '',
-    categories: [],
-    proof: event.snapshotUrl || '',
-    source: event.sourceUrl || '',
-    description: event.description ? { en: event.description } : undefined,
-    important: Boolean(event.impact),
-  };
-}
+type CoinMeta = {
+  iconUrl?: string;
+  name?: string;
+  rank?: number;
+};
 
 type EventsPayload = {
   body: ReturnType<typeof mapEvent>[];
@@ -64,6 +50,7 @@ type CacheEntry = {
 };
 
 const eventsCache = new Map<string, CacheEntry>();
+const coinMetaCache = new Map<string, { expiresAt: number; meta: Record<string, CoinMeta> }>();
 
 function cacheKey(pageNum: number, limit: number) {
   return `${pageNum}:${limit}`;
@@ -85,6 +72,115 @@ function setCached(pageNum: number, limit: number, payload: EventsPayload) {
 
 function getStale(pageNum: number, limit: number): EventsPayload | null {
   return eventsCache.get(cacheKey(pageNum, limit))?.payload ?? null;
+}
+
+function localIconForSymbol(symbol?: string) {
+  const normalized = (symbol || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  if (!normalized) return '/crypto-icons/color/generic.svg';
+  return `/crypto-icons/color/${normalized}.svg`;
+}
+
+function cmcIconForSlug(slug?: string) {
+  if (!slug) return '';
+  return `${CMC_ICON_BASE}/${slug}.png`;
+}
+
+function buildDescription(event: V2Event, coinLabels: string[]) {
+  const direct = event.description?.trim() || event.impactSummary?.trim();
+  if (direct) return direct;
+
+  const title = event.title?.trim() || 'Crypto event';
+  const datePart = event.displayedDate ? ` Scheduled for ${event.displayedDate}.` : '';
+  const coinPart = coinLabels.length ? ` Related assets: ${coinLabels.join(', ')}.` : '';
+  return `${title}.${datePart}${coinPart}`.replace(/\.\./g, '.').trim();
+}
+
+async function fetchCoinMeta(slugs: string[]): Promise<Record<string, CoinMeta>> {
+  const unique = [...new Set(slugs.filter(Boolean))].slice(0, 40);
+  if (!unique.length) return {};
+
+  const cacheKeyForSlugs = unique.slice().sort().join(',');
+  const cached = coinMetaCache.get(cacheKeyForSlugs);
+  if (cached && Date.now() < cached.expiresAt) {
+    return cached.meta;
+  }
+
+  const meta: Record<string, CoinMeta> = {};
+  await Promise.all(
+    unique.map(async slug => {
+      meta[slug] = { iconUrl: cmcIconForSlug(slug) };
+      try {
+        const res = await fetch(`${COINS_URL}/${encodeURIComponent(slug)}`, {
+          headers: {
+            'x-api-key': API_KEY,
+            Accept: 'application/json',
+          },
+          next: { revalidate: 3600 },
+        });
+        if (!res.ok) return;
+        const coin = await res.json();
+        if (coin?.slug) {
+          meta[slug] = {
+            iconUrl: coin.iconUrl || cmcIconForSlug(slug),
+            name: coin.name,
+            rank: typeof coin.rank === 'number' ? coin.rank : undefined,
+          };
+        }
+      } catch {
+        // Keep slug-based icon fallback
+      }
+    })
+  );
+
+  coinMetaCache.set(cacheKeyForSlugs, {
+    expiresAt: Date.now() + 60 * 60 * 1000,
+    meta,
+  });
+
+  return meta;
+}
+
+function mapEvent(event: V2Event, coinMeta: Record<string, CoinMeta>) {
+  const numericId = Number(event.id);
+  const coins = (event.coins || []).map(coin => {
+    const slug = coin.slug || '';
+    const details = slug ? coinMeta[slug] : undefined;
+    return {
+      id: slug || coin.symbol || coin.name || '',
+      name: details?.name || coin.name || coin.symbol || '',
+      rank: details?.rank || 0,
+      symbol: (coin.symbol || '').toUpperCase(),
+      fullname: details?.name || coin.name || coin.symbol || '',
+      image: details?.iconUrl || cmcIconForSlug(slug) || localIconForSymbol(coin.symbol),
+    };
+  });
+
+  const primaryCoin = coins[0];
+  const proof =
+    event.snapshotUrl ||
+    primaryCoin?.image ||
+    cmcIconForSlug(event.coins?.[0]?.slug) ||
+    localIconForSymbol(primaryCoin?.symbol) ||
+    '/crypto-icons/color/generic.svg';
+
+  const coinLabels = coins.map(coin => coin.name || coin.symbol).filter(Boolean);
+  const description = buildDescription(event, coinLabels);
+
+  return {
+    id: Number.isFinite(numericId) ? numericId : event.id,
+    slug: event.slug || '',
+    title: { en: event.title?.trim() || 'Untitled event' },
+    coins,
+    date_event: event.date || '',
+    can_occur_before: Boolean(event.isEstimated),
+    created_date: event.createdAt || '',
+    displayed_date: event.displayedDate || '',
+    categories: [],
+    proof,
+    source: event.sourceUrl || (event.slug ? `https://coinmarketcal.com/en/event/${event.slug}` : ''),
+    description: { en: description },
+    important: Boolean(event.impact),
+  };
 }
 
 function jsonResponse(payload: EventsPayload, cacheStatus: 'HIT' | 'MISS' | 'STALE') {
@@ -134,11 +230,14 @@ export async function GET(request: NextRequest) {
     }
 
     const payload = await response.json();
-    const events = Array.isArray(payload?.data) ? payload.data : [];
+    const events: V2Event[] = Array.isArray(payload?.data) ? payload.data : [];
+    const slugs = events.flatMap(event => (event.coins || []).map(coin => coin.slug || '')).filter(Boolean);
+    const coinMeta = await fetchCoinMeta(slugs);
+
     const totalEvents = Number(payload?.meta?.total) || events.length;
     const totalPages = Math.max(1, Math.ceil(totalEvents / limit));
     const mapped: EventsPayload = {
-      body: events.map(mapEvent),
+      body: events.map(event => mapEvent(event, coinMeta)),
       page: pageNum,
       totalPages,
       totalEvents,

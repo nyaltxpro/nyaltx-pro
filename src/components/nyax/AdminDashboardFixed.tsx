@@ -7,7 +7,7 @@ import { CONTRACT_ABIS, CONTRACT_ADDRESSES } from '@/services/contracts';
 import { FolderInfo, MultisigTransaction } from '@/services/contracts/types';
 import { useAppKitAccount } from '@reown/appkit/react';
 import { ethers } from 'ethers';
-import { Filter, Gavel, Loader2, Lock, Plus, PlusIcon, Search, Shield, UserPlus2 } from 'lucide-react';
+import { Ban, CircleDollarSign, Filter, Gavel, Loader2, Lock, Plus, PlusIcon, Search, Shield, SplitSquareHorizontal, UserPlus2 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAccount, useChainId, useSwitchChain } from 'wagmi';
 
@@ -68,6 +68,9 @@ const describePermissions = (mask: number) =>
 
 const TOOL_BUTTON_CLASSES =
     'flex flex-col items-center gap-2 p-4 bg-white/5 rounded-lg border border-white/10 text-gray-300 text-sm hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed';
+
+const PLACEHOLDER_TOOL_CLASSES =
+    'flex flex-col items-center justify-center gap-2 p-4 min-h-[96px] rounded-lg border border-dashed border-white/20 bg-white/[0.03] text-gray-300 text-sm cursor-default';
 
 type ActiveTab = 'folders' | 'staking';
 
@@ -2264,6 +2267,22 @@ export default function AdminDashboardFixed() {
                                 <Shield className="w-4 h-4" /> Send to Folder
                             </div>
                         </button>
+
+                        <div className={PLACEHOLDER_TOOL_CLASSES} title="Coming soon">
+                            <Ban className="w-5 h-5 text-red-300" />
+                            <span className="font-medium text-white">Cancel</span>
+                            <span className="text-[10px] uppercase tracking-wider text-gray-500">Preview</span>
+                        </div>
+                        <div className={PLACEHOLDER_TOOL_CLASSES} title="Coming soon">
+                            <SplitSquareHorizontal className="w-5 h-5 text-cyan-300" />
+                            <span className="font-medium text-white">Splits</span>
+                            <span className="text-[10px] uppercase tracking-wider text-gray-500">Preview</span>
+                        </div>
+                        <div className={PLACEHOLDER_TOOL_CLASSES} title="Coming soon">
+                            <CircleDollarSign className="w-5 h-5 text-emerald-300" />
+                            <span className="font-medium text-white">Dividend</span>
+                            <span className="text-[10px] uppercase tracking-wider text-gray-500">Preview</span>
+                        </div>
 
                     </div>
                 </div>

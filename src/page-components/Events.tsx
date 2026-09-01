@@ -15,15 +15,17 @@ import { useEffect, useState } from 'react';
 
 interface Event {
     id: number;
+    slug?: string;
     title: {
         en: string;
-    };
+    } | string;
     coins: Array<{
         id: string;
         name: string;
         rank: number;
         symbol: string;
         fullname: string;
+        image?: string;
     }>;
     date_event: string;
     can_occur_before: boolean;
@@ -37,7 +39,7 @@ interface Event {
     source: string;
     description?: {
         en: string;
-    };
+    } | string;
     percentage?: number;
     important?: boolean;
 }
@@ -118,9 +120,19 @@ export default function EventsPage() {
         }
     };
 
+    const getEventTitle = (event: Event) => {
+        if (typeof event.title === 'string') return event.title;
+        return event.title?.en || 'Untitled event';
+    };
+
+    const getEventDescription = (event: Event) => {
+        if (typeof event.description === 'string') return event.description;
+        return event.description?.en || '';
+    };
+
     // Helper function to get proxied image URL for viewing
     const getProxiedImageUrl = (url: string) => {
-        if (!url) return url;
+        if (!url) return '/crypto-icons/color/generic.svg';
 
         // Check if it's a CloudFront URL that needs proxying
         if (url.includes('d32bfp67k1q0s7.cloudfront.net')) {
@@ -129,6 +141,26 @@ export default function EventsPage() {
 
         // For other URLs, return as-is
         return url;
+    };
+
+    const getEventImage = (event: Event) => {
+        if (event.proof) return getProxiedImageUrl(event.proof);
+        if (event.coins?.[0]?.image) return getProxiedImageUrl(event.coins[0].image);
+        if (event.coins?.[0]?.symbol) {
+            return `/crypto-icons/color/${event.coins[0].symbol.toLowerCase()}.svg`;
+        }
+        return '/crypto-icons/color/generic.svg';
+    };
+
+    const isLogoImage = (url: string) => {
+        return (
+            url.includes('/crypto-icons/') ||
+            url.includes('coin-images.coingecko.com') ||
+            url.includes('assets.coingecko.com') ||
+            url.includes('coinmarketcal-share.s3.eu-west-1.amazonaws.com') ||
+            url.endsWith('.svg') ||
+            url.endsWith('.png')
+        );
     };
 
     if (loading && events.length === 0) {
@@ -169,7 +201,7 @@ export default function EventsPage() {
                 <div className="relative rounded-2xl p-6">
                     <div className="flex items-center gap-4 mb-4">
                         <div>
-                            <h1 className="text-3xl md:text-4xl font-bold bg-white bg-clip-text text-transparent" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                            <h1 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-indigo-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                                 Crypto Events Hub
                             </h1>
                             <div className="flex items-center gap-2 mt-1">
@@ -231,7 +263,13 @@ export default function EventsPage() {
                 </div>
             ) : (
                 <div className="grid gap-6 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
-                    {filteredEvents.map((event, index) => (
+                    {filteredEvents.map(event => {
+                        const imageSrc = getEventImage(event);
+                        const logoStyle = isLogoImage(imageSrc);
+                        const eventTitle = getEventTitle(event);
+                        const eventDescription = getEventDescription(event);
+
+                        return (
                         <div key={event.id} className="group relative">
                             {/* Glow effect */}
                             <div className="absolute -inset-0.5 bg-gradient-to-r from-[#00c3ff]/20 via-[#7c3aed]/20 to-[#f59e0b]/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
@@ -241,37 +279,59 @@ export default function EventsPage() {
                                 <div
                                     className="relative h-48 overflow-hidden cursor-pointer group/image"
                                     onClick={() =>
-                                        event.proof &&
                                         setSelectedImage({
-                                            src: getProxiedImageUrl(event.proof),
-                                            title: event.title?.en || 'Event',
+                                            src: imageSrc,
+                                            title: eventTitle,
                                         })
                                     }
                                 >
-                                    {event.proof && !imageErrors[event.id] ? (
-                                        <Image
-                                            src={getProxiedImageUrl(event.proof)}
-                                            alt={event.title?.en || 'Event'}
-                                            fill
-                                            className="object-cover transition-transform duration-300 group-hover:scale-105"
-                                            onError={() => {
-                                                setImageErrors(prev => ({ ...prev, [event.id]: true }));
-                                            }}
-                                        />
+                                    {!imageErrors[event.id] ? (
+                                        <div
+                                            className={`absolute inset-0 ${
+                                                logoStyle
+                                                    ? 'flex items-center justify-center bg-gradient-to-br from-slate-900 via-gray-900 to-cyan-950'
+                                                    : ''
+                                            }`}
+                                        >
+                                            {logoStyle ? (
+                                                <Image
+                                                    src={imageSrc}
+                                                    alt={eventTitle}
+                                                    width={96}
+                                                    height={96}
+                                                    className="object-contain drop-shadow-lg transition-transform duration-300 group-hover:scale-110"
+                                                    unoptimized
+                                                    onError={() => {
+                                                        setImageErrors(prev => ({ ...prev, [event.id]: true }));
+                                                    }}
+                                                />
+                                            ) : (
+                                                <Image
+                                                    src={imageSrc}
+                                                    alt={eventTitle}
+                                                    fill
+                                                    className="object-cover transition-transform duration-300 group-hover:scale-105"
+                                                    unoptimized
+                                                    onError={() => {
+                                                        setImageErrors(prev => ({ ...prev, [event.id]: true }));
+                                                    }}
+                                                />
+                                            )}
+                                        </div>
                                     ) : (
                                         <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
                                             <div className="w-14 h-14 rounded-full bg-gray-700 flex items-center justify-center">
                                                 <ImageIcon className="w-7 h-7 text-gray-400" />
                                             </div>
                                             <span className="mt-2 max-w-[90%] truncate text-xs text-gray-400 px-2 text-center">
-                                                {event.title?.en || 'Event'}
+                                                {eventTitle}
                                             </span>
                                         </div>
                                     )}
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
                                     {/* View Image Overlay */}
-                                    {event.proof && !imageErrors[event.id] && (
+                                    {!imageErrors[event.id] && (
                                         <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/image:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                                             <div className="bg-white/20 backdrop-blur-sm rounded-full p-3 border border-white/30">
                                                 <EyeOpenIcon className="w-5 h-5 text-white" />
@@ -290,7 +350,6 @@ export default function EventsPage() {
 
                                     {/* Important Badge */}
                                     {event.important && (
-        
                                         <div className="absolute top-3 right-3">
                                             <div className="bg-yellow-500/90 backdrop-blur-sm text-black px-3 py-1 rounded-full text-xs font-bold">
                                                 ⭐ Important
@@ -313,12 +372,12 @@ export default function EventsPage() {
                                     </div>
 
                                     <h3 className="text-lg font-bold text-white hover:text-transparent hover:bg-gradient-to-r hover:from-[#00c3ff] hover:to-[#7c3aed] hover:bg-clip-text transition-all duration-300 mb-3 line-clamp-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                                        {event.title?.en || 'Untitled event'}
+                                        {eventTitle}
                                     </h3>
 
-                                    {event.description?.en && (
+                                    {eventDescription && (
                                         <p className="text-sm text-gray-400 line-clamp-3 leading-relaxed mb-4" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                                            {event.description.en}
+                                            {eventDescription}
                                         </p>
                                     )}
 
@@ -344,9 +403,20 @@ export default function EventsPage() {
                                                         className="flex items-center justify-between bg-gray-800/50 rounded-lg p-3 border border-gray-700/50"
                                                     >
                                                         <div className="flex items-center gap-3">
+                                                            {coin.image ? (
+                                                                <Image
+                                                                    src={coin.image}
+                                                                    alt={coin.symbol}
+                                                                    width={32}
+                                                                    height={32}
+                                                                    className="rounded-full object-cover"
+                                                                    unoptimized
+                                                                />
+                                                            ) : (
                                                             <div className="w-8 h-8 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
                                                                 {(coin.symbol || coin.name || '?').charAt(0)}
                                                             </div>
+                                                            )}
                                                             <div>
                                                                 <div className="text-white font-medium text-sm">{coin.symbol}</div>
                                                                 <div className="text-gray-400 text-xs">{coin.name}</div>
@@ -396,7 +466,7 @@ export default function EventsPage() {
                                                     style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                                                 >
                                                     <ExternalLinkIcon className="w-4 h-4" />
-                                                    View Source
+                                                    View on CoinMarketCal
                                                 </a>
                                             ) : (
                                                 <span style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
@@ -409,7 +479,8 @@ export default function EventsPage() {
                                 </div>
                             </div>
                         </div>
-                    ))}
+                        );
+                    })}
                 </div>
             )}
 
