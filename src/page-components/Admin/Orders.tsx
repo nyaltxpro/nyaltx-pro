@@ -51,14 +51,25 @@ const AdminOrdersComponent = () => {
   const fetchOrders = async () => {
     try {
       setLoading(true);
+      setError(null);
       const params = new URLSearchParams();
       if (typeFilter) params.append('type', typeFilter);
       if (statusFilter) params.append('status', statusFilter);
       params.append('limit', '100');
 
-      const response = await fetch(`/api/admin/orders?${params.toString()}`);
+      const response = await fetch(`/api/admin/orders?${params.toString()}`, {
+        credentials: 'include',
+        cache: 'no-store',
+      });
+
+      if (response.status === 401) {
+        window.location.href = `/adminpanel/login?from=${encodeURIComponent('/adminpanel/orders')}`;
+        return;
+      }
+
       if (!response.ok) {
-        throw new Error('Failed to fetch orders');
+        const body = await response.json().catch(() => ({}));
+        throw new Error(body.error || `Failed to fetch orders (${response.status})`);
       }
 
       const result = await response.json();

@@ -1326,6 +1326,11 @@ export default function NYALTXGovernance() {
                                         ))}
                                     </div>
 
+                                    <div className="rounded-2xl border border-white/10 bg-white/5 p-3 text-xs text-gray-400">
+                                        Governor requires <span className="text-white font-semibold">1,000,000 gNYAX</span> voting power.
+                                        Hold tokens and <span className="text-white font-semibold">delegate to yourself</span> before creating a proposal.
+                                    </div>
+
                                     <button
                                         type="button"
                                         onClick={handleCreateProposal}

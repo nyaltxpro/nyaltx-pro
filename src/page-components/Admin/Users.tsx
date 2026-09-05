@@ -53,9 +53,19 @@ const AdminUsersComponent = () => {
       if (searchTerm) params.append('search', searchTerm);
       params.append('limit', '200');
 
-      const response = await fetch(`/api/admin/users?${params.toString()}`);
+      const response = await fetch(`/api/admin/users?${params.toString()}`, {
+        credentials: 'include',
+        cache: 'no-store',
+      });
+
+      if (response.status === 401) {
+        window.location.href = `/adminpanel/login?from=${encodeURIComponent('/adminpanel/users')}`;
+        return;
+      }
+
       if (!response.ok) {
-        throw new Error('Failed to fetch users');
+        const body = await response.json().catch(() => ({}));
+        throw new Error(body.error || `Failed to fetch users (${response.status})`);
       }
 
       const result = await response.json();

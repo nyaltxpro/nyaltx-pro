@@ -38,6 +38,7 @@ function AdminLoginInner() {
       const res = await fetch("/api/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         // API expects { identifier, password } where identifier can be email or username
         body: JSON.stringify({ identifier: email, password }),
       });
@@ -45,7 +46,8 @@ function AdminLoginInner() {
         const data = await res.json().catch(() => ({}));
         throw new Error(data?.message || "Invalid password");
       }
-      router.replace(from);
+      // Force full navigation so middleware sees the new cookie
+      window.location.href = from;
     } catch (err: any) {
       setError(err.message || "Login failed");
     } finally {
@@ -98,7 +100,7 @@ function AdminLoginInner() {
       }
 
       // Success - redirect to admin dashboard
-      router.replace(from);
+      window.location.href = from;
     } catch (err: any) {
       // Handle user rejection gracefully
       if (err.message?.includes("User rejected") || err.message?.includes("rejected") || err.message?.includes("denied")) {

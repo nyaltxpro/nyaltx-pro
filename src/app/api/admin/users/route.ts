@@ -44,7 +44,16 @@ export async function GET(req: NextRequest) {
           firstOrder: { $min: '$createdAt' },
           lastOrder: { $max: '$createdAt' },
           totalOrders: { $sum: 1 },
-          totalSpent: { $sum: { $toDouble: '$amount' } },
+          totalSpent: {
+            $sum: {
+              $convert: {
+                input: '$amount',
+                to: 'double',
+                onError: 0,
+                onNull: 0,
+              },
+            },
+          },
           orders: { $push: '$$ROOT' }
         }
       }
@@ -79,7 +88,16 @@ export async function GET(req: NextRequest) {
           firstOrder: { $min: '$createdAt' },
           lastOrder: { $max: '$createdAt' },
           totalOrders: { $sum: 1 },
-          totalSpent: { $sum: { $toDouble: '$amount' } }
+          totalSpent: {
+            $sum: {
+              $convert: {
+                input: '$amount',
+                to: 'double',
+                onError: 0,
+                onNull: 0,
+              },
+            },
+          }
         }
       }
     ]).toArray();

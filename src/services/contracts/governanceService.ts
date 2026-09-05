@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 import { CONSTANTS, CONTRACT_ABIS, CONTRACT_ADDRESSES } from './config';
-import { ContractError, GovernanceStats, ProposalData, VoteSupport } from './types';
+import { GovernanceStats, ProposalData, VoteSupport } from './types';
 
 export class GovernanceService {
   private provider: ethers.Provider;
@@ -35,14 +35,54 @@ export class GovernanceService {
   ): Promise<string> {
     try {
       if (!this.signer) throw new Error('Signer required for creating proposals');
-      const tx = await this.governorContract.propose(targets, values, calldatas, description);
-      
+      if (!targets.length || targets.length !== values.length || targets.length !== calldatas.length) {
+        throw new Error('Proposal actions are invalid (targets/values/calldatas length mismatch).');
+      }
+      if (!description.trim()) {
+        throw new Error('Proposal description is required.');
+      }
+
+      const proposer = await this.signer.getAddress();
+      const [votes, threshold] = await Promise.all([
+        this.tokenContract.getVotes(proposer),
+        this.governorContract.proposalThreshold(),
+      ]);
+
+      if (votes < threshold) {
+        const votesFmt = ethers.formatEther(votes);
+        const thresholdFmt = ethers.formatEther(threshold);
+        const delegates = await this.tokenContract.delegates(proposer).catch(() => ethers.ZeroAddress);
+        const needsDelegate =
+          !delegates || delegates === ethers.ZeroAddress || delegates.toLowerCase() !== proposer.toLowerCase();
+
+        throw new Error(
+          `Not enough voting power to create a proposal. You have ${votesFmt} votes but need at least ${thresholdFmt} gNYAX.` +
+            (needsDelegate
+              ? ' Delegate your gNYAX voting power to yourself first, then try again.'
+              : '')
+        );
+      }
+
+      const normalizedValues = values.map(v => {
+        const trimmed = (v || '0').trim();
+        if (!/^\d+$/.test(trimmed)) {
+          // Allow ether-style inputs like "0.0" by converting to wei
+          try {
+            return ethers.parseEther(trimmed).toString();
+          } catch {
+            throw new Error(`Invalid ETH value "${v}". Use wei integer or ETH decimal.`);
+          }
+        }
+        return trimmed;
+      });
+
+      const tx = await this.governorContract.propose(targets, normalizedValues, calldatas, description);
       const receipt = await tx.wait();
-      const event = receipt.logs.find((log: ethers.Log) => 
+      const event = receipt.logs.find((log: ethers.Log) =>
         log.topics && log.topics[0] === ethers.id('ProposalCreated(uint256,address,address[],uint256[],string[],bytes[],uint256,uint256,string)')
       );
-      
-      return event && event.topics ? event.topics[1] : '';
+
+      return event && event.topics ? BigInt(event.topics[1]).toString() : receipt.hash;
     } catch (error) {
       throw this.handleError(error);
     }
@@ -369,27 +409,46 @@ export class GovernanceService {
     return stateMap[state] || 'active';
   }
 
-  private handleError(error: any): ContractError {
-    if (error.code === 'CALL_EXCEPTION') {
-      return {
-        code: 'CALL_EXCEPTION',
-        message: error.reason || 'Contract call failed',
-        data: error.data,
-      };
+  private handleError(error: any): Error {
+    if (error instanceof Error && error.message && !error.code) {
+      return error;
     }
-    
-    if (error.code === 'INSUFFICIENT_FUNDS') {
-      return {
-        code: 'INSUFFICIENT_FUNDS',
-        message: 'Insufficient funds for transaction',
-      };
+
+    const raw =
+      error?.shortMessage ||
+      error?.reason ||
+      error?.info?.error?.message ||
+      error?.data?.message ||
+      error?.message ||
+      '';
+
+    const text = String(raw);
+
+    if (/user rejected|denied|ACTION_REJECTED|4001/i.test(text)) {
+      return new Error('Transaction was rejected in your wallet.');
     }
-    
-    return {
-      code: 'UNKNOWN_ERROR',
-      message: error.message || 'An unknown error occurred',
-      data: error,
-    };
+    if (/GovernorInsufficientProposerVotes|insufficient proposer votes/i.test(text)) {
+      return new Error(
+        'Not enough voting power to create a proposal. You need at least 1,000,000 gNYAX voting power (delegate tokens to yourself first).'
+      );
+    }
+    if (/GovernorUnexpectedProposalState|proposal already/i.test(text)) {
+      return new Error('This proposal already exists or is in an unexpected state.');
+    }
+    if (/GovernorInvalidProposalLength|invalid proposal length/i.test(text)) {
+      return new Error('Invalid proposal actions. Check targets, values, and calldata.');
+    }
+    if (/network|chain|unsupported/i.test(text)) {
+      return new Error('Wrong network. Switch to Ethereum Sepolia (chain ID 11155111) and try again.');
+    }
+    if (error?.code === 'INSUFFICIENT_FUNDS') {
+      return new Error('Insufficient ETH for gas on Sepolia.');
+    }
+    if (error?.code === 'CALL_EXCEPTION') {
+      return new Error(error.reason || 'Contract call failed. Check voting power, network, and proposal actions.');
+    }
+
+    return new Error(text || 'Failed to create proposal');
   }
 
   // Event Listeners

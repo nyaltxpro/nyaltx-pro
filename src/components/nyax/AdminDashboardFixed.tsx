@@ -3099,6 +3099,10 @@ export default function AdminDashboardFixed() {
                             </div>
 
                             <div className="flex flex-col gap-3">
+                                <div className="rounded-2xl border border-white/10 bg-white/5 p-3 text-xs text-gray-400">
+                                    Governor requires <span className="text-white font-semibold">1,000,000 gNYAX</span> voting power.
+                                    Hold tokens and <span className="text-white font-semibold">delegate to yourself</span> before creating a proposal.
+                                </div>
                                 <button
                                     className="w-full px-4 py-3 rounded-2xl bg-linear-to-r from-indigo-500 via-blue-500 to-purple-500 font-semibold disabled:opacity-50"
                                     onClick={handleCreateProposal}
