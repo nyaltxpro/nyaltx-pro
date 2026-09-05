@@ -89,7 +89,25 @@ export class DAOService {
       this.signer = undefined;
     }
 
-    // Update all services
+    this.rebuildServices();
+  }
+
+  // Set an already-resolved ethers signer (preferred for wagmi/AppKit)
+  setSigner(signer: ethers.Signer, provider?: ethers.Provider): void {
+    this.signer = signer;
+    if (provider) {
+      this.provider = provider;
+    }
+    this.rebuildServices();
+  }
+
+  clearSigner(): void {
+    this.signer = undefined;
+    this.provider = new ethers.JsonRpcProvider(NETWORK_CONFIG.rpcUrl);
+    this.rebuildServices();
+  }
+
+  private rebuildServices(): void {
     this.governance = new GovernanceService(this.provider, this.signer);
     this.treasury = new TreasuryService(this.provider, this.signer);
     this.vesting = new VestingService(this.provider, this.signer);
@@ -98,6 +116,43 @@ export class DAOService {
     this.staking = new StakingService(this.provider, this.signer);
     this.migrationVault = new MigrationVaultService(this.provider, this.signer);
     this.treasuryBridge = new TreasuryBridgeService(this.provider, this.signer);
+  }
+
+  /**
+   * Ensure a wallet signer is attached. Tries wagmi/AppKit-compatible providers.
+   */
+  async ensureWalletSigner(preferredProvider?: any): Promise<ethers.Signer> {
+    if (this.signer) {
+      try {
+        await this.signer.getAddress();
+        return this.signer;
+      } catch {
+        // fall through and re-bind
+      }
+    }
+
+    const candidates: any[] = [];
+    if (preferredProvider) candidates.push(preferredProvider);
+    if (typeof window !== 'undefined') {
+      const ethereum = (window as any).ethereum;
+      if (ethereum) candidates.push(ethereum);
+    }
+
+    let lastError: unknown;
+    for (const candidate of candidates) {
+      try {
+        await this.updateSigner(candidate);
+        if (this.signer) return this.signer;
+      } catch (err) {
+        lastError = err;
+      }
+    }
+
+    throw new Error(
+      lastError instanceof Error
+        ? `Wallet signer unavailable: ${lastError.message}. Reconnect your wallet and try again.`
+        : 'Wallet signer unavailable. Connect your wallet on Sepolia and try again.'
+    );
   }
 
   // Utility methods

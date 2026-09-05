@@ -103,7 +103,7 @@ export default function NYALTXGovernance() {
     const { address, isConnected } = useAccount();
     const chainId = useChainId();
     const { switchChainAsync, isPending: isSwitching } = useSwitchChain();
-    const { daoService, isLoading: daoLoading, error: daoError } = useDAOService();
+    const { daoService, isLoading: daoLoading, error: daoError, ensureSigner } = useDAOService();
     const { stats: vaultStats, depositLegacy, loading: vaultLoading, actionPending: vaultPending, error: vaultError, recentDeposits } = useMigrationVault();
 
     const [activeTab, setActiveTab] = useState<TabId>('overview');
@@ -686,6 +686,7 @@ export default function NYALTXGovernance() {
         setProposalAlert(null);
 
         try {
+            await ensureSigner();
             const targets = proposalActions.map((action) => action.target.trim());
             const values = proposalActions.map((action) => (action.value.trim() ? action.value.trim() : '0'));
             const calldatas = proposalActions.map((action) => {
@@ -708,7 +709,7 @@ export default function NYALTXGovernance() {
         } finally {
             setProposalSubmitting(false);
         }
-    }, [daoService, isConnected, onRequiredNetwork, proposalTitle, proposalDescription, proposalActions, refreshGovernanceData]);
+    }, [daoService, ensureSigner, isConnected, onRequiredNetwork, proposalTitle, proposalDescription, proposalActions, refreshGovernanceData, handleSwitchNetwork]);
 
     const handleVote = useCallback(
         async (proposalId: string, support: 0 | 1 | 2) => {

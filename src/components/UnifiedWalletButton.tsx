@@ -41,15 +41,10 @@ export default function UnifiedWalletButton({
   useEffect(() => {
     if (isConnected && address) {
       setDisplayAddress(formatAddress(address));
-      const walletTypeText = walletType === 'evm' ? 'EVM' : 'Solana';
-      toast.success(`🔗 ${walletTypeText} wallet connected: ${formatAddress(address)}`);
-      if (onConnect) {
-        onConnect();
-      }
     } else {
       setDisplayAddress('');
     }
-  }, [isConnected, address, walletType, formatAddress, onConnect]);
+  }, [isConnected, address, formatAddress]);
 
   const handleConnectEvm = () => {
     console.log('Attempting to open EVM wallet modal...');

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useAccount, useWalletClient } from "wagmi";
+import { BrowserProvider } from "ethers";
 
 import { DAOService, createDAOService } from "@/services/contracts";
 import { GovernanceStats, LegacyDepositEvent, MigrationVaultStats, ProposalData, TreasuryStats, VotingPower } from '@/services/contracts/types';
@@ -12,6 +13,7 @@ type DaoHookState = {
   error: string | null;
   vaultStats: MigrationVaultStats | null;
   vaultDeposits: LegacyDepositEvent[];
+  hasSigner: boolean;
 };
 
 const INITIAL_STATE: DaoHookState = {
@@ -20,6 +22,7 @@ const INITIAL_STATE: DaoHookState = {
   error: null,
   vaultStats: null,
   vaultDeposits: [],
+  hasSigner: false,
 };
 
 let cachedDAOService: DAOService | null = null;
@@ -30,6 +33,24 @@ const getInjectedProvider = () => {
   if (typeof window === "undefined") return undefined;
   return (window as typeof window & { ethereum?: unknown }).ethereum;
 };
+
+async function bindWalletSigner(service: DAOService, walletClient: any | undefined) {
+  // Prefer wagmi/AppKit wallet client transport (works without window.ethereum)
+  if (walletClient?.transport && walletClient?.account?.address) {
+    const provider = new BrowserProvider(walletClient.transport as any);
+    const signer = await provider.getSigner(walletClient.account.address);
+    service.setSigner(signer, provider);
+    return true;
+  }
+
+  const injected = getInjectedProvider();
+  if (injected) {
+    await service.updateSigner(injected);
+    return Boolean(service.getSigner());
+  }
+
+  return false;
+}
 
 export function useDAOService() {
   const { address, isConnected } = useAccount();
@@ -74,11 +95,25 @@ export function useDAOService() {
         }
       }
 
-      setState({ daoService: service, isLoading: false, error: null, vaultStats: null, vaultDeposits: [] });
+      setState({
+        daoService: service,
+        isLoading: false,
+        error: null,
+        vaultStats: null,
+        vaultDeposits: [],
+        hasSigner: Boolean(service.getSigner()),
+      });
     } catch (err) {
       console.error("Failed to initialize DAO service:", err);
       const message = err instanceof Error ? err.message : "Unable to connect to DAO service";
-      setState({ daoService: null, isLoading: false, error: message, vaultStats: null, vaultDeposits: [] });
+      setState({
+        daoService: null,
+        isLoading: false,
+        error: message,
+        vaultStats: null,
+        vaultDeposits: [],
+        hasSigner: false,
+      });
     }
   }, []);
 
@@ -90,20 +125,50 @@ export function useDAOService() {
     const service = state.daoService;
     if (!service) return;
 
+    let cancelled = false;
+
     const syncSigner = async () => {
       try {
-        const injected = getInjectedProvider();
-        if (injected) {
-          await service.updateSigner(injected);
-        } else {
-          await service.updateSigner();
+        if (!isConnected) {
+          // Keep read-only mode when wallet disconnects; don't wipe if AppKit
+          // reports connected via a different adapter momentarily.
+          if (!walletClient) {
+            service.clearSigner();
+            if (!cancelled) {
+              setState((prev) => ({ ...prev, hasSigner: false }));
+            }
+          }
+          return;
+        }
+
+        const bound = await bindWalletSigner(service, walletClient);
+        if (!cancelled) {
+          setState((prev) => ({ ...prev, hasSigner: bound || Boolean(service.getSigner()) }));
         }
       } catch (err) {
         console.error("Failed to sync DAO signer", err);
+        if (!cancelled) {
+          setState((prev) => ({ ...prev, hasSigner: Boolean(service.getSigner()) }));
+        }
       }
     };
 
     syncSigner();
+    return () => {
+      cancelled = true;
+    };
+  }, [state.daoService, walletClient, isConnected, address]);
+
+  const ensureSigner = useCallback(async () => {
+    if (!state.daoService) {
+      throw new Error("DAO service not initialized");
+    }
+    const bound = await bindWalletSigner(state.daoService, walletClient);
+    if (!bound && !state.daoService.getSigner()) {
+      await state.daoService.ensureWalletSigner(getInjectedProvider());
+    }
+    setState((prev) => ({ ...prev, hasSigner: Boolean(state.daoService?.getSigner()) }));
+    return state.daoService.getSigner()!;
   }, [state.daoService, walletClient]);
 
   const fetchVault = useCallback(async () => {
@@ -131,13 +196,15 @@ export function useDAOService() {
     error: state.error,
     isConnected,
     address,
+    hasSigner: state.hasSigner,
+    ensureSigner,
     vaultStats: state.vaultStats,
     vaultDeposits: state.vaultDeposits,
   };
 }
 
 export function useGovernance() {
-  const { daoService, isLoading: serviceLoading } = useDAOService();
+  const { daoService, isLoading: serviceLoading, ensureSigner } = useDAOService();
   const { address } = useAccount();
 
   const [proposals, setProposals] = useState<ProposalData[]>([]);
@@ -195,31 +262,34 @@ export function useGovernance() {
   const createProposal = useCallback(
     async (targets: string[], values: string[], calldatas: string[], description: string, isEmergency = false) => {
       if (!daoService) throw new Error("DAO service not initialized");
+      await ensureSigner();
       const proposalId = await daoService.governance.createProposal(targets, values, calldatas, description, isEmergency);
       await fetchProposals();
       return proposalId;
     },
-    [daoService, fetchProposals]
+    [daoService, ensureSigner, fetchProposals]
   );
 
   const castVote = useCallback(
     async (proposalId: string, support: 0 | 1 | 2, reason?: string) => {
       if (!daoService) throw new Error("DAO service not initialized");
+      await ensureSigner();
       const txHash = await daoService.governance.castVote(proposalId, support, reason);
       await Promise.all([fetchProposals(), fetchVotingPower()]);
       return txHash;
     },
-    [daoService, fetchProposals, fetchVotingPower]
+    [daoService, ensureSigner, fetchProposals, fetchVotingPower]
   );
 
   const delegate = useCallback(
     async (delegatee: string) => {
       if (!daoService) throw new Error("DAO service not initialized");
+      await ensureSigner();
       const txHash = await daoService.governance.delegate(delegatee);
       await fetchVotingPower();
       return txHash;
     },
-    [daoService, fetchVotingPower]
+    [daoService, ensureSigner, fetchVotingPower]
   );
 
   return {

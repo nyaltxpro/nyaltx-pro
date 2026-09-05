@@ -91,11 +91,13 @@ export default function AdminDashboardFixed() {
         refresh,
     } = useFolderRegistry();
 
-    const { daoService } = useDAOService();
+    const { daoService, ensureSigner, hasSigner } = useDAOService();
 
-    const { isConnected: isEvmConnected } = useAccount();
-    const { isConnected: isAppKitConnected } = useAppKitAccount();
-    const isConnected = isEvmConnected || isAppKitConnected;
+    const { isConnected: isEvmConnected, address: wagmiAddress } = useAccount();
+    const { isConnected: isAppKitConnected, address: appKitAddress } = useAppKitAccount();
+    const isConnected = Boolean(
+      (isEvmConnected && wagmiAddress) || (isAppKitConnected && appKitAddress)
+    );
     const chainId = useChainId();
     const { switchChainAsync, isPending: isSwitchingChain } = useSwitchChain();
 
@@ -1666,6 +1668,7 @@ export default function AdminDashboardFixed() {
         setProposalAlert(null);
 
         try {
+            await ensureSigner();
             const targets = proposalActions.map(action => action.target.trim());
             const values = proposalActions.map(action => (action.value.trim() ? action.value.trim() : '0'));
             const calldatas = proposalActions.map(action => {
@@ -3113,6 +3116,11 @@ export default function AdminDashboardFixed() {
                                 {!isConnected && (
                                     <div className="rounded-2xl border border-yellow-400/40 bg-yellow-400/10 p-4 text-sm text-yellow-200">
                                         Connect your wallet to create proposals.
+                                    </div>
+                                )}
+                                {isConnected && !hasSigner && (
+                                    <div className="rounded-2xl border border-orange-400/40 bg-orange-400/10 p-4 text-sm text-orange-200">
+                                        Wallet connected, but signer is not ready. Reconnect your wallet (or refresh) and try again.
                                     </div>
                                 )}
                                 {!onRequiredNetwork && isConnected && (

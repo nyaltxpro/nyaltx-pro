@@ -6,7 +6,7 @@ import { useAppKit } from '@reown/appkit/react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import toast from 'react-hot-toast';
 import { CiWallet } from "react-icons/ci";
@@ -36,6 +36,14 @@ export default function SimpleUnifiedWalletButton({
   const { disconnect: disconnectEvm } = useDisconnect();
   const [showModal, setShowModal] = useState(false);
   const [isModalOpening, setIsModalOpening] = useState(false);
+
+  // Close connect picker once wallet is actually connected
+  useEffect(() => {
+    if (isConnected && showModal && walletType === 'evm') {
+      setShowModal(false);
+      onConnect?.();
+    }
+  }, [isConnected, showModal, walletType, onConnect]);
 
   // const { buttonState, onConnect, onDisconnect, publicKey, walletIcon, walletName } = useWalletMultiButton({
   //   onSelectWallet() {
@@ -96,11 +104,15 @@ export default function SimpleUnifiedWalletButton({
 
   const handleMainButtonClick = () => {
     if (isConnected) {
-      // Directly disconnect when connected
-      handleDisconnect();
-    } else {
-      setShowModal(true);
+      // Connected: open account management, do not force reconnect/disconnect
+      if (walletType === 'evm') {
+        openEvmModal({ view: 'Account' });
+      } else {
+        setShowModal(true);
+      }
+      return;
     }
+    setShowModal(true);
   };
 
   if (isConnecting || isModalOpening) {
@@ -120,16 +132,84 @@ export default function SimpleUnifiedWalletButton({
     return (
       <div className="relative">
         <button
-          className={`py-2 px-3 sm:px-4 rounded-lg sm:rounded-xl bg-gradient-to-r from-red-500 to-red-600 text-white font-medium hover:from-red-500/90 hover:to-red-600/90 transition-all duration-200 text-xs sm:text-sm tracking-wide flex items-center gap-1 sm:gap-2 shadow-lg shadow-red-500/20 ${className}`}
+          className={`py-2 px-3 sm:px-4 rounded-lg sm:rounded-xl bg-gradient-to-r from-[#00b8d8] to-[#3b82f6] text-white font-medium hover:from-[#00b8d8]/90 hover:to-[#3b82f6]/90 transition-all duration-200 text-xs sm:text-sm tracking-wide flex items-center gap-1 sm:gap-2 shadow-lg shadow-[#00b8d8]/20 ${className}`}
           onClick={handleMainButtonClick}
-          title={`Disconnect from ${chainName}`}
+          title={`Connected to ${chainName || 'wallet'}`}
+          type="button"
         >
-          <ExitIcon className="w-3 h-3 sm:w-4 sm:h-4" />
+          <CiWallet className="w-3 h-3 sm:w-4 sm:h-4" fill="#ffffff" />
           <div className="flex flex-col items-start">
-            <span className="text-xs opacity-75 hidden sm:block">Disconnect</span>
+            <span className="text-[10px] opacity-75 hidden sm:block">{chainName || 'Connected'}</span>
             <span className="text-xs sm:text-sm">{formatAddress(address || '')}</span>
           </div>
+          <ChevronDownIcon className="w-3 h-3 sm:w-4 sm:h-4" />
         </button>
+
+        {showModal && typeof window !== 'undefined' && createPortal(
+          <>
+            <div
+              className="fixed inset-0 bg-black/70 backdrop-blur-sm"
+              style={{ zIndex: 9999998 }}
+              onClick={() => setShowModal(false)}
+            />
+            <div
+              className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 bg-black/95 backdrop-blur-xl border border-gray-800/50 rounded-xl shadow-2xl overflow-hidden"
+              style={{ zIndex: 9999999 }}
+            >
+              <div className="p-4">
+                <div className="text-sm text-gray-300 mb-4 font-medium">Wallet Account</div>
+                <div className="mb-4 p-3 rounded-lg bg-gradient-to-r from-[#00b8d8]/10 to-[#3b82f6]/10 border border-[#00b8d8]/30">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gradient-to-r from-[#00b8d8] to-[#3b82f6] rounded-lg flex items-center justify-center">
+                      <PersonIcon className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="text-white font-medium">{chainName}</div>
+                      <div className="text-xs text-gray-400">{formatAddress(address || '')}</div>
+                    </div>
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  </div>
+                </div>
+
+                {walletType === 'evm' && (
+                  <button
+                    onClick={() => {
+                      openEvmModal({ view: 'Account' });
+                      setShowModal(false);
+                    }}
+                    className="w-full mb-3 px-4 py-3 rounded-lg bg-gradient-to-r from-[#627eea]/20 to-[#8b5cf6]/20 hover:from-[#627eea]/30 hover:to-[#8b5cf6]/30 transition-colors duration-200 text-left border border-[#627eea]/30 flex items-center gap-3"
+                    type="button"
+                  >
+                    <div className="w-8 h-8 bg-gradient-to-r from-[#627eea] to-[#8b5cf6] rounded-lg flex items-center justify-center">
+                      <Image src="/ethereum.svg" alt="Ethereum" width={16} height={16} className="w-4 h-4" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="text-white font-medium">Manage Account</div>
+                      <div className="text-xs text-gray-400">View balance, network, settings</div>
+                    </div>
+                  </button>
+                )}
+
+                <button
+                  onClick={handleDisconnect}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-gradient-to-r from-red-500/20 to-red-600/20 hover:from-red-500/30 hover:to-red-600/30 transition-colors duration-200 text-left group border border-red-500/30"
+                  type="button"
+                >
+                  <div className="w-8 h-8 bg-gradient-to-r from-red-500 to-red-600 rounded-lg flex items-center justify-center">
+                    <ExitIcon className="w-4 h-4 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-white font-medium group-hover:text-red-400 transition-colors">
+                      Disconnect Wallet
+                    </div>
+                    <div className="text-xs text-gray-400">Disconnect from {chainName}</div>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </>,
+          document.body
+        )}
       </div>
     );
   }
