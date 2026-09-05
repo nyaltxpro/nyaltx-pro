@@ -3,7 +3,8 @@
 import ConnectWalletButton from '@/components/ConnectWalletButton';
 import { useDAOService } from '@/hooks/useDAOService';
 import { useFolderRegistry } from '@/hooks/useFolderRegistry';
-import { CONTRACT_ABIS, CONTRACT_ADDRESSES } from '@/services/contracts';
+import { PROPOSAL_FUNCTION_PRESETS, encodeProposalPreset } from '@/lib/proposalFunctionPresets';
+import { CONTRACT_ADDRESSES } from '@/services/contracts';
 import { FolderInfo, MultisigTransaction } from '@/services/contracts/types';
 import { useAppKitAccount } from '@reown/appkit/react';
 import { ethers } from 'ethers';
@@ -26,21 +27,6 @@ type ProposalAction = {
     value: string;
     calldata: string;
 };
-
-const TOKEN_FUNCTION_PRESETS = [
-    {
-        key: 'enableTransfers',
-        label: 'NYAX: Enable transfers',
-        functionName: 'setTransfersEnabled',
-        args: [true],
-    },
-    {
-        key: 'disableTransfers',
-        label: 'NYAX: Disable transfers',
-        functionName: 'setTransfersEnabled',
-        args: [false],
-    },
-];
 
 const formatNumber = (value: string | number) => {
     const numeric = typeof value === 'string' ? Number(value) : value;
@@ -232,16 +218,6 @@ export default function AdminDashboardFixed() {
     const [tokenPaused, setTokenPaused] = useState<boolean | null>(null);
     const [pauseLoading, setPauseLoading] = useState<string | null>(null);
     const [pauseError, setPauseError] = useState<string | null>(null);
-
-    const nyaxTokenAddress = CONTRACT_ADDRESSES.nyaxToken ?? '';
-    const nyaxTokenInterface = useMemo(() => {
-        try {
-            return new ethers.Interface(CONTRACT_ABIS.nyaxToken ?? []);
-        } catch (error) {
-            console.error('Failed to init NYAX token interface', error);
-            return null;
-        }
-    }, []);
 
     const REQUIRED_CHAIN_ID = 11155111;
     const onRequiredNetwork = chainId === REQUIRED_CHAIN_ID;
@@ -1251,34 +1227,28 @@ export default function AdminDashboardFixed() {
     };
 
     const applyTokenFunctionPreset = (index: number, key: string) => {
-        const preset = TOKEN_FUNCTION_PRESETS.find(entry => entry.key === key);
-        if (!preset) return;
-        if (!nyaxTokenAddress) {
-            setProposalAlert({ type: 'error', message: 'NYAX token address not configured.' });
-            return;
-        }
-        if (!nyaxTokenInterface) {
-            setProposalAlert({ type: 'error', message: 'Unable to encode NYAX token function.' });
-            return;
-        }
         try {
-            const data = nyaxTokenInterface.encodeFunctionData(preset.functionName, preset.args);
+            const encoded = encodeProposalPreset(key);
             setProposalActions(prev =>
                 prev.map((action, i) =>
                     i === index
                         ? {
                             ...action,
-                            target: nyaxTokenAddress,
-                            value: '0',
-                            calldata: data,
+                            target: encoded.target,
+                            value: encoded.value,
+                            calldata: encoded.calldata,
                         }
                         : action,
                 ),
             );
-            setProposalAlert(null);
+            setProposalAlert({ type: 'success', message: `Filled action with: ${encoded.label}` });
         } catch (error) {
-            console.error('Failed to apply token preset', error);
-            setProposalAlert({ type: 'error', message: 'Failed to encode NYAX token calldata.' });
+            if (error instanceof Error && error.message === 'Cancelled') return;
+            console.error('Failed to apply function preset', error);
+            setProposalAlert({
+                type: 'error',
+                message: error instanceof Error ? error.message : 'Failed to encode proposal calldata.',
+            });
         }
     };
 
@@ -3056,13 +3026,22 @@ export default function AdminDashboardFixed() {
                                                 className="mt-1 w-full rounded-xl border border-white/10 bg-gray-900/40 px-3 py-2 text-sm text-white"
                                             >
                                                 <option value="" disabled>
-                                                    Use NYAX token function…
+                                                    Use governance function…
                                                 </option>
-                                                {TOKEN_FUNCTION_PRESETS.map(preset => (
-                                                    <option key={preset.key} value={preset.key}>
-                                                        {preset.label}
-                                                    </option>
-                                                ))}
+                                                <optgroup label="NYAX Token">
+                                                    {PROPOSAL_FUNCTION_PRESETS.filter(p => p.group === 'NYAX Token').map(preset => (
+                                                        <option key={preset.key} value={preset.key}>
+                                                            {preset.label}
+                                                        </option>
+                                                    ))}
+                                                </optgroup>
+                                                <optgroup label="Treasury">
+                                                    {PROPOSAL_FUNCTION_PRESETS.filter(p => p.group === 'Treasury').map(preset => (
+                                                        <option key={preset.key} value={preset.key}>
+                                                            {preset.label}
+                                                        </option>
+                                                    ))}
+                                                </optgroup>
                                             </select>
                                         </div>
                                         <div className="grid gap-3 md:grid-cols-3">

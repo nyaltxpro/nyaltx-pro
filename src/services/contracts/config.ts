@@ -46,6 +46,8 @@ export const CONTRACT_ABIS = {
     'function blacklisted(address) view returns (bool)',
     'function remainingMintableSupply() view returns (uint256)',
     'function paused() view returns (bool)',
+    'function pause()',
+    'function unpause()',
     'function mint(address to, uint256 amount)',
     'function burn(address from, uint256 amount)',
     'function burnSelf(uint256 amount)',

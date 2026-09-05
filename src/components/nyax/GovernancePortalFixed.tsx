@@ -2,7 +2,8 @@
 
 import { useDAOService } from '@/hooks/useDAOService';
 import { useMigrationVault } from '@/hooks/useMigrationVault';
-import { CONTRACT_ABIS, CONTRACT_ADDRESSES, NETWORK_CONFIG } from '@/services/contracts';
+import { PROPOSAL_FUNCTION_PRESETS, encodeProposalPreset } from '@/lib/proposalFunctionPresets';
+import { NETWORK_CONFIG } from '@/services/contracts';
 import { GovernanceStats, ProposalData, StakingStats, TreasuryTransfer } from '@/services/contracts/types';
 import { ethers } from 'ethers';
 import { ArrowUpRight, CheckCircle, Coins, Shield, TrendingUp, Users, XCircle } from 'lucide-react';
@@ -43,21 +44,6 @@ type FolderSummary = {
         revocable: boolean;
     };
 };
-
-const TOKEN_FUNCTION_PRESETS = [
-    {
-        key: 'enableTransfers',
-        label: 'NYAX: Enable transfers',
-        functionName: 'setTransfersEnabled',
-        args: [true],
-    },
-    {
-        key: 'disableTransfers',
-        label: 'NYAX: Disable transfers',
-        functionName: 'setTransfersEnabled',
-        args: [false],
-    },
-];
 
 const formatNumber = (value: number | string | null | undefined, decimals = 2) => {
     if (value === null || value === undefined) return '0';
@@ -157,15 +143,6 @@ export default function NYALTXGovernance() {
     const [folderSummariesLoading, setFolderSummariesLoading] = useState(false);
     const [folderSummariesError, setFolderSummariesError] = useState<string | null>(null);
     const [foldersReloadNonce, setFoldersReloadNonce] = useState(0);
-    const nyaxTokenAddress = CONTRACT_ADDRESSES.nyaxToken ?? '';
-    const nyaxTokenInterface = useMemo(() => {
-        try {
-            return new ethers.Interface(CONTRACT_ABIS.nyaxToken ?? []);
-        } catch (error) {
-            console.error('Failed to init NYAX token interface', error);
-            return null;
-        }
-    }, []);
 
     const refreshGovernanceData = useCallback(async () => {
         if (!daoService) return;
@@ -597,39 +574,31 @@ export default function NYALTXGovernance() {
         setProposalActions((prev) => prev.map((action, i) => (i === index ? { ...action, [field]: value } : action)));
     }, []);
 
-    const applyTokenFunctionPreset = useCallback(
-        (index: number, key: string) => {
-            const preset = TOKEN_FUNCTION_PRESETS.find((entry) => entry.key === key);
-            if (!preset) return;
-            if (!nyaxTokenAddress) {
-                setProposalAlert({ type: 'error', message: 'NYAX token address not configured.' });
-                return;
-            }
-            if (!nyaxTokenInterface) {
-                setProposalAlert({ type: 'error', message: 'Unable to encode NYAX token function.' });
-                return;
-            }
-            try {
-                const data = nyaxTokenInterface.encodeFunctionData(preset.functionName, preset.args);
-                setProposalActions((prev) =>
-                    prev.map((action, i) =>
-                        i === index
-                            ? {
-                                ...action,
-                                target: nyaxTokenAddress,
-                                value: '0',
-                                calldata: data,
-                            }
-                            : action
-                    )
-                );
-            } catch (error) {
-                console.error('Failed to apply token preset', error);
-                setProposalAlert({ type: 'error', message: 'Failed to encode NYAX token calldata.' });
-            }
-        },
-        [nyaxTokenAddress, nyaxTokenInterface]
-    );
+    const applyTokenFunctionPreset = useCallback((index: number, key: string) => {
+        try {
+            const encoded = encodeProposalPreset(key);
+            setProposalActions(prev =>
+                prev.map((action, i) =>
+                    i === index
+                        ? {
+                            ...action,
+                            target: encoded.target,
+                            value: encoded.value,
+                            calldata: encoded.calldata,
+                        }
+                        : action
+                )
+            );
+            setProposalAlert({ type: 'success', message: `Filled action with: ${encoded.label}` });
+        } catch (error) {
+            if (error instanceof Error && error.message === 'Cancelled') return;
+            console.error('Failed to apply function preset', error);
+            setProposalAlert({
+                type: 'error',
+                message: error instanceof Error ? error.message : 'Failed to encode proposal calldata.',
+            });
+        }
+    }, []);
 
     const getDepositErrorMessage = (error: unknown) => {
         if (typeof error === 'object' && error !== null && 'code' in error) {
@@ -1282,13 +1251,22 @@ export default function NYALTXGovernance() {
                                                         className="mt-1 w-full rounded-xl border border-white/10 bg-gray-900/40 px-3 py-2 text-sm text-white"
                                                     >
                                                         <option value="" disabled>
-                                                            Use NYAX token function…
+                                                            Use governance function…
                                                         </option>
-                                                        {TOKEN_FUNCTION_PRESETS.map((preset) => (
-                                                            <option key={preset.key} value={preset.key}>
-                                                                {preset.label}
-                                                            </option>
-                                                        ))}
+                                                        <optgroup label="NYAX Token">
+                                                            {PROPOSAL_FUNCTION_PRESETS.filter((p) => p.group === 'NYAX Token').map((preset) => (
+                                                                <option key={preset.key} value={preset.key}>
+                                                                    {preset.label}
+                                                                </option>
+                                                            ))}
+                                                        </optgroup>
+                                                        <optgroup label="Treasury">
+                                                            {PROPOSAL_FUNCTION_PRESETS.filter((p) => p.group === 'Treasury').map((preset) => (
+                                                                <option key={preset.key} value={preset.key}>
+                                                                    {preset.label}
+                                                                </option>
+                                                            ))}
+                                                        </optgroup>
                                                     </select>
                                                 </div>
                                                 <div className="grid gap-3 md:grid-cols-3">
