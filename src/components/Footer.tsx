@@ -2,18 +2,25 @@
 
 import { useFooterContent } from '@/hooks/useTinaContent';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import React, { useState } from 'react';
 import { BsDiscord } from 'react-icons/bs';
 import { FaTelegram, FaYoutube } from 'react-icons/fa';
 import { FaXTwitter } from 'react-icons/fa6';
 
 const Footer = () => {
+  const pathname = usePathname();
   const { content: footerContent, loading, error } = useFooterContent();
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState<'success' | 'error'>('success');
+
+  // Docs/whitepaper layout is full-bleed; site footer clashes with Fumadocs chrome
+  if (pathname?.startsWith('/whitepaper')) {
+    return null;
+  }
 
   const handleNewsletterSignup = async (e: React.FormEvent) => {
     e.preventDefault();

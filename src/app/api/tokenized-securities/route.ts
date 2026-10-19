@@ -1,40 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
+export const revalidate = 120;
 
 const XSTOCKS_BASE = 'https://api.xstocks.fi/api/v2';
-const CACHE_TTL_MS = 60 * 1000;
-const MAX_PRICE_LOOKUPS = 80;
+const ASSET_CACHE_TTL_MS = 10 * 60 * 1000; // asset metadata changes rarely
+const PRICE_CACHE_TTL_MS = 2 * 60 * 1000; // quotes refresh every 2 minutes
+const DEFAULT_PAGE_SIZE = 25;
+const MAX_PAGE_SIZE = 50;
 
 type Deployment = {
   address?: string;
   network?: string;
-  supportsAtomicSwaps?: boolean;
 };
 
 type XStockAsset = {
   id: string;
   name: string;
   symbol: string;
-  isin?: string;
   underlyingSymbol?: string;
-  underlyingIsin?: string;
   underlying?: {
     symbol?: string;
-    currency?: string;
     exchange?: {
       abbreviation?: string;
       name?: string;
-      country?: string;
     };
   };
-  description?: string;
   logo?: string;
   isTradingHalted?: boolean;
   trading?: {
     openNow?: boolean;
     currentPeriod?: string;
-    currency?: string;
   };
   deployments?: Deployment[];
 };
@@ -56,56 +52,71 @@ type QuoteRow = {
   spreadBps: number | null;
 };
 
-type CacheEntry = {
+type AssetCache = {
   expiresAt: number;
-  payload: {
-    updatedAt: string;
-    source: string;
-    count: number;
-    securities: QuoteRow[];
-  };
+  assets: XStockAsset[];
 };
 
-let cache: CacheEntry | null = null;
+type PriceCacheEntry = {
+  expiresAt: number;
+  price: number | null;
+};
+
+let assetCache: AssetCache | null = null;
+const priceCache = new Map<string, PriceCacheEntry>();
 
 async function fetchJson<T>(url: string): Promise<T> {
   const res = await fetch(url, {
     headers: { Accept: 'application/json' },
-    next: { revalidate: 60 },
+    next: { revalidate: 120 },
   });
   if (!res.ok) {
-    throw new Error(`xStocks request failed (${res.status}) for ${url}`);
+    throw new Error(`xStocks request failed (${res.status})`);
   }
   return res.json() as Promise<T>;
 }
 
-async function listAllAssets(): Promise<XStockAsset[]> {
+async function listAllAssets(force = false): Promise<XStockAsset[]> {
+  if (!force && assetCache && assetCache.expiresAt > Date.now()) {
+    return assetCache.assets;
+  }
+
   const nodes: XStockAsset[] = [];
   let page = 0;
 
-  for (let i = 0; i < 12; i++) {
+  for (let i = 0; i < 20; i++) {
     const data = await fetchJson<{
       nodes?: XStockAsset[];
-      page?: { currentPage?: number; hasNextPage?: boolean };
+      page?: { hasNextPage?: boolean };
     }>(`${XSTOCKS_BASE}/public/assets?pageSize=50&page=${page}`);
 
     const batch = data.nodes ?? [];
     nodes.push(...batch);
-
     if (!data.page?.hasNextPage || batch.length === 0) break;
     page += 1;
   }
 
+  nodes.sort((a, b) => a.symbol.localeCompare(b.symbol));
+  assetCache = { expiresAt: Date.now() + ASSET_CACHE_TTL_MS, assets: nodes };
   return nodes;
 }
 
-async function fetchPrice(symbol: string): Promise<number | null> {
+async function fetchPrice(symbol: string, force = false): Promise<number | null> {
+  const cached = priceCache.get(symbol);
+  if (!force && cached && cached.expiresAt > Date.now()) {
+    return cached.price;
+  }
+
   try {
     const data = await fetchJson<{ quote?: number }>(
       `${XSTOCKS_BASE}/public/assets/${encodeURIComponent(symbol)}/price-data`,
     );
-    return typeof data.quote === 'number' && Number.isFinite(data.quote) ? data.quote : null;
+    const price =
+      typeof data.quote === 'number' && Number.isFinite(data.quote) ? data.quote : null;
+    priceCache.set(symbol, { expiresAt: Date.now() + PRICE_CACHE_TTL_MS, price });
+    return price;
   } catch {
+    priceCache.set(symbol, { expiresAt: Date.now() + 30_000, price: null });
     return null;
   }
 }
@@ -126,13 +137,14 @@ async function mapWithConcurrency<T, R>(
     }
   }
 
-  const workers = Array.from({ length: Math.min(limit, items.length) }, () => worker());
-  await Promise.all(workers);
+  await Promise.all(
+    Array.from({ length: Math.min(limit, Math.max(items.length, 1)) }, () => worker()),
+  );
   return results;
 }
 
 function toRow(asset: XStockAsset, tokenizedPrice: number | null): QuoteRow {
-  const traditionalPrice = tokenizedPrice; // xStocks indicative quote is Nasdaq-linked
+  const traditionalPrice = tokenizedPrice;
   const spread =
     tokenizedPrice !== null && traditionalPrice !== null
       ? tokenizedPrice - traditionalPrice
@@ -155,7 +167,9 @@ function toRow(asset: XStockAsset, tokenizedPrice: number | null): QuoteRow {
     isTradingHalted: Boolean(asset.isTradingHalted),
     openNow: Boolean(asset.trading?.openNow),
     tradingPeriod: asset.trading?.currentPeriod || null,
-    networks: [...new Set((asset.deployments || []).map(d => d.network).filter(Boolean))] as string[],
+    networks: [
+      ...new Set((asset.deployments || []).map(d => d.network).filter(Boolean)),
+    ] as string[],
     tokenizedPrice,
     traditionalPrice,
     spread,
@@ -163,65 +177,66 @@ function toRow(asset: XStockAsset, tokenizedPrice: number | null): QuoteRow {
   };
 }
 
+function matchesQuery(asset: XStockAsset, q: string) {
+  if (!q) return true;
+  return (
+    asset.symbol.toLowerCase().includes(q) ||
+    asset.name.toLowerCase().includes(q) ||
+    (asset.underlyingSymbol || '').toLowerCase().includes(q) ||
+    (asset.underlying?.symbol || '').toLowerCase().includes(q)
+  );
+}
+
+function matchesStatus(asset: XStockAsset, status: string) {
+  if (status === 'open') return !asset.isTradingHalted && Boolean(asset.trading?.openNow);
+  if (status === 'halted') return Boolean(asset.isTradingHalted);
+  return true;
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const q = (searchParams.get('q') || '').trim().toLowerCase();
+    const status = (searchParams.get('status') || 'all').toLowerCase();
     const force = searchParams.get('refresh') === '1';
-
-    if (!force && cache && cache.expiresAt > Date.now()) {
-      const filtered = q
-        ? cache.payload.securities.filter(
-            s =>
-              s.symbol.toLowerCase().includes(q) ||
-              s.name.toLowerCase().includes(q) ||
-              s.underlyingSymbol.toLowerCase().includes(q),
-          )
-        : cache.payload.securities;
-
-      return NextResponse.json(
-        { ...cache.payload, count: filtered.length, securities: filtered },
-        {
-          headers: {
-            'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
-          },
-        },
-      );
-    }
-
-    const assets = await listAllAssets();
-    const priceTargets = assets.slice(0, MAX_PRICE_LOOKUPS);
-    const prices = await mapWithConcurrency(priceTargets, 8, asset => fetchPrice(asset.symbol));
-    const priceBySymbol = new Map(
-      priceTargets.map((asset, i) => [asset.symbol, prices[i]] as const),
+    const page = Math.max(1, Number(searchParams.get('page') || 1) || 1);
+    const pageSize = Math.min(
+      MAX_PAGE_SIZE,
+      Math.max(1, Number(searchParams.get('pageSize') || DEFAULT_PAGE_SIZE) || DEFAULT_PAGE_SIZE),
     );
 
-    const securities = assets
-      .map(asset => toRow(asset, priceBySymbol.get(asset.symbol) ?? null))
-      .sort((a, b) => a.symbol.localeCompare(b.symbol));
+    const assets = await listAllAssets(force);
+    const filtered = assets.filter(
+      asset => matchesQuery(asset, q) && matchesStatus(asset, status),
+    );
 
-    const payload = {
-      updatedAt: new Date().toISOString(),
-      source: 'xStocks',
-      count: securities.length,
-      securities,
-      note:
-        'Tokenized quotes from xStocks public price-data (Nasdaq/on-chain indicative). Traditional column currently mirrors that indicative reference until a licensed equity feed is added.',
-    };
+    const total = filtered.length;
+    const totalPages = Math.max(1, Math.ceil(total / pageSize));
+    const safePage = Math.min(page, totalPages);
+    const start = (safePage - 1) * pageSize;
+    const pageAssets = filtered.slice(start, start + pageSize);
 
-    cache = { expiresAt: Date.now() + CACHE_TTL_MS, payload };
+    const prices = await mapWithConcurrency(pageAssets, 10, asset =>
+      fetchPrice(asset.symbol, force),
+    );
 
-    const filtered = q
-      ? securities.filter(
-          s =>
-            s.symbol.toLowerCase().includes(q) ||
-            s.name.toLowerCase().includes(q) ||
-            s.underlyingSymbol.toLowerCase().includes(q),
-        )
-      : securities;
+    const securities = pageAssets.map((asset, i) => toRow(asset, prices[i]));
 
     return NextResponse.json(
-      { ...payload, count: filtered.length, securities: filtered },
+      {
+        updatedAt: new Date().toISOString(),
+        source: 'xStocks',
+        total,
+        page: safePage,
+        pageSize,
+        totalPages,
+        count: securities.length,
+        pricedOnPage: securities.filter(s => s.tokenizedPrice !== null).length,
+        securities,
+        note:
+          'Tokenized quotes from xStocks public price-data (Nasdaq/on-chain indicative). Traditional column currently mirrors that indicative reference until a licensed equity feed is added.',
+        syncIntervalSeconds: 120,
+      },
       {
         headers: {
           'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
