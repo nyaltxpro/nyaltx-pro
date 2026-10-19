@@ -11,20 +11,20 @@
     { "id": "strategic-thesis", "title": "The Strategic Thesis", "level": "0" },
     { "id": "executive-summary", "title": "1. Executive Summary", "level": "0" },
     { "id": "defi-foundation", "title": "2. Existing NYALTX Foundation: DeFi Awareness", "level": "0" },
-    { "id": "defi-pillars", "title": "DeFi Product and Commercial Pillars", "level": "1" },
-    { "id": "nyax-utility", "title": "Platform Utility Token (NYAX)", "level": "1" },
+    { "id": "defi-pillars", "title": "DeFi product and commercial pillars", "level": "1" },
+    { "id": "nyax-utility", "title": "Platform utility token", "level": "1" },
     { "id": "tokenized-opportunity", "title": "3. The Tokenized Securities Opportunity", "level": "0" },
     { "id": "governa", "title": "4. Governa: Proposed Tokenization and Governance Layer", "level": "0" },
-    { "id": "governa-architecture", "title": "Proposed Functional Architecture", "level": "1" },
+    { "id": "governa-architecture", "title": "Proposed functional architecture", "level": "1" },
     { "id": "sec-exemption", "title": "5. September 17, 2026 SEC Innovation Exemption", "level": "0" },
-    { "id": "exemption-conditions", "title": "Illustrative Conditions and Boundaries", "level": "1" },
+    { "id": "exemption-conditions", "title": "Illustrative conditions and boundaries", "level": "1" },
     { "id": "market-structure", "title": "6. Proposed Market Structure and AMM Trading", "level": "0" },
-    { "id": "transaction-lifecycle", "title": "Target Transaction Lifecycle", "level": "1" },
+    { "id": "transaction-lifecycle", "title": "Target transaction lifecycle — conceptual", "level": "1" },
     { "id": "business-model", "title": "7. Business Model and Revenue Opportunities", "level": "0" },
     { "id": "competitive-positioning", "title": "8. Competitive Positioning", "level": "0" },
     { "id": "roadmap", "title": "9. Milestone-Based Development Roadmap", "level": "0" },
     { "id": "capital-partnerships", "title": "10. Strategic Capital and Partnership Priorities", "level": "0" },
-    { "id": "diligence-package", "title": "Institutional Diligence Package", "level": "1" },
+    { "id": "diligence-package", "title": "Institutional diligence package to prepare", "level": "1" },
     { "id": "principal-risks", "title": "11. Principal Risks", "level": "0" },
     { "id": "conclusion", "title": "12. Conclusion", "level": "0" },
     { "id": "sources", "title": "Sources and Regulatory References", "level": "0" },
@@ -36,11 +36,7 @@
       "id": "strategic-thesis",
       "title": "The Strategic Thesis",
       "level": "0",
-      "content": "NYALTX seeks to evolve from a Web3 project-awareness and discovery platform into an integrated capital-markets technology ecosystem. The proposed architecture combines NYALTX’s existing DeFi visibility and embedded-swap experience; Governa’s planned securities tokenization, governance and administration capabilities; and a future permissioned venue for compliant secondary trading of eligible tokenized securities.\n\nThe September 17, 2026 SEC Innovation Exemption creates a defined, conditional avenue to evaluate on-chain trading of tokenized NMS stocks through qualifying Tokenized Securities Venues (TSVs).\n\nCurrent functionality, development intentions and activities requiring separate legal authorization are distinguished throughout this paper.",
-      "highlight": {
-        "style": "cyan",
-        "content": "This paper is a strategic business and technology overview for discussion purposes only — not an offering memorandum, investment advice, or a representation of regulatory approval."
-      }
+      "content": "NYALTX seeks to evolve from a Web3 project-awareness and discovery platform into an integrated capital-markets technology ecosystem. The proposed architecture combines NYALTX’s existing DeFi visibility and embedded-swap experience; Governa’s planned securities tokenization, governance and administration capabilities; and a future permissioned venue for compliant secondary trading of eligible tokenized securities. The September 17, 2026 SEC Innovation Exemption creates a defined, conditional avenue to evaluate on-chain trading of tokenized NMS stocks through qualifying Tokenized Securities Venues (TSVs).\n\nCurrent functionality, development intentions and activities requiring separate legal authorization are distinguished throughout this paper."
     },
     {
       "id": "executive-summary",
@@ -69,26 +65,23 @@
       "id": "defi-foundation",
       "title": "2. Existing NYALTX Foundation: DeFi Awareness",
       "level": "0",
-      "content": "The current NYALTX white paper describes a DeFi hub emphasizing project discovery, investor visibility and Web3 engagement. Its documented feature set includes dedicated crypto project profiles, market charts, social and news feeds, embedded non-custodial swap connections, advertising and premium profile opportunities, and a proposed token generator. The existing paper also describes wallet-based authentication and smart-contract transparency. These are platform descriptions from management-provided material, not independent technical audits.\n\nThis discovery capability can provide an initial user experience for a securities-oriented platform, but marketing exposure and project profiles must not be characterized as regulatory approval, a securities listing, or a guarantee of liquidity.",
+      "content": "The current NYALTX white paper describes a DeFi hub emphasizing project discovery, investor visibility and Web3 engagement. Its documented feature set includes dedicated crypto project profiles, market charts, social and news feeds, embedded non-custodial swap connections, advertising and premium profile opportunities, and a proposed token generator. The existing paper also describes wallet-based authentication and smart-contract transparency. These are platform descriptions from management-provided material, not independent technical audits.",
       "subsections": [
         {
           "id": "defi-pillars",
-          "title": "DeFi Product and Commercial Pillars",
+          "title": "DeFi product and commercial pillars",
           "listItems": [
             { "content": "Project discovery: issuer/project pages aggregating market data, media, social channels and announcements." },
             { "content": "Awareness services: premium profiles, advertising placements, interviews, and investor-oriented content." },
             { "content": "Embedded DeFi trading: integrations described with external decentralized swap protocols; swaps are distinct from trading regulated securities." },
             { "content": "Web3 utility: wallet connection, contract identification and potential token creation tools, with feature availability subject to verification." }
-          ]
+          ],
+          "content": "This discovery capability can provide an initial user experience for a securities-oriented platform, but marketing exposure and project profiles must not be characterized as regulatory approval, a securities listing, or a guarantee of liquidity."
         },
         {
           "id": "nyax-utility",
-          "title": "Platform Utility Token (NYAX)",
-          "content": "NYALTX also has a platform utility token, NYAX, which is used for site features such as premium visibility and promotional services. NYAX is not an ownership interest in NYALTX, Governa or any issuer, and it is kept entirely separate from tokenized securities and their trading. Nothing in this paper depends on NYAX, and no price, return or value is represented for it.",
-          "highlight": {
-            "style": "orange",
-            "content": "NYAX is a platform utility token only. It is separate from tokenized securities and is not an ownership interest in NYALTX, Governa or any issuer."
-          }
+          "title": "Platform utility token",
+          "content": "NYALTX also has a platform utility token, NYAX, which is used for site features such as premium visibility and promotional services. NYAX is not an ownership interest in NYALTX, Governa or any issuer, and it is kept entirely separate from tokenized securities and their trading. Nothing in this paper depends on NYAX, and no price, return or value is represented for it."
         }
       ]
     },
@@ -102,18 +95,19 @@
       "id": "governa",
       "title": "4. Governa: Proposed Tokenization and Governance Layer",
       "level": "0",
-      "content": "Governa is positioned as the planned infrastructure layer supporting compliant digital securities administration. Its proposed scope includes token issuance workflows, issuer and security reference data, holder eligibility and transfer restrictions, governance and voting events, corporate actions, reporting, and integration with appropriately registered transfer agents and professional advisers.\n\nThese are product objectives; this paper does not represent that Governa currently acts as a registered transfer agent, broker-dealer, custodian or operating securities venue.",
+      "content": "Governa is positioned as the planned infrastructure layer supporting compliant digital securities administration. Its proposed scope includes token issuance workflows, issuer and security reference data, holder eligibility and transfer restrictions, governance and voting events, corporate actions, reporting, and integration with appropriately registered transfer agents and professional advisers.",
       "subsections": [
         {
           "id": "governa-architecture",
-          "title": "Proposed Functional Architecture",
+          "title": "Proposed functional architecture",
           "listItems": [
             { "content": "Issuer onboarding and security definition: entity verification, capitalization data, rights and offering restrictions." },
             { "content": "Tokenization workflow: approved contract templates, permission controls, issuance and burn/reconciliation events." },
             { "content": "Securities administration: transfer-agent connectivity, authoritative ledger reconciliation, audit trails and corporate actions." },
             { "content": "Governance: voting entitlements, notices, record dates, permissions and reporting." },
             { "content": "Integration APIs: securely expose verified issuer and security metadata to NYALTX discovery and a future authorized trading layer." }
-          ]
+          ],
+          "content": "These are product objectives; this paper does not represent that Governa currently acts as a registered transfer agent, broker-dealer, custodian or operating securities venue."
         }
       ]
     },
@@ -121,22 +115,19 @@
       "id": "sec-exemption",
       "title": "5. September 17, 2026 SEC Innovation Exemption",
       "level": "0",
-      "content": "On September 17, 2026, the SEC issued Release No. 34-106402, a temporary, conditional order granting qualifying Tokenized Securities Venues relief from the Exchange Act definition of “exchange” for specified trading of tokenized National Market System (NMS) stocks using permissioned AMM liquidity pools. The order also grants conditional relief from the definition of “dealer” for certain qualifying liquidity providers. The exemptions are time-limited and are scheduled to expire five years after publication, absent further SEC action.\n\nThis is an exemption order—not an “Innovation Act,” blanket authorization for tokenized securities, or automatic approval of NYALTX. The relief is limited in scope and requires compliance with detailed conditions.\n\nThe exemption does not, by itself, authorize trading of private placements, all OTC securities, debt, funds or other non-NMS assets. Those products require independent legal analysis and potentially different regulatory structures.",
-      "highlight": {
-        "style": "indigo",
-        "content": "Release No. 34-106402 is a temporary, conditional TSV exemption — not automatic approval of NYALTX, and not a blanket authorization for all tokenized securities."
-      },
+      "content": "On September 17, 2026, the SEC issued Release No. 34-106402, a temporary, conditional order granting qualifying Tokenized Securities Venues relief from the Exchange Act definition of “exchange” for specified trading of tokenized National Market System (NMS) stocks using permissioned AMM liquidity pools. The order also grants conditional relief from the definition of “dealer” for certain qualifying liquidity providers. The exemptions are time-limited and are scheduled to expire five years after publication, absent further SEC action.\n\nThis is an exemption order—not an “Innovation Act,” blanket authorization for tokenized securities, or automatic approval of NYALTX. The relief is limited in scope and requires compliance with detailed conditions.",
       "subsections": [
         {
           "id": "exemption-conditions",
-          "title": "Illustrative Conditions and Boundaries",
+          "title": "Illustrative conditions and boundaries",
           "listItems": [
             { "content": "Permissioned participant access and U.S.-person / sanctions-related requirements." },
             { "content": "Limits on eligible stock symbols and trading volume, and publication of specified market and transaction information." },
             { "content": "Tokenized NMS stock must convey rights and privileges equivalent to the underlying traditional shares; synthetic exposure products are outside this definition." },
             { "content": "Issuer notice and opportunity to object when applicable, and coordination with primary-market trading halts." },
             { "content": "Auditable public smart contracts, books and records, technology safeguards and continued anti-fraud / anti-manipulation obligations." }
-          ]
+          ],
+          "content": "The exemption does not, by itself, authorize trading of private placements, all OTC securities, debt, funds or other non-NMS assets. Those products require independent legal analysis and potentially different regulatory structures."
         }
       ]
     },
@@ -199,60 +190,51 @@
       "id": "roadmap",
       "title": "9. Milestone-Based Development Roadmap",
       "level": "0",
-      "content": "Development is staged so product claims, regulatory analysis and live market activity remain clearly separated.",
+      "content": "",
       "timeline": [
         {
           "id": "stage-1",
-          "title": "Stage 1 — Validate the Foundation",
+          "title": "Stage 1 — Validate the foundation",
           "subtitle": "Foundation",
           "color": "cyan",
           "items": [
-            { "text": "Document live NYALTX capabilities" },
-            { "text": "Confirm entity ownership and product architecture" },
-            { "text": "Prepare a technical demonstration" }
+            { "text": "Document live NYALTX capabilities, confirm entity ownership and product architecture, and prepare a technical demonstration." }
           ]
         },
         {
           "id": "stage-2",
-          "title": "Stage 2 — Design Governa Securities Workflows",
+          "title": "Stage 2 — Design Governa securities workflows",
           "subtitle": "Governa",
           "color": "purple",
           "items": [
-            { "text": "Prototype issuer onboarding, token issuance, governance and transfer restrictions" },
-            { "text": "Design transfer-agent interfaces" },
-            { "text": "Commission smart-contract and security reviews" }
+            { "text": "Prototype issuer onboarding, token issuance, governance, transfer restrictions and transfer-agent interfaces; commission smart-contract and security reviews." }
           ]
         },
         {
           "id": "stage-3",
-          "title": "Stage 3 — Select Regulatory Pathway",
+          "title": "Stage 3 — Select regulatory pathway",
           "subtitle": "Counsel & Partners",
           "color": "indigo",
           "items": [
-            { "text": "Engage securities counsel and prospective BD/ATS/TSV partners" },
-            { "text": "Produce written analysis of registrations, exemptive conditions, product scope, costs and control responsibilities" }
+            { "text": "Engage securities counsel and prospective BD/ATS/TSV partners; produce a written analysis of applicable registrations, exemptive conditions, product scope, costs and control responsibilities." }
           ]
         },
         {
           "id": "stage-4",
-          "title": "Stage 4 — Build Permissioned Trading Pilot",
+          "title": "Stage 4 — Build permissioned trading pilot",
           "subtitle": "Pilot",
           "color": "green",
           "items": [
-            { "text": "Develop a controlled AMM proof of concept" },
-            { "text": "Identity/eligibility checks, surveillance, halt integration, disclosure and recordkeeping" },
-            { "text": "Do not conduct live securities trading before all prerequisites are met" }
+            { "text": "Develop a controlled AMM proof of concept, identity/eligibility checks, surveillance, halt integration, disclosure and recordkeeping; do not conduct live securities trading before all prerequisites are met." }
           ]
         },
         {
           "id": "stage-5",
-          "title": "Stage 5 — Institutional Commercialization",
+          "title": "Stage 5 — Institutional commercialization",
           "subtitle": "Scale",
           "color": "orange",
           "items": [
-            { "text": "Secure issuer and infrastructure partnerships" },
-            { "text": "Launch approved services and measure adoption and recurring revenue" },
-            { "text": "Expand only as regulatory permissions and operating capacity allow" }
+            { "text": "Secure issuer and infrastructure partnerships, launch approved services, measure adoption and recurring revenue, and expand only as regulatory permissions and operating capacity allow." }
           ]
         }
       ]
@@ -279,24 +261,13 @@
       "id": "principal-risks",
       "title": "11. Principal Risks",
       "level": "0",
-      "listItems": [
-        { "content": "Regulatory risk: exemptive relief is temporary, conditional, narrow and subject to change." },
-        { "content": "Execution risk: licensing, partnerships and production technology may be delayed or unavailable." },
-        { "content": "Market risk: tokenized securities may lack issuers, investors or sustainable liquidity." },
-        { "content": "Smart-contract and cyber risk: code flaws, wallet compromises, key management failures and chain outages." },
-        { "content": "Operational risk: custody, settlement, records, trading halts, sanctions and market surveillance." },
-        { "content": "Commercial risk: revenue assumptions, customer acquisition, liquidity-provider economics and capital requirements may not be achieved." }
-      ]
+      "content": "Regulatory risk: exemptive relief is temporary, conditional, narrow and subject to change. Execution risk: licensing, partnerships and production technology may be delayed or unavailable. Market risk: tokenized securities may lack issuers, investors or sustainable liquidity. Smart-contract and cyber risk: code flaws, wallet compromises, key management failures and chain outages. Operational risk: custody, settlement, records, trading halts, sanctions and market surveillance. Commercial risk: revenue assumptions, customer acquisition, liquidity-provider economics and capital requirements may not be achieved."
     },
     {
       "id": "conclusion",
       "title": "12. Conclusion",
       "level": "0",
-      "content": "NYALTX’s next phase is a focused capital-markets infrastructure strategy: retain the existing DeFi awareness platform, develop Governa as the proposed tokenization and governance layer, and pursue a legally supportable route to permissioned trading of eligible tokenized securities. The September 17 SEC order provides a concrete regulatory reference point for evaluating a TSV-based AMM model. The investment case depends on disciplined execution, verifiable technology, experienced regulated partners and transparent milestones—not on a claim of existing authorization.",
-      "highlight": {
-        "style": "green",
-        "content": "The case rests on disciplined execution, verifiable technology, regulated partners and transparent milestones — not on a claim of existing authorization."
-      }
+      "content": "NYALTX’s next phase is a focused capital-markets infrastructure strategy: retain the existing DeFi awareness platform, develop Governa as the proposed tokenization and governance layer, and pursue a legally supportable route to permissioned trading of eligible tokenized securities. The September 17 SEC order provides a concrete regulatory reference point for evaluating a TSV-based AMM model. The investment case depends on disciplined execution, verifiable technology, experienced regulated partners and transparent milestones—not on a claim of existing authorization."
     },
     {
       "id": "sources",
@@ -313,22 +284,13 @@
       "id": "important-notice",
       "title": "Important Notice",
       "level": "0",
-      "content": "This paper is a strategic business and technology overview for discussion purposes only. It is not an offer to sell or solicitation to buy any security or digital asset, investment advice, a representation of regulatory approval, or a guarantee of future product availability. All proposed regulated activities are contingent on applicable law, exemptions, registrations, partner arrangements and operational readiness. Securities counsel should review before external investor distribution.",
-      "highlight": {
-        "style": "orange",
-        "content": "Not an offer, solicitation, investment advice, or representation of regulatory approval. Counsel review recommended before external investor distribution."
-      }
+      "content": "This paper is a strategic business and technology overview for discussion purposes only. It is not an offer to sell or solicitation to buy any security or digital asset, investment advice, a representation of regulatory approval, or a guarantee of future product availability. All proposed regulated activities are contingent on applicable law, exemptions, registrations, partner arrangements and operational readiness. Securities counsel should review before external investor distribution."
     },
     {
       "id": "contact",
       "title": "Contact",
       "level": "0",
-      "content": "NYALTX.pro | Governa.pro",
-      "details": [
-        { "label": "Platform", "value": "NYALTX.pro" },
-        { "label": "Tokenization / Governance", "value": "Governa.pro" },
-        { "label": "Edition", "value": "Strategic Development Edition • October 2026" }
-      ]
+      "content": "NYALTX.pro | Governa.pro"
     }
   ],
   "seo": {
