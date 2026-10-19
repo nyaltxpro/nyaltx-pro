@@ -30,7 +30,6 @@ type ApiResponse = {
   count?: number;
   pricedOnPage?: number;
   securities?: SecurityRow[];
-  note?: string;
   syncIntervalSeconds?: number;
   error?: string;
 };
@@ -55,11 +54,34 @@ const formatSpread = (spread: number | null, bps: number | null) => {
   return `${sign}${formatUsd(spread)}${bpsLabel}`;
 };
 
+/** Compact page list: 1 … 4 5 6 … 24 */
+function getPageNumbers(current: number, total: number): Array<number | '…'> {
+  if (total <= 7) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+
+  const pages = new Set<number>();
+  pages.add(1);
+  pages.add(total);
+  for (let i = current - 1; i <= current + 1; i++) {
+    if (i >= 1 && i <= total) pages.add(i);
+  }
+
+  const sorted = [...pages].sort((a, b) => a - b);
+  const result: Array<number | '…'> = [];
+  for (let i = 0; i < sorted.length; i++) {
+    if (i > 0 && sorted[i] - sorted[i - 1] > 1) {
+      result.push('…');
+    }
+    result.push(sorted[i]);
+  }
+  return result;
+}
+
 export default function TokenizedSecurities() {
   const [rows, setRows] = useState<SecurityRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [note, setNote] = useState<string | null>(null);
   const [updatedAt, setUpdatedAt] = useState<string | null>(null);
   const [queryInput, setQueryInput] = useState('');
   const [query, setQuery] = useState('');
@@ -90,7 +112,6 @@ export default function TokenizedSecurities() {
         }
 
         setRows(data.securities || []);
-        setNote(data.note || null);
         setUpdatedAt(data.updatedAt || null);
         setTotal(data.total || 0);
         setTotalPages(data.totalPages || 1);
@@ -207,12 +228,6 @@ export default function TokenizedSecurities() {
           ))}
         </div>
       </div>
-
-      {note && (
-        <p className="mb-4 rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-xs leading-relaxed text-amber-100/80">
-          {note} Market data display only — not an offer to buy or sell securities.
-        </p>
-      )}
 
       {loading && rows.length === 0 ? (
         <div className="flex min-h-[320px] items-center justify-center">
@@ -342,7 +357,7 @@ export default function TokenizedSecurities() {
             <p className="text-xs text-gray-500">
               Page {page} of {totalPages} · showing {rows.length} of {total}
             </p>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-1.5">
               <button
                 type="button"
                 disabled={page <= 1 || loading}
@@ -351,6 +366,34 @@ export default function TokenizedSecurities() {
               >
                 <ChevronLeftIcon /> Prev
               </button>
+
+              {getPageNumbers(page, totalPages).map((item, idx) =>
+                item === '…' ? (
+                  <span
+                    key={`ellipsis-${idx}`}
+                    className="px-1.5 text-xs text-gray-500"
+                    aria-hidden
+                  >
+                    …
+                  </span>
+                ) : (
+                  <button
+                    key={item}
+                    type="button"
+                    disabled={loading || item === page}
+                    onClick={() => goToPage(item)}
+                    aria-current={item === page ? 'page' : undefined}
+                    className={`min-w-[2rem] rounded-lg border px-2.5 py-2 text-xs transition ${
+                      item === page
+                        ? 'border-[#00d4aa]/40 bg-[#00d4aa]/20 text-[#00d4aa]'
+                        : 'border-white/10 bg-white/5 text-gray-300 hover:bg-white/10 disabled:opacity-40'
+                    }`}
+                  >
+                    {item}
+                  </button>
+                ),
+              )}
+
               <button
                 type="button"
                 disabled={page >= totalPages || loading}

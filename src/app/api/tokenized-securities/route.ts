@@ -233,8 +233,6 @@ export async function GET(request: NextRequest) {
         count: securities.length,
         pricedOnPage: securities.filter(s => s.tokenizedPrice !== null).length,
         securities,
-        note:
-          'Tokenized quotes from xStocks public price-data (Nasdaq/on-chain indicative). Traditional column currently mirrors that indicative reference until a licensed equity feed is added.',
         syncIntervalSeconds: 120,
       },
       {
