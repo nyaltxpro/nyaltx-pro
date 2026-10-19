@@ -36,6 +36,11 @@
           "enabled": true
         },
         {
+          "label": "Tokenized Securities",
+          "href": "/dashboard/tokenized-securities",
+          "enabled": true
+        },
+        {
           "label": "Podcast",
           "href": "/podcast",
           "enabled": true

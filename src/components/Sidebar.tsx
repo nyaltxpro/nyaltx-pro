@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  BarChartIcon,
   CalendarIcon,
   GearIcon,
   HomeIcon,
@@ -116,6 +117,7 @@ export default function Sidebar({ isMobileMenuOpen, toggleMobileMenu }: SidebarP
     { icon: <StarIcon />, text: 'Favorites', href: '/dashboard/favorites' },
     { icon: <PlayIcon />, text: 'Live Stream', href: '/dashboard/live-stream' },
     { icon: <RocketIcon />, text: 'Trending', href: '/dashboard/trending' },
+    { icon: <BarChartIcon />, text: 'Tokenized Securities', href: '/dashboard/tokenized-securities' },
     { icon: <ReaderIcon />, text: 'News', href: '/dashboard/news' },
     { icon: <CalendarIcon />, text: 'Events', href: '/dashboard/events' },
     { icon: <MagnifyingGlassIcon />, text: 'Search Token', href: '/dashboard/search' },

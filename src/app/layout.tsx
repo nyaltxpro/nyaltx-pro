@@ -78,7 +78,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${poppins.variable} ${roboto.variable}`}>
+    <html lang="en" className={`${poppins.variable} ${roboto.variable}`} suppressHydrationWarning>
       <head>
         {/* Organization Schema */}
         <script

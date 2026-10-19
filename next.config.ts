@@ -1,4 +1,7 @@
+import { createMDX } from 'fumadocs-mdx/next';
 import type { NextConfig } from "next";
+
+const withMDX = createMDX();
 
 const nextConfig: NextConfig = {
   eslint: {
@@ -66,6 +69,7 @@ const nextConfig: NextConfig = {
       ...(config.resolve.alias || {}),
       // Optional wagmi Tempo dependency — not installed, must not fail resolve
       accounts: false,
+      '@wagmi/core/tempo': false,
     };
 
     // Reduce peak memory during production minify on Vercel 2-core builders
@@ -103,6 +107,7 @@ const nextConfig: NextConfig = {
       "dd.dexscreener.com",
       "assets.tina.io",
       "coinmarketcal-share.s3.eu-west-1.amazonaws.com",
+      "xstocks-metadata.backed.fi",
     ],
     remotePatterns: [
       {
@@ -207,6 +212,11 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
+        hostname: "xstocks-metadata.backed.fi",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
         hostname: "nyaltx.pro",
         pathname: "/**",
       },
@@ -214,4 +224,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withMDX(nextConfig);

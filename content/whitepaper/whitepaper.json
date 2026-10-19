@@ -1,457 +1,339 @@
 {
   "slug": "whitepaper",
-  "title": "NYALTX Whitepaper",
-  "description": "Welcome to the comprehensive technical documentation for New York Alt Exchange (NYALTX), a revolutionary decentralized finance (DeFi) platform designed to transform how crypto projects gain visibility, liquidity, and growth opportunities in the Web3 ecosystem",
+  "title": "NYALTX Institutional White Paper",
+  "description": "Connecting DeFi Discovery, Tokenized Securities Infrastructure and Regulated On-Chain Markets. Strategic Development Edition — October 2026. Business strategy and technology roadmap | Not an offering memorandum.",
   "hero": {
-    "title": "NYALTX Whitepaper",
-    "subtitle": "New York Alt Exchange - Powered by the NYAX Token",
-    "tagline": "Transforming crypto marketing, trading, and community engagement"
+    "title": "Connecting DeFi Discovery, Tokenized Securities Infrastructure and Regulated On-Chain Markets",
+    "subtitle": "New York Alt Exchange (NYALTX) | NYALTX.pro | Institutional White Paper",
+    "tagline": "Strategic Development Edition • October 2026 • Business strategy and technology roadmap | Not an offering memorandum"
   },
   "toc": [
-    {
-      "id": "introduction",
-      "title": "Introduction",
-      "level": "0"
-    },
-    {
-      "id": "executive-summary",
-      "title": "Executive Summary",
-      "level": "0"
-    },
-    {
-      "id": "vision-mission",
-      "title": "Vision and Mission",
-      "level": "0"
-    },
-    {
-      "id": "vision",
-      "title": "Vision",
-      "level": "1"
-    },
-    {
-      "id": "mission",
-      "title": "Mission",
-      "level": "1"
-    },
-    {
-      "id": "market-opportunity",
-      "title": "Market Opportunity",
-      "level": "0"
-    },
-    {
-      "id": "platform-overview",
-      "title": "Platform Overview",
-      "level": "0"
-    },
-    {
-      "id": "crypto-profiles",
-      "title": "Crypto Profiles",
-      "level": "1"
-    },
-    {
-      "id": "embedded-trading",
-      "title": "Embedded Trading",
-      "level": "1"
-    },
-    {
-      "id": "authentication-and-security",
-      "title": "Authentication and Security Framework",
-      "level": "2"
-    },
-    {
-      "id": "token-generator",
-      "title": "Token Generator",
-      "level": "1"
-    },
-    {
-      "id": "nyax-token",
-      "title": "The NYAX Token",
-      "level": "0"
-    },
-    {
-      "id": "payment-token",
-      "title": "Payment Token",
-      "level": "1"
-    },
-    {
-      "id": "governance",
-      "title": "Governance",
-      "level": "1"
-    },
-    {
-      "id": "staking-rewards",
-      "title": "Staking & Rewards",
-      "level": "1"
-    },
-    {
-      "id": "tokenomics",
-      "title": "Tokenomics",
-      "level": "0"
-    },
-    {
-      "id": "token-details",
-      "title": "Token Details",
-      "level": "1"
-    },
-    {
-      "id": "allocation",
-      "title": "Allocation",
-      "level": "1"
-    },
-    {
-      "id": "revenue-model",
-      "title": "Revenue Model",
-      "level": "1"
-    },
-    {
-      "id": "competitive-advantage",
-      "title": "Competitive Advantage",
-      "level": "0"
-    },
-    {
-      "id": "roadmap",
-      "title": "Roadmap",
-      "level": "0"
-    },
-    {
-      "id": "phase-1",
-      "title": "Phase 1 - Launch (2025)",
-      "level": "1"
-    },
-    {
-      "id": "phase-2",
-      "title": "Phase 2 - Growth (2025)",
-      "level": "1"
-    },
-    {
-      "id": "phase-3",
-      "title": "Phase 3 - Expansion (2026)",
-      "level": "1"
-    },
-    {
-      "id": "phase-4",
-      "title": "Phase 4 - Scaling (2026+)",
-      "level": "1"
-    },
-    {
-      "id": "conclusion",
-      "title": "Conclusion",
-      "level": "0"
-    },
-    {
-      "id": "contact",
-      "title": "Contact Information",
-      "level": "0"
-    },
-    {}
+    { "id": "strategic-thesis", "title": "The Strategic Thesis", "level": "0" },
+    { "id": "executive-summary", "title": "1. Executive Summary", "level": "0" },
+    { "id": "defi-foundation", "title": "2. Existing NYALTX Foundation: DeFi Awareness", "level": "0" },
+    { "id": "defi-pillars", "title": "DeFi Product and Commercial Pillars", "level": "1" },
+    { "id": "nyax-utility", "title": "Platform Utility Token (NYAX)", "level": "1" },
+    { "id": "tokenized-opportunity", "title": "3. The Tokenized Securities Opportunity", "level": "0" },
+    { "id": "governa", "title": "4. Governa: Proposed Tokenization and Governance Layer", "level": "0" },
+    { "id": "governa-architecture", "title": "Proposed Functional Architecture", "level": "1" },
+    { "id": "sec-exemption", "title": "5. September 17, 2026 SEC Innovation Exemption", "level": "0" },
+    { "id": "exemption-conditions", "title": "Illustrative Conditions and Boundaries", "level": "1" },
+    { "id": "market-structure", "title": "6. Proposed Market Structure and AMM Trading", "level": "0" },
+    { "id": "transaction-lifecycle", "title": "Target Transaction Lifecycle", "level": "1" },
+    { "id": "business-model", "title": "7. Business Model and Revenue Opportunities", "level": "0" },
+    { "id": "competitive-positioning", "title": "8. Competitive Positioning", "level": "0" },
+    { "id": "roadmap", "title": "9. Milestone-Based Development Roadmap", "level": "0" },
+    { "id": "capital-partnerships", "title": "10. Strategic Capital and Partnership Priorities", "level": "0" },
+    { "id": "diligence-package", "title": "Institutional Diligence Package", "level": "1" },
+    { "id": "principal-risks", "title": "11. Principal Risks", "level": "0" },
+    { "id": "conclusion", "title": "12. Conclusion", "level": "0" },
+    { "id": "sources", "title": "Sources and Regulatory References", "level": "0" },
+    { "id": "important-notice", "title": "Important Notice", "level": "0" },
+    { "id": "contact", "title": "Contact", "level": "0" }
   ],
   "sections": [
     {
-      "id": "introduction",
-      "title": "Introduction",
+      "id": "strategic-thesis",
+      "title": "The Strategic Thesis",
       "level": "0",
-      "content": "The NYALTX ecosystem, where the next generation of DeFi meets real-world investor engagement. Built to elevate crypto projects beyond mere token listings, NYALTX offers an integrated platform combining visible project profiles, seamless embedded trading, and a robust utility token model. With our native token at the core and a user-centric architecture front and center, NYALTX empowers projects, investors, and community participants alike—creating a transparent path to liquidity, discovery, and meaningful growth."
+      "content": "NYALTX seeks to evolve from a Web3 project-awareness and discovery platform into an integrated capital-markets technology ecosystem. The proposed architecture combines NYALTX’s existing DeFi visibility and embedded-swap experience; Governa’s planned securities tokenization, governance and administration capabilities; and a future permissioned venue for compliant secondary trading of eligible tokenized securities.\n\nThe September 17, 2026 SEC Innovation Exemption creates a defined, conditional avenue to evaluate on-chain trading of tokenized NMS stocks through qualifying Tokenized Securities Venues (TSVs).\n\nCurrent functionality, development intentions and activities requiring separate legal authorization are distinguished throughout this paper.",
+      "highlight": {
+        "style": "cyan",
+        "content": "This paper is a strategic business and technology overview for discussion purposes only — not an offering memorandum, investment advice, or a representation of regulatory approval."
+      }
     },
     {
       "id": "executive-summary",
-      "title": "Executive Summary",
+      "title": "1. Executive Summary",
       "level": "0",
-      "highlight": {
-        "style": "cyan",
-        "content": "NYALTX.Pro represents the next evolution of decentralized finance infrastructure, merging traditional financial intelligence with blockchain innovation and media connectivity. The platform unites trading, analytics, and content under one ecosystem—empowering projects to gain exposure, investors to access transparent data, and communities to engage through real-time storytelling. By integrating DeFi and media, NYALTX.Pro redefines how visibility, credibility, and liquidity converge in the digital economy."
-      },
-      "listItems": [
-        {
-          "content": "NYALTX Exchange (NYALTX.com) is a decentralized finance (DeFi) hub designed to give crypto projects visibility, liquidity, and growth opportunities."
-        },
-        {
-          "content": "Unlike traditional data aggregators, NYALTX integrates project profiles, embedded trading, token creation, and community engagement tools—all powered by the NYAX token."
-        },
-        {
-          "content": "NYAX is more than a currency. It is the fuel of the ecosystem, supporting payments, staking rewards, governance, marketing, and real-world access to investor networks."
-        }
-      ]
-    },
-    {
-      "id": "vision-mission",
-      "title": "Vision and Mission",
-      "level": "0",
-      "subsections": [
-        {
-          "id": "vision",
-          "title": "Vision",
-          "highlight": {
-            "style": "green",
-            "content": "To position NYALTX.Pro as the global leader in DeFi media and project visibility, transforming how Web3 ventures connect with investors and audiences by turning attention, transparency, and trust into real market value."
-          }
-        },
-        {
-          "id": "mission",
-          "title": "Mission",
-          "highlight": {
-            "style": "purple",
-            "content": "To empower projects, investors, and communities through a unified platform that combines DeFi trading, media visibility, and social engagement—all supported by a transparent, sustainable token economy designed for long-term growth."
-          }
-        }
-      ]
-    },
-    {
-      "id": "market-opportunity",
-      "title": "Market Opportunity",
-      "level": "0",
-      "content": "Unlike typical DeFi platforms that focus solely on analytics or trading volume, NYALTX.Pro stands out as a leader in DeFi media and project visibility. It’s built around profile-driven exposure and community engagement, connecting projects, investors, and audiences through a unified marketing ecosystem. NYALTX.Pro monetizes not just trading, but also attention, interaction, and reach, turning visibility itself into a measurable asset that bridges decentralized markets with real-world investor awareness.",
-      "stats": [
-        {
-          "value": "18,000+",
-          "description": "Active tokens competing for visibility across fragmented markets",
-          "color": "cyan"
-        },
-        {
-          "value": "Trillions",
-          "description": "Annual DeFi trading volume, yet most platforms lack project storytelling tools",
-          "color": "green"
-        }
-      ]
-    },
-    {
-      "id": "platform-overview",
-      "title": "Platform Overview",
-      "level": "0",
+      "content": "The capital-markets opportunity is not simply to create another crypto token listing site. It is to connect issuer identity and disclosures, legally valid digital securities records, investor-facing discovery, and—when authorized—secondary-market liquidity. NYALTX can provide a familiar institutional interface to blockchain-native financial infrastructure.\n\nThe proposed ecosystem comprises three complementary layers: (i) NYALTX.pro, the discovery and investor-awareness layer; (ii) Governa.pro, the proposed issuance, recordkeeping and governance infrastructure; and (iii) a future regulated or qualifying exempt trading venue with permissioned automated market maker (AMM) liquidity pools. These layers may be operated by different appropriately authorized entities or partners.",
       "cards": [
         {
-          "title": "Profile Upgrades",
-          "description": "Paid in NYAX/ETH for boosted visibility",
+          "title": "NYALTX.pro",
+          "description": "Discovery and investor-awareness layer for projects, issuers and market data.",
           "color": "blue"
         },
         {
-          "title": "Advertising Marketplace",
-          "description": "Sponsored listings and promotions",
-          "color": "green"
+          "title": "Governa.pro",
+          "description": "Proposed issuance, recordkeeping, governance and securities administration infrastructure.",
+          "color": "purple"
         },
         {
-          "title": "Venture Network Events",
-          "description": "Access to digital and real-world investor meetups",
-          "color": "purple"
+          "title": "Future Venue / TSV",
+          "description": "Permissioned AMM model for eligible tokenized securities, subject to authorization.",
+          "color": "teal"
+        }
+      ]
+    },
+    {
+      "id": "defi-foundation",
+      "title": "2. Existing NYALTX Foundation: DeFi Awareness",
+      "level": "0",
+      "content": "The current NYALTX white paper describes a DeFi hub emphasizing project discovery, investor visibility and Web3 engagement. Its documented feature set includes dedicated crypto project profiles, market charts, social and news feeds, embedded non-custodial swap connections, advertising and premium profile opportunities, and a proposed token generator. The existing paper also describes wallet-based authentication and smart-contract transparency. These are platform descriptions from management-provided material, not independent technical audits.\n\nThis discovery capability can provide an initial user experience for a securities-oriented platform, but marketing exposure and project profiles must not be characterized as regulatory approval, a securities listing, or a guarantee of liquidity.",
+      "subsections": [
+        {
+          "id": "defi-pillars",
+          "title": "DeFi Product and Commercial Pillars",
+          "listItems": [
+            { "content": "Project discovery: issuer/project pages aggregating market data, media, social channels and announcements." },
+            { "content": "Awareness services: premium profiles, advertising placements, interviews, and investor-oriented content." },
+            { "content": "Embedded DeFi trading: integrations described with external decentralized swap protocols; swaps are distinct from trading regulated securities." },
+            { "content": "Web3 utility: wallet connection, contract identification and potential token creation tools, with feature availability subject to verification." }
+          ]
+        },
+        {
+          "id": "nyax-utility",
+          "title": "Platform Utility Token (NYAX)",
+          "content": "NYALTX also has a platform utility token, NYAX, which is used for site features such as premium visibility and promotional services. NYAX is not an ownership interest in NYALTX, Governa or any issuer, and it is kept entirely separate from tokenized securities and their trading. Nothing in this paper depends on NYAX, and no price, return or value is represented for it.",
+          "highlight": {
+            "style": "orange",
+            "content": "NYAX is a platform utility token only. It is separate from tokenized securities and is not an ownership interest in NYALTX, Governa or any issuer."
+          }
+        }
+      ]
+    },
+    {
+      "id": "tokenized-opportunity",
+      "title": "3. The Tokenized Securities Opportunity",
+      "level": "0",
+      "content": "Tokenization represents ownership or other rights in a security using a blockchain-linked record or token. The business opportunity is to improve interoperability among issuance, cap-table administration, governance, transfer restrictions, disclosures, and trading. A token is not automatically a legally valid share: rights, transfer-agent records, corporate authorization, beneficial ownership and applicable securities law must be aligned.\n\nFor institutional investors, the relevant questions are practical: Who is the issuer? What legal rights attach to the token? Who maintains the authoritative ownership record? Who can trade? How are restrictions enforced? What happens during corporate actions or trading halts? The NYALTX/Governa strategy should be evaluated against those requirements."
+    },
+    {
+      "id": "governa",
+      "title": "4. Governa: Proposed Tokenization and Governance Layer",
+      "level": "0",
+      "content": "Governa is positioned as the planned infrastructure layer supporting compliant digital securities administration. Its proposed scope includes token issuance workflows, issuer and security reference data, holder eligibility and transfer restrictions, governance and voting events, corporate actions, reporting, and integration with appropriately registered transfer agents and professional advisers.\n\nThese are product objectives; this paper does not represent that Governa currently acts as a registered transfer agent, broker-dealer, custodian or operating securities venue.",
+      "subsections": [
+        {
+          "id": "governa-architecture",
+          "title": "Proposed Functional Architecture",
+          "listItems": [
+            { "content": "Issuer onboarding and security definition: entity verification, capitalization data, rights and offering restrictions." },
+            { "content": "Tokenization workflow: approved contract templates, permission controls, issuance and burn/reconciliation events." },
+            { "content": "Securities administration: transfer-agent connectivity, authoritative ledger reconciliation, audit trails and corporate actions." },
+            { "content": "Governance: voting entitlements, notices, record dates, permissions and reporting." },
+            { "content": "Integration APIs: securely expose verified issuer and security metadata to NYALTX discovery and a future authorized trading layer." }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sec-exemption",
+      "title": "5. September 17, 2026 SEC Innovation Exemption",
+      "level": "0",
+      "content": "On September 17, 2026, the SEC issued Release No. 34-106402, a temporary, conditional order granting qualifying Tokenized Securities Venues relief from the Exchange Act definition of “exchange” for specified trading of tokenized National Market System (NMS) stocks using permissioned AMM liquidity pools. The order also grants conditional relief from the definition of “dealer” for certain qualifying liquidity providers. The exemptions are time-limited and are scheduled to expire five years after publication, absent further SEC action.\n\nThis is an exemption order—not an “Innovation Act,” blanket authorization for tokenized securities, or automatic approval of NYALTX. The relief is limited in scope and requires compliance with detailed conditions.\n\nThe exemption does not, by itself, authorize trading of private placements, all OTC securities, debt, funds or other non-NMS assets. Those products require independent legal analysis and potentially different regulatory structures.",
+      "highlight": {
+        "style": "indigo",
+        "content": "Release No. 34-106402 is a temporary, conditional TSV exemption — not automatic approval of NYALTX, and not a blanket authorization for all tokenized securities."
+      },
+      "subsections": [
+        {
+          "id": "exemption-conditions",
+          "title": "Illustrative Conditions and Boundaries",
+          "listItems": [
+            { "content": "Permissioned participant access and U.S.-person / sanctions-related requirements." },
+            { "content": "Limits on eligible stock symbols and trading volume, and publication of specified market and transaction information." },
+            { "content": "Tokenized NMS stock must convey rights and privileges equivalent to the underlying traditional shares; synthetic exposure products are outside this definition." },
+            { "content": "Issuer notice and opportunity to object when applicable, and coordination with primary-market trading halts." },
+            { "content": "Auditable public smart contracts, books and records, technology safeguards and continued anti-fraud / anti-manipulation obligations." }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "market-structure",
+      "title": "6. Proposed Market Structure and AMM Trading",
+      "level": "0",
+      "content": "NYALTX intends to assess three potentially complementary pathways: (A) partnership with an existing SEC-registered broker-dealer and, where relevant, FINRA-member ATS operator; (B) acquisition or establishment of a registered broker-dealer and possible ATS operation subject to applicable approvals and rules; and (C) development or partnership with a qualifying TSV operating under the September 17 conditional exemption. No path should be treated as automatic or interchangeable.\n\nThe proposed AMM would be permissioned, with participant eligibility checks, tokenized-stock qualification, liquidity provider controls, auditable smart contracts, market surveillance, transaction records, incident response and halt propagation. The precise architecture—custody, settlement, cash leg, stablecoin use, pricing controls and on/off-chain reconciliation—would be designed with securities counsel and authorized market participants.",
+      "cards": [
+        {
+          "title": "Path A — Partner BD / ATS",
+          "description": "Partner with an existing SEC-registered broker-dealer and, where relevant, FINRA-member ATS operator.",
+          "color": "blue"
+        },
+        {
+          "title": "Path B — Establish BD / ATS",
+          "description": "Acquire or establish a registered broker-dealer and possible ATS operation subject to approvals.",
+          "color": "indigo"
+        },
+        {
+          "title": "Path C — Qualifying TSV",
+          "description": "Develop or partner with a TSV operating under the September 17 conditional exemption.",
+          "color": "teal"
         }
       ],
       "subsections": [
         {
-          "id": "crypto-profiles",
-          "title": "Crypto Profiles",
-          "content": "Each project on NYALTX.Pro receives a dedicated profile page featuring live market charts, social links, and automated news feeds from verified sources. Projects can embed promotional videos, interviews, and announcements, creating a dynamic showcase that blends data, media, and community engagement to build credibility and visibility in the decentralized market."
-        },
-        {
-          "id": "embedded-trading",
-          "title": "Embedded Trading",
-          "content": "NYALTX.Pro integrates with leading decentralized exchanges—Uniswap, PancakeSwap, SushiSwap, and others—to enable non-custodial, on-chain swaps directly within project pages. Through this multi-swap framework, users maintain full wallet ownership while accessing cross-chain liquidity for optimal pricing and execution. The result is a unified interface that connects token discovery, analytics, and trading into a single decentralized environment."
-        },
-        {
-          "id": "token-generator",
-          "title": "Token Generator",
-          "content": "Coming Soon: NYALTX.Pro is preparing to launch a streamlined token creation system developed entirely in-house, giving creators the ability to launch new tokens quickly and transparently. Projects will soon be able to customize supply, name, symbol, and liquidity fees while deploying directly to supported networks—no coding required.  Building on this foundation, NYALTX.Pro is also developing a native multi-chain token creation API designed to extend support beyond Solana to Ethereum, BNB Chain, and additional networks. This upcoming expansion will enable seamless cross-chain deployment, enhanced liquidity options, and more flexible token economics—all within the NYALTX.Pro ecosystem."
-        }
-      ]
-    },
-    {
-      "id": "authentication-and-security",
-      "title": "Authentication & Security ",
-      "level": "0",
-      "content": "",
-      "subsections": [
-        {
-          "id": "authentication",
-          "title": "Authentication",
-          "content": "NYALTX.Pro uses non-custodial Web3 authentication, allowing users to connect through wallets such as MetaMask, Phantom, or WalletConnect. Access is verified via cryptographic signatures, not usernames or passwords, ensuring users retain full control of their assets. Smart-contract addresses are cross-checked against verified sources to prevent spoofing and maintain transparency."
-        },
-        {
-          "id": "security-and-data-integrity",
-          "title": "Security & Data Integrity",
-          "content": "The platform employs encrypted connections, smart-contract verification, and multi-chain monitoring to safeguard user activity. All interactions occur through secure blockchain protocols, ensuring transparency and immutability. No private keys or personal information are stored, maintaining full user ownership and trustless integrity."
-        },
-        {
-          "id": "compliance-and-transparency",
-          "title": "Compliance & Transparency",
-          "content": "NYALTX.Pro is built with a forward-looking approach to regulatory alignment under emerging Web3 standards. The platform maintains transaction auditability, project verification, and public reporting of listed contracts. This ensures that every project meets NYALTX.Pro’s internal standards for disclosure, legitimacy, and ethical engagement within decentralized finance."
-        }
-      ]
-    },
-    {
-      "id": "nyax-token",
-      "title": "The NYAX Token",
-      "level": "0",
-      "content": "The NYAX Token is the native utility asset of the NYALTX.Pro ecosystem, designed to power engagement, visibility, and growth across the platform. Holders can use NYAX to access premium listing features, participate in community governance, and unlock promotional and media packages that connect Web3 projects with global audiences. NYAX also serves as the conversion bridge between tokenized listings and Corporate Roadshow’s traditional investor network, aligning DeFi innovation with real-world market visibility.",
-      "subsections": [
-        {
-          "id": "payment-token",
-          "title": "Payment Token",
-          "content": "NYAX serves as the primary payment method for all platform services within the NYALTX.Pro ecosystem. Projects can use NYAX to pay for listings, promotional campaigns, and premium exposure tools—often at discounted rates compared to traditional payments. Token holders gain access to exclusive features, including enhanced placement in the discovery feed, early access to new tools, and priority consideration for media promotions through Corporate Roadshow and the Off Road with Frank Ferraro podcast network. By integrating NYAX as a native payment option, the platform creates a closed-loop economy that rewards active participation and reinforces token demand as the ecosystem grows."
-        },
-        {
-          "id": "governance",
-          "title": "Governance",
-          "content": "NYAX token holders will gain the ability to participate in platform governance, voting on key updates, feature integrations, and ecosystem priorities. This governance framework will be activated following the completion of the current offering, ensuring that decision-making evolves in alignment with both regulatory readiness and community growth. The goal is to create a balanced model where verified stakeholders help guide NYALTX.Pro’s future development while preserving transparency and accountability across the platform."
-        },
-        {
-          "id": "staking-rewards",
-          "title": "Staking & Rewards",
-          "content": "Staking features will be introduced after the current offering, following regulatory review and platform readiness. Verified users will be able to stake NYAX tokens for access to enhanced visibility, service discounts, and upcoming platform benefits—all within a compliant, transparent framework."
-        }
-      ]
-    },
-    {
-      "id": "tokenomics",
-      "title": "Tokenomics",
-      "level": "0",
-      "content": "The NYAX Token is the economic foundation of the NYALTX.Pro ecosystem, designed to align user participation with platform growth. Its model rewards engagement, visibility, and liquidity—ensuring that value flows between creators, investors, and the platform itself. Rather than existing solely as a trading instrument, NYAX functions as the fuel behind listings, promotions, and transaction activity across the network. The tokenomics framework is built for long-term sustainability, balancing supply control, utility, and future integrations",
-      "subsections": [
-        {
-          "id": "token-details",
-          "title": "Token Details",
-          "content": "",
+          "id": "transaction-lifecycle",
+          "title": "Target Transaction Lifecycle — Conceptual",
           "listItems": [
-            {
-              "content": "Token Name: New York Alt Exchange (the native token of the NYALTX platform)"
-            },
-            {
-              "content": " Symbol: NYAX Total Supply: 10,000,000,000 (10 billion) NYAX tokens."
-            },
-            {
-              "content": " Blockchain: Ethereum (ERC-20) standard."
-            },
-            {
-              "content": "Contract Address : 0x5eEd5621B92Be4473F99BaCAC77ACfA27DEB57d9"
-            }
-          ]
-        },
-        {
-          "id": "allocation",
-          "title": "Allocation",
-          "content": "NYAX Tokens are distributed to support the overall growth and sustainability of the NYALTX.Pro ecosystem. A portion is reserved for investors through the current offering or future offerings, while additional tokens are allocated to the team, advisors, marketing, liquidity, and future development. This balanced structure ensures ongoing platform support, market stability, and long-term value for all participants."
-        },
-        {
-          "id": "revenue-model",
-          "title": "Revenue Model",
-          "listItems": [
-            {
-              "content": "Platform fees from token generation and trading"
-            },
-            {
-              "content": "Premium profile upgrades and advertising"
-            },
-            {
-              "content": "Venture network event access fees"
-            }
+            { "content": "An issuer and its advisers establish legally valid securities rights and recordkeeping arrangements." },
+            { "content": "Governa or its authorized partners support token issuance and governance administration." },
+            { "content": "NYALTX publishes verified discovery and disclosure information without implying exchange listing approval." },
+            { "content": "Eligible participants access an authorized trading venue or qualifying TSV." },
+            { "content": "A permissioned AMM facilitates permitted transactions, with surveillance, records, settlement and transfer controls." }
           ]
         }
       ]
     },
     {
-      "id": "competitive-advantage",
-      "title": "Competitive Advantage",
+      "id": "business-model",
+      "title": "7. Business Model and Revenue Opportunities",
       "level": "0",
-      "highlight": {
-        "style": "indigo",
-        "content": "NYALTX combines the best of DeFi trading, social media marketing, and venture networking in one integrated platform."
-      },
+      "content": "Potential revenue streams are illustrative and contingent on product completion, customer contracts, licenses, and regulatory analysis. Transaction-based compensation, securities brokerage activity and exchange/ATS fees may require specific registration or exemptive authority. The model should not assume such revenue until counsel confirms the applicable framework.",
       "listItems": [
-        {
-          "content": "Integrated Ecosystem: Unlike competitors who focus on single features, NYALTX provides end-to-end project lifecycle support."
-        },
-        {
-          "content": "Community-First: Built-in social features and gamification drive organic engagement"
-        },
-        {
-          "content": "Real-World Connections: Bridge between digital assets and traditional venture networks"
-        }
+        { "content": "Discovery and issuer awareness: premium profiles, sponsored visibility, media and content packages." },
+        { "content": "Governa enterprise software: SaaS licensing, onboarding, governance modules, data integrations and administration services." },
+        { "content": "Issuer implementation: technical tokenization, workflow configuration and professional-service integrations where permitted." },
+        { "content": "Market infrastructure: data services, connectivity and authorized venue-related charges, if legally permissible." },
+        { "content": "Strategic partnerships: white-label technology and integration services for registered intermediaries and service providers." }
       ]
+    },
+    {
+      "id": "competitive-positioning",
+      "title": "8. Competitive Positioning",
+      "level": "0",
+      "content": "NYALTX’s proposed differentiation is a combined issuer-to-investor workflow: existing Web3 discovery, Governa’s planned securities administration, and a future compliant secondary trading interface. The thesis is integration and distribution, not an assertion that the company has already solved regulatory licensing, custody, market-making capital or institutional adoption."
     },
     {
       "id": "roadmap",
-      "title": "Roadmap",
+      "title": "9. Milestone-Based Development Roadmap",
       "level": "0",
+      "content": "Development is staged so product claims, regulatory analysis and live market activity remain clearly separated.",
       "timeline": [
         {
-          "id": "phase-1",
-          "title": "Phase 1 - Launch (2025)",
+          "id": "stage-1",
+          "title": "Stage 1 — Validate the Foundation",
+          "subtitle": "Foundation",
           "color": "cyan",
           "items": [
-            {
-              "text": "Platform launch with core features"
-            },
-            {
-              "text": "NYAX token generation and distribution"
-            },
-            {
-              "text": "Initial project onboarding"
-            }
+            { "text": "Document live NYALTX capabilities" },
+            { "text": "Confirm entity ownership and product architecture" },
+            { "text": "Prepare a technical demonstration" }
           ]
         },
         {
-          "id": "phase-2",
-          "title": "Phase 2 - Growth (2025)",
-          "color": "green",
-          "items": [
-            {
-              "text": "Token generator with fee structure"
-            },
-            {
-              "text": "Staking pools and rewards system"
-            },
-            {
-              "text": "Enhanced trading features"
-            }
-          ]
-        },
-        {
-          "id": "phase-3",
-          "title": "Phase 3 - Expansion (2026)",
+          "id": "stage-2",
+          "title": "Stage 2 — Design Governa Securities Workflows",
+          "subtitle": "Governa",
           "color": "purple",
           "items": [
-            {
-              "text": "Global venture network events"
-            },
-            {
-              "text": "Merchandise and physical products"
-            },
-            {
-              "text": "Cross-chain integration"
-            }
+            { "text": "Prototype issuer onboarding, token issuance, governance and transfer restrictions" },
+            { "text": "Design transfer-agent interfaces" },
+            { "text": "Commission smart-contract and security reviews" }
           ]
         },
         {
-          "id": "phase-4",
-          "title": "Phase 4 - Scaling (2026+)",
+          "id": "stage-3",
+          "title": "Stage 3 — Select Regulatory Pathway",
+          "subtitle": "Counsel & Partners",
+          "color": "indigo",
+          "items": [
+            { "text": "Engage securities counsel and prospective BD/ATS/TSV partners" },
+            { "text": "Produce written analysis of registrations, exemptive conditions, product scope, costs and control responsibilities" }
+          ]
+        },
+        {
+          "id": "stage-4",
+          "title": "Stage 4 — Build Permissioned Trading Pilot",
+          "subtitle": "Pilot",
+          "color": "green",
+          "items": [
+            { "text": "Develop a controlled AMM proof of concept" },
+            { "text": "Identity/eligibility checks, surveillance, halt integration, disclosure and recordkeeping" },
+            { "text": "Do not conduct live securities trading before all prerequisites are met" }
+          ]
+        },
+        {
+          "id": "stage-5",
+          "title": "Stage 5 — Institutional Commercialization",
+          "subtitle": "Scale",
           "color": "orange",
           "items": [
-            {
-              "text": "Advanced analytics and AI features"
-            },
-            {
-              "text": "Strategic partnerships and integrations"
-            },
-            {
-              "text": "Global marketing campaigns"
-            }
+            { "text": "Secure issuer and infrastructure partnerships" },
+            { "text": "Launch approved services and measure adoption and recurring revenue" },
+            { "text": "Expand only as regulatory permissions and operating capacity allow" }
           ]
         }
+      ]
+    },
+    {
+      "id": "capital-partnerships",
+      "title": "10. Strategic Capital and Partnership Priorities",
+      "level": "0",
+      "content": "NYALTX seeks discussions with registered broker-dealers, ATS operators, prospective TSV operators, transfer agents, market makers, institutional technology providers, securities counsel and strategic capital partners. A financing program would prioritize legal structuring, technical development, audits, compliance personnel, infrastructure integration, and working capital. Funding size, valuation, ownership, use-of-proceeds allocation and financial projections should be added only after management approval and diligence.",
+      "subsections": [
+        {
+          "id": "diligence-package",
+          "title": "Institutional Diligence Package to Prepare",
+          "listItems": [
+            { "content": "Corporate structure, beneficial ownership, intellectual-property ownership and Governa/NYALTX relationship." },
+            { "content": "Demonstrable platform functionality, user and usage metrics, technology architecture, code audits and security controls." },
+            { "content": "Counsel memorandum covering TSV eligibility, BD/ATS alternatives, tokenized-stock rights and transfer-agent responsibilities." },
+            { "content": "Operating budget, milestones, capital requirements, potential partners and risk management plan." }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "principal-risks",
+      "title": "11. Principal Risks",
+      "level": "0",
+      "listItems": [
+        { "content": "Regulatory risk: exemptive relief is temporary, conditional, narrow and subject to change." },
+        { "content": "Execution risk: licensing, partnerships and production technology may be delayed or unavailable." },
+        { "content": "Market risk: tokenized securities may lack issuers, investors or sustainable liquidity." },
+        { "content": "Smart-contract and cyber risk: code flaws, wallet compromises, key management failures and chain outages." },
+        { "content": "Operational risk: custody, settlement, records, trading halts, sanctions and market surveillance." },
+        { "content": "Commercial risk: revenue assumptions, customer acquisition, liquidity-provider economics and capital requirements may not be achieved." }
       ]
     },
     {
       "id": "conclusion",
-      "title": "Conclusion",
+      "title": "12. Conclusion",
       "level": "0",
-      "content": "NYALTX represents a paradigm shift in how crypto projects approach marketing, community building, and investor relations. By combining DeFi infrastructure with social engagement tools and real-world networking opportunities, we're creating a comprehensive ecosystem that serves the entire crypto project lifecycle.\n\nThe NYAX token serves as the foundation of this ecosystem, incentivizing participation, governance, and long-term platform growth. Join us in building the future of decentralized project marketing and community engagement."
+      "content": "NYALTX’s next phase is a focused capital-markets infrastructure strategy: retain the existing DeFi awareness platform, develop Governa as the proposed tokenization and governance layer, and pursue a legally supportable route to permissioned trading of eligible tokenized securities. The September 17 SEC order provides a concrete regulatory reference point for evaluating a TSV-based AMM model. The investment case depends on disciplined execution, verifiable technology, experienced regulated partners and transparent milestones—not on a claim of existing authorization.",
+      "highlight": {
+        "style": "green",
+        "content": "The case rests on disciplined execution, verifiable technology, regulated partners and transparent milestones — not on a claim of existing authorization."
+      }
+    },
+    {
+      "id": "sources",
+      "title": "Sources and Regulatory References",
+      "level": "0",
+      "listItems": [
+        { "content": "SEC, Release No. 34-106402, September 17, 2026: https://www.sec.gov/files/rules/exorders/2026/34-106402.pdf" },
+        { "content": "SEC, Innovation Exemption press release, September 17, 2026: https://www.sec.gov/newsroom/press-releases/2026-90-sec-issues-innovation-exemption-facilitate-trading-tokenized-nms-stock-request-comment" },
+        { "content": "SEC fact sheet: https://www.sec.gov/files/34-106402-fact-sheet.pdf" },
+        { "content": "Management-provided NYALTX white paper, supplied October 18, 2026. Product descriptions reflect that source and are not independently verified." }
+      ]
+    },
+    {
+      "id": "important-notice",
+      "title": "Important Notice",
+      "level": "0",
+      "content": "This paper is a strategic business and technology overview for discussion purposes only. It is not an offer to sell or solicitation to buy any security or digital asset, investment advice, a representation of regulatory approval, or a guarantee of future product availability. All proposed regulated activities are contingent on applicable law, exemptions, registrations, partner arrangements and operational readiness. Securities counsel should review before external investor distribution.",
+      "highlight": {
+        "style": "orange",
+        "content": "Not an offer, solicitation, investment advice, or representation of regulatory approval. Counsel review recommended before external investor distribution."
+      }
     },
     {
       "id": "contact",
-      "title": "Contact Information",
+      "title": "Contact",
       "level": "0",
-      "content": "For partnership opportunities, investor relations, or media inquiries, reach out to team@nyaltx.pro."
+      "content": "NYALTX.pro | Governa.pro",
+      "details": [
+        { "label": "Platform", "value": "NYALTX.pro" },
+        { "label": "Tokenization / Governance", "value": "Governa.pro" },
+        { "label": "Edition", "value": "Strategic Development Edition • October 2026" }
+      ]
     }
   ],
   "seo": {
-    "metaTitle": "NYALTX Whitepaper",
-    "metaDescription": "Explore the NYALTX whitepaper detailing our Web3 ecosystem, NYAX token utility, tokenomics, and product roadmap.",
-    "keywords": "NYALTX, NYAX token, whitepaper, DeFi ecosystem, tokenomics, roadmap, web3, "
+    "metaTitle": "NYALTX Institutional White Paper | Tokenized Securities Strategy",
+    "metaDescription": "Connecting DeFi discovery, Governa tokenization infrastructure, and regulated on-chain markets. NYALTX strategic development white paper — October 2026.",
+    "keywords": "NYALTX, Governa, tokenized securities, SEC Innovation Exemption, TSV, DeFi discovery, institutional white paper"
   }
 }
