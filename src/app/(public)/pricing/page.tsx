@@ -1,5 +1,6 @@
 import { PricingPage } from '@/components/PrigingPage';
 import { tinaClient } from '@/lib/tinaClient';
+import { tinaQueryOrJson } from '@/lib/tinaQuery';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -15,10 +16,12 @@ export const metadata: Metadata = {
 };
 
 const Pricing = async () => {
-  const tinaData = await tinaClient.queries.pricing({
-    relativePath: 'pricing.json',
-  });
-  return <PricingPage tinaData={tinaData} />;
+  const tinaData = await tinaQueryOrJson(
+    () => tinaClient.queries.pricing({ relativePath: 'pricing.json' }),
+    'pricing',
+    ['content/pricing/pricing.json', 'src/content/pricing/pricing.json'],
+  );
+  return <PricingPage tinaData={tinaData as any} />;
 };
 
 export default Pricing;

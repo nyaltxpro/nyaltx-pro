@@ -1,12 +1,18 @@
-// app/legal-advice/page.tsx
-import LegalAdviceClient from "@/page-components/LegalAdvice";
-import client from "../../../../tina/__generated__/client";
+import LegalAdviceClient from '@/page-components/LegalAdvice';
+import { tinaClient } from '@/lib/tinaClient';
+import { tinaQueryOrJson } from '@/lib/tinaQuery';
 
 export default async function LegalAdvicePage() {
-  // Fetch the legal advice page content via Tina CMS
-  const res = await client.queries.legalAdvice({
-    relativePath: "legaladvice.json", // Make sure your file matches this path
-  });
-
-  return <LegalAdviceClient {...res} />;
+  const res = await tinaQueryOrJson(
+    () =>
+      tinaClient.queries.legalAdvice({
+        relativePath: 'legaladvice.json',
+      }),
+    'legalAdvice',
+    [
+      'src/content/legaladvice/legaladvice.json',
+      'content/legaladvice/settings.json',
+    ],
+  );
+  return <LegalAdviceClient {...(res as any)} />;
 }

@@ -1,11 +1,18 @@
-// app/general-statement/page.tsx
-import GeneralStatementClient from "@/page-components/GeneralStatement";
-import client from "../../../../tina/__generated__/client";
+import GeneralStatementClient from '@/page-components/GeneralStatement';
+import { tinaClient } from '@/lib/tinaClient';
+import { tinaQueryOrJson } from '@/lib/tinaQuery';
 
 export default async function GeneralStatementPage() {
-  const res = await client.queries.generalStatement({
-    relativePath: "generalstatement.json",
-  });
-
-  return <GeneralStatementClient {...res} />;
+  const res = await tinaQueryOrJson(
+    () =>
+      tinaClient.queries.generalStatement({
+        relativePath: 'generalstatement.json',
+      }),
+    'generalStatement',
+    [
+      'src/content/generalstatement/generalstatement.json',
+      'content/generalstatement.json',
+    ],
+  );
+  return <GeneralStatementClient {...(res as any)} />;
 }

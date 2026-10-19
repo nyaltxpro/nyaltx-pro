@@ -46,7 +46,7 @@ next-env.d.ts
 # tina cms
 .tina/__generated__
 public/admin
-tina/__generated__
+tina/__generated__/.cache
 
 node_modules
 .env

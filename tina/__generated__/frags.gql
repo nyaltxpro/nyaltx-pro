@@ -1,0 +1,727 @@
+fragment GeneralStatementParts on GeneralStatement {
+  __typename
+  title
+  tagline
+  description
+  badges
+  sections {
+    __typename
+    heading
+    icon
+    subsections {
+      __typename
+      title
+      content
+    }
+    content
+    list
+  }
+}
+
+fragment AboutUsParts on AboutUs {
+  __typename
+  slug
+  meta {
+    __typename
+    title
+    description
+    lastUpdated
+    version
+  }
+  hero {
+    __typename
+    badge {
+      __typename
+      icon
+      text
+    }
+    title {
+      __typename
+      text
+      gradient
+    }
+    description
+  }
+  content {
+    __typename
+    sections {
+      __typename
+      id
+      icon
+      title
+      type
+      paragraphs
+      contactInfo {
+        __typename
+        label
+        value
+      }
+    }
+  }
+  seo {
+    __typename
+    metaTitle
+    metaDescription
+    keywords
+    canonical
+  }
+}
+
+fragment LegalAdviceParts on LegalAdvice {
+  __typename
+  slug
+  meta {
+    __typename
+    title
+    description
+    lastUpdated
+    version
+  }
+  hero {
+    __typename
+    badge {
+      __typename
+      icon
+      text
+    }
+    title {
+      __typename
+      text
+      gradient
+    }
+    description
+  }
+  content {
+    __typename
+    sections {
+      __typename
+      id
+      type
+      paragraphs
+    }
+  }
+  seo {
+    __typename
+    metaTitle
+    metaDescription
+    keywords
+    canonical
+  }
+}
+
+fragment PrivacyPolicyParts on PrivacyPolicy {
+  __typename
+  slug
+  title
+  description
+  hero {
+    __typename
+    title
+    subtitle
+    backgroundImage
+  }
+  content
+  seo {
+    __typename
+    metaTitle
+    metaDescription
+    keywords
+    ogImage
+  }
+}
+
+fragment VenturegroupParts on Venturegroup {
+  __typename
+  slug
+  title
+  description
+  hero {
+    __typename
+    title
+    subtitle
+    backgroundImage
+  }
+  content
+  teamSection {
+    __typename
+    title
+    subtitle
+    members {
+      __typename
+      name
+      role
+      bio
+      photo
+      linkedin
+      twitter
+    }
+  }
+  sections {
+    __typename
+    title
+    description
+    items {
+      __typename
+      title
+      description
+    }
+  }
+  seo {
+    __typename
+    metaTitle
+    metaDescription
+    keywords
+    ogImage
+  }
+}
+
+fragment PodcastParts on Podcast {
+  __typename
+  slug
+  title
+  description
+  hero {
+    __typename
+    badge
+    title
+    subtitle
+    backgroundImage
+    host {
+      __typename
+      name
+      title
+      bio
+      photo
+      twitter
+      linkedin
+    }
+  }
+  schedule {
+    __typename
+    title
+    subtitle
+    episodes {
+      __typename
+      datetime
+      duration
+      topic
+      description
+      guest {
+        __typename
+        name
+        title
+        bio
+        photo
+        twitter
+        linkedin
+      }
+      resources {
+        __typename
+        label
+        url
+      }
+    }
+  }
+  pastEpisodes {
+    __typename
+    title
+    subtitle
+    episodes {
+      __typename
+      topic
+      summary
+      guest {
+        __typename
+        name
+        title
+        photo
+      }
+      recordingUrl
+    }
+  }
+  cta {
+    __typename
+    title
+    description
+    buttonLabel
+    buttonLink
+  }
+  seo {
+    __typename
+    metaTitle
+    metaDescription
+    keywords
+    ogImage
+  }
+}
+
+fragment TradevideosParts on Tradevideos {
+  __typename
+  title
+  videoId
+  description
+  featured
+  order
+  publishedAt
+}
+
+fragment PricingParts on Pricing {
+  __typename
+  hero {
+    __typename
+    title
+    description
+  }
+  nyaltxPro {
+    __typename
+    sectionTitle
+    badge
+    title
+    description
+    price
+    features {
+      __typename
+      text
+    }
+    bannerTitle
+    bannerDescription
+    proMessage
+  }
+  raceToLiberty {
+    __typename
+    sectionTitle
+    tiers {
+      __typename
+      id
+      name
+      description
+      priceUSD
+      isPopular
+      popularBadge
+      features {
+        __typename
+        text
+      }
+      buttonText
+      buttonSubtext
+    }
+  }
+  boostPacks {
+    __typename
+    sectionTitle
+    description
+    subDescription
+    packs {
+      __typename
+      id
+      name
+      points
+      priceUSD
+      description
+      icon
+      isPopular
+      popularBadge
+      buttonText
+      buttonSubtext
+    }
+  }
+  footer {
+    __typename
+    paymentMethods
+    technicalNote
+    networkFees
+    paypalNote
+  }
+}
+
+fragment WhitepaperParts on Whitepaper {
+  __typename
+  slug
+  title
+  description
+  hero {
+    __typename
+    title
+    subtitle
+    tagline
+  }
+  toc {
+    __typename
+    id
+    title
+    level
+  }
+  sections {
+    __typename
+    id
+    title
+    level
+    content
+    highlight {
+      __typename
+      style
+      content
+    }
+    listItems {
+      __typename
+      content
+    }
+    stats {
+      __typename
+      value
+      description
+      color
+    }
+    cards {
+      __typename
+      title
+      description
+      color
+    }
+    details {
+      __typename
+      label
+      value
+    }
+    subsections {
+      __typename
+      id
+      title
+      content
+      highlight {
+        __typename
+        style
+        content
+      }
+      listItems {
+        __typename
+        content
+      }
+    }
+    timeline {
+      __typename
+      id
+      title
+      subtitle
+      color
+      items {
+        __typename
+        text
+      }
+    }
+  }
+  seo {
+    __typename
+    metaTitle
+    metaDescription
+    keywords
+    ogImage
+  }
+}
+
+fragment GovernaParts on Governa {
+  __typename
+  slug
+  title
+  description
+  nav {
+    __typename
+    brandText
+    brandHref
+    ctaText
+    ctaHref
+  }
+  hero {
+    __typename
+    eyebrow
+    heading
+    highlight
+    description
+    primaryCta {
+      __typename
+      label
+      href
+    }
+    secondaryCta {
+      __typename
+      label
+      href
+    }
+    floatingCards {
+      __typename
+      image
+      alt
+      width
+      height
+    }
+  }
+  comparisonSection {
+    __typename
+    title
+    withGovernance {
+      __typename
+      title
+      icon
+      benefits {
+        __typename
+        text
+      }
+    }
+    withoutGovernance {
+      __typename
+      title
+      icon
+      benefits {
+        __typename
+        text
+      }
+    }
+  }
+  ctaSection {
+    __typename
+    title
+    subtitle
+    primaryCta {
+      __typename
+      label
+      href
+    }
+    secondaryCta {
+      __typename
+      label
+      href
+    }
+  }
+  seo {
+    __typename
+    metaTitle
+    metaDescription
+    twitterTitle
+    twitterDescription
+    ogImage
+  }
+}
+
+fragment NavigationParts on Navigation {
+  __typename
+  brand {
+    __typename
+    label
+    href
+  }
+  primaryLinks {
+    __typename
+    label
+    href
+    enabled
+  }
+  dropdownMenus {
+    __typename
+    label
+    enabled
+    links {
+      __typename
+      label
+      href
+      enabled
+    }
+  }
+}
+
+fragment LandingParts on Landing {
+  __typename
+  hero {
+    __typename
+    title
+    subtitle
+    ctaText
+    ctaLink
+    backgroundImage
+  }
+  features {
+    __typename
+    title
+    subtitle
+    items {
+      __typename
+      title
+      description
+      icon
+      image
+    }
+  }
+  stats {
+    __typename
+    title
+    items {
+      __typename
+      value
+      label
+      description
+    }
+  }
+  testimonials {
+    __typename
+    title
+    items {
+      __typename
+      quote
+      author
+      role
+      avatar
+    }
+  }
+  cta {
+    __typename
+    title
+    subtitle
+    primaryButtonText
+    primaryButtonLink
+    secondaryButtonText
+    secondaryButtonLink
+    backgroundImage
+  }
+  howItWorks {
+    __typename
+    title
+    subtitle
+    steps {
+      __typename
+      step
+      title
+      description
+      icon
+      image
+    }
+  }
+  partnerships {
+    __typename
+    title
+    subtitle
+    partners {
+      __typename
+      name
+      logo
+      description
+    }
+  }
+  roadmap {
+    __typename
+    title
+    subtitle
+    quarters {
+      __typename
+      period
+      title
+      status
+      features
+    }
+  }
+}
+
+fragment FooterParts on Footer {
+  __typename
+  branding {
+    __typename
+    title
+    subtitle
+    description
+    logo
+  }
+  links {
+    __typename
+    sections {
+      __typename
+      title
+      items {
+        __typename
+        label
+        url
+        external
+      }
+    }
+  }
+  social {
+    __typename
+    title
+    description
+    platforms {
+      __typename
+      twitter
+      discord
+      telegram
+      youtube
+      linkedin
+      github
+    }
+  }
+  newsletter {
+    __typename
+    title
+    description
+    placeholder
+    buttonText
+  }
+  legal {
+    __typename
+    copyright
+    disclaimer
+    links {
+      __typename
+      label
+      url
+    }
+  }
+}
+
+fragment ContactParts on Contact {
+  __typename
+  hero {
+    __typename
+    title
+    subtitle
+  }
+  contactInfo {
+    __typename
+    email
+    phone
+    address
+    businessHours
+  }
+  form {
+    __typename
+    title
+    description
+    submitText
+  }
+}
+
+fragment TeamParts on Team {
+  __typename
+  hero {
+    __typename
+    title
+    subtitle
+    backgroundImage
+  }
+  members {
+    __typename
+    name
+    role
+    description
+    image
+    socials {
+      __typename
+      twitter
+      linkedin
+      telegram
+    }
+  }
+  seo {
+    __typename
+    metaTitle
+    metaDescription
+    keywords
+    ogImage
+  }
+}

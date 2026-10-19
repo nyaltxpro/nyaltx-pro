@@ -1,5 +1,6 @@
 import { fetchBuzzsproutEpisodes, type PodcastRssEpisode } from '@/lib/podcastRss';
 import { tinaClient } from '@/lib/tinaClient';
+import { tinaQueryOrJson } from '@/lib/tinaQuery';
 import PodcastPage from '@/page-components/PodcastPage';
 import type { Metadata } from 'next';
 
@@ -16,9 +17,11 @@ export const metadata: Metadata = {
 };
 
 const Podcast = async () => {
-  const tinaData = await tinaClient.queries.podcast({
-    relativePath: 'podcast.json',
-  });
+  const tinaData = await tinaQueryOrJson(
+    () => tinaClient.queries.podcast({ relativePath: 'podcast.json' }),
+    'podcast',
+    ['src/content/podcast/podcast.json'],
+  );
 
   let rssEpisodes: PodcastRssEpisode[] = [];
   let rssPodcastImage: string | null = null;
@@ -27,13 +30,17 @@ const Podcast = async () => {
     const rssResult = await fetchBuzzsproutEpisodes();
     rssEpisodes = rssResult.episodes;
     rssPodcastImage = rssResult.podcastImage;
-    console.log('RSS Episodes:', rssEpisodes);
-
   } catch (error) {
     console.error('Failed to fetch Buzzsprout RSS feed:', error);
   }
 
-  return <PodcastPage tinaData={tinaData} rssEpisodes={rssEpisodes} rssPodcastImage={rssPodcastImage} />;
+  return (
+    <PodcastPage
+      tinaData={tinaData as any}
+      rssEpisodes={rssEpisodes}
+      rssPodcastImage={rssPodcastImage}
+    />
+  );
 };
 
 export default Podcast;
