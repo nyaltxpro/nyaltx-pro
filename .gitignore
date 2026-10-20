@@ -45,7 +45,8 @@ next-env.d.ts
 
 # tina cms
 .tina/__generated__
-public/admin
+# Keep public/admin committed so /admin/index.html works on Vercel
+# when Tina build is skipped during deploy.
 tina/__generated__/.cache
 
 node_modules
