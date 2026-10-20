@@ -64,7 +64,7 @@ export default function LandingPage() {
         <div className="min-h-screen">
             {/* 1) Hero */}
             <motion.section
-                className="relative overflow-hidden"
+                className="relative overflow-hidden min-h-[70vh] md:min-h-[78vh] flex flex-col"
                 variants={container}
                 initial="hidden"
                 animate="show"
@@ -76,16 +76,16 @@ export default function LandingPage() {
                     <div className="absolute bottom-0 left-10 h-64 w-64 rounded-full bg-fuchsia-500/10 blur-3xl" />
                     <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent_0,transparent_95%,rgba(255,255,255,0.04)_95%,rgba(255,255,255,0.04)_100%),linear-gradient(to_bottom,transparent_0,transparent_95%,rgba(255,255,255,0.04)_95%,rgba(255,255,255,0.04)_100%)] bg-[length:22px_22px] opacity-30" />
                 </div>
-                <div className="mx-auto max-w-7xl px-6 py-20 md:py-28">
-                    <div className="grid grid-cols-1 md:grid-cols-2 items-center gap-10">
-                        <motion.div className="max-w-3xl" variants={fadeUp}>
-                            <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-indigo-400">
+                <div className="mx-auto flex w-full max-w-7xl flex-1 items-center px-6 py-24 md:py-32 lg:py-36">
+                    <div className="grid w-full grid-cols-1 md:grid-cols-2 items-center gap-12 md:gap-14">
+                        <motion.div className="max-w-3xl overflow-visible" variants={fadeUp}>
+                            <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight leading-[1.2] md:leading-[1.18] pb-2 bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-indigo-400">
                                 {landingContent?.hero?.title || 'Discover. Track. Grow your token with NYALTX'}
                             </h1>
-                            <p className="mt-4 text-gray-300/90 max-w-2xl">
+                            <p className="mt-6 text-base md:text-lg text-gray-300/90 max-w-2xl leading-relaxed">
                                 {landingContent?.hero?.subtitle || 'Real-time insights, curated listings, and promotional placements to help your project reach more holders across chains.'}
                             </p>
-                            <div className="mt-6 flex flex-wrap gap-3">
+                            <div className="mt-8 flex flex-wrap gap-3">
                                 <Link
                                     href={landingContent?.hero?.ctaLink || '/dashboard'}
                                     className="rounded-full bg-cyan-500/90 px-5 py-2.5 font-medium text-white hover:bg-cyan-400 transition-colors"
