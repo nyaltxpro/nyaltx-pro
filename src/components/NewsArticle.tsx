@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { FaClock, FaUser, FaEye, FaTags, FaArrowLeft, FaShare, FaTwitter, FaLinkedin, FaCopy } from 'react-icons/fa';
+import { toReliableIpfsUrl } from '@/utils/ipfsUpload';
 
 interface NewsData {
   _id: string;
@@ -39,22 +40,7 @@ function NewsArticle({ article }: NewsArticleProps) {
     return String(article.content);
   }, [article.content]);
 
-  // Helper function to convert Pinata gateway URLs to ipfs.io
-  const convertToWorkingIPFSUrl = (url: string): string => {
-    if (url && url.includes('gateway.pinata.cloud/ipfs/')) {
-      const hash = url.split('gateway.pinata.cloud/ipfs/')[1];
-      return `https://ipfs.io/ipfs/${hash}`;
-    }
-    return url;
-  };
-
-  // Convert featured image URL if it's a Pinata gateway URL
-  const workingImageUrl = article.featuredImage ? convertToWorkingIPFSUrl(article.featuredImage) : '';
-
-  // Debug logging
-  console.log('Article data:', article);
-  console.log('Original featured image URL:', article.featuredImage);
-  console.log('Working featured image URL:', workingImageUrl);
+  const workingImageUrl = article.featuredImage ? toReliableIpfsUrl(article.featuredImage) : '';
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -200,7 +186,7 @@ function NewsArticle({ article }: NewsArticleProps) {
                   objectFit: 'cover',
                   objectPosition: 'center'
                 }}
-                unoptimized={workingImageUrl.includes('ipfs.io')}
+                unoptimized={/\/ipfs\//.test(workingImageUrl)}
                 onError={(e) => {
                   console.error('Next.js Image failed to load:', workingImageUrl);
                   setImageError(true);

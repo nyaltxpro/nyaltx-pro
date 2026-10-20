@@ -1,7 +1,7 @@
 {
-  "name": "NYALTX - Crypto Token Tracker",
+  "name": "NYALTX — Digital Markets & Tokenized Securities",
   "short_name": "NYALTX",
-  "description": "Track meme tokens, view real-time charts, participate in Race to Liberty gamification, and discover trending cryptocurrencies across multiple blockchains.",
+  "description": "Discover digital markets, tokenized securities, and project visibility on NYALTX — connecting DeFi discovery with tokenized stock market data.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#000000",

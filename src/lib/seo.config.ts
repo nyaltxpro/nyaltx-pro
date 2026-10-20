@@ -3,24 +3,24 @@ import { DefaultSeoProps } from 'next-seo';
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://nyaltx.pro';
 
 export const defaultSEO: DefaultSeoProps = {
-  title: 'NYALTX | Crypto Token Tracker & DeFi Platform',
+  title: 'NYALTX | Digital Markets & Tokenized Securities Discovery Platform',
   description:
-    'Track meme tokens, view real-time charts, participate in Race to Liberty gamification, and discover trending cryptocurrencies across multiple blockchains.',
+    'Discover digital markets, tokenized securities, and project visibility on NYALTX — connecting DeFi discovery with tokenized stock market data.',
   canonical: baseUrl,
   openGraph: {
     type: 'website',
     locale: 'en_US',
     url: baseUrl,
     siteName: 'NYALTX',
-    title: 'NYALTX | Crypto Token Tracker & DeFi Platform',
+    title: 'NYALTX | Digital Markets & Tokenized Securities Discovery Platform',
     description:
-      'Track meme tokens, view real-time charts, participate in Race to Liberty gamification, and discover trending cryptocurrencies across multiple blockchains.',
+      'Discover digital markets, tokenized securities, and project visibility on NYALTX — connecting DeFi discovery with tokenized stock market data.',
     images: [
       {
         url: `${baseUrl}/og-image.png`,
         width: 1200,
         height: 630,
-        alt: 'NYALTX - Crypto Token Tracker',
+        alt: 'NYALTX — Digital Markets & Tokenized Securities',
         type: 'image/png',
       },
       {
@@ -45,7 +45,7 @@ export const defaultSEO: DefaultSeoProps = {
     {
       name: 'keywords',
       content:
-        'crypto, cryptocurrency, token tracker, DeFi, meme tokens, blockchain, Ethereum, trading, gamification, Race to Liberty, NYAX',
+        'NYALTX, digital markets, tokenized securities, xStocks, DeFi discovery, capital markets, blockchain, Governa, NYAX',
     },
     {
       name: 'author',
@@ -141,9 +141,9 @@ export const defaultSEO: DefaultSeoProps = {
 // Page-specific SEO configurations
 export const pageSEO = {
   home: {
-    title: 'NYALTX | Crypto Token Tracker & DeFi Platform',
+    title: 'NYALTX | Digital Markets & Tokenized Securities Discovery Platform',
     description:
-      'Discover, track, and grow your crypto tokens with NYALTX. Real-time insights, curated listings, and promotional placements across multiple blockchains.',
+      'Discover digital markets, tokenized securities, and project visibility on NYALTX — connecting DeFi discovery with tokenized stock market data.',
     canonical: baseUrl,
   },
 
@@ -226,7 +226,7 @@ export const organizationJsonLd = {
   url: baseUrl,
   logo: `${baseUrl}/logo.png`,
   description:
-    'Crypto token tracker and DeFi platform for discovering, tracking, and promoting cryptocurrency tokens.',
+    'Digital markets and tokenized securities discovery platform connecting DeFi visibility with capital-markets infrastructure.',
   sameAs: ['https://twitter.com/nyaltx', 'https://t.me/nyaltx', 'https://discord.gg/nyaltx'],
   contactPoint: {
     '@type': 'ContactPoint',
@@ -241,7 +241,7 @@ export const websiteJsonLd = {
   '@type': 'WebSite',
   name: 'NYALTX',
   url: baseUrl,
-  description: 'Crypto token tracker and DeFi platform',
+  description: 'Digital markets and tokenized securities discovery platform',
   potentialAction: {
     '@type': 'SearchAction',
     target: `${baseUrl}/dashboard/trade?search={search_term_string}`,

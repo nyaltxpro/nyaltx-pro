@@ -12,11 +12,11 @@ export interface LandingPageSeo {
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.nyaltx.pro';
 
 const FALLBACK_SEO: LandingPageSeo = {
-  title: 'NYALTX | Crypto Token Tracker & DeFi Platform',
+  title: 'NYALTX | Digital Markets & Tokenized Securities Discovery Platform',
   description:
-    'Discover, track, and grow your crypto tokens with NYALTX. Real-time insights, curated listings, and gamified promotion across multiple blockchains.',
+    'Discover digital markets, tokenized securities, and project visibility on NYALTX — connecting DeFi discovery with tokenized stock market data.',
   keywords:
-    'crypto, cryptocurrency, token tracker, DeFi, meme tokens, blockchain, Ethereum, trading, gamification, Race to Liberty, NYAX',
+    'NYALTX, digital markets, tokenized securities, xStocks, DeFi discovery, capital markets, blockchain, Governa, NYAX',
   ogImage: `${baseUrl}/og-image.png`,
   canonical: baseUrl,
 };

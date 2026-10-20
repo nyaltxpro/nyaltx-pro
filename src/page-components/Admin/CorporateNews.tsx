@@ -7,6 +7,7 @@ import type { QuillOptions } from 'quill';
 import 'quill/dist/quill.snow.css';
 import React, { useEffect, useRef, useState } from 'react';
 import { FaClock, FaEdit, FaEye, FaNewspaper, FaPlus, FaSpinner, FaTags, FaTrash, FaUpload, FaUser } from 'react-icons/fa';
+import { toReliableIpfsUrl } from '@/utils/ipfsUpload';
 
 const AdminCorporateNewsClient = dynamic(() => Promise.resolve(AdminCorporateNewsComponent), {
     ssr: false,
@@ -105,15 +106,6 @@ function AdminCorporateNewsComponent() {
     const quillChangeHandlerRef = useRef<((delta: unknown, oldDelta: unknown, source: string) => void) | null>(null);
     const suppressQuillChangeRef = useRef(false);
     const [isQuillLoading, setIsQuillLoading] = useState(false);
-
-    // Helper function to convert Pinata gateway URLs to ipfs.io
-    const convertToWorkingIPFSUrl = (url: string): string => {
-        if (url.includes('gateway.pinata.cloud/ipfs/')) {
-            const hash = url.split('gateway.pinata.cloud/ipfs/')[1];
-            return `https://ipfs.io/ipfs/${hash}`;
-        }
-        return url;
-    };
 
     useEffect(() => {
         const teardown = () => {
@@ -383,7 +375,7 @@ function AdminCorporateNewsComponent() {
             }
 
             const data = await response.json();
-            const ipfsUrl = `https://ipfs.io/ipfs/${data.hash}`;
+            const ipfsUrl = data.url || `https://gateway.pinata.cloud/ipfs/${data.hash}`;
 
             // Update the featured image field with IPFS URL
             setNewsForm(prev => ({ ...prev, featuredImage: ipfsUrl }));

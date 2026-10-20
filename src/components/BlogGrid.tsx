@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import type { SerializedBlogPost } from "@/lib/blogServer";
+import { toReliableIpfsUrl } from "@/utils/ipfsUpload";
 
 interface BlogResponse {
   posts: SerializedBlogPost[];
@@ -21,17 +22,6 @@ const formatPublishedDate = (dateString?: string) => {
     console.warn("Failed to format blog date", error);
     return dateString;
   }
-};
-
-const convertToWorkingIPFSUrl = (url?: string | null) => {
-  if (!url) return undefined;
-
-  if (url.includes("gateway.pinata.cloud/ipfs/")) {
-    const hash = url.split("gateway.pinata.cloud/ipfs/")[1];
-    return `https://ipfs.io/ipfs/${hash}`;
-  }
-
-  return url;
 };
 
 const BlogGrid = () => {
@@ -143,7 +133,7 @@ const BlogGrid = () => {
       <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
         {filteredPosts.map((post) => {
           const publishedAt = formatPublishedDate(post.publishedAt ?? undefined);
-          const image = convertToWorkingIPFSUrl(post.featuredImage);
+          const image = toReliableIpfsUrl(post.featuredImage);
 
           return (
             <article
@@ -158,7 +148,7 @@ const BlogGrid = () => {
                       alt={post.title ?? "Blog post"}
                       fill
                       className="object-cover transition-transform duration-500 group-hover:scale-105"
-                      unoptimized={image.includes("ipfs.io")}
+                      unoptimized={/\/ipfs\//.test(image)}
                     />
                     <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
                   </>

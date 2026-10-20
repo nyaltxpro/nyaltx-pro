@@ -14,9 +14,9 @@ export const metadata: Metadata = {
   alternates: {
     canonical: baseUrl,
   },
-  title: 'NYALTX | Crypto Token Tracker & DeFi Platform',
-  description: 'Track meme tokens, view real-time charts, participate in Race to Liberty gamification, and discover trending cryptocurrencies across multiple blockchains.',
-  keywords: 'crypto, cryptocurrency, token tracker, DeFi, meme tokens, blockchain, Ethereum, trading, gamification, Race to Liberty, NYAX',
+  title: 'NYALTX | Digital Markets & Tokenized Securities Discovery Platform',
+  description: 'Discover digital markets, tokenized securities, and project visibility on NYALTX — connecting DeFi discovery with tokenized stock market data.',
+  keywords: 'NYALTX, digital markets, tokenized securities, xStocks, DeFi discovery, capital markets, blockchain, Governa, NYAX',
   authors: [{ name: 'NYALTX Team' }],
   creator: 'NYALTX Team',
   publisher: 'NYALTX',
@@ -31,8 +31,8 @@ export const metadata: Metadata = {
     locale: 'en_US',
     url: baseUrl,
     siteName: 'NYALTX',
-    title: 'NYALTX | Crypto Token Tracker & DeFi Platform',
-    description: 'Track meme tokens, view real-time charts, participate in Race to Liberty gamification, and discover trending cryptocurrencies across multiple blockchains.',
+    title: 'NYALTX | Digital Markets & Tokenized Securities Discovery Platform',
+    description: 'Discover digital markets, tokenized securities, and project visibility on NYALTX — connecting DeFi discovery with tokenized stock market data.',
     images: [
       {
         url: `${baseUrl}/og-image.png`,
@@ -96,7 +96,7 @@ export default function RootLayout({
                 width: 512,
                 height: 512,
               },
-              description: 'Crypto token tracker and DeFi platform for discovering, tracking, and promoting cryptocurrency tokens.',
+              description: 'Digital markets and tokenized securities discovery platform connecting DeFi visibility with capital-markets infrastructure.',
               sameAs: [
                 'https://twitter.com/nyaltx',
                 'https://t.me/nyaltx',
@@ -199,8 +199,8 @@ export default function RootLayout({
               '@type': 'WebPage',
               '@id': `${baseUrl}/#webpage`,
               url: baseUrl,
-              name: 'NYALTX | Crypto Token Tracker & DeFi Platform',
-              description: 'Track meme tokens, view real-time charts, participate in Race to Liberty gamification, and discover trending cryptocurrencies across multiple blockchains.',
+              name: 'NYALTX | Digital Markets & Tokenized Securities Discovery Platform',
+              description: 'Discover digital markets, tokenized securities, and project visibility on NYALTX — connecting DeFi discovery with tokenized stock market data.',
               isPartOf: {
                 '@id': `${baseUrl}/#website`,
               },

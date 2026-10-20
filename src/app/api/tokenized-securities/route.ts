@@ -193,9 +193,77 @@ function matchesStatus(asset: XStockAsset, status: string) {
   return true;
 }
 
+/** Popular underlyings for the dashboard ticker */
+const TICKER_UNDERLYINGS = [
+  'AAPL',
+  'TSLA',
+  'NVDA',
+  'MSFT',
+  'GOOGL',
+  'AMZN',
+  'META',
+  'NFLX',
+  'AMD',
+  'COIN',
+  'MSTR',
+  'SPY',
+  'QQQ',
+  'BABA',
+  'SHOP',
+  'PLTR',
+  'INTC',
+  'CRM',
+  'UBER',
+  'HOOD',
+  'ARM',
+  'AVGO',
+  'ORCL',
+  'JPM',
+  'V',
+];
+
+function pickTickerAssets(assets: XStockAsset[], limit = 24): XStockAsset[] {
+  const picked: XStockAsset[] = [];
+  const used = new Set<string>();
+
+  for (const underlying of TICKER_UNDERLYINGS) {
+    if (picked.length >= limit) break;
+    const match = assets.find(asset => {
+      if (used.has(asset.id)) return false;
+      const u = (asset.underlyingSymbol || asset.underlying?.symbol || '').toUpperCase();
+      const sym = asset.symbol.toUpperCase();
+      return (
+        u === underlying ||
+        sym === `${underlying}X` ||
+        sym === underlying ||
+        sym.startsWith(`${underlying}X`)
+      );
+    });
+    if (match) {
+      used.add(match.id);
+      picked.push(match);
+    }
+  }
+
+  // Fill remaining slots with open (or any) assets that still need pricing
+  if (picked.length < limit) {
+    const fillers = assets.filter(
+      a => !used.has(a.id) && !a.isTradingHalted && Boolean(a.trading?.openNow),
+    );
+    for (const asset of fillers) {
+      if (picked.length >= limit) break;
+      used.add(asset.id);
+      picked.push(asset);
+    }
+  }
+
+  return picked;
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
+    const mode = (searchParams.get('mode') || '').toLowerCase();
     const q = (searchParams.get('q') || '').trim().toLowerCase();
     const status = (searchParams.get('status') || 'all').toLowerCase();
     const force = searchParams.get('refresh') === '1';
@@ -206,6 +274,51 @@ export async function GET(request: NextRequest) {
     );
 
     const assets = await listAllAssets(force);
+
+    // Dashboard ticker: curated popular tokenized stocks with live quotes
+    if (mode === 'ticker') {
+      const tickerLimit = Math.min(30, Math.max(8, Number(searchParams.get('limit') || 24) || 24));
+      const pageAssets = pickTickerAssets(assets, tickerLimit);
+      const prices = await mapWithConcurrency(pageAssets, 10, asset =>
+        fetchPrice(asset.symbol, force),
+      );
+      const securities = pageAssets
+        .map((asset, i) => toRow(asset, prices[i]))
+        .filter(row => row.tokenizedPrice !== null);
+
+      // If few priced from curated list, append any other cached-priced open assets
+      if (securities.length < 8) {
+        const extras = assets
+          .filter(a => !pageAssets.some(p => p.id === a.id))
+          .slice(0, 40);
+        const extraPrices = await mapWithConcurrency(extras, 10, asset =>
+          fetchPrice(asset.symbol, false),
+        );
+        for (let i = 0; i < extras.length && securities.length < tickerLimit; i++) {
+          if (extraPrices[i] !== null) {
+            securities.push(toRow(extras[i], extraPrices[i]));
+          }
+        }
+      }
+
+      return NextResponse.json(
+        {
+          updatedAt: new Date().toISOString(),
+          source: 'xStocks',
+          mode: 'ticker',
+          count: securities.length,
+          pricedOnPage: securities.length,
+          securities,
+          syncIntervalSeconds: 120,
+        },
+        {
+          headers: {
+            'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
+          },
+        },
+      );
+    }
+
     const filtered = assets.filter(
       asset => matchesQuery(asset, q) && matchesStatus(asset, status),
     );

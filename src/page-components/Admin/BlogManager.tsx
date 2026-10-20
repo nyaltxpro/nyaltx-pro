@@ -416,7 +416,7 @@ const AdminBlogManagerComponent = () => {
       }
 
       const data = await response.json();
-      const ipfsUrl = `https://ipfs.io/ipfs/${data.hash}`;
+      const ipfsUrl = data.url || `https://gateway.pinata.cloud/ipfs/${data.hash}`;
       setForm((prev) => ({ ...prev, featuredImage: ipfsUrl }));
       setSelectedFile(null);
       const element = document.getElementById('blog-ipfs-file') as HTMLInputElement | null;

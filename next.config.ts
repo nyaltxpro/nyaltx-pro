@@ -91,6 +91,7 @@ const nextConfig: NextConfig = {
       "cryptologos.cc",
       "ipfs.io",
       "gateway.ipfs.io",
+      "gateway.pinata.cloud",
       "cloudflare-ipfs.com",
       "dweb.link",
       "assets.coingecko.com",
@@ -129,6 +130,11 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "gateway.ipfs.io",
         pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "gateway.pinata.cloud",
+        pathname: "/ipfs/**",
       },
       {
         protocol: "https",

@@ -34,7 +34,7 @@ const pinataProvider: IPFSProvider = {
       return {
         success: true,
         ipfsHash: data.IpfsHash,
-        ipfsUrl: `https://ipfs.io/ipfs/${data.IpfsHash}`,
+        ipfsUrl: `https://gateway.pinata.cloud/ipfs/${data.IpfsHash}`,
       };
     } catch (error) {
       console.error('Pinata upload error:', error);
@@ -67,7 +67,7 @@ const web3StorageProvider: IPFSProvider = {
       return {
         success: true,
         ipfsHash: data.cid,
-        ipfsUrl: `https://ipfs.io/ipfs/${data.cid}`,
+        ipfsUrl: `https://gateway.pinata.cloud/ipfs/${data.cid}`,
       };
     } catch (error) {
       console.error('Web3.Storage upload error:', error);
@@ -100,7 +100,7 @@ const ipfsIoProvider: IPFSProvider = {
       return {
         success: true,
         ipfsHash: data.Hash,
-        ipfsUrl: `https://ipfs.io/ipfs/${data.Hash}`,
+        ipfsUrl: `https://gateway.pinata.cloud/ipfs/${data.Hash}`,
       };
     } catch (error) {
       console.error('IPFS.io upload error:', error);
@@ -287,8 +287,11 @@ export const uploadToIPFS = async (
   };
 };
 
+/** Prefer Pinata — public ipfs.io is rate-limited / unreliable for images */
+export const IPFS_GATEWAY = 'https://gateway.pinata.cloud';
+
 // Utility to get IPFS URL from hash
-export const getIPFSUrl = (hash: string, gateway = 'https://ipfs.io'): string => {
+export const getIPFSUrl = (hash: string, gateway = IPFS_GATEWAY): string => {
   if (hash.startsWith('http')) return hash; // Already a URL
   return `${gateway}/ipfs/${hash}`;
 };
@@ -300,16 +303,18 @@ export const extractIPFSHash = (url: string): string | null => {
   return match ? match[1] : null;
 };
 
-// Utility to convert any IPFS URL to use ipfs.io gateway
-export const normalizeIPFSUrl = (url: string): string => {
-  if (!url) return url;
-  
-  // Extract IPFS hash from any gateway URL
+/**
+ * Rewrite any IPFS gateway URL (ipfs.io, dweb.link, etc.) to a working Pinata gateway.
+ * Non-IPFS URLs are returned unchanged.
+ */
+export const toReliableIpfsUrl = (url?: string | null): string => {
+  if (!url) return '';
   const hash = extractIPFSHash(url);
   if (hash) {
-    return `https://ipfs.io/ipfs/${hash}`;
+    return `${IPFS_GATEWAY}/ipfs/${hash}`;
   }
-  
-  // If it's already an ipfs.io URL or not an IPFS URL, return as-is
   return url;
 };
+
+/** @deprecated Use toReliableIpfsUrl — ipfs.io is no longer reliable */
+export const normalizeIPFSUrl = (url: string): string => toReliableIpfsUrl(url);

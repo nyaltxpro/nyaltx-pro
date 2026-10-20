@@ -2,15 +2,15 @@ import LandingPage from '@/page-components/LandingPage';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'NYALTX.pro – Token Profiles & Project Visibility',
+  title: 'NYALTX | Digital Markets & Tokenized Securities Discovery Platform',
   description:
-    'Discover token profiles, project details, and updates in one place. NYALTX.pro helps teams share information and connect with their community in a simple, organized way.',
+    'Discover digital markets, tokenized securities, and project visibility on NYALTX — connecting DeFi discovery with tokenized stock market data.',
   keywords:
-    'crypto, cryptocurrency, token tracker, DeFi, meme tokens, blockchain, Ethereum, trading, gamification, Race to Liberty, NYAX',
+    'NYALTX, digital markets, tokenized securities, xStocks, DeFi discovery, capital markets, blockchain, Governa, NYAX',
   openGraph: {
-    title: 'NYALTX.pro – Token Profiles & Project Visibility',
+    title: 'NYALTX | Digital Markets & Tokenized Securities Discovery Platform',
     description:
-      'Discover token profiles, project details, and updates in one place. NYALTX.pro helps teams share information and connect with their community in a simple, organized way.',
+      'Discover digital markets, tokenized securities, and project visibility on NYALTX — connecting DeFi discovery with tokenized stock market data.',
     type: 'website',
     url: 'https://www.nyaltx.pro',
     siteName: 'NYALTX',
@@ -25,11 +25,12 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'NYALTX.pro – Token Profiles & Project Visibility',
-    description: 'Discover token profiles, project details, and updates in one place.',
+    title: 'NYALTX | Digital Markets & Tokenized Securities Discovery Platform',
+    description:
+      'Discover digital markets, tokenized securities, and project visibility on NYALTX.',
     images: ['https://www.nyaltx.pro/og-image.png'],
   },
-}
+};
 
 export const revalidate = 300;
 

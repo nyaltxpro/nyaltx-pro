@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { FaClock, FaUser, FaEye, FaTags, FaArrowRight } from 'react-icons/fa';
+import { toReliableIpfsUrl } from '@/utils/ipfsUpload';
 
 interface NewsArticle {
   _id: string;
@@ -34,15 +35,6 @@ function NewsGrid() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pagination, setPagination] = useState<NewsResponse['pagination'] | null>(null);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
-
-  // Helper function to convert Pinata gateway URLs to ipfs.io
-  const convertToWorkingIPFSUrl = (url: string): string => {
-    if (url && url.includes('gateway.pinata.cloud/ipfs/')) {
-      const hash = url.split('gateway.pinata.cloud/ipfs/')[1];
-      return `https://ipfs.io/ipfs/${hash}`;
-    }
-    return url;
-  };
 
   useEffect(() => {
     loadNews();
@@ -200,13 +192,13 @@ function NewsGrid() {
             <div className="relative h-48 overflow-hidden bg-gray-800/50">
               {article.featuredImage ? (
                 <Image
-                  src={convertToWorkingIPFSUrl(article.featuredImage)}
+                  src={toReliableIpfsUrl(article.featuredImage)}
                   alt={article.title}
                   fill
                   className="object-cover transition-transform duration-500 group-hover:scale-110"
-                  unoptimized={convertToWorkingIPFSUrl(article.featuredImage).includes('ipfs.io')}
+                  unoptimized={/\/ipfs\//.test(toReliableIpfsUrl(article.featuredImage))}
                   onError={(e) => {
-                    console.error('News card image failed to load:', convertToWorkingIPFSUrl(article.featuredImage));
+                    console.error('News card image failed to load:', toReliableIpfsUrl(article.featuredImage));
                     const target = e.target as HTMLImageElement;
                     target.style.display = 'none';
                   }}

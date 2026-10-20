@@ -2,6 +2,7 @@
 
 import { ChevronLeftIcon, ChevronRightIcon, ExternalLinkIcon, MagnifyingGlassIcon, ReloadIcon } from '@radix-ui/react-icons';
 import Image from 'next/image';
+import { useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 
 type SecurityRow = {
@@ -79,12 +80,14 @@ function getPageNumbers(current: number, total: number): Array<number | '…'> {
 }
 
 export default function TokenizedSecurities() {
+  const searchParams = useSearchParams();
+  const initialQ = (searchParams.get('q') || '').trim();
   const [rows, setRows] = useState<SecurityRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [updatedAt, setUpdatedAt] = useState<string | null>(null);
-  const [queryInput, setQueryInput] = useState('');
-  const [query, setQuery] = useState('');
+  const [queryInput, setQueryInput] = useState(initialQ);
+  const [query, setQuery] = useState(initialQ);
   const [statusFilter, setStatusFilter] = useState<'all' | 'open' | 'halted'>('all');
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);

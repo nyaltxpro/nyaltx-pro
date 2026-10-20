@@ -14,6 +14,7 @@ import {
 } from 'react-icons/fa';
 import RichTextRenderer from '@/components/TinaRichText';
 import type { SerializedBlogPost } from '@/lib/blogServer';
+import { toReliableIpfsUrl } from '@/utils/ipfsUpload';
 
 interface BlogArticleProps {
   post: SerializedBlogPost;
@@ -34,20 +35,11 @@ const formatPublishedDateTime = (dateString?: string) => {
   }
 };
 
-const convertToWorkingIPFSUrl = (url?: string | null) => {
-  if (!url) return undefined;
-  if (url.includes('gateway.pinata.cloud/ipfs/')) {
-    const hash = url.split('gateway.pinata.cloud/ipfs/')[1];
-    return `https://ipfs.io/ipfs/${hash}`;
-  }
-  return url;
-};
-
 const BlogArticle = ({ post }: BlogArticleProps) => {
   const [copied, setCopied] = useState(false);
   const shareUrl = useMemo(() => (typeof window !== 'undefined' ? window.location.href : ''), []);
 
-  const workingImageUrl = useMemo(() => convertToWorkingIPFSUrl(post.featuredImage), [post.featuredImage]);
+  const workingImageUrl = useMemo(() => toReliableIpfsUrl(post.featuredImage) || undefined, [post.featuredImage]);
   const published = formatPublishedDateTime(post.publishedAt ?? undefined);
   const readingTime = useMemo(() => {
     if (post.readingTime) return post.readingTime;
@@ -181,7 +173,7 @@ const BlogArticle = ({ post }: BlogArticleProps) => {
               alt={post.title ?? 'Blog featured image'}
               fill
               className="object-cover"
-              unoptimized={workingImageUrl.includes('ipfs.io')}
+              unoptimized={Boolean(workingImageUrl && /\/ipfs\//.test(workingImageUrl))}
               priority
             />
             <div className="absolute inset-0 bg-linear-to-t from-black/50 via-transparent to-transparent" />
