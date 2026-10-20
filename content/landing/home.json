@@ -1,18 +1,18 @@
 {
   "hero": {
-    "title": "Discover. Track. Grow your token with NYALTX",
-    "subtitle": "Real-time insights, curated listings, and promotional placements to help your project reach more holders across chains.",
+    "title": "Discover. Track. Explore the Future of Digital Markets.",
+    "subtitle": "New York Alt Exchange brings together digital assets, blockchain innovation, and tokenized securities market intelligence in one platform.",
     "ctaText": "Explore Dashboard",
     "ctaLink": "/dashboard",
-    "backgroundImage": "/hero 1.png"
+    "backgroundImage": "/New York Token Exchange Skyline.png"
   },
   "features": {
     "title": "Why Choose NYALTX?",
-    "subtitle": "Built for traders, by traders. Our platform combines cutting-edge technology with user-friendly design to deliver the ultimate DeFi experience.",
+    "subtitle": "Our platform combines cutting-edge technology with user-friendly design to deliver the ultimate DeFi experience.",
     "items": [
       {
         "title": "Multi-Chain Trading",
-        "description": "Trade seamlessly across Ethereum, BSC, Polygon, Arbitrum, Optimism, Solana, and more. One platform, unlimited possibilities.",
+        "description": "Swap seamlessly across Ethereum, BSC, Polygon, Arbitrum, Optimism, Solana, and more. One platform, unlimited possibilities.",
         "icon": "🌐",
         "image": "/images/features/multi-chain.jpg"
       },
