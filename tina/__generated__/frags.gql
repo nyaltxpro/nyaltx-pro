@@ -271,7 +271,6 @@ fragment PricingParts on Pricing {
     __typename
     title
     description
-    backgroundImage
   }
   nyaltxPro {
     __typename

@@ -865,7 +865,6 @@ type TradevideosConnection implements Connection {
 type PricingHero {
   title: String!
   description: String!
-  backgroundImage: String
 }
 
 type PricingNyaltxProFeatures {
@@ -947,7 +946,6 @@ type Pricing implements Node & Document {
 input PricingHeroFilter {
   title: StringFilter
   description: StringFilter
-  backgroundImage: ImageFilter
 }
 
 input PricingNyaltxProFeaturesFilter {
@@ -2400,7 +2398,6 @@ input TradevideosMutation {
 input PricingHeroMutation {
   title: String
   description: String
-  backgroundImage: String
 }
 
 input PricingNyaltxProFeaturesMutation {

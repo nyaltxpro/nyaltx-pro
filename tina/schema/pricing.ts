@@ -26,12 +26,6 @@ export const pricing: Collection = {
             component: "textarea",
           },
         },
-        {
-          type: "image",
-          name: "backgroundImage",
-          label: "Hero Image",
-          description: "Image shown in the pricing page hero section",
-        },
       ],
     },
     {
@@ -84,8 +78,8 @@ export const pricing: Collection = {
         {
           type: "image",
           name: "bannerImage",
-          label: "Banner Image",
-          description: "Race to Liberty banner image next to NyaltxPro",
+          label: "Race to Liberty Banner Image",
+          description: "Image shown on the Race to Liberty card (Statue of Liberty campaign banner)",
         },
         {
           type: "string",
