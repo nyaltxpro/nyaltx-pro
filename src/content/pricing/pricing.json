@@ -1,7 +1,8 @@
 {
   "hero": {
     "title": "Pricing",
-    "description": "Start with **NyaltxPro** to unlock your project profile and media. Then upgrade to the **Race to Liberty** campaign for broader visibility."
+    "description": "Start with **NyaltxPro** to unlock your project profile and media. Then upgrade to the **Race to Liberty** campaign for broader visibility.",
+    "image": "/banner23.png"
   },
   "nyaltxPro": {
     "sectionTitle": "NyaltxPro",
@@ -9,6 +10,7 @@
     "title": "NyaltxPro Membership",
     "description": "Unlock your project profile on NYALTX.",
     "price": 199,
+    "bannerImage": "/banner23.png",
     "features": [
       {
         "text": "Dedicated project profile page"

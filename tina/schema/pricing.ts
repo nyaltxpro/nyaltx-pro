@@ -26,6 +26,11 @@ export const pricing: Collection = {
             component: "textarea",
           },
         },
+        {
+          type: "image",
+          name: "image",
+          label: "Hero Image",
+        },
       ],
     },
     {
@@ -74,6 +79,11 @@ export const pricing: Collection = {
               label: "Feature Text",
             },
           ],
+        },
+        {
+          type: "image",
+          name: "bannerImage",
+          label: "Banner Image",
         },
         {
           type: "string",

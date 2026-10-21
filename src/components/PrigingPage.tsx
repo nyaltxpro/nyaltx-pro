@@ -306,20 +306,41 @@ export const PricingPage = ({ tinaData }: any) => {
             <div className="relative">
                 <div className="max-w-7xl mx-auto px-4 md:px-6 py-10">
                     {/* Hero Section */}
-                    <div className="flex items-start justify-between gap-4 mb-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center mb-10">
                         <div>
-                            <h1 className="text-2xl md:text-7xl font-semibold tracking-tight bg-clip-text my-6 p-3 text-transparent bg-white" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                            <div className="flex items-center gap-3 mb-2">
+                                {chain?.name && (
+                                    <span className="text-xs px-3 py-2 rounded-full border border-cyan-500/30 bg-cyan-500/10 text-cyan-300 font-medium backdrop-blur-sm">
+                                        {chain.name}
+                                    </span>
+                                )}
+                            </div>
+                            <h1 className="text-2xl md:text-7xl font-semibold tracking-tight bg-clip-text my-6 p-3 text-transparent bg-white leading-[1.15]" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                                 {content?.hero?.title}
                             </h1>
-                            <p className="text-gray-300 mt-4 max-w-2xl text-sm md:text-lg leading-relaxed" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }} dangerouslySetInnerHTML={{ __html: content?.hero?.description.replace(/\*\*(.*?)\*\*/g, '<strong class="text-cyan-400">$1</strong>') }} />
+                            <p
+                                className="text-gray-300 mt-4 max-w-2xl text-sm md:text-lg leading-relaxed"
+                                style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+                                dangerouslySetInnerHTML={{
+                                    __html: (content?.hero?.description || '').replace(
+                                        /\*\*(.*?)\*\*/g,
+                                        '<strong class="text-cyan-400">$1</strong>',
+                                    ),
+                                }}
+                            />
                         </div>
-                        <div className="flex items-center gap-3">
-                            {chain?.name && (
-                                <span className="text-xs px-3 py-2 rounded-full border border-cyan-500/30 bg-cyan-500/10 text-cyan-300 font-medium backdrop-blur-sm">
-                                    {chain.name}
-                                </span>
-                            )}
-                        </div>
+                        {(content?.hero?.image || content?.nyaltxPro?.bannerImage) && (
+                            <div className="relative mx-auto w-full max-w-xl aspect-[4/3] rounded-2xl overflow-hidden border border-white/10 bg-gray-800/20">
+                                <Image
+                                    src={content?.hero?.image || content?.nyaltxPro?.bannerImage || '/banner23.png'}
+                                    alt={content?.hero?.title || 'Pricing'}
+                                    fill
+                                    className="object-contain p-2"
+                                    sizes="(max-width: 1024px) 100vw, 560px"
+                                    priority
+                                />
+                            </div>
+                        )}
                     </div>
 
                     {/* NyaltxPro Section */}
@@ -411,8 +432,14 @@ export const PricingPage = ({ tinaData }: any) => {
                             </div>
 
                             {/* Banner */}
-                            <div className="relative border border-white/10 rounded-2xl overflow-hidden bg-gray-800/20 backdrop-blur-sm hover:border-indigo-500/30 transition-all duration-500">
-                                <Image src="/banner23.png" alt="Race to Liberty" fill className="object-contain opacity-90" />
+                            <div className="relative min-h-[400px] border border-white/10 rounded-2xl overflow-hidden bg-gray-800/20 backdrop-blur-sm hover:border-indigo-500/30 transition-all duration-500">
+                                <Image
+                                    src={content?.nyaltxPro?.bannerImage || content?.hero?.image || '/banner23.png'}
+                                    alt={content?.nyaltxPro?.bannerTitle || 'Race to Liberty'}
+                                    fill
+                                    className="object-contain opacity-90"
+                                    sizes="(max-width: 768px) 100vw, 50vw"
+                                />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                                 <div className="absolute bottom-6 left-6 right-6">
                                     <div className="text-white text-2xl font-bold mb-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
