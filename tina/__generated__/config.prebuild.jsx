@@ -1155,6 +1155,11 @@ var pricing = {
           ui: {
             component: "textarea"
           }
+        },
+        {
+          type: "image",
+          name: "image",
+          label: "Hero Image"
         }
       ]
     },
@@ -1204,6 +1209,11 @@ var pricing = {
               label: "Feature Text"
             }
           ]
+        },
+        {
+          type: "image",
+          name: "bannerImage",
+          label: "Banner Image"
         },
         {
           type: "string",

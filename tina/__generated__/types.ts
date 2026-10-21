@@ -1211,6 +1211,7 @@ export type PricingHero = {
   __typename?: 'PricingHero';
   title: Scalars['String']['output'];
   description: Scalars['String']['output'];
+  image?: Maybe<Scalars['String']['output']>;
 };
 
 export type PricingNyaltxProFeatures = {
@@ -1226,6 +1227,7 @@ export type PricingNyaltxPro = {
   description: Scalars['String']['output'];
   price: Scalars['Float']['output'];
   features?: Maybe<Array<Maybe<PricingNyaltxProFeatures>>>;
+  bannerImage?: Maybe<Scalars['String']['output']>;
   bannerTitle?: Maybe<Scalars['String']['output']>;
   bannerDescription?: Maybe<Scalars['String']['output']>;
   proMessage?: Maybe<Scalars['String']['output']>;
@@ -1300,6 +1302,7 @@ export type Pricing = Node & Document & {
 export type PricingHeroFilter = {
   title?: InputMaybe<StringFilter>;
   description?: InputMaybe<StringFilter>;
+  image?: InputMaybe<ImageFilter>;
 };
 
 export type PricingNyaltxProFeaturesFilter = {
@@ -1313,6 +1316,7 @@ export type PricingNyaltxProFilter = {
   description?: InputMaybe<StringFilter>;
   price?: InputMaybe<NumberFilter>;
   features?: InputMaybe<PricingNyaltxProFeaturesFilter>;
+  bannerImage?: InputMaybe<ImageFilter>;
   bannerTitle?: InputMaybe<StringFilter>;
   bannerDescription?: InputMaybe<StringFilter>;
   proMessage?: InputMaybe<StringFilter>;
@@ -3050,6 +3054,7 @@ export type TradevideosMutation = {
 export type PricingHeroMutation = {
   title?: InputMaybe<Scalars['String']['input']>;
   description?: InputMaybe<Scalars['String']['input']>;
+  image?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type PricingNyaltxProFeaturesMutation = {
@@ -3063,6 +3068,7 @@ export type PricingNyaltxProMutation = {
   description?: InputMaybe<Scalars['String']['input']>;
   price?: InputMaybe<Scalars['Float']['input']>;
   features?: InputMaybe<Array<InputMaybe<PricingNyaltxProFeaturesMutation>>>;
+  bannerImage?: InputMaybe<Scalars['String']['input']>;
   bannerTitle?: InputMaybe<Scalars['String']['input']>;
   bannerDescription?: InputMaybe<Scalars['String']['input']>;
   proMessage?: InputMaybe<Scalars['String']['input']>;
@@ -3585,7 +3591,7 @@ export type PodcastPartsFragment = { __typename: 'Podcast', slug: string, title:
 
 export type TradevideosPartsFragment = { __typename: 'Tradevideos', title: string, videoId: string, description?: string | null, featured?: boolean | null, order?: number | null, publishedAt?: string | null };
 
-export type PricingPartsFragment = { __typename: 'Pricing', hero?: { __typename: 'PricingHero', title: string, description: string } | null, nyaltxPro?: { __typename: 'PricingNyaltxPro', sectionTitle: string, badge?: string | null, title: string, description: string, price: number, bannerTitle?: string | null, bannerDescription?: string | null, proMessage?: string | null, features?: Array<{ __typename: 'PricingNyaltxProFeatures', text?: string | null } | null> | null } | null, raceToLiberty?: { __typename: 'PricingRaceToLiberty', sectionTitle: string, tiers?: Array<{ __typename: 'PricingRaceToLibertyTiers', id: string, name: string, description: string, priceUSD: number, isPopular?: boolean | null, popularBadge?: string | null, buttonText: string, buttonSubtext?: string | null, features?: Array<{ __typename: 'PricingRaceToLibertyTiersFeatures', text?: string | null } | null> | null } | null> | null } | null, boostPacks?: { __typename: 'PricingBoostPacks', sectionTitle: string, description: string, subDescription?: string | null, packs?: Array<{ __typename: 'PricingBoostPacksPacks', id: string, name: string, points?: number | null, priceUSD: number, description: string, icon?: string | null, isPopular?: boolean | null, popularBadge?: string | null, buttonText?: string | null, buttonSubtext?: string | null } | null> | null } | null, footer?: { __typename: 'PricingFooter', paymentMethods?: string | null, technicalNote?: string | null, networkFees?: string | null, paypalNote?: string | null } | null };
+export type PricingPartsFragment = { __typename: 'Pricing', hero?: { __typename: 'PricingHero', title: string, description: string, image?: string | null } | null, nyaltxPro?: { __typename: 'PricingNyaltxPro', sectionTitle: string, badge?: string | null, title: string, description: string, price: number, bannerImage?: string | null, bannerTitle?: string | null, bannerDescription?: string | null, proMessage?: string | null, features?: Array<{ __typename: 'PricingNyaltxProFeatures', text?: string | null } | null> | null } | null, raceToLiberty?: { __typename: 'PricingRaceToLiberty', sectionTitle: string, tiers?: Array<{ __typename: 'PricingRaceToLibertyTiers', id: string, name: string, description: string, priceUSD: number, isPopular?: boolean | null, popularBadge?: string | null, buttonText: string, buttonSubtext?: string | null, features?: Array<{ __typename: 'PricingRaceToLibertyTiersFeatures', text?: string | null } | null> | null } | null> | null } | null, boostPacks?: { __typename: 'PricingBoostPacks', sectionTitle: string, description: string, subDescription?: string | null, packs?: Array<{ __typename: 'PricingBoostPacksPacks', id: string, name: string, points?: number | null, priceUSD: number, description: string, icon?: string | null, isPopular?: boolean | null, popularBadge?: string | null, buttonText?: string | null, buttonSubtext?: string | null } | null> | null } | null, footer?: { __typename: 'PricingFooter', paymentMethods?: string | null, technicalNote?: string | null, networkFees?: string | null, paypalNote?: string | null } | null };
 
 export type WhitepaperPartsFragment = { __typename: 'Whitepaper', slug: string, title: string, description?: string | null, hero?: { __typename: 'WhitepaperHero', title: string, subtitle?: string | null, tagline?: string | null } | null, toc?: Array<{ __typename: 'WhitepaperToc', id: string, title: string, level?: string | null } | null> | null, sections?: Array<{ __typename: 'WhitepaperSections', id: string, title: string, level?: string | null, content?: string | null, highlight?: { __typename: 'WhitepaperSectionsHighlight', style?: string | null, content?: string | null } | null, listItems?: Array<{ __typename: 'WhitepaperSectionsListItems', content?: string | null } | null> | null, stats?: Array<{ __typename: 'WhitepaperSectionsStats', value: string, description?: string | null, color?: string | null } | null> | null, cards?: Array<{ __typename: 'WhitepaperSectionsCards', title: string, description?: string | null, color?: string | null } | null> | null, details?: Array<{ __typename: 'WhitepaperSectionsDetails', label: string, value: string } | null> | null, subsections?: Array<{ __typename: 'WhitepaperSectionsSubsections', id: string, title: string, content?: string | null, highlight?: { __typename: 'WhitepaperSectionsSubsectionsHighlight', style?: string | null, content?: string | null } | null, listItems?: Array<{ __typename: 'WhitepaperSectionsSubsectionsListItems', content?: string | null } | null> | null } | null> | null, timeline?: Array<{ __typename: 'WhitepaperSectionsTimeline', id: string, title: string, subtitle?: string | null, color?: string | null, items?: Array<{ __typename: 'WhitepaperSectionsTimelineItems', text?: string | null } | null> | null } | null> | null } | null> | null, seo?: { __typename: 'WhitepaperSeo', metaTitle?: string | null, metaDescription?: string | null, keywords?: string | null, ogImage?: string | null } | null };
 
@@ -3739,7 +3745,7 @@ export type PricingQueryVariables = Exact<{
 }>;
 
 
-export type PricingQuery = { __typename?: 'Query', pricing: { __typename: 'Pricing', id: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string }, hero?: { __typename: 'PricingHero', title: string, description: string } | null, nyaltxPro?: { __typename: 'PricingNyaltxPro', sectionTitle: string, badge?: string | null, title: string, description: string, price: number, bannerTitle?: string | null, bannerDescription?: string | null, proMessage?: string | null, features?: Array<{ __typename: 'PricingNyaltxProFeatures', text?: string | null } | null> | null } | null, raceToLiberty?: { __typename: 'PricingRaceToLiberty', sectionTitle: string, tiers?: Array<{ __typename: 'PricingRaceToLibertyTiers', id: string, name: string, description: string, priceUSD: number, isPopular?: boolean | null, popularBadge?: string | null, buttonText: string, buttonSubtext?: string | null, features?: Array<{ __typename: 'PricingRaceToLibertyTiersFeatures', text?: string | null } | null> | null } | null> | null } | null, boostPacks?: { __typename: 'PricingBoostPacks', sectionTitle: string, description: string, subDescription?: string | null, packs?: Array<{ __typename: 'PricingBoostPacksPacks', id: string, name: string, points?: number | null, priceUSD: number, description: string, icon?: string | null, isPopular?: boolean | null, popularBadge?: string | null, buttonText?: string | null, buttonSubtext?: string | null } | null> | null } | null, footer?: { __typename: 'PricingFooter', paymentMethods?: string | null, technicalNote?: string | null, networkFees?: string | null, paypalNote?: string | null } | null } };
+export type PricingQuery = { __typename?: 'Query', pricing: { __typename: 'Pricing', id: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string }, hero?: { __typename: 'PricingHero', title: string, description: string, image?: string | null } | null, nyaltxPro?: { __typename: 'PricingNyaltxPro', sectionTitle: string, badge?: string | null, title: string, description: string, price: number, bannerImage?: string | null, bannerTitle?: string | null, bannerDescription?: string | null, proMessage?: string | null, features?: Array<{ __typename: 'PricingNyaltxProFeatures', text?: string | null } | null> | null } | null, raceToLiberty?: { __typename: 'PricingRaceToLiberty', sectionTitle: string, tiers?: Array<{ __typename: 'PricingRaceToLibertyTiers', id: string, name: string, description: string, priceUSD: number, isPopular?: boolean | null, popularBadge?: string | null, buttonText: string, buttonSubtext?: string | null, features?: Array<{ __typename: 'PricingRaceToLibertyTiersFeatures', text?: string | null } | null> | null } | null> | null } | null, boostPacks?: { __typename: 'PricingBoostPacks', sectionTitle: string, description: string, subDescription?: string | null, packs?: Array<{ __typename: 'PricingBoostPacksPacks', id: string, name: string, points?: number | null, priceUSD: number, description: string, icon?: string | null, isPopular?: boolean | null, popularBadge?: string | null, buttonText?: string | null, buttonSubtext?: string | null } | null> | null } | null, footer?: { __typename: 'PricingFooter', paymentMethods?: string | null, technicalNote?: string | null, networkFees?: string | null, paypalNote?: string | null } | null } };
 
 export type PricingConnectionQueryVariables = Exact<{
   before?: InputMaybe<Scalars['String']['input']>;
@@ -3751,7 +3757,7 @@ export type PricingConnectionQueryVariables = Exact<{
 }>;
 
 
-export type PricingConnectionQuery = { __typename?: 'Query', pricingConnection: { __typename?: 'PricingConnection', totalCount: number, pageInfo: { __typename?: 'PageInfo', hasPreviousPage: boolean, hasNextPage: boolean, startCursor: string, endCursor: string }, edges?: Array<{ __typename?: 'PricingConnectionEdges', cursor: string, node?: { __typename: 'Pricing', id: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string }, hero?: { __typename: 'PricingHero', title: string, description: string } | null, nyaltxPro?: { __typename: 'PricingNyaltxPro', sectionTitle: string, badge?: string | null, title: string, description: string, price: number, bannerTitle?: string | null, bannerDescription?: string | null, proMessage?: string | null, features?: Array<{ __typename: 'PricingNyaltxProFeatures', text?: string | null } | null> | null } | null, raceToLiberty?: { __typename: 'PricingRaceToLiberty', sectionTitle: string, tiers?: Array<{ __typename: 'PricingRaceToLibertyTiers', id: string, name: string, description: string, priceUSD: number, isPopular?: boolean | null, popularBadge?: string | null, buttonText: string, buttonSubtext?: string | null, features?: Array<{ __typename: 'PricingRaceToLibertyTiersFeatures', text?: string | null } | null> | null } | null> | null } | null, boostPacks?: { __typename: 'PricingBoostPacks', sectionTitle: string, description: string, subDescription?: string | null, packs?: Array<{ __typename: 'PricingBoostPacksPacks', id: string, name: string, points?: number | null, priceUSD: number, description: string, icon?: string | null, isPopular?: boolean | null, popularBadge?: string | null, buttonText?: string | null, buttonSubtext?: string | null } | null> | null } | null, footer?: { __typename: 'PricingFooter', paymentMethods?: string | null, technicalNote?: string | null, networkFees?: string | null, paypalNote?: string | null } | null } | null } | null> | null } };
+export type PricingConnectionQuery = { __typename?: 'Query', pricingConnection: { __typename?: 'PricingConnection', totalCount: number, pageInfo: { __typename?: 'PageInfo', hasPreviousPage: boolean, hasNextPage: boolean, startCursor: string, endCursor: string }, edges?: Array<{ __typename?: 'PricingConnectionEdges', cursor: string, node?: { __typename: 'Pricing', id: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string }, hero?: { __typename: 'PricingHero', title: string, description: string, image?: string | null } | null, nyaltxPro?: { __typename: 'PricingNyaltxPro', sectionTitle: string, badge?: string | null, title: string, description: string, price: number, bannerImage?: string | null, bannerTitle?: string | null, bannerDescription?: string | null, proMessage?: string | null, features?: Array<{ __typename: 'PricingNyaltxProFeatures', text?: string | null } | null> | null } | null, raceToLiberty?: { __typename: 'PricingRaceToLiberty', sectionTitle: string, tiers?: Array<{ __typename: 'PricingRaceToLibertyTiers', id: string, name: string, description: string, priceUSD: number, isPopular?: boolean | null, popularBadge?: string | null, buttonText: string, buttonSubtext?: string | null, features?: Array<{ __typename: 'PricingRaceToLibertyTiersFeatures', text?: string | null } | null> | null } | null> | null } | null, boostPacks?: { __typename: 'PricingBoostPacks', sectionTitle: string, description: string, subDescription?: string | null, packs?: Array<{ __typename: 'PricingBoostPacksPacks', id: string, name: string, points?: number | null, priceUSD: number, description: string, icon?: string | null, isPopular?: boolean | null, popularBadge?: string | null, buttonText?: string | null, buttonSubtext?: string | null } | null> | null } | null, footer?: { __typename: 'PricingFooter', paymentMethods?: string | null, technicalNote?: string | null, networkFees?: string | null, paypalNote?: string | null } | null } | null } | null> | null } };
 
 export type WhitepaperQueryVariables = Exact<{
   relativePath: Scalars['String']['input'];
@@ -4167,6 +4173,7 @@ export const PricingPartsFragmentDoc = gql`
     __typename
     title
     description
+    image
   }
   nyaltxPro {
     __typename
@@ -4179,6 +4186,7 @@ export const PricingPartsFragmentDoc = gql`
       __typename
       text
     }
+    bannerImage
     bannerTitle
     bannerDescription
     proMessage

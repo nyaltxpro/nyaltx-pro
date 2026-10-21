@@ -271,6 +271,7 @@ fragment PricingParts on Pricing {
     __typename
     title
     description
+    image
   }
   nyaltxPro {
     __typename
@@ -283,6 +284,7 @@ fragment PricingParts on Pricing {
       __typename
       text
     }
+    bannerImage
     bannerTitle
     bannerDescription
     proMessage

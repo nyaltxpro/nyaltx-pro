@@ -865,6 +865,7 @@ type TradevideosConnection implements Connection {
 type PricingHero {
   title: String!
   description: String!
+  image: String
 }
 
 type PricingNyaltxProFeatures {
@@ -878,6 +879,7 @@ type PricingNyaltxPro {
   description: String!
   price: Float!
   features: [PricingNyaltxProFeatures]
+  bannerImage: String
   bannerTitle: String
   bannerDescription: String
   proMessage: String
@@ -945,6 +947,7 @@ type Pricing implements Node & Document {
 input PricingHeroFilter {
   title: StringFilter
   description: StringFilter
+  image: ImageFilter
 }
 
 input PricingNyaltxProFeaturesFilter {
@@ -958,6 +961,7 @@ input PricingNyaltxProFilter {
   description: StringFilter
   price: NumberFilter
   features: PricingNyaltxProFeaturesFilter
+  bannerImage: ImageFilter
   bannerTitle: StringFilter
   bannerDescription: StringFilter
   proMessage: StringFilter
@@ -2396,6 +2400,7 @@ input TradevideosMutation {
 input PricingHeroMutation {
   title: String
   description: String
+  image: String
 }
 
 input PricingNyaltxProFeaturesMutation {
@@ -2409,6 +2414,7 @@ input PricingNyaltxProMutation {
   description: String
   price: Float
   features: [PricingNyaltxProFeaturesMutation]
+  bannerImage: String
   bannerTitle: String
   bannerDescription: String
   proMessage: String
