@@ -139,8 +139,6 @@ export default function StockProfile({ symbol }: StockProfileProps) {
       <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-[1fr_2fr_1fr] lg:items-stretch">
         <div className="flex flex-col gap-4">
           <WidgetCard
-            className="flex-1"
-            style={{ minHeight: 480 }}
             bodyClassName="h-[440px]"
             title="Symbol info"
           >
@@ -158,8 +156,6 @@ export default function StockProfile({ symbol }: StockProfileProps) {
             />
           </WidgetCard>
           <WidgetCard
-            className="flex-1"
-            style={{ minHeight: 480 }}
             bodyClassName="h-[440px]"
             title="Market overview"
           >
@@ -208,14 +204,12 @@ export default function StockProfile({ symbol }: StockProfileProps) {
 
         <div className="flex flex-col gap-4">
           <WidgetCard
-            className="flex-1"
-            style={{ minHeight: 640 }}
-            bodyClassName="h-[640px]"
+            bodyClassName="h-[440px]"
             title="Advanced chart"
           >
             <TradingViewEmbed
               fill
-              heightPx={640}
+              heightPx={440}
               scriptSrc="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js"
               config={{
                 symbol: tvSymbol,
@@ -231,10 +225,10 @@ export default function StockProfile({ symbol }: StockProfileProps) {
               }}
             />
           </WidgetCard>
-          <WidgetCard bodyClassName="h-[320px]" title="Top stories">
+          <WidgetCard bodyClassName="h-[440px]" title="Top stories">
             <TradingViewEmbed
               fill
-              heightPx={320}
+              heightPx={440}
               scriptSrc="https://s3.tradingview.com/external-embedding/embed-widget-timeline.js"
               config={{
                 feedMode: 'symbol',
