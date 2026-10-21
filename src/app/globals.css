@@ -494,3 +494,33 @@ body {
 .hide-scrollbar::-webkit-scrollbar {
   display: none; /* Chrome, Safari and Opera */
 }
+
+/* Whitepaper docs: match site body / footer background */
+.whitepaper-shell {
+  --color-fd-background: transparent;
+  --color-fd-foreground: #ffffff;
+  --color-fd-muted: rgba(17, 17, 17, 0.85);
+  --color-fd-muted-foreground: #a0a9b8;
+  --color-fd-popover: #0a0a0a;
+  --color-fd-popover-foreground: #ffffff;
+  --color-fd-card: rgba(10, 10, 10, 0.72);
+  --color-fd-card-foreground: #ffffff;
+  --color-fd-border: rgba(255, 255, 255, 0.1);
+  --color-fd-primary: #00b8d8;
+  --color-fd-primary-foreground: #ffffff;
+  --color-fd-secondary: rgba(26, 26, 26, 0.9);
+  --color-fd-secondary-foreground: #ffffff;
+  --color-fd-accent: rgba(26, 26, 26, 0.9);
+  --color-fd-accent-foreground: #ffffff;
+  --color-fd-ring: rgba(0, 184, 216, 0.5);
+
+  color: #ffffff;
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0f0f0f 100%);
+}
+
+.whitepaper-shell aside,
+.whitepaper-shell header {
+  border-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(10, 10, 10, 0.55) !important;
+  backdrop-filter: blur(12px);
+}

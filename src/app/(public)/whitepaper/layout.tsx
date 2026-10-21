@@ -19,7 +19,7 @@ export default function WhitepaperLayout({ children }: { children: ReactNode }) 
         },
       }}
     >
-      <div className="min-h-screen bg-fd-background text-fd-foreground">
+      <div className="whitepaper-shell min-h-screen text-white">
         <DocsLayout tree={whitepaperSource.getPageTree()} {...whitepaperBaseOptions()}>
           {children}
         </DocsLayout>
