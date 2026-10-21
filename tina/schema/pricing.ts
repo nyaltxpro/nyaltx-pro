@@ -28,8 +28,9 @@ export const pricing: Collection = {
         },
         {
           type: "image",
-          name: "image",
+          name: "backgroundImage",
           label: "Hero Image",
+          description: "Image shown in the pricing page hero section",
         },
       ],
     },
@@ -84,6 +85,7 @@ export const pricing: Collection = {
           type: "image",
           name: "bannerImage",
           label: "Banner Image",
+          description: "Race to Liberty banner image next to NyaltxPro",
         },
         {
           type: "string",

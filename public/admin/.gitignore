@@ -1,2 +1,2 @@
-# Track TinaCMS production admin assets in git.
-# (Tina CLI used to ignore index.html + assets here, which caused 404s on Vercel.)
+index.html
+assets/

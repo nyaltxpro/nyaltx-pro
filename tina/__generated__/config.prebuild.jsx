@@ -1158,8 +1158,9 @@ var pricing = {
         },
         {
           type: "image",
-          name: "image",
-          label: "Hero Image"
+          name: "backgroundImage",
+          label: "Hero Image",
+          description: "Image shown in the pricing page hero section"
         }
       ]
     },
@@ -1213,7 +1214,8 @@ var pricing = {
         {
           type: "image",
           name: "bannerImage",
-          label: "Banner Image"
+          label: "Banner Image",
+          description: "Race to Liberty banner image next to NyaltxPro"
         },
         {
           type: "string",

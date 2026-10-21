@@ -329,10 +329,15 @@ export const PricingPage = ({ tinaData }: any) => {
                                 }}
                             />
                         </div>
-                        {(content?.hero?.image || content?.nyaltxPro?.bannerImage) && (
+                        {(content?.hero?.backgroundImage || content?.hero?.image || content?.nyaltxPro?.bannerImage) && (
                             <div className="relative mx-auto w-full max-w-xl aspect-[4/3] rounded-2xl overflow-hidden border border-white/10 bg-gray-800/20">
                                 <Image
-                                    src={content?.hero?.image || content?.nyaltxPro?.bannerImage || '/banner23.png'}
+                                    src={
+                                        content?.hero?.backgroundImage ||
+                                        content?.hero?.image ||
+                                        content?.nyaltxPro?.bannerImage ||
+                                        '/banner23.png'
+                                    }
                                     alt={content?.hero?.title || 'Pricing'}
                                     fill
                                     className="object-contain p-2"
@@ -434,7 +439,12 @@ export const PricingPage = ({ tinaData }: any) => {
                             {/* Banner */}
                             <div className="relative min-h-[400px] border border-white/10 rounded-2xl overflow-hidden bg-gray-800/20 backdrop-blur-sm hover:border-indigo-500/30 transition-all duration-500">
                                 <Image
-                                    src={content?.nyaltxPro?.bannerImage || content?.hero?.image || '/banner23.png'}
+                                    src={
+                                        content?.nyaltxPro?.bannerImage ||
+                                        content?.hero?.backgroundImage ||
+                                        content?.hero?.image ||
+                                        '/banner23.png'
+                                    }
                                     alt={content?.nyaltxPro?.bannerTitle || 'Race to Liberty'}
                                     fill
                                     className="object-contain opacity-90"
