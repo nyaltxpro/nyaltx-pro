@@ -8,7 +8,7 @@
     "dev:webpack": "next dev",
     "postinstall": "fumadocs-mdx",
     "build": "node scripts/build-tina.js && NODE_OPTIONS=--max-old-space-size=6144 next build",
-    "prebuild": "node scripts/build-tina.js",
+    "prebuild": "node -e \"console.log('prebuild: Tina handled in build script')\"",
     "build:tina": "echo 'Skipping Tina build for local development - using static content files'",
     "build:cloud": "tinacms build && NODE_OPTIONS=--max-old-space-size=6144 next build",
     "start": "next start",

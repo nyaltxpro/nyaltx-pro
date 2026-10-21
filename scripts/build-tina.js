@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
 /**
- * Build TinaCMS admin SPA into public/admin when credentials are available.
- * Falls back to a small placeholder so /admin/index.html never 404s.
+ * Optionally rebuild TinaCMS admin into public/admin.
+ * Never overwrite a committed production admin with a placeholder —
+ * that caused /admin/index.html to show "TinaCMS Admin unavailable" on Vercel.
  */
 
 const { execSync } = require('child_process');
@@ -11,10 +12,12 @@ const path = require('path');
 
 const adminPath = path.join(__dirname, '..', 'public', 'admin');
 const indexPath = path.join(adminPath, 'index.html');
+const assetsPath = path.join(adminPath, 'assets');
 
 const clientId = process.env.NEXT_PUBLIC_TINA_CLIENT_ID || '';
 const token = process.env.TINA_TOKEN || '';
 const forceEnabled = process.env.TINA_CLOUD_ENABLED === 'true';
+const forceRebuild = process.env.TINA_FORCE_BUILD === 'true';
 
 const hasCredentials =
   Boolean(clientId) &&
@@ -22,12 +25,24 @@ const hasCredentials =
   Boolean(token) &&
   token !== 'dummy-token';
 
-const shouldBuildTina = forceEnabled || hasCredentials;
+function hasProductionAdmin() {
+  if (!fs.existsSync(indexPath)) return false;
+  try {
+    const html = fs.readFileSync(indexPath, 'utf8');
+    // Real Tina build references /admin/assets/*.js — placeholder does not
+    const hasAssetScript =
+      html.includes('/admin/assets/') && html.includes('type="module"');
+    const hasAssetsDir =
+      fs.existsSync(assetsPath) && fs.readdirSync(assetsPath).some(f => f.endsWith('.js'));
+    return hasAssetScript && hasAssetsDir;
+  } catch {
+    return false;
+  }
+}
 
 function writePlaceholder(message) {
   fs.mkdirSync(adminPath, { recursive: true });
-  // Keep assets dir so relative paths do not explode if referenced
-  fs.mkdirSync(path.join(adminPath, 'assets'), { recursive: true });
+  fs.mkdirSync(assetsPath, { recursive: true });
   fs.writeFileSync(
     indexPath,
     `<!DOCTYPE html>
@@ -55,27 +70,41 @@ function writePlaceholder(message) {
   );
 }
 
-if (!shouldBuildTina) {
-  console.log('⏭️ Skipping TinaCMS build (set NEXT_PUBLIC_TINA_CLIENT_ID + TINA_TOKEN, or TINA_CLOUD_ENABLED=true)');
+const productionAdminPresent = hasProductionAdmin();
+
+// Prefer committed production admin unless explicitly rebuilding
+if (productionAdminPresent && !forceRebuild) {
+  if (!hasCredentials && !forceEnabled) {
+    console.log('✅ Using committed TinaCMS admin at public/admin (skip rebuild — no Tina credentials)');
+    process.exit(0);
+  }
+  // Credentials exist: still try rebuild, but keep committed admin if rebuild fails
+  console.log('📝 Tina credentials found — attempting admin rebuild (committed admin kept on failure)…');
+} else if (!hasCredentials && !forceEnabled) {
+  console.log('⏭️ Skipping TinaCMS build (no credentials). No production admin found — writing placeholder.');
   writePlaceholder(
-    'Configure <code>NEXT_PUBLIC_TINA_CLIENT_ID</code> and <code>TINA_TOKEN</code> in the deployment environment, then redeploy.',
+    'Configure <code>NEXT_PUBLIC_TINA_CLIENT_ID</code> and <code>TINA_TOKEN</code> in the deployment environment, then redeploy. Or commit a production <code>public/admin</code> build.',
   );
   process.exit(0);
+} else {
+  console.log('📝 Building TinaCMS admin…');
 }
 
-console.log('📝 Building TinaCMS admin…');
 try {
   execSync('npx tinacms build', { stdio: 'inherit', env: process.env });
-  if (!fs.existsSync(indexPath)) {
-    throw new Error('tinacms build finished but public/admin/index.html is missing');
+  if (!hasProductionAdmin()) {
+    throw new Error('tinacms build finished but production public/admin assets are missing');
   }
-  console.log('✅ TinaCMS admin built at public/admin/index.html');
+  console.log('✅ TinaCMS admin ready at public/admin/index.html');
 } catch (error) {
-  console.warn('⚠️ TinaCMS build failed; writing placeholder so /admin does not 404');
-  console.warn(error instanceof Error ? error.message : String(error));
+  console.warn('⚠️ TinaCMS build failed:', error instanceof Error ? error.message : String(error));
+  if (productionAdminPresent || hasProductionAdmin()) {
+    console.warn('✅ Keeping existing committed TinaCMS admin — /admin/index.html will still work');
+    process.exit(0);
+  }
+  console.warn('⚠️ No production admin available — writing placeholder');
   writePlaceholder(
-    'TinaCMS build failed during deployment. Check build logs and Tina credentials, then redeploy.',
+    'TinaCMS build failed during deployment and no committed admin was found. Check build logs and Tina credentials, then redeploy.',
   );
-  // Do not fail the whole Next.js build for CMS admin generation issues
   process.exit(0);
 }
