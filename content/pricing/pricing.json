@@ -2,7 +2,7 @@
   "hero": {
     "title": "Pricing",
     "description": "Start with **NyaltxPro** to unlock your project profile and media. Then upgrade to the **Race to Liberty** campaign for broader visibility.",
-    "backgroundImage": "/banner23.png"
+    "backgroundImage": "/New York Alt Exchange Poster.png"
   },
   "nyaltxPro": {
     "sectionTitle": "NyaltxPro",
@@ -10,7 +10,6 @@
     "title": "NyaltxPro Membership",
     "description": "Unlock your project profile on NYALTX.",
     "price": 199,
-    "bannerImage": "/banner23.png",
     "features": [
       {
         "text": "Dedicated project profile page"
@@ -25,6 +24,7 @@
         "text": "Valid for 1 year"
       }
     ],
+    "bannerImage": "/banner23.png",
     "bannerTitle": "Race to Liberty",
     "bannerDescription": "After NyaltxPro, boost your exposure with our Statue of Liberty–themed campaign.",
     "proMessage": "✅ You have NyaltxPro! Ready to gain more visibility? Upgrade to Race to Liberty."
