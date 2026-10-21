@@ -5,9 +5,9 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
 import Banner from './Banner';
 import BlockchainDropdown from './BlockchainDropdown';
-import SimpleUnifiedWalletButton from './SimpleUnifiedWalletButton';
 import LivePriceTicker from './LivePriceTicker';
 import SearchModal from './SearchModal';
+import SimpleUnifiedWalletButton from './SimpleUnifiedWalletButton';
 import './animations.css';
 
 // Define token pair type

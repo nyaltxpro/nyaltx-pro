@@ -1,8 +1,9 @@
 'use client';
 
+import { stockProfilePath } from '@/lib/tradingViewSymbol';
 import { ChevronLeftIcon, ChevronRightIcon, ExternalLinkIcon, MagnifyingGlassIcon, ReloadIcon } from '@radix-ui/react-icons';
 import Image from 'next/image';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 
 type SecurityRow = {
@@ -80,6 +81,7 @@ function getPageNumbers(current: number, total: number): Array<number | '…'> {
 }
 
 export default function TokenizedSecurities() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const initialQ = (searchParams.get('q') || '').trim();
   const [rows, setRows] = useState<SecurityRow[]>([]);
@@ -270,7 +272,22 @@ export default function TokenizedSecurities() {
                   {rows.map(row => (
                     <tr
                       key={row.id}
-                      className="border-b border-white/5 transition hover:bg-white/[0.03]"
+                      role="link"
+                      tabIndex={0}
+                      onClick={() => {
+                        const sym =
+                          row.underlyingSymbol || row.symbol.replace(/x$/i, '') || row.symbol;
+                        if (sym) router.push(stockProfilePath(sym));
+                      }}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          const sym =
+                            row.underlyingSymbol || row.symbol.replace(/x$/i, '') || row.symbol;
+                          if (sym) router.push(stockProfilePath(sym));
+                        }
+                      }}
+                      className="cursor-pointer border-b border-white/5 transition hover:bg-white/[0.03]"
                     >
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">

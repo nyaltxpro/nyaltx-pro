@@ -275,6 +275,61 @@ export async function GET(request: NextRequest) {
 
     const assets = await listAllAssets(force);
 
+    // Single security by underlying or tokenized symbol
+    if (mode === 'symbol') {
+      const symbolParam = (
+        searchParams.get('symbol') ||
+        searchParams.get('q') ||
+        ''
+      )
+        .trim()
+        .toUpperCase();
+
+      if (!symbolParam) {
+        return NextResponse.json({ error: 'symbol is required' }, { status: 400 });
+      }
+
+      const asset =
+        assets.find(a => {
+          const u = (a.underlyingSymbol || a.underlying?.symbol || '').toUpperCase();
+          const sym = a.symbol.toUpperCase();
+          return (
+            u === symbolParam ||
+            sym === symbolParam ||
+            sym === `${symbolParam}X` ||
+            sym.startsWith(`${symbolParam}X`)
+          );
+        }) || null;
+
+      if (!asset) {
+        return NextResponse.json(
+          {
+            updatedAt: new Date().toISOString(),
+            source: 'xStocks',
+            mode: 'symbol',
+            security: null,
+            error: `No tokenized security found for ${symbolParam}`,
+          },
+          { status: 404 },
+        );
+      }
+
+      const price = await fetchPrice(asset.symbol, force);
+      return NextResponse.json(
+        {
+          updatedAt: new Date().toISOString(),
+          source: 'xStocks',
+          mode: 'symbol',
+          security: toRow(asset, price),
+        },
+        {
+          headers: {
+            'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
+          },
+        },
+      );
+    }
+
     // Dashboard ticker: curated popular tokenized stocks with live quotes
     if (mode === 'ticker') {
       const tickerLimit = Math.min(30, Math.max(8, Number(searchParams.get('limit') || 24) || 24));

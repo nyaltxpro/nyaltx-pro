@@ -1,6 +1,7 @@
 'use client';
 
 import TokenAvatar from '@/components/TokenAvatar';
+import { stockProfilePath } from '@/lib/tradingViewSymbol';
 import { ActivityLogIcon, ExternalLinkIcon, BarChartIcon } from '@radix-ui/react-icons';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { useRouter } from 'next/navigation';
@@ -77,11 +78,13 @@ const LivePriceTicker: React.FC = () => {
     return () => cancelAnimationFrame(animationId);
   }, [loading, securities]);
 
-  const openBoard = (security?: TickerSecurity) => {
-    if (security?.underlyingSymbol) {
-      router.push(
-        `/dashboard/tokenized-securities?q=${encodeURIComponent(security.underlyingSymbol)}`,
-      );
+  const openProfile = (security?: TickerSecurity) => {
+    const underlying =
+      security?.underlyingSymbol ||
+      security?.symbol?.replace(/x$/i, '') ||
+      security?.symbol;
+    if (underlying) {
+      router.push(stockProfilePath(underlying));
       return;
     }
     router.push('/dashboard/tokenized-securities');
@@ -131,7 +134,7 @@ const LivePriceTicker: React.FC = () => {
         >
           <button
             type="button"
-            onClick={() => openBoard()}
+            onClick={() => openProfile()}
             className="flex items-center gap-3 pl-6 flex-shrink-0 hover:opacity-90 transition"
           >
             <div className="w-7 h-7 bg-gradient-to-r from-[#00d4aa] to-[#3b82f6] rounded-lg flex items-center justify-center">
@@ -156,7 +159,7 @@ const LivePriceTicker: React.FC = () => {
               <Tooltip.Trigger asChild>
                 <div
                   className="group flex items-center gap-3 px-4 py-2 bg-gray-800/30 hover:bg-gray-700/40 rounded-xl cursor-pointer transition-all duration-300 hover:scale-105 border border-gray-700/30 hover:border-[#00d4aa]/40 flex-shrink-0"
-                  onClick={() => openBoard(security)}
+                  onClick={() => openProfile(security)}
                 >
                   <div className="flex items-center gap-3">
                     <div className="relative">
@@ -226,7 +229,7 @@ const LivePriceTicker: React.FC = () => {
                       {security.underlyingExchange} · {security.symbol}
                       {security.networks?.[0] ? ` · ${security.networks[0]}` : ''}
                     </div>
-                    <div className="text-xs text-gray-500">Open tokenized securities board</div>
+                    <div className="text-xs text-gray-500">Open stock profile & charts</div>
                   </div>
                   <Tooltip.Arrow className="fill-black/90" />
                 </Tooltip.Content>
