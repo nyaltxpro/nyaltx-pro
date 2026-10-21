@@ -1,2 +1,2 @@
-index.html
-assets/
+# Track TinaCMS production admin assets in git.
+# (Tina CLI regenerates a ignore for index.html + assets — do not keep that.)
