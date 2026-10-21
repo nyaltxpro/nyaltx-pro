@@ -1,12 +1,15 @@
 'use client';
 
-import { useEffect, useId, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 type TradingViewEmbedProps = {
   scriptSrc: string;
   config: Record<string, unknown>;
   className?: string;
-  height?: number | string;
+  /** Fill parent when true (parent must have explicit height). */
+  fill?: boolean;
+  /** Explicit pixel height for the widget iframe/container. */
+  heightPx?: number;
 };
 
 /**
@@ -17,11 +20,21 @@ export default function TradingViewEmbed({
   scriptSrc,
   config,
   className = '',
-  height,
+  fill = false,
+  heightPx,
 }: TradingViewEmbedProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const reactId = useId();
-  const configKey = JSON.stringify(config);
+  const mergedConfig = {
+    ...config,
+    ...(heightPx != null
+      ? {
+          height: heightPx,
+          width: config.width ?? '100%',
+          autosize: false,
+        }
+      : {}),
+  };
+  const configKey = JSON.stringify(mergedConfig);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -31,9 +44,11 @@ export default function TradingViewEmbed({
 
     const widgetEl = document.createElement('div');
     widgetEl.className = 'tradingview-widget-container__widget';
-    if (height) {
-      widgetEl.style.height = typeof height === 'number' ? `${height}px` : height;
-      widgetEl.style.width = '100%';
+    widgetEl.style.width = '100%';
+    if (heightPx != null) {
+      widgetEl.style.height = `${heightPx}px`;
+    } else if (fill) {
+      widgetEl.style.height = '100%';
     }
     container.appendChild(widgetEl);
 
@@ -47,13 +62,13 @@ export default function TradingViewEmbed({
     return () => {
       container.innerHTML = '';
     };
-  }, [scriptSrc, configKey, height, reactId]);
+  }, [scriptSrc, configKey, fill, heightPx]);
 
   return (
     <div
-      className={`tradingview-widget-container ${className}`}
+      className={`tradingview-widget-container h-full w-full ${className}`}
       ref={containerRef}
-      style={height ? { height: typeof height === 'number' ? `${height}px` : height } : undefined}
+      style={heightPx != null ? { height: heightPx, minHeight: heightPx } : undefined}
     />
   );
 }

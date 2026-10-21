@@ -1,5 +1,6 @@
 import { createMDX } from 'fumadocs-mdx/next';
 import type { NextConfig } from "next";
+import path from 'path';
 
 const withMDX = createMDX();
 
@@ -42,6 +43,14 @@ const nextConfig: NextConfig = {
     cpus: 1,
   },
 
+  // Turbopack (dev:fast) does not use webpack.resolve.alias — mirror the tempo stub here
+  turbopack: {
+    resolveAlias: {
+      '@wagmi/core/tempo': './src/shims/wagmi-core-tempo.ts',
+      accounts: './src/shims/wagmi-core-tempo.ts',
+    },
+  },
+
   serverExternalPackages: [
     'pino-pretty',
     'lokijs',
@@ -68,8 +77,8 @@ const nextConfig: NextConfig = {
     config.resolve.alias = {
       ...(config.resolve.alias || {}),
       // Optional wagmi Tempo dependency — not installed, must not fail resolve
-      accounts: false,
-      '@wagmi/core/tempo': false,
+      accounts: path.join(__dirname, 'src/shims/wagmi-core-tempo.ts'),
+      '@wagmi/core/tempo': path.join(__dirname, 'src/shims/wagmi-core-tempo.ts'),
     };
 
     // Reduce peak memory during production minify on Vercel 2-core builders
