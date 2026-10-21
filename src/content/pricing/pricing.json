@@ -9,7 +9,6 @@
     "title": "NyaltxPro Membership",
     "description": "Unlock your project profile on NYALTX.",
     "price": 199,
-    "bannerImage": "/banner23.png",
     "features": [
       {
         "text": "Dedicated project profile page"
@@ -18,15 +17,16 @@
         "text": "Social media links (Twitter/X, Telegram, Website, etc.)"
       },
       {
-        "text": "Embedded project video — default video provided if none purchased"
+        "text": "Embedded project video \u2014 default video provided if none purchased"
       },
       {
         "text": "Valid for 1 year"
       }
     ],
+    "bannerImage": "/New York Alt Exchange Poster.png",
     "bannerTitle": "Race to Liberty",
-    "bannerDescription": "After NyaltxPro, boost your exposure with our Statue of Liberty–themed campaign.",
-    "proMessage": "✅ You have NyaltxPro! Ready to gain more visibility? Upgrade to Race to Liberty."
+    "bannerDescription": "After NyaltxPro, boost your exposure with our Statue of Liberty\u2013themed campaign.",
+    "proMessage": "\u2705 You have NyaltxPro! Ready to gain more visibility? Upgrade to Race to Liberty."
   },
   "raceToLiberty": {
     "sectionTitle": "Race to Liberty",
@@ -34,12 +34,12 @@
       {
         "id": "speedboat",
         "name": "Speed Boat",
-        "description": "1 week on Recently Updated.",
+        "description": "1 month on Recently Updated.",
         "priceUSD": 199,
         "isPopular": false,
         "features": [
           {
-            "text": "Placement on Recently Updated for 1 week"
+            "text": "Placement on Recently Updated for 1 month"
           },
           {
             "text": "Eligible for Off Road podcast mention"
@@ -51,19 +51,19 @@
             "text": "Basic socials link-out"
           }
         ],
-        "buttonText": "🏆 Select Coin & Enter Race",
-        "buttonSubtext": "Choose your coin • Earn points • Boost visibility"
+        "buttonText": "\ud83c\udfc6 Select Coin & Enter Race",
+        "buttonSubtext": "Choose your coin \u2022 Earn points \u2022 Boost visibility"
       },
       {
         "id": "helicopter",
         "name": "Helicopter",
-        "description": "1 month placement.",
+        "description": "6 month placement.",
         "priceUSD": 349,
         "isPopular": true,
         "popularBadge": "Most Popular",
         "features": [
           {
-            "text": "Homepage placement for 1 month"
+            "text": "Homepage placement for 6 months"
           },
           {
             "text": "Priority slot in Race to Liberty carousel"
@@ -75,18 +75,18 @@
             "text": "Enhanced socials and website spotlight"
           }
         ],
-        "buttonText": "🏆 Select Coin & Enter Race",
-        "buttonSubtext": "Choose your coin • Earn points • Boost visibility"
+        "buttonText": "\ud83c\udfc6 Select Coin & Enter Race",
+        "buttonSubtext": "Choose your coin \u2022 Earn points \u2022 Boost visibility"
       },
       {
         "id": "submarine",
         "name": "Submarine",
-        "description": "3 months placement.",
+        "description": "1 year placement.",
         "priceUSD": 599,
         "isPopular": false,
         "features": [
           {
-            "text": "Premium placement for 3 months"
+            "text": "Premium placement for 1 year"
           },
           {
             "text": "Featured in Race to Liberty highlights"
@@ -98,8 +98,8 @@
             "text": "Priority support and promo coordination"
           }
         ],
-        "buttonText": "🏆 Select Coin & Enter Race",
-        "buttonSubtext": "Choose your coin • Earn points • Boost visibility"
+        "buttonText": "\ud83c\udfc6 Select Coin & Enter Race",
+        "buttonSubtext": "Choose your coin \u2022 Earn points \u2022 Boost visibility"
       }
     ]
   },
@@ -114,10 +114,10 @@
         "points": 250,
         "priceUSD": 199,
         "description": "Gain entry into the Boosted Zone",
-        "icon": "🔹",
+        "icon": "\ud83d\udd39",
         "isPopular": false,
         "buttonText": "Select Tokens & Purchase",
-        "buttonSubtext": "Choose tokens to boost • Multiple payment options"
+        "buttonSubtext": "Choose tokens to boost \u2022 Multiple payment options"
       },
       {
         "id": "growth",
@@ -125,11 +125,11 @@
         "points": 750,
         "priceUSD": 399,
         "description": "Highlighted in daily \"Top Movers\" feed",
-        "icon": "🔹",
+        "icon": "\ud83d\udd39",
         "isPopular": true,
         "popularBadge": "Popular",
         "buttonText": "Select Tokens & Purchase",
-        "buttonSubtext": "Choose tokens to boost • Multiple payment options"
+        "buttonSubtext": "Choose tokens to boost \u2022 Multiple payment options"
       },
       {
         "id": "pro",
@@ -137,10 +137,10 @@
         "points": 1500,
         "priceUSD": 599,
         "description": "Unlocks \"Featured\" placement (color frames, 48h push)",
-        "icon": "🔹",
+        "icon": "\ud83d\udd39",
         "isPopular": false,
         "buttonText": "Select Tokens & Purchase",
-        "buttonSubtext": "Choose tokens to boost • Multiple payment options"
+        "buttonSubtext": "Choose tokens to boost \u2022 Multiple payment options"
       },
       {
         "id": "elite",
@@ -148,15 +148,15 @@
         "points": 7500,
         "priceUSD": 2999,
         "description": "Premium: Top of board + Featured Video slot + Podcast appearance",
-        "icon": "🔹",
+        "icon": "\ud83d\udd39",
         "isPopular": false,
         "buttonText": "Select Tokens & Purchase",
-        "buttonSubtext": "Choose tokens to boost • Multiple payment options"
+        "buttonSubtext": "Choose tokens to boost \u2022 Multiple payment options"
       }
     ]
   },
   "footer": {
-    "paymentMethods": "Accepted payment methods: PayPal, ETH, SOL, or NYAX token (with 20% discount).",
+    "paymentMethods": "Accepted payment methods: PayPal, ETH, SOL, or NYAX token (with 30% discount).",
     "technicalNote": "On-chain payments are sent to the configured receiver address. Default NYAX token address is used. You can override via environment variables.",
     "networkFees": "Note: Network fees apply to on-chain payments. Ensure you are on the correct chain. Configure receiver address, tokens, and chain via environment variables.",
     "paypalNote": "PayPal payments are processed securely through PayPal's payment system."
