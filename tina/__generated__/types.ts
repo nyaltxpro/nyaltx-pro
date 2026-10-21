@@ -82,6 +82,8 @@ export type Query = {
   collections: Array<Collection>;
   node: Node;
   document: DocumentNode;
+  siteSettings: SiteSettings;
+  siteSettingsConnection: SiteSettingsConnection;
   generalStatement: GeneralStatement;
   generalStatementConnection: GeneralStatementConnection;
   aboutUs: AboutUs;
@@ -133,6 +135,21 @@ export type QueryNodeArgs = {
 export type QueryDocumentArgs = {
   collection?: InputMaybe<Scalars['String']['input']>;
   relativePath?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QuerySiteSettingsArgs = {
+  relativePath?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QuerySiteSettingsConnectionArgs = {
+  before?: InputMaybe<Scalars['String']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Float']['input']>;
+  last?: InputMaybe<Scalars['Float']['input']>;
+  sort?: InputMaybe<Scalars['String']['input']>;
+  filter?: InputMaybe<SiteSettingsFilter>;
 };
 
 
@@ -361,6 +378,7 @@ export type QueryTeamConnectionArgs = {
 };
 
 export type DocumentFilter = {
+  siteSettings?: InputMaybe<SiteSettingsFilter>;
   generalStatement?: InputMaybe<GeneralStatementFilter>;
   aboutUs?: InputMaybe<AboutUsFilter>;
   legalAdvice?: InputMaybe<LegalAdviceFilter>;
@@ -415,7 +433,64 @@ export type CollectionDocumentsArgs = {
   folder?: InputMaybe<Scalars['String']['input']>;
 };
 
-export type DocumentNode = GeneralStatement | AboutUs | LegalAdvice | PrivacyPolicy | Venturegroup | Podcast | Tradevideos | Pricing | Whitepaper | Governa | Navigation | Landing | Footer | Contact | Team | Folder;
+export type DocumentNode = SiteSettings | GeneralStatement | AboutUs | LegalAdvice | PrivacyPolicy | Venturegroup | Podcast | Tradevideos | Pricing | Whitepaper | Governa | Navigation | Landing | Footer | Contact | Team | Folder;
+
+export type SiteSettings = Node & Document & {
+  __typename?: 'SiteSettings';
+  title: Scalars['String']['output'];
+  description: Scalars['String']['output'];
+  keywords?: Maybe<Scalars['String']['output']>;
+  authors?: Maybe<Scalars['String']['output']>;
+  creator?: Maybe<Scalars['String']['output']>;
+  publisher?: Maybe<Scalars['String']['output']>;
+  siteName?: Maybe<Scalars['String']['output']>;
+  ogImage?: Maybe<Scalars['String']['output']>;
+  twitterSite?: Maybe<Scalars['String']['output']>;
+  twitterCreator?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  _sys: SystemInfo;
+  _values: Scalars['JSON']['output'];
+};
+
+export type StringFilter = {
+  startsWith?: InputMaybe<Scalars['String']['input']>;
+  eq?: InputMaybe<Scalars['String']['input']>;
+  exists?: InputMaybe<Scalars['Boolean']['input']>;
+  in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+};
+
+export type ImageFilter = {
+  startsWith?: InputMaybe<Scalars['String']['input']>;
+  eq?: InputMaybe<Scalars['String']['input']>;
+  exists?: InputMaybe<Scalars['Boolean']['input']>;
+  in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+};
+
+export type SiteSettingsFilter = {
+  title?: InputMaybe<StringFilter>;
+  description?: InputMaybe<StringFilter>;
+  keywords?: InputMaybe<StringFilter>;
+  authors?: InputMaybe<StringFilter>;
+  creator?: InputMaybe<StringFilter>;
+  publisher?: InputMaybe<StringFilter>;
+  siteName?: InputMaybe<StringFilter>;
+  ogImage?: InputMaybe<ImageFilter>;
+  twitterSite?: InputMaybe<StringFilter>;
+  twitterCreator?: InputMaybe<StringFilter>;
+};
+
+export type SiteSettingsConnectionEdges = {
+  __typename?: 'SiteSettingsConnectionEdges';
+  cursor: Scalars['String']['output'];
+  node?: Maybe<SiteSettings>;
+};
+
+export type SiteSettingsConnection = Connection & {
+  __typename?: 'SiteSettingsConnection';
+  pageInfo: PageInfo;
+  totalCount: Scalars['Float']['output'];
+  edges?: Maybe<Array<Maybe<SiteSettingsConnectionEdges>>>;
+};
 
 export type GeneralStatementSectionsSubsections = {
   __typename?: 'GeneralStatementSectionsSubsections';
@@ -442,13 +517,6 @@ export type GeneralStatement = Node & Document & {
   id: Scalars['ID']['output'];
   _sys: SystemInfo;
   _values: Scalars['JSON']['output'];
-};
-
-export type StringFilter = {
-  startsWith?: InputMaybe<Scalars['String']['input']>;
-  eq?: InputMaybe<Scalars['String']['input']>;
-  exists?: InputMaybe<Scalars['Boolean']['input']>;
-  in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
 };
 
 export type GeneralStatementSectionsSubsectionsFilter = {
@@ -776,13 +844,6 @@ export type PrivacyPolicy = Node & Document & {
   id: Scalars['ID']['output'];
   _sys: SystemInfo;
   _values: Scalars['JSON']['output'];
-};
-
-export type ImageFilter = {
-  startsWith?: InputMaybe<Scalars['String']['input']>;
-  eq?: InputMaybe<Scalars['String']['input']>;
-  exists?: InputMaybe<Scalars['Boolean']['input']>;
-  in?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
 };
 
 export type PrivacyPolicyHeroFilter = {
@@ -2471,6 +2532,8 @@ export type Mutation = {
   deleteDocument: DocumentNode;
   createDocument: DocumentNode;
   createFolder: DocumentNode;
+  updateSiteSettings: SiteSettings;
+  createSiteSettings: SiteSettings;
   updateGeneralStatement: GeneralStatement;
   createGeneralStatement: GeneralStatement;
   updateAboutUs: AboutUs;
@@ -2534,6 +2597,18 @@ export type MutationCreateDocumentArgs = {
 export type MutationCreateFolderArgs = {
   collection?: InputMaybe<Scalars['String']['input']>;
   relativePath: Scalars['String']['input'];
+};
+
+
+export type MutationUpdateSiteSettingsArgs = {
+  relativePath: Scalars['String']['input'];
+  params: SiteSettingsMutation;
+};
+
+
+export type MutationCreateSiteSettingsArgs = {
+  relativePath: Scalars['String']['input'];
+  params: SiteSettingsMutation;
 };
 
 
@@ -2717,6 +2792,7 @@ export type MutationCreateTeamArgs = {
 };
 
 export type DocumentUpdateMutation = {
+  siteSettings?: InputMaybe<SiteSettingsMutation>;
   generalStatement?: InputMaybe<GeneralStatementMutation>;
   aboutUs?: InputMaybe<AboutUsMutation>;
   legalAdvice?: InputMaybe<LegalAdviceMutation>;
@@ -2736,6 +2812,7 @@ export type DocumentUpdateMutation = {
 };
 
 export type DocumentMutation = {
+  siteSettings?: InputMaybe<SiteSettingsMutation>;
   generalStatement?: InputMaybe<GeneralStatementMutation>;
   aboutUs?: InputMaybe<AboutUsMutation>;
   legalAdvice?: InputMaybe<LegalAdviceMutation>;
@@ -2751,6 +2828,19 @@ export type DocumentMutation = {
   footer?: InputMaybe<FooterMutation>;
   contact?: InputMaybe<ContactMutation>;
   team?: InputMaybe<TeamMutation>;
+};
+
+export type SiteSettingsMutation = {
+  title?: InputMaybe<Scalars['String']['input']>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  keywords?: InputMaybe<Scalars['String']['input']>;
+  authors?: InputMaybe<Scalars['String']['input']>;
+  creator?: InputMaybe<Scalars['String']['input']>;
+  publisher?: InputMaybe<Scalars['String']['input']>;
+  siteName?: InputMaybe<Scalars['String']['input']>;
+  ogImage?: InputMaybe<Scalars['String']['input']>;
+  twitterSite?: InputMaybe<Scalars['String']['input']>;
+  twitterCreator?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type GeneralStatementSectionsSubsectionsMutation = {
@@ -3574,6 +3664,8 @@ export type TeamMutation = {
   seo?: InputMaybe<TeamSeoMutation>;
 };
 
+export type SiteSettingsPartsFragment = { __typename: 'SiteSettings', title: string, description: string, keywords?: string | null, authors?: string | null, creator?: string | null, publisher?: string | null, siteName?: string | null, ogImage?: string | null, twitterSite?: string | null, twitterCreator?: string | null };
+
 export type GeneralStatementPartsFragment = { __typename: 'GeneralStatement', title: string, tagline?: string | null, description?: string | null, badges?: Array<string | null> | null, sections?: Array<{ __typename: 'GeneralStatementSections', heading?: string | null, icon?: string | null, content?: string | null, list?: Array<string | null> | null, subsections?: Array<{ __typename: 'GeneralStatementSectionsSubsections', title?: string | null, content?: string | null } | null> | null } | null> | null };
 
 export type AboutUsPartsFragment = { __typename: 'AboutUs', slug: string, meta?: { __typename: 'AboutUsMeta', title: string, description?: string | null, lastUpdated: string, version?: string | null } | null, hero?: { __typename: 'AboutUsHero', description?: string | null, badge?: { __typename: 'AboutUsHeroBadge', icon?: string | null, text?: string | null } | null, title?: { __typename: 'AboutUsHeroTitle', text: string, gradient?: string | null } | null } | null, content?: { __typename: 'AboutUsContent', sections?: Array<{ __typename: 'AboutUsContentSections', id: string, icon?: string | null, title: string, type?: string | null, paragraphs?: Array<string | null> | null, contactInfo?: Array<{ __typename: 'AboutUsContentSectionsContactInfo', label?: string | null, value?: string | null } | null> | null } | null> | null } | null, seo?: { __typename: 'AboutUsSeo', metaTitle: string, metaDescription: string, keywords?: string | null, canonical?: string | null } | null };
@@ -3603,6 +3695,25 @@ export type FooterPartsFragment = { __typename: 'Footer', branding?: { __typenam
 export type ContactPartsFragment = { __typename: 'Contact', hero?: { __typename: 'ContactHero', title: string, subtitle?: string | null } | null, contactInfo?: { __typename: 'ContactContactInfo', email?: string | null, phone?: string | null, address?: string | null, businessHours?: string | null } | null, form?: { __typename: 'ContactForm', title?: string | null, description?: string | null, submitText?: string | null } | null };
 
 export type TeamPartsFragment = { __typename: 'Team', hero?: { __typename: 'TeamHero', title: string, subtitle?: string | null, backgroundImage?: string | null } | null, members?: Array<{ __typename: 'TeamMembers', name: string, role?: string | null, description?: string | null, image: string, socials?: { __typename: 'TeamMembersSocials', twitter?: string | null, linkedin?: string | null, telegram?: string | null } | null } | null> | null, seo?: { __typename: 'TeamSeo', metaTitle?: string | null, metaDescription?: string | null, keywords?: string | null, ogImage?: string | null } | null };
+
+export type SiteSettingsQueryVariables = Exact<{
+  relativePath: Scalars['String']['input'];
+}>;
+
+
+export type SiteSettingsQuery = { __typename?: 'Query', siteSettings: { __typename: 'SiteSettings', id: string, title: string, description: string, keywords?: string | null, authors?: string | null, creator?: string | null, publisher?: string | null, siteName?: string | null, ogImage?: string | null, twitterSite?: string | null, twitterCreator?: string | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } };
+
+export type SiteSettingsConnectionQueryVariables = Exact<{
+  before?: InputMaybe<Scalars['String']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Float']['input']>;
+  last?: InputMaybe<Scalars['Float']['input']>;
+  sort?: InputMaybe<Scalars['String']['input']>;
+  filter?: InputMaybe<SiteSettingsFilter>;
+}>;
+
+
+export type SiteSettingsConnectionQuery = { __typename?: 'Query', siteSettingsConnection: { __typename?: 'SiteSettingsConnection', totalCount: number, pageInfo: { __typename?: 'PageInfo', hasPreviousPage: boolean, hasNextPage: boolean, startCursor: string, endCursor: string }, edges?: Array<{ __typename?: 'SiteSettingsConnectionEdges', cursor: string, node?: { __typename: 'SiteSettings', id: string, title: string, description: string, keywords?: string | null, authors?: string | null, creator?: string | null, publisher?: string | null, siteName?: string | null, ogImage?: string | null, twitterSite?: string | null, twitterCreator?: string | null, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null } | null> | null } };
 
 export type GeneralStatementQueryVariables = Exact<{
   relativePath: Scalars['String']['input'];
@@ -3889,6 +4000,21 @@ export type TeamConnectionQueryVariables = Exact<{
 
 export type TeamConnectionQuery = { __typename?: 'Query', teamConnection: { __typename?: 'TeamConnection', totalCount: number, pageInfo: { __typename?: 'PageInfo', hasPreviousPage: boolean, hasNextPage: boolean, startCursor: string, endCursor: string }, edges?: Array<{ __typename?: 'TeamConnectionEdges', cursor: string, node?: { __typename: 'Team', id: string, _sys: { __typename?: 'SystemInfo', filename: string, basename: string, hasReferences?: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string }, hero?: { __typename: 'TeamHero', title: string, subtitle?: string | null, backgroundImage?: string | null } | null, members?: Array<{ __typename: 'TeamMembers', name: string, role?: string | null, description?: string | null, image: string, socials?: { __typename: 'TeamMembersSocials', twitter?: string | null, linkedin?: string | null, telegram?: string | null } | null } | null> | null, seo?: { __typename: 'TeamSeo', metaTitle?: string | null, metaDescription?: string | null, keywords?: string | null, ogImage?: string | null } | null } | null } | null> | null } };
 
+export const SiteSettingsPartsFragmentDoc = gql`
+    fragment SiteSettingsParts on SiteSettings {
+  __typename
+  title
+  description
+  keywords
+  authors
+  creator
+  publisher
+  siteName
+  ogImage
+  twitterSite
+  twitterCreator
+}
+    `;
 export const GeneralStatementPartsFragmentDoc = gql`
     fragment GeneralStatementParts on GeneralStatement {
   __typename
@@ -4633,6 +4759,63 @@ export const TeamPartsFragmentDoc = gql`
   }
 }
     `;
+export const SiteSettingsDocument = gql`
+    query siteSettings($relativePath: String!) {
+  siteSettings(relativePath: $relativePath) {
+    ... on Document {
+      _sys {
+        filename
+        basename
+        hasReferences
+        breadcrumbs
+        path
+        relativePath
+        extension
+      }
+      id
+    }
+    ...SiteSettingsParts
+  }
+}
+    ${SiteSettingsPartsFragmentDoc}`;
+export const SiteSettingsConnectionDocument = gql`
+    query siteSettingsConnection($before: String, $after: String, $first: Float, $last: Float, $sort: String, $filter: SiteSettingsFilter) {
+  siteSettingsConnection(
+    before: $before
+    after: $after
+    first: $first
+    last: $last
+    sort: $sort
+    filter: $filter
+  ) {
+    pageInfo {
+      hasPreviousPage
+      hasNextPage
+      startCursor
+      endCursor
+    }
+    totalCount
+    edges {
+      cursor
+      node {
+        ... on Document {
+          _sys {
+            filename
+            basename
+            hasReferences
+            breadcrumbs
+            path
+            relativePath
+            extension
+          }
+          id
+        }
+        ...SiteSettingsParts
+      }
+    }
+  }
+}
+    ${SiteSettingsPartsFragmentDoc}`;
 export const GeneralStatementDocument = gql`
     query generalStatement($relativePath: String!) {
   generalStatement(relativePath: $relativePath) {
@@ -5491,7 +5674,13 @@ export const TeamConnectionDocument = gql`
 export type Requester<C= {}> = <R, V>(doc: DocumentNode, vars?: V, options?: C) => Promise<R>
   export function getSdk<C>(requester: Requester<C>) {
     return {
-      generalStatement(variables: GeneralStatementQueryVariables, options?: C): Promise<{data: GeneralStatementQuery, errors?: { message: string, locations: { line: number, column: number }[], path: string[] }[], variables: GeneralStatementQueryVariables, query: string}> {
+      siteSettings(variables: SiteSettingsQueryVariables, options?: C): Promise<{data: SiteSettingsQuery, errors?: { message: string, locations: { line: number, column: number }[], path: string[] }[], variables: SiteSettingsQueryVariables, query: string}> {
+        return requester<{data: SiteSettingsQuery, errors?: { message: string, locations: { line: number, column: number }[], path: string[] }[], variables: SiteSettingsQueryVariables, query: string}, SiteSettingsQueryVariables>(SiteSettingsDocument, variables, options);
+      },
+    siteSettingsConnection(variables?: SiteSettingsConnectionQueryVariables, options?: C): Promise<{data: SiteSettingsConnectionQuery, errors?: { message: string, locations: { line: number, column: number }[], path: string[] }[], variables: SiteSettingsConnectionQueryVariables, query: string}> {
+        return requester<{data: SiteSettingsConnectionQuery, errors?: { message: string, locations: { line: number, column: number }[], path: string[] }[], variables: SiteSettingsConnectionQueryVariables, query: string}, SiteSettingsConnectionQueryVariables>(SiteSettingsConnectionDocument, variables, options);
+      },
+    generalStatement(variables: GeneralStatementQueryVariables, options?: C): Promise<{data: GeneralStatementQuery, errors?: { message: string, locations: { line: number, column: number }[], path: string[] }[], variables: GeneralStatementQueryVariables, query: string}> {
         return requester<{data: GeneralStatementQuery, errors?: { message: string, locations: { line: number, column: number }[], path: string[] }[], variables: GeneralStatementQueryVariables, query: string}, GeneralStatementQueryVariables>(GeneralStatementDocument, variables, options);
       },
     generalStatementConnection(variables?: GeneralStatementConnectionQueryVariables, options?: C): Promise<{data: GeneralStatementConnectionQuery, errors?: { message: string, locations: { line: number, column: number }[], path: string[] }[], variables: GeneralStatementConnectionQueryVariables, query: string}> {
@@ -5628,7 +5817,7 @@ export const ExperimentalGetTinaClient = () =>
   getSdk(
     generateRequester(
       createClient({
-        url: "https://content.tinajs.io/1.6/content/875ea65f-9159-4773-857e-d07f66271e14/github/main",
+        url: "http://localhost:4001/graphql",
         queries,
       })
     )

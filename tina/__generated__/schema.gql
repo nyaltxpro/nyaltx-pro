@@ -54,6 +54,8 @@ type Query {
   collections: [Collection!]!
   node(id: String): Node!
   document(collection: String, relativePath: String): DocumentNode!
+  siteSettings(relativePath: String): SiteSettings!
+  siteSettingsConnection(before: String, after: String, first: Float, last: Float, sort: String, filter: SiteSettingsFilter): SiteSettingsConnection!
   generalStatement(relativePath: String): GeneralStatement!
   generalStatementConnection(before: String, after: String, first: Float, last: Float, sort: String, filter: GeneralStatementFilter): GeneralStatementConnection!
   aboutUs(relativePath: String): AboutUs!
@@ -87,6 +89,7 @@ type Query {
 }
 
 input DocumentFilter {
+  siteSettings: SiteSettingsFilter
   generalStatement: GeneralStatementFilter
   aboutUs: AboutUsFilter
   legalAdvice: LegalAdviceFilter
@@ -127,7 +130,61 @@ type Collection {
   documents(before: String, after: String, first: Float, last: Float, sort: String, filter: DocumentFilter, folder: String): DocumentConnection!
 }
 
-union DocumentNode = GeneralStatement | AboutUs | LegalAdvice | PrivacyPolicy | Venturegroup | Podcast | Tradevideos | Pricing | Whitepaper | Governa | Navigation | Landing | Footer | Contact | Team | Folder
+union DocumentNode = SiteSettings | GeneralStatement | AboutUs | LegalAdvice | PrivacyPolicy | Venturegroup | Podcast | Tradevideos | Pricing | Whitepaper | Governa | Navigation | Landing | Footer | Contact | Team | Folder
+
+type SiteSettings implements Node & Document {
+  title: String!
+  description: String!
+  keywords: String
+  authors: String
+  creator: String
+  publisher: String
+  siteName: String
+  ogImage: String
+  twitterSite: String
+  twitterCreator: String
+  id: ID!
+  _sys: SystemInfo!
+  _values: JSON!
+}
+
+input StringFilter {
+  startsWith: String
+  eq: String
+  exists: Boolean
+  in: [String]
+}
+
+input ImageFilter {
+  startsWith: String
+  eq: String
+  exists: Boolean
+  in: [String]
+}
+
+input SiteSettingsFilter {
+  title: StringFilter
+  description: StringFilter
+  keywords: StringFilter
+  authors: StringFilter
+  creator: StringFilter
+  publisher: StringFilter
+  siteName: StringFilter
+  ogImage: ImageFilter
+  twitterSite: StringFilter
+  twitterCreator: StringFilter
+}
+
+type SiteSettingsConnectionEdges {
+  cursor: String!
+  node: SiteSettings
+}
+
+type SiteSettingsConnection implements Connection {
+  pageInfo: PageInfo!
+  totalCount: Float!
+  edges: [SiteSettingsConnectionEdges]
+}
 
 type GeneralStatementSectionsSubsections {
   title: String
@@ -151,13 +208,6 @@ type GeneralStatement implements Node & Document {
   id: ID!
   _sys: SystemInfo!
   _values: JSON!
-}
-
-input StringFilter {
-  startsWith: String
-  eq: String
-  exists: Boolean
-  in: [String]
 }
 
 input GeneralStatementSectionsSubsectionsFilter {
@@ -459,13 +509,6 @@ type PrivacyPolicy implements Node & Document {
   id: ID!
   _sys: SystemInfo!
   _values: JSON!
-}
-
-input ImageFilter {
-  startsWith: String
-  eq: String
-  exists: Boolean
-  in: [String]
 }
 
 input PrivacyPolicyHeroFilter {
@@ -2030,6 +2073,8 @@ type Mutation {
   deleteDocument(collection: String, relativePath: String!): DocumentNode!
   createDocument(collection: String, relativePath: String!, params: DocumentMutation!): DocumentNode!
   createFolder(collection: String, relativePath: String!): DocumentNode!
+  updateSiteSettings(relativePath: String!, params: SiteSettingsMutation!): SiteSettings!
+  createSiteSettings(relativePath: String!, params: SiteSettingsMutation!): SiteSettings!
   updateGeneralStatement(relativePath: String!, params: GeneralStatementMutation!): GeneralStatement!
   createGeneralStatement(relativePath: String!, params: GeneralStatementMutation!): GeneralStatement!
   updateAboutUs(relativePath: String!, params: AboutUsMutation!): AboutUs!
@@ -2063,6 +2108,7 @@ type Mutation {
 }
 
 input DocumentUpdateMutation {
+  siteSettings: SiteSettingsMutation
   generalStatement: GeneralStatementMutation
   aboutUs: AboutUsMutation
   legalAdvice: LegalAdviceMutation
@@ -2082,6 +2128,7 @@ input DocumentUpdateMutation {
 }
 
 input DocumentMutation {
+  siteSettings: SiteSettingsMutation
   generalStatement: GeneralStatementMutation
   aboutUs: AboutUsMutation
   legalAdvice: LegalAdviceMutation
@@ -2097,6 +2144,19 @@ input DocumentMutation {
   footer: FooterMutation
   contact: ContactMutation
   team: TeamMutation
+}
+
+input SiteSettingsMutation {
+  title: String
+  description: String
+  keywords: String
+  authors: String
+  creator: String
+  publisher: String
+  siteName: String
+  ogImage: String
+  twitterSite: String
+  twitterCreator: String
 }
 
 input GeneralStatementSectionsSubsectionsMutation {

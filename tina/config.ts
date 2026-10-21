@@ -6,6 +6,7 @@ import { legalAdvice } from "./schema/legalAdvice";
 import podcast from "./schema/podcast";
 import pricing from "./schema/pricing";
 import { privacyPolicy } from "./schema/privacyPolicy";
+import siteSettings from "./schema/siteSettings";
 import tradeVideos from "./schema/tradeVideos";
 import ventureGroup from "./schema/ventureGroup";
 import whitepaper from "./schema/whitepaper";
@@ -37,6 +38,7 @@ export default defineConfig({
   // See docs on content modeling for more info on how to setup new content models: https://tina.io/docs/r/content-modelling-collections/
   schema: {
     collections: [
+      siteSettings,
       generalStatement,
       aboutUs,
       legalAdvice,

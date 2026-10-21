@@ -1,59 +1,24 @@
 import Footer from '@/components/Footer';
+import { buildRootMetadata, getSiteSeoSettings } from '@/lib/siteSeo';
 import '@solana/wallet-adapter-react-ui/styles.css';
 
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter, Poppins, Roboto } from "next/font/google";
 import { Toaster } from 'react-hot-toast';
 import "./globals.css";
 import Providers from './providers';
 
 const baseUrl = 'https://www.nyaltx.pro';
-const metadataBase = new URL(baseUrl);
-export const metadata: Metadata = {
-  metadataBase,
-  alternates: {
-    canonical: baseUrl,
-  },
-  title: 'NYALTX | Digital Markets & Tokenized Securities Discovery Platform',
-  description: 'Discover digital markets, tokenized securities, and project visibility on NYALTX — connecting DeFi discovery with tokenized stock market data.',
-  keywords: 'NYALTX, digital markets, tokenized securities, xStocks, DeFi discovery, capital markets, blockchain, Governa, NYAX',
-  authors: [{ name: 'NYALTX Team' }],
-  creator: 'NYALTX Team',
-  publisher: 'NYALTX',
-  robots: 'index, follow',
-  icons: {
-    icon: `${baseUrl}/og-image.png`,
-    shortcut: `${baseUrl}/og-image.png`,
-    apple: `${baseUrl}/og-image.png`,
-  },
-  openGraph: {
-    type: 'website',
-    locale: 'en_US',
-    url: baseUrl,
-    siteName: 'NYALTX',
-    title: 'NYALTX | Digital Markets & Tokenized Securities Discovery Platform',
-    description: 'Discover digital markets, tokenized securities, and project visibility on NYALTX — connecting DeFi discovery with tokenized stock market data.',
-    images: [
-      {
-        url: `${baseUrl}/og-image.png`,
-        width: 512,
-        height: 512,
-        alt: 'NYALTX Logo',
-      },
-    ],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    site: '@nyaltx',
-    creator: '@nyaltx',
-  },
 
-  manifest: '/manifest.json',
+export async function generateMetadata(): Promise<Metadata> {
+  return buildRootMetadata();
+}
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
   themeColor: '#06b6d4',
-
 };
-
-export const viewport = 'width=device-width, initial-scale=1';
 
 
 const poppins = Poppins({
@@ -72,11 +37,16 @@ const roboto = Roboto({
 
 
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const seo = await getSiteSeoSettings();
+  const ogImageUrl = seo.ogImage?.startsWith('http')
+    ? seo.ogImage
+    : `${baseUrl}${seo.ogImage?.startsWith('/') ? seo.ogImage : `/${seo.ogImage || 'og-image.png'}`}`;
+
   return (
     <html lang="en" className={`${poppins.variable} ${roboto.variable}`} suppressHydrationWarning>
       <head>
@@ -88,15 +58,15 @@ export default function RootLayout({
               '@context': 'https://schema.org',
               '@type': 'Organization',
               '@id': `${baseUrl}/#organization`,
-              name: 'NYALTX',
+              name: seo.publisher || seo.siteName || 'NYALTX',
               url: baseUrl,
               logo: {
                 '@type': 'ImageObject',
-                url: `${baseUrl}/og-image.png`,
+                url: ogImageUrl,
                 width: 512,
                 height: 512,
               },
-              description: 'Digital markets and tokenized securities discovery platform connecting DeFi visibility with capital-markets infrastructure.',
+              description: seo.description,
               sameAs: [
                 'https://twitter.com/nyaltx',
                 'https://t.me/nyaltx',
@@ -118,9 +88,9 @@ export default function RootLayout({
               '@context': 'https://schema.org',
               '@type': 'WebSite',
               '@id': `${baseUrl}/#website`,
-              name: 'NYALTX',
+              name: seo.siteName || 'NYALTX',
               url: baseUrl,
-              description: 'Track meme tokens, view real-time charts, participate in Race to Liberty gamification, and discover trending cryptocurrencies.',
+              description: seo.description,
               publisher: {
                 '@id': `${baseUrl}/#organization`,
               },
@@ -199,8 +169,8 @@ export default function RootLayout({
               '@type': 'WebPage',
               '@id': `${baseUrl}/#webpage`,
               url: baseUrl,
-              name: 'NYALTX | Digital Markets & Tokenized Securities Discovery Platform',
-              description: 'Discover digital markets, tokenized securities, and project visibility on NYALTX — connecting DeFi discovery with tokenized stock market data.',
+              name: seo.title,
+              description: seo.description,
               isPartOf: {
                 '@id': `${baseUrl}/#website`,
               },
@@ -209,7 +179,7 @@ export default function RootLayout({
               },
               primaryImageOfPage: {
                 '@type': 'ImageObject',
-                url: `${baseUrl}/og-image.png`,
+                url: ogImageUrl,
               },
               inLanguage: 'en-US',
             })

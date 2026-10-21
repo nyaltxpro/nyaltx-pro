@@ -1,3 +1,17 @@
+fragment SiteSettingsParts on SiteSettings {
+  __typename
+  title
+  description
+  keywords
+  authors
+  creator
+  publisher
+  siteName
+  ogImage
+  twitterSite
+  twitterCreator
+}
+
 fragment GeneralStatementParts on GeneralStatement {
   __typename
   title
