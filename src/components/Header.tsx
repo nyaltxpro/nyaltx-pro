@@ -6,7 +6,6 @@ import { useRef, useState } from 'react';
 import Banner from './Banner';
 import BlockchainDropdown from './BlockchainDropdown';
 import LivePriceTicker from './LivePriceTicker';
-import MemecoinTicker from './MemecoinTicker';
 import SearchModal from './SearchModal';
 import SimpleUnifiedWalletButton from './SimpleUnifiedWalletButton';
 import './animations.css';
@@ -165,7 +164,6 @@ const Header = () => {
         </div>
 
         <LivePriceTicker />
-        <MemecoinTicker />
 
         {/* Search Modal */}
         <SearchModal isOpen={isSearchModalOpen} onClose={closeSearchModal} />
