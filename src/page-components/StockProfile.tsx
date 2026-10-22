@@ -72,9 +72,13 @@ type StockProfileProps = {
 export default function StockProfile({ symbol }: StockProfileProps) {
   const [security, setSecurity] = useState<SecurityDetail | null>(null);
   const [origin, setOrigin] = useState('');
+  const [widgetsReady, setWidgetsReady] = useState(false);
 
   useEffect(() => {
     setOrigin(window.location.origin);
+    // Defer heavy TradingView mounts so the profile shell paints first.
+    const id = window.setTimeout(() => setWidgetsReady(true), 50);
+    return () => window.clearTimeout(id);
   }, []);
 
   const underlying = symbol.includes(':')
@@ -109,10 +113,13 @@ export default function StockProfile({ symbol }: StockProfileProps) {
   }, [underlying]);
 
   const displayName = security?.name?.replace(/ xStock$/i, '') || underlying;
+  const chartUrl = origin
+    ? `${origin}/dashboard/tokenized-securities/go`
+    : '/dashboard/tokenized-securities/go';
 
   return (
     <div className="min-h-screen w-full px-3 py-5 sm:px-4 lg:px-6">
-      <div className="mb-4">
+      <div className="mb-4 flex flex-wrap items-center gap-3">
         <Link
           href="/dashboard/tokenized-securities"
           className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-gray-300 transition hover:border-white/20 hover:text-white"
@@ -120,8 +127,21 @@ export default function StockProfile({ symbol }: StockProfileProps) {
           <ArrowLeftIcon />
           Board
         </Link>
+        <div>
+          <h1 className="text-xl font-semibold text-white sm:text-2xl">{displayName}</h1>
+          <p className="text-xs text-gray-500">
+            {tvSymbol}
+            {security?.symbol ? ` · ${security.symbol}` : ''}
+          </p>
+        </div>
       </div>
 
+      {!widgetsReady || !origin ? (
+        <div className="flex min-h-[40vh] items-center justify-center rounded-xl border border-white/10 bg-[#0a0a0a]/60">
+          <div className="h-10 w-10 animate-spin rounded-full border-b-2 border-[#00d4aa]" />
+        </div>
+      ) : (
+        <>
       {/* Full-width ticker tape — clicks go to our stock profile via largeChartUrl */}
       <WidgetCard className="mb-4" title="Ticker tape">
         <div className="min-h-[72px]">
@@ -137,9 +157,7 @@ export default function StockProfile({ symbol }: StockProfileProps) {
               isTransparent: true,
               displayMode: 'adaptive',
               locale: 'en',
-              largeChartUrl: origin
-                ? `${origin}/dashboard/tokenized-securities/go`
-                : '/dashboard/tokenized-securities/go',
+              largeChartUrl: chartUrl,
             }}
           />
         </div>
@@ -318,7 +336,8 @@ export default function StockProfile({ symbol }: StockProfileProps) {
           </WidgetCard>
         </div>
       </div>
-
+        </>
+      )}
     </div>
   );
 }

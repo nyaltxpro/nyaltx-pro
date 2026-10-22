@@ -6,12 +6,19 @@ import { FiMenu } from 'react-icons/fi'; // Import hamburger menu icon
 import { SlStar } from 'react-icons/sl';
 import { commonCryptoSymbols } from '../utils/cryptoIcons';
 import { getCryptoName } from '../utils/cryptoNames';
+import dynamic from 'next/dynamic';
 import Banner from './Banner';
 import BlockchainDropdown from './BlockchainDropdown';
-import LivePriceTicker from './LivePriceTicker';
 import SearchModal from './SearchModal';
 import SimpleUnifiedWalletButton from './SimpleUnifiedWalletButton';
 import './animations.css';
+
+const LivePriceTicker = dynamic(() => import('./LivePriceTicker'), {
+  ssr: false,
+  loading: () => (
+    <div className="min-h-[92px] w-full border-y border-gray-800/50 bg-black/80" />
+  ),
+});
 
 // Define token pair type
 interface TokenPair {
@@ -284,7 +291,7 @@ const Header = ({ toggleMobileMenu }: HeaderProps) => {
         </div>
       </div>
 
-      <LivePriceTicker />
+      <LivePriceTicker compact />
       <SearchModal isOpen={isSearchModalOpen} onClose={closeSearchModal} />
     </div>
   );

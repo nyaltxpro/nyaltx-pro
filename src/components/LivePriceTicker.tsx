@@ -4,7 +4,7 @@ import TickerTapeRow from '@/components/TickerTapeRow';
 import { FAMOUS_TV_STOCKS } from '@/lib/famousStocks';
 import { toTradingViewSymbol } from '@/lib/tradingViewSymbol';
 import { BarChartIcon, CubeIcon } from '@radix-ui/react-icons';
-import { useEffect, useMemo, useState } from 'react';
+import { Component, type ReactNode, useEffect, useMemo, useState } from 'react';
 
 type TickerSecurity = {
   id: string;
@@ -33,7 +33,34 @@ const DIGITAL_ASSET_SYMBOLS = [
   { description: 'Cosmos', proName: 'BINANCE:ATOMUSDT' },
 ];
 
-const LivePriceTicker: React.FC = () => {
+class TickerErrorBoundary extends Component<
+  { children: ReactNode },
+  { hasError: boolean }
+> {
+  state = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="w-full border-y border-gray-800/50 bg-black/80 px-4 py-3 text-sm text-gray-500">
+          Market tickers temporarily unavailable
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+type LivePriceTickerProps = {
+  /** Fewer symbols / lighter load (e.g. on stock profile pages). */
+  compact?: boolean;
+};
+
+function LivePriceTickerInner({ compact = false }: LivePriceTickerProps) {
   const [securities, setSecurities] = useState<TickerSecurity[]>([]);
   const [loading, setLoading] = useState(true);
   const [origin, setOrigin] = useState('');
@@ -69,7 +96,6 @@ const LivePriceTicker: React.FC = () => {
     };
   }, []);
 
-  // Top 100 famous TV stocks; enrich names from xStocks when available.
   const xStockSymbols = useMemo(() => {
     const byUnderlying = new Map<string, TickerSecurity>();
     for (const s of securities) {
@@ -77,7 +103,9 @@ const LivePriceTicker: React.FC = () => {
       if (key && !byUnderlying.has(key)) byUnderlying.set(key, s);
     }
 
-    return FAMOUS_TV_STOCKS.map(stock => {
+    const list = compact ? FAMOUS_TV_STOCKS.slice(0, 30) : FAMOUS_TV_STOCKS;
+
+    return list.map(stock => {
       const matched = byUnderlying.get(stock.underlying.toUpperCase());
       const exchange = matched?.underlyingExchange || stock.exchange;
       return {
@@ -85,16 +113,20 @@ const LivePriceTicker: React.FC = () => {
         proName: toTradingViewSymbol(stock.underlying, exchange),
       };
     });
-  }, [securities]);
+  }, [securities, compact]);
 
-  // Dedicated /go route server-redirects to profile (no board flash).
   const xStocksChartUrl = origin
     ? `${origin}/dashboard/tokenized-securities/go`
-    : '/dashboard/tokenized-securities/go'
+    : '/dashboard/tokenized-securities/go';
 
   const digitalAssetsChartUrl = origin
     ? `${origin}/dashboard/trending`
     : '/dashboard/trending';
+
+  // Wait for origin so largeChartUrl is absolute (TV needs it for click routing).
+  if (!origin) {
+    return <div className="min-h-[92px] w-full border-y border-gray-800/50 bg-black/80" />;
+  }
 
   return (
     <div className="w-full border-y border-gray-800/50">
@@ -121,6 +153,12 @@ const LivePriceTicker: React.FC = () => {
       />
     </div>
   );
-};
+}
 
-export default LivePriceTicker;
+export default function LivePriceTicker({ compact = false }: LivePriceTickerProps) {
+  return (
+    <TickerErrorBoundary>
+      <LivePriceTickerInner compact={compact} />
+    </TickerErrorBoundary>
+  );
+}

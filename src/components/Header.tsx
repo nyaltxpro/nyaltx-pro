@@ -3,12 +3,19 @@ import * as Tooltip from '@radix-ui/react-tooltip';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
+import dynamic from 'next/dynamic';
 import Banner from './Banner';
 import BlockchainDropdown from './BlockchainDropdown';
-import LivePriceTicker from './LivePriceTicker';
 import SearchModal from './SearchModal';
 import SimpleUnifiedWalletButton from './SimpleUnifiedWalletButton';
 import './animations.css';
+
+const LivePriceTicker = dynamic(() => import('./LivePriceTicker'), {
+  ssr: false,
+  loading: () => (
+    <div className="min-h-[92px] w-full border-y border-gray-800/50 bg-black/80" />
+  ),
+});
 
 // Define token pair type
 interface TokenPair {
@@ -163,7 +170,7 @@ const Header = () => {
           </div>
         </div>
 
-        <LivePriceTicker />
+        <LivePriceTicker compact />
 
         {/* Search Modal */}
         <SearchModal isOpen={isSearchModalOpen} onClose={closeSearchModal} />

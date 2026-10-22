@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 type TradingViewEmbedProps = {
   scriptSrc: string;
@@ -14,6 +14,7 @@ type TradingViewEmbedProps = {
 
 /**
  * Mounts a TradingView external-embedding widget script inside a container.
+ * Only runs after client mount to avoid SSR/hydration blank pages.
  * @see https://www.tradingview.com/widget-docs/
  */
 export default function TradingViewEmbed({
@@ -24,6 +25,12 @@ export default function TradingViewEmbed({
   heightPx,
 }: TradingViewEmbedProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    setReady(true);
+  }, []);
+
   const mergedConfig = {
     ...config,
     ...(heightPx != null
@@ -37,6 +44,7 @@ export default function TradingViewEmbed({
   const configKey = JSON.stringify(mergedConfig);
 
   useEffect(() => {
+    if (!ready) return;
     const container = containerRef.current;
     if (!container) return;
 
@@ -56,13 +64,13 @@ export default function TradingViewEmbed({
     script.src = scriptSrc;
     script.type = 'text/javascript';
     script.async = true;
-    script.innerHTML = configKey;
+    script.text = configKey;
     container.appendChild(script);
 
     return () => {
       container.innerHTML = '';
     };
-  }, [scriptSrc, configKey, fill, heightPx]);
+  }, [ready, scriptSrc, configKey, fill, heightPx]);
 
   return (
     <div
