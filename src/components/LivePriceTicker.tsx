@@ -1,6 +1,7 @@
 'use client';
 
 import TickerTapeRow from '@/components/TickerTapeRow';
+import { FAMOUS_TV_STOCKS } from '@/lib/famousStocks';
 import { toTradingViewSymbol } from '@/lib/tradingViewSymbol';
 import { BarChartIcon, CubeIcon } from '@radix-ui/react-icons';
 import { useEffect, useMemo, useState } from 'react';
@@ -15,7 +16,6 @@ type TickerSecurity = {
 
 const SYNC_MS = 5 * 60 * 1000;
 
-/** Major digital assets for the second ticker tape. */
 const DIGITAL_ASSET_SYMBOLS = [
   { description: 'Bitcoin', proName: 'BINANCE:BTCUSDT' },
   { description: 'Ethereum', proName: 'BINANCE:ETHUSDT' },
@@ -26,7 +26,6 @@ const DIGITAL_ASSET_SYMBOLS = [
   { description: 'Cardano', proName: 'BINANCE:ADAUSDT' },
   { description: 'Avalanche', proName: 'BINANCE:AVAXUSDT' },
   { description: 'Chainlink', proName: 'BINANCE:LINKUSDT' },
-  { description: 'Polygon', proName: 'BINANCE:MATICUSDT' },
   { description: 'Polkadot', proName: 'BINANCE:DOTUSDT' },
   { description: 'Near', proName: 'BINANCE:NEARUSDT' },
   { description: 'Uniswap', proName: 'BINANCE:UNIUSDT' },
@@ -48,7 +47,7 @@ const LivePriceTicker: React.FC = () => {
 
     const fetchTicker = async () => {
       try {
-        const res = await fetch('/api/tokenized-securities?mode=ticker&limit=24');
+        const res = await fetch('/api/tokenized-securities?mode=ticker&limit=100');
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Failed to load ticker');
         if (!cancelled) {
@@ -70,17 +69,23 @@ const LivePriceTicker: React.FC = () => {
     };
   }, []);
 
-  const xStockSymbols = useMemo(
-    () =>
-      securities.map(s => {
-        const underlying = s.underlyingSymbol || s.symbol.replace(/x$/i, '') || s.symbol;
-        return {
-          description: (s.name || underlying).replace(/ xStock$/i, ''),
-          proName: toTradingViewSymbol(underlying, s.underlyingExchange),
-        };
-      }),
-    [securities],
-  );
+  // Top 100 famous TV stocks; enrich names from xStocks when available.
+  const xStockSymbols = useMemo(() => {
+    const byUnderlying = new Map<string, TickerSecurity>();
+    for (const s of securities) {
+      const key = (s.underlyingSymbol || s.symbol.replace(/x$/i, '') || s.symbol).toUpperCase();
+      if (key && !byUnderlying.has(key)) byUnderlying.set(key, s);
+    }
+
+    return FAMOUS_TV_STOCKS.map(stock => {
+      const matched = byUnderlying.get(stock.underlying.toUpperCase());
+      const exchange = matched?.underlyingExchange || stock.exchange;
+      return {
+        description: matched?.name?.replace(/ xStock$/i, '') || stock.description,
+        proName: toTradingViewSymbol(stock.underlying, exchange),
+      };
+    });
+  }, [securities]);
 
   const xStocksChartUrl = origin
     ? `${origin}/dashboard/tokenized-securities`
@@ -100,7 +105,7 @@ const LivePriceTicker: React.FC = () => {
         iconClassName="bg-gradient-to-r from-[#00d4aa] to-[#3b82f6]"
         symbols={xStockSymbols}
         largeChartUrl={xStocksChartUrl}
-        loading={loading}
+        loading={loading && xStockSymbols.length === 0}
         borderClassName="border-b border-gray-800/40"
       />
       <TickerTapeRow

@@ -1,3 +1,4 @@
+import { FAMOUS_UNDERLYINGS } from '@/lib/famousStocks';
 import { NextRequest, NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
@@ -193,50 +194,32 @@ function matchesStatus(asset: XStockAsset, status: string) {
   return true;
 }
 
-/** Popular underlyings for the dashboard ticker */
-const TICKER_UNDERLYINGS = [
-  'AAPL',
-  'TSLA',
-  'NVDA',
-  'MSFT',
-  'GOOGL',
-  'AMZN',
-  'META',
-  'NFLX',
-  'AMD',
-  'COIN',
-  'MSTR',
-  'SPY',
-  'QQQ',
-  'BABA',
-  'SHOP',
-  'PLTR',
-  'INTC',
-  'CRM',
-  'UBER',
-  'HOOD',
-  'ARM',
-  'AVGO',
-  'ORCL',
-  'JPM',
-  'V',
-];
+/** Famous / mega-cap underlyings for the dashboard ticker (order = display priority). */
+const TICKER_UNDERLYINGS = FAMOUS_UNDERLYINGS;
 
-function pickTickerAssets(assets: XStockAsset[], limit = 24): XStockAsset[] {
+function underlyingKey(asset: XStockAsset): string {
+  return (asset.underlyingSymbol || asset.underlying?.symbol || asset.symbol || '')
+    .toUpperCase()
+    .replace(/X$/i, '');
+}
+
+function pickTickerAssets(assets: XStockAsset[], limit = 100): XStockAsset[] {
   const picked: XStockAsset[] = [];
   const used = new Set<string>();
 
   for (const underlying of TICKER_UNDERLYINGS) {
     if (picked.length >= limit) break;
+    const target = underlying.toUpperCase();
     const match = assets.find(asset => {
       if (used.has(asset.id)) return false;
       const u = (asset.underlyingSymbol || asset.underlying?.symbol || '').toUpperCase();
       const sym = asset.symbol.toUpperCase();
       return (
-        u === underlying ||
-        sym === `${underlying}X` ||
-        sym === underlying ||
-        sym.startsWith(`${underlying}X`)
+        u === target ||
+        sym === `${target}X` ||
+        sym === target ||
+        sym === `${target.replace('.', '')}X` ||
+        (u.replace('.', '') === target.replace('.', '') && u.length > 0)
       );
     });
     if (match) {
@@ -245,13 +228,18 @@ function pickTickerAssets(assets: XStockAsset[], limit = 24): XStockAsset[] {
     }
   }
 
-  // Fill remaining slots with open (or any) assets that still need pricing
+  // Only fill from the curated famous list order — never dump alphabetical A* leftovers.
   if (picked.length < limit) {
-    const fillers = assets.filter(
-      a => !used.has(a.id) && !a.isTradingHalted && Boolean(a.trading?.openNow),
-    );
-    for (const asset of fillers) {
+    const byUnderlying = new Map<string, XStockAsset>();
+    for (const asset of assets) {
+      if (used.has(asset.id)) continue;
+      const key = underlyingKey(asset);
+      if (key && !byUnderlying.has(key)) byUnderlying.set(key, asset);
+    }
+    for (const underlying of TICKER_UNDERLYINGS) {
       if (picked.length >= limit) break;
+      const asset = byUnderlying.get(underlying.toUpperCase());
+      if (!asset || used.has(asset.id)) continue;
       used.add(asset.id);
       picked.push(asset);
     }
@@ -332,29 +320,17 @@ export async function GET(request: NextRequest) {
 
     // Dashboard ticker: curated popular tokenized stocks with live quotes
     if (mode === 'ticker') {
-      const tickerLimit = Math.min(30, Math.max(8, Number(searchParams.get('limit') || 24) || 24));
+      const tickerLimit = Math.min(
+        100,
+        Math.max(8, Number(searchParams.get('limit') || 100) || 100),
+      );
       const pageAssets = pickTickerAssets(assets, tickerLimit);
       const prices = await mapWithConcurrency(pageAssets, 10, asset =>
         fetchPrice(asset.symbol, force),
       );
-      const securities = pageAssets
-        .map((asset, i) => toRow(asset, prices[i]))
-        .filter(row => row.tokenizedPrice !== null);
-
-      // If few priced from curated list, append any other cached-priced open assets
-      if (securities.length < 8) {
-        const extras = assets
-          .filter(a => !pageAssets.some(p => p.id === a.id))
-          .slice(0, 40);
-        const extraPrices = await mapWithConcurrency(extras, 10, asset =>
-          fetchPrice(asset.symbol, false),
-        );
-        for (let i = 0; i < extras.length && securities.length < tickerLimit; i++) {
-          if (extraPrices[i] !== null) {
-            securities.push(toRow(extras[i], extraPrices[i]));
-          }
-        }
-      }
+      // Keep famous-list order; include rows even without a live quote so the tape
+      // never falls back to alphabetical A* fillers.
+      const securities = pageAssets.map((asset, i) => toRow(asset, prices[i]));
 
       return NextResponse.json(
         {
@@ -362,7 +338,7 @@ export async function GET(request: NextRequest) {
           source: 'xStocks',
           mode: 'ticker',
           count: securities.length,
-          pricedOnPage: securities.length,
+          pricedOnPage: securities.filter(s => s.tokenizedPrice !== null).length,
           securities,
           syncIntervalSeconds: 120,
         },
