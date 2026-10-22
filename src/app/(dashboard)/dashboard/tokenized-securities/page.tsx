@@ -1,3 +1,4 @@
+import TvWidgetSymbolRedirect from '@/components/TvWidgetSymbolRedirect';
 import TokenizedSecurities from '@/page-components/TokenizedSecurities';
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
@@ -17,6 +18,7 @@ export default function TokenizedSecuritiesPage() {
         </div>
       }
     >
+      <TvWidgetSymbolRedirect />
       <TokenizedSecurities />
     </Suspense>
   );

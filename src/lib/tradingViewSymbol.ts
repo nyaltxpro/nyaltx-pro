@@ -67,3 +67,13 @@ export function stockProfilePath(underlyingSymbol: string): string {
   const symbol = underlyingSymbol.trim().toUpperCase();
   return `/dashboard/tokenized-securities/${encodeURIComponent(symbol)}`;
 }
+
+/** Strip EXCHANGE: prefix from TradingView `tvwidgetsymbol` query values. */
+export function underlyingFromTvWidgetSymbol(raw: string | null | undefined): string | null {
+  if (!raw) return null;
+  const decoded = decodeURIComponent(raw).trim().toUpperCase();
+  if (!decoded) return null;
+  const colon = decoded.lastIndexOf(':');
+  const symbol = colon >= 0 ? decoded.slice(colon + 1) : decoded;
+  return symbol || null;
+}

@@ -107,8 +107,8 @@ export default function Banner() {
       console.log('Using metadata hyperlink:', metadata.hyperlink);
       return metadata.hyperlink;
     }
-    // Fallback to existing logic
-    const fallbackLink = index === 1 ? '/pricing' : '/';
+    // Fallback: tokenized securities board
+    const fallbackLink = '/dashboard/tokenized-securities';
     console.log('Using fallback hyperlink:', fallbackLink, 'metadata:', metadata);
     return fallbackLink;
   };
@@ -118,13 +118,15 @@ export default function Banner() {
     const metadata = getCurrentBannerMetadata();
     if (metadata) {
       return {
-        title: metadata.title || (index === 1 ? 'Explore Pricing Plans' : 'Welcome to NYALTX'),
-        description: metadata.description || (index === 1 ? 'Discover our premium features' : 'Your crypto trading platform')
+        title: metadata.title || 'Tokenized Securities',
+        description:
+          metadata.description ||
+          'Live tokenized equities — open a symbol for charts and market data',
       };
     }
     return {
-      title: index === 1 ? 'Explore Pricing Plans' : 'Welcome to NYALTX',
-      description: index === 1 ? 'Discover our premium features' : 'Your crypto trading platform'
+      title: 'Tokenized Securities',
+      description: 'Live tokenized equities — open a symbol for charts and market data',
     };
   };
 

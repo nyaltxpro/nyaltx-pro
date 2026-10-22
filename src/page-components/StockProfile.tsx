@@ -71,8 +71,15 @@ type StockProfileProps = {
 
 export default function StockProfile({ symbol }: StockProfileProps) {
   const [security, setSecurity] = useState<SecurityDetail | null>(null);
+  const [origin, setOrigin] = useState('');
 
-  const underlying = symbol.toUpperCase();
+  useEffect(() => {
+    setOrigin(window.location.origin);
+  }, []);
+
+  const underlying = symbol.includes(':')
+    ? symbol.slice(symbol.lastIndexOf(':') + 1).toUpperCase()
+    : symbol.toUpperCase();
 
   const tvSymbol = useMemo(
     () =>
@@ -115,7 +122,7 @@ export default function StockProfile({ symbol }: StockProfileProps) {
         </Link>
       </div>
 
-      {/* Full-width ticker tape above the grid */}
+      {/* Full-width ticker tape — clicks go to our stock profile via largeChartUrl */}
       <WidgetCard className="mb-4" title="Ticker tape">
         <div className="min-h-[72px]">
           <TradingViewEmbed
@@ -130,6 +137,9 @@ export default function StockProfile({ symbol }: StockProfileProps) {
               isTransparent: true,
               displayMode: 'adaptive',
               locale: 'en',
+              largeChartUrl: origin
+                ? `${origin}/dashboard/tokenized-securities`
+                : '/dashboard/tokenized-securities',
             }}
           />
         </div>
