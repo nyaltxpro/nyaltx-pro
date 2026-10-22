@@ -1,9 +1,8 @@
 'use client';
 
-import TradingViewEmbed from '@/components/TradingViewEmbed';
+import TickerTapeRow from '@/components/TickerTapeRow';
 import { toTradingViewSymbol } from '@/lib/tradingViewSymbol';
-import { BarChartIcon } from '@radix-ui/react-icons';
-import Link from 'next/link';
+import { BarChartIcon, CubeIcon } from '@radix-ui/react-icons';
 import { useEffect, useMemo, useState } from 'react';
 
 type TickerSecurity = {
@@ -15,6 +14,25 @@ type TickerSecurity = {
 };
 
 const SYNC_MS = 5 * 60 * 1000;
+
+/** Major digital assets for the second ticker tape. */
+const DIGITAL_ASSET_SYMBOLS = [
+  { description: 'Bitcoin', proName: 'BINANCE:BTCUSDT' },
+  { description: 'Ethereum', proName: 'BINANCE:ETHUSDT' },
+  { description: 'Solana', proName: 'BINANCE:SOLUSDT' },
+  { description: 'BNB', proName: 'BINANCE:BNBUSDT' },
+  { description: 'XRP', proName: 'BINANCE:XRPUSDT' },
+  { description: 'Dogecoin', proName: 'BINANCE:DOGEUSDT' },
+  { description: 'Cardano', proName: 'BINANCE:ADAUSDT' },
+  { description: 'Avalanche', proName: 'BINANCE:AVAXUSDT' },
+  { description: 'Chainlink', proName: 'BINANCE:LINKUSDT' },
+  { description: 'Polygon', proName: 'BINANCE:MATICUSDT' },
+  { description: 'Polkadot', proName: 'BINANCE:DOTUSDT' },
+  { description: 'Near', proName: 'BINANCE:NEARUSDT' },
+  { description: 'Uniswap', proName: 'BINANCE:UNIUSDT' },
+  { description: 'Litecoin', proName: 'BINANCE:LTCUSDT' },
+  { description: 'Cosmos', proName: 'BINANCE:ATOMUSDT' },
+];
 
 const LivePriceTicker: React.FC = () => {
   const [securities, setSecurities] = useState<TickerSecurity[]>([]);
@@ -52,7 +70,7 @@ const LivePriceTicker: React.FC = () => {
     };
   }, []);
 
-  const symbols = useMemo(
+  const xStockSymbols = useMemo(
     () =>
       securities.map(s => {
         const underlying = s.underlyingSymbol || s.symbol.replace(/x$/i, '') || s.symbol;
@@ -64,59 +82,37 @@ const LivePriceTicker: React.FC = () => {
     [securities],
   );
 
-  // Clicks append ?tvwidgetsymbol=EXCHANGE:SYMBOL — board page redirects to our profile.
-  const largeChartUrl = origin
+  const xStocksChartUrl = origin
     ? `${origin}/dashboard/tokenized-securities`
     : '/dashboard/tokenized-securities';
 
-  return (
-    <div
-      className="w-full border-y border-gray-800/50 bg-gradient-to-r from-black/95 via-gray-900/95 to-black/95 backdrop-blur-lg"
-      style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
-    >
-      <div className="flex items-stretch">
-        <Link
-          href="/dashboard/tokenized-securities"
-          className="flex shrink-0 items-center gap-2 border-r border-gray-800/60 px-4 py-2 transition hover:bg-white/5"
-        >
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-r from-[#00d4aa] to-[#3b82f6]">
-            <BarChartIcon className="h-4 w-4 text-white" />
-          </div>
-          <div className="flex items-center gap-2">
-            <span
-              className="text-sm font-semibold tracking-wide text-[#00d4aa]"
-              style={{
-                fontFamily:
-                  'Space Grotesk, -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
-              }}
-            >
-              TOKENIZED SECURITIES
-            </span>
-            <span className="h-2 w-2 animate-pulse rounded-full bg-[#00d4aa]" />
-          </div>
-        </Link>
+  const digitalAssetsChartUrl = origin
+    ? `${origin}/dashboard/trending`
+    : '/dashboard/trending';
 
-        <div className="min-h-[46px] min-w-0 flex-1 overflow-hidden">
-          {loading && symbols.length === 0 ? (
-            <div className="flex h-full items-center px-4 text-sm text-gray-400">
-              Loading ticker tape…
-            </div>
-          ) : symbols.length === 0 ? null : (
-            <TradingViewEmbed
-              scriptSrc="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js"
-              config={{
-                symbols,
-                showSymbolLogo: true,
-                colorTheme: 'dark',
-                isTransparent: true,
-                displayMode: 'adaptive',
-                locale: 'en',
-                largeChartUrl,
-              }}
-            />
-          )}
-        </div>
-      </div>
+  return (
+    <div className="w-full border-y border-gray-800/50">
+      <TickerTapeRow
+        label="TOKENIZED XSTOCKS"
+        href="/dashboard/tokenized-securities"
+        icon={<BarChartIcon className="h-4 w-4 text-white" />}
+        accentClassName="text-[#00d4aa]"
+        iconClassName="bg-gradient-to-r from-[#00d4aa] to-[#3b82f6]"
+        symbols={xStockSymbols}
+        largeChartUrl={xStocksChartUrl}
+        loading={loading}
+        borderClassName="border-b border-gray-800/40"
+      />
+      <TickerTapeRow
+        label="DIGITAL ASSETS"
+        href="/dashboard/trending"
+        icon={<CubeIcon className="h-4 w-4 text-white" />}
+        accentClassName="text-cyan-400"
+        iconClassName="bg-gradient-to-r from-cyan-500 to-blue-600"
+        symbols={DIGITAL_ASSET_SYMBOLS}
+        largeChartUrl={digitalAssetsChartUrl}
+        borderClassName=""
+      />
     </div>
   );
 };
