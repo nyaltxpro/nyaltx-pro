@@ -119,9 +119,10 @@ function LivePriceTickerInner({ compact = false }: LivePriceTickerProps) {
     ? `${origin}/dashboard/tokenized-securities/go`
     : '/dashboard/tokenized-securities/go';
 
+  // TV appends ?tvwidgetsymbol=BINANCE:BTCUSDT → /trade/go redirects to token profile.
   const digitalAssetsChartUrl = origin
-    ? `${origin}/dashboard/trending`
-    : '/dashboard/trending';
+    ? `${origin}/dashboard/trade/go`
+    : '/dashboard/trade/go';
 
   // Wait for origin so largeChartUrl is absolute (TV needs it for click routing).
   if (!origin) {
@@ -143,7 +144,7 @@ function LivePriceTickerInner({ compact = false }: LivePriceTickerProps) {
       />
       <TickerTapeRow
         label="DIGITAL ASSETS"
-        href="/dashboard/trending"
+        href="/dashboard/trade"
         icon={<CubeIcon className="h-4 w-4 text-white" />}
         accentClassName="text-cyan-400"
         iconClassName="bg-gradient-to-r from-cyan-500 to-blue-600"
