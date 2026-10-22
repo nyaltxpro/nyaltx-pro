@@ -77,3 +77,25 @@ export function underlyingFromTvWidgetSymbol(raw: string | null | undefined): st
   const symbol = colon >= 0 ? decoded.slice(colon + 1) : decoded;
   return symbol || null;
 }
+
+const QUOTE_SUFFIXES = ['USDT', 'USDC', 'BUSD', 'USD', 'PERP'];
+
+/**
+ * From TradingView crypto symbols like BINANCE:BTCUSDT → BTC for /dashboard/trade?base=
+ */
+export function cryptoBaseFromTvWidgetSymbol(raw: string | null | undefined): string | null {
+  const pair = underlyingFromTvWidgetSymbol(raw);
+  if (!pair) return null;
+
+  for (const quote of QUOTE_SUFFIXES) {
+    if (pair.endsWith(quote) && pair.length > quote.length) {
+      return pair.slice(0, -quote.length);
+    }
+  }
+  return pair;
+}
+
+export function tokenTradePath(baseSymbol: string): string {
+  const base = baseSymbol.trim().toUpperCase();
+  return `/dashboard/trade?base=${encodeURIComponent(base)}`;
+}

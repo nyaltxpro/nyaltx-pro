@@ -14,6 +14,19 @@ function underlyingFromTvWidgetSymbol(raw: string | null): string | null {
   return symbol || null;
 }
 
+const QUOTE_SUFFIXES = ['USDT', 'USDC', 'BUSD', 'USD', 'PERP'];
+
+function cryptoBaseFromTvWidgetSymbol(raw: string | null): string | null {
+  const pair = underlyingFromTvWidgetSymbol(raw);
+  if (!pair) return null;
+  for (const quote of QUOTE_SUFFIXES) {
+    if (pair.endsWith(quote) && pair.length > quote.length) {
+      return pair.slice(0, -quote.length);
+    }
+  }
+  return pair;
+}
+
 async function hasValidAdminSession(req: NextRequest): Promise<boolean> {
   const token = req.cookies.get(COOKIE_NAME)?.value;
   if (!token) return false;
@@ -34,7 +47,7 @@ async function hasValidAdminSession(req: NextRequest): Promise<boolean> {
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // Ticker tape → stock profile (skip board page flash)
+  // xStocks ticker → stock profile
   if (
     pathname === '/dashboard/tokenized-securities' ||
     pathname === '/dashboard/tokenized-securities/go'
@@ -46,6 +59,17 @@ export async function middleware(req: NextRequest) {
       const url = req.nextUrl.clone();
       url.pathname = `/dashboard/tokenized-securities/${encodeURIComponent(underlying)}`;
       url.search = '';
+      return NextResponse.redirect(url);
+    }
+  }
+
+  // Digital assets ticker → token trade/profile
+  if (pathname === '/dashboard/trade/go' || pathname === '/dashboard/trending') {
+    const base = cryptoBaseFromTvWidgetSymbol(req.nextUrl.searchParams.get('tvwidgetsymbol'));
+    if (base) {
+      const url = req.nextUrl.clone();
+      url.pathname = '/dashboard/trade';
+      url.search = `?base=${encodeURIComponent(base)}`;
       return NextResponse.redirect(url);
     }
   }
@@ -94,5 +118,11 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/adminpanel/:path*', '/dashboard/tokenized-securities', '/dashboard/tokenized-securities/go'],
+  matcher: [
+    '/adminpanel/:path*',
+    '/dashboard/tokenized-securities',
+    '/dashboard/tokenized-securities/go',
+    '/dashboard/trade/go',
+    '/dashboard/trending',
+  ],
 };
