@@ -138,8 +138,8 @@ export default function StockProfile({ symbol }: StockProfileProps) {
               displayMode: 'adaptive',
               locale: 'en',
               largeChartUrl: origin
-                ? `${origin}/dashboard/tokenized-securities`
-                : '/dashboard/tokenized-securities',
+                ? `${origin}/dashboard/tokenized-securities/go`
+                : '/dashboard/tokenized-securities/go',
             }}
           />
         </div>

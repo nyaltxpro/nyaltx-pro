@@ -4,6 +4,16 @@ import { NextResponse } from 'next/server';
 
 const COOKIE_NAME = 'admin_jwt';
 
+/** Strip EXCHANGE: prefix from TradingView tvwidgetsymbol. */
+function underlyingFromTvWidgetSymbol(raw: string | null): string | null {
+  if (!raw) return null;
+  const decoded = decodeURIComponent(raw).trim().toUpperCase();
+  if (!decoded) return null;
+  const colon = decoded.lastIndexOf(':');
+  const symbol = colon >= 0 ? decoded.slice(colon + 1) : decoded;
+  return symbol || null;
+}
+
 async function hasValidAdminSession(req: NextRequest): Promise<boolean> {
   const token = req.cookies.get(COOKIE_NAME)?.value;
   if (!token) return false;
@@ -23,6 +33,23 @@ async function hasValidAdminSession(req: NextRequest): Promise<boolean> {
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
+
+  // Ticker tape → stock profile (skip board page flash)
+  if (
+    pathname === '/dashboard/tokenized-securities' ||
+    pathname === '/dashboard/tokenized-securities/go'
+  ) {
+    const underlying = underlyingFromTvWidgetSymbol(
+      req.nextUrl.searchParams.get('tvwidgetsymbol'),
+    );
+    if (underlying) {
+      const url = req.nextUrl.clone();
+      url.pathname = `/dashboard/tokenized-securities/${encodeURIComponent(underlying)}`;
+      url.search = '';
+      return NextResponse.redirect(url);
+    }
+  }
+
   const isAdminRoute = pathname.startsWith('/adminpanel');
   const isLoginRoute = pathname === '/adminpanel/login';
 
@@ -67,5 +94,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/adminpanel/:path*'],
+  matcher: ['/adminpanel/:path*', '/dashboard/tokenized-securities', '/dashboard/tokenized-securities/go'],
 };

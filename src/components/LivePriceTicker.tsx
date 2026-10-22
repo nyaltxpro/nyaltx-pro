@@ -87,9 +87,10 @@ const LivePriceTicker: React.FC = () => {
     });
   }, [securities]);
 
+  // Dedicated /go route server-redirects to profile (no board flash).
   const xStocksChartUrl = origin
-    ? `${origin}/dashboard/tokenized-securities`
-    : '/dashboard/tokenized-securities';
+    ? `${origin}/dashboard/tokenized-securities/go`
+    : '/dashboard/tokenized-securities/go'
 
   const digitalAssetsChartUrl = origin
     ? `${origin}/dashboard/trending`
