@@ -611,9 +611,20 @@ const AdminBlogManagerComponent = () => {
                   </p>
                 ) : null}
                 {form.featuredImage ? (
-                  <p className="mt-2 text-xs text-white/50 break-all">
-                    Current image: <span className="font-medium text-white/80">{form.featuredImage}</span>
-                  </p>
+                  <div className="mt-3 space-y-2">
+                    <p className="text-xs text-white/50 break-all">
+                      Current image: <span className="font-medium text-white/80">{form.featuredImage}</span>
+                    </p>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={form.featuredImage}
+                      alt="Featured preview"
+                      className="max-h-40 w-full rounded-lg border border-white/10 object-cover"
+                      onError={(event) => {
+                        (event.target as HTMLImageElement).style.display = 'none';
+                      }}
+                    />
+                  </div>
                 ) : null}
               </div>
             </div>
@@ -706,7 +717,7 @@ const AdminBlogManagerComponent = () => {
                 placeholder="Write your blog post content here..."
               />
             ) : (
-              <div className="mt-2 rounded-lg border border-white/10 bg-black/10">
+              <div className="quill-dark mt-2 overflow-hidden rounded-xl">
                 <div
                   ref={quillContainerRef}
                   className="quill-editor"

@@ -13,8 +13,8 @@ import {
   FaTag,
 } from 'react-icons/fa';
 import RichTextRenderer from '@/components/TinaRichText';
+import { isLocalBlogImage, resolveBlogImageUrl } from '@/lib/blogImage';
 import type { SerializedBlogPost } from '@/lib/blogServer';
-import { toReliableIpfsUrl } from '@/utils/ipfsUpload';
 
 interface BlogArticleProps {
   post: SerializedBlogPost;
@@ -39,7 +39,11 @@ const BlogArticle = ({ post }: BlogArticleProps) => {
   const [copied, setCopied] = useState(false);
   const shareUrl = useMemo(() => (typeof window !== 'undefined' ? window.location.href : ''), []);
 
-  const workingImageUrl = useMemo(() => toReliableIpfsUrl(post.featuredImage) || undefined, [post.featuredImage]);
+  const workingImageUrl = useMemo(
+    () => resolveBlogImageUrl(post.featuredImage) || undefined,
+    [post.featuredImage],
+  );
+  const [imageFailed, setImageFailed] = useState(false);
   const published = formatPublishedDateTime(post.publishedAt ?? undefined);
   const readingTime = useMemo(() => {
     if (post.readingTime) return post.readingTime;
@@ -166,24 +170,35 @@ const BlogArticle = ({ post }: BlogArticleProps) => {
           </div>
         </header>
 
-        {workingImageUrl ? (
-          <div className="relative mb-10 overflow-hidden rounded-3xl border border-white/10" style={{ minHeight: '320px' }}>
-            <Image
-              src={workingImageUrl}
-              alt={post.title ?? 'Blog featured image'}
-              fill
-              className="object-cover"
-              unoptimized={Boolean(workingImageUrl && /\/ipfs\//.test(workingImageUrl))}
-              priority
-            />
-            <div className="absolute inset-0 bg-linear-to-t from-black/50 via-transparent to-transparent" />
+        {workingImageUrl && !imageFailed ? (
+          <div className="relative mb-10 overflow-hidden rounded-3xl border border-white/10 bg-black/30" style={{ minHeight: '320px' }}>
+            {/* Prefer plain img for local/public paths with awkward filenames; Next Image for remotes */}
+            {isLocalBlogImage(post.featuredImage) || /\/ipfs\//.test(workingImageUrl) ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={workingImageUrl}
+                alt={post.title ?? 'Blog featured image'}
+                className="h-full w-full object-cover"
+                style={{ minHeight: 320, maxHeight: 480 }}
+                onError={() => setImageFailed(true)}
+              />
+            ) : (
+              <Image
+                src={workingImageUrl}
+                alt={post.title ?? 'Blog featured image'}
+                fill
+                className="object-cover"
+                unoptimized
+                priority
+                onError={() => setImageFailed(true)}
+              />
+            )}
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
           </div>
         ) : null}
 
-        <article className="prose prose-invert prose-lg max-w-none">
-          {post.content ? (
-            <RichTextRenderer content={post.content} className="prose prose-invert prose-lg max-w-none" />
-          ) : null}
+        <article className="rounded-2xl border border-white/10 bg-black/20 p-6 md:p-10">
+          {post.content ? <RichTextRenderer content={post.content} /> : null}
         </article>
 
         {post.tags?.length ? (

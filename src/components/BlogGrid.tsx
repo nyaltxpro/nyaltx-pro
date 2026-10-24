@@ -3,8 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { isLocalBlogImage, resolveBlogImageUrl } from "@/lib/blogImage";
 import type { SerializedBlogPost } from "@/lib/blogServer";
-import { toReliableIpfsUrl } from "@/utils/ipfsUpload";
 
 interface BlogResponse {
   posts: SerializedBlogPost[];
@@ -133,24 +133,33 @@ const BlogGrid = () => {
       <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
         {filteredPosts.map((post) => {
           const publishedAt = formatPublishedDate(post.publishedAt ?? undefined);
-          const image = toReliableIpfsUrl(post.featuredImage);
+          const image = resolveBlogImageUrl(post.featuredImage);
 
           return (
             <article
               key={post.slug}
               className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur transition-transform duration-300 hover:-translate-y-1 hover:border-cyan-500/40"
             >
-              <div className="relative h-48 w-full overflow-hidden">
+              <div className="relative h-48 w-full overflow-hidden bg-black/30">
                 {image ? (
                   <>
-                    <Image
-                      src={image}
-                      alt={post.title ?? "Blog post"}
-                      fill
-                      className="object-cover transition-transform duration-500 group-hover:scale-105"
-                      unoptimized={/\/ipfs\//.test(image)}
-                    />
-                    <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
+                    {isLocalBlogImage(post.featuredImage) || /\/ipfs\//.test(image) ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={image}
+                        alt={post.title ?? "Blog post"}
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    ) : (
+                      <Image
+                        src={image}
+                        alt={post.title ?? "Blog post"}
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        unoptimized
+                      />
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                   </>
                 ) : (
                   <div className="flex h-full w-full items-center justify-center bg-linear-to-br from-cyan-500/30 via-indigo-500/20 to-transparent">

@@ -543,7 +543,7 @@ function AdminCorporateNewsComponent() {
                                 placeholder="Write your news article content here..."
                             />
                         ) : (
-                            <div className="relative rounded-lg border border-gray-600/50 bg-gray-700/30">
+                            <div className="quill-dark relative overflow-hidden rounded-xl">
                                 {isQuillLoading && (
                                     <div className="absolute inset-0 z-10 flex items-center justify-center bg-gray-900/60 backdrop-blur-sm">
                                         <div className="text-center">

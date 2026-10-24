@@ -4,11 +4,11 @@
   "publishedAt": "2025-11-04T04:14:45.366Z",
   "author": "test",
   "excerpt": "test",
-  "featuredImage": "/ChatGPT%20Image%20Oct%2025,%202025,%2002_16_11%20AM.png",
-  "status": "draft",
+  "featuredImage": "/blog-featured-test.png",
+  "status": "published",
   "categories": [
     "sdd"
   ],
   "tags": [],
-  "content": "##### **ddfdfdf**\n"
+  "content": "<h2>Test post</h2><p>This is a sample body with <strong>readable</strong> light text on the dark blog theme.</p>"
 }

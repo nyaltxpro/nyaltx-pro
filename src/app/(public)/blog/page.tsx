@@ -20,7 +20,7 @@ export const revalidate = 300;
 
 const BlogPage = () => {
     return (
-        <div className="min-h-screen text-white">
+        <div className="min-h-screen bg-gradient-to-b from-[#0a0a0a] via-[#101010] to-[#0a0a0a] text-white">
             <PublicHeader />
 
             <section className="relative overflow-hidden">

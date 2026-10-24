@@ -524,3 +524,149 @@ body {
   background-color: rgba(10, 10, 10, 0.55) !important;
   backdrop-filter: blur(12px);
 }
+
+/* Blog article body — force readable light text on dark pages (Quill/HTML often ships black text) */
+.blog-prose {
+  color: rgba(255, 255, 255, 0.82);
+  line-height: 1.75;
+  font-size: 1.05rem;
+}
+
+.blog-prose h1,
+.blog-prose h2,
+.blog-prose h3,
+.blog-prose h4,
+.blog-prose h5,
+.blog-prose h6 {
+  color: #ffffff !important;
+  font-weight: 700;
+  margin-top: 1.75rem;
+  margin-bottom: 0.75rem;
+  line-height: 1.25;
+}
+
+.blog-prose h1 { font-size: 2rem; }
+.blog-prose h2 { font-size: 1.5rem; }
+.blog-prose h3 { font-size: 1.25rem; }
+
+.blog-prose p,
+.blog-prose li,
+.blog-prose span,
+.blog-prose div {
+  color: rgba(255, 255, 255, 0.82) !important;
+}
+
+.blog-prose a {
+  color: #67e8f9 !important;
+  text-decoration: underline;
+}
+
+.blog-prose strong,
+.blog-prose b {
+  color: #ffffff !important;
+  font-weight: 700;
+}
+
+.blog-prose ul,
+.blog-prose ol {
+  margin: 1rem 0;
+  padding-left: 1.5rem;
+}
+
+.blog-prose ul { list-style: disc; }
+.blog-prose ol { list-style: decimal; }
+
+.blog-prose blockquote {
+  border-left: 3px solid rgba(34, 211, 238, 0.5);
+  padding-left: 1rem;
+  margin: 1.25rem 0;
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.blog-prose code {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fef08a !important;
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.35rem;
+  font-size: 0.9em;
+}
+
+.blog-prose pre {
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  overflow-x: auto;
+  margin: 1.25rem 0;
+}
+
+.blog-prose img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.75rem;
+  margin: 1.5rem 0;
+  display: block;
+}
+
+.blog-prose hr {
+  border-color: rgba(255, 255, 255, 0.15);
+  margin: 2rem 0;
+}
+
+/* Quill editor — dark admin panel (snow theme overrides) */
+.quill-dark .ql-toolbar.ql-snow {
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 0.75rem 0.75rem 0 0;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.quill-dark .ql-container.ql-snow {
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-top: 0 !important;
+  border-radius: 0 0 0.75rem 0.75rem;
+  background: rgba(0, 0, 0, 0.35);
+  color: #ffffff;
+  min-height: 320px;
+  font-size: 0.95rem;
+}
+
+.quill-dark .ql-editor {
+  min-height: 300px;
+  color: rgba(255, 255, 255, 0.9) !important;
+  line-height: 1.6;
+}
+
+.quill-dark .ql-editor.ql-blank::before {
+  color: rgba(255, 255, 255, 0.35) !important;
+  font-style: normal;
+}
+
+.quill-dark .ql-snow .ql-stroke {
+  stroke: rgba(255, 255, 255, 0.7) !important;
+}
+
+.quill-dark .ql-snow .ql-fill {
+  fill: rgba(255, 255, 255, 0.7) !important;
+}
+
+.quill-dark .ql-snow .ql-picker {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.quill-dark .ql-snow .ql-picker-options {
+  background: #111111 !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+.quill-dark .ql-snow .ql-picker-item,
+.quill-dark .ql-snow .ql-picker-label {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.quill-dark .ql-snow.ql-toolbar button:hover,
+.quill-dark .ql-snow .ql-toolbar button:hover,
+.quill-dark .ql-snow.ql-toolbar button.ql-active,
+.quill-dark .ql-snow .ql-toolbar button.ql-active {
+  background: rgba(34, 211, 238, 0.15);
+  border-radius: 0.35rem;
+}

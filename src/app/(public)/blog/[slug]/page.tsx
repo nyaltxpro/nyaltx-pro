@@ -2,17 +2,18 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import PublicHeader from "@/components/PublicHeader";
 import BlogArticle from "@/components/BlogArticle";
-import { getBlogPostBySlug, getPublishedBlogPosts } from "@/lib/blogServer";
+import { getPublicBlogPostBySlug, getPublicBlogPosts } from "@/lib/publicBlog";
+import { resolveBlogImageUrl } from "@/lib/blogImage";
 
-export const revalidate = 300;
+export const revalidate = 60;
 
-type PageParams = {
-  slug: string;
+type PageProps = {
+  params: Promise<{ slug: string }>;
 };
 
 export async function generateStaticParams() {
   try {
-    const posts = await getPublishedBlogPosts(100);
+    const posts = await getPublicBlogPosts(100);
     return posts.map((post) => ({ slug: post.slug }));
   } catch (error) {
     console.error("Failed to generate blog params", error);
@@ -20,8 +21,9 @@ export async function generateStaticParams() {
   }
 }
 
-export async function generateMetadata({ params }: { params: PageParams }): Promise<Metadata> {
-  const post = await getBlogPostBySlug(params.slug);
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const post = await getPublicBlogPostBySlug(slug);
 
   if (!post) {
     return {
@@ -32,7 +34,7 @@ export async function generateMetadata({ params }: { params: PageParams }): Prom
 
   const fallbackTitle = post.title ? `${post.title} - NYALTX Blog` : "NYALTX Blog";
   const fallbackDescription = post.excerpt ?? "Discover insights from the NYALTX team.";
-  const ogImage = post.seo?.ogImage ?? post.featuredImage;
+  const ogImage = resolveBlogImageUrl(post.seo?.ogImage ?? post.featuredImage);
 
   return {
     title: post.seo?.metaTitle ?? fallbackTitle,
@@ -63,15 +65,16 @@ export async function generateMetadata({ params }: { params: PageParams }): Prom
   };
 }
 
-const BlogPostPage = async ({ params }: { params: PageParams }) => {
-  const post = await getBlogPostBySlug(params.slug);
+const BlogPostPage = async ({ params }: PageProps) => {
+  const { slug } = await params;
+  const post = await getPublicBlogPostBySlug(slug);
 
   if (!post) {
     notFound();
   }
 
   return (
-    <div className="min-h-screen text-white">
+    <div className="min-h-screen bg-gradient-to-b from-[#0a0a0a] via-[#101010] to-[#0a0a0a] text-white">
       <PublicHeader />
       <BlogArticle post={post} />
     </div>
