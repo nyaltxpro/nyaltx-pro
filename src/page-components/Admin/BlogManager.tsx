@@ -11,6 +11,7 @@ import {
   FaSave,
   FaSpinner,
   FaTag,
+  FaTimes,
   FaTrash,
   FaUpload,
 } from 'react-icons/fa';
@@ -213,17 +214,36 @@ const AdminBlogManagerComponent = () => {
     }
   };
 
-  useEffect(() => {
-    loadPosts(activeFilter);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeFilter]);
-
   const resetForm = () => {
     setForm(initialFormState);
     setIsFormOpen(false);
     setSelectedFile(null);
     setIsUploadingToIPFS(false);
   };
+
+  useEffect(() => {
+    loadPosts(activeFilter);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeFilter]);
+
+  useEffect(() => {
+    if (!isFormOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && !state.loading && !isUploadingToIPFS) {
+        resetForm();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isFormOpen, state.loading, isUploadingToIPFS]);
 
   const handleCreate = () => {
     setForm(initialFormState);
@@ -534,256 +554,296 @@ const AdminBlogManagerComponent = () => {
       </div>
 
       {isFormOpen ? (
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-          <div className="mb-4 flex items-center justify-between">
-            <h3 className="flex items-center gap-2 text-lg font-semibold text-white">
-              <FaNewspaper className="h-5 w-5 text-cyan-300" />
-              {form.id ? 'Edit Blog Post' : 'Create Blog Post'}
-            </h3>
-          </div>
+        <div
+          className="fixed inset-0 z-[80] flex items-start justify-center overflow-y-auto bg-black/70 p-4 backdrop-blur-sm sm:items-center"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="blog-form-modal-title"
+          onClick={(event) => {
+            if (event.target === event.currentTarget && !state.loading && !isUploadingToIPFS) {
+              resetForm();
+            }
+          }}
+        >
+          <div className="my-4 flex max-h-[min(92vh,900px)] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#0d0d0d] shadow-2xl">
+            <div className="flex shrink-0 items-center justify-between gap-4 border-b border-white/10 px-5 py-4 sm:px-6">
+              <h3
+                id="blog-form-modal-title"
+                className="flex items-center gap-2 text-lg font-semibold text-white"
+              >
+                <FaNewspaper className="h-5 w-5 text-cyan-300" />
+                {form.id ? 'Edit Blog Post' : 'Create Blog Post'}
+              </h3>
+              <button
+                type="button"
+                onClick={resetForm}
+                disabled={state.loading || isUploadingToIPFS}
+                aria-label="Close"
+                className="rounded-lg border border-white/15 p-2 text-white/60 transition hover:bg-white/10 hover:text-white disabled:opacity-50"
+              >
+                <FaTimes className="h-4 w-4" />
+              </button>
+            </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-4">
-              <label className="block text-sm text-white/70">
-                Title
-                <input
-                  type="text"
-                  value={form.title}
-                  onChange={(event) => setForm((prev) => ({ ...prev, title: event.target.value }))}
-                  className="mt-1 w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white focus:border-cyan-500/60 focus:outline-none"
-                />
-              </label>
-              <label className="block text-sm text-white/70">
-                Slug (optional)
-                <input
-                  type="text"
-                  value={form.slug}
-                  onChange={(event) => setForm((prev) => ({ ...prev, slug: event.target.value }))}
-                  className="mt-1 w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white focus:border-cyan-500/60 focus:outline-none"
-                  placeholder="auto-generated from title"
-                />
-              </label>
-              <label className="block text-sm text-white/70">
-                Author
-                <input
-                  type="text"
-                  value={form.author}
-                  onChange={(event) => setForm((prev) => ({ ...prev, author: event.target.value }))}
-                  className="mt-1 w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white focus:border-cyan-500/60 focus:outline-none"
-                />
-              </label>
-              <label className="block text-sm text-white/70">
-                Featured Image URL
-                <input
-                  type="text"
-                  value={form.featuredImage}
-                  onChange={(event) => setForm((prev) => ({ ...prev, featuredImage: event.target.value }))}
-                  className="mt-1 w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white focus:border-cyan-500/60 focus:outline-none"
-                  placeholder="https://ipfs.io/ipfs/..."
-                />
-              </label>
-              <div className="rounded-lg border border-white/10 bg-black/20 p-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/40">Upload to IPFS</p>
-                <p className="mt-2 text-sm text-white/60">
-                  Select an image to upload via the existing IPFS uploader. When the upload finishes, the image URL will be added automatically.
-                </p>
-                <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center">
-                  <input
-                    id="blog-ipfs-file"
-                    type="file"
-                    accept="image/jpeg,image/png,image/gif,image/webp"
-                    onChange={handleFileSelect}
-                    className="text-sm text-white/70 file:mr-3 file:rounded-md file:border-0 file:bg-cyan-500/20 file:px-3 file:py-2 file:text-sm file:font-medium file:text-cyan-100 hover:file:bg-cyan-500/30"
-                  />
-                  <button
-                    type="button"
-                    onClick={uploadToIPFS}
-                    disabled={isUploadingToIPFS || !selectedFile}
-                    className="inline-flex items-center gap-2 rounded-lg border border-cyan-500/40 bg-cyan-500/20 px-3 py-2 text-xs font-semibold text-cyan-100 transition hover:bg-cyan-500/30 disabled:opacity-60"
-                  >
-                    {isUploadingToIPFS ? <FaSpinner className="h-4 w-4 animate-spin" /> : <FaUpload className="h-4 w-4" />}
-                    Upload to IPFS
-                  </button>
+            <div className="flex-1 space-y-4 overflow-y-auto px-5 py-5 sm:px-6">
+              {state.error ? (
+                <div className="rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+                  {state.error}
                 </div>
-                {selectedFile ? (
-                  <p className="mt-2 text-xs text-white/50">
-                    Selected file: <span className="font-medium text-white">{selectedFile.name}</span>
-                  </p>
-                ) : null}
-                {form.featuredImage ? (
-                  <div className="mt-3 space-y-2">
-                    <p className="text-xs text-white/50 break-all">
-                      Current image: <span className="font-medium text-white/80">{form.featuredImage}</span>
+              ) : null}
+              {state.success ? (
+                <div className="rounded-lg border border-green-500/40 bg-green-500/10 px-4 py-3 text-sm text-green-200">
+                  {state.success}
+                </div>
+              ) : null}
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-4">
+                  <label className="block text-sm text-white/70">
+                    Title
+                    <input
+                      type="text"
+                      value={form.title}
+                      onChange={(event) => setForm((prev) => ({ ...prev, title: event.target.value }))}
+                      className="mt-1 w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white focus:border-cyan-500/60 focus:outline-none"
+                    />
+                  </label>
+                  <label className="block text-sm text-white/70">
+                    Slug (optional)
+                    <input
+                      type="text"
+                      value={form.slug}
+                      onChange={(event) => setForm((prev) => ({ ...prev, slug: event.target.value }))}
+                      className="mt-1 w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white focus:border-cyan-500/60 focus:outline-none"
+                      placeholder="auto-generated from title"
+                    />
+                  </label>
+                  <label className="block text-sm text-white/70">
+                    Author
+                    <input
+                      type="text"
+                      value={form.author}
+                      onChange={(event) => setForm((prev) => ({ ...prev, author: event.target.value }))}
+                      className="mt-1 w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white focus:border-cyan-500/60 focus:outline-none"
+                    />
+                  </label>
+                  <label className="block text-sm text-white/70">
+                    Featured Image URL
+                    <input
+                      type="text"
+                      value={form.featuredImage}
+                      onChange={(event) => setForm((prev) => ({ ...prev, featuredImage: event.target.value }))}
+                      className="mt-1 w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white focus:border-cyan-500/60 focus:outline-none"
+                      placeholder="https://ipfs.io/ipfs/..."
+                    />
+                  </label>
+                  <div className="rounded-lg border border-white/10 bg-black/20 p-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/40">Upload to IPFS</p>
+                    <p className="mt-2 text-sm text-white/60">
+                      Select an image to upload via the existing IPFS uploader. When the upload finishes, the image URL will be added automatically.
                     </p>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={form.featuredImage}
-                      alt="Featured preview"
-                      className="max-h-40 w-full rounded-lg border border-white/10 object-cover"
-                      onError={(event) => {
-                        (event.target as HTMLImageElement).style.display = 'none';
-                      }}
+                    <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center">
+                      <input
+                        id="blog-ipfs-file"
+                        type="file"
+                        accept="image/jpeg,image/png,image/gif,image/webp"
+                        onChange={handleFileSelect}
+                        className="text-sm text-white/70 file:mr-3 file:rounded-md file:border-0 file:bg-cyan-500/20 file:px-3 file:py-2 file:text-sm file:font-medium file:text-cyan-100 hover:file:bg-cyan-500/30"
+                      />
+                      <button
+                        type="button"
+                        onClick={uploadToIPFS}
+                        disabled={isUploadingToIPFS || !selectedFile}
+                        className="inline-flex items-center gap-2 rounded-lg border border-cyan-500/40 bg-cyan-500/20 px-3 py-2 text-xs font-semibold text-cyan-100 transition hover:bg-cyan-500/30 disabled:opacity-60"
+                      >
+                        {isUploadingToIPFS ? <FaSpinner className="h-4 w-4 animate-spin" /> : <FaUpload className="h-4 w-4" />}
+                        Upload to IPFS
+                      </button>
+                    </div>
+                    {selectedFile ? (
+                      <p className="mt-2 text-xs text-white/50">
+                        Selected file: <span className="font-medium text-white">{selectedFile.name}</span>
+                      </p>
+                    ) : null}
+                    {form.featuredImage ? (
+                      <div className="mt-3 space-y-2">
+                        <p className="break-all text-xs text-white/50">
+                          Current image: <span className="font-medium text-white/80">{form.featuredImage}</span>
+                        </p>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={form.featuredImage}
+                          alt="Featured preview"
+                          className="max-h-40 w-full rounded-lg border border-white/10 object-cover"
+                          onError={(event) => {
+                            (event.target as HTMLImageElement).style.display = 'none';
+                          }}
+                        />
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <label className="block text-sm text-white/70">
+                    Status
+                    <select
+                      value={form.status}
+                      onChange={(event) => setForm((prev) => ({ ...prev, status: event.target.value as 'draft' | 'published' }))}
+                      className="mt-1 w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white focus:border-cyan-500/60 focus:outline-none"
+                    >
+                      <option value="draft">Draft</option>
+                      <option value="published">Published</option>
+                    </select>
+                  </label>
+                  <label className="block text-sm text-white/70">
+                    Published At (optional)
+                    <input
+                      type="datetime-local"
+                      value={form.publishedAt}
+                      onChange={(event) => setForm((prev) => ({ ...prev, publishedAt: event.target.value }))}
+                      className="mt-1 w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white focus:border-cyan-500/60 focus:outline-none"
+                    />
+                  </label>
+                  <label className="block text-sm text-white/70">
+                    Reading Time Label
+                    <input
+                      type="text"
+                      value={form.readingTime}
+                      onChange={(event) => setForm((prev) => ({ ...prev, readingTime: event.target.value }))}
+                      className="mt-1 w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white focus:border-cyan-500/60 focus:outline-none"
+                      placeholder="e.g. 5 min read"
+                    />
+                  </label>
+                  <label className="block text-sm text-white/70">
+                    Categories (comma separated)
+                    <input
+                      type="text"
+                      value={form.categories}
+                      onChange={(event) => setForm((prev) => ({ ...prev, categories: event.target.value }))}
+                      className="mt-1 w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white focus:border-cyan-500/60 focus:outline-none"
+                    />
+                  </label>
+                  <label className="block text-sm text-white/70">
+                    Tags (comma separated)
+                    <input
+                      type="text"
+                      value={form.tags}
+                      onChange={(event) => setForm((prev) => ({ ...prev, tags: event.target.value }))}
+                      className="mt-1 w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white focus:border-cyan-500/60 focus:outline-none"
+                    />
+                  </label>
+                </div>
+              </div>
+
+              <label className="block text-sm text-white/70">
+                Excerpt
+                <textarea
+                  value={form.excerpt}
+                  onChange={(event) => setForm((prev) => ({ ...prev, excerpt: event.target.value }))}
+                  rows={3}
+                  className="mt-1 w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white focus:border-cyan-500/60 focus:outline-none"
+                  placeholder="Short description shown on listing pages"
+                />
+              </label>
+
+              <div className="flex items-center gap-4">
+                <label className="block text-sm text-white/70">
+                  Editor Type
+                  <select
+                    value={form.editorType}
+                    onChange={(event) => setForm((prev) => ({ ...prev, editorType: event.target.value as 'simple' | 'quill' }))}
+                    className="mt-1 w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white focus:border-cyan-500/60 focus:outline-none"
+                  >
+                    <option value="simple">Simple Text</option>
+                    <option value="quill">Rich Text (Quill)</option>
+                  </select>
+                </label>
+              </div>
+
+              <label className="block text-sm text-white/70">
+                Content
+                {form.editorType === 'simple' ? (
+                  <textarea
+                    value={form.content}
+                    onChange={(event) => setForm((prev) => ({ ...prev, content: event.target.value }))}
+                    rows={12}
+                    className="mt-2 w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white focus:border-cyan-500/60 focus:outline-none"
+                    placeholder="Write your blog post content here..."
+                  />
+                ) : (
+                  <div className="quill-dark mt-2 overflow-hidden rounded-xl">
+                    <div
+                      ref={quillContainerRef}
+                      className="quill-editor"
+                      style={{ minHeight: '320px' }}
                     />
                   </div>
-                ) : null}
+                )}
+              </label>
+
+              <div className="rounded-xl border border-white/10 bg-black/20 p-4">
+                <h4 className="text-sm font-semibold text-white">SEO Metadata</h4>
+                <div className="mt-3 grid gap-4 md:grid-cols-2">
+                  <label className="block text-sm text-white/70">
+                    Meta Title
+                    <input
+                      type="text"
+                      value={form.seoMetaTitle}
+                      onChange={(event) => setForm((prev) => ({ ...prev, seoMetaTitle: event.target.value }))}
+                      className="mt-1 w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white focus:border-cyan-500/60 focus:outline-none"
+                    />
+                  </label>
+                  <label className="block text-sm text-white/70">
+                    Meta Description
+                    <input
+                      type="text"
+                      value={form.seoMetaDescription}
+                      onChange={(event) => setForm((prev) => ({ ...prev, seoMetaDescription: event.target.value }))}
+                      className="mt-1 w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white focus:border-cyan-500/60 focus:outline-none"
+                    />
+                  </label>
+                  <label className="block text-sm text-white/70">
+                    Keywords (comma separated)
+                    <input
+                      type="text"
+                      value={form.seoKeywords}
+                      onChange={(event) => setForm((prev) => ({ ...prev, seoKeywords: event.target.value }))}
+                      className="mt-1 w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white focus:border-cyan-500/60 focus:outline-none"
+                    />
+                  </label>
+                  <label className="block text-sm text-white/70">
+                    Open Graph Image URL
+                    <input
+                      type="text"
+                      value={form.seoOgImage}
+                      onChange={(event) => setForm((prev) => ({ ...prev, seoOgImage: event.target.value }))}
+                      className="mt-1 w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white focus:border-cyan-500/60 focus:outline-none"
+                    />
+                  </label>
+                </div>
               </div>
             </div>
 
-            <div className="space-y-4">
-              <label className="block text-sm text-white/70">
-                Status
-                <select
-                  value={form.status}
-                  onChange={(event) => setForm((prev) => ({ ...prev, status: event.target.value as 'draft' | 'published' }))}
-                  className="mt-1 w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white focus:border-cyan-500/60 focus:outline-none"
-                >
-                  <option value="draft">Draft</option>
-                  <option value="published">Published</option>
-                </select>
-              </label>
-              <label className="block text-sm text-white/70">
-                Published At (optional)
-                <input
-                  type="datetime-local"
-                  value={form.publishedAt}
-                  onChange={(event) => setForm((prev) => ({ ...prev, publishedAt: event.target.value }))}
-                  className="mt-1 w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white focus:border-cyan-500/60 focus:outline-none"
-                />
-              </label>
-              <label className="block text-sm text-white/70">
-                Reading Time Label
-                <input
-                  type="text"
-                  value={form.readingTime}
-                  onChange={(event) => setForm((prev) => ({ ...prev, readingTime: event.target.value }))}
-                  className="mt-1 w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white focus:border-cyan-500/60 focus:outline-none"
-                  placeholder="e.g. 5 min read"
-                />
-              </label>
-              <label className="block text-sm text-white/70">
-                Categories (comma separated)
-                <input
-                  type="text"
-                  value={form.categories}
-                  onChange={(event) => setForm((prev) => ({ ...prev, categories: event.target.value }))}
-                  className="mt-1 w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white focus:border-cyan-500/60 focus:outline-none"
-                />
-              </label>
-              <label className="block text-sm text-white/70">
-                Tags (comma separated)
-                <input
-                  type="text"
-                  value={form.tags}
-                  onChange={(event) => setForm((prev) => ({ ...prev, tags: event.target.value }))}
-                  className="mt-1 w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white focus:border-cyan-500/60 focus:outline-none"
-                />
-              </label>
-            </div>
-          </div>
-
-          <label className="mt-4 block text-sm text-white/70">
-            Excerpt
-            <textarea
-              value={form.excerpt}
-              onChange={(event) => setForm((prev) => ({ ...prev, excerpt: event.target.value }))}
-              rows={3}
-              className="mt-1 w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white focus:border-cyan-500/60 focus:outline-none"
-              placeholder="Short description shown on listing pages"
-            />
-          </label>
-
-          <div className="mt-4 flex items-center gap-4">
-            <label className="block text-sm text-white/70">
-              Editor Type
-              <select
-                value={form.editorType}
-                onChange={(event) => setForm((prev) => ({ ...prev, editorType: event.target.value as 'simple' | 'quill' }))}
-                className="mt-1 w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white focus:border-cyan-500/60 focus:outline-none"
+            <div className="flex shrink-0 flex-wrap items-center gap-3 border-t border-white/10 px-5 py-4 sm:px-6">
+              <button
+                type="button"
+                onClick={handleSave}
+                disabled={state.loading}
+                className="inline-flex items-center gap-2 rounded-lg border border-cyan-500/40 bg-cyan-500/20 px-4 py-2 text-sm font-semibold text-cyan-100 transition hover:bg-cyan-500/30 disabled:opacity-60"
               >
-                <option value="simple">Simple Text</option>
-                <option value="quill">Rich Text (Quill)</option>
-              </select>
-            </label>
-          </div>
-
-          <label className="mt-4 block text-sm text-white/70">
-            Content
-            {form.editorType === 'simple' ? (
-              <textarea
-                value={form.content}
-                onChange={(event) => setForm((prev) => ({ ...prev, content: event.target.value }))}
-                rows={12}
-                className="mt-2 w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white focus:border-cyan-500/60 focus:outline-none"
-                placeholder="Write your blog post content here..."
-              />
-            ) : (
-              <div className="quill-dark mt-2 overflow-hidden rounded-xl">
-                <div
-                  ref={quillContainerRef}
-                  className="quill-editor"
-                  style={{ minHeight: '320px' }}
-                />
-              </div>
-            )}
-          </label>
-
-          <div className="mt-6 rounded-xl border border-white/10 bg-black/20 p-4">
-            <h4 className="text-sm font-semibold text-white">SEO Metadata</h4>
-            <div className="mt-3 grid gap-4 md:grid-cols-2">
-              <label className="block text-sm text-white/70">
-                Meta Title
-                <input
-                  type="text"
-                  value={form.seoMetaTitle}
-                  onChange={(event) => setForm((prev) => ({ ...prev, seoMetaTitle: event.target.value }))}
-                  className="mt-1 w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white focus:border-cyan-500/60 focus:outline-none"
-                />
-              </label>
-              <label className="block text-sm text-white/70">
-                Meta Description
-                <input
-                  type="text"
-                  value={form.seoMetaDescription}
-                  onChange={(event) => setForm((prev) => ({ ...prev, seoMetaDescription: event.target.value }))}
-                  className="mt-1 w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white focus:border-cyan-500/60 focus:outline-none"
-                />
-              </label>
-              <label className="block text-sm text-white/70">
-                Keywords (comma separated)
-                <input
-                  type="text"
-                  value={form.seoKeywords}
-                  onChange={(event) => setForm((prev) => ({ ...prev, seoKeywords: event.target.value }))}
-                  className="mt-1 w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white focus:border-cyan-500/60 focus:outline-none"
-                />
-              </label>
-              <label className="block text-sm text-white/70">
-                Open Graph Image URL
-                <input
-                  type="text"
-                  value={form.seoOgImage}
-                  onChange={(event) => setForm((prev) => ({ ...prev, seoOgImage: event.target.value }))}
-                  className="mt-1 w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white focus:border-cyan-500/60 focus:outline-none"
-                />
-              </label>
+                {state.loading ? <FaSpinner className="h-4 w-4 animate-spin" /> : <FaSave className="h-4 w-4" />}
+                {form.id ? 'Update Post' : 'Create Post'}
+              </button>
+              <button
+                type="button"
+                onClick={resetForm}
+                disabled={state.loading || isUploadingToIPFS}
+                className="inline-flex items-center gap-2 rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white/70 transition hover:text-white disabled:opacity-50"
+              >
+                Cancel
+              </button>
             </div>
-          </div>
-
-          <div className="mt-6 flex flex-wrap items-center gap-3">
-            <button
-              onClick={handleSave}
-              disabled={state.loading}
-              className="inline-flex items-center gap-2 rounded-lg border border-cyan-500/40 bg-cyan-500/20 px-4 py-2 text-sm font-semibold text-cyan-100 transition hover:bg-cyan-500/30 disabled:opacity-60"
-            >
-              {state.loading ? <FaSpinner className="h-4 w-4 animate-spin" /> : <FaSave className="h-4 w-4" />}
-              {form.id ? 'Update Post' : 'Create Post'}
-            </button>
-            <button
-              onClick={resetForm}
-              className="inline-flex items-center gap-2 rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white/70 transition hover:text-white"
-            >
-              Cancel
-            </button>
           </div>
         </div>
       ) : null}
