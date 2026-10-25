@@ -173,32 +173,46 @@ const BlogArticle = ({ post }: BlogArticleProps) => {
           </div>
         </header>
 
-        {workingImageUrl && !imageFailed ? (
-          <div className="relative mb-10 overflow-hidden rounded-3xl border border-white/10 bg-black/30" style={{ minHeight: '320px' }}>
-            {/* Prefer plain img for local/public paths with awkward filenames; Next Image for remotes */}
-            {isLocalBlogImage(post.featuredImage) || /\/ipfs\//.test(workingImageUrl) ? (
-              // eslint-disable-next-line @next/next/no-img-element
+        <div
+          className="relative mb-10 overflow-hidden rounded-3xl border border-white/10 bg-black/30"
+          style={{ minHeight: '320px' }}
+        >
+          {workingImageUrl && !imageFailed ? (
+            <>
+              {/* Prefer plain img for local/public paths; Next Image for remotes */}
+              {isLocalBlogImage(post.featuredImage) || /\/ipfs\//.test(workingImageUrl) ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={workingImageUrl}
+                  alt={post.title ?? 'Blog featured image'}
+                  className="h-full w-full object-cover"
+                  style={{ minHeight: 320, maxHeight: 480 }}
+                  onError={() => setImageFailed(true)}
+                />
+              ) : (
+                <Image
+                  src={workingImageUrl}
+                  alt={post.title ?? 'Blog featured image'}
+                  fill
+                  className="object-cover"
+                  unoptimized
+                  priority
+                  onError={() => setImageFailed(true)}
+                />
+              )}
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+            </>
+          ) : (
+            <div className="flex min-h-[320px] w-full items-center justify-center bg-linear-to-br from-cyan-500/20 via-indigo-500/10 to-black/40">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={workingImageUrl}
-                alt={post.title ?? 'Blog featured image'}
-                className="h-full w-full object-cover"
-                style={{ minHeight: 320, maxHeight: 480 }}
-                onError={() => setImageFailed(true)}
+                src="/logo.png"
+                alt="NYALTX"
+                className="h-24 w-24 object-contain opacity-90 md:h-28 md:w-28"
               />
-            ) : (
-              <Image
-                src={workingImageUrl}
-                alt={post.title ?? 'Blog featured image'}
-                fill
-                className="object-cover"
-                unoptimized
-                priority
-                onError={() => setImageFailed(true)}
-              />
-            )}
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-          </div>
-        ) : null}
+            </div>
+          )}
+        </div>
 
         <article className="rounded-2xl border border-white/10 bg-black/20 p-6 md:p-10">
           {post.content ? <RichTextRenderer content={post.content} /> : null}

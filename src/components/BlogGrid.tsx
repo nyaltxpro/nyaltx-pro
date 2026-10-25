@@ -164,10 +164,13 @@ const BlogGrid = () => {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                   </>
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center bg-linear-to-br from-cyan-500/30 via-indigo-500/20 to-transparent">
-                    <span className="text-sm font-semibold uppercase tracking-[0.4em] text-white/70">
-                      NYALTX
-                    </span>
+                  <div className="flex h-full w-full items-center justify-center bg-linear-to-br from-cyan-500/20 via-indigo-500/10 to-black/40">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src="/logo.png"
+                      alt="NYALTX"
+                      className="h-16 w-16 object-contain opacity-90 transition-transform duration-500 group-hover:scale-105 md:h-20 md:w-20"
+                    />
                   </div>
                 )}
                 {publishedAt && (
