@@ -218,7 +218,8 @@ export default function SimpleUnifiedWalletButton({
     <>
       <div className="relative wallet-dropdown-container">
         <button
-          className={`py-2 px-3 sm:px-4 rounded-lg sm:rounded-xl bg-gradient-to-r from-[#00b8d8] to-[#3b82f6] text-white font-medium hover:from-[#00b8d8]/90 hover:to-[#3b82f6]/90 transition-all duration-200 text-xs sm:text-sm tracking-wide flex items-center gap-1 sm:gap-2 shadow-lg shadow-[#00b8d8]/20 ${className}`}
+          type="button"
+          className={`relative z-10 py-2 px-3 sm:px-4 rounded-lg sm:rounded-xl bg-gradient-to-r from-[#00b8d8] to-[#3b82f6] text-white font-medium hover:from-[#00b8d8]/90 hover:to-[#3b82f6]/90 transition-all duration-200 text-xs sm:text-sm tracking-wide flex items-center gap-1 sm:gap-2 shadow-lg shadow-[#00b8d8]/20 ${className}`}
           onClick={handleMainButtonClick}
           data-wallet-button
         >

@@ -192,11 +192,11 @@ export default async function RootLayout({
             "'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
         }} >
         <Providers>
-          {/* DexScreener-inspired background pattern */}
-          <div className="dex-bg-pattern"></div>
+          {/* Decorative only — never block clicks */}
+          <div className="dex-bg-pattern pointer-events-none fixed inset-0 -z-10" aria-hidden />
 
-          <div className="relative transition-all duration-300 flex flex-col min-h-screen">
-            <main className="flex-grow relative z-10">
+          <div className="relative z-0 flex min-h-screen flex-col transition-all duration-300">
+            <main className="relative z-0 flex-grow">
               {children}
             </main>
             <Footer />

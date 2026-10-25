@@ -75,7 +75,7 @@ const Footer = () => {
   };
 
   return (
-    <footer className="relative text-white border-t border-white/10 py-10 px-4 mt-8 font-poppins md:ml-16 footer-with-sidebar">
+    <footer className="relative z-0 mt-8 border-t border-white/10 px-4 py-10 font-poppins text-white">
       {/* subtle aurora background */}
       <div className="pointer-events-none absolute inset-0 -z-10">
         {/* <div className="absolute -top-10 left-10 h-40 w-40 rounded-full bg-cyan-500/10 blur-3xl" />

@@ -147,22 +147,25 @@ const BlogArticle = ({ post }: BlogArticleProps) => {
           <div className="mt-6 flex flex-wrap items-center gap-3">
             <span className="text-xs uppercase tracking-[0.3em] text-white/60">Share</span>
             <button
+              type="button"
               onClick={() => handleShare('twitter')}
-              className="inline-flex items-center gap-2 rounded-lg border border-blue-500/30 bg-blue-500/10 px-3 py-2 text-xs font-medium text-blue-200 transition-colors hover:bg-blue-500/20"
+              className="relative z-10 inline-flex items-center gap-2 rounded-lg border border-blue-500/30 bg-blue-500/10 px-3 py-2 text-xs font-medium text-blue-200 transition-colors hover:bg-blue-500/20"
             >
               <FaTwitter className="h-4 w-4" />
               Twitter
             </button>
             <button
+              type="button"
               onClick={() => handleShare('linkedin')}
-              className="inline-flex items-center gap-2 rounded-lg border border-blue-600/30 bg-blue-600/10 px-3 py-2 text-xs font-medium text-blue-200 transition-colors hover:bg-blue-600/20"
+              className="relative z-10 inline-flex items-center gap-2 rounded-lg border border-blue-600/30 bg-blue-600/10 px-3 py-2 text-xs font-medium text-blue-200 transition-colors hover:bg-blue-600/20"
             >
               <FaLinkedin className="h-4 w-4" />
               LinkedIn
             </button>
             <button
+              type="button"
               onClick={handleCopy}
-              className="inline-flex items-center gap-2 rounded-lg border border-white/20 bg-white/5 px-3 py-2 text-xs font-medium text-white/70 transition-colors hover:bg-white/10"
+              className="relative z-10 inline-flex items-center gap-2 rounded-lg border border-white/20 bg-white/5 px-3 py-2 text-xs font-medium text-white/70 transition-colors hover:bg-white/10"
             >
               <FaCopy className="h-4 w-4" />
               {copied ? 'Copied!' : 'Copy link'}

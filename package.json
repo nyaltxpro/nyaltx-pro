@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "tinacms dev -c \"next dev --turbopack\"",
+    "dev": "next dev --turbopack",
+    "dev:tina": "tinacms dev -c \"next dev --turbopack\"",
     "dev:fast": "next dev --turbopack",
     "dev:webpack": "next dev",
     "postinstall": "fumadocs-mdx",
@@ -24,6 +25,7 @@
     "fetch:coins:detailed": "node scripts/getTop400CoinsDetailed.js",
     "tina:init": "tinacms init",
     "tina:build": "tinacms build",
+    "tina:restore": "node scripts/restore-tina-admin.js",
     "tina:dev": "tinacms dev"
   },
   "dependencies": {
