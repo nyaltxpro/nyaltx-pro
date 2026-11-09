@@ -12,11 +12,11 @@ export const metadata: Metadata = {
     description:
       'Discover digital markets, tokenized securities, and project visibility on NYALTX — connecting DeFi discovery with tokenized stock market data.',
     type: 'website',
-    url: 'https://www.nyaltx.pro',
+    url: 'https://www.nyaltx.com',
     siteName: 'NYALTX',
     images: [
       {
-        url: 'https://www.nyaltx.pro/og-image.png',
+        url: 'https://www.nyaltx.com/og-image.png',
         width: 512,
         height: 512,
         alt: 'NYALTX Logo',
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     title: 'NYALTX | Digital Markets & Tokenized Securities Discovery Platform',
     description:
       'Discover digital markets, tokenized securities, and project visibility on NYALTX.',
-    images: ['https://www.nyaltx.pro/og-image.png'],
+    images: ['https://www.nyaltx.com/og-image.png'],
   },
 };
 
