@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
-import path from 'path';
 import type { Metadata } from 'next';
+import path from 'path';
 
 export type SiteSeoSettings = {
   title: string;
@@ -27,7 +27,7 @@ export const FALLBACK_SITE_SEO: SiteSeoSettings = {
   creator: 'NYALTX Team',
   publisher: 'NYALTX',
   siteName: 'NYALTX',
-  ogImage: '/og-image.png',
+  ogImage: '/logo.png',
   twitterSite: '@nyaltx',
   twitterCreator: '@nyaltx',
 };
