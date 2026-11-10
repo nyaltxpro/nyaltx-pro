@@ -42,6 +42,8 @@ export default function robots(): MetadataRoute.Robots {
           '/investors',
           '/about',
           '/services',
+          '/stake-nyx',
+          'alt-coin-advisory-form',
           // Dynamic routes that might contain sensitive data
           // Checkout pages - no indexing needed
           '/pricing/checkout/*',
