@@ -45,7 +45,10 @@ export default async function RootLayout({
   const seo = await getSiteSeoSettings();
   const ogImageUrl = seo.ogImage?.startsWith('http')
     ? seo.ogImage
-    : `${baseUrl}${seo.ogImage?.startsWith('/') ? seo.ogImage : `/${seo.ogImage || 'logo.png'}`}`;
+    : `${baseUrl}${seo.ogImage?.startsWith('/') ? seo.ogImage : `/${seo.ogImage || 'og-image.png'}`}`;
+  const logoImageUrl = seo.ogImage?.startsWith('http')
+    ? seo.siteLogoUrl
+    : `${baseUrl}${seo.siteLogoUrl?.startsWith('/') ? seo.siteLogoUrl : `/${seo.siteLogoUrl || 'logo.png'}`}`;
 
   return (
     <html lang="en" className={`${poppins.variable} ${roboto.variable}`} suppressHydrationWarning>
@@ -62,7 +65,7 @@ export default async function RootLayout({
               url: baseUrl,
               logo: {
                 '@type': 'ImageObject',
-                url: ogImageUrl,
+                url: logoImageUrl,
                 width: 512,
                 height: 512,
               },
