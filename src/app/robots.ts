@@ -38,6 +38,10 @@ export default function robots(): MetadataRoute.Robots {
           // Test and development routes
           '/test-email',
           '/websockets',
+          '/legal',
+          '/investors',
+          '/about',
+          '/services',
           // Dynamic routes that might contain sensitive data
           // Checkout pages - no indexing needed
           '/pricing/checkout/*',
