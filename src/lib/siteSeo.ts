@@ -95,7 +95,7 @@ export async function buildRootMetadata(): Promise<Metadata> {
       description: seo.description,
       images: [
         {
-          url: siteLogoUrl,
+          url: seo.siteLogoUrl || '/logo.png',
           width: 512,
           height: 512,
           alt: seo.siteName || 'NYALTX',
