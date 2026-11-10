@@ -8,7 +8,7 @@ import { Toaster } from 'react-hot-toast';
 import "./globals.css";
 import Providers from './providers';
 
-const baseUrl = 'https://www.nyaltx.pro';
+const baseUrl = 'https://www.nyaltx.com';
 
 export async function generateMetadata(): Promise<Metadata> {
   return buildRootMetadata();
@@ -45,7 +45,7 @@ export default async function RootLayout({
   const seo = await getSiteSeoSettings();
   const ogImageUrl = seo.ogImage?.startsWith('http')
     ? seo.ogImage
-    : `${baseUrl}${seo.ogImage?.startsWith('/') ? seo.ogImage : `/${seo.ogImage || 'og-image.png'}`}`;
+    : `${baseUrl}${seo.ogImage?.startsWith('/') ? seo.ogImage : `/${seo.ogImage || 'logo.png'}`}`;
 
   return (
     <html lang="en" className={`${poppins.variable} ${roboto.variable}`} suppressHydrationWarning>

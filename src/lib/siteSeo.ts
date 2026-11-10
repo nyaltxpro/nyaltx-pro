@@ -13,9 +13,10 @@ export type SiteSeoSettings = {
   ogImage?: string;
   twitterSite?: string;
   twitterCreator?: string;
+  siteLogoUrl?: string;
 };
 
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.nyaltx.pro';
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.nyaltx.com';
 
 export const FALLBACK_SITE_SEO: SiteSeoSettings = {
   title: 'NYALTX | Digital Markets & Tokenized Securities Discovery Platform',
@@ -27,7 +28,8 @@ export const FALLBACK_SITE_SEO: SiteSeoSettings = {
   creator: 'NYALTX Team',
   publisher: 'NYALTX',
   siteName: 'NYALTX',
-  ogImage: '/logo.png',
+  ogImage: '/og-image.png',
+  siteLogoUrl: '/logo.png',
   twitterSite: '@nyaltx',
   twitterCreator: '@nyaltx',
 };
@@ -93,7 +95,7 @@ export async function buildRootMetadata(): Promise<Metadata> {
       description: seo.description,
       images: [
         {
-          url: ogImage,
+          url: siteLogoUrl,
           width: 512,
           height: 512,
           alt: seo.siteName || 'NYALTX',
