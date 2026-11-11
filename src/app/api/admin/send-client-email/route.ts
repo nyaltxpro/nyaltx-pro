@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
 import { getCollection } from '@/lib/mongodb';
+import { NextRequest, NextResponse } from 'next/server';
 
 interface EmailRecord {
   id: string;
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://nyaltx-pro-5hqd.vercel.app';
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://nyaltx.com';
     
     // Send emails to all recipients
     const emailPromises = recipients.map(async (recipientEmail) => {

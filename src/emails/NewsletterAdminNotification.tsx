@@ -18,7 +18,7 @@ interface NewsletterAdminNotificationProps {
   timestamp: string;
 }
 
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://nyaltx-pro-5hqd.vercel.app';
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://nyaltx.com';
 
 export default function NewsletterAdminNotification({
   email,

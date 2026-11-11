@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
             </ul>
             
             <center>
-              <a href="https://nyaltx-pro-5hqd.vercel.app/admin/email-management" class="button">
+              <a href="https://nyaltx.com/admin/email-management" class="button">
                 Manage Email Settings
               </a>
             </center>
@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
     };
 
     // Call email sending API
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://nyaltx-pro-5hqd.vercel.app';
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://nyaltx.com';
     const response = await fetch(`${baseUrl}/api/email/send`, {
       method: 'POST',
       headers: {
