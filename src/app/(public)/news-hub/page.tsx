@@ -1,5 +1,6 @@
 import PublicHeader from '@/components/PublicHeader';
 import NewsHubComponent from '@/components/NewsHub/NewsHubComponent';
+import Footer from '@/components/Footer';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -53,9 +54,13 @@ export const revalidate = 60; // Revalidate every 60 seconds
 
 export default function NewsHubPage() {
   return (
-    <div className="min-h-screen text-white bg-[#070b12]">
+    <div className="flex flex-col min-h-screen text-white bg-[#070b12]">
       <PublicHeader />
-      <NewsHubComponent />
+      <main className="flex-1">
+        <NewsHubComponent />
+      </main>
+      <Footer />
     </div>
   );
 }
+

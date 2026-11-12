@@ -1,5 +1,6 @@
 import LandingPage from '@/page-components/LandingPage';
 import type { Metadata } from 'next';
+import { asTinaPageProps, loadJson } from '@/lib/loadTinaContent';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.nyaltx.com'),
@@ -57,6 +58,14 @@ export const metadata: Metadata = {
 
 export const revalidate = 300;
 
-export default function Page() {
-  return <LandingPage />;
+export default async function Page() {
+  let res: any;
+  try {
+    const data = await loadJson('src/content/landing/home.json');
+    res = asTinaPageProps('landing', data);
+  } catch {
+    // Minimal fallback if JSON missing
+    res = asTinaPageProps('landing', { hero: {}, features: {}, stats: {}, testimonials: {} });
+  }
+  return <LandingPage {...(res as any)} />;
 }
