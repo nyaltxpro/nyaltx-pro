@@ -216,6 +216,14 @@ export default async function RootLayout({
             })
           }}
         />
+              {/* Existing favicon from Next.js */}
+        <link rel="icon" href="/favicon.ico" />
+        {/* Search icon – used by browsers and Google search results */}
+        <link rel="icon" type="image/png" sizes="48x48" href="/nyaltxpro.png" />
+        {/* Apple Touch icon – used on iOS/Android and Google mobile SERPs */}
+        <link rel="apple-touch-icon" sizes="192x192" href="/nyaltxpro.png" />
+        {/* Shortcut icon for legacy browsers */}
+        <link rel="shortcut icon" href="/nyaltxpro.png" />
       </head>
       <body className={`${inter.variable} ${poppins.variable} antialiased`}
         style={{
