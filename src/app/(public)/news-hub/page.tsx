@@ -4,24 +4,24 @@ import Footer from '@/components/Footer';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://www.nyaltx.com'),
+  metadataBase: new URL('https://www.nyaltx.pro'),
   title: 'NYALTX News Hub – Where Wall Street Meets Web3',
   description:
     'The latest on NYAX, tokenized securities, and the wider crypto market from trusted sources and our community. Submit news, press releases, and feature in our top banner.',
   keywords: 'NYALTX news, crypto news hub, press releases, tokenized securities, blockchain news, NYAX token, alt assets',
   alternates: {
-    canonical: 'https://www.nyaltx.com/news-hub',
+    canonical: 'https://www.nyaltx.pro/news-hub',
   },
   openGraph: {
     title: 'NYALTX News Hub – Where Wall Street Meets Web3',
     description:
       'The latest on NYAX, tokenized securities, and the wider crypto market from trusted sources and our community. Submit news, press releases, and feature in our top banner.',
     type: 'website',
-    url: 'https://www.nyaltx.com/news-hub',
+    url: 'https://www.nyaltx.pro/news-hub',
     siteName: 'NYALTX',
     images: [
       {
-        url: 'https://www.nyaltx.com/og-image.png',
+        url: 'https://www.nyaltx.pro/og-image.png',
         width: 1200,
         height: 630,
         alt: 'NYALTX News Hub',
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     title: 'NYALTX News Hub – Where Wall Street Meets Web3',
     description:
       'The latest on NYAX, tokenized securities, and the wider crypto market. Submit your news and press releases.',
-    images: ['https://www.nyaltx.com/og-image.png'],
+    images: ['https://www.nyaltx.pro/og-image.png'],
   },
   robots: {
     index: true,

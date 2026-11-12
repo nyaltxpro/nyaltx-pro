@@ -63,7 +63,7 @@ export function SolanaWalletProvider({
       new BitKeepWalletAdapter(),
       new CloverWalletAdapter(),
       new TrezorWalletAdapter({
-        email: 'support@nyaltx.com',
+        email: 'support@nyaltx.pro',
       }),
       new TrustWalletAdapter(),
       new WalletConnectWalletAdapter({
@@ -74,8 +74,8 @@ export function SolanaWalletProvider({
           metadata: {
             name: 'NYALTX',
             description: 'NYALTX - Crypto Trading Platform',
-            url: 'https://nyaltx.com',
-            icons: ['https://nyaltx.com/logo.png'],
+            url: 'https://nyaltx.pro',
+            icons: ['https://nyaltx.pro/logo.png'],
           },
         },
       }),

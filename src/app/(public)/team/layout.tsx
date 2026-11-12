@@ -1,18 +1,18 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://www.nyaltx.com'),
+  metadataBase: new URL('https://www.nyaltx.pro'),
   title: 'Meet the NYALTX Team | Leadership & Builders',
   description:
     'Meet the multidisciplinary crew of builders, traders, and storytellers behind the New York Alt Exchange (NYALTX).',
   alternates: {
-    canonical: 'https://www.nyaltx.com/team',
+    canonical: 'https://www.nyaltx.pro/team',
   },
   openGraph: {
     title: 'Meet the NYALTX Team | Leadership & Builders',
     description:
       'Meet the multidisciplinary crew of builders, traders, and storytellers behind the New York Alt Exchange (NYALTX).',
-    url: 'https://www.nyaltx.com/team',
+    url: 'https://www.nyaltx.pro/team',
     siteName: 'NYALTX',
     type: 'website',
   },

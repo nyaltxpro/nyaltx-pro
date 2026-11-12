@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next';
 import { getDb } from '@/lib/mongodb';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://www.nyaltx.com';
+  const baseUrl = 'https://www.nyaltx.pro';
 
   const staticRoutes: MetadataRoute.Sitemap = [
     {

@@ -2,7 +2,7 @@ import GeneralStatementClient from '@/page-components/GeneralStatement';
 import { asTinaPageProps, loadJson } from '@/lib/loadTinaContent';
 import type { Metadata } from 'next';
 
-const baseUrl = 'https://www.nyaltx.com';
+const baseUrl = 'https://www.nyaltx.pro';
 
 export const metadata: Metadata = {
   title: 'General Statement | NYALTX',

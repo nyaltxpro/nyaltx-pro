@@ -16,7 +16,7 @@ export type SiteSeoSettings = {
   siteLogoUrl?: string;
 };
 
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.nyaltx.com';
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.nyaltx.pro';
 
 export const FALLBACK_SITE_SEO: SiteSeoSettings = {
   title: 'NYALTX | Digital Markets & Tokenized Securities Discovery Platform',

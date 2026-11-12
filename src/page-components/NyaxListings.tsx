@@ -272,7 +272,7 @@ const NyaxListingsComponent: React.FC = () => {
                                         <FaTelegram size={16} />
                                     </a>
                                 )}
-                                {token.twitter && token.twitter !== 'https://www.nyaltx.com/privacy-policy/' && (
+                                {token.twitter && token.twitter !== 'https://www.nyaltx.pro/privacy-policy/' && (
                                     <a
                                         href={token.twitter}
                                         target="_blank"

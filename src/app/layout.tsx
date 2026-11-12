@@ -8,7 +8,7 @@ import { Toaster } from 'react-hot-toast';
 import "./globals.css";
 import Providers from './providers';
 
-const baseUrl = 'https://www.nyaltx.com';
+const baseUrl = 'https://www.nyaltx.pro';
 
 export async function generateMetadata(): Promise<Metadata> {
   return buildRootMetadata();

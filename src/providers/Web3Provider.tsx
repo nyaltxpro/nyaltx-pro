@@ -21,8 +21,8 @@ const modal = createAppKit({
   metadata: {
     name: 'NYALTX',
     description: 'NYALTX - Crypto Trading Platform',
-    url: 'https://nyaltx.com',
-    icons: ['https://nyaltx.com/logo.png'],
+    url: 'https://nyaltx.pro',
+    icons: ['https://nyaltx.pro/logo.png'],
   },
   features: {
     analytics: true,

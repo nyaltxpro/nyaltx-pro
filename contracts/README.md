@@ -328,8 +328,8 @@ For support and questions:
 
 ## 🔗 Links
 
-- [NYALTX Platform](https://nyaltx.com)
-- [Documentation](https://docs.nyaltx.com)
+- [NYALTX Platform](https://nyaltx.pro)
+- [Documentation](https://docs.nyaltx.pro)
 - [GitHub Repository](https://github.com/nyaltx/platform)
 
 ---

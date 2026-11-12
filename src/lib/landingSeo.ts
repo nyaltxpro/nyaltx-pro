@@ -9,7 +9,7 @@ export interface LandingPageSeo {
   canonical: string;
 }
 
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.nyaltx.com';
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.nyaltx.pro';
 
 const FALLBACK_SEO: LandingPageSeo = {
   title: 'NYALTX | Digital Markets & Tokenized Securities Discovery Platform',

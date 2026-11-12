@@ -4,23 +4,23 @@ import Link from 'next/link';
 import NewsGrid from '../../../components/NewsGrid';
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://www.nyaltx.com'),
+  metadataBase: new URL('https://www.nyaltx.pro'),
   title: 'NYALTX News – Updates & Announcements',
   description:
     'Stay up to date with the latest NYALTX announcements, platform features, tokenized securities insights, and community updates.',
   keywords: 'NYALTX news, crypto news, blockchain updates, platform announcements, partnerships, tokenized securities',
   alternates: {
-    canonical: 'https://www.nyaltx.com/news',
+    canonical: 'https://www.nyaltx.pro/news',
   },
   openGraph: {
     title: 'NYALTX News – Updates & Announcements',
     description: 'Stay up to date with the latest NYALTX announcements, platform features, and community updates.',
     type: 'website',
-    url: 'https://www.nyaltx.com/news',
+    url: 'https://www.nyaltx.pro/news',
     siteName: 'NYALTX',
     images: [
       {
-        url: 'https://www.nyaltx.com/og-image.png',
+        url: 'https://www.nyaltx.pro/og-image.png',
         width: 1200,
         height: 630,
         alt: 'NYALTX News',
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     creator: '@nyaltx',
     title: 'NYALTX News – Updates & Announcements',
     description: 'Stay up to date with the latest NYALTX announcements, platform features, and community updates.',
-    images: ['https://www.nyaltx.com/og-image.png'],
+    images: ['https://www.nyaltx.pro/og-image.png'],
   },
 };
 

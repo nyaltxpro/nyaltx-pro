@@ -187,7 +187,7 @@ function generateBoostMessage(token: any, platform: 'twitter' | 'telegram'): str
   const baseMessage =
     platform === 'twitter'
       ? `🚀 ${token.tokenName} ($${token.tokenSymbol}) just boosted their visibility in the Race to Liberty!\n\n🏁 Join the race and boost your token\n🏆 Compete for the weekly crown\n💎 NYAX holders get 20% off\n\n#RaceToLiberty #NYALTX #${token.tokenSymbol}`
-      : `🚀 **BOOST ALERT!**\n\n${token.tokenName} ($${token.tokenSymbol}) just activated a boost in the Race to Liberty!\n\n🏁 Join the race: nyaltx.com/pricing\n🏆 Weekly winners get crown badges\n💎 Use NYAX for 20% discount\n\n#RaceToLiberty #NYALTX`;
+      : `🚀 **BOOST ALERT!**\n\n${token.tokenName} ($${token.tokenSymbol}) just activated a boost in the Race to Liberty!\n\n🏁 Join the race: nyaltx.pro/pricing\n🏆 Weekly winners get crown badges\n💎 Use NYAX for 20% discount\n\n#RaceToLiberty #NYALTX`;
 
   return baseMessage;
 }

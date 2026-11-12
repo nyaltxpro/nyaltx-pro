@@ -2,18 +2,18 @@ import ContactPage from '@/components/ContactPage';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://www.nyaltx.com'),
+  metadataBase: new URL('https://www.nyaltx.pro'),
   title: 'Contact Us | NYALTX',
   description:
     'Get in touch with the NYALTX team for partnerships, token listings, press releases, or support.',
   alternates: {
-    canonical: 'https://www.nyaltx.com/contact',
+    canonical: 'https://www.nyaltx.pro/contact',
   },
   openGraph: {
     title: 'Contact Us | NYALTX',
     description:
       'Get in touch with the NYALTX team for partnerships, token listings, press releases, or support.',
-    url: 'https://www.nyaltx.com/contact',
+    url: 'https://www.nyaltx.pro/contact',
     siteName: 'NYALTX',
     type: 'website',
   },

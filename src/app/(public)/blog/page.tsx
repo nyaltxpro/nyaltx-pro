@@ -3,21 +3,21 @@ import PublicHeader from "@/components/PublicHeader";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-    metadataBase: new URL('https://www.nyaltx.com'),
+    metadataBase: new URL('https://www.nyaltx.pro'),
     title: "NYALTX Blog – Web3 Ideas, Insights & Updates",
     description:
         "Read articles about governance, project growth, and the Web3 landscape. Simple, useful insight for teams building in the space.",
     keywords:
         "nyaltx blog, defi insights, platform updates, crypto education, trading tips, nyaltx news",
     alternates: {
-        canonical: "https://www.nyaltx.com/blog",
+        canonical: "https://www.nyaltx.pro/blog",
     },
     openGraph: {
         title: "NYALTX Blog – Web3 Ideas, Insights & Updates",
         description:
             "Read articles about governance, project growth, and the Web3 landscape. Simple, useful insight for teams building in the space.",
         type: "website",
-        url: "https://www.nyaltx.com/blog",
+        url: "https://www.nyaltx.pro/blog",
         siteName: "NYALTX",
     },
 };

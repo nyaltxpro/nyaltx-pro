@@ -18,7 +18,7 @@ interface ContactFormAdminProps {
   message: string;
 }
 
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://nyaltx.com';
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://nyaltx.pro';
 
 export default function ContactFormAdmin({
   name,
@@ -89,7 +89,7 @@ export default function ContactFormAdmin({
           <Text style={footerText}>
             © {new Date().getFullYear()} NYALTX. All rights reserved. |{' '}
             <Link href={`${baseUrl}`} target="_blank" style={link}>
-              www.nyaltx.com
+              www.nyaltx.pro
             </Link>
             {' | '}
             <Link href={`${baseUrl}/admin`} target="_blank" style={link}>

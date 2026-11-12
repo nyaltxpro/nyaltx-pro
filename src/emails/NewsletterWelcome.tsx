@@ -16,7 +16,7 @@ interface NewsletterWelcomeProps {
   email: string;
 }
 
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://nyaltx.com';
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://nyaltx.pro';
 
 export default function NewsletterWelcome({
   name,

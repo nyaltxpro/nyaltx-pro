@@ -178,7 +178,7 @@ export default function NewsHubComponent() {
   };
 
   const copyRss = () => {
-    const url = "https://www.nyaltx.com/rss/news.xml";
+    const url = "https://www.nyaltx.pro/rss/news.xml";
     if (navigator.clipboard) {
       navigator.clipboard.writeText(url).then(() => {
         setRssCopied(true);
@@ -1017,7 +1017,7 @@ export default function NewsHubComponent() {
 
             <div className="side">
               <h4>Subscribe via RSS</h4>
-              <code>https://www.nyaltx.com/rss/news.xml</code>
+              <code>https://www.nyaltx.pro/rss/news.xml</code>
               <div className="note">
                 Filters: <span style={{ display: 'inline-block', background: 'var(--bg)', padding: '2px 6px', borderRadius: '4px', margin: '2px' }}>?tag=nyax</span> <span style={{ display: 'inline-block', background: 'var(--bg)', padding: '2px 6px', borderRadius: '4px', margin: '2px' }}>?tag=btc</span>
               </div>

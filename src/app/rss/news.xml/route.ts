@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
       .limit(50)
       .toArray();
 
-    const siteUrl = 'https://www.nyaltx.com';
+    const siteUrl = 'https://www.nyaltx.pro';
     const now = new Date().toUTCString();
 
     const itemsXml = articles.map(art => {

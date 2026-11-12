@@ -1,4 +1,4 @@
-# Robots.txt for NYALTX (https://www.nyaltx.com)
+# Robots.txt for NYALTX (https://www.nyaltx.pro)
 User-agent: *
 Allow: /
 Allow: /news-hub
@@ -30,4 +30,4 @@ Disallow: /pricing/checkout/*
 Disallow: /test-email
 
 # Sitemap location
-Sitemap: https://www.nyaltx.com/sitemap.xml
+Sitemap: https://www.nyaltx.pro/sitemap.xml

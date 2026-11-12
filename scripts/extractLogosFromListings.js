@@ -25,7 +25,7 @@ function fetchHtml(url) {
 async function extractLogoMappings() {
   try {
     console.log('Fetching NYAX listings page...');
-    const html = await fetchHtml('https://www.nyaltx.com/nyax-listings/');
+    const html = await fetchHtml('https://www.nyaltx.pro/nyax-listings/');
 
     const dom = new JSDOM(html);
     const document = dom.window.document;
@@ -78,7 +78,7 @@ async function extractLogoMappings() {
               logoUrl: src.startsWith('//')
                 ? 'https:' + src
                 : src.startsWith('/')
-                  ? 'https://www.nyaltx.com' + src
+                  ? 'https://www.nyaltx.pro' + src
                   : src,
               alt: alt,
               context: link.textContent.trim(),
@@ -119,7 +119,7 @@ async function extractLogoMappings() {
                   logoUrl: src.startsWith('//')
                     ? 'https:' + src
                     : src.startsWith('/')
-                      ? 'https://www.nyaltx.com' + src
+                      ? 'https://www.nyaltx.pro' + src
                       : src,
                   alt: img.getAttribute('alt') || '',
                   context: text,
@@ -149,7 +149,7 @@ async function extractLogoMappings() {
             logoUrl: src.startsWith('//')
               ? 'https:' + src
               : src.startsWith('/')
-                ? 'https://www.nyaltx.com' + src
+                ? 'https://www.nyaltx.pro' + src
                 : src,
             alt: img.getAttribute('alt') || '',
             context: 'WordPress upload (filename match)',

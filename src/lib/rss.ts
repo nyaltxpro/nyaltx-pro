@@ -20,7 +20,7 @@ export const FEEDS: { name: NewsSource; url: string }[] = [
 export async function fetchRss(url: string, revalidate?: number): Promise<string> {
   const res = await fetch(url, {
     headers: {
-      'User-Agent': 'NYALTXBot/1.0 (+https://www.nyaltx.com)',
+      'User-Agent': 'NYALTXBot/1.0 (+https://www.nyaltx.pro)',
       Accept: 'application/rss+xml, application/xml, text/xml;q=0.9, */*;q=0.8',
     },
     next: revalidate ? { revalidate } : undefined,

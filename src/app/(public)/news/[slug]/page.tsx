@@ -80,18 +80,18 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   }
 
   return {
-    metadataBase: new URL('https://www.nyaltx.com'),
+    metadataBase: new URL('https://www.nyaltx.pro'),
     title: `${article.title} - NYALTX News`,
     description: article.excerpt,
     keywords: article.tags.join(', '),
     alternates: {
-      canonical: `https://www.nyaltx.com/news/${params.slug}`,
+      canonical: `https://www.nyaltx.pro/news/${params.slug}`,
     },
     openGraph: {
       title: article.title,
       description: article.excerpt,
       type: 'article',
-      url: `https://www.nyaltx.com/news/${params.slug}`,
+      url: `https://www.nyaltx.pro/news/${params.slug}`,
       siteName: 'NYALTX',
       publishedTime: article.publishedAt,
       authors: [article.author],
@@ -105,7 +105,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
         }
       ] : [
         {
-          url: 'https://www.nyaltx.com/og-image.png',
+          url: 'https://www.nyaltx.pro/og-image.png',
           width: 1200,
           height: 630,
           alt: 'NYALTX News',
@@ -117,7 +117,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       site: '@nyaltx',
       title: article.title,
       description: article.excerpt,
-      images: article.featuredImage ? [article.featuredImage] : ['https://www.nyaltx.com/og-image.png'],
+      images: article.featuredImage ? [article.featuredImage] : ['https://www.nyaltx.pro/og-image.png'],
     },
   };
 }

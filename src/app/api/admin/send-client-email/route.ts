@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://nyaltx.com';
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://nyaltx.pro';
     
     // Send emails to all recipients
     const emailPromises = recipients.map(async (recipientEmail) => {

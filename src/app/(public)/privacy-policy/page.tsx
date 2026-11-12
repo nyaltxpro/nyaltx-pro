@@ -5,7 +5,7 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Privacy Policy | NYALTX',
   description: 'Read the NYALTX Privacy Policy to understand how we collect, use, and protect your personal data.',
-  alternates: { canonical: 'https://www.nyaltx.com/privacy-policy' },
+  alternates: { canonical: 'https://www.nyaltx.pro/privacy-policy' },
 };
 
 const PrivacyPolicyPage = async () => {

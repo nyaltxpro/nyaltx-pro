@@ -21,14 +21,14 @@
     "redirects": [
     {
       "source": "/(.*)",
-      "has": [{ "type": "host", "value": "nyaltx.com" }],
-      "destination": "https://www.nyaltx.com/$1",
+      "has": [{ "type": "host", "value": "nyaltx.pro" }],
+      "destination": "https://www.nyaltx.pro/$1",
       "permanent": true
     },
     {
       "source": "/adminpanel/(.*)",
-      "has": [{ "type": "host", "value": "nyaltx.com" }],
-      "destination": "https://www.nyaltx.com/adminpanel/$1",
+      "has": [{ "type": "host", "value": "nyaltx.pro" }],
+      "destination": "https://www.nyaltx.pro/adminpanel/$1",
       "permanent": true
     }
   ],

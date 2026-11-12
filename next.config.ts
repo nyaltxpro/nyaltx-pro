@@ -29,16 +29,16 @@ const nextConfig: NextConfig = {
 
   async redirects() {
     return [
-      // Redirect apex domain → www (handles nyaltx.com → www.nyaltx.com)
+      // Redirect apex domain → www (handles nyaltx.pro → www.nyaltx.pro)
       {
         source: '/:path*',
         has: [
           {
             type: 'host',
-            value: 'nyaltx.com',
+            value: 'nyaltx.pro',
           },
         ],
-        destination: 'https://www.nyaltx.com/:path*',
+        destination: 'https://www.nyaltx.pro/:path*',
         permanent: true,
       },
     ];
@@ -126,7 +126,7 @@ const nextConfig: NextConfig = {
       "github.com",
       "imgur.com",
       "i.imgur.com",
-      "www.nyaltx.com",
+      "www.nyaltx.pro",
       "api.geckoterminal.com",
       "images.pump.fun",
       "logo.moralis.io",
@@ -204,7 +204,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "www.nyaltx.com",
+        hostname: "www.nyaltx.pro",
         pathname: "/**",
       },
       {

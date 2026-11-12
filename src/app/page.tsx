@@ -3,31 +3,31 @@ import type { Metadata } from 'next';
 import { asTinaPageProps, loadJson } from '@/lib/loadTinaContent';
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://www.nyaltx.com'),
+  metadataBase: new URL('https://www.nyaltx.pro'),
   title: 'NYALTX | Digital Markets & Tokenized Securities Discovery Platform',
   description:
     'Discover digital markets, tokenized securities, and project visibility on NYALTX — connecting DeFi discovery with tokenized stock market data.',
   keywords:
     'NYALTX, digital markets, tokenized securities, xStocks, DeFi discovery, capital markets, blockchain, Governa, NYAX',
   alternates: {
-    canonical: 'https://www.nyaltx.com',
+    canonical: 'https://www.nyaltx.pro',
   },
   openGraph: {
     title: 'NYALTX | Digital Markets & Tokenized Securities Discovery Platform',
     description:
       'Discover digital markets, tokenized securities, and project visibility on NYALTX — connecting DeFi discovery with tokenized stock market data.',
     type: 'website',
-    url: 'https://www.nyaltx.com',
+    url: 'https://www.nyaltx.pro',
     siteName: 'NYALTX',
     images: [
       {
-        url: 'https://www.nyaltx.com/og-image.png',
+        url: 'https://www.nyaltx.pro/og-image.png',
         width: 1200,
         height: 630,
         alt: 'NYALTX — Digital Markets & Tokenized Securities',
       },
       {
-        url: 'https://www.nyaltx.com/logo.png',
+        url: 'https://www.nyaltx.pro/logo.png',
         width: 512,
         height: 512,
         alt: 'NYALTX Logo',
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     title: 'NYALTX | Digital Markets & Tokenized Securities Discovery Platform',
     description:
       'Discover digital markets, tokenized securities, and project visibility on NYALTX.',
-    images: ['https://www.nyaltx.com/og-image.png'],
+    images: ['https://www.nyaltx.pro/og-image.png'],
   },
   robots: {
     index: true,

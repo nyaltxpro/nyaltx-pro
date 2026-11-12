@@ -4,60 +4,60 @@ const { JSDOM } = require('jsdom');
 
 // Extract token URLs from the listings page
 const tokenUrls = [
-  'https://www.nyaltx.com/token-new/?logoid=63',
-  'https://www.nyaltx.com/token-bnb-new/?logoid=535',
-  'https://www.nyaltx.com/token-bnb-new/?logoid=653',
-  'https://www.nyaltx.com/token-bnb-new/?logoid=544',
-  'https://www.nyaltx.com/token-bnb-new/?logoid=661',
-  'https://www.nyaltx.com/token-new/?logoid=93',
-  'https://www.nyaltx.com/token-bnb-new/?logoid=560',
-  'https://www.nyaltx.com/token-new/?logoid=162',
-  'https://www.nyaltx.com/token-new/?logoid=111',
-  'https://www.nyaltx.com/token-new/?logoid=79',
-  'https://www.nyaltx.com/token-new/?logoid=151',
-  'https://www.nyaltx.com/token-new/?logoid=211',
-  'https://www.nyaltx.com/token-bnb-new/?logoid=550',
-  'https://www.nyaltx.com/token-new/?logoid=215',
-  'https://www.nyaltx.com/token-new/?logoid=225',
-  'https://www.nyaltx.com/token-bnb-new/?logoid=556',
-  'https://www.nyaltx.com/token-bnb-new/?logoid=694',
-  'https://www.nyaltx.com/token-bnb-new/?logoid=679',
-  'https://www.nyaltx.com/token-new/?logoid=673',
-  'https://www.nyaltx.com/token-bnb-new/?logoid=656',
-  'https://www.nyaltx.com/token-bnb-new/?logoid=642',
-  'https://www.nyaltx.com/token-bnb-new/?logoid=634',
-  'https://www.nyaltx.com/token-bnb-new/?logoid=573',
-  'https://www.nyaltx.com/token-bnb-new/?logoid=580',
-  'https://www.nyaltx.com/token-bnb-new/?logoid=565',
-  'https://www.nyaltx.com/token-bnb-new/?logoid=559',
-  'https://www.nyaltx.com/token-bnb-new/?logoid=536',
-  'https://www.nyaltx.com/token-bnb-new/?logoid=531',
-  'https://www.nyaltx.com/token-bnb-new/?logoid=548',
-  'https://www.nyaltx.com/token-bnb-new/?logoid=533',
-  'https://www.nyaltx.com/token-new/?logoid=263',
-  'https://www.nyaltx.com/token-new/?logoid=261',
-  'https://www.nyaltx.com/token-bnb-new/?logoid=543',
-  'https://www.nyaltx.com/token-bnb-new/?logoid=553',
-  'https://www.nyaltx.com/token-new/?logoid=206',
-  'https://www.nyaltx.com/token-new/?logoid=224',
-  'https://www.nyaltx.com/token-new/?logoid=157',
-  'https://www.nyaltx.com/token-new/?logoid=136',
-  'https://www.nyaltx.com/token-new/?logoid=124',
-  'https://www.nyaltx.com/token-bnb-new/?logoid=561',
-  'https://www.nyaltx.com/token-bnb-new/?logoid=549',
-  'https://www.nyaltx.com/token-bnb-new/?logoid=557',
-  'https://www.nyaltx.com/token-new/?logoid=202',
-  'https://www.nyaltx.com/token-new/?logoid=135',
-  'https://www.nyaltx.com/token-bnb-new/?logoid=555',
-  'https://www.nyaltx.com/token-new/?logoid=216',
-  'https://www.nyaltx.com/token-new/?logoid=160',
-  'https://www.nyaltx.com/token-new/?logoid=676',
-  'https://www.nyaltx.com/token-bnb-new/?logoid=647',
-  'https://www.nyaltx.com/token-bnb-new/?logoid=675',
-  'https://www.nyaltx.com/token-new/?logoid=585',
-  'https://www.nyaltx.com/token-bnb-new/?logoid=527',
-  'https://www.nyaltx.com/token-new/?logoid=241',
-  'https://www.nyaltx.com/token-new/?logoid=512',
+  'https://www.nyaltx.pro/token-new/?logoid=63',
+  'https://www.nyaltx.pro/token-bnb-new/?logoid=535',
+  'https://www.nyaltx.pro/token-bnb-new/?logoid=653',
+  'https://www.nyaltx.pro/token-bnb-new/?logoid=544',
+  'https://www.nyaltx.pro/token-bnb-new/?logoid=661',
+  'https://www.nyaltx.pro/token-new/?logoid=93',
+  'https://www.nyaltx.pro/token-bnb-new/?logoid=560',
+  'https://www.nyaltx.pro/token-new/?logoid=162',
+  'https://www.nyaltx.pro/token-new/?logoid=111',
+  'https://www.nyaltx.pro/token-new/?logoid=79',
+  'https://www.nyaltx.pro/token-new/?logoid=151',
+  'https://www.nyaltx.pro/token-new/?logoid=211',
+  'https://www.nyaltx.pro/token-bnb-new/?logoid=550',
+  'https://www.nyaltx.pro/token-new/?logoid=215',
+  'https://www.nyaltx.pro/token-new/?logoid=225',
+  'https://www.nyaltx.pro/token-bnb-new/?logoid=556',
+  'https://www.nyaltx.pro/token-bnb-new/?logoid=694',
+  'https://www.nyaltx.pro/token-bnb-new/?logoid=679',
+  'https://www.nyaltx.pro/token-new/?logoid=673',
+  'https://www.nyaltx.pro/token-bnb-new/?logoid=656',
+  'https://www.nyaltx.pro/token-bnb-new/?logoid=642',
+  'https://www.nyaltx.pro/token-bnb-new/?logoid=634',
+  'https://www.nyaltx.pro/token-bnb-new/?logoid=573',
+  'https://www.nyaltx.pro/token-bnb-new/?logoid=580',
+  'https://www.nyaltx.pro/token-bnb-new/?logoid=565',
+  'https://www.nyaltx.pro/token-bnb-new/?logoid=559',
+  'https://www.nyaltx.pro/token-bnb-new/?logoid=536',
+  'https://www.nyaltx.pro/token-bnb-new/?logoid=531',
+  'https://www.nyaltx.pro/token-bnb-new/?logoid=548',
+  'https://www.nyaltx.pro/token-bnb-new/?logoid=533',
+  'https://www.nyaltx.pro/token-new/?logoid=263',
+  'https://www.nyaltx.pro/token-new/?logoid=261',
+  'https://www.nyaltx.pro/token-bnb-new/?logoid=543',
+  'https://www.nyaltx.pro/token-bnb-new/?logoid=553',
+  'https://www.nyaltx.pro/token-new/?logoid=206',
+  'https://www.nyaltx.pro/token-new/?logoid=224',
+  'https://www.nyaltx.pro/token-new/?logoid=157',
+  'https://www.nyaltx.pro/token-new/?logoid=136',
+  'https://www.nyaltx.pro/token-new/?logoid=124',
+  'https://www.nyaltx.pro/token-bnb-new/?logoid=561',
+  'https://www.nyaltx.pro/token-bnb-new/?logoid=549',
+  'https://www.nyaltx.pro/token-bnb-new/?logoid=557',
+  'https://www.nyaltx.pro/token-new/?logoid=202',
+  'https://www.nyaltx.pro/token-new/?logoid=135',
+  'https://www.nyaltx.pro/token-bnb-new/?logoid=555',
+  'https://www.nyaltx.pro/token-new/?logoid=216',
+  'https://www.nyaltx.pro/token-new/?logoid=160',
+  'https://www.nyaltx.pro/token-new/?logoid=676',
+  'https://www.nyaltx.pro/token-bnb-new/?logoid=647',
+  'https://www.nyaltx.pro/token-bnb-new/?logoid=675',
+  'https://www.nyaltx.pro/token-new/?logoid=585',
+  'https://www.nyaltx.pro/token-bnb-new/?logoid=527',
+  'https://www.nyaltx.pro/token-new/?logoid=241',
+  'https://www.nyaltx.pro/token-new/?logoid=512',
 ];
 
 // Function to fetch HTML content from URL
@@ -174,7 +174,7 @@ function extractTokenData(html, url) {
         tokenData.whitepaper = href;
       }
       // Website
-      else if (parentText.includes('WEBSITE') && !href.includes('nyaltx.com/token')) {
+      else if (parentText.includes('WEBSITE') && !href.includes('nyaltx.pro/token')) {
         tokenData.website = href;
       }
       // Etherscan
@@ -347,10 +347,10 @@ function extractTokenData(html, url) {
         // Check if there's a pattern for logo URLs based on logoId
         const logoId = logoIdMatch[1];
         const possibleLogoUrls = [
-          `https://www.nyaltx.com/wp-content/uploads/${logoId}.png`,
-          `https://www.nyaltx.com/wp-content/uploads/${logoId}.jpg`,
-          `https://www.nyaltx.com/wp-content/uploads/logos/${logoId}.png`,
-          `https://www.nyaltx.com/logos/${logoId}.png`,
+          `https://www.nyaltx.pro/wp-content/uploads/${logoId}.png`,
+          `https://www.nyaltx.pro/wp-content/uploads/${logoId}.jpg`,
+          `https://www.nyaltx.pro/wp-content/uploads/logos/${logoId}.png`,
+          `https://www.nyaltx.pro/logos/${logoId}.png`,
         ];
 
         // For now, we'll note the logoId and potential URLs
@@ -371,7 +371,7 @@ function extractTokenData(html, url) {
       if (logoSrc.startsWith('//')) {
         logoSrc = 'https:' + logoSrc;
       } else if (logoSrc.startsWith('/')) {
-        logoSrc = 'https://www.nyaltx.com' + logoSrc;
+        logoSrc = 'https://www.nyaltx.pro' + logoSrc;
       }
       tokenData.logo = logoSrc;
     }

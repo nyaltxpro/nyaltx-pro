@@ -17,7 +17,7 @@ interface ContactFormReplyProps {
   message: string;
 }
 
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://nyaltx.com';
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://nyaltx.pro';
 
 export default function ContactFormReply({
   name,
@@ -107,10 +107,10 @@ export default function ContactFormReply({
                 <strong>The NYALTX Team</strong>
               </Text>
               <Text style={contactInfo}>
-                📧 Email: info@nyaltx.com<br />
+                📧 Email: info@nyaltx.pro<br />
                 🌐 Website:{' '}
                 <Link href={baseUrl} target="_blank" style={link}>
-                  www.nyaltx.com
+                  www.nyaltx.pro
                 </Link>
               </Text>
             </Section>

@@ -8,12 +8,12 @@ export const metadata: Metadata = {
     title: 'Governa Pro | Institutional Blockchain Governance',
     description:
         'Governa Pro delivers transparent, investor-ready on-chain governance with institutional workflows, secure voting, and compliance reporting.',
-    metadataBase: new URL('https://nyaltx.com/governa'),
+    metadataBase: new URL('https://nyaltx.pro/governa'),
     openGraph: {
         title: 'Institutional Blockchain Governance Made Simple | Governa Pro',
         description:
             'Transform your protocol with transparent, efficient governance that attracts investors and empowers communities.',
-        url: 'https://nyaltx.com/governa',
+        url: 'https://nyaltx.pro/governa',
         siteName: 'Governa Pro',
         type: 'website'
     },
