@@ -1,6 +1,5 @@
 import { fetchBuzzsproutEpisodes, type PodcastRssEpisode } from '@/lib/podcastRss';
-import { tinaClient } from '@/lib/tinaClient';
-import { tinaQueryOrJson } from '@/lib/tinaQuery';
+import { asTinaPageProps, loadJson } from '@/lib/loadTinaContent';
 import PodcastPage from '@/page-components/PodcastPage';
 import type { Metadata } from 'next';
 
@@ -23,11 +22,13 @@ export const metadata: Metadata = {
 };
 
 const Podcast = async () => {
-  const tinaData = await tinaQueryOrJson(
-    () => tinaClient.queries.podcast({ relativePath: 'podcast.json' }),
-    'podcast',
-    ['src/content/podcast/podcast.json'],
-  );
+  let tinaData: any;
+  try {
+    const data = await loadJson('src/content/podcast/podcast.json');
+    tinaData = asTinaPageProps('podcast', data);
+  } catch {
+    tinaData = asTinaPageProps('podcast', { episodes: [], cta: {} });
+  }
 
   let rssEpisodes: PodcastRssEpisode[] = [];
   let rssPodcastImage: string | null = null;

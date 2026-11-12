@@ -1,6 +1,5 @@
 import AboutClient from '@/page-components/Aboutus';
-import { tinaClient } from '@/lib/tinaClient';
-import { tinaQueryOrJson } from '@/lib/tinaQuery';
+import { asTinaPageProps, loadJson } from '@/lib/loadTinaContent';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -22,10 +21,13 @@ export const metadata: Metadata = {
 };
 
 export default async function AboutPage() {
-  const res = await tinaQueryOrJson(
-    () => tinaClient.queries.aboutUs({ relativePath: 'aboutus.json' }),
-    'aboutUs',
-    ['src/content/aboutus/aboutus.json', 'content/aboutus/settings.json'],
-  );
+  let res: any;
+  try {
+    const data = await loadJson('src/content/aboutus/aboutus.json');
+    res = asTinaPageProps('aboutUs', data);
+  } catch {
+    const data = await loadJson('content/aboutus/settings.json');
+    res = asTinaPageProps('aboutUs', data);
+  }
   return <AboutClient {...(res as any)} />;
 }
