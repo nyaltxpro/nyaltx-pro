@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
         website: website || undefined,
         twitter: twitter || undefined,
         telegram: telegram || undefined,
-        createdOn: 'https://nyaltx.pro',
+        createdOn: 'https://www.nyaltx.com',
       };
 
       console.log('📤 Starting IPFS upload with provider:', ipfsProvider, 'platform:', platform);

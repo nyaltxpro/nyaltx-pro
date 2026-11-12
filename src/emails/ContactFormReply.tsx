@@ -107,10 +107,10 @@ export default function ContactFormReply({
                 <strong>The NYALTX Team</strong>
               </Text>
               <Text style={contactInfo}>
-                📧 Email: info@nyaltx.pro<br />
+                📧 Email: info@nyaltx.com<br />
                 🌐 Website:{' '}
                 <Link href={baseUrl} target="_blank" style={link}>
-                  nyaltx.pro
+                  www.nyaltx.com
                 </Link>
               </Text>
             </Section>

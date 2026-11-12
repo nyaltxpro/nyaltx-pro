@@ -19,7 +19,7 @@ interface TokenApprovalProps {
   approved: boolean;
 }
 
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://nyaltx.pro';
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.nyaltx.com';
 
 export default function TokenApproval({
   tokenName,

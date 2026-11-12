@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
       id: `telegram_${weeklyWinner.id}`,
       tokenId: winner.tokenId,
       platform: 'telegram',
-      message: `🏆 WEEKLY RACE WINNER!\n\n${winner.tokenName} ($${winner.tokenSymbol}) is this week's champion with ${winner.weeklyPoints} points!\n\n👑 Crown Badge awarded forever\n🎯 Featured in upcoming promotions\n\nJoin the race: nyaltx.pro/pricing`,
+      message: `🏆 WEEKLY RACE WINNER!\n\n${winner.tokenName} ($${winner.tokenSymbol}) is this week's champion with ${winner.weeklyPoints} points!\n\n👑 Crown Badge awarded forever\n🎯 Featured in upcoming promotions\n\nJoin the race: www.nyaltx.com/pricing`,
       scheduledAt: new Date(now.getTime() + 10 * 60 * 1000), // 10 minutes from now
       status: 'pending',
     };

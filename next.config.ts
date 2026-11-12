@@ -27,6 +27,23 @@ const nextConfig: NextConfig = {
     ];
   },
 
+  async redirects() {
+    return [
+      // Redirect apex domain → www (handles nyaltx.com → www.nyaltx.com)
+      {
+        source: '/:path*',
+        has: [
+          {
+            type: 'host',
+            value: 'nyaltx.com',
+          },
+        ],
+        destination: 'https://www.nyaltx.com/:path*',
+        permanent: true,
+      },
+    ];
+  },
+
   typescript: {
     ignoreBuildErrors: true,
   },
