@@ -5,13 +5,19 @@ import PodcastPage from '@/page-components/PodcastPage';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://www.nyaltx.com'),
   title: 'NYALTX Podcast – Conversations with Builders & Community Voices',
   description:
     'Tune into candid conversations about project visibility, governance, marketing, and community growth across Web3. Fresh episodes from founders, marketers, and the NYALTX team.',
+  alternates: {
+    canonical: 'https://www.nyaltx.com/podcast',
+  },
   openGraph: {
     title: 'NYALTX Podcast – Conversations with Builders & Community Voices',
     description:
-      'Discover interviews and updates about project visibility, governance, marketing, and community growth across Web3 with NYALTX.pro.',
+      'Discover interviews and updates about project visibility, governance, marketing, and community growth across Web3 with NYALTX.',
+    url: 'https://www.nyaltx.com/podcast',
+    siteName: 'NYALTX',
     type: 'website',
   },
 };

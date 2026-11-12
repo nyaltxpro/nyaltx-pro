@@ -80,11 +80,24 @@ export async function buildRootMetadata(): Promise<Metadata> {
     authors: seo.authors ? [{ name: seo.authors }] : undefined,
     creator: seo.creator,
     publisher: seo.publisher,
-    robots: 'index, follow',
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
+    },
     icons: {
-      icon: ogImage,
-      shortcut: ogImage,
-      apple: ogImage,
+      icon: [
+        { url: '/favicon.ico' },
+        { url: '/logo.png', sizes: '192x192', type: 'image/png' },
+      ],
+      shortcut: '/logo.png',
+      apple: '/logo.png',
     },
     openGraph: {
       type: 'website',

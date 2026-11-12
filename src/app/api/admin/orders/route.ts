@@ -5,7 +5,7 @@ import { getCollection } from '@/lib/mongodb';
 // Comprehensive order interface covering all payment types
 export interface Order {
   id: string;
-  type: 'race_to_liberty' | 'boost_pack' | 'pro_subscription' | 'token_registration';
+  type: 'race_to_liberty' | 'boost_pack' | 'pro_subscription' | 'token_registration' | 'news_submission';
   status: 'pending' | 'completed' | 'failed' | 'refunded';
   
   // Payment details

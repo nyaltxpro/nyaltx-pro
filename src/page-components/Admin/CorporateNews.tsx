@@ -68,7 +68,8 @@ interface NewsArticle {
     content: string;
     excerpt: string;
     featuredImage?: string;
-    status: 'published' | 'draft';
+    status: 'published' | 'draft' | 'pending';
+    featuredInBanner?: boolean;
     publishedAt?: Date;
     tags: string[];
     author: string;
@@ -90,7 +91,8 @@ function AdminCorporateNewsComponent() {
         content: '',
         excerpt: '',
         featuredImage: '',
-        status: 'draft' as 'published' | 'draft',
+        status: 'draft' as 'published' | 'draft' | 'pending',
+        featuredInBanner: false,
         tags: '',
         author: 'NYALTX Team',
         editorType: 'quill' as 'simple' | 'quill'
@@ -216,6 +218,7 @@ function AdminCorporateNewsComponent() {
             excerpt: '',
             featuredImage: '',
             status: 'draft',
+            featuredInBanner: false,
             tags: '',
             author: 'NYALTX Team',
             editorType: 'quill'
@@ -231,10 +234,32 @@ function AdminCorporateNewsComponent() {
             excerpt: article.excerpt,
             featuredImage: article.featuredImage || '',
             status: article.status,
+            featuredInBanner: Boolean(article.featuredInBanner),
             tags: article.tags.join(', '),
             author: article.author,
             editorType: 'quill' // Default to quill for existing articles
         });
+    };
+
+    const handleToggleBanner = async (article: NewsArticle) => {
+        try {
+            const nextState = !article.featuredInBanner;
+            const response = await fetch('/api/admin/news', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: article._id, featuredInBanner: nextState })
+            });
+
+            if (!response.ok) {
+                const errData = await response.json().catch(() => ({}));
+                throw new Error(errData.error || 'Failed to update banner status');
+            }
+
+            setSuccess(nextState ? `"${article.title}" added to Top Banner Slider!` : `"${article.title}" removed from Top Banner Slider.`);
+            loadNews();
+        } catch (err: any) {
+            setError(err.message);
+        }
     };
 
     const handleSaveNews = async () => {
@@ -668,12 +693,22 @@ function AdminCorporateNewsComponent() {
                             <label className="block text-sm font-medium text-gray-300 mb-2">Status</label>
                             <select
                                 value={newsForm.status}
-                                onChange={(e) => setNewsForm(prev => ({ ...prev, status: e.target.value as 'published' | 'draft' }))}
+                                onChange={(e) => setNewsForm(prev => ({ ...prev, status: e.target.value as 'published' | 'draft' | 'pending' }))}
                                 className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600/50 rounded-lg text-white focus:outline-none focus:border-blue-500/50"
                             >
                                 <option value="draft">Draft</option>
                                 <option value="published">Published</option>
+                                <option value="pending">Pending Review</option>
                             </select>
+                            <label className="flex items-center gap-2 mt-3 cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    checked={newsForm.featuredInBanner}
+                                    onChange={(e) => setNewsForm(prev => ({ ...prev, featuredInBanner: e.target.checked }))}
+                                    className="rounded border-gray-600 text-cyan-500 focus:ring-cyan-500"
+                                />
+                                <span className="text-xs font-medium text-yellow-300">★ Feature in Top Banner Slider</span>
+                            </label>
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-300 mb-2">Tags</label>
@@ -737,14 +772,21 @@ function AdminCorporateNewsComponent() {
                                 <div key={article._id} className="bg-gray-700/30 border border-gray-600/30 rounded-lg p-4 hover:bg-gray-700/40 transition-all duration-200">
                                     <div className="flex items-start justify-between">
                                         <div className="flex-1">
-                                            <div className="flex items-center gap-2 mb-2">
+                                            <div className="flex items-center gap-2 mb-2 flex-wrap">
                                                 <h4 className="font-medium text-white text-lg">{article.title}</h4>
                                                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${article.status === 'published'
                                                     ? 'bg-green-500/10 text-green-300 border border-green-500/20'
+                                                    : article.status === 'pending'
+                                                    ? 'bg-amber-500/10 text-amber-300 border border-amber-500/20'
                                                     : 'bg-yellow-500/10 text-yellow-300 border border-yellow-500/20'
                                                     }`}>
                                                     {article.status}
                                                 </span>
+                                                {article.featuredInBanner && (
+                                                    <span className="px-2 py-1 rounded-full text-xs font-semibold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 flex items-center gap-1">
+                                                        ★ In Top Banner
+                                                    </span>
+                                                )}
                                             </div>
 
                                             <p className="text-gray-400 text-sm mb-3 line-clamp-2">{article.excerpt}</p>
@@ -773,6 +815,17 @@ function AdminCorporateNewsComponent() {
                                         </div>
 
                                         <div className="flex gap-2 ml-4">
+                                            <button
+                                                onClick={() => handleToggleBanner(article)}
+                                                className={`p-2 rounded-lg transition-all duration-200 border text-xs font-bold ${
+                                                    article.featuredInBanner
+                                                        ? 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border-amber-500/30'
+                                                        : 'bg-gray-700/50 hover:bg-gray-700/70 text-gray-400 border-gray-600/30'
+                                                }`}
+                                                title={article.featuredInBanner ? "Remove from top banner slider" : "Add to top banner slider"}
+                                            >
+                                                ★ {article.featuredInBanner ? 'In Banner' : 'Pin to Banner'}
+                                            </button>
                                             {article.status === 'published' && (
                                                 <button
                                                     onClick={() => window.open(`/news/${article.slug}`, '_blank')}

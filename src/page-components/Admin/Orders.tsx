@@ -6,7 +6,7 @@ import { FaExternalLinkAlt, FaEye, FaFilter, FaSearch, FaShoppingCart, FaCoins, 
 
 interface Order {
   id: string;
-  type: 'race_to_liberty' | 'boost_pack' | 'pro_subscription' | 'token_registration';
+  type: 'race_to_liberty' | 'boost_pack' | 'pro_subscription' | 'token_registration' | 'news_submission';
   status: 'pending' | 'completed' | 'failed' | 'refunded';
   paymentMethod: 'eth' | 'sol' | 'nyax' | 'paypal' | 'stripe' | 'free_promo';
   amount: string;
@@ -182,6 +182,7 @@ const AdminOrdersComponent = () => {
               <option value="boost_pack">Boost Pack</option>
               <option value="pro_subscription">Pro Subscription</option>
               <option value="token_registration">Token Registration</option>
+              <option value="news_submission">News Submission</option>
             </select>
           </div>
 

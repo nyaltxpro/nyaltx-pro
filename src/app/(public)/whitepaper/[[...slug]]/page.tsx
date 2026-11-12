@@ -40,8 +40,22 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
   const page = whitepaperSource.getPage(params.slug);
   if (!page) notFound();
 
+  const slugPath = params.slug && params.slug.length ? `/${params.slug.join('/')}` : '';
+  const canonicalUrl = `https://www.nyaltx.com/whitepaper${slugPath}`;
+
   return {
+    metadataBase: new URL('https://www.nyaltx.com'),
     title: `${page.data.title} | NYALTX Whitepaper`,
     description: page.data.description,
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    openGraph: {
+      title: `${page.data.title} | NYALTX Whitepaper`,
+      description: page.data.description,
+      url: canonicalUrl,
+      siteName: 'NYALTX',
+      type: 'article',
+    },
   };
 }

@@ -80,13 +80,19 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   }
 
   return {
+    metadataBase: new URL('https://www.nyaltx.com'),
     title: `${article.title} - NYALTX News`,
     description: article.excerpt,
     keywords: article.tags.join(', '),
+    alternates: {
+      canonical: `https://www.nyaltx.com/news/${params.slug}`,
+    },
     openGraph: {
       title: article.title,
       description: article.excerpt,
       type: 'article',
+      url: `https://www.nyaltx.com/news/${params.slug}`,
+      siteName: 'NYALTX',
       publishedTime: article.publishedAt,
       authors: [article.author],
       tags: article.tags,
@@ -97,13 +103,21 @@ export async function generateMetadata({ params }: { params: { slug: string } })
           height: 630,
           alt: article.title,
         }
-      ] : [],
+      ] : [
+        {
+          url: 'https://www.nyaltx.com/og-image.png',
+          width: 1200,
+          height: 630,
+          alt: 'NYALTX News',
+        }
+      ],
     },
     twitter: {
       card: 'summary_large_image',
+      site: '@nyaltx',
       title: article.title,
       description: article.excerpt,
-      images: article.featuredImage ? [article.featuredImage] : [],
+      images: article.featuredImage ? [article.featuredImage] : ['https://www.nyaltx.com/og-image.png'],
     },
   };
 }

@@ -32,6 +32,7 @@ export default function PublicHeader() {
         { label: 'Podcast', href: '/podcast', enabled: true },
         { label: 'Team', href: '/team', enabled: true },
         { label: 'Our News', href: '/news', enabled: true },
+        { label: 'News Hub', href: '/news-hub', enabled: true },
         { label: 'Whitepaper', href: '/whitepaper', enabled: true },
 
       ],

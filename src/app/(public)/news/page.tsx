@@ -1,16 +1,39 @@
 import PublicHeader from '@/components/PublicHeader';
 import { Metadata } from 'next';
+import Link from 'next/link';
 import NewsGrid from '../../../components/NewsGrid';
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://www.nyaltx.com'),
   title: 'NYALTX News – Updates & Announcements',
   description:
-    'Stay up to date with the latest NYALTX.pro announcements, platform features, and community updates.',
-  keywords: 'NYALTX news, crypto news, blockchain updates, platform announcements, partnerships',
+    'Stay up to date with the latest NYALTX announcements, platform features, tokenized securities insights, and community updates.',
+  keywords: 'NYALTX news, crypto news, blockchain updates, platform announcements, partnerships, tokenized securities',
+  alternates: {
+    canonical: 'https://www.nyaltx.com/news',
+  },
   openGraph: {
     title: 'NYALTX News – Updates & Announcements',
-    description: 'Stay up to date with the latest NYALTX.pro announcements, platform features, and community updates.',
+    description: 'Stay up to date with the latest NYALTX announcements, platform features, and community updates.',
     type: 'website',
+    url: 'https://www.nyaltx.com/news',
+    siteName: 'NYALTX',
+    images: [
+      {
+        url: 'https://www.nyaltx.com/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'NYALTX News',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    site: '@nyaltx',
+    creator: '@nyaltx',
+    title: 'NYALTX News – Updates & Announcements',
+    description: 'Stay up to date with the latest NYALTX announcements, platform features, and community updates.',
+    images: ['https://www.nyaltx.com/og-image.png'],
   },
 };
 
@@ -50,6 +73,15 @@ export default function NewsPage() {
                 <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
                 <span>Industry Insights</span>
               </div>
+            </div>
+
+            <div className="mt-8 flex justify-center gap-4 flex-wrap">
+              <Link
+                href="/news-hub"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cyan-400 to-indigo-500 hover:from-cyan-300 hover:to-indigo-400 text-slate-950 font-bold rounded-xl shadow-lg transition-all transform hover:scale-105"
+              >
+                📰 Open Interactive News Hub &amp; Submit News →
+              </Link>
             </div>
           </div>
         </div>

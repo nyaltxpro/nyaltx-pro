@@ -62,7 +62,8 @@ export async function POST(request: NextRequest) {
       publishedAt,
       tags = [],
       author,
-      slug
+      slug,
+      featuredInBanner = false
     } = await request.json();
     
     // Validate required fields
@@ -96,6 +97,7 @@ export async function POST(request: NextRequest) {
       tags,
       author: author || 'NYALTX Team',
       slug: finalSlug,
+      featuredInBanner: Boolean(featuredInBanner),
       createdAt: new Date(),
       updatedAt: new Date(),
       views: 0
@@ -130,7 +132,8 @@ export async function PUT(request: NextRequest) {
       publishedAt,
       tags,
       author,
-      slug
+      slug,
+      featuredInBanner
     } = await request.json();
     
     if (!id) {
@@ -158,6 +161,7 @@ export async function PUT(request: NextRequest) {
     if (tags) updateData.tags = tags;
     if (author) updateData.author = author;
     if (slug) updateData.slug = slug;
+    if (featuredInBanner !== undefined) updateData.featuredInBanner = Boolean(featuredInBanner);
     
     const result = await collection.updateOne(
       { _id: new ObjectId(id) },

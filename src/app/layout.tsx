@@ -46,7 +46,7 @@ export default async function RootLayout({
   const ogImageUrl = seo.ogImage?.startsWith('http')
     ? seo.ogImage
     : `${baseUrl}${seo.ogImage?.startsWith('/') ? seo.ogImage : `/${seo.ogImage || 'og-image.png'}`}`;
-  const logoImageUrl = seo.ogImage?.startsWith('http')
+  const logoImageUrl = seo.siteLogoUrl?.startsWith('http')
     ? seo.siteLogoUrl
     : `${baseUrl}${seo.siteLogoUrl?.startsWith('/') ? seo.siteLogoUrl : `/${seo.siteLogoUrl || 'logo.png'}`}`;
 
@@ -120,41 +120,69 @@ export default async function RootLayout({
                 {
                   '@type': 'SiteNavigationElement',
                   position: 1,
+                  name: 'News Hub',
+                  description: 'Where Wall Street meets Web3: latest crypto news, press releases, and market stories',
+                  url: `${baseUrl}/news-hub`,
+                },
+                {
+                  '@type': 'SiteNavigationElement',
+                  position: 2,
                   name: 'Dashboard',
                   description: 'Access your crypto dashboard with real-time token tracking',
                   url: `${baseUrl}/dashboard`,
                 },
                 {
                   '@type': 'SiteNavigationElement',
-                  position: 2,
+                  position: 3,
+                  name: 'Tokenized Securities',
+                  description: 'Explore tokenized stock markets and real-world digital asset securities',
+                  url: `${baseUrl}/dashboard/tokenized-securities`,
+                },
+                {
+                  '@type': 'SiteNavigationElement',
+                  position: 4,
                   name: 'Pricing',
                   description: 'View pricing plans for Race to Liberty and boost packs',
                   url: `${baseUrl}/pricing`,
                 },
                 {
                   '@type': 'SiteNavigationElement',
-                  position: 3,
+                  position: 5,
+                  name: 'Trade & Markets',
+                  description: 'Real-time crypto charts, token swap, and digital market data',
+                  url: `${baseUrl}/dashboard/trade`,
+                },
+                {
+                  '@type': 'SiteNavigationElement',
+                  position: 6,
+                  name: 'Blog',
+                  description: 'Market insights, crypto guides, and platform announcements',
+                  url: `${baseUrl}/blog`,
+                },
+                {
+                  '@type': 'SiteNavigationElement',
+                  position: 7,
+                  name: 'Whitepaper',
+                  description: 'Read the NYALTX whitepaper and ecosystem documentation',
+                  url: `${baseUrl}/whitepaper`,
+                },
+                {
+                  '@type': 'SiteNavigationElement',
+                  position: 8,
                   name: 'About Us',
                   description: 'Learn about NYALTX and our mission',
                   url: `${baseUrl}/about-us`,
                 },
                 {
                   '@type': 'SiteNavigationElement',
-                  position: 4,
+                  position: 9,
                   name: 'Contact',
                   description: 'Get in touch with the NYALTX team',
                   url: `${baseUrl}/contact`,
                 },
                 {
                   '@type': 'SiteNavigationElement',
-                  position: 5,
-                  name: 'Whitepaper',
-                  description: 'Read the NYALTX whitepaper and documentation',
-                  url: `${baseUrl}/whitepaper`,
-                },
-                {
-                  '@type': 'SiteNavigationElement',
-                  position: 6,
+                  position: 10,
                   name: 'Podcast',
                   description: 'Listen to Off Road with Frank Ferraro podcast',
                   url: `${baseUrl}/podcast`,

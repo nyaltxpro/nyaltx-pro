@@ -10,13 +10,18 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
     const tag = searchParams.get('tag');
+    const featured = searchParams.get('featured');
     
-    console.log('News API called with params:', { page, limit, tag });
+    console.log('News API called with params:', { page, limit, tag, featured });
     
     const skip = (page - 1) * limit;
     
     // Build query - only show published articles
     let query: any = { status: 'published' };
+    
+    if (featured === 'true') {
+      query.featuredInBanner = true;
+    }
     
     if (tag) {
       query.tags = { $in: [tag] };
@@ -47,7 +52,13 @@ export async function GET(request: NextRequest) {
         author: 1,
         slug: 1,
         tags: 1,
-        views: 1
+        views: 1,
+        featuredInBanner: 1,
+        category: 1,
+        coverColor: 1,
+        type: 1,
+        sourceUrl: 1,
+        status: 1
       })
       .toArray();
     
