@@ -1,5 +1,6 @@
-import { getNews } from '@/lib/rss';
 import DashboardSubmitNewsButton from '@/components/NewsHub/DashboardSubmitNewsButton';
+import { getNews } from '@/lib/rss';
+import Link from 'next/link';
 
 export const revalidate = 600; // Revalidate every 10 minutes
 
@@ -15,13 +16,28 @@ function formatDate(d?: Date): string {
   }
 }
 
+// Feed descriptions are third-party HTML. Render them as plain text
+// instead of using dangerouslySetInnerHTML.
+function toPlainText(html?: string): string {
+  if (!html) return '';
+  return html
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 const NewsPage = async () => {
   let items = [] as Awaited<ReturnType<typeof getNews>>;
   let error: string | null = null;
 
   try {
     items = await getNews();
-    console.log('Fetched news items:', items.length);
   } catch (e) {
     console.error('Error fetching news:', e);
     error = e instanceof Error ? e.message : 'Failed to fetch news';
@@ -40,11 +56,9 @@ const NewsPage = async () => {
               </h1>
               <div className="flex items-center gap-2 mt-1">
                 <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-
+              </div>
               <div className="mt-4">
                 <DashboardSubmitNewsButton />
-              </div>
-
               </div>
             </div>
           </div>
@@ -156,10 +170,9 @@ const NewsPage = async () => {
                   </Link>
 
                   {item.description ? (
-                    <p
-                      className="text-sm text-gray-400 line-clamp-3 leading-relaxed"
-                      dangerouslySetInnerHTML={{ __html: item.description }}
-                    />
+                    <p className="text-sm text-gray-400 line-clamp-3 leading-relaxed">
+                      {toPlainText(item.description)}
+                    </p>
                   ) : null}
 
                   {/* Read more indicator */}
@@ -208,6 +221,6 @@ const NewsPage = async () => {
       )}
     </div>
   );
-}
+};
 
 export default NewsPage;
