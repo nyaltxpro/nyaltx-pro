@@ -68,13 +68,12 @@ const CATEGORIES = ["All", "NYAX", "Bitcoin", "Ethereum", "DeFi", "Tokenized Sto
 
 const PLANS_CONFIG = {
   news: [
-    { id: "feed", name: "Feed listing", desc: "RSS feed + news page · 7 days", price: 29 },
-    { id: "slider", name: "Featured slider", desc: "Top banner slider + feed + RSS · 7 days", price: 99 },
-    { id: "prem", name: "Premium spotlight", desc: "Pinned slide, newsletter mention · 30 days", price: 249 }
+    { id: "feed", name: "Direct Distribution", desc: "DO IT YOURSELF · $199 flat rate per release", price: 199 },
+    { id: "slider", name: "Full Service", desc: "MOST POPULAR · $499 per release · Banner slider + editorial review", price: 499 }
   ],
   pr: [
-    { id: "feed", name: "Direct distribution", desc: "News Hub, RSS feed, newsletter and social · unlimited words", price: 199 },
-    { id: "slider", name: "Full service", desc: "Editorial review + banner slot 7 days + Google News / partner network", price: 499 }
+    { id: "feed", name: "Direct Distribution", desc: "DO IT YOURSELF · $199 flat rate per release", price: 199 },
+    { id: "slider", name: "Full Service", desc: "MOST POPULAR · $499 per release · Banner slider + editorial review", price: 499 }
   ]
 };
 
@@ -223,7 +222,7 @@ export default function NewsHubComponent() {
   };
 
   const copyRss = () => {
-    const url = "https://www.nyaltx.pro/rss/news.xml";
+    const url = "https://www.nyaltx.pro/rss.xml";
     if (navigator.clipboard) {
       navigator.clipboard.writeText(url).then(() => {
         setRssCopied(true);
@@ -1152,7 +1151,7 @@ export default function NewsHubComponent() {
 
             <div className="side">
               <h4>Subscribe via RSS</h4>
-              <code>https://www.nyaltx.pro/rss/news.xml</code>
+              <code>https://www.nyaltx.pro/rss.xml</code>
               <div className="note">
                 Filters: <span style={{ display: 'inline-block', background: 'var(--bg)', padding: '2px 6px', borderRadius: '4px', margin: '2px' }}>?tag=nyax</span> <span style={{ display: 'inline-block', background: 'var(--bg)', padding: '2px 6px', borderRadius: '4px', margin: '2px' }}>?tag=btc</span>
               </div>
@@ -1471,7 +1470,7 @@ export default function NewsHubComponent() {
                   contentEditable
                   suppressContentEditableWarning
                   onInput={(e) => setStoryBody(e.currentTarget.innerHTML)}
-                  placeholder="Write your full story here..."
+                  data-placeholder="Write your full story here..."
                 />
 
                 <label>Cover image (optional)</label>

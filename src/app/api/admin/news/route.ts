@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
+import { sendNewsApprovalEmail } from '@/lib/newsEmailService';
 
 export async function GET(request: NextRequest) {
   try {
@@ -146,6 +147,11 @@ export async function PUT(request: NextRequest) {
     }
     
     console.log('Updating news article with ID:', id);
+
+    const existingArticle = await collection.findOne({ _id: new ObjectId(id) });
+    if (!existingArticle) {
+      return NextResponse.json({ error: 'News article not found' }, { status: 404 });
+    }
     
     const updateData: any = {
       updatedAt: new Date()
@@ -159,7 +165,7 @@ export async function PUT(request: NextRequest) {
       updateData.status = status;
       if (status === 'published' && publishedAt) {
         updateData.publishedAt = new Date(publishedAt);
-      } else if (status === 'published') {
+      } else if (status === 'published' && !existingArticle.publishedAt) {
         updateData.publishedAt = new Date();
       }
     }
@@ -169,19 +175,43 @@ export async function PUT(request: NextRequest) {
     if (featuredInBanner !== undefined) updateData.featuredInBanner = Boolean(featuredInBanner);
     if (isPaid !== undefined) updateData.isPaid = Boolean(isPaid);
     if (isPendingReview !== undefined) updateData.isPendingReview = Boolean(isPendingReview);
+
+    // Send email notification upon admin approval (guaranteed single send via approvalEmailSent flag)
+    let emailSent = false;
+    if (status === 'published' && existingArticle.email && !existingArticle.approvalEmailSent) {
+      const finalSlug = slug || existingArticle.slug || id;
+      const finalTitle = title || existingArticle.title;
+      try {
+        const emailResult = await sendNewsApprovalEmail({
+          to: existingArticle.email,
+          headline: finalTitle,
+          slug: finalSlug,
+          category: existingArticle.category || existingArticle.tags?.[0] || 'News',
+          planName: existingArticle.planName || existingArticle.plan,
+          publishedAt: updateData.publishedAt || existingArticle.publishedAt || new Date(),
+          author: author || existingArticle.author
+        });
+
+        if (emailResult.success) {
+          emailSent = true;
+          updateData.approvalEmailSent = true;
+          updateData.approvalEmailSentAt = new Date();
+          updateData.approvalMessageId = emailResult.messageId;
+        }
+      } catch (emailErr) {
+        console.error('Error sending approval notification email:', emailErr);
+      }
+    }
     
     const result = await collection.updateOne(
       { _id: new ObjectId(id) },
       { $set: updateData }
     );
     
-    if (result.matchedCount === 0) {
-      return NextResponse.json({ error: 'News article not found' }, { status: 404 });
-    }
-    
     return NextResponse.json({
       success: true,
-      message: 'News article updated successfully'
+      message: 'News article updated successfully',
+      emailSent
     });
   } catch (error: any) {
     console.error('Error updating news article:', error);

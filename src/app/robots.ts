@@ -34,6 +34,7 @@ export default function robots(): MetadataRoute.Robots {
           '/_next/*',
           '/images/*',
           '/rss/*',
+          '/rss.xml',
         ],
         disallow: [
           '/admin',

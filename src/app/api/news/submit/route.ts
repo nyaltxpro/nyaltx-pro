@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb, getCollection } from '@/lib/mongodb';
 import { Order } from '@/app/api/admin/orders/route';
+import { verifyNewsPayment, sendNewsSubmissionConfirmationEmail } from '@/lib/newsEmailService';
 
 export async function POST(req: NextRequest) {
   try {
@@ -19,12 +20,13 @@ export async function POST(req: NextRequest) {
       email,
       plan = 'feed', // 'feed' | 'slider' | 'prem'
       paymentMethod = 'card', // 'paypal' | 'eth' | 'sol' | 'card' | 'usdc' | 'nyax'
-      amount = 29,
+      amount = 199,
       txHash,
       paymentId,
       walletAddress,
       paymentStatus = 'completed',
-      planName
+      planName,
+      isTest = false
     } = data;
 
     if (!title || title.trim().length < 5) {
@@ -39,6 +41,26 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Story content is required (minimum 20 characters)' }, { status: 400 });
     }
 
+    if (!email || !email.trim() || !email.includes('@')) {
+      return NextResponse.json({ error: 'A valid email address is required to receive payment and status confirmation.' }, { status: 400 });
+    }
+
+    // 1. Verify Payment on Backend before proceeding
+    const paymentVerification = await verifyNewsPayment({
+      paymentMethod,
+      paymentId: paymentId || null,
+      txHash: txHash || null,
+      amount,
+      paymentStatus,
+      isTest: Boolean(isTest)
+    });
+
+    if (!paymentVerification.verified) {
+      return NextResponse.json({
+        error: paymentVerification.reason || 'Payment verification failed. Please complete payment before submitting.'
+      }, { status: 400 });
+    }
+
     const db = await getDb();
     const newsCollection = db.collection('corporate_news');
 
@@ -48,6 +70,10 @@ export async function POST(req: NextRequest) {
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '');
     const finalSlug = `${baseSlug}-${Date.now().toString(36)}`;
+
+    const resolvedPlanName = planName || (plan === 'slider'
+      ? 'Full Service ($499)'
+      : 'Direct Distribution ($199)');
 
     const submissionDoc = {
       title: title.trim(),
@@ -59,15 +85,20 @@ export async function POST(req: NextRequest) {
       featuredImage: featuredImage || null,
       coverColor: Number(coverColor) || 0,
       author: author.trim() || (type === 'pr' ? 'Press Release' : 'Community Submission'),
-      email: email?.trim() || null,
+      email: email.trim(),
       plan,
-      planName: planName || (type === 'pr' ? (plan === 'slider' ? 'Full Service ($499)' : 'Direct Distribution ($199)') : plan),
+      planName: resolvedPlanName,
       paymentMethod,
       amount: Number(amount) || 0,
       txHash: txHash || null,
       paymentId: paymentId || null,
       walletAddress: walletAddress || null,
       paymentStatus: paymentStatus || 'completed',
+      paymentVerified: true,
+      paymentVerifiedAt: new Date(),
+      paymentProviderDetails: paymentVerification.providerDetails || null,
+      paymentConfirmationEmailSent: false,
+      approvalEmailSent: false,
       status: 'pending', // Pending admin review
       isPendingReview: true,
       isPaid: true,
@@ -81,7 +112,7 @@ export async function POST(req: NextRequest) {
 
     const insertResult = await newsCollection.insertOne(submissionDoc);
 
-    // Also record the payment order in 'orders' collection
+    // 2. Record the verified payment order in 'orders' collection
     let orderRecord: Order | null = null;
     try {
       const ordersCollection = await getCollection<Order>('orders');
@@ -90,15 +121,15 @@ export async function POST(req: NextRequest) {
       const newOrder: Order = {
         id: orderId,
         type: 'news_submission' as any,
-        status: (paymentStatus === 'completed' || paymentStatus === 'paid') ? 'completed' : 'pending',
+        status: 'completed',
         paymentMethod: paymentMethod as any,
         amount: String(amount),
         currency: (paymentMethod === 'eth' ? 'ETH' : paymentMethod === 'sol' ? 'SOL' : paymentMethod === 'nyax' ? 'NYAX' : 'USD') as any,
         txHash: txHash || undefined,
         paymentId: paymentId || undefined,
         walletAddress: walletAddress || undefined,
-        email: email || undefined,
-        productName: `NYALTX News Hub - ${type === 'pr' ? 'Press Release' : 'News'} (${submissionDoc.planName})`,
+        email: email.trim(),
+        productName: `NYALTX News Hub - ${type === 'pr' ? 'Press Release' : 'News'} (${resolvedPlanName})`,
         tier: plan,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -109,11 +140,12 @@ export async function POST(req: NextRequest) {
           category,
           submissionType: type,
           plan,
-          planName: submissionDoc.planName,
+          planName: resolvedPlanName,
           paymentMethod,
           paymentId,
           txHash,
-          walletAddress
+          walletAddress,
+          paymentVerified: true
         }
       };
 
@@ -123,12 +155,47 @@ export async function POST(req: NextRequest) {
       console.warn('Could not record order automatically:', orderErr);
     }
 
+    // 3. Send payment & submission confirmation email to client
+    let emailSent = false;
+    try {
+      const emailRes = await sendNewsSubmissionConfirmationEmail({
+        to: email.trim(),
+        headline: title.trim(),
+        category,
+        planName: resolvedPlanName,
+        amount: Number(amount) || 0,
+        paymentMethod,
+        paymentId: paymentId || undefined,
+        txHash: txHash || undefined,
+        author: submissionDoc.author,
+        submittedAt: submissionDoc.createdAt.toISOString()
+      });
+
+      if (emailRes.success) {
+        emailSent = true;
+        await newsCollection.updateOne(
+          { _id: insertResult.insertedId },
+          {
+            $set: {
+              paymentConfirmationEmailSent: true,
+              paymentConfirmationEmailSentAt: new Date(),
+              paymentConfirmationMessageId: emailRes.messageId
+            }
+          }
+        );
+      }
+    } catch (emailError) {
+      console.error('Error sending news submission email:', emailError);
+    }
+
     return NextResponse.json({
       success: true,
       id: insertResult.insertedId.toString(),
       slug: finalSlug,
       orderId: orderRecord?.id || null,
-      message: 'Your story has been submitted for moderation.'
+      paymentVerified: true,
+      emailSent,
+      message: 'Payment verified successfully. Your story has been submitted and is pending admin approval.'
     });
 
   } catch (error: any) {

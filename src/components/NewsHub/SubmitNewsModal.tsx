@@ -42,16 +42,57 @@ const BTN_PRIMARY =
   'px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed text-white rounded-lg transition-all duration-200 font-medium text-sm';
 const PANEL = 'bg-gray-700/30 border border-gray-600/30 rounded-lg';
 
-const PLANS_CONFIG = {
-  news: [
-    { id: 'feed', name: 'Feed listing', desc: 'RSS feed + news page · 7 days', price: 29 },
-    { id: 'slider', name: 'Featured slider', desc: 'Top banner slider + feed + RSS · 7 days', price: 99 },
-    { id: 'prem', name: 'Premium spotlight', desc: 'Pinned slide, newsletter mention · 30 days', price: 249 }
-  ],
-  pr: [
-    { id: 'feed', name: 'Direct distribution', desc: 'News Hub, RSS feed, newsletter and social · unlimited words', price: 199 },
-    { id: 'slider', name: 'Full service', desc: 'Editorial review + banner slot 7 days + Google News / partner network', price: 499 }
-  ]
+export interface PlanItem {
+  id: string;
+  name: string;
+  badge: string;
+  price: number;
+  priceLabel: string;
+  ctaText: string;
+  desc: string;
+  features: string[];
+}
+
+const PUBLISH_PLANS: PlanItem[] = [
+  {
+    id: 'feed',
+    badge: 'DO IT YOURSELF',
+    name: 'Direct Distribution',
+    price: 199,
+    priceLabel: 'flat rate per release',
+    ctaText: 'Start DIY release',
+    desc: 'Publish your story on NYALTX with direct distribution to our News Hub, RSS feed, and social channels.',
+    features: [
+      'Unlimited word count',
+      'Goes live on the NYALTX News Hub after a quick compliance check',
+      'Included in our RSS feed and weekly newsletter',
+      'Shared on NYALTX social channels',
+      'Live in under 24 hours',
+      'Full editorial review and headline help',
+    ],
+  },
+  {
+    id: 'slider',
+    badge: 'MOST POPULAR',
+    name: 'Full Service',
+    price: 499,
+    priceLabel: 'per release',
+    ctaText: 'Start Full Service',
+    desc: 'Publish your press release on NYALTX, in our RSS feed and newsletter, and push it out through our distribution network. Write it yourself or let our editors polish it first.',
+    features: [
+      'Unlimited word count',
+      'Goes live on the NYALTX News Hub after a quick compliance check',
+      'Included in our RSS feed and weekly newsletter',
+      'Shared on NYALTX social channels',
+      'Live in under 24 hours',
+      'Full editorial review and headline help',
+    ],
+  },
+];
+
+const PLANS_CONFIG: Record<'news' | 'pr', PlanItem[]> = {
+  news: PUBLISH_PLANS,
+  pr: PUBLISH_PLANS,
 };
 
 /* ---------- Payment configuration (same as pricing page) ---------- */
@@ -919,8 +960,8 @@ export default function SubmitNewsModalCorporate({
                 }}
                 className={INPUT}
               >
-                <option value="news">News story (from $29)</option>
-                <option value="pr">Press release (from $199)</option>
+                <option value="news">News Article</option>
+                <option value="pr">Press Release</option>
               </select>
             </div>
 
@@ -1119,37 +1160,91 @@ export default function SubmitNewsModalCorporate({
         {/* Step 2: Package */}
         {modalStep === 2 && (
           <div className="space-y-4">
-            <h4 className="text-sm font-medium text-gray-300">Select your visibility package</h4>
+            <div className="text-center mb-1">
+              <h4 className="text-xl font-bold text-white tracking-tight">Choose how you publish</h4>
+              <p className="text-xs text-gray-400 mt-1">Select the distribution plan that fits your announcement.</p>
+            </div>
 
-            <div className="space-y-3">
-              {currentPlans.map(p => (
-                <div
-                  key={p.id}
-                  onClick={() => setPlan(p.id)}
-                  className={`p-4 rounded-lg border cursor-pointer transition-all flex justify-between items-center ${plan === p.id
-                    ? 'border-cyan-500/60 bg-cyan-500/10 shadow-md'
-                    : 'border-gray-600/30 bg-gray-700/30 hover:bg-gray-700/40'
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+              {currentPlans.map((p) => {
+                const isSelected = plan === p.id;
+                const isPopular = p.badge === 'MOST POPULAR';
+
+                return (
+                  <div
+                    key={p.id}
+                    onClick={() => setPlan(p.id)}
+                    className={`relative p-5 rounded-2xl border cursor-pointer transition-all duration-300 flex flex-col justify-between ${
+                      isSelected
+                        ? isPopular
+                          ? 'border-cyan-400 bg-cyan-950/40 ring-2 ring-cyan-400/60 shadow-xl shadow-cyan-500/10'
+                          : 'border-blue-400 bg-blue-950/40 ring-2 ring-blue-400/60 shadow-xl shadow-blue-500/10'
+                        : isPopular
+                          ? 'border-cyan-500/30 bg-gray-800/60 hover:border-cyan-500/60 hover:bg-gray-800/80'
+                          : 'border-gray-700/60 bg-gray-800/40 hover:border-gray-600 hover:bg-gray-800/60'
                     }`}
-                >
-                  <div>
-                    <div className="font-semibold text-white flex items-center gap-2">
-                      {p.name}
-                      {p.id === 'slider' && (
-                        <span className="text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-full font-semibold">
-                          ★ RECOMMENDED
-                        </span>
+                  >
+                    {isPopular && (
+                      <div className="absolute -top-3 right-4 bg-gradient-to-r from-cyan-400 to-indigo-500 text-slate-950 text-[10px] font-extrabold uppercase px-3 py-1 rounded-full shadow-lg tracking-wider">
+                        ★ MOST POPULAR
+                      </div>
+                    )}
+
+                    <div>
+                      <div className="text-[11px] font-extrabold tracking-wider text-cyan-400 uppercase mb-1">
+                        {p.badge}
+                      </div>
+
+                      <h3 className="text-2xl font-bold text-white mb-2">{p.name}</h3>
+
+                      <div className="flex items-baseline gap-2 mb-3">
+                        <span className="text-3xl font-extrabold text-white">${p.price}</span>
+                        <span className="text-xs text-gray-400 font-medium">{p.priceLabel}</span>
+                      </div>
+
+                      {p.desc && (
+                        <p className="text-xs text-gray-300 leading-relaxed mb-4 min-h-[36px]">
+                          {p.desc}
+                        </p>
                       )}
+
+                      <div className="space-y-2.5 border-t border-gray-700/50 pt-4 mb-5">
+                        {p.features?.map((feat, fIdx) => (
+                          <div key={fIdx} className="flex items-start gap-2 text-xs text-gray-200">
+                            <span className="text-emerald-400 font-bold shrink-0">✓</span>
+                            <span className="leading-tight">{feat}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                    <div className="text-xs text-gray-400 mt-1">{p.desc}</div>
+
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setPlan(p.id);
+                        setModalStep(3);
+                      }}
+                      className={`w-full py-3 px-4 rounded-xl text-xs font-bold transition-all duration-200 ${
+                        isSelected
+                          ? 'bg-gradient-to-r from-cyan-400 to-indigo-500 text-slate-950 shadow-md shadow-cyan-500/20 hover:opacity-95'
+                          : 'bg-gray-700/70 hover:bg-gray-600 text-white'
+                      }`}
+                    >
+                      {p.ctaText} (${p.price})
+                    </button>
                   </div>
-                  <div className="text-xl font-semibold text-cyan-400">${p.price}</div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             <div className="flex justify-between items-center pt-4 border-t border-gray-700/20">
-              <button type="button" onClick={() => setModalStep(1)} className={BTN_GHOST}>← Back</button>
-              <button type="button" onClick={() => setModalStep(3)} className={BTN_PRIMARY}>Continue to Payment →</button>
+              <button type="button" onClick={() => setModalStep(1)} className={BTN_GHOST}>
+                ← Back
+              </button>
+              <button type="button" onClick={() => setModalStep(3)} className={BTN_PRIMARY}>
+                Continue to Payment (${activePlanObj.price}) →
+              </button>
             </div>
           </div>
         )}
