@@ -100,6 +100,7 @@ export async function POST(request: NextRequest) {
       author: author || 'NYALTX Team',
       slug: finalSlug,
       featuredInBanner: Boolean(featuredInBanner),
+      isPaid: false,
       createdAt: new Date(),
       updatedAt: new Date(),
       views: 0
@@ -135,7 +136,9 @@ export async function PUT(request: NextRequest) {
       tags,
       author,
       slug,
-      featuredInBanner
+      featuredInBanner,
+      isPaid,
+      isPendingReview
     } = await request.json();
     
     if (!id) {
@@ -164,6 +167,8 @@ export async function PUT(request: NextRequest) {
     if (author) updateData.author = author;
     if (slug) updateData.slug = slug;
     if (featuredInBanner !== undefined) updateData.featuredInBanner = Boolean(featuredInBanner);
+    if (isPaid !== undefined) updateData.isPaid = Boolean(isPaid);
+    if (isPendingReview !== undefined) updateData.isPendingReview = Boolean(isPendingReview);
     
     const result = await collection.updateOne(
       { _id: new ObjectId(id) },

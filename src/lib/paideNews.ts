@@ -2,7 +2,7 @@ import { getCollection } from '@/lib/mongodb';
 import { toReliableIpfsUrl } from '@/utils/ipfsUpload';
 
 // Must match the collection used by /api/admin/news and /api/news
-const COLLECTION = 'news';
+const COLLECTION = 'corporate_news';
 
 interface NewsDoc {
   _id: unknown;
@@ -16,6 +16,13 @@ interface NewsDoc {
   slug?: string;
   featuredInBanner?: boolean;
   plan?: string;
+  planName?: string;
+  paymentMethod?: string;
+  paymentStatus?: string;
+  amount?: number;
+  type?: string;
+  isPaid?: boolean;
+  status?: string;
 }
 
 export interface PaidNewsItem {
@@ -55,17 +62,32 @@ function fixImage(url?: string): string | undefined {
 
 function getBaseUrl(): string {
   if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL;
+  if (process.env.NEXT_PUBLIC_BASE_URL) return process.env.NEXT_PUBLIC_BASE_URL;
   if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
   return 'http://localhost:3000';
 }
 
-// Primary: read published articles straight from MongoDB
+// Published paid news submitted by users and approved by admin
+export const PAID_NEWS_QUERY = {
+  status: 'published',
+  $or: [
+    { isPaid: true },
+    { plan: { $in: ['feed', 'slider', 'prem'] } },
+    { plan: { $exists: true, $ne: null } },
+    { paymentMethod: { $exists: true, $ne: null } },
+    { paymentStatus: { $exists: true, $ne: null } },
+    { amount: { $gt: 0 } },
+    { type: 'pr' },
+  ],
+};
+
+// Primary: read published paid articles straight from MongoDB
 async function fromDb(limit: number): Promise<PaidNewsItem[]> {
   const collection = await getCollection<NewsDoc>(COLLECTION);
 
   const docs = await collection
-    .find({ status: 'published' } as any)
-    .sort({ createdAt: -1 })
+    .find(PAID_NEWS_QUERY as any)
+    .sort({ publishedAt: -1, createdAt: -1 })
     .limit(limit)
     .toArray();
 
@@ -76,7 +98,7 @@ async function fromDb(limit: number): Promise<PaidNewsItem[]> {
       title: d.title,
       description: d.excerpt || stripHtml(d.content).slice(0, 220),
       image: fixImage(d.featuredImage),
-      source: d.author || 'NYALTX',
+      source: d.author || 'NYALTX Partner',
       pubDate: d.publishedAt || d.createdAt || undefined,
       href: `/news/${d.slug || id}`,
       isPaid: true as const,
@@ -85,9 +107,9 @@ async function fromDb(limit: number): Promise<PaidNewsItem[]> {
   });
 }
 
-// Fallback: same endpoint the public /news page uses
+// Fallback: API endpoint
 async function fromApi(limit: number): Promise<PaidNewsItem[]> {
-  const res = await fetch(`${getBaseUrl()}/api/news?page=1&limit=${limit}`, {
+  const res = await fetch(`${getBaseUrl()}/api/news?page=1&limit=${limit}&paid=true`, {
     cache: 'no-store',
   });
   if (!res.ok) throw new Error(`News API failed: ${res.status}`);
@@ -99,7 +121,7 @@ async function fromApi(limit: number): Promise<PaidNewsItem[]> {
     title: d.title,
     description: d.excerpt || '',
     image: fixImage(d.featuredImage),
-    source: d.author || 'NYALTX',
+    source: d.author || 'NYALTX Partner',
     pubDate: d.publishedAt || d.createdAt,
     href: `/news/${d.slug || d._id}`,
     isPaid: true as const,

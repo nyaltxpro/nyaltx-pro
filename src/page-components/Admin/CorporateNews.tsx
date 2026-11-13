@@ -278,6 +278,14 @@ function AdminCorporateNewsComponent() {
     const handleApproveNews = async (article: NewsArticle) => {
         try {
             setApprovingId(article._id);
+            const isPaidSubmission = Boolean(
+                (article as any).isPaid ||
+                article.plan ||
+                article.paymentMethod ||
+                article.amount ||
+                article.type === 'pr' ||
+                article.email
+            );
             const shouldBeInBanner = article.plan === 'slider' || article.plan === 'prem' || Boolean(article.featuredInBanner);
             const response = await fetch('/api/admin/news', {
                 method: 'PUT',
@@ -286,7 +294,9 @@ function AdminCorporateNewsComponent() {
                     id: article._id,
                     status: 'published',
                     publishedAt: new Date().toISOString(),
-                    featuredInBanner: shouldBeInBanner
+                    featuredInBanner: shouldBeInBanner,
+                    isPaid: isPaidSubmission,
+                    isPendingReview: false
                 })
             });
 
@@ -471,6 +481,7 @@ function AdminCorporateNewsComponent() {
             excerpt: '',
             featuredImage: '',
             status: 'draft',
+            featuredInBanner: false,
             tags: '',
             author: 'NYALTX Team',
             editorType: 'quill'
@@ -700,7 +711,7 @@ function AdminCorporateNewsComponent() {
                                         <button
                                             type="button"
                                             onClick={() => {
-                                                const fixedUrl = convertToWorkingIPFSUrl(newsForm.featuredImage);
+                                                const fixedUrl = toReliableIpfsUrl(newsForm.featuredImage);
                                                 setNewsForm(prev => ({ ...prev, featuredImage: fixedUrl }));
                                                 setSuccess('URL converted to working IPFS gateway!');
                                             }}

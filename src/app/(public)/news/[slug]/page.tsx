@@ -1,5 +1,6 @@
 import PublicHeader from '@/components/PublicHeader';
 import { getDb } from '@/lib/mongodb';
+import { ObjectId } from 'mongodb';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import NewsArticle from '../../../../components/NewsArticle';
@@ -33,11 +34,16 @@ async function getNewsArticle(slug: string): Promise<NewsData | null> {
       slug: a.slug
     })));
 
-    // Find the published article
-    const newsArticle = await collection.findOne({
-      slug,
-      status: 'published'
-    });
+    // Find the published article by slug or ObjectId
+    const query: any = {
+      status: 'published',
+      $or: [{ slug }]
+    };
+    if (ObjectId.isValid(slug)) {
+      query.$or.push({ _id: new ObjectId(slug) });
+    }
+
+    const newsArticle = await collection.findOne(query);
 
     console.log('Published article found:', newsArticle ? 'YES' : 'NO');
 
@@ -127,6 +133,7 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
 
   if (!article) {
     notFound();
+    return null;
   }
 
   return (

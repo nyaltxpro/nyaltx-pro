@@ -155,7 +155,7 @@ export default function NewsHubComponent() {
     } catch {}
 
     // Fetch published news from backend
-    fetch('/api/news?limit=20')
+    fetch('/api/news?limit=20&paid=all')
       .then(res => res.json())
       .then(data => {
         if (data.news && Array.isArray(data.news) && data.news.length > 0) {

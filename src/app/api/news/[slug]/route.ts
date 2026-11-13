@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/mongodb';
+import { ObjectId } from 'mongodb';
 
 export async function GET(
   request: NextRequest,
@@ -26,11 +27,16 @@ export async function GET(
       slug: a.slug 
     })));
     
-    // Find the news article by slug and ensure it's published
-    const newsArticle = await collection.findOne({ 
-      slug, 
-      status: 'published' 
-    });
+    // Find the news article by slug or ObjectId and ensure it's published
+    const query: any = {
+      status: 'published',
+      $or: [{ slug }]
+    };
+    if (ObjectId.isValid(slug)) {
+      query.$or.push({ _id: new ObjectId(slug) });
+    }
+
+    const newsArticle = await collection.findOne(query);
     
     console.log('Published article found:', newsArticle ? 'YES' : 'NO');
     

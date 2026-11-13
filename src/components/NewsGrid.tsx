@@ -45,7 +45,8 @@ function NewsGrid() {
       setLoading(true);
       const params = new URLSearchParams({
         page: currentPage.toString(),
-        limit: '9'
+        limit: '9',
+        paid: 'false'
       });
       
       if (selectedTag) {
@@ -197,7 +198,7 @@ function NewsGrid() {
                   fill
                   className="object-cover transition-transform duration-500 group-hover:scale-110"
                   unoptimized={/\/ipfs\//.test(toReliableIpfsUrl(article.featuredImage))}
-                  onError={(e) => {
+                  onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
                     console.error('News card image failed to load:', toReliableIpfsUrl(article.featuredImage));
                     const target = e.target as HTMLImageElement;
                     target.style.display = 'none';

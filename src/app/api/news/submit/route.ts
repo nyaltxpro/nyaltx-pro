@@ -70,6 +70,7 @@ export async function POST(req: NextRequest) {
       paymentStatus: paymentStatus || 'completed',
       status: 'pending', // Pending admin review
       isPendingReview: true,
+      isPaid: true,
       featuredInBanner: plan === 'slider' || plan === 'prem',
       tags: [category, type === 'pr' ? 'Press Release' : 'Community'],
       slug: finalSlug,

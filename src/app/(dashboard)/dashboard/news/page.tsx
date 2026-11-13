@@ -101,9 +101,12 @@ export default async function NewsPage() {
   }));
 
   // Paid + RSS mixed together, newest first (by publish/approval time)
-  const items: FeedItem[] = [...paidFeed, ...rssFeed].sort(
-    (a, b) => timeOf(b.pubDate) - timeOf(a.pubDate)
-  );
+  // Pinned items (featured banner/slider/prem) appear at the top
+  const items: FeedItem[] = [...paidFeed, ...rssFeed].sort((a, b) => {
+    if (a.pinned && !b.pinned) return -1;
+    if (!a.pinned && b.pinned) return 1;
+    return timeOf(b.pubDate) - timeOf(a.pubDate);
+  });
 
   const error = items.length === 0 && errors.length > 0 ? errors[0] : null;
 
