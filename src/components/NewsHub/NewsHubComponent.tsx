@@ -2,6 +2,10 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { PayPalButtons } from '@paypal/react-paypal-js';
+
+const RECEIVER_ADDRESS = (process.env.NEXT_PUBLIC_PAYMENT_RECEIVER_ADDRESS as string) || '0x81bA7b98E49014Bff22F811E9405640bC2B39cC0';
+const SOLANA_RECEIVER = (process.env.NEXT_PUBLIC_SOLANA_RECEIVER_ADDRESS as string) || 'GjTfUFXFvL1wKkHQH48Q5hN9aUjR9tZ2oP6mX7y3sW';
 
 interface Slide {
   t: string;
@@ -65,7 +69,7 @@ const PLANS_CONFIG = {
   ],
   pr: [
     { id: "feed", name: "Direct distribution", desc: "News Hub, RSS feed, newsletter and social · unlimited words", price: 199 },
-    { id: "slider", name: "Full service & Google News", desc: "Editorial review + banner slot 7 days + Google News / partner network", price: 299 }
+    { id: "slider", name: "Full service", desc: "Editorial review + banner slot 7 days + Google News / partner network", price: 499 }
   ]
 };
 
@@ -77,10 +81,15 @@ export default function NewsHubComponent() {
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isPrPricingOpen, setIsPrPricingOpen] = useState(false);
   const [modalStep, setModalStep] = useState(1);
   const [subType, setSubType] = useState<'news' | 'pr'>('news');
   const [plan, setPlan] = useState("feed");
-  const [payMethod, setPayMethod] = useState<'card' | 'usdc' | 'nyax'>('card');
+  const [payMethod, setPayMethod] = useState<'paypal' | 'eth' | 'sol' | 'nyax'>('paypal');
+  const [cryptoTxHash, setCryptoTxHash] = useState("");
+  const [ethPrice, setEthPrice] = useState(3200);
+  const [solPrice, setSolPrice] = useState(180);
+  const [copiedReceiver, setCopiedReceiver] = useState(false);
   const [selectedSwatch, setSelectedSwatch] = useState(0);
   const [uploadedImg, setUploadedImg] = useState<string | null>(null);
 
@@ -158,6 +167,15 @@ export default function NewsHubComponent() {
         }
       })
       .catch(() => {});
+
+    // Fetch crypto prices
+    fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum,solana&vs_currencies=usd')
+      .then(r => r.json())
+      .then(d => {
+        if (d?.ethereum?.usd) setEthPrice(d.ethereum.usd);
+        if (d?.solana?.usd) setSolPrice(d.solana.usd);
+      })
+      .catch(() => {});
   }, []);
 
   // Slider auto-rotate
@@ -206,13 +224,15 @@ export default function NewsHubComponent() {
     setTimeout(() => setNewsletterStatus(null), 4000);
   };
 
-  const openM = (type: 'news' | 'pr' = 'news') => {
+  const openM = (type: 'news' | 'pr' = 'news', selectedPlan?: string) => {
     setSubType(type);
-    setPlan('feed');
+    setPlan(selectedPlan || 'feed');
     setModalStep(1);
     setIsModalOpen(true);
+    setIsPrPricingOpen(false);
     setFormError("");
     setImgError("");
+    setCryptoTxHash("");
   };
 
   const closeM = () => {
@@ -282,11 +302,32 @@ export default function NewsHubComponent() {
   const basePrice = activePlanObj.price;
   const finalPrice = payMethod === 'nyax' ? (basePrice * 0.9) : basePrice;
 
-  const handlePayAndSubmit = async () => {
+  const handlePayAndSubmit = async (paymentOverride?: {
+    paymentMethod?: 'paypal' | 'eth' | 'sol' | 'nyax';
+    paymentId?: string;
+    txHash?: string;
+    walletAddress?: string;
+    paymentStatus?: string;
+    amount?: number;
+  }) => {
     setIsSubmitting(true);
     setFormError("");
 
+    if (!userEmail.trim() || !userEmail.includes('@')) {
+      setFormError("Please enter a valid contact email address.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    const currentPayMethod = paymentOverride?.paymentMethod || payMethod;
+    if ((currentPayMethod === 'eth' || currentPayMethod === 'sol' || currentPayMethod === 'nyax') && !paymentOverride?.txHash && !cryptoTxHash.trim()) {
+      setFormError("Please paste your transaction hash / signature after sending your payment.");
+      setIsSubmitting(false);
+      return;
+    }
+
     const bodyHtml = editorRef.current ? editorRef.current.innerHTML : storyBody;
+    const chosenAmount = paymentOverride?.amount ?? finalPrice;
 
     const submissionPayload = {
       title: headline.trim(),
@@ -300,8 +341,13 @@ export default function NewsHubComponent() {
       author: subType === 'pr' ? 'Press Release' : 'You',
       email: userEmail.trim(),
       plan,
-      paymentMethod: payMethod,
-      amount: finalPrice
+      planName: activePlanObj.name,
+      paymentMethod: currentPayMethod,
+      amount: chosenAmount,
+      txHash: paymentOverride?.txHash || (cryptoTxHash.trim() || null),
+      paymentId: paymentOverride?.paymentId || null,
+      walletAddress: paymentOverride?.walletAddress || null,
+      paymentStatus: paymentOverride?.paymentStatus || 'completed'
     };
 
     try {
@@ -898,8 +944,8 @@ export default function NewsHubComponent() {
             <div className="sub">Crypto news, curated by the community.</div>
           </div>
           <div className="row">
-            <button className="btn" onClick={() => openM('pr')}>
-              Press releases
+            <button className="btn" onClick={() => setIsPrPricingOpen(true)}>
+              Press releases & Pricing
             </button>
             <button className="btn" onClick={copyRss} title="Click to copy RSS feed link">
               {rssCopied ? "✓ Link Copied!" : "RSS feed"}
@@ -1012,7 +1058,16 @@ export default function NewsHubComponent() {
             <div className="side cta">
               <h4>Got news? Get seen.</h4>
               <p>Publish your story to the NYALTX feed or land a spot in the top banner slider.</p>
-              <button className="btn" onClick={() => openM('news')}>Submit a story</button>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <button className="btn" onClick={() => openM('news')}>Submit a story</button>
+                <button
+                  className="btn"
+                  style={{ background: 'rgba(2, 48, 56, 0.5)', borderColor: 'rgba(2, 48, 56, 0.8)', color: '#023038', fontWeight: 700 }}
+                  onClick={() => setIsPrPricingOpen(true)}
+                >
+                  Press Release Pricing ($199+) →
+                </button>
+              </div>
             </div>
 
             <div className="side">
@@ -1076,7 +1131,181 @@ export default function NewsHubComponent() {
         </footer>
       </div>
 
-      {/* 4-Step Submit News Modal */}
+      {/* Press Release Pricing & Distribution Modal */}
+      {isPrPricingOpen && (
+        <div className="ov" role="dialog" aria-modal="true" style={{ alignItems: 'center' }}>
+          <div className="modal" style={{ maxWidth: '860px', maxHeight: '92vh', overflowY: 'auto', padding: '28px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
+              <button
+                type="button"
+                className="btn"
+                onClick={() => setIsPrPricingOpen(false)}
+                style={{ fontSize: '12px' }}
+              >
+                ← Back to News Hub
+              </button>
+              <button
+                type="button"
+                className="btn"
+                onClick={() => setIsPrPricingOpen(false)}
+                style={{ padding: '4px 10px' }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+              <div style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.25em', color: '#fde68a', textTransform: 'uppercase', marginBottom: '8px' }}>
+                NYALTX PRESS RELEASES
+              </div>
+              <h2 style={{ fontSize: '30px', fontWeight: 800, margin: '0 0 10px', color: '#fff', lineHeight: 1.2 }}>
+                Get your announcement in front of crypto & digital-markets readers
+              </h2>
+              <p style={{ color: 'var(--muted)', fontSize: '14px', maxWidth: '580px', margin: '0 auto', lineHeight: 1.5 }}>
+                Submit a release and choose how you publish. Live on the NYALTX News Hub, featured in our rotating top banner, and distributed across Web3 channels.
+              </p>
+            </div>
+
+            {/* Pricing Cards Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: '20px', marginBottom: '32px' }}>
+              {/* Card 1: Direct Distribution */}
+              <div style={{
+                background: 'var(--bg)',
+                border: '1px solid var(--border)',
+                borderRadius: '16px',
+                padding: '24px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between'
+              }}>
+                <div>
+                  <div style={{ fontSize: '11px', fontWeight: 800, color: '#38bdf8', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '4px' }}>
+                    DO IT YOURSELF
+                  </div>
+                  <h3 style={{ fontSize: '22px', fontWeight: 700, margin: '0 0 6px', color: '#fff' }}>Direct Distribution</h3>
+                  <div style={{ fontSize: '26px', fontWeight: 800, color: 'var(--accent)', margin: '10px 0 16px' }}>
+                    $199 <span style={{ fontSize: '13px', fontWeight: 500, color: 'var(--muted)' }}>flat rate per release</span>
+                  </div>
+
+                  <p style={{ fontSize: '13px', color: 'var(--muted)', marginBottom: '16px', lineHeight: 1.4 }}>
+                    Ideal for teams with finished releases ready to post directly to NYALTX News Hub, RSS, and social syndication.
+                  </p>
+
+                  <div style={{ fontSize: '13px', display: 'flex', flexDirection: 'column', gap: '8px', color: '#e2e8f0', marginBottom: '20px' }}>
+                    <div>✓ Unlimited word count</div>
+                    <div>✓ Goes live on NYALTX News Hub after quick compliance</div>
+                    <div>✓ Included in our RSS feed and weekly newsletter</div>
+                    <div>✓ Shared on NYALTX social channels</div>
+                    <div>✓ Live in under 24 hours</div>
+                    <div>✓ Full editorial review and headline help</div>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  className="btn"
+                  onClick={() => openM('pr', 'feed')}
+                  style={{ width: '100%', justifyContent: 'center', padding: '12px', fontWeight: 700, borderRadius: '10px' }}
+                >
+                  Start DIY release ($199)
+                </button>
+              </div>
+
+              {/* Card 2: Full Service */}
+              <div style={{
+                background: 'linear-gradient(180deg, rgba(8, 145, 178, 0.15) 0%, rgba(15, 22, 35, 0.95) 100%)',
+                border: '2px solid var(--accent)',
+                borderRadius: '16px',
+                padding: '24px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                position: 'relative',
+                boxShadow: '0 10px 30px rgba(6, 182, 212, 0.2)'
+              }}>
+                <div style={{
+                  position: 'absolute',
+                  top: '-12px',
+                  right: '20px',
+                  background: 'var(--accent)',
+                  color: 'var(--accent-ink)',
+                  fontSize: '11px',
+                  fontWeight: 800,
+                  padding: '3px 10px',
+                  borderRadius: '99px',
+                  letterSpacing: '0.05em'
+                }}>
+                  MOST POPULAR
+                </div>
+
+                <div>
+                  <div style={{ fontSize: '11px', fontWeight: 800, color: '#facc15', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '4px' }}>
+                    MOST POPULAR
+                  </div>
+                  <h3 style={{ fontSize: '22px', fontWeight: 700, margin: '0 0 6px', color: '#fff' }}>Full Service</h3>
+                  <div style={{ fontSize: '26px', fontWeight: 800, color: '#38bdf8', margin: '10px 0 16px' }}>
+                    $499 <span style={{ fontSize: '13px', fontWeight: 500, color: 'var(--muted)' }}>per release</span>
+                  </div>
+
+                  <p style={{ fontSize: '13px', color: '#cbd5e1', marginBottom: '16px', lineHeight: 1.4 }}>
+                    Publish your press release on NYALTX, in our RSS feed and newsletter, and push it out through our distribution network. Write it yourself or let our editors polish it first.
+                  </p>
+
+                  <div style={{ fontSize: '13px', display: 'flex', flexDirection: 'column', gap: '8px', color: '#f1f5f9', marginBottom: '20px' }}>
+                    <div style={{ fontWeight: 600, color: '#67e8f9' }}>✓ Everything in Direct Distribution</div>
+                    <div>✓ Pinned slot in the top banner slider for 7 days</div>
+                    <div>✓ Wire and partner network delivery (when connected)</div>
+                    <div>✓ Target by topic or region</div>
+                    <div>✓ Support for tables and charts</div>
+                    <div>✓ Priority review within 12 hours</div>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  className="btn pri"
+                  onClick={() => openM('pr', 'slider')}
+                  style={{ width: '100%', justifyContent: 'center', padding: '12px', fontWeight: 700, borderRadius: '10px' }}
+                >
+                  Start Full Service ($499)
+                </button>
+              </div>
+            </div>
+
+            {/* Where your release appears */}
+            <div style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '14px', padding: '20px', marginBottom: '24px' }}>
+              <h4 style={{ margin: '0 0 6px', fontSize: '15px', fontWeight: 700, color: '#fff' }}>Where your release appears</h4>
+              <p style={{ fontSize: '12px', color: 'var(--muted)', margin: '0 0 14px' }}>
+                Distribution channels for your story:
+              </p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                <span className="badge" style={{ padding: '6px 12px', fontSize: '12px', background: 'var(--card)', border: '1px solid var(--border)' }}>🏛️ NYALTX News Hub + Slider</span>
+                <span className="badge" style={{ padding: '6px 12px', fontSize: '12px', background: 'var(--card)', border: '1px solid var(--border)' }}>📡 RSS Feed Syndication</span>
+                <span className="badge" style={{ padding: '6px 12px', fontSize: '12px', background: 'var(--card)', border: '1px solid var(--border)' }}>✉️ Weekly Investor Newsletter</span>
+                <span className="badge" style={{ padding: '6px 12px', fontSize: '12px', background: 'var(--card)', border: '1px solid var(--border)' }}>📱 X · Telegram · LinkedIn</span>
+                <span className="badge" style={{ padding: '6px 12px', fontSize: '12px', background: 'var(--card)', border: '1px dashed var(--border)', opacity: 0.8 }}>🌐 Newswire Partner Network (TBD)</span>
+                <span className="badge" style={{ padding: '6px 12px', fontSize: '12px', background: 'var(--card)', border: '1px dashed var(--border)', opacity: 0.8 }}>📊 Crypto Aggregators (TBD)</span>
+              </div>
+            </div>
+
+            {/* How it works */}
+            <div style={{ borderTop: '1px solid var(--border)', paddingTop: '18px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+              <div>
+                <div style={{ color: 'var(--accent)', fontWeight: 800, fontSize: '14px', marginBottom: '4px' }}>1 · Submit</div>
+                <div style={{ fontSize: '13px', color: '#cbd5e1' }}>Paste or upload your release with cover image and summary.</div>
+              </div>
+              <div>
+                <div style={{ color: 'var(--accent)', fontWeight: 800, fontSize: '14px', marginBottom: '4px' }}>2 · Review</div>
+                <div style={{ fontSize: '13px', color: '#cbd5e1' }}>Admin verifies payment and checks for accuracy and compliance.</div>
+              </div>
+              <div>
+                <div style={{ color: 'var(--accent)', fontWeight: 800, fontSize: '14px', marginBottom: '4px' }}>3 · Distribute</div>
+                <div style={{ fontSize: '13px', color: '#cbd5e1' }}>Goes live immediately on NYALTX News Hub and top banner slider!</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       {isModalOpen && (
         <div className="ov" role="dialog" aria-modal="true">
           <div className="modal">
@@ -1252,7 +1481,7 @@ export default function NewsHubComponent() {
             {/* Step 3: Pay */}
             {modalStep === 3 && (
               <div>
-                <label>Your Contact Email (for live notification & editorial updates)</label>
+                <label>Your Contact Email (for editorial updates & live notification) *</label>
                 <input
                   type="email"
                   placeholder="name@company.com"
@@ -1261,73 +1490,227 @@ export default function NewsHubComponent() {
                   required
                 />
 
-                <label>Select payment method</label>
+                <label style={{ marginTop: '14px' }}>Select Payment Method</label>
                 <div className="chips">
                   <button
-                    className={`chip ${payMethod === 'card' ? 'on' : ''}`}
-                    onClick={() => setPayMethod('card')}
+                    type="button"
+                    className={`chip ${payMethod === 'paypal' ? 'on' : ''}`}
+                    onClick={() => setPayMethod('paypal')}
                   >
-                    Card
+                    🅿️ PayPal & Cards
                   </button>
                   <button
-                    className={`chip ${payMethod === 'usdc' ? 'on' : ''}`}
-                    onClick={() => setPayMethod('usdc')}
+                    type="button"
+                    className={`chip ${payMethod === 'eth' ? 'on' : ''}`}
+                    onClick={() => setPayMethod('eth')}
                   >
-                    USDC
+                    ⟠ ETH / Crypto
                   </button>
                   <button
+                    type="button"
+                    className={`chip ${payMethod === 'sol' ? 'on' : ''}`}
+                    onClick={() => setPayMethod('sol')}
+                  >
+                    ◎ Solana (SOL)
+                  </button>
+                  <button
+                    type="button"
                     className={`chip ${payMethod === 'nyax' ? 'on' : ''}`}
                     onClick={() => setPayMethod('nyax')}
                   >
-                    NYAX token (10% off)
+                    ⚡ NYAX Token (10% off)
                   </button>
                 </div>
 
-                {payMethod === 'card' ? (
-                  <div>
-                    <label>Card number</label>
-                    <input placeholder="4242 4242 4242 4242" inputMode="numeric" />
-                    <div className="two">
-                      <div>
-                        <label>Expiry</label>
-                        <input placeholder="MM/YY" />
-                      </div>
-                      <div>
-                        <label>CVC</label>
-                        <input placeholder="123" />
-                      </div>
+                <div className="sum" style={{ marginTop: '12px', marginBottom: '14px' }}>
+                  <span>{activePlanObj.name} {payMethod === 'nyax' ? '(10% NYAX Discount applied)' : ''}</span>
+                  <span style={{ color: 'var(--accent)', fontSize: '20px' }}>${finalPrice.toFixed(2)} USD</span>
+                </div>
+
+                {/* PayPal View */}
+                {payMethod === 'paypal' && (
+                  <div style={{ marginTop: '10px', marginBottom: '16px' }}>
+                    <div className="note" style={{ marginBottom: '12px', color: '#93c5fd' }}>
+                      💳 Pay securely with PayPal balance, Credit Card, or Debit Card. Your story will be submitted for admin review immediately upon completion.
                     </div>
-                  </div>
-                ) : (
-                  <div>
-                    <label>Send {payMethod.toUpperCase()} to this deposit address</label>
-                    <code>0x71C...NYAX...DEP0S1T (Auto-verified)</code>
-                    <div className="note">
-                      Send the exact amount. Confirmed automatically once received on-chain.
-                    </div>
+                    {!userEmail.trim() || !userEmail.includes('@') ? (
+                      <div className="err" style={{ marginBottom: '8px' }}>
+                        Please enter a valid email address above to enable PayPal checkout.
+                      </div>
+                    ) : (
+                      <div style={{ minHeight: '110px', maxWidth: '360px', margin: '0 auto' }}>
+                        <PayPalButtons
+                          style={{
+                            layout: 'vertical',
+                            color: 'gold',
+                            shape: 'rect',
+                            label: 'paypal',
+                          }}
+                          createOrder={async (_, actions) => {
+                            return actions.order.create({
+                              intent: 'CAPTURE',
+                              purchase_units: [
+                                {
+                                  description: `NYALTX ${subType === 'pr' ? 'Press Release' : 'News'} - ${activePlanObj.name}`,
+                                  amount: {
+                                    currency_code: 'USD',
+                                    value: finalPrice.toFixed(2),
+                                  },
+                                },
+                              ],
+                            });
+                          }}
+                          onApprove={async (_, actions) => {
+                            if (!actions.order) return;
+                            const details = await actions.order.capture();
+                            await handlePayAndSubmit({
+                              paymentMethod: 'paypal',
+                              paymentId: details.id,
+                              amount: finalPrice,
+                              paymentStatus: 'completed'
+                            });
+                          }}
+                          onError={(err) => {
+                            console.error('PayPal error:', err);
+                            setFormError('PayPal payment was cancelled or failed. Please try again or use crypto.');
+                          }}
+                        />
+                      </div>
+                    )}
                   </div>
                 )}
 
-                <div className="sum">
-                  <span>{activePlanObj.name} {payMethod === 'nyax' ? '(10% NYAX Discount applied)' : ''}</span>
-                  <span style={{ color: 'var(--accent)' }}>${finalPrice.toFixed(2)}</span>
-                </div>
+                {/* ETH / Crypto View */}
+                {payMethod === 'eth' && (
+                  <div style={{ marginTop: '12px', marginBottom: '14px' }}>
+                    <div className="note" style={{ marginBottom: '10px', color: '#67e8f9' }}>
+                      ⟠ Send ETH or USDT/USDC (Ethereum, Arbitrum, Base, or Polygon) to our official treasury address.
+                    </div>
+                    <label>Official NYALTX Payment Address (EVM / ERC-20):</label>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '10px' }}>
+                      <code style={{ flex: 1, padding: '10px 12px', fontSize: '13px', borderRadius: '8px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {RECEIVER_ADDRESS}
+                      </code>
+                      <button
+                        type="button"
+                        className="btn"
+                        onClick={() => {
+                          navigator.clipboard?.writeText(RECEIVER_ADDRESS);
+                          setCopiedReceiver(true);
+                          setTimeout(() => setCopiedReceiver(false), 2000);
+                        }}
+                      >
+                        {copiedReceiver ? '✓ Copied' : 'Copy'}
+                      </button>
+                    </div>
 
-                <div className="note">
-                  Payments are non-refundable once approved and published. If rejected, you will receive a full refund.
+                    <div style={{ padding: '10px 12px', background: 'var(--soft)', borderRadius: '8px', border: '1px solid var(--border)', marginBottom: '12px' }}>
+                      <div style={{ fontSize: '12px', color: 'var(--muted)' }}>Equivalent Amount:</div>
+                      <div style={{ fontSize: '16px', fontWeight: 700, color: '#fff', marginTop: '2px' }}>
+                        ~{(finalPrice / (ethPrice || 3200)).toFixed(4)} ETH <span style={{ fontSize: '12px', color: 'var(--accent)' }}>(${finalPrice.toFixed(2)} USD)</span>
+                      </div>
+                    </div>
+
+                    <label>Transaction Hash (TXID) after sending *</label>
+                    <input
+                      placeholder="0x... (paste your transaction hash here)"
+                      value={cryptoTxHash}
+                      onChange={(e) => setCryptoTxHash(e.target.value)}
+                    />
+                    <div className="note">Admin will verify your transaction hash on Etherscan before publishing.</div>
+                  </div>
+                )}
+
+                {/* Solana View */}
+                {payMethod === 'sol' && (
+                  <div style={{ marginTop: '12px', marginBottom: '14px' }}>
+                    <div className="note" style={{ marginBottom: '10px', color: '#c084fc' }}>
+                      ◎ Send SOL to our verified Solana Treasury.
+                    </div>
+                    <label>Official NYALTX Solana Treasury Address:</label>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '10px' }}>
+                      <code style={{ flex: 1, padding: '10px 12px', fontSize: '13px', borderRadius: '8px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {SOLANA_RECEIVER}
+                      </code>
+                      <button
+                        type="button"
+                        className="btn"
+                        onClick={() => {
+                          navigator.clipboard?.writeText(SOLANA_RECEIVER);
+                          setCopiedReceiver(true);
+                          setTimeout(() => setCopiedReceiver(false), 2000);
+                        }}
+                      >
+                        {copiedReceiver ? '✓ Copied' : 'Copy'}
+                      </button>
+                    </div>
+
+                    <div style={{ padding: '10px 12px', background: 'var(--soft)', borderRadius: '8px', border: '1px solid var(--border)', marginBottom: '12px' }}>
+                      <div style={{ fontSize: '12px', color: 'var(--muted)' }}>Equivalent Amount:</div>
+                      <div style={{ fontSize: '16px', fontWeight: 700, color: '#fff', marginTop: '2px' }}>
+                        ~{(finalPrice / (solPrice || 180)).toFixed(3)} SOL <span style={{ fontSize: '12px', color: 'var(--accent)' }}>(${finalPrice.toFixed(2)} USD)</span>
+                      </div>
+                    </div>
+
+                    <label>Solana Transaction Signature (TXID) *</label>
+                    <input
+                      placeholder="Enter Solana transaction signature..."
+                      value={cryptoTxHash}
+                      onChange={(e) => setCryptoTxHash(e.target.value)}
+                    />
+                  </div>
+                )}
+
+                {/* NYAX View */}
+                {payMethod === 'nyax' && (
+                  <div style={{ marginTop: '12px', marginBottom: '14px' }}>
+                    <div className="note" style={{ marginBottom: '10px', color: '#fbbf24' }}>
+                      ⚡ 10% Discount applied when paying with NYAX tokens!
+                    </div>
+                    <label>NYAX Token Receiver Address:</label>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '10px' }}>
+                      <code style={{ flex: 1, padding: '10px 12px', fontSize: '13px', borderRadius: '8px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {RECEIVER_ADDRESS}
+                      </code>
+                      <button
+                        type="button"
+                        className="btn"
+                        onClick={() => {
+                          navigator.clipboard?.writeText(RECEIVER_ADDRESS);
+                          setCopiedReceiver(true);
+                          setTimeout(() => setCopiedReceiver(false), 2000);
+                        }}
+                      >
+                        {copiedReceiver ? '✓ Copied' : 'Copy'}
+                      </button>
+                    </div>
+
+                    <label>Transaction Hash (TXID) *</label>
+                    <input
+                      placeholder="0x..."
+                      value={cryptoTxHash}
+                      onChange={(e) => setCryptoTxHash(e.target.value)}
+                    />
+                  </div>
+                )}
+
+                <div className="note" style={{ marginTop: '12px' }}>
+                  Payments are non-refundable once approved and published. If rejected by compliance, you will receive a full refund.
                 </div>
 
                 {formError && <div className="err">{formError}</div>}
 
                 <div className="foot">
                   <button className="btn" onClick={() => setModalStep(2)}>Back</button>
-                  <button
-                    className="btn pri"
-                    onClick={handlePayAndSubmit}
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? 'Processing...' : 'Pay & submit'}
-                  </button>
+                  {payMethod !== 'paypal' && (
+                    <button
+                      className="btn pri"
+                      onClick={() => handlePayAndSubmit()}
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? 'Submitting...' : 'Submit Story for Review'}
+                    </button>
+                  )}
                 </div>
               </div>
             )}

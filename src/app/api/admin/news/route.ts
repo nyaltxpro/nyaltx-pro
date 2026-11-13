@@ -20,6 +20,8 @@ export async function GET(request: NextRequest) {
       query.status = 'published';
     } else if (status === 'draft') {
       query.status = 'draft';
+    } else if (status === 'pending') {
+      query.status = 'pending';
     }
     
     // Get total count for pagination

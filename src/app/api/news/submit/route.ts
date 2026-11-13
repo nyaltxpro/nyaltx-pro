@@ -18,8 +18,13 @@ export async function POST(req: NextRequest) {
       author = 'Community Submission',
       email,
       plan = 'feed', // 'feed' | 'slider' | 'prem'
-      paymentMethod = 'card', // 'card' | 'usdc' | 'nyax'
-      amount = 29
+      paymentMethod = 'card', // 'paypal' | 'eth' | 'sol' | 'card' | 'usdc' | 'nyax'
+      amount = 29,
+      txHash,
+      paymentId,
+      walletAddress,
+      paymentStatus = 'completed',
+      planName
     } = data;
 
     if (!title || title.trim().length < 5) {
@@ -56,8 +61,13 @@ export async function POST(req: NextRequest) {
       author: author.trim() || (type === 'pr' ? 'Press Release' : 'Community Submission'),
       email: email?.trim() || null,
       plan,
+      planName: planName || (type === 'pr' ? (plan === 'slider' ? 'Full Service ($499)' : 'Direct Distribution ($199)') : plan),
       paymentMethod,
       amount: Number(amount) || 0,
+      txHash: txHash || null,
+      paymentId: paymentId || null,
+      walletAddress: walletAddress || null,
+      paymentStatus: paymentStatus || 'completed',
       status: 'pending', // Pending admin review
       isPendingReview: true,
       featuredInBanner: plan === 'slider' || plan === 'prem',
@@ -79,12 +89,15 @@ export async function POST(req: NextRequest) {
       const newOrder: Order = {
         id: orderId,
         type: 'news_submission' as any,
-        status: 'completed',
+        status: (paymentStatus === 'completed' || paymentStatus === 'paid') ? 'completed' : 'pending',
         paymentMethod: paymentMethod as any,
         amount: String(amount),
-        currency: paymentMethod === 'nyax' ? 'NYAX' : 'USD',
+        currency: (paymentMethod === 'eth' ? 'ETH' : paymentMethod === 'sol' ? 'SOL' : paymentMethod === 'nyax' ? 'NYAX' : 'USD') as any,
+        txHash: txHash || undefined,
+        paymentId: paymentId || undefined,
+        walletAddress: walletAddress || undefined,
         email: email || undefined,
-        productName: `NYALTX News Hub - ${type === 'pr' ? 'Press Release' : 'News'} (${plan.toUpperCase()})`,
+        productName: `NYALTX News Hub - ${type === 'pr' ? 'Press Release' : 'News'} (${submissionDoc.planName})`,
         tier: plan,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -94,7 +107,12 @@ export async function POST(req: NextRequest) {
           headline: title,
           category,
           submissionType: type,
-          plan
+          plan,
+          planName: submissionDoc.planName,
+          paymentMethod,
+          paymentId,
+          txHash,
+          walletAddress
         }
       };
 
