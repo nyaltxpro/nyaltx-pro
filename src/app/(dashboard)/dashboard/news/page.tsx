@@ -3,7 +3,7 @@ import { getPaidNews } from '@/lib/paideNews';
 import { getNews } from '@/lib/rss';
 import Link from 'next/link';
 
-export const revalidate = 60; // approved paid news shows up within ~1 minute
+export const dynamic = 'force-dynamic'; // always read approved news fresh
 
 type RssItem = Awaited<ReturnType<typeof getNews>>[number];
 
@@ -73,24 +73,20 @@ export default async function NewsPage() {
   if (paidResult.status === 'fulfilled') {
     paidItems = paidResult.value;
   } else {
-    // Don't show a scary error for this, just log it
     console.error('Error fetching paid news:', paidResult.reason);
   }
 
-  const paidFeed: FeedItem[] = paidItems
-    .map((p) => ({
-      id: p.id,
-      title: p.title,
-      description: p.description,
-      image: p.image,
-      source: p.source,
-      pubDate: p.pubDate,
-      href: p.href,
-      isPaid: true,
-      pinned: p.pinned,
-    }))
-    // pinned/banner articles first, then newest
-    .sort((a, b) => Number(b.pinned) - Number(a.pinned) || timeOf(b.pubDate) - timeOf(a.pubDate));
+  const paidFeed: FeedItem[] = paidItems.map((p) => ({
+    id: p.id,
+    title: p.title,
+    description: p.description,
+    image: p.image,
+    source: p.source,
+    pubDate: p.pubDate,
+    href: p.href,
+    isPaid: true,
+    pinned: p.pinned,
+  }));
 
   const rssFeed: FeedItem[] = rssItems.map((r) => ({
     id: r.id,
@@ -104,9 +100,17 @@ export default async function NewsPage() {
     pinned: false,
   }));
 
-  // Paid (approved) news first, then RSS
-  const items: FeedItem[] = [...paidFeed, ...rssFeed];
+  // Paid + RSS mixed together, newest first (by publish/approval time)
+  const items: FeedItem[] = [...paidFeed, ...rssFeed].sort(
+    (a, b) => timeOf(b.pubDate) - timeOf(a.pubDate)
+  );
+
   const error = items.length === 0 && errors.length > 0 ? errors[0] : null;
+
+  // Trending badge goes to the first 3 RSS items in the mixed list
+  const trendingIds = new Set(
+    items.filter((i) => !i.isPaid).slice(0, 3).map((i) => i.id)
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 px-4 py-6 md:px-6 lg:px-8">
@@ -174,10 +178,8 @@ export default async function NewsPage() {
       ) : (
         /* ================= NEWS GRID ================= */
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
-          {items.map((item, index) => {
-            // Trending badge: first 3 RSS items only (paid items get their own badge)
-            const rssIndex = index - paidFeed.length;
-            const showTrending = !item.isPaid && rssIndex >= 0 && rssIndex < 3;
+          {items.map((item) => {
+            const showTrending = trendingIds.has(item.id);
 
             return (
               <article key={item.id} className="group relative">
