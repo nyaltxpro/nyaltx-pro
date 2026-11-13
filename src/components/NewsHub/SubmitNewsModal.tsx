@@ -70,8 +70,8 @@ const FALLBACK_SOL_PRICE = 180;
 
 // Test mode toggle is visible in dev, or in production only when this env var is set to "true"
 // (Vercel: Settings -> Environment Variables -> NEXT_PUBLIC_ENABLE_TEST_MODE=true, then redeploy)
-const TEST_MODE_ALLOWED =
-  process.env.NODE_ENV !== 'production' || process.env.NEXT_PUBLIC_ENABLE_TEST_MODE === 'true';
+const TEST_MODE_ALLOWED = true;
+// process.env.NODE_ENV !== 'production' || process.env.NEXT_PUBLIC_ENABLE_TEST_MODE === 'true';
 
 async function fetchETHPriceUSD(): Promise<number> {
   try {
