@@ -46,29 +46,37 @@ const NewsPage = async () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 px-4 py-6 md:px-6 lg:px-8">
       {/* Header Section */}
-      <div className="relative mb-4">
-        <div className="absolute inset-0 bg-gradient-to-r from-[#00c3ff]/20 via-[#7c3aed]/20 to-[#f59e0b]/20 rounded-2xl blur-xl"></div>
-        <div className="relative bg-black/40 backdrop-blur-md border border-gray-800/50 rounded-2xl p-6">
-          <div className="flex items-center gap-4">
-            <div>
-              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-                Nyaltx News Hub
-              </h1>
-              <div className="flex items-center gap-2 mt-1">
-                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-              </div>
+      <div className="relative mb-8">
+        {/*
+          Background layers only (no children). backdrop-filter makes an element
+          the containing block for position:fixed descendants, which would trap
+          the submit modal inside the header. Keeping the blur on empty sibling
+          layers means the button is never inside a backdrop-filter ancestor.
+        */}
+        <div
+          className="absolute inset-0 bg-gradient-to-r from-[#00c3ff]/20 via-[#7c3aed]/20 to-[#f59e0b]/20 rounded-2xl blur-xl"
+          aria-hidden="true"
+        ></div>
+        <div
+          className="absolute inset-0 bg-black/40 backdrop-blur-md border border-gray-800/50 rounded-2xl"
+          aria-hidden="true"
+        ></div>
+
+        {/* Content row: title on the left, Submit News on the right */}
+        <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between p-6">
+          <div>
+            <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+              Nyaltx News Hub
+            </h1>
+            <div className="flex items-center gap-2 mt-1">
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
             </div>
           </div>
-        </div>
-      </div>
 
-      {/*
-        Submit button lives OUTSIDE the backdrop-blur card above.
-        backdrop-filter makes a parent the containing block for
-        position:fixed children, which trapped the modal inside the header.
-      */}
-      <div className="mb-8">
-        <DashboardSubmitNewsButton />
+          <div className="shrink-0">
+            <DashboardSubmitNewsButton />
+          </div>
+        </div>
       </div>
 
       {/* Error Message */}
