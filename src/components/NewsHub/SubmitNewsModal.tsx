@@ -65,6 +65,10 @@ const FALLBACK_ETH_PRICE = process.env.NEXT_PUBLIC_FALLBACK_ETH_PRICE
   : 3000;
 const FALLBACK_SOL_PRICE = 180;
 
+// Test mode is only available in dev, or in prod when explicitly enabled via env
+const TEST_MODE_ALLOWED =
+  process.env.NODE_ENV !== 'production' || process.env.NEXT_PUBLIC_ENABLE_TEST_MODE === 'true';
+
 async function fetchETHPriceUSD(): Promise<number> {
   try {
     const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd', { cache: 'no-store' });
@@ -136,6 +140,9 @@ export default function SubmitNewsModalCorporate({
   const [plan, setPlan] = useState(initialPlan);
   const [payMethod, setPayMethod] = useState<PayMethod>('paypal');
   const [selectedSwatch] = useState(0);
+
+  // Test mode (simulated payments, no real funds)
+  const [testMode, setTestMode] = useState(false);
 
   // Cover image (IPFS / external URL)
   const [uploadedImg, setUploadedImg] = useState<string | null>(null);
@@ -324,6 +331,7 @@ export default function SubmitNewsModalCorporate({
     walletAddress?: string;
     paymentStatus?: string;
     amount?: number;
+    isTest?: boolean;
   }) => {
     setIsSubmitting(true);
     setFormError('');
@@ -362,7 +370,8 @@ export default function SubmitNewsModalCorporate({
       txHash: paymentOverride?.txHash || (cryptoTxHash.trim() || null),
       paymentId: paymentOverride?.paymentId || null,
       walletAddress: paymentOverride?.walletAddress || null,
-      paymentStatus: paymentOverride?.paymentStatus || 'completed'
+      paymentStatus: paymentOverride?.paymentStatus || (testMode ? 'test' : 'completed'),
+      isTest: paymentOverride?.isTest ?? testMode
     };
 
     try {
@@ -399,7 +408,7 @@ export default function SubmitNewsModalCorporate({
     } catch (err: any) {
       const base = err.message || 'Error submitting story. Please try again.';
       setFormError(
-        paymentOverride?.txHash
+        paymentOverride?.txHash && !paymentOverride?.isTest
           ? `Payment sent (tx ${paymentOverride.txHash.slice(0, 10)}...) but submission failed: ${base}. Click "Submit Story with TX Hash" to retry — do not pay again.`
           : base
       );
@@ -469,11 +478,48 @@ export default function SubmitNewsModalCorporate({
         txHash,
         walletAddress: walletAddress || undefined,
         amount: finalPrice,
-        paymentStatus: 'completed'
+        paymentStatus: 'completed',
+        isTest: false
       });
     } catch (err: any) {
       console.error('Wallet payment failed:', err);
       setFormError(err?.shortMessage || err?.message || 'Wallet transaction failed. You can also send manually and paste the tx hash below.');
+    } finally {
+      setWalletPaying(null);
+    }
+  };
+
+  /* ---------- Test mode: simulated payment (no real funds) ---------- */
+  const simulateTestPayment = async (method: PayMethod) => {
+    if (!validEmail) {
+      setFormError('Please enter your contact email address above first.');
+      return;
+    }
+    setFormError('');
+    setWalletPaying(method === 'paypal' ? null : (method as WalletMethod));
+    try {
+      await new Promise((r) => setTimeout(r, 800)); // fake processing delay
+      const rand = Array.from({ length: 60 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
+      if (method === 'paypal') {
+        await handlePayAndSubmit({
+          paymentMethod: 'paypal',
+          paymentId: `TEST-PAYPAL-${Date.now()}`,
+          amount: finalPrice,
+          paymentStatus: 'test',
+          isTest: true
+        });
+      } else {
+        const fakeHash = `0xTEST${rand}`;
+        setCryptoTxHash(fakeHash);
+        await handlePayAndSubmit({
+          paymentMethod: method,
+          txHash: fakeHash,
+          walletAddress: '0xTEST000000000000000000000000000000000000',
+          amount: finalPrice,
+          paymentStatus: 'test',
+          isTest: true
+        });
+      }
     } finally {
       setWalletPaying(null);
     }
@@ -523,7 +569,18 @@ export default function SubmitNewsModalCorporate({
         </span>
       </div>
 
-      {!isConnected ? (
+      {testMode ? (
+        <button
+          type="button"
+          onClick={() => simulateTestPayment(method)}
+          disabled={isSubmitting || walletPaying !== null}
+          className={`w-full py-3 ${BTN_PRIMARY}`}
+        >
+          {walletPaying === method || isSubmitting
+            ? 'Simulating payment...'
+            : `🧪 Simulate ${method.toUpperCase()} payment ($${finalPrice.toFixed(2)})`}
+        </button>
+      ) : !isConnected ? (
         <div className="text-center py-4 bg-black/30 rounded-lg border border-gray-700/40 space-y-2">
           <p className="text-xs text-gray-400">Connect your Web3 wallet (MetaMask, Coinbase, WalletConnect) to pay:</p>
           <div className="flex justify-center">
@@ -556,25 +613,27 @@ export default function SubmitNewsModalCorporate({
         </div>
       )}
 
-      <details className="text-xs text-gray-400 pt-1">
-        <summary className="cursor-pointer font-medium text-gray-400 hover:text-white">
-          Or send manually to Treasury address & paste TXID ▾
-        </summary>
-        <div className="mt-2 space-y-2">
-          <div className="flex items-center gap-2">
-            <code className="flex-1 p-2 bg-black/40 rounded border border-gray-700/40 text-[11px] truncate">{RECEIVER}</code>
-            <button type="button" onClick={() => copyAddr(RECEIVER)} className="px-2.5 py-1.5 bg-gray-600/50 hover:bg-gray-600/70 text-xs rounded text-white">
-              {copiedReceiver ? '✓ Copied' : 'Copy'}
-            </button>
+      {!testMode && (
+        <details className="text-xs text-gray-400 pt-1">
+          <summary className="cursor-pointer font-medium text-gray-400 hover:text-white">
+            Or send manually to Treasury address & paste TXID ▾
+          </summary>
+          <div className="mt-2 space-y-2">
+            <div className="flex items-center gap-2">
+              <code className="flex-1 p-2 bg-black/40 rounded border border-gray-700/40 text-[11px] truncate">{RECEIVER}</code>
+              <button type="button" onClick={() => copyAddr(RECEIVER)} className="px-2.5 py-1.5 bg-gray-600/50 hover:bg-gray-600/70 text-xs rounded text-white">
+                {copiedReceiver ? '✓ Copied' : 'Copy'}
+              </button>
+            </div>
+            <input
+              placeholder="0x... (paste your transaction hash here)"
+              value={cryptoTxHash}
+              onChange={(e) => setCryptoTxHash(e.target.value)}
+              className={INPUT}
+            />
           </div>
-          <input
-            placeholder="0x... (paste your transaction hash here)"
-            value={cryptoTxHash}
-            onChange={(e) => setCryptoTxHash(e.target.value)}
-            className={INPUT}
-          />
-        </div>
-      </details>
+        </details>
+      )}
     </div>
   );
 
@@ -602,6 +661,13 @@ export default function SubmitNewsModalCorporate({
           <div className={stepCls(3)}>3 · Pay</div>
           <div className={stepCls(4)}>4 · Done</div>
         </div>
+
+        {/* Test mode banner */}
+        {testMode && (
+          <div className="mb-4 p-2 text-center text-xs font-semibold text-yellow-300 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+            🧪 TEST MODE ON: no real payment will be made
+          </div>
+        )}
 
         {/* Step 1: Write */}
         {modalStep === 1 && (
@@ -876,6 +942,37 @@ export default function SubmitNewsModalCorporate({
               </div>
             </div>
 
+            {/* Test Mode toggle */}
+            {TEST_MODE_ALLOWED && (
+              <div
+                className={`p-3 rounded-lg border flex items-center justify-between gap-3 ${testMode ? 'border-yellow-500/50 bg-yellow-500/10' : 'border-gray-600/30 bg-gray-700/30'
+                  }`}
+              >
+                <div>
+                  <div className="text-sm font-semibold text-yellow-300">🧪 Test Mode</div>
+                  <p className="text-xs text-gray-400">
+                    Simulates PayPal, ETH, SOL &amp; NYAX payments. No real funds are moved.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={testMode}
+                  aria-label="Toggle test mode"
+                  onClick={() => {
+                    setTestMode((v) => !v);
+                    setFormError('');
+                  }}
+                  className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${testMode ? 'bg-yellow-500' : 'bg-gray-600'}`}
+                >
+                  <span
+                    className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${testMode ? 'translate-x-5' : ''
+                      }`}
+                  />
+                </button>
+              </div>
+            )}
+
             {/* Total Summary */}
             <div className={`p-3 ${PANEL} flex justify-between items-center`}>
               <div>
@@ -906,6 +1003,15 @@ export default function SubmitNewsModalCorporate({
                   <p className="text-xs text-amber-300 bg-amber-500/10 p-2.5 rounded-lg border border-amber-500/20">
                     ⚠️ Please enter a valid contact email above to activate PayPal checkout buttons.
                   </p>
+                ) : testMode ? (
+                  <button
+                    type="button"
+                    onClick={() => simulateTestPayment('paypal')}
+                    disabled={isSubmitting}
+                    className={`w-full py-3 ${BTN_PRIMARY}`}
+                  >
+                    {isSubmitting ? 'Submitting...' : `🧪 Simulate PayPal payment ($${finalPrice.toFixed(2)})`}
+                  </button>
                 ) : (
                   <div className="pt-2">
                     <PayPalCheckout
@@ -917,7 +1023,8 @@ export default function SubmitNewsModalCorporate({
                           paymentMethod: 'paypal',
                           paymentId: details.id,
                           amount: finalPrice,
-                          paymentStatus: 'completed'
+                          paymentStatus: 'completed',
+                          isTest: false
                         });
                       }}
                       onError={(err: any) => {
@@ -968,7 +1075,7 @@ export default function SubmitNewsModalCorporate({
 
             <div className="flex justify-between items-center pt-3 border-t border-gray-700/20">
               <button type="button" onClick={() => setModalStep(2)} className={BTN_GHOST}>← Back</button>
-              {payMethod !== 'paypal' && (
+              {payMethod !== 'paypal' && !testMode && (
                 <button
                   type="button"
                   onClick={() => handlePayAndSubmit()}
@@ -991,6 +1098,9 @@ export default function SubmitNewsModalCorporate({
               Thank you! Your submission is now in our moderation queue and marked as <b>“Pending review”</b>.
               Our editors verify the payment and accuracy, and you will receive an email as soon as it goes live!
             </p>
+            {testMode && (
+              <p className="text-xs text-yellow-300">🧪 This was a test submission. No real payment was made.</p>
+            )}
             <button onClick={onClose} className={BTN_PRIMARY}>
               Back to News Hub
             </button>
