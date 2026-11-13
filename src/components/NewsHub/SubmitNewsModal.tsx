@@ -394,7 +394,7 @@ export default function SubmitNewsModalCorporate({
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-start justify-center p-4 z-50 overflow-y-auto" style={FONT}>
-      <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-lg w-full max-w-2xl p-6 my-8 text-white shadow-xl relative">
+      <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-lg w-full max-w-3xl p-6 my-8 text-white shadow-xl relative">
         <div className="flex justify-between items-center mb-4 border-b border-gray-700/20 pb-3">
           <h3 className="font-semibold text-white flex items-center gap-2 text-lg">
             <FaNewspaper className="w-5 h-5 text-blue-400" />
