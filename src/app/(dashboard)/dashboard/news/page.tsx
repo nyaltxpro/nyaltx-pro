@@ -1,5 +1,5 @@
 import { getNews } from '@/lib/rss';
-import Link from 'next/link';
+import DashboardSubmitNewsButton from '@/components/NewsHub/DashboardSubmitNewsButton';
 
 export const revalidate = 600; // Revalidate every 10 minutes
 
@@ -42,9 +42,7 @@ const NewsPage = async () => {
                 <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
 
               <div className="mt-4">
-                <Link href="/news-hub" className="inline-flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-cyan-400 to-indigo-500 hover:from-cyan-300 hover:to-indigo-400 text-slate-950 font-bold rounded-md shadow-md transition-all transform hover:scale-105">
-                  Submit News →
-                </Link>
+                <DashboardSubmitNewsButton />
               </div>
 
               </div>

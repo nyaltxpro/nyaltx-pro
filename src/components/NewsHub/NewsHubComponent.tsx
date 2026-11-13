@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { PayPalButtons } from '@paypal/react-paypal-js';
+import PayPalCheckout from '@/components/PayPalCheckout';
 import { useAccount, useSendTransaction, useSwitchChain } from 'wagmi';
 import { useAppKit } from '@reown/appkit/react';
 import { parseEther } from 'viem';
@@ -127,6 +128,21 @@ export default function NewsHubComponent() {
 
   // Load backend news and local submissions on mount
   useEffect(() => {
+    // Check URL query parameters to auto-open submit or PR modal
+    if (typeof window !== 'undefined') {
+      try {
+        const searchParams = new URLSearchParams(window.location.search);
+        if (searchParams.get('submit') === 'true' || searchParams.get('modal') === 'submit') {
+          setIsModalOpen(true);
+          if (searchParams.get('type') === 'pr') {
+            setSubType('pr');
+          }
+        } else if (searchParams.get('pr') === 'pricing' || searchParams.get('pr') === 'true') {
+          setIsPrPricingOpen(true);
+        }
+      } catch {}
+    }
+
     // Load local submissions
     try {
       const stored = localStorage.getItem('nyaltx_news_submissions');
@@ -1591,7 +1607,7 @@ export default function NewsHubComponent() {
                   <span style={{ color: 'var(--accent)', fontSize: '20px' }}>${finalPrice.toFixed(2)} USD</span>
                 </div>
 
-                {/* PayPal View */}
+                {/* PayPal View - exact full PayPal checkout component as used on pricing checkout */}
                 {payMethod === 'paypal' && (
                   <div style={{ marginTop: '10px', marginBottom: '16px' }}>
                     <div className="note" style={{ marginBottom: '12px', color: '#93c5fd' }}>
@@ -1602,41 +1618,22 @@ export default function NewsHubComponent() {
                         Please enter a valid email address above to enable PayPal checkout.
                       </div>
                     ) : (
-                      <div style={{ minHeight: '110px', maxWidth: '360px', margin: '0 auto' }}>
-                        <PayPalButtons
-                          style={{
-                            layout: 'vertical',
-                            color: 'gold',
-                            shape: 'rect',
-                            label: 'paypal',
-                          }}
-                          createOrder={async (_, actions) => {
-                            return actions.order.create({
-                              intent: 'CAPTURE',
-                              purchase_units: [
-                                {
-                                  description: `NYALTX ${subType === 'pr' ? 'Press Release' : 'News'} - ${activePlanObj.name}`,
-                                  amount: {
-                                    currency_code: 'USD',
-                                    value: finalPrice.toFixed(2),
-                                  },
-                                },
-                              ],
-                            });
-                          }}
-                          onApprove={async (_, actions) => {
-                            if (!actions.order) return;
-                            const details = await actions.order.capture();
-                            await handlePayAndSubmit({
+                      <div style={{ minHeight: '110px', maxWidth: '420px', margin: '0 auto' }}>
+                        <PayPalCheckout
+                          amount={finalPrice.toFixed(2)}
+                          tier={`${subType}_${plan}`}
+                          email={userEmail.trim()}
+                          onSuccess={(details: any) => {
+                            handlePayAndSubmit({
                               paymentMethod: 'paypal',
                               paymentId: details.id,
                               amount: finalPrice,
                               paymentStatus: 'completed'
                             });
                           }}
-                          onError={(err) => {
+                          onError={(err: any) => {
                             console.error('PayPal error:', err);
-                            setFormError('PayPal payment was cancelled or failed. Please try again or use crypto.');
+                            setFormError(err?.message || 'PayPal payment was cancelled or failed. Please try again or use crypto.');
                           }}
                         />
                       </div>

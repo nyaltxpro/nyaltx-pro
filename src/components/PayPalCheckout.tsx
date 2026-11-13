@@ -83,6 +83,16 @@ export default function PayPalCheckout({
           toast.dismiss(raceToast);
           throw error;
         }
+      } else if (tier.toLowerCase().startsWith('news') || tier.toLowerCase().startsWith('pr')) {
+        const orderToast = toast.loading('📝 Recording submission payment...');
+        try {
+          await storePayPalOrder(details);
+          toast.dismiss(orderToast);
+          toast.success('✅ Payment verified! Submitting story...');
+        } catch (error) {
+          toast.dismiss(orderToast);
+          console.warn('Order record notice:', error);
+        }
       } else {
         // For other payments, check if there's a pending token registration
         const pendingTokenData = localStorage.getItem('pendingTokenRegistration');
@@ -136,7 +146,8 @@ export default function PayPalCheckout({
     try {
       const orderData = {
         type: tier.toLowerCase() === 'nyaltxpro' || tier.toLowerCase() === 'nyaltxpro1' ? 'pro_subscription' : 
-              ['paddle', 'motor', 'helicopter'].includes(tier.toLowerCase()) ? 'race_to_liberty' : 'pro_subscription',
+              ['paddle', 'motor', 'helicopter'].includes(tier.toLowerCase()) ? 'race_to_liberty' :
+              (tier.toLowerCase().startsWith('news') || tier.toLowerCase().startsWith('pr')) ? 'news_submission' : 'pro_subscription',
         paymentMethod: 'paypal',
         amount: amount,
         currency: 'USD',
