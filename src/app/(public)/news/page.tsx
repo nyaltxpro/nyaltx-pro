@@ -1,6 +1,5 @@
 import PublicHeader from '@/components/PublicHeader';
 import { Metadata } from 'next';
-import Link from 'next/link';
 import NewsGrid from '../../../components/NewsGrid';
 
 export const metadata: Metadata = {
@@ -41,14 +40,11 @@ export const revalidate = 300; // Revalidate every 5 minutes
 
 export default function NewsPage() {
   return (
-    <div className="min-h-screen  text-white">
+    <div className="min-h-screen text-white">
       <PublicHeader />
 
       {/* Hero Section */}
       <section className="relative overflow-hidden">
-        {/* Background effects */}
-
-
         <div className="mx-auto max-w-7xl px-6 py-20 md:py-28">
           <div className="text-center">
             <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight bg-clip-text text-transparent bg-linear-to-r from-cyan-400 to-indigo-400 mb-6">
@@ -60,7 +56,7 @@ export default function NewsPage() {
             </p>
 
             {/* Stats */}
-            <div className="flex justify-center items-center gap-8 text-sm text-gray-400">
+            <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-8 text-sm text-gray-400">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
                 <span>Latest Updates</span>
@@ -73,10 +69,6 @@ export default function NewsPage() {
                 <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
                 <span>Industry Insights</span>
               </div>
-            </div>
-
-
-
             </div>
           </div>
         </div>

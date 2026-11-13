@@ -216,16 +216,20 @@ export default async function RootLayout({
             })
           }}
         />
-              {/* Existing favicon from Next.js */}
-        <link rel="icon" href="/favicon.ico" />
-        {/* Search icon – used by browsers and Google search results */}
-        <link rel="icon" type="image/png" sizes="48x48" href="/nyaltxpro.png" />
-        {/* Apple Touch icon – used on iOS/Android and Google mobile SERPs */}
-        <link rel="apple-touch-icon" sizes="192x192" href="/nyaltxpro.png" />
-        {/* Shortcut icon for legacy browsers */}
-        <link rel="shortcut icon" href="/nyaltxpro.png" />
-        <link rel="canonical" href={baseUrl} />
-        <meta name="robots" content="index,follow" />
+<Head>
+          {/* Existing favicon from Next.js */}
+          <link rel="icon" href="/favicon.ico" />
+          {/* Search icon – used by browsers and Google search results */}
+          <link rel="icon" type="image/png" sizes="48x48" href="/nyaltxpro.png" />
+          {/* Apple Touch icon – used on iOS/Android and Google mobile SERPs */}
+          <link rel="apple-touch-icon" sizes="192x192" href="/nyaltxpro.png" />
+          {/* Shortcut icon for legacy browsers */}
+          <link rel="shortcut icon" href="/nyaltxpro.png" />
+          {/* Canonical URL */}
+          <link rel="canonical" href={baseUrl} />
+          {/* Robots meta */}
+          <meta name="robots" content="index,follow" />
+        </Head>
       </head>
       <body className={`${inter.variable} ${poppins.variable} antialiased`}
         style={{
