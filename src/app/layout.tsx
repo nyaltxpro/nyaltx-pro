@@ -6,7 +6,8 @@ import type { Metadata, Viewport } from 'next';
 import { Inter, Poppins, Roboto } from "next/font/google";
 import { Toaster } from 'react-hot-toast';
 import "./globals.css";
-import Providers from './providers';
+import Head from 'next/head';
+
 
 const baseUrl = 'https://www.nyaltx.pro';
 
