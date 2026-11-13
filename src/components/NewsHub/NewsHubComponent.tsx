@@ -3,6 +3,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { PayPalButtons } from '@paypal/react-paypal-js';
+import { useAccount, useSendTransaction, useSwitchChain } from 'wagmi';
+import { useAppKit } from '@reown/appkit/react';
+import { parseEther } from 'viem';
+import ConnectWalletButton from '@/components/ConnectWalletButton';
 
 const RECEIVER_ADDRESS = (process.env.NEXT_PUBLIC_PAYMENT_RECEIVER_ADDRESS as string) || '0x81bA7b98E49014Bff22F811E9405640bC2B39cC0';
 const SOLANA_RECEIVER = (process.env.NEXT_PUBLIC_SOLANA_RECEIVER_ADDRESS as string) || 'GjTfUFXFvL1wKkHQH48Q5hN9aUjR9tZ2oP6mX7y3sW';
@@ -92,6 +96,13 @@ export default function NewsHubComponent() {
   const [copiedReceiver, setCopiedReceiver] = useState(false);
   const [selectedSwatch, setSelectedSwatch] = useState(0);
   const [uploadedImg, setUploadedImg] = useState<string | null>(null);
+
+  // Web3 hooks for Connect Wallet & Pay method (same as pricing page)
+  const { address: walletAddress, isConnected, chain } = useAccount();
+  const { open: openAppKit } = useAppKit();
+  const { switchChainAsync } = useSwitchChain();
+  const { sendTransactionAsync } = useSendTransaction();
+  const [walletPaying, setWalletPaying] = useState(false);
 
   // Form inputs
   const [headline, setHeadline] = useState("");
@@ -403,6 +414,59 @@ export default function NewsHubComponent() {
       setFormError(err.message || 'Error submitting story. Please try again.');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleWalletPay = async () => {
+    if (!userEmail.trim() || !userEmail.includes('@')) {
+      setFormError("Please enter your contact email address above first.");
+      return;
+    }
+
+    if (!isConnected) {
+      if (openAppKit) {
+        openAppKit({ view: 'Connect' });
+      }
+      return;
+    }
+
+    setWalletPaying(true);
+    setFormError("");
+
+    try {
+      const MAINNET_CHAIN_ID = 1;
+      if (chain?.id !== MAINNET_CHAIN_ID && switchChainAsync) {
+        try {
+          await switchChainAsync({ chainId: MAINNET_CHAIN_ID });
+        } catch (swErr) {
+          console.warn("Chain switch error or bypassed:", swErr);
+        }
+      }
+
+      let calculatedEth = finalPrice / (ethPrice || 3200);
+      if (calculatedEth < 0.0001) calculatedEth = 0.0001;
+
+      const txHash = await sendTransactionAsync({
+        to: RECEIVER_ADDRESS as `0x${string}`,
+        value: parseEther(calculatedEth.toFixed(8)),
+      });
+
+      if (!txHash) {
+        throw new Error("Transaction was rejected or failed to broadcast.");
+      }
+
+      await handlePayAndSubmit({
+        paymentMethod: 'eth',
+        txHash,
+        walletAddress: walletAddress || undefined,
+        amount: finalPrice,
+        paymentStatus: 'completed'
+      });
+    } catch (err: any) {
+      console.error("Wallet payment failed:", err);
+      setFormError(err?.shortMessage || err?.message || "Wallet transaction failed or was rejected. You can also send manually and paste the tx hash below.");
+    } finally {
+      setWalletPaying(false);
     }
   };
 
@@ -1580,44 +1644,91 @@ export default function NewsHubComponent() {
                   </div>
                 )}
 
-                {/* ETH / Crypto View */}
+                {/* ETH / Crypto View: Connect Wallet & Pay */}
                 {payMethod === 'eth' && (
                   <div style={{ marginTop: '12px', marginBottom: '14px' }}>
                     <div className="note" style={{ marginBottom: '10px', color: '#67e8f9' }}>
-                      ⟠ Send ETH or USDT/USDC (Ethereum, Arbitrum, Base, or Polygon) to our official treasury address.
-                    </div>
-                    <label>Official NYALTX Payment Address (EVM / ERC-20):</label>
-                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '10px' }}>
-                      <code style={{ flex: 1, padding: '10px 12px', fontSize: '13px', borderRadius: '8px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {RECEIVER_ADDRESS}
-                      </code>
-                      <button
-                        type="button"
-                        className="btn"
-                        onClick={() => {
-                          navigator.clipboard?.writeText(RECEIVER_ADDRESS);
-                          setCopiedReceiver(true);
-                          setTimeout(() => setCopiedReceiver(false), 2000);
-                        }}
-                      >
-                        {copiedReceiver ? '✓ Copied' : 'Copy'}
-                      </button>
+                      ⟠ Connect your wallet to pay directly with ETH on Ethereum, or send to our official treasury.
                     </div>
 
-                    <div style={{ padding: '10px 12px', background: 'var(--soft)', borderRadius: '8px', border: '1px solid var(--border)', marginBottom: '12px' }}>
-                      <div style={{ fontSize: '12px', color: 'var(--muted)' }}>Equivalent Amount:</div>
-                      <div style={{ fontSize: '16px', fontWeight: 700, color: '#fff', marginTop: '2px' }}>
-                        ~{(finalPrice / (ethPrice || 3200)).toFixed(4)} ETH <span style={{ fontSize: '12px', color: 'var(--accent)' }}>(${finalPrice.toFixed(2)} USD)</span>
+                    <div style={{ padding: '10px 14px', background: 'var(--soft)', borderRadius: '10px', border: '1px solid var(--border)', marginBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div>
+                        <div style={{ fontSize: '12px', color: 'var(--muted)' }}>Total to pay:</div>
+                        <div style={{ fontSize: '17px', fontWeight: 800, color: '#fff', marginTop: '2px' }}>
+                          ~{(finalPrice / (ethPrice || 3200)).toFixed(4)} ETH <span style={{ fontSize: '13px', color: 'var(--accent)', fontWeight: 600 }}>(${finalPrice.toFixed(2)} USD)</span>
+                        </div>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <span style={{ fontSize: '11px', background: 'var(--card)', padding: '3px 8px', borderRadius: '4px', border: '1px solid var(--border)', color: '#38bdf8' }}>
+                          Ethereum Mainnet
+                        </span>
                       </div>
                     </div>
 
-                    <label>Transaction Hash (TXID) after sending *</label>
-                    <input
-                      placeholder="0x... (paste your transaction hash here)"
-                      value={cryptoTxHash}
-                      onChange={(e) => setCryptoTxHash(e.target.value)}
-                    />
-                    <div className="note">Admin will verify your transaction hash on Etherscan before publishing.</div>
+                    {/* Connect Wallet & Pay Button */}
+                    <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: '12px', padding: '16px', marginBottom: '16px' }}>
+                      {!isConnected ? (
+                        <div style={{ textAlign: 'center' }}>
+                          <p style={{ color: 'var(--muted)', fontSize: '13px', margin: '0 0 12px' }}>
+                            Connect your Web3 wallet (MetaMask, Coinbase, WalletConnect) to pay on-chain in 1 click:
+                          </p>
+                          <div style={{ display: 'flex', justifyContent: 'center' }}>
+                            <ConnectWalletButton />
+                          </div>
+                        </div>
+                      ) : (
+                        <div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                            <span style={{ fontSize: '12px', color: 'var(--muted)' }}>Connected Wallet:</span>
+                            <span style={{ fontSize: '12px', fontWeight: 700, color: '#22d3ee', fontFamily: 'monospace' }}>
+                              ● {walletAddress ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}` : 'Connected'}
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            className="btn pri"
+                            onClick={handleWalletPay}
+                            disabled={walletPaying}
+                            style={{ width: '100%', justifyContent: 'center', padding: '12px', fontWeight: 700, borderRadius: '8px', fontSize: '14px' }}
+                          >
+                            {walletPaying ? 'Sending On-Chain Payment...' : `⚡ Pay $${finalPrice.toFixed(2)} with Connected Wallet`}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Or Manual Transfer Option */}
+                    <details style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '10px', padding: '10px 14px' }}>
+                      <summary style={{ cursor: 'pointer', fontSize: '12px', color: 'var(--muted)', fontWeight: 600 }}>
+                        Or send manually to Treasury address & paste TXID ▾
+                      </summary>
+                      <div style={{ marginTop: '10px' }}>
+                        <label>Official NYALTX Payment Address (EVM / ERC-20):</label>
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '10px' }}>
+                          <code style={{ flex: 1, padding: '10px 12px', fontSize: '12px', borderRadius: '8px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {RECEIVER_ADDRESS}
+                          </code>
+                          <button
+                            type="button"
+                            className="btn"
+                            onClick={() => {
+                              navigator.clipboard?.writeText(RECEIVER_ADDRESS);
+                              setCopiedReceiver(true);
+                              setTimeout(() => setCopiedReceiver(false), 2000);
+                            }}
+                          >
+                            {copiedReceiver ? '✓ Copied' : 'Copy'}
+                          </button>
+                        </div>
+
+                        <label>Transaction Hash (TXID) after sending *</label>
+                        <input
+                          placeholder="0x... (paste your transaction hash here)"
+                          value={cryptoTxHash}
+                          onChange={(e) => setCryptoTxHash(e.target.value)}
+                        />
+                      </div>
+                    </details>
                   </div>
                 )}
 
@@ -1702,7 +1813,17 @@ export default function NewsHubComponent() {
 
                 <div className="foot">
                   <button className="btn" onClick={() => setModalStep(2)}>Back</button>
-                  {payMethod !== 'paypal' && (
+                  {payMethod === 'eth' ? (
+                    cryptoTxHash.trim().length > 0 ? (
+                      <button
+                        className="btn pri"
+                        onClick={() => handlePayAndSubmit()}
+                        disabled={isSubmitting}
+                      >
+                        {isSubmitting ? 'Submitting...' : 'Submit Story with Manual TX'}
+                      </button>
+                    ) : null
+                  ) : payMethod !== 'paypal' ? (
                     <button
                       className="btn pri"
                       onClick={() => handlePayAndSubmit()}
@@ -1710,7 +1831,7 @@ export default function NewsHubComponent() {
                     >
                       {isSubmitting ? 'Submitting...' : 'Submit Story for Review'}
                     </button>
-                  )}
+                  ) : null}
                 </div>
               </div>
             )}
