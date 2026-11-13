@@ -36,13 +36,17 @@ const NewsPage = async () => {
           <div className="flex items-center gap-4 mb-4">
             <div>
               <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-                DeFi News Hub
+                Nyaltx News Hub
               </h1>
               <div className="flex items-center gap-2 mt-1">
                 <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                <p className="text-gray-400 text-sm">
-                  Live updates • Sourced from The Defiant and Decrypt DeFi
-                </p>
+
+              <div className="mt-4">
+                <Link href="/news-hub" className="inline-flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-cyan-400 to-indigo-500 hover:from-cyan-300 hover:to-indigo-400 text-slate-950 font-bold rounded-md shadow-md transition-all transform hover:scale-105">
+                  Submit News →
+                </Link>
+              </div>
+
               </div>
             </div>
           </div>

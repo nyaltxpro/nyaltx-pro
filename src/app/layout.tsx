@@ -224,6 +224,8 @@ export default async function RootLayout({
         <link rel="apple-touch-icon" sizes="192x192" href="/nyaltxpro.png" />
         {/* Shortcut icon for legacy browsers */}
         <link rel="shortcut icon" href="/nyaltxpro.png" />
+        <link rel="canonical" href={baseUrl} />
+        <meta name="robots" content="index,follow" />
       </head>
       <body className={`${inter.variable} ${poppins.variable} antialiased`}
         style={{

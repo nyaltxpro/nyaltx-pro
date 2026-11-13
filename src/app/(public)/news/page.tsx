@@ -75,13 +75,8 @@ export default function NewsPage() {
               </div>
             </div>
 
-            <div className="mt-8 flex justify-center gap-4 flex-wrap">
-              <Link
-                href="/news-hub"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cyan-400 to-indigo-500 hover:from-cyan-300 hover:to-indigo-400 text-slate-950 font-bold rounded-xl shadow-lg transition-all transform hover:scale-105"
-              >
-                📰 Open Interactive News Hub &amp; Submit News →
-              </Link>
+
+
             </div>
           </div>
         </div>
