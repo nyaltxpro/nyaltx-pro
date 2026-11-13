@@ -4,6 +4,14 @@ import ConnectWalletButton from '@/components/ConnectWalletButton';
 import PayPalCheckout from '@/components/PayPalCheckout';
 import { getNYAXPriceUSD } from '@/utils/nyaxPriceApi';
 import { useAppKit } from '@reown/appkit/react';
+import {
+  Connection,
+  LAMPORTS_PER_SOL,
+  PublicKey,
+  SystemProgram,
+  Transaction,
+  clusterApiUrl
+} from '@solana/web3.js';
 import { AnimatePresence, motion } from 'motion/react';
 import Image from 'next/image';
 import React, { useEffect, useRef, useState } from 'react';
@@ -21,6 +29,7 @@ export interface SubmitNewsModalProps {
 
 type PayMethod = 'paypal' | 'eth' | 'sol' | 'nyax';
 type WalletMethod = Exclude<PayMethod, 'paypal'>;
+type PayMode = 'live' | 'testnet' | 'simulate';
 
 /* ---------- Corporate News (admin) theme tokens ---------- */
 const FONT = { fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' } as const;
@@ -68,8 +77,19 @@ const FALLBACK_ETH_PRICE = process.env.NEXT_PUBLIC_FALLBACK_ETH_PRICE
   : 3000;
 const FALLBACK_SOL_PRICE = 180;
 
-// Test mode toggle is visible in dev, or in production only when this env var is set to "true"
-// (Vercel: Settings -> Environment Variables -> NEXT_PUBLIC_ENABLE_TEST_MODE=true, then redeploy)
+/* ---------- Testnet configuration ---------- */
+// Sepolia chain id (must also be enabled in your wagmi / AppKit networks config)
+const TESTNET_CHAIN_ID = process.env.NEXT_PUBLIC_TESTNET_CHAIN_ID
+  ? Number(process.env.NEXT_PUBLIC_TESTNET_CHAIN_ID)
+  : 11155111;
+// Optional Solana devnet receiver. If empty, the test SOL is sent back to your own wallet (self-transfer).
+const SOLANA_TEST_RECEIVER = process.env.NEXT_PUBLIC_SOLANA_TEST_RECEIVER_ADDRESS || '';
+// Faucet funds are limited, so testnet payments are capped.
+const TESTNET_MAX_ETH = 0.001;
+const TESTNET_MAX_SOL = 0.05;
+
+// Test mode selector visible in dev, or in production only when NEXT_PUBLIC_ENABLE_TEST_MODE=true
+// (set to true here so you can test on your deployed site; restore the env check before launch)
 const TEST_MODE_ALLOWED = true;
 // process.env.NODE_ENV !== 'production' || process.env.NEXT_PUBLIC_ENABLE_TEST_MODE === 'true';
 
@@ -224,8 +244,8 @@ export default function SubmitNewsModalCorporate({
   const [payMethod, setPayMethod] = useState<PayMethod>('paypal');
   const [selectedSwatch] = useState(0);
 
-  // Test mode (simulated payments, no real funds)
-  const [testMode, setTestMode] = useState(false);
+  // Payment mode: live (real money) | testnet (PayPal sandbox, Sepolia, Solana devnet) | simulate (fake, no network)
+  const [payMode, setPayMode] = useState<PayMode>('live');
 
   // Cover image (IPFS / external URL)
   const [uploadedImg, setUploadedImg] = useState<string | null>(null);
@@ -281,6 +301,25 @@ export default function SubmitNewsModalCorporate({
 
   if (!isOpen) return null;
 
+  // Mode helpers
+  const simulate = payMode === 'simulate';
+  const testnet = payMode === 'testnet';
+  const isTestFlow = payMode !== 'live';
+  // NYAX has no testnet token, so in testnet mode it falls back to a simulated payment
+  const isSimulatedFor = (m: PayMethod) => simulate || (testnet && m === 'nyax');
+  const networkFor = (m: PayMethod) =>
+    simulate
+      ? 'simulated'
+      : testnet
+        ? m === 'paypal'
+          ? 'paypal-sandbox'
+          : m === 'eth'
+            ? 'sepolia'
+            : m === 'sol'
+              ? 'solana-devnet'
+              : 'simulated'
+        : 'mainnet';
+
   // Price calculations
   const currentPlans = PLANS_CONFIG[subType];
   const activePlanObj = currentPlans.find(p => p.id === plan) || currentPlans[0];
@@ -293,6 +332,9 @@ export default function SubmitNewsModalCorporate({
   const ethAmount = finalPrice / ethRef;
   const solAmount = finalPrice / solRef;
   const nyaxAmount = finalPrice / nyaxRef;
+  // Amounts actually sent (capped on testnets because faucet funds are limited)
+  const ethPayAmount = testnet ? Math.min(ethAmount, TESTNET_MAX_ETH) : ethAmount;
+  const solTestAmount = Math.min(solAmount, TESTNET_MAX_SOL);
 
   const validEmail = userEmail.trim().length > 0 && userEmail.includes('@');
 
@@ -415,6 +457,7 @@ export default function SubmitNewsModalCorporate({
     paymentStatus?: string;
     amount?: number;
     isTest?: boolean;
+    network?: string;
   }) => {
     setIsSubmitting(true);
     setFormError('');
@@ -453,8 +496,9 @@ export default function SubmitNewsModalCorporate({
       txHash: paymentOverride?.txHash || (cryptoTxHash.trim() || null),
       paymentId: paymentOverride?.paymentId || null,
       walletAddress: paymentOverride?.walletAddress || null,
-      paymentStatus: paymentOverride?.paymentStatus || (testMode ? 'test' : 'completed'),
-      isTest: paymentOverride?.isTest ?? testMode
+      paymentStatus: paymentOverride?.paymentStatus || (isTestFlow ? 'test' : 'completed'),
+      isTest: paymentOverride?.isTest ?? isTestFlow,
+      network: paymentOverride?.network ?? networkFor(currentPayMethod)
     };
 
     try {
@@ -491,7 +535,7 @@ export default function SubmitNewsModalCorporate({
     } catch (err: any) {
       const base = err.message || 'Error submitting story. Please try again.';
       setFormError(
-        paymentOverride?.txHash && !paymentOverride?.isTest
+        paymentOverride?.txHash && !simulate
           ? `Payment sent (tx ${paymentOverride.txHash.slice(0, 10)}...) but submission failed: ${base}. Click "Submit Story with TX Hash" to retry — do not pay again.`
           : base
       );
@@ -500,7 +544,7 @@ export default function SubmitNewsModalCorporate({
     }
   };
 
-  /* ---------- On-chain payment (same logic as pricing page handlers) ---------- */
+  /* ---------- On-chain EVM payment (Ethereum mainnet, or Sepolia in testnet mode) ---------- */
   const payWithWallet = async (method: WalletMethod) => {
     if (!validEmail) {
       setFormError('Please enter your contact email address above first.');
@@ -517,18 +561,23 @@ export default function SubmitNewsModalCorporate({
     setFormError('');
 
     try {
-      if (PAYMENT_CHAIN_ID && chain?.id !== PAYMENT_CHAIN_ID) {
+      const targetChainId = testnet ? TESTNET_CHAIN_ID : PAYMENT_CHAIN_ID;
+      if (targetChainId && chain?.id !== targetChainId) {
         try {
-          await switchChainAsync({ chainId: PAYMENT_CHAIN_ID });
+          await switchChainAsync({ chainId: targetChainId });
         } catch {
-          throw new Error('Please switch to the correct chain to pay');
+          throw new Error(
+            testnet
+              ? 'Could not switch to Sepolia. Switch your wallet to Sepolia, and make sure Sepolia is enabled in your wagmi / AppKit networks config.'
+              : 'Please switch to the correct chain to pay'
+          );
         }
       }
 
       let txHash: `0x${string}`;
 
       if (method === 'eth') {
-        let eth = ethAmount;
+        let eth = ethPayAmount;
         if (eth < 0.0001) eth = 0.0001;
         txHash = await sendTransactionAsync({
           to: RECEIVER,
@@ -561,8 +610,9 @@ export default function SubmitNewsModalCorporate({
         txHash,
         walletAddress: walletAddress || undefined,
         amount: finalPrice,
-        paymentStatus: 'completed',
-        isTest: false
+        paymentStatus: testnet ? 'testnet' : 'completed',
+        isTest: testnet,
+        network: testnet ? 'sepolia' : 'mainnet'
       });
     } catch (err: any) {
       console.error('Wallet payment failed:', err);
@@ -572,7 +622,62 @@ export default function SubmitNewsModalCorporate({
     }
   };
 
-  /* ---------- Test mode: simulated payment (no real funds) ---------- */
+  /* ---------- Solana devnet payment (testnet mode, Phantom / injected wallet) ---------- */
+  const payWithSolanaDevnet = async () => {
+    if (!validEmail) {
+      setFormError('Please enter your contact email address above first.');
+      return;
+    }
+    const provider = (window as any).phantom?.solana ?? (window as any).solana;
+    if (!provider) {
+      setFormError('No Solana wallet found. Install Phantom (set it to Testnet Mode / Devnet) and reload the page.');
+      return;
+    }
+
+    setWalletPaying('sol');
+    setFormError('');
+
+    try {
+      const resp = await provider.connect();
+      const fromKey = new PublicKey((resp?.publicKey ?? provider.publicKey).toString());
+      const toKey = SOLANA_TEST_RECEIVER ? new PublicKey(SOLANA_TEST_RECEIVER) : fromKey;
+      const lamports = Math.round(solTestAmount * LAMPORTS_PER_SOL);
+
+      const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');
+      const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
+
+      const tx = new Transaction({ feePayer: fromKey, blockhash, lastValidBlockHeight }).add(
+        SystemProgram.transfer({ fromPubkey: fromKey, toPubkey: toKey, lamports })
+      );
+
+      // Sign in the wallet, then broadcast ourselves so it always lands on devnet
+      const signed = await provider.signTransaction(tx);
+      const signature = await connection.sendRawTransaction(signed.serialize());
+      await connection.confirmTransaction({ signature, blockhash, lastValidBlockHeight }, 'confirmed');
+
+      setCryptoTxHash(signature);
+      await handlePayAndSubmit({
+        paymentMethod: 'sol',
+        txHash: signature,
+        walletAddress: fromKey.toString(),
+        amount: finalPrice,
+        paymentStatus: 'testnet',
+        isTest: true,
+        network: 'solana-devnet'
+      });
+    } catch (err: any) {
+      console.error('Solana devnet payment failed:', err);
+      setFormError(
+        err?.message?.includes('0x1') || err?.message?.toLowerCase().includes('insufficient')
+          ? 'Not enough devnet SOL. Get free devnet SOL at faucet.solana.com and try again.'
+          : err?.message || 'Solana devnet payment failed.'
+      );
+    } finally {
+      setWalletPaying(null);
+    }
+  };
+
+  /* ---------- Simulated payment (no network, no funds) ---------- */
   const simulateTestPayment = async (method: PayMethod) => {
     if (!validEmail) {
       setFormError('Please enter your contact email address above first.');
@@ -589,7 +694,8 @@ export default function SubmitNewsModalCorporate({
           paymentId: `TEST-PAYPAL-${Date.now()}`,
           amount: finalPrice,
           paymentStatus: 'test',
-          isTest: true
+          isTest: true,
+          network: 'simulated'
         });
       } else {
         const fakeHash = `0xTEST${rand}`;
@@ -600,7 +706,8 @@ export default function SubmitNewsModalCorporate({
           walletAddress: '0xTEST000000000000000000000000000000000000',
           amount: finalPrice,
           paymentStatus: 'test',
-          isTest: true
+          isTest: true,
+          network: 'simulated'
         });
       }
     } finally {
@@ -626,96 +733,149 @@ export default function SubmitNewsModalCorporate({
     </button>
   );
 
+  const modeBtn = (id: PayMode, label: string, activeCls: string) => (
+    <button
+      key={id}
+      type="button"
+      onClick={() => {
+        setPayMode(id);
+        setFormError('');
+      }}
+      className={`flex-1 px-3 py-2 rounded-md text-xs font-semibold transition-all ${payMode === id ? activeCls : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
+        }`}
+    >
+      {label}
+    </button>
+  );
+
   /* Shared panel for ETH / SOL / NYAX (connect wallet -> pay -> auto submit) */
   const renderWalletPanel = (
     method: WalletMethod,
     cfg: { title: string; subtitle: string; border: string; titleColor: string; amountText: string; btnLabel: string }
-  ) => (
-    <div className={`p-4 bg-gray-700/30 border ${cfg.border} rounded-lg space-y-3`}>
-      <div className="flex justify-between items-center gap-3">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-gray-800/60 rounded-lg flex items-center justify-center border border-gray-600/40">
-            {method === 'eth' && <Image src="/crypto-icons/color/eth.svg" width={20} height={20} alt="ETH" />}
-            {method === 'sol' && <Image src="/crypto-icons/color/sol.svg" width={20} height={20} alt="SOL" />}
-            {method === 'nyax' && <Image src="/logo.png" width={20} height={20} alt="NYAX" />}
-          </div>
-          <div>
-            <h4 className={`text-sm font-semibold ${cfg.titleColor}`}>{cfg.title}</h4>
-            <p className="text-xs text-gray-400">{cfg.subtitle}</p>
-          </div>
-        </div>
-        <span className="text-xs font-mono font-bold text-white bg-gray-800/70 px-2 py-1 rounded whitespace-nowrap">
-          {cfg.amountText}
-        </span>
-      </div>
+  ) => {
+    const useSim = isSimulatedFor(method);
+    const solDevnet = testnet && method === 'sol';
 
-      {testMode ? (
-        <button
-          type="button"
-          onClick={() => simulateTestPayment(method)}
-          disabled={isSubmitting || walletPaying !== null}
-          className={`w-full py-3 ${BTN_PRIMARY}`}
-        >
-          {walletPaying === method || isSubmitting
-            ? 'Simulating payment...'
-            : `🧪 Simulate ${method.toUpperCase()} payment ($${finalPrice.toFixed(2)})`}
-        </button>
-      ) : !isConnected ? (
-        <div className="text-center py-4 bg-black/30 rounded-lg border border-gray-700/40 space-y-2">
-          <p className="text-xs text-gray-400">Connect your Web3 wallet (MetaMask, Coinbase, WalletConnect) to pay:</p>
-          <div className="flex justify-center">
-            <ConnectWalletButton />
+    return (
+      <div className={`p-4 bg-gray-700/30 border ${cfg.border} rounded-lg space-y-3`}>
+        <div className="flex justify-between items-center gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 bg-gray-800/60 rounded-lg flex items-center justify-center border border-gray-600/40">
+              {method === 'eth' && <Image src="/crypto-icons/color/eth.svg" width={20} height={20} alt="ETH" />}
+              {method === 'sol' && <Image src="/crypto-icons/color/sol.svg" width={20} height={20} alt="SOL" />}
+              {method === 'nyax' && <Image src="/logo.png" width={20} height={20} alt="NYAX" />}
+            </div>
+            <div>
+              <h4 className={`text-sm font-semibold ${cfg.titleColor}`}>{cfg.title}</h4>
+              <p className="text-xs text-gray-400">{cfg.subtitle}</p>
+            </div>
           </div>
+          <span className="text-xs font-mono font-bold text-white bg-gray-800/70 px-2 py-1 rounded whitespace-nowrap">
+            {cfg.amountText}
+          </span>
         </div>
-      ) : (
-        <div className="space-y-3">
-          <div className="flex justify-between items-center p-2.5 bg-cyan-500/10 border border-cyan-500/30 rounded-lg text-xs">
-            <span className="text-gray-400">Connected Wallet:</span>
-            <span className="font-mono text-cyan-300 font-bold">
-              ● {walletAddress ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}` : 'Connected'}
-            </span>
-          </div>
 
+        {testnet && method === 'nyax' && (
+          <p className="text-xs text-yellow-300 bg-yellow-500/10 p-2.5 rounded-lg border border-yellow-500/20">
+            NYAX has no testnet token, so this payment is simulated in Testnet mode.
+          </p>
+        )}
+        {testnet && method === 'eth' && (
+          <p className="text-xs text-yellow-300 bg-yellow-500/10 p-2.5 rounded-lg border border-yellow-500/20">
+            Sepolia test ETH only (capped at {TESTNET_MAX_ETH} ETH). Get free test ETH from a Sepolia faucet.
+          </p>
+        )}
+        {solDevnet && (
+          <p className="text-xs text-yellow-300 bg-yellow-500/10 p-2.5 rounded-lg border border-yellow-500/20">
+            Solana Devnet via Phantom (capped at {TESTNET_MAX_SOL} SOL).{' '}
+            {SOLANA_TEST_RECEIVER ? 'Sent to your test receiver.' : 'No test receiver set, so it is sent back to your own wallet.'}{' '}
+            Free devnet SOL: faucet.solana.com
+          </p>
+        )}
+
+        {useSim ? (
           <button
             type="button"
-            onClick={() => payWithWallet(method)}
+            onClick={() => simulateTestPayment(method)}
+            disabled={isSubmitting || walletPaying !== null}
+            className={`w-full py-3 ${BTN_PRIMARY}`}
+          >
+            {walletPaying === method || isSubmitting
+              ? 'Simulating payment...'
+              : `🧪 Simulate ${method.toUpperCase()} payment ($${finalPrice.toFixed(2)})`}
+          </button>
+        ) : solDevnet ? (
+          <button
+            type="button"
+            onClick={payWithSolanaDevnet}
             disabled={walletPaying !== null || isSubmitting}
             className={`w-full py-3 ${BTN_PRIMARY}`}
           >
-            {walletPaying === method ? (
+            {walletPaying === 'sol' ? (
               <span className="inline-flex items-center gap-2">
-                <FaSpinner className="w-4 h-4 animate-spin" /> Sending On-Chain Payment...
+                <FaSpinner className="w-4 h-4 animate-spin" /> Confirm in Phantom...
               </span>
             ) : (
               cfg.btnLabel
             )}
           </button>
-        </div>
-      )}
-
-      {!testMode && (
-        <details className="text-xs text-gray-400 pt-1">
-          <summary className="cursor-pointer font-medium text-gray-400 hover:text-white">
-            Or send manually to Treasury address & paste TXID ▾
-          </summary>
-          <div className="mt-2 space-y-2">
-            <div className="flex items-center gap-2">
-              <code className="flex-1 p-2 bg-black/40 rounded border border-gray-700/40 text-[11px] truncate">{RECEIVER}</code>
-              <button type="button" onClick={() => copyAddr(RECEIVER)} className="px-2.5 py-1.5 bg-gray-600/50 hover:bg-gray-600/70 text-xs rounded text-white">
-                {copiedReceiver ? '✓ Copied' : 'Copy'}
-              </button>
+        ) : !isConnected ? (
+          <div className="text-center py-4 bg-black/30 rounded-lg border border-gray-700/40 space-y-2">
+            <p className="text-xs text-gray-400">Connect your Web3 wallet (MetaMask, Coinbase, WalletConnect) to pay:</p>
+            <div className="flex justify-center">
+              <ConnectWalletButton />
             </div>
-            <input
-              placeholder="0x... (paste your transaction hash here)"
-              value={cryptoTxHash}
-              onChange={(e) => setCryptoTxHash(e.target.value)}
-              className={INPUT}
-            />
           </div>
-        </details>
-      )}
-    </div>
-  );
+        ) : (
+          <div className="space-y-3">
+            <div className="flex justify-between items-center p-2.5 bg-cyan-500/10 border border-cyan-500/30 rounded-lg text-xs">
+              <span className="text-gray-400">Connected Wallet:</span>
+              <span className="font-mono text-cyan-300 font-bold">
+                ● {walletAddress ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}` : 'Connected'}
+              </span>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => payWithWallet(method)}
+              disabled={walletPaying !== null || isSubmitting}
+              className={`w-full py-3 ${BTN_PRIMARY}`}
+            >
+              {walletPaying === method ? (
+                <span className="inline-flex items-center gap-2">
+                  <FaSpinner className="w-4 h-4 animate-spin" /> Sending On-Chain Payment...
+                </span>
+              ) : (
+                cfg.btnLabel
+              )}
+            </button>
+          </div>
+        )}
+
+        {!useSim && !solDevnet && (
+          <details className="text-xs text-gray-400 pt-1">
+            <summary className="cursor-pointer font-medium text-gray-400 hover:text-white">
+              Or send manually to Treasury address & paste TXID ▾
+            </summary>
+            <div className="mt-2 space-y-2">
+              <div className="flex items-center gap-2">
+                <code className="flex-1 p-2 bg-black/40 rounded border border-gray-700/40 text-[11px] truncate">{RECEIVER}</code>
+                <button type="button" onClick={() => copyAddr(RECEIVER)} className="px-2.5 py-1.5 bg-gray-600/50 hover:bg-gray-600/70 text-xs rounded text-white">
+                  {copiedReceiver ? '✓ Copied' : 'Copy'}
+                </button>
+              </div>
+              <input
+                placeholder="0x... (paste your transaction hash here)"
+                value={cryptoTxHash}
+                onChange={(e) => setCryptoTxHash(e.target.value)}
+                className={INPUT}
+              />
+            </div>
+          </details>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-start justify-center p-4 z-50 overflow-y-auto" style={FONT}>
@@ -738,9 +898,11 @@ export default function SubmitNewsModalCorporate({
         <ModalStepper current={modalStep} />
 
         {/* Test mode banner */}
-        {testMode && (
+        {isTestFlow && (
           <div className="mb-4 p-2 text-center text-xs font-semibold text-yellow-300 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-            🧪 TEST MODE ON: no real payment will be made
+            {testnet
+              ? '🧪 TESTNET MODE: PayPal Sandbox · Sepolia · Solana Devnet. Test funds only.'
+              : '🧪 SIMULATED MODE: no real payment and no network call will be made.'}
           </div>
         )}
 
@@ -1007,36 +1169,24 @@ export default function SubmitNewsModalCorporate({
               />
             </div>
 
-            {/* Test / Live toggle */}
+            {/* Payment mode selector: Live / Testnet / Simulated */}
             {TEST_MODE_ALLOWED && (
               <div
-                className={`p-3 rounded-lg border flex items-center justify-between gap-3 ${testMode ? 'border-yellow-500/50 bg-yellow-500/10' : 'border-gray-600/30 bg-gray-700/30'
+                className={`p-3 rounded-lg border space-y-2 ${isTestFlow ? 'border-yellow-500/50 bg-yellow-500/10' : 'border-gray-600/30 bg-gray-700/30'
                   }`}
               >
-                <div>
-                  <div className="text-sm font-semibold text-yellow-300">
-                    🧪 Test Mode {testMode ? '(ON)' : '(OFF — live payments)'}
-                  </div>
-                  <p className="text-xs text-gray-400">
-                    Simulates PayPal, ETH, SOL &amp; NYAX payments. No real funds are moved.
-                  </p>
+                <div className="text-sm font-semibold text-yellow-300">🧪 Payment mode</div>
+                <div className="flex gap-1 p-1 bg-gray-800/60 rounded-lg border border-gray-600/30">
+                  {modeBtn('live', 'Live', 'bg-green-500/20 text-green-300 border border-green-500/40')}
+                  {modeBtn('testnet', 'Testnet', 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/40')}
+                  {modeBtn('simulate', 'Simulated', 'bg-purple-500/20 text-purple-300 border border-purple-500/40')}
                 </div>
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={testMode}
-                  aria-label="Toggle test mode"
-                  onClick={() => {
-                    setTestMode((v) => !v);
-                    setFormError('');
-                  }}
-                  className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${testMode ? 'bg-yellow-500' : 'bg-gray-600'}`}
-                >
-                  <span
-                    className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${testMode ? 'translate-x-5' : ''
-                      }`}
-                  />
-                </button>
+                <p className="text-xs text-gray-400">
+                  {payMode === 'live' && 'Real payments with real money.'}
+                  {payMode === 'testnet' &&
+                    'PayPal Sandbox, ETH on Sepolia and SOL on Solana Devnet with test funds. NYAX has no testnet token, so it is simulated.'}
+                  {payMode === 'simulate' && 'Fake payments for every method. Nothing is sent to any network.'}
+                </p>
               </div>
             )}
 
@@ -1071,8 +1221,14 @@ export default function SubmitNewsModalCorporate({
                     <PayPalIcon />
                   </div>
                   <div>
-                    <h4 className="text-sm font-semibold text-blue-400">PayPal & Card Payment</h4>
-                    <p className="text-xs text-gray-400">Complete payment securely with PayPal or Credit/Debit Card</p>
+                    <h4 className="text-sm font-semibold text-blue-400">
+                      PayPal & Card Payment{testnet ? ' (Sandbox)' : ''}
+                    </h4>
+                    <p className="text-xs text-gray-400">
+                      {testnet
+                        ? 'Log in with a PayPal sandbox buyer account to test'
+                        : 'Complete payment securely with PayPal or Credit/Debit Card'}
+                    </p>
                   </div>
                 </div>
 
@@ -1080,7 +1236,7 @@ export default function SubmitNewsModalCorporate({
                   <p className="text-xs text-amber-300 bg-amber-500/10 p-2.5 rounded-lg border border-amber-500/20">
                     ⚠️ Please enter a valid contact email above to activate PayPal checkout buttons.
                   </p>
-                ) : testMode ? (
+                ) : simulate ? (
                   <button
                     type="button"
                     onClick={() => simulateTestPayment('paypal')}
@@ -1092,16 +1248,20 @@ export default function SubmitNewsModalCorporate({
                 ) : (
                   <div className="pt-2">
                     <PayPalCheckout
+                      key={payMode} // remount when switching between live and sandbox
                       amount={finalPrice.toFixed(2)}
                       tier={`${subType}_${plan}`}
                       email={userEmail.trim()}
+                      // Sandbox flag for PayPalCheckout (it must read these props to switch to sandbox credentials)
+                      {...({ sandbox: testnet, environment: testnet ? 'sandbox' : 'production' } as any)}
                       onSuccess={(details: any) => {
                         handlePayAndSubmit({
                           paymentMethod: 'paypal',
                           paymentId: details.id,
                           amount: finalPrice,
-                          paymentStatus: 'completed',
-                          isTest: false
+                          paymentStatus: testnet ? 'testnet' : 'completed',
+                          isTest: testnet,
+                          network: testnet ? 'paypal-sandbox' : 'mainnet'
                         });
                       }}
                       onError={(err: any) => {
@@ -1116,23 +1276,29 @@ export default function SubmitNewsModalCorporate({
             {/* ETH */}
             {payMethod === 'eth' &&
               renderWalletPanel('eth', {
-                title: 'Pay with ETH',
-                subtitle: 'Sent from your connected wallet',
+                title: testnet ? 'Pay with Sepolia ETH' : 'Pay with ETH',
+                subtitle: testnet ? 'Test ETH on Sepolia from your connected wallet' : 'Sent from your connected wallet',
                 border: 'border-cyan-500/30',
                 titleColor: 'text-cyan-300',
-                amountText: `~${ethAmount.toFixed(5)} ETH`,
-                btnLabel: `Pay $${finalPrice.toFixed(2)} with ETH`
+                amountText: `~${ethPayAmount.toFixed(5)} ETH${testnet ? ' (Sepolia)' : ''}`,
+                btnLabel: testnet
+                  ? `Pay ${ethPayAmount.toFixed(5)} Sepolia ETH`
+                  : `Pay $${finalPrice.toFixed(2)} with ETH`
               })}
 
-            {/* SOL (ERC-20 SOL token, same as pricing page) */}
+            {/* SOL (ERC-20 SOL token live; native SOL on devnet in testnet mode) */}
             {payMethod === 'sol' &&
               renderWalletPanel('sol', {
-                title: 'Pay with SOL',
-                subtitle: 'SOL token transfer from your connected wallet',
+                title: testnet ? 'Pay with Devnet SOL' : 'Pay with SOL',
+                subtitle: testnet
+                  ? 'Native SOL on Solana Devnet via Phantom'
+                  : 'SOL token transfer from your connected wallet',
                 border: 'border-purple-500/30',
                 titleColor: 'text-purple-300',
-                amountText: `~${solAmount.toFixed(4)} SOL`,
-                btnLabel: `Pay $${finalPrice.toFixed(2)} with SOL`
+                amountText: testnet ? `~${solTestAmount.toFixed(4)} SOL (devnet)` : `~${solAmount.toFixed(4)} SOL`,
+                btnLabel: testnet
+                  ? `Pay ${solTestAmount.toFixed(4)} Devnet SOL with Phantom`
+                  : `Pay $${finalPrice.toFixed(2)} with SOL`
               })}
 
             {/* NYAX */}
@@ -1152,7 +1318,7 @@ export default function SubmitNewsModalCorporate({
 
             <div className="flex justify-between items-center pt-3 border-t border-gray-700/20">
               <button type="button" onClick={() => setModalStep(2)} className={BTN_GHOST}>← Back</button>
-              {payMethod !== 'paypal' && !testMode && (
+              {payMethod !== 'paypal' && !isSimulatedFor(payMethod) && (
                 <button
                   type="button"
                   onClick={() => handlePayAndSubmit()}
@@ -1175,8 +1341,12 @@ export default function SubmitNewsModalCorporate({
               Thank you! Your submission is now in our moderation queue and marked as <b>“Pending review”</b>.
               Our editors verify the payment and accuracy, and you will receive an email as soon as it goes live!
             </p>
-            {testMode && (
-              <p className="text-xs text-yellow-300">🧪 This was a test submission. No real payment was made.</p>
+            {isTestFlow && (
+              <p className="text-xs text-yellow-300">
+                {testnet
+                  ? '🧪 This was a testnet submission. Only test funds were used.'
+                  : '🧪 This was a simulated submission. No real payment was made.'}
+              </p>
             )}
             <button onClick={onClose} className={BTN_PRIMARY}>
               Back to News Hub
