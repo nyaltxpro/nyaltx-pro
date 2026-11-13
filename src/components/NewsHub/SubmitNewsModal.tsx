@@ -2,11 +2,13 @@
 
 import ConnectWalletButton from '@/components/ConnectWalletButton';
 import PayPalCheckout from '@/components/PayPalCheckout';
+import { getNYAXPriceUSD } from '@/utils/nyaxPriceApi';
 import { useAppKit } from '@reown/appkit/react';
+import Image from 'next/image';
 import React, { useEffect, useRef, useState } from 'react';
 import { FaNewspaper, FaSpinner, FaTimes, FaUpload } from 'react-icons/fa';
-import { parseEther } from 'viem';
-import { useAccount, useSendTransaction, useSwitchChain } from 'wagmi';
+import { erc20Abi, isAddress, parseEther, parseUnits } from 'viem';
+import { useAccount, useSendTransaction, useSwitchChain, useWriteContract } from 'wagmi';
 
 export interface SubmitNewsModalProps {
   isOpen: boolean;
@@ -15,6 +17,9 @@ export interface SubmitNewsModalProps {
   initialPlan?: string;
   onSuccess?: (item: any) => void;
 }
+
+type PayMethod = 'paypal' | 'eth' | 'sol' | 'nyax';
+type WalletMethod = Exclude<PayMethod, 'paypal'>;
 
 /* ---------- Corporate News (admin) theme tokens ---------- */
 const FONT = { fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' } as const;
@@ -26,14 +31,6 @@ const BTN_GHOST =
 const BTN_PRIMARY =
   'px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed text-white rounded-lg transition-all duration-200 font-medium text-sm';
 const PANEL = 'bg-gray-700/30 border border-gray-600/30 rounded-lg';
-
-const GRADS = [
-  'linear-gradient(135deg,#0e7490,#06b6d4)',
-  'linear-gradient(135deg,#4c1d95,#8b5cf6)',
-  'linear-gradient(135deg,#9a3412,#f59e0b)',
-  'linear-gradient(135deg,#14532d,#22c55e)',
-  'linear-gradient(135deg,#1e293b,#475569)'
-];
 
 const PLANS_CONFIG = {
   news: [
@@ -47,11 +44,85 @@ const PLANS_CONFIG = {
   ]
 };
 
-const RECEIVER_ADDRESS = (process.env.NEXT_PUBLIC_PAYMENT_RECEIVER_ADDRESS as string) || '0x81bA7b98E49014Bff22F811E9405640bC2B39cC0';
-const SOLANA_RECEIVER = (process.env.NEXT_PUBLIC_SOLANA_RECEIVER_ADDRESS as string) || 'GjTfUFXFvL1wKkHQH48Q5hN9aUjR9tZ2oP6mX7y3sW';
+/* ---------- Payment configuration (same as pricing page) ---------- */
+const NYAX_DISCOUNT = 0.2; // 20% off, same as pricing page
+const DEFAULT_RECEIVER: `0x${string}` = '0x81bA7b98E49014Bff22F811E9405640bC2B39cC0';
+const DEFAULT_NYAX: `0x${string}` = '0x5eed5621b92be4473f99bacac27deb57d9'; // NYAX on Ethereum
+const DEFAULT_SOL: `0x${string}` =
+  (process.env.NEXT_PUBLIC_SOL_TOKEN_ADDRESS as `0x${string}` | undefined) ??
+  ('0xD31a59c85aE9D8edEFeC411D448f90841571b89c' as `0x${string}`);
+
+const RECEIVER =
+  (process.env.NEXT_PUBLIC_PAYMENT_RECEIVER_ADDRESS as `0x${string}` | undefined) ?? DEFAULT_RECEIVER;
+const NYAX_TOKEN =
+  (process.env.NEXT_PUBLIC_NYAX_TOKEN_ADDRESS as `0x${string}` | undefined) ?? DEFAULT_NYAX;
+const SOL_TOKEN = DEFAULT_SOL;
+const PAYMENT_CHAIN_ID = process.env.NEXT_PUBLIC_PAYMENT_CHAIN_ID
+  ? Number(process.env.NEXT_PUBLIC_PAYMENT_CHAIN_ID)
+  : 1;
+const FALLBACK_ETH_PRICE = process.env.NEXT_PUBLIC_FALLBACK_ETH_PRICE
+  ? Number(process.env.NEXT_PUBLIC_FALLBACK_ETH_PRICE)
+  : 3000;
+const FALLBACK_SOL_PRICE = 180;
+
+async function fetchETHPriceUSD(): Promise<number> {
+  try {
+    const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd', { cache: 'no-store' });
+    if (res.ok) {
+      const v = (await res.json())?.ethereum?.usd;
+      if (typeof v === 'number' && v > 0) return v;
+    }
+  } catch { }
+  try {
+    const res = await fetch('https://api.dexscreener.com/latest/dex/tokens/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', { cache: 'no-store' });
+    if (res.ok) {
+      const json = await res.json();
+      const pairs = Array.isArray(json?.pairs) ? json.pairs : [];
+      if (pairs.length) {
+        const best = pairs.reduce((a: any, b: any) =>
+          Number(a?.liquidity?.usd || 0) > Number(b?.liquidity?.usd || 0) ? a : b
+        );
+        const price = parseFloat(best?.priceUsd);
+        if (!Number.isNaN(price) && price > 0) return price;
+      }
+    }
+  } catch { }
+  try {
+    const res = await fetch('https://api.coinbase.com/v2/prices/ETH-USD/spot', { cache: 'no-store' });
+    if (res.ok) {
+      const price = parseFloat((await res.json())?.data?.amount);
+      if (!Number.isNaN(price) && price > 0) return price;
+    }
+  } catch { }
+  return 0;
+}
+
+async function fetchSOLPriceUSD(): Promise<number> {
+  try {
+    const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd', { cache: 'no-store' });
+    if (res.ok) {
+      const v = (await res.json())?.solana?.usd;
+      if (typeof v === 'number' && v > 0) return v;
+    }
+  } catch { }
+  return 0;
+}
 
 const convertToWorkingIPFSUrl = (url: string) =>
   url.replace('https://gateway.pinata.cloud/ipfs/', 'https://ipfs.io/ipfs/');
+
+const PayPalIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a9.124 9.124 0 0 1-.077.437c-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287z" />
+  </svg>
+);
+
+const LOGOS: Record<PayMethod, React.ReactNode> = {
+  paypal: <PayPalIcon />,
+  eth: <Image src="/crypto-icons/color/eth.svg" width={16} height={16} alt="ETH" />,
+  sol: <Image src="/crypto-icons/color/sol.svg" width={16} height={16} alt="SOL" />,
+  nyax: <Image src="/logo.png" width={16} height={16} alt="NYAX" />
+};
 
 export default function SubmitNewsModalCorporate({
   isOpen,
@@ -63,10 +134,10 @@ export default function SubmitNewsModalCorporate({
   const [modalStep, setModalStep] = useState(1);
   const [subType, setSubType] = useState<'news' | 'pr'>(initialType);
   const [plan, setPlan] = useState(initialPlan);
-  const [payMethod, setPayMethod] = useState<'paypal' | 'eth' | 'sol' | 'nyax'>('paypal');
-  const [selectedSwatch, setSelectedSwatch] = useState(0);
+  const [payMethod, setPayMethod] = useState<PayMethod>('paypal');
+  const [selectedSwatch] = useState(0);
 
-  // Cover image (now an IPFS / external URL instead of base64)
+  // Cover image (IPFS / external URL)
   const [uploadedImg, setUploadedImg] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploadingToIPFS, setIsUploadingToIPFS] = useState(false);
@@ -82,17 +153,21 @@ export default function SubmitNewsModalCorporate({
   const [userEmail, setUserEmail] = useState('');
   const [formError, setFormError] = useState('');
   const [cryptoTxHash, setCryptoTxHash] = useState('');
-  const [ethPrice, setEthPrice] = useState(3200);
-  const [solPrice, setSolPrice] = useState(180);
   const [copiedReceiver, setCopiedReceiver] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Web3 hooks
+  // Prices
+  const [ethPrice, setEthPrice] = useState<number | null>(null);
+  const [solPrice, setSolPrice] = useState<number | null>(null);
+  const [nyaxPrice, setNyaxPrice] = useState<number | null>(null);
+
+  // Web3 hooks (same as pricing page)
   const { address: walletAddress, isConnected, chain } = useAccount();
   const { open: openAppKit } = useAppKit();
   const { switchChainAsync } = useSwitchChain();
   const { sendTransactionAsync } = useSendTransaction();
-  const [walletPaying, setWalletPaying] = useState(false);
+  const { writeContractAsync } = useWriteContract();
+  const [walletPaying, setWalletPaying] = useState<WalletMethod | null>(null);
 
   const editorRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -109,13 +184,9 @@ export default function SubmitNewsModalCorporate({
   }, [isOpen, initialType, initialPlan]);
 
   useEffect(() => {
-    fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum,solana&vs_currencies=usd')
-      .then(r => r.json())
-      .then(d => {
-        if (d?.ethereum?.usd) setEthPrice(d.ethereum.usd);
-        if (d?.solana?.usd) setSolPrice(d.solana.usd);
-      })
-      .catch(() => { });
+    fetchETHPriceUSD().then(p => setEthPrice(p > 0 ? p : null)).catch(() => setEthPrice(null));
+    fetchSOLPriceUSD().then(p => setSolPrice(p > 0 ? p : null)).catch(() => setSolPrice(null));
+    getNYAXPriceUSD().then(setNyaxPrice).catch(() => setNyaxPrice(null));
   }, []);
 
   if (!isOpen) return null;
@@ -124,9 +195,18 @@ export default function SubmitNewsModalCorporate({
   const currentPlans = PLANS_CONFIG[subType];
   const activePlanObj = currentPlans.find(p => p.id === plan) || currentPlans[0];
   const basePrice = activePlanObj.price;
-  const finalPrice = payMethod === 'nyax' ? basePrice * 0.9 : basePrice;
+  const finalPrice = payMethod === 'nyax' ? basePrice * (1 - NYAX_DISCOUNT) : basePrice;
 
-  /* ---------- IPFS image handling (same rules as admin) ---------- */
+  const ethRef = ethPrice && ethPrice > 0 ? ethPrice : FALLBACK_ETH_PRICE;
+  const solRef = solPrice && solPrice > 0 ? solPrice : FALLBACK_SOL_PRICE;
+  const nyaxRef = nyaxPrice && nyaxPrice > 0 ? nyaxPrice : 1.0;
+  const ethAmount = finalPrice / ethRef;
+  const solAmount = finalPrice / solRef;
+  const nyaxAmount = finalPrice / nyaxRef;
+
+  const validEmail = userEmail.trim().length > 0 && userEmail.includes('@');
+
+  /* ---------- IPFS image handling ---------- */
   const clearFileInput = () => {
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
@@ -148,7 +228,7 @@ export default function SubmitNewsModalCorporate({
       return;
     }
 
-    const img = new Image();
+    const img = new window.Image();
     const objectUrl = URL.createObjectURL(file);
     img.onload = () => {
       URL.revokeObjectURL(objectUrl);
@@ -236,9 +316,9 @@ export default function SubmitNewsModalCorporate({
     setModalStep(2);
   };
 
-  /* ---------- Submit ---------- */
+  /* ---------- Submit (runs only AFTER payment, like token registration) ---------- */
   const handlePayAndSubmit = async (paymentOverride?: {
-    paymentMethod?: 'paypal' | 'eth' | 'sol' | 'nyax';
+    paymentMethod?: PayMethod;
     paymentId?: string;
     txHash?: string;
     walletAddress?: string;
@@ -248,14 +328,14 @@ export default function SubmitNewsModalCorporate({
     setIsSubmitting(true);
     setFormError('');
 
-    if (!userEmail.trim() || !userEmail.includes('@')) {
+    if (!validEmail) {
       setFormError('Please enter a valid contact email address.');
       setIsSubmitting(false);
       return;
     }
 
     const currentPayMethod = paymentOverride?.paymentMethod || payMethod;
-    if ((currentPayMethod === 'eth' || currentPayMethod === 'sol' || currentPayMethod === 'nyax') && !paymentOverride?.txHash && !cryptoTxHash.trim()) {
+    if (currentPayMethod !== 'paypal' && !paymentOverride?.txHash && !cryptoTxHash.trim()) {
       setFormError('Please enter the transaction hash / signature after sending your payment.');
       setIsSubmitting(false);
       return;
@@ -317,48 +397,75 @@ export default function SubmitNewsModalCorporate({
       onSuccess?.(newLocalItem);
       setModalStep(4);
     } catch (err: any) {
-      setFormError(err.message || 'Error submitting story. Please try again.');
+      const base = err.message || 'Error submitting story. Please try again.';
+      setFormError(
+        paymentOverride?.txHash
+          ? `Payment sent (tx ${paymentOverride.txHash.slice(0, 10)}...) but submission failed: ${base}. Click "Submit Story with TX Hash" to retry — do not pay again.`
+          : base
+      );
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleWalletPay = async () => {
-    if (!userEmail.trim() || !userEmail.includes('@')) {
+  /* ---------- On-chain payment (same logic as pricing page handlers) ---------- */
+  const payWithWallet = async (method: WalletMethod) => {
+    if (!validEmail) {
       setFormError('Please enter your contact email address above first.');
       return;
     }
-
     if (!isConnected) {
-      if (openAppKit) openAppKit({ view: 'Connect' });
+      try {
+        openAppKit({ view: 'Connect' });
+      } catch { }
       return;
     }
 
-    setWalletPaying(true);
+    setWalletPaying(method);
     setFormError('');
 
     try {
-      const MAINNET_CHAIN_ID = 1;
-      if (chain?.id !== MAINNET_CHAIN_ID && switchChainAsync) {
+      if (PAYMENT_CHAIN_ID && chain?.id !== PAYMENT_CHAIN_ID) {
         try {
-          await switchChainAsync({ chainId: MAINNET_CHAIN_ID });
-        } catch (swErr) {
-          console.warn('Chain switch bypassed or error:', swErr);
+          await switchChainAsync({ chainId: PAYMENT_CHAIN_ID });
+        } catch {
+          throw new Error('Please switch to the correct chain to pay');
         }
       }
 
-      let calculatedEth = finalPrice / (ethPrice || 3200);
-      if (calculatedEth < 0.0001) calculatedEth = 0.0001;
+      let txHash: `0x${string}`;
 
-      const txHash = await sendTransactionAsync({
-        to: RECEIVER_ADDRESS as `0x${string}`,
-        value: parseEther(calculatedEth.toFixed(8)),
-      });
+      if (method === 'eth') {
+        let eth = ethAmount;
+        if (eth < 0.0001) eth = 0.0001;
+        txHash = await sendTransactionAsync({
+          to: RECEIVER,
+          value: parseEther(eth.toFixed(6)),
+        });
+      } else {
+        const token = method === 'nyax' ? NYAX_TOKEN : SOL_TOKEN;
+        if (!isAddress(token)) {
+          throw new Error(
+            method === 'nyax'
+              ? 'NYAX token address is not configured correctly (NEXT_PUBLIC_NYAX_TOKEN_ADDRESS).'
+              : 'SOL token address is not configured correctly (NEXT_PUBLIC_SOL_TOKEN_ADDRESS).'
+          );
+        }
+        const decimals = method === 'nyax' ? 18 : 9;
+        const amount = method === 'nyax' ? nyaxAmount : solAmount;
+        txHash = await writeContractAsync({
+          abi: erc20Abi,
+          address: token,
+          functionName: 'transfer',
+          args: [RECEIVER, parseUnits(amount.toFixed(method === 'nyax' ? 6 : 9), decimals)],
+        });
+      }
 
       if (!txHash) throw new Error('Transaction was rejected or failed to broadcast.');
 
+      setCryptoTxHash(txHash);
       await handlePayAndSubmit({
-        paymentMethod: 'eth',
+        paymentMethod: method,
         txHash,
         walletAddress: walletAddress || undefined,
         amount: finalPrice,
@@ -368,7 +475,7 @@ export default function SubmitNewsModalCorporate({
       console.error('Wallet payment failed:', err);
       setFormError(err?.shortMessage || err?.message || 'Wallet transaction failed. You can also send manually and paste the tx hash below.');
     } finally {
-      setWalletPaying(false);
+      setWalletPaying(null);
     }
   };
 
@@ -378,19 +485,98 @@ export default function SubmitNewsModalCorporate({
     setTimeout(() => setCopiedReceiver(false), 2000);
   };
 
-  const payTab = (id: typeof payMethod, label: string, active: string) => (
+  const payTab = (id: PayMethod, label: string, active: string) => (
     <button
       type="button"
       onClick={() => setPayMethod(id)}
-      className={`p-2.5 rounded-lg border text-xs font-medium transition-all text-center ${payMethod === id ? `${active} shadow-md` : 'border-gray-600/30 bg-gray-700/30 text-gray-400 hover:bg-gray-700/50'
+      className={`p-2.5 rounded-lg border text-xs font-medium transition-all flex items-center justify-center gap-2 ${payMethod === id ? `${active} shadow-md` : 'border-gray-600/30 bg-gray-700/30 text-gray-400 hover:bg-gray-700/50'
         }`}
     >
+      {LOGOS[id]}
       {label}
     </button>
   );
 
   const stepCls = (n: number) =>
     `p-2 rounded-lg ${modalStep >= n ? 'bg-cyan-500 text-black font-semibold' : 'bg-gray-700/50 text-gray-400'}`;
+
+  /* Shared panel for ETH / SOL / NYAX (connect wallet -> pay -> auto submit) */
+  const renderWalletPanel = (
+    method: WalletMethod,
+    cfg: { title: string; subtitle: string; border: string; titleColor: string; amountText: string; btnLabel: string }
+  ) => (
+    <div className={`p-4 bg-gray-700/30 border ${cfg.border} rounded-lg space-y-3`}>
+      <div className="flex justify-between items-center gap-3">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 bg-gray-800/60 rounded-lg flex items-center justify-center border border-gray-600/40">
+            {method === 'eth' && <Image src="/crypto-icons/color/eth.svg" width={20} height={20} alt="ETH" />}
+            {method === 'sol' && <Image src="/crypto-icons/color/sol.svg" width={20} height={20} alt="SOL" />}
+            {method === 'nyax' && <Image src="/logo.png" width={20} height={20} alt="NYAX" />}
+          </div>
+          <div>
+            <h4 className={`text-sm font-semibold ${cfg.titleColor}`}>{cfg.title}</h4>
+            <p className="text-xs text-gray-400">{cfg.subtitle}</p>
+          </div>
+        </div>
+        <span className="text-xs font-mono font-bold text-white bg-gray-800/70 px-2 py-1 rounded whitespace-nowrap">
+          {cfg.amountText}
+        </span>
+      </div>
+
+      {!isConnected ? (
+        <div className="text-center py-4 bg-black/30 rounded-lg border border-gray-700/40 space-y-2">
+          <p className="text-xs text-gray-400">Connect your Web3 wallet (MetaMask, Coinbase, WalletConnect) to pay:</p>
+          <div className="flex justify-center">
+            <ConnectWalletButton />
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          <div className="flex justify-between items-center p-2.5 bg-cyan-500/10 border border-cyan-500/30 rounded-lg text-xs">
+            <span className="text-gray-400">Connected Wallet:</span>
+            <span className="font-mono text-cyan-300 font-bold">
+              ● {walletAddress ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}` : 'Connected'}
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => payWithWallet(method)}
+            disabled={walletPaying !== null || isSubmitting}
+            className={`w-full py-3 ${BTN_PRIMARY}`}
+          >
+            {walletPaying === method ? (
+              <span className="inline-flex items-center gap-2">
+                <FaSpinner className="w-4 h-4 animate-spin" /> Sending On-Chain Payment...
+              </span>
+            ) : (
+              cfg.btnLabel
+            )}
+          </button>
+        </div>
+      )}
+
+      <details className="text-xs text-gray-400 pt-1">
+        <summary className="cursor-pointer font-medium text-gray-400 hover:text-white">
+          Or send manually to Treasury address & paste TXID ▾
+        </summary>
+        <div className="mt-2 space-y-2">
+          <div className="flex items-center gap-2">
+            <code className="flex-1 p-2 bg-black/40 rounded border border-gray-700/40 text-[11px] truncate">{RECEIVER}</code>
+            <button type="button" onClick={() => copyAddr(RECEIVER)} className="px-2.5 py-1.5 bg-gray-600/50 hover:bg-gray-600/70 text-xs rounded text-white">
+              {copiedReceiver ? '✓ Copied' : 'Copy'}
+            </button>
+          </div>
+          <input
+            placeholder="0x... (paste your transaction hash here)"
+            value={cryptoTxHash}
+            onChange={(e) => setCryptoTxHash(e.target.value)}
+            className={INPUT}
+          />
+        </div>
+      </details>
+    </div>
+  );
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-start justify-center p-4 z-50 overflow-y-auto" style={FONT}>
@@ -499,7 +685,7 @@ export default function SubmitNewsModalCorporate({
               />
             </div>
 
-            {/* Cover image — IPFS upload (same as admin) */}
+            {/* Cover image — IPFS upload */}
             <div>
               <label className={LABEL}>Cover image (optional)</label>
 
@@ -589,6 +775,7 @@ export default function SubmitNewsModalCorporate({
                 <div className="mt-3">
                   <label className={LABEL}>Preview</label>
                   <div className="relative w-full h-32 bg-gray-800/50 rounded-lg overflow-hidden">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={uploadedImg}
                       alt="Cover image preview"
@@ -682,10 +869,10 @@ export default function SubmitNewsModalCorporate({
             <div>
               <label className={LABEL}>Select Payment Method</label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                {payTab('paypal', '🅿️ PayPal & Cards', 'border-blue-500/40 bg-blue-500/20 text-blue-300')}
-                {payTab('eth', '⟠ Connect Wallet (ETH)', 'border-cyan-500/40 bg-cyan-500/20 text-cyan-300')}
-                {payTab('sol', '◎ Solana (SOL)', 'border-purple-500/40 bg-purple-500/20 text-purple-300')}
-                {payTab('nyax', '⚡ NYAX (10% off)', 'border-amber-500/40 bg-amber-500/20 text-amber-300')}
+                {payTab('paypal', 'PayPal & Cards', 'border-blue-500/40 bg-blue-500/20 text-blue-300')}
+                {payTab('eth', 'ETH', 'border-cyan-500/40 bg-cyan-500/20 text-cyan-300')}
+                {payTab('sol', 'SOL', 'border-purple-500/40 bg-purple-500/20 text-purple-300')}
+                {payTab('nyax', 'NYAX (20% off)', 'border-amber-500/40 bg-amber-500/20 text-amber-300')}
               </div>
             </div>
 
@@ -693,7 +880,11 @@ export default function SubmitNewsModalCorporate({
             <div className={`p-3 ${PANEL} flex justify-between items-center`}>
               <div>
                 <span className="text-sm font-semibold text-white">{activePlanObj.name}</span>
-                {payMethod === 'nyax' && <span className="block text-xs text-amber-400">10% NYAX Discount applied</span>}
+                {payMethod === 'nyax' && (
+                  <span className="block text-xs text-amber-400">
+                    {NYAX_DISCOUNT * 100}% NYAX discount applied (was ${basePrice.toFixed(2)})
+                  </span>
+                )}
               </div>
               <span className="text-2xl font-semibold text-cyan-400">${finalPrice.toFixed(2)} USD</span>
             </div>
@@ -702,8 +893,8 @@ export default function SubmitNewsModalCorporate({
             {payMethod === 'paypal' && (
               <div className="p-4 bg-gray-700/30 border border-blue-500/30 rounded-lg space-y-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 bg-blue-500/20 rounded-lg flex items-center justify-center border border-blue-500/30">
-                    <span className="text-lg">💳</span>
+                  <div className="w-9 h-9 bg-blue-500/20 rounded-lg flex items-center justify-center border border-blue-500/30 text-blue-300">
+                    <PayPalIcon />
                   </div>
                   <div>
                     <h4 className="text-sm font-semibold text-blue-400">PayPal & Card Payment</h4>
@@ -711,7 +902,7 @@ export default function SubmitNewsModalCorporate({
                   </div>
                 </div>
 
-                {!userEmail.trim() || !userEmail.includes('@') ? (
+                {!validEmail ? (
                   <p className="text-xs text-amber-300 bg-amber-500/10 p-2.5 rounded-lg border border-amber-500/20">
                     ⚠️ Please enter a valid contact email above to activate PayPal checkout buttons.
                   </p>
@@ -738,111 +929,38 @@ export default function SubmitNewsModalCorporate({
               </div>
             )}
 
-            {/* Connect Wallet (ETH) */}
-            {payMethod === 'eth' && (
-              <div className="p-4 bg-gray-700/30 border border-cyan-500/30 rounded-lg space-y-3">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h4 className="text-sm font-semibold text-cyan-300">Connect Wallet & Pay</h4>
-                    <p className="text-xs text-gray-400">Pay directly on Ethereum Mainnet</p>
-                  </div>
-                  <span className="text-xs font-mono font-bold text-white bg-gray-800/70 px-2 py-1 rounded">
-                    ~{(finalPrice / (ethPrice || 3200)).toFixed(4)} ETH
-                  </span>
-                </div>
+            {/* ETH */}
+            {payMethod === 'eth' &&
+              renderWalletPanel('eth', {
+                title: 'Pay with ETH',
+                subtitle: 'Sent from your connected wallet',
+                border: 'border-cyan-500/30',
+                titleColor: 'text-cyan-300',
+                amountText: `~${ethAmount.toFixed(5)} ETH`,
+                btnLabel: `Pay $${finalPrice.toFixed(2)} with ETH`
+              })}
 
-                {!isConnected ? (
-                  <div className="text-center py-4 bg-black/30 rounded-lg border border-gray-700/40 space-y-2">
-                    <p className="text-xs text-gray-400">Connect your Web3 wallet (MetaMask, Coinbase, WalletConnect) to pay:</p>
-                    <div className="flex justify-center">
-                      <ConnectWalletButton />
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center p-2.5 bg-cyan-500/10 border border-cyan-500/30 rounded-lg text-xs">
-                      <span className="text-gray-400">Connected Wallet:</span>
-                      <span className="font-mono text-cyan-300 font-bold">
-                        ● {walletAddress ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}` : 'Connected'}
-                      </span>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={handleWalletPay}
-                      disabled={walletPaying}
-                      className={`w-full py-3 ${BTN_PRIMARY}`}
-                    >
-                      {walletPaying ? 'Sending On-Chain Payment...' : `⚡ Pay $${finalPrice.toFixed(2)} with Connected Wallet`}
-                    </button>
-                  </div>
-                )}
-
-                <details className="text-xs text-gray-400 pt-1">
-                  <summary className="cursor-pointer font-medium text-gray-400 hover:text-white">
-                    Or send manually to Treasury address & paste TXID ▾
-                  </summary>
-                  <div className="mt-2 space-y-2">
-                    <div className="flex items-center gap-2">
-                      <code className="flex-1 p-2 bg-black/40 rounded border border-gray-700/40 text-[11px] truncate">{RECEIVER_ADDRESS}</code>
-                      <button type="button" onClick={() => copyAddr(RECEIVER_ADDRESS)} className="px-2.5 py-1.5 bg-gray-600/50 hover:bg-gray-600/70 text-xs rounded text-white">
-                        {copiedReceiver ? '✓ Copied' : 'Copy'}
-                      </button>
-                    </div>
-                    <input
-                      placeholder="0x... (paste your transaction hash here)"
-                      value={cryptoTxHash}
-                      onChange={(e) => setCryptoTxHash(e.target.value)}
-                      className={INPUT}
-                    />
-                  </div>
-                </details>
-              </div>
-            )}
-
-            {/* Solana */}
-            {payMethod === 'sol' && (
-              <div className="p-4 bg-gray-700/30 border border-purple-500/30 rounded-lg space-y-3 text-xs">
-                <div className="flex justify-between items-center">
-                  <span className="font-semibold text-purple-300">Solana Payment</span>
-                  <span className="font-mono text-white">~{(finalPrice / (solPrice || 180)).toFixed(3)} SOL</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <code className="flex-1 p-2 bg-black/40 rounded border border-gray-700/40 text-[11px] truncate">{SOLANA_RECEIVER}</code>
-                  <button type="button" onClick={() => copyAddr(SOLANA_RECEIVER)} className="px-2.5 py-1.5 bg-gray-600/50 hover:bg-gray-600/70 rounded text-white">
-                    {copiedReceiver ? '✓' : 'Copy'}
-                  </button>
-                </div>
-                <input
-                  placeholder="Enter Solana transaction signature..."
-                  value={cryptoTxHash}
-                  onChange={(e) => setCryptoTxHash(e.target.value)}
-                  className={INPUT}
-                />
-              </div>
-            )}
+            {/* SOL (ERC-20 SOL token, same as pricing page) */}
+            {payMethod === 'sol' &&
+              renderWalletPanel('sol', {
+                title: 'Pay with SOL',
+                subtitle: 'SOL token transfer from your connected wallet',
+                border: 'border-purple-500/30',
+                titleColor: 'text-purple-300',
+                amountText: `~${solAmount.toFixed(4)} SOL`,
+                btnLabel: `Pay $${finalPrice.toFixed(2)} with SOL`
+              })}
 
             {/* NYAX */}
-            {payMethod === 'nyax' && (
-              <div className="p-4 bg-gray-700/30 border border-amber-500/30 rounded-lg space-y-3 text-xs">
-                <div className="flex justify-between items-center">
-                  <span className="font-semibold text-amber-300">NYAX Token (10% Discount)</span>
-                  <span className="font-mono text-white">${(finalPrice * 0.9).toFixed(2)} USD in NYAX</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <code className="flex-1 p-2 bg-black/40 rounded border border-gray-700/40 text-[11px] truncate">{RECEIVER_ADDRESS}</code>
-                  <button type="button" onClick={() => copyAddr(RECEIVER_ADDRESS)} className="px-2.5 py-1.5 bg-gray-600/50 hover:bg-gray-600/70 rounded text-white">
-                    {copiedReceiver ? '✓' : 'Copy'}
-                  </button>
-                </div>
-                <input
-                  placeholder="0x... (paste your transaction hash here)"
-                  value={cryptoTxHash}
-                  onChange={(e) => setCryptoTxHash(e.target.value)}
-                  className={INPUT}
-                />
-              </div>
-            )}
+            {payMethod === 'nyax' &&
+              renderWalletPanel('nyax', {
+                title: `Pay with NYAX (${NYAX_DISCOUNT * 100}% off)`,
+                subtitle: 'NYAX token transfer from your connected wallet',
+                border: 'border-amber-500/30',
+                titleColor: 'text-amber-300',
+                amountText: `~${nyaxAmount.toFixed(2)} NYAX`,
+                btnLabel: `Pay ${nyaxAmount.toFixed(2)} NYAX ($${finalPrice.toFixed(2)})`
+              })}
 
             {formError && (
               <div className="p-3 rounded-lg border border-red-500/30 bg-red-500/10 text-red-300 text-xs font-medium">{formError}</div>
@@ -851,8 +969,13 @@ export default function SubmitNewsModalCorporate({
             <div className="flex justify-between items-center pt-3 border-t border-gray-700/20">
               <button type="button" onClick={() => setModalStep(2)} className={BTN_GHOST}>← Back</button>
               {payMethod !== 'paypal' && (
-                <button type="button" onClick={() => handlePayAndSubmit()} disabled={isSubmitting} className={BTN_PRIMARY}>
-                  {isSubmitting ? 'Submitting...' : 'Submit Story with Manual TX'}
+                <button
+                  type="button"
+                  onClick={() => handlePayAndSubmit()}
+                  disabled={isSubmitting || walletPaying !== null || !cryptoTxHash.trim()}
+                  className={BTN_PRIMARY}
+                >
+                  {isSubmitting ? 'Submitting...' : 'Submit Story with TX Hash'}
                 </button>
               )}
             </div>
