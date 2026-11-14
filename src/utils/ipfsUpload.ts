@@ -298,9 +298,17 @@ export const getIPFSUrl = (hash: string, gateway = IPFS_GATEWAY): string => {
 
 // Utility to extract IPFS hash from URL
 export const extractIPFSHash = (url: string): string | null => {
-  const ipfsRegex = /\/ipfs\/([a-zA-Z0-9]+)/;
-  const match = url.match(ipfsRegex);
-  return match ? match[1] : null;
+  if (!url) return null;
+  const trimmed = url.trim();
+  if (trimmed.startsWith('ipfs://')) {
+    return trimmed.replace('ipfs://', '').split('/')[0].split('?')[0];
+  }
+  if (/^(Qm[1-9A-HJ-NP-za-km-z]{44}|bafy[a-z0-9]{50,})$/i.test(trimmed)) {
+    return trimmed;
+  }
+  const ipfsRegex = /\/ipfs\/([a-zA-Z0-9_\-]+)/;
+  const match = trimmed.match(ipfsRegex);
+  return match ? match[1].split('?')[0] : null;
 };
 
 /**

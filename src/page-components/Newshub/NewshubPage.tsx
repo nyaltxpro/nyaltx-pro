@@ -155,6 +155,11 @@ export default function NewshubPage() {
   }, []);
 
   useEffect(() => {
+    // Clear any obsolete local submission storage to prevent stale pending items
+    try {
+      localStorage.removeItem('nyaltx_news_submissions');
+    } catch {}
+
     // Check hash for auto-open
     if (typeof window !== 'undefined') {
       const hash = window.location.hash;
@@ -247,7 +252,6 @@ export default function NewshubPage() {
   const loadMore = () => {
     if (pagination.page < pagination.pages && !feedLoading) {
       fetchData(selectedCat, pagination.page + 1, true);
-      setPagination(prev => ({ ...prev, page: prev.page + 1 }));
     }
   };
 

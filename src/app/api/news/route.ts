@@ -21,9 +21,8 @@ export async function GET(request: NextRequest) {
     const paidCriteria = [
       { isPaid: true },
       { plan: { $in: ['feed', 'slider', 'prem'] } },
-      { plan: { $exists: true, $ne: null } },
       { paymentMethod: { $exists: true, $ne: null } },
-      { paymentStatus: { $exists: true, $ne: null } },
+      { paymentStatus: { $in: ['completed', 'paid', 'success'] } },
       { amount: { $gt: 0 } },
       { type: 'pr' },
     ];

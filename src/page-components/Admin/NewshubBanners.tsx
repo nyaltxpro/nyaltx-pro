@@ -394,7 +394,7 @@ function NewshubBannersComponent() {
                 {/* Banner Preview Card */}
                 <div>
                   <div
-                    className="relative w-full aspect-8/3 overflow-hidden flex flex-col justify-end p-4 text-white"
+                    className="relative w-full aspect-[8/3] overflow-hidden flex flex-col justify-end p-4 text-white"
                     style={{
                       background: hasImg
                         ? `linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.2) 60%, rgba(0,0,0,0) 100%), url(${reliableImg}) center/cover no-repeat`
@@ -646,7 +646,7 @@ function NewshubBannersComponent() {
               <div>
                 <div className="text-xs font-semibold text-gray-400 mb-1.5">Live Banner Preview</div>
                 <div
-                  className="w-full aspect-8/3 rounded-xl overflow-hidden p-5 flex flex-col justify-end text-white border border-gray-700 relative"
+                  className="w-full aspect-[8/3] rounded-xl overflow-hidden p-5 flex flex-col justify-end text-white border border-gray-700 relative"
                   style={{
                     background: form.imageUrl
                       ? `linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.2) 60%, rgba(0,0,0,0) 100%), url(${toReliableIpfsUrl(

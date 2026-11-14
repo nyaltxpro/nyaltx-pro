@@ -70,13 +70,14 @@ function getBaseUrl(): string {
 // Published paid news submitted by users and approved by admin
 export const PAID_NEWS_QUERY = {
   status: 'published',
+  isPaid: { $ne: false },
+  author: { $nin: ['NYALTX Team', 'NYALTX Learn'] },
   $or: [
     { isPaid: true },
     { plan: { $in: ['feed', 'slider', 'prem'] } },
-    { plan: { $exists: true, $ne: null } },
-    { paymentMethod: { $exists: true, $ne: null } },
-    { paymentStatus: { $exists: true, $ne: null } },
     { amount: { $gt: 0 } },
+    { paymentMethod: { $exists: true, $ne: null } },
+    { paymentStatus: { $in: ['completed', 'paid', 'success'] } },
     { type: 'pr' },
   ],
 };
