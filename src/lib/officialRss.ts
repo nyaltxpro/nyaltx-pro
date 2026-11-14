@@ -24,7 +24,7 @@ function stripHtml(html?: string): string {
     .trim();
 }
 
-export async function generateOfficialNewsRss(options?: { feedPath?: string; siteUrl?: string }): Promise<string> {
+export async function generateOfficialNewsRss(options?: { feedPath?: string; siteUrl?: string; tag?: string }): Promise<string> {
   const siteUrl = options?.siteUrl || process.env.NEXT_PUBLIC_BASE_URL || 'https://www.nyaltx.pro';
   const feedPath = options?.feedPath || '/rss.xml';
   const feedUrl = `${siteUrl}${feedPath}`;
@@ -49,6 +49,10 @@ export async function generateOfficialNewsRss(options?: { feedPath?: string; sit
       { isPaid: true }
     ]
   };
+
+  if (options?.tag) {
+    query.tags = { $regex: new RegExp(options.tag, 'i') };
+  }
 
   const articles = await collection
     .find(query)

@@ -182,6 +182,7 @@ export default function AdminSidebar({ isMobileMenuOpen, toggleMobileMenu }: Adm
     { icon: <FaNewspaper />, text: 'Blog Posts', href: '/adminpanel/blog' },
     { icon: <FaNewspaper />, text: 'Corporate News', href: '/adminpanel/news' },
     { icon: <FaImage />, text: 'Banners', href: '/adminpanel/banners' },
+    { icon: <FaNewspaper />, text: 'Newshub Banners', href: '/adminpanel/newshub-banners' },
     { icon: <FaYoutube />, text: 'Trade Videos', href: '/adminpanel/trade-videos' },
     // { icon: <FaRocket />, text: 'Campaigns', href: '/admin/campaigns' },
     // { icon: <FaFootballBall />, text: 'Footer Settings', href: '/admin/footer-settings' },

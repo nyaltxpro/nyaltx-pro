@@ -5,7 +5,9 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
   try {
-    const xml = await generateOfficialNewsRss({ feedPath: '/rss/news.xml' });
+    const { searchParams } = new URL(req.url);
+    const tag = searchParams.get('tag') || undefined;
+    const xml = await generateOfficialNewsRss({ feedPath: '/rss/news.xml', tag });
 
     return new NextResponse(xml, {
       status: 200,
