@@ -1,63 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/mongodb';
 
-// Default starter banners to ensure high presentation fidelity when db has no banners yet
-const DEFAULT_BANNERS = [
-  {
-    _id: 'default-1',
-    title: 'Welcome to the NYALTX News Hub',
-    description: 'Your home for NYAX updates, crypto headlines and community stories, all in one place.',
-    category: 'NYAX',
-    imageUrl: '',
-    gradientIndex: 0,
-    linkUrl: '/news',
-    isSponsored: false,
-    isActive: true,
-    displayOrder: 1,
-  },
-  {
-    _id: 'default-2',
-    title: 'Got a story? Publish it on NYALTX',
-    description: 'Reach crypto readers with a feed listing or a spot in the top banner.',
-    category: 'Submit news',
-    imageUrl: '',
-    gradientIndex: 1,
-    linkUrl: '#submit-news',
-    isSponsored: false,
-    isActive: true,
-    displayOrder: 2,
-  },
-  {
-    _id: 'default-3',
-    title: 'NYAX Community Spotlight: Meet the builders',
-    description: 'The people and projects shaping the NYAX ecosystem this month.',
-    category: 'Community',
-    imageUrl: '',
-    gradientIndex: 3,
-    linkUrl: '/news',
-    isSponsored: false,
-    isActive: true,
-    displayOrder: 3,
-  },
-  {
-    _id: 'default-4',
-    title: 'Crypto Weekly: 5 things to watch',
-    description: 'Our quick roundup of the stories moving digital markets.',
-    category: 'Bitcoin',
-    imageUrl: '',
-    gradientIndex: 2,
-    linkUrl: '/news',
-    isSponsored: false,
-    isActive: true,
-    displayOrder: 4,
-  },
+// Criteria that marks a submission as a paid user submission (not platform editorial)
+const PAID_CRITERIA = [
+  { isPaid: true },
+  { plan: { $in: ['feed', 'slider', 'prem'] } },
+  { paymentMethod: { $exists: true, $ne: null } },
+  { paymentStatus: { $exists: true, $ne: null } },
+  { amount: { $gt: 0 } },
+  { type: 'pr' },
 ];
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
-    const limit = parseInt(searchParams.get('limit') || '30', 10);
+    const limit = parseInt(searchParams.get('limit') || '12', 10);
     const page = parseInt(searchParams.get('page') || '1', 10);
     const skip = (page - 1) * limit;
 
@@ -65,28 +23,34 @@ export async function GET(request: NextRequest) {
     const bannersCollection = db.collection('newshub_banners');
     const newsCollection = db.collection('corporate_news');
 
-    // 1. Fetch active banners uploaded by admin
+    // ── 1. Admin-uploaded slider banners ──────────────────────────────────
     const adminBanners = await bannersCollection
       .find({ isActive: { $ne: false } })
       .sort({ displayOrder: 1, createdAt: -1 })
       .toArray();
 
-    // 2. Fetch featured published articles (slider plan or marked featuredInBanner)
-    const featuredArticles = await newsCollection
+    // ── 2. Published PAID articles marked as featured / Full Service slider ─
+    // These auto-appear in the slider alongside admin banners
+    const featuredPaidArticles = await newsCollection
       .find({
         status: 'published',
-        $or: [
-          { featuredInBanner: true },
-          { plan: 'slider' },
-          { planName: { $regex: /slider|full service/i } },
+        $or: PAID_CRITERIA,
+        $and: [
+          {
+            $or: [
+              { featuredInBanner: true },
+              { plan: 'slider' },
+              { planName: { $regex: /full service/i } },
+            ],
+          },
         ],
       })
       .sort({ publishedAt: -1, createdAt: -1 })
       .limit(6)
       .toArray();
 
-    // Map featured articles into banner format
-    const articleBanners = featuredArticles.map(art => ({
+    // Map paid featured articles into slider banner format
+    const articleBanners = featuredPaidArticles.map(art => ({
       _id: String(art._id),
       title: art.title,
       description: art.excerpt || '',
@@ -94,41 +58,46 @@ export async function GET(request: NextRequest) {
       imageUrl: art.featuredImage || '',
       gradientIndex: typeof art.coverColor === 'number' ? art.coverColor : 0,
       linkUrl: `/news/${art.slug}`,
-      isSponsored: Boolean(art.isPaid || art.plan || art.type === 'pr'),
+      isSponsored: true,
       isActive: true,
       displayOrder: 10,
     }));
 
-    // Combine admin banners + featured articles
-    let combinedBanners = [...adminBanners, ...articleBanners];
-    if (combinedBanners.length === 0) {
-      combinedBanners = DEFAULT_BANNERS;
-    }
+    // Final slider: admin banners first, then featured paid article banners
+    // If NO admin banners and NO featured articles → empty slider (no fake defaults)
+    const combinedBanners = [...adminBanners, ...articleBanners];
 
-    // 3. Build feed query
+    // ── 3. Feed: ONLY published PAID submissions ──────────────────────────
     const feedQuery: any = {
       status: 'published',
+      $or: PAID_CRITERIA,
     };
 
+    // Category filter on top of paid filter
     if (category && category !== 'All') {
       if (category === 'Press Releases') {
-        feedQuery.$or = [
-          { type: 'pr' },
-          { category: 'Press Releases' },
-          { tags: { $in: ['Press Releases', 'PR', 'press-release'] } },
+        feedQuery.$and = [
+          { $or: PAID_CRITERIA },
+          {
+            $or: [
+              { type: 'pr' },
+              { category: 'Press Releases' },
+              { tags: { $in: ['Press Releases', 'PR', 'press-release'] } },
+            ],
+          },
         ];
-      } else if (category === 'Community') {
-        feedQuery.$or = [
-          { category: 'Community' },
-          { tags: { $in: ['Community'] } },
-          { author: { $regex: /community/i } },
-          { type: { $ne: 'pr' }, isPaid: true },
-        ];
+        delete feedQuery.$or; // replaced by $and above
       } else {
-        feedQuery.$or = [
-          { category: { $regex: new RegExp(`^${category}$`, 'i') } },
-          { tags: { $in: [category] } },
+        feedQuery.$and = [
+          { $or: PAID_CRITERIA },
+          {
+            $or: [
+              { category: { $regex: new RegExp(`^${category}$`, 'i') } },
+              { tags: { $in: [category] } },
+            ],
+          },
         ];
+        delete feedQuery.$or;
       }
     }
 
@@ -154,6 +123,7 @@ export async function GET(request: NextRequest) {
         type: 1,
         isPaid: 1,
         plan: 1,
+        planName: 1,
         sourceUrl: 1,
       })
       .toArray();
