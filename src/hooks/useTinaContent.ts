@@ -163,9 +163,9 @@ export interface FooterContent {
 }
 
 // Hook for landing page content
-export const useLandingPageContent = () => {
-  const [content, setContent] = useState<LandingPageContent | null>(null);
-  const [loading, setLoading] = useState(true);
+export const useLandingPageContent = (initialContent?: LandingPageContent | null) => {
+  const [content, setContent] = useState<LandingPageContent | null>(initialContent || null);
+  const [loading, setLoading] = useState(!initialContent);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {

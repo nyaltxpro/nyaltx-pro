@@ -1,21 +1,21 @@
 import LandingPage from '@/page-components/LandingPage';
 import type { Metadata } from 'next';
-import { asTinaPageProps, loadJson } from '@/lib/loadTinaContent';
+import { loadJson } from '@/lib/loadTinaContent';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.nyaltx.pro'),
-  title: 'NYALTX | Digital Markets & Tokenized Securities Discovery Platform',
+  title: 'NYALTX | New York Alt Exchange — Digital Markets & Tokenized Securities',
   description:
-    'Discover digital markets, tokenized securities, and project visibility on NYALTX — connecting DeFi discovery with tokenized stock market data.',
+    'NYALTX (New York Alt Exchange) is the premier digital markets and tokenized securities discovery platform — connecting DeFi discovery with institutional tokenized stock market intelligence.',
   keywords:
-    'NYALTX, digital markets, tokenized securities, xStocks, DeFi discovery, capital markets, blockchain, Governa, NYAX',
+    'NYALTX, New York Alt Exchange, NYAX, digital markets, tokenized securities, xStocks, DeFi discovery, capital markets, blockchain, crypto trading, tokenized stocks',
   alternates: {
     canonical: 'https://www.nyaltx.pro',
   },
   openGraph: {
-    title: 'NYALTX | Digital Markets & Tokenized Securities Discovery Platform',
+    title: 'NYALTX | New York Alt Exchange — Digital Markets & Tokenized Securities',
     description:
-      'Discover digital markets, tokenized securities, and project visibility on NYALTX — connecting DeFi discovery with tokenized stock market data.',
+      'Discover digital markets, tokenized securities, and project visibility on NYALTX (New York Alt Exchange) — connecting DeFi discovery with tokenized stock market data.',
     type: 'website',
     url: 'https://www.nyaltx.pro',
     siteName: 'NYALTX',
@@ -38,9 +38,9 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     site: '@nyaltx',
     creator: '@nyaltx',
-    title: 'NYALTX | Digital Markets & Tokenized Securities Discovery Platform',
+    title: 'NYALTX | New York Alt Exchange — Digital Markets & Tokenized Securities',
     description:
-      'Discover digital markets, tokenized securities, and project visibility on NYALTX.',
+      'Discover digital markets, tokenized securities, and project visibility on NYALTX (New York Alt Exchange).',
     images: ['https://www.nyaltx.pro/og-image.png'],
   },
   robots: {
@@ -59,13 +59,11 @@ export const metadata: Metadata = {
 export const revalidate = 300;
 
 export default async function Page() {
-  let res: any;
+  let initialContent: any = null;
   try {
-    const data = await loadJson('src/content/landing/home.json');
-    res = asTinaPageProps('landing', data);
-  } catch {
-    // Minimal fallback if JSON missing
-    res = asTinaPageProps('landing', { hero: {}, features: {}, stats: {}, testimonials: {} });
+    initialContent = await loadJson('content/landing/home.json');
+  } catch (err) {
+    console.error('Failed to load home.json for SSR:', err);
   }
-  return <LandingPage {...(res as any)} />;
+  return <LandingPage initialContent={initialContent} />;
 }

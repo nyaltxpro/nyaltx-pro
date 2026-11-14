@@ -1,21 +1,6 @@
 # Robots.txt for NYALTX (https://www.nyaltx.pro)
 User-agent: *
 Allow: /
-Allow: /news-hub
-Allow: /news
-Allow: /news/*
-Allow: /blog
-Allow: /blog/*
-Allow: /dashboard
-Allow: /dashboard/*
-Allow: /pricing
-Allow: /race-to-liberty
-Allow: /whitepaper
-Allow: /podcast
-Allow: /about-us
-Allow: /contact
-Allow: /team
-Allow: /faq
 
 # Disallow admin, private, and internal checkout routes
 Disallow: /admin

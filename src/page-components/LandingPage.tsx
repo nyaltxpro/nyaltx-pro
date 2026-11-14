@@ -33,10 +33,16 @@ const scaleIn: Variants = {
     show: { opacity: 1, scale: 1, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] } },
 };
 
-export default function LandingPage() {
-    const { content: landingContent, loading, error } = useLandingPageContent();
+interface LandingPageProps {
+    initialContent?: any;
+    data?: any;
+}
 
-    if (loading) {
+export default function LandingPage(props?: LandingPageProps) {
+    const serverContent = props?.initialContent || props?.data?.landing || null;
+    const { content: landingContent, loading, error } = useLandingPageContent(serverContent);
+
+    if (loading && !landingContent) {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-cyan-500"></div>
@@ -160,7 +166,7 @@ export default function LandingPage() {
                         ))}
                     </div>
                 </div>
-                <style jsx>{`
+                <style dangerouslySetInnerHTML={{ __html: `
             @keyframes marquee {
               from {
                 transform: translateX(0);
@@ -169,7 +175,7 @@ export default function LandingPage() {
                 transform: translateX(-50%);
               }
             }
-          `}</style>
+          ` }} />
             </motion.section>
 
             <motion.section

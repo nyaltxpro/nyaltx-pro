@@ -3,113 +3,150 @@ import { getDb } from '@/lib/mongodb';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://www.nyaltx.pro';
+  const now = new Date();
 
   const staticRoutes: MetadataRoute.Sitemap = [
     {
       url: baseUrl,
-      lastModified: new Date(),
+      lastModified: now,
       changeFrequency: 'daily',
       priority: 1.0,
     },
     {
+      url: `${baseUrl}/newshub`,
+      lastModified: now,
+      changeFrequency: 'daily',
+      priority: 0.95,
+    },
+    {
       url: `${baseUrl}/news-hub`,
-      lastModified: new Date(),
+      lastModified: now,
       changeFrequency: 'daily',
       priority: 0.95,
     },
     {
       url: `${baseUrl}/news`,
-      lastModified: new Date(),
+      lastModified: now,
       changeFrequency: 'daily',
       priority: 0.9,
     },
     {
       url: `${baseUrl}/dashboard`,
-      lastModified: new Date(),
+      lastModified: now,
       changeFrequency: 'daily',
       priority: 0.9,
     },
     {
       url: `${baseUrl}/dashboard/tokenized-securities`,
-      lastModified: new Date(),
+      lastModified: now,
       changeFrequency: 'daily',
       priority: 0.9,
     },
     {
       url: `${baseUrl}/dashboard/trade`,
-      lastModified: new Date(),
+      lastModified: now,
       changeFrequency: 'daily',
       priority: 0.9,
     },
     {
       url: `${baseUrl}/dashboard/trending`,
-      lastModified: new Date(),
+      lastModified: now,
+      changeFrequency: 'daily',
+      priority: 0.85,
+    },
+    {
+      url: `${baseUrl}/dashboard/leaderboard`,
+      lastModified: now,
+      changeFrequency: 'daily',
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/dashboard/swap`,
+      lastModified: now,
       changeFrequency: 'daily',
       priority: 0.85,
     },
     {
       url: `${baseUrl}/pricing`,
-      lastModified: new Date(),
+      lastModified: now,
       changeFrequency: 'weekly',
       priority: 0.9,
     },
     {
       url: `${baseUrl}/blog`,
-      lastModified: new Date(),
+      lastModified: now,
       changeFrequency: 'daily',
       priority: 0.9,
     },
     {
       url: `${baseUrl}/whitepaper`,
-      lastModified: new Date(),
+      lastModified: now,
       changeFrequency: 'weekly',
       priority: 0.85,
     },
     {
       url: `${baseUrl}/race-to-liberty`,
-      lastModified: new Date(),
+      lastModified: now,
       changeFrequency: 'weekly',
       priority: 0.85,
     },
     {
       url: `${baseUrl}/podcast`,
-      lastModified: new Date(),
+      lastModified: now,
       changeFrequency: 'weekly',
       priority: 0.8,
     },
     {
       url: `${baseUrl}/about-us`,
-      lastModified: new Date(),
+      lastModified: now,
       changeFrequency: 'monthly',
       priority: 0.8,
     },
     {
       url: `${baseUrl}/team`,
-      lastModified: new Date(),
+      lastModified: now,
       changeFrequency: 'monthly',
       priority: 0.8,
     },
     {
       url: `${baseUrl}/faq`,
-      lastModified: new Date(),
+      lastModified: now,
       changeFrequency: 'monthly',
       priority: 0.8,
     },
     {
       url: `${baseUrl}/contact`,
-      lastModified: new Date(),
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/venture-group`,
+      lastModified: now,
       changeFrequency: 'monthly',
       priority: 0.7,
     },
     {
       url: `${baseUrl}/privacy-policy`,
-      lastModified: new Date(),
+      lastModified: now,
       changeFrequency: 'monthly',
       priority: 0.5,
     },
     {
       url: `${baseUrl}/general-statement`,
-      lastModified: new Date(),
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.5,
+    },
+    {
+      url: `${baseUrl}/disclaimer`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.5,
+    },
+    {
+      url: `${baseUrl}/cookies-settings`,
+      lastModified: now,
       changeFrequency: 'monthly',
       priority: 0.5,
     },
@@ -121,14 +158,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .collection('corporate_news')
       .find({ status: 'published' })
       .project({ slug: 1, updatedAt: 1, publishedAt: 1 })
-      .limit(100)
+      .limit(200)
       .toArray();
 
     const dynamicNews: MetadataRoute.Sitemap = newsArticles
       .filter((art: any) => art.slug)
       .map((art: any) => ({
         url: `${baseUrl}/news/${art.slug}`,
-        lastModified: art.updatedAt || art.publishedAt || new Date(),
+        lastModified: art.updatedAt || art.publishedAt || now,
         changeFrequency: 'weekly' as const,
         priority: 0.8,
       }));

@@ -61,7 +61,9 @@ export default async function RootLayout({
               '@context': 'https://schema.org',
               '@type': 'Organization',
               '@id': `${baseUrl}/#organization`,
-              name: seo.publisher || seo.siteName || 'NYALTX',
+              name: 'NYALTX',
+              legalName: 'New York Alt Exchange',
+              alternateName: ['New York Alt Exchange', 'NYAX', 'NYALTX Pro'],
               url: baseUrl,
               logo: {
                 '@type': 'ImageObject',
@@ -70,6 +72,11 @@ export default async function RootLayout({
                 height: 512,
               },
               description: seo.description,
+              brand: {
+                '@type': 'Brand',
+                name: 'NYALTX',
+                alternateName: 'New York Alt Exchange',
+              },
               sameAs: [
                 'https://twitter.com/nyaltx',
                 'https://t.me/nyaltx',
@@ -224,7 +231,7 @@ export default async function RootLayout({
         <link rel="apple-touch-icon" sizes="192x192" href="/nyaltxpro.png" />
         {/* Shortcut icon for legacy browsers */}
         <link rel="shortcut icon" href="/nyaltxpro.png" />
-        <link rel="canonical" href={baseUrl} />
+        <meta name="google-site-verification" content="google337da366d3c2759e" />
         <meta name="robots" content="index,follow" />
       </head>
       <body className={`${inter.variable} ${poppins.variable} antialiased`}

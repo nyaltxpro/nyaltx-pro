@@ -74,12 +74,18 @@ export async function buildRootMetadata(): Promise<Metadata> {
     alternates: {
       canonical: baseUrl,
     },
-    title: seo.title,
+    title: {
+      default: `${seo.siteName || 'NYALTX'} | New York Alt Exchange — Digital Markets & Tokenized Securities`,
+      template: `%s | ${seo.siteName || 'NYALTX'}`,
+    },
     description: seo.description,
     keywords: seo.keywords,
     authors: seo.authors ? [{ name: seo.authors }] : undefined,
     creator: seo.creator,
     publisher: seo.publisher,
+    verification: {
+      google: 'google337da366d3c2759e',
+    },
     robots: {
       index: true,
       follow: true,
