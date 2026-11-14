@@ -86,7 +86,7 @@ export default function LandingPage(props?: LandingPageProps) {
                     <div className="grid w-full grid-cols-1 md:grid-cols-2 items-center gap-12 md:gap-14">
                         <motion.div className="max-w-3xl overflow-visible" variants={fadeUp}>
                             <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight leading-[1.2] md:leading-[1.18] pb-2 bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-indigo-400">
-                                {landingContent?.hero?.title || 'Discover. Track. Grow your token with NYALTX'}
+                                {landingContent?.hero?.title || 'Discover. Track. Explore the Future of Digital Markets.'}
                             </h1>
                             <p className="mt-6 text-base md:text-lg text-gray-300/90 max-w-2xl leading-relaxed">
                                 {landingContent?.hero?.subtitle || 'Real-time insights, curated listings, and promotional placements to help your project reach more holders across chains.'}
