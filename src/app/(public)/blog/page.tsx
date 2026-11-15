@@ -1,6 +1,8 @@
 import BlogGrid from "@/components/BlogGrid";
 import PublicHeader from "@/components/PublicHeader";
+import { getPublicBlogPosts } from "@/lib/publicBlog";
 import { Metadata } from "next";
+import type { SerializedBlogPost } from "@/lib/blogServer";
 
 export const metadata: Metadata = {
     metadataBase: new URL('https://www.nyaltx.pro'),
@@ -24,7 +26,14 @@ export const metadata: Metadata = {
 
 export const revalidate = 300;
 
-const BlogPage = () => {
+const BlogPage = async () => {
+    let initialPosts: SerializedBlogPost[] | undefined;
+    try {
+        initialPosts = await getPublicBlogPosts(60);
+    } catch (error) {
+        console.error("Failed to load public blog posts for SSR", error);
+    }
+
     return (
         <div className="min-h-screen bg-gradient-to-b from-[#0a0a0a] via-[#101010] to-[#0a0a0a] text-white">
             <PublicHeader />
@@ -54,7 +63,7 @@ const BlogPage = () => {
             </section>
 
             <section className="mx-auto max-w-7xl px-6 pb-24">
-                <BlogGrid />
+                <BlogGrid initialPosts={initialPosts} />
             </section>
         </div>
     );

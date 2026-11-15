@@ -1,5 +1,6 @@
 import FAQPage from '@/components/FAQPage';
 import type { Metadata } from 'next';
+import faqContent from '../../../../content/faq/faq-data.json';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.nyaltx.pro'),
@@ -20,5 +21,5 @@ export const metadata: Metadata = {
 };
 
 export default function FAQ() {
-  return <FAQPage />;
+  return <FAQPage initialContent={faqContent} />;
 }

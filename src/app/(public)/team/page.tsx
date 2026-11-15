@@ -1,5 +1,6 @@
 'use client';
 
+import initialTeamContent from '../../../../content/team/team.json';
 import PublicHeader from '@/components/PublicHeader';
 import { useTeamContent } from '@/hooks/useTinaContent';
 import { motion } from 'framer-motion';
@@ -8,7 +9,7 @@ import { useState } from 'react';
 import { FiLinkedin, FiSend, FiTwitter } from 'react-icons/fi';
 
 export default function TeamPage() {
-  const { content, loading } = useTeamContent();
+  const { content, loading } = useTeamContent(initialTeamContent);
   const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({});
 
   // Force use static content for debugging
@@ -106,7 +107,7 @@ export default function TeamPage() {
           )}
           <div className="relative container mx-auto px-4 py-20 max-w-4xl">
             <motion.div
-              initial={{ opacity: 0, y: 16 }}
+              initial={false}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
@@ -132,7 +133,7 @@ export default function TeamPage() {
         </section>
 
         <section className="container mx-auto px-4 py-16 max-w-6xl">
-          {loading ? (
+          {loading && !content ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {Array.from({ length: 3 }).map((_, idx) => (
                 <div
@@ -143,7 +144,7 @@ export default function TeamPage() {
             </div>
           ) : (
             <motion.div
-              initial={{ opacity: 0, y: 12 }}
+              initial={false}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4 }}
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"

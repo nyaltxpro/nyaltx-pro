@@ -1,20 +1,5 @@
-'use client';
+import NewshubPage, { type NewshubInitialData } from '@/page-components/Newshub/NewshubPage';
 
-import React from 'react';
-import dynamic from 'next/dynamic';
-
-const NewshubPage = dynamic(
-  () => import('@/page-components/Newshub/NewshubPage'),
-  {
-    ssr: false,
-    loading: () => (
-      <div style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#070b12', color: '#8a99ad' }}>
-        Loading News Hub...
-      </div>
-    ),
-  }
-);
-
-export default function NewsHubComponent() {
-  return <NewshubPage />;
+export default function NewsHubComponent({ initialData }: { initialData?: NewshubInitialData }) {
+  return <NewshubPage initialData={initialData} />;
 }

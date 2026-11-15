@@ -23,7 +23,7 @@ export default function DashboardRaceToLibertyPage() {
   const { address, isConnected } = useAccount();
   const [userTokens, setUserTokens] = useState<any[]>([]);
   const [selectedToken, setSelectedToken] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const [showAnalytics, setShowAnalytics] = useState(false);
   

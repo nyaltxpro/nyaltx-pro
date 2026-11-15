@@ -2,6 +2,7 @@ import PublicHeader from '@/components/PublicHeader';
 import NewsHubComponent from '@/components/NewsHub/NewsHubComponent';
 import Footer from '@/components/Footer';
 import { Metadata } from 'next';
+import { getNewshubInitialData } from '@/lib/newshubInitialData';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.nyaltx.pro'),
@@ -52,12 +53,19 @@ export const metadata: Metadata = {
 
 export const revalidate = 60; // Revalidate every 60 seconds
 
-export default function NewsHubPage() {
+export default async function NewsHubPage() {
+  let initialData: Awaited<ReturnType<typeof getNewshubInitialData>> | undefined;
+  try {
+    initialData = await getNewshubInitialData();
+  } catch (error) {
+    console.error('Failed to load News Hub content for SSR:', error);
+  }
+
   return (
     <div className="flex flex-col min-h-screen text-white bg-[#070b12]">
       <PublicHeader />
       <main className="flex-1">
-        <NewsHubComponent />
+        <NewsHubComponent initialData={initialData} />
       </main>
       <Footer />
     </div>

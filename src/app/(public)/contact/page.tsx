@@ -1,5 +1,6 @@
 import ContactPage from '@/components/ContactPage';
 import type { Metadata } from 'next';
+import contactContent from '../../../../content/contact/contact-data.json';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.nyaltx.pro'),
@@ -20,5 +21,5 @@ export const metadata: Metadata = {
 };
 
 export default function Contact() {
-  return <ContactPage />;
+  return <ContactPage initialContent={contactContent} />;
 }

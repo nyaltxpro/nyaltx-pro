@@ -42,6 +42,13 @@ interface Article {
   planName?: string;
 }
 
+export interface NewshubInitialData {
+  banners?: BannerSlide[];
+  articles?: Article[];
+  categories?: string[];
+  pagination?: { total: number; page: number; pages: number };
+}
+
 // ─── Constants ──────────────────────────────────────────────────────────────
 
 const GRADS = [
@@ -98,13 +105,13 @@ function relativeDate(dateStr?: string): string {
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
-export default function NewshubPage() {
+export default function NewshubPage({ initialData }: { initialData?: NewshubInitialData }) {
   // Data state
-  const [banners, setBanners] = useState<BannerSlide[]>([]);
-  const [articles, setArticles] = useState<Article[]>([]);
-  const [categories, setCategories] = useState<string[]>(CATEGORIES);
-  const [pagination, setPagination] = useState({ total: 0, page: 1, pages: 1 });
-  const [loading, setLoading] = useState(true);
+  const [banners, setBanners] = useState<BannerSlide[]>(initialData?.banners ?? []);
+  const [articles, setArticles] = useState<Article[]>(initialData?.articles ?? []);
+  const [categories, setCategories] = useState<string[]>(initialData?.categories ?? CATEGORIES);
+  const [pagination, setPagination] = useState(initialData?.pagination ?? { total: 0, page: 1, pages: 1 });
+  const [loading, setLoading] = useState(initialData === undefined);
   const [feedLoading, setFeedLoading] = useState(false);
 
   // Slider
@@ -126,7 +133,7 @@ export default function NewshubPage() {
 
   const fetchData = useCallback(async (cat: string, page: number, append = false) => {
     try {
-      if (!append) setLoading(true);
+      if (!append && initialData === undefined) setLoading(true);
       setFeedLoading(true);
 
       const params = new URLSearchParams({ page: String(page), limit: '12' });
@@ -167,11 +174,16 @@ export default function NewshubPage() {
         setSubmitOpen(true);
       }
     }
-    fetchData('All', 1);
-  }, [fetchData]);
+    if (initialData === undefined) fetchData('All', 1);
+  }, [fetchData, initialData]);
 
   // Category change → reset feed
+  const initialCategoryLoad = useRef(true);
   useEffect(() => {
+    if (initialCategoryLoad.current) {
+      initialCategoryLoad.current = false;
+      return;
+    }
     setArticles([]);
     setPagination({ total: 0, page: 1, pages: 1 });
     fetchData(selectedCat, 1);

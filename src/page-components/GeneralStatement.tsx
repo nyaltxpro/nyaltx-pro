@@ -18,7 +18,7 @@ export default function GeneralStatementClient(props: { data: GeneralStatementQu
             {/* Hero */}
             <section className="container mx-auto px-4 pt-16 pb-6">
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={false}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 }}
                     className="flex flex-col items-start gap-4"
@@ -39,7 +39,7 @@ export default function GeneralStatementClient(props: { data: GeneralStatementQu
                 {page?.sections?.map((sec: any, i: any) => (
                     <motion.div
                         key={i}
-                        initial={{ opacity: 0, y: 12 }}
+                        initial={false}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.1 }}
                         className="mb-10 overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-6 md:p-10"

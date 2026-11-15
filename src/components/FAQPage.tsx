@@ -3,24 +3,13 @@
 import Footer from '@/components/Footer';
 import PublicHeader from '@/components/PublicHeader';
 import { useFAQContent } from '@/hooks/useTinaContent';
-import React, { useState } from 'react';
-import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
+import React from 'react';
+import { FaChevronDown } from 'react-icons/fa';
 
-const FAQPage: React.FC = () => {
-    const { content, loading, error } = useFAQContent();
-    const [openIndex, setOpenIndex] = useState<string | null>(null);
-    const [openCategory, setOpenCategory] = useState<string | null>(null);
+const FAQPage: React.FC<{ initialContent?: any }> = ({ initialContent }) => {
+    const { content, loading, error } = useFAQContent(initialContent);
 
-    const toggleFAQ = (categoryIndex: number, questionIndex: number) => {
-        const index = `${categoryIndex}-${questionIndex}`;
-        setOpenIndex(openIndex === index ? null : index);
-    };
-
-    const toggleCategory = (categoryName: string) => {
-        setOpenCategory(openCategory === categoryName ? null : categoryName);
-    };
-
-    if (loading) {
+    if (loading && !content) {
         return (
             <div className="min-h-screen bg-gray-900 text-white">
                 <PublicHeader />
@@ -71,11 +60,8 @@ const FAQPage: React.FC = () => {
             <section className="py-16 px-4">
                 <div className="container mx-auto max-w-4xl">
                     {content?.categories?.map((category: any, categoryIndex: number) => (
-                        <div key={categoryIndex} className="mb-8">
-                            <button
-                                onClick={() => toggleCategory(category.name)}
-                                className="w-full text-left mb-4 p-4 bg-gray-800 hover:bg-gray-750 rounded-lg border border-gray-700 transition-colors"
-                            >
+                        <details key={categoryIndex} className="mb-8" open={categoryIndex === 0}>
+                            <summary className="mb-4 cursor-pointer list-none rounded-lg border border-gray-700 bg-gray-800 p-4 text-left transition-colors hover:bg-gray-750">
                                 <div className="flex justify-between items-center">
                                     <div>
                                         <h2 className="text-2xl font-bold text-cyan-400 mb-2">
@@ -87,49 +73,38 @@ const FAQPage: React.FC = () => {
                                             </p>
                                         )}
                                     </div>
-                                    {openCategory === category.name ? <FaChevronUp /> : <FaChevronDown />}
+                                    <FaChevronDown aria-hidden="true" />
                                 </div>
-                            </button>
+                            </summary>
 
-                            {openCategory === category.name && (
-                                <div className="space-y-4">
-                                    {category.questions?.map((question: any, questionIndex: number) => {
-                                        const faqIndex = `${categoryIndex}-${questionIndex}`;
-                                        return (
-                                            <div key={questionIndex} className="border border-gray-700 rounded-lg overflow-hidden">
-                                                <button
-                                                    className="w-full px-6 py-4 text-left bg-gray-800 hover:bg-gray-750 flex justify-between items-center transition-colors"
-                                                    onClick={() => toggleFAQ(categoryIndex, questionIndex)}
-                                                >
-                                                    <span className="font-medium text-lg">{question.question}</span>
-                                                    {openIndex === faqIndex ? <FaChevronUp /> : <FaChevronDown />}
-                                                </button>
-
-                                                {openIndex === faqIndex && (
-                                                    <div className="px-6 py-4 bg-gray-850 border-t border-gray-700">
-                                                        <div className="prose prose-invert max-w-none">
-                                                            <TinaRichText content={question.answer} />
-                                                        </div>
-                                                        {question.tags && (
-                                                            <div className="mt-4 flex flex-wrap gap-2">
-                                                                {question.tags.split(',').map((tag: string, tagIndex: number) => (
-                                                                    <span
-                                                                        key={tagIndex}
-                                                                        className="px-2 py-1 bg-cyan-500/20 text-cyan-400 text-xs rounded-full"
-                                                                    >
-                                                                        {tag.trim()}
-                                                                    </span>
-                                                                ))}
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                )}
+                            <div className="space-y-4">
+                                {category.questions?.map((question: any, questionIndex: number) => (
+                                    <details key={questionIndex} className="overflow-hidden rounded-lg border border-gray-700">
+                                        <summary className="flex cursor-pointer items-center justify-between bg-gray-800 px-6 py-4 text-left transition-colors hover:bg-gray-750">
+                                            <span className="font-medium text-lg">{question.question}</span>
+                                            <FaChevronDown aria-hidden="true" />
+                                        </summary>
+                                        <div className="border-t border-gray-700 bg-gray-850 px-6 py-4">
+                                            <div className="prose prose-invert max-w-none">
+                                                <TinaRichText content={question.answer} />
                                             </div>
-                                        );
-                                    })}
-                                </div>
-                            )}
-                        </div>
+                                            {question.tags && (
+                                                <div className="mt-4 flex flex-wrap gap-2">
+                                                    {question.tags.split(',').map((tag: string, tagIndex: number) => (
+                                                        <span
+                                                            key={tagIndex}
+                                                            className="px-2 py-1 bg-cyan-500/20 text-cyan-400 text-xs rounded-full"
+                                                        >
+                                                            {tag.trim()}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </details>
+                                ))}
+                            </div>
+                        </details>
                     ))}
                 </div>
             </section>

@@ -24,16 +24,16 @@ const formatPublishedDate = (dateString?: string) => {
   }
 };
 
-const BlogGrid = () => {
-  const [posts, setPosts] = useState<SerializedBlogPost[]>([]);
-  const [loading, setLoading] = useState(true);
+const BlogGrid = ({ initialPosts }: { initialPosts?: SerializedBlogPost[] }) => {
+  const [posts, setPosts] = useState<SerializedBlogPost[]>(initialPosts ?? []);
+  const [loading, setLoading] = useState(initialPosts === undefined);
   const [error, setError] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
   useEffect(() => {
     const loadPosts = async () => {
       try {
-        setLoading(true);
+        if (initialPosts === undefined) setLoading(true);
         setError(null);
 
         const response = await fetch("/api/blog?limit=60", { cache: "no-store" });
@@ -53,7 +53,7 @@ const BlogGrid = () => {
     };
 
     loadPosts();
-  }, []);
+  }, [initialPosts]);
 
   const categories = useMemo(() => {
     const all = posts.flatMap((post) => post.categories ?? []);
@@ -65,7 +65,7 @@ const BlogGrid = () => {
     return posts.filter((post) => post.categories?.includes(activeCategory));
   }, [posts, activeCategory]);
 
-  if (loading) {
+  if (loading && initialPosts === undefined) {
     return (
       <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 6 }).map((_, index) => (
@@ -80,7 +80,7 @@ const BlogGrid = () => {
     );
   }
 
-  if (error) {
+  if (error && initialPosts === undefined) {
     return (
       <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-6 text-center text-red-200">
         <h3 className="text-lg font-semibold">Failed to load blog posts</h3>

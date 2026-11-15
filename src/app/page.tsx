@@ -1,6 +1,6 @@
 import LandingPage from '@/page-components/LandingPage';
 import type { Metadata } from 'next';
-import { loadJson } from '@/lib/loadTinaContent';
+import homeContent from '../../content/landing/home.json';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.nyaltx.pro'),
@@ -58,12 +58,6 @@ export const metadata: Metadata = {
 
 export const revalidate = 300;
 
-export default async function Page() {
-  let initialContent: any = null;
-  try {
-    initialContent = await loadJson('content/landing/home.json');
-  } catch (err) {
-    console.error('Failed to load home.json for SSR:', err);
-  }
-  return <LandingPage initialContent={initialContent} />;
+export default function Page() {
+  return <LandingPage initialContent={homeContent} />;
 }

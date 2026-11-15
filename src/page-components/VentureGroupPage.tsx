@@ -62,7 +62,7 @@ const VentureGroupPage: React.FC<VentureGroupPageProps> = ({ tinaData }) => {
             </div>
           ) : null}
           <div className="relative mx-auto max-w-4xl px-4 py-20">
-            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+            <motion.div initial={false} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
               <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-sm text-white/80 backdrop-blur">
                 <span>Venture Group</span>
               </div>
@@ -80,7 +80,7 @@ const VentureGroupPage: React.FC<VentureGroupPageProps> = ({ tinaData }) => {
 
         {introContent ? (
           <section className="mx-auto max-w-4xl px-4 py-16">
-            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+            <motion.div initial={false} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
               <div className="prose prose-invert max-w-none prose-p:leading-relaxed">
                 <TinaRichText content={introContent} />
               </div>
@@ -90,7 +90,7 @@ const VentureGroupPage: React.FC<VentureGroupPageProps> = ({ tinaData }) => {
 
         {teamMembers.length ? (
           <section className="mx-auto max-w-5xl px-4 py-16">
-            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+            <motion.div initial={false} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
               <div className="mb-10 text-center">
                 {teamSection.title ? <h2 className="text-3xl font-semibold">{teamSection.title}</h2> : null}
                 {teamSection.subtitle ? <p className="mt-3 text-base text-white/70">{teamSection.subtitle}</p> : null}
@@ -147,7 +147,7 @@ const VentureGroupPage: React.FC<VentureGroupPageProps> = ({ tinaData }) => {
               {extraSections.map((section, index) => (
                 <motion.div
                   key={section?.title ?? index}
-                  initial={{ opacity: 0, y: 16 }}
+                  initial={false}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.4 }}

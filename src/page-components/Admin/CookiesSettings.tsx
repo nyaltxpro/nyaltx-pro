@@ -74,7 +74,7 @@ export default function CookiesSettings() {
             {/* Hero */}
             <section className="container mx-auto px-4 pt-16 pb-8">
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={false}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 }}
                     className="flex flex-col items-start gap-4"
@@ -98,7 +98,7 @@ export default function CookiesSettings() {
                 <div className="max-w-7xl mx-auto space-y-8">
                     {/* About Cookies */}
                     <motion.div
-                        initial={{ opacity: 0, y: 12 }}
+                        initial={false}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.05 }}
                         className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl"
@@ -123,7 +123,7 @@ export default function CookiesSettings() {
 
                     {/* Manage Preferences */}
                     <motion.div
-                        initial={{ opacity: 0, y: 12 }}
+                        initial={false}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.1 }}
                         className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl"
@@ -247,7 +247,7 @@ export default function CookiesSettings() {
 
                     {/* Policy */}
                     <motion.div
-                        initial={{ opacity: 0, y: 12 }}
+                        initial={false}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.15 }}
                         className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl"
