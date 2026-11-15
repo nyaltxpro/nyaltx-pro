@@ -56,9 +56,15 @@ const plans: {
   },
 ];
 
-export default function NewsPublishingPage() {
-  const [selectedPlan, setSelectedPlan] = useState<PublishingPlan>('feed');
-  const [modalOpen, setModalOpen] = useState(false);
+export default function NewsPublishingPage({
+  openModalOnLoad = false,
+  initialPlan = 'feed',
+}: {
+  openModalOnLoad?: boolean;
+  initialPlan?: PublishingPlan;
+}) {
+  const [selectedPlan, setSelectedPlan] = useState<PublishingPlan>(initialPlan);
+  const [modalOpen, setModalOpen] = useState(openModalOnLoad);
 
   const openSubmitModal = (plan: PublishingPlan) => {
     setSelectedPlan(plan);

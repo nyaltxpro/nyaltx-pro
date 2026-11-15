@@ -19,6 +19,13 @@ export const metadata: Metadata = {
   },
 };
 
-export default function NewsPublishingRoute() {
-  return <NewsPublishingPage />;
+interface NewsPublishingRouteProps {
+  searchParams: Promise<{ modal?: string; plan?: string }>;
+}
+
+export default async function NewsPublishingRoute({ searchParams }: NewsPublishingRouteProps) {
+  const { modal, plan } = await searchParams;
+  const initialPlan = plan === 'slider' ? 'slider' : 'feed';
+
+  return <NewsPublishingPage openModalOnLoad={modal === 'open'} initialPlan={initialPlan} />;
 }
