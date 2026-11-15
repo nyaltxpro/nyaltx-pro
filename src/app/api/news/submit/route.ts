@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
       author = 'Community Submission',
       email,
       plan = 'feed', // 'feed' | 'slider' | 'prem'
-      paymentMethod = 'card', // 'paypal' | 'eth' | 'sol' | 'card' | 'usdc' | 'nyax'
+      paymentMethod = 'paypal', // 'paypal' | 'usdc' | 'nyax'
       amount = 199,
       txHash,
       paymentId,
@@ -28,6 +28,13 @@ export async function POST(req: NextRequest) {
       planName,
       isTest = false
     } = data;
+
+    if (!['paypal', 'usdc', 'nyax'].includes(paymentMethod)) {
+      return NextResponse.json(
+        { error: 'Unsupported payment method. Choose PayPal, USDC, or NYAX.' },
+        { status: 400 }
+      );
+    }
 
     if (!title || title.trim().length < 5) {
       return NextResponse.json({ error: 'Headline is required (minimum 5 characters)' }, { status: 400 });
@@ -124,7 +131,7 @@ export async function POST(req: NextRequest) {
         status: 'completed',
         paymentMethod: paymentMethod as any,
         amount: String(amount),
-        currency: (paymentMethod === 'eth' ? 'ETH' : paymentMethod === 'sol' ? 'SOL' : paymentMethod === 'nyax' ? 'NYAX' : 'USD') as any,
+        currency: (paymentMethod === 'usdc' ? 'USDC' : paymentMethod === 'nyax' ? 'NYAX' : 'USD') as any,
         txHash: txHash || undefined,
         paymentId: paymentId || undefined,
         walletAddress: walletAddress || undefined,
