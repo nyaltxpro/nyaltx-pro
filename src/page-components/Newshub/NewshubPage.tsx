@@ -2,14 +2,8 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import dynamic from 'next/dynamic';
+import { useRouter } from 'next/navigation';
 import { toReliableIpfsUrl } from '@/utils/ipfsUpload';
-
-// Lazy-load the SubmitNewsModal (heavy – contains PayPal, wagmi, etc.)
-const SubmitNewsModal = dynamic(
-  () => import('@/components/NewsHub/SubmitNewsModal').then(m => ({ default: m.default })),
-  { ssr: false }
-);
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -106,6 +100,7 @@ function relativeDate(dateStr?: string): string {
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function NewshubPage({ initialData }: { initialData?: NewshubInitialData }) {
+  const router = useRouter();
   // Data state
   const [banners, setBanners] = useState<BannerSlide[]>(initialData?.banners ?? []);
   const [articles, setArticles] = useState<Article[]>(initialData?.articles ?? []);
@@ -120,9 +115,6 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
 
   // Filter
   const [selectedCat, setSelectedCat] = useState('All');
-
-  // Modal
-  const [submitOpen, setSubmitOpen] = useState(false);
 
   // RSS & Newsletter
   const [rssCopied, setRssCopied] = useState(false);
@@ -171,11 +163,11 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
     if (typeof window !== 'undefined') {
       const hash = window.location.hash;
       if (hash === '#submit-news' || hash === '#submit-press') {
-        setSubmitOpen(true);
+        router.replace('/newshub/submit');
       }
     }
     if (initialData === undefined) fetchData('All', 1);
-  }, [fetchData, initialData]);
+  }, [fetchData, initialData, router]);
 
   // Category change → reset feed
   const initialCategoryLoad = useRef(true);
@@ -201,12 +193,12 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
 
   const startSlider = useCallback(() => {
     stopSlider();
-    if (banners.length > 1 && !submitOpen) {
+    if (banners.length > 1) {
       sliderTimerRef.current = setInterval(() => {
         setCurSlide(prev => (prev + 1) % banners.length);
       }, 6000);
     }
-  }, [banners.length, submitOpen, stopSlider]);
+  }, [banners.length, stopSlider]);
 
   useEffect(() => {
     startSlider();
@@ -355,9 +347,9 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
               <h2>NYALTX <span>News Hub</span></h2>
               <p>Where Wall Street meets Web3: news, press releases and market stories for crypto and alt assets.</p>
             </div>
-            <button className="nh-btn-pri nh-submit-cta" onClick={() => setSubmitOpen(true)}>
+            <Link href="/newshub/submit" className="nh-btn-pri nh-submit-cta">
               + Submit news
-            </button>
+            </Link>
           </section>
 
           {/* ── PAGE HEADER ──────────────────────────────────────────── */}
@@ -370,9 +362,9 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
               <button className="nh-btn" onClick={copyRss} title="Copy RSS URL">
                 {rssCopied ? '✓ Copied!' : '📡 RSS feed'}
               </button>
-              <button className="nh-btn nh-btn-pri" onClick={() => setSubmitOpen(true)}>
+              <Link href="/newshub/submit" className="nh-btn nh-btn-pri">
                 + Submit news
-              </button>
+              </Link>
             </div>
           </header>
 
@@ -458,9 +450,9 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
                         ? 'Be the first to submit a press release or sponsored story.'
                         : `No paid ${selectedCat} articles approved yet. Try a different category or submit your own.`}
                     </div>
-                    <button className="nh-btn nh-btn-pri" onClick={() => setSubmitOpen(true)}>
+                    <Link href="/newshub/submit" className="nh-btn nh-btn-pri">
                       + Submit your news
-                    </button>
+                    </Link>
                   </div>
                 ) : (
                   articles.map(art => (
@@ -510,9 +502,9 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
               <div className="nh-side nh-cta">
                 <h4>Got news? Get seen.</h4>
                 <p>Publish your press release or sponsored story to the NYALTX feed and reach thousands of crypto readers.</p>
-                <button className="nh-btn" style={{ width: '100%', justifyContent: 'center' }} onClick={() => setSubmitOpen(true)}>
+                <Link href="/newshub/submit" className="nh-btn" style={{ width: '100%', justifyContent: 'center' }}>
                   Submit a story
-                </button>
+                </Link>
                 <div style={{ marginTop: 10, fontSize: 12, color: '#023038', opacity: 0.75 }}>
                   From $199 · Direct Distribution &amp; Full Service plans
                 </div>
@@ -599,15 +591,6 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
         </div>
       </div>
 
-      {/* Submit News Modal */}
-      {submitOpen && (
-        <SubmitNewsModal
-          isOpen={submitOpen}
-          onClose={() => setSubmitOpen(false)}
-          initialType="news"
-          onSuccess={() => {}}
-        />
-      )}
     </>
   );
 }
