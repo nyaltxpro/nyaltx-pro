@@ -102,7 +102,9 @@ const TinaRichText: React.FC<{ content: any }> = ({ content }) => {
                 if (level === 1) {
                     return (
                         <h1 key={index} className={headingClasses}>
-                            {node.content?.map((child: any, childIndex: number) => renderNode(child, childIndex))}
+                            <span>
+                                {node.content?.map((child: any, childIndex: number) => renderNode(child, childIndex))}
+                            </span>
                         </h1>
                     );
                 } else if (level === 2) {
