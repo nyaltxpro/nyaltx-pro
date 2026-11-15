@@ -220,7 +220,7 @@ export default function SubmitNewsModalCorporate({
   const [payMethod, setPayMethod] = useState<PayMethod>('paypal');
   const [selectedSwatch] = useState(0);
 
-  // Payment mode: live (real money) | testnet (PayPal sandbox, Sepolia, Solana devnet) | simulate (fake, no network)
+  // Payment mode: live (real money) | testnet (PayPal sandbox and Sepolia USDC) | simulate (fake, no network)
   const [payMode, setPayMode] = useState<PayMode>('live');
 
   // Cover image (IPFS / external URL)
@@ -276,7 +276,7 @@ export default function SubmitNewsModalCorporate({
   const simulate = payMode === 'simulate';
   const testnet = payMode === 'testnet';
   const isTestFlow = payMode !== 'live';
-  // NYAX has no testnet token, so in testnet mode it falls back to a simulated payment
+  // NYAX has no testnet token, so in testnet mode it falls back to a simulated payment.
   const isSimulatedFor = (m: PayMethod) => simulate || (testnet && m === 'nyax');
   const networkFor = (m: PayMethod) =>
     simulate
@@ -537,33 +537,24 @@ export default function SubmitNewsModalCorporate({
         }
       }
 
-      let txHash: `0x${string}`;
-
-      if (method === 'eth') {
-        let eth = ethPayAmount;
-        if (eth < 0.0001) eth = 0.0001;
-        txHash = await sendTransactionAsync({
-          to: RECEIVER,
-          value: parseEther(eth.toFixed(6)),
-        });
-      } else {
-        const token = method === 'nyax' ? NYAX_TOKEN : SOL_TOKEN;
-        if (!isAddress(token)) {
-          throw new Error(
-            method === 'nyax'
-              ? 'NYAX token address is not configured correctly (NEXT_PUBLIC_NYAX_TOKEN_ADDRESS).'
-              : 'SOL token address is not configured correctly (NEXT_PUBLIC_SOL_TOKEN_ADDRESS).'
-          );
-        }
-        const decimals = method === 'nyax' ? 18 : 9;
-        const amount = method === 'nyax' ? nyaxAmount : solAmount;
-        txHash = await writeContractAsync({
-          abi: erc20Abi,
-          address: token,
-          functionName: 'transfer',
-          args: [RECEIVER, parseUnits(amount.toFixed(method === 'nyax' ? 6 : 9), decimals)],
-        });
+      const token =
+        method === 'nyax' ? NYAX_TOKEN : testnet ? TESTNET_USDC : USDC_TOKEN;
+      if (!isAddress(token)) {
+        throw new Error(
+          method === 'nyax'
+            ? 'NYAX token address is not configured correctly (NEXT_PUBLIC_NYAX_TOKEN_ADDRESS).'
+            : 'USDC token address is not configured correctly (NEXT_PUBLIC_USDC_TOKEN_ADDRESS).'
+        );
       }
+
+      const decimals = method === 'nyax' ? 18 : 6;
+      const amount = method === 'nyax' ? nyaxAmount : usdcAmount;
+      const txHash = await writeContractAsync({
+        abi: erc20Abi,
+        address: token,
+        functionName: 'transfer',
+        args: [RECEIVER, parseUnits(amount.toFixed(method === 'nyax' ? 6 : 2), decimals)],
+      });
 
       if (!txHash) throw new Error('Transaction was rejected or failed to broadcast.');
 
@@ -575,66 +566,11 @@ export default function SubmitNewsModalCorporate({
         amount: finalPrice,
         paymentStatus: testnet ? 'testnet' : 'completed',
         isTest: testnet,
-        network: testnet ? 'sepolia' : 'mainnet'
+        network: networkFor(method)
       });
     } catch (err: any) {
       console.error('Wallet payment failed:', err);
       setFormError(err?.shortMessage || err?.message || 'Wallet transaction failed. You can also send manually and paste the tx hash below.');
-    } finally {
-      setWalletPaying(null);
-    }
-  };
-
-  /* ---------- Solana devnet payment (testnet mode, Phantom / injected wallet) ---------- */
-  const payWithSolanaDevnet = async () => {
-    if (!validEmail) {
-      setFormError('Please enter your contact email address above first.');
-      return;
-    }
-    const provider = (window as any).phantom?.solana ?? (window as any).solana;
-    if (!provider) {
-      setFormError('No Solana wallet found. Install Phantom (set it to Testnet Mode / Devnet) and reload the page.');
-      return;
-    }
-
-    setWalletPaying('sol');
-    setFormError('');
-
-    try {
-      const resp = await provider.connect();
-      const fromKey = new PublicKey((resp?.publicKey ?? provider.publicKey).toString());
-      const toKey = SOLANA_TEST_RECEIVER ? new PublicKey(SOLANA_TEST_RECEIVER) : fromKey;
-      const lamports = Math.round(solTestAmount * LAMPORTS_PER_SOL);
-
-      const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');
-      const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
-
-      const tx = new Transaction({ feePayer: fromKey, blockhash, lastValidBlockHeight }).add(
-        SystemProgram.transfer({ fromPubkey: fromKey, toPubkey: toKey, lamports })
-      );
-
-      // Sign in the wallet, then broadcast ourselves so it always lands on devnet
-      const signed = await provider.signTransaction(tx);
-      const signature = await connection.sendRawTransaction(signed.serialize());
-      await connection.confirmTransaction({ signature, blockhash, lastValidBlockHeight }, 'confirmed');
-
-      setCryptoTxHash(signature);
-      await handlePayAndSubmit({
-        paymentMethod: 'sol',
-        txHash: signature,
-        walletAddress: fromKey.toString(),
-        amount: finalPrice,
-        paymentStatus: 'testnet',
-        isTest: true,
-        network: 'solana-devnet'
-      });
-    } catch (err: any) {
-      console.error('Solana devnet payment failed:', err);
-      setFormError(
-        err?.message?.includes('0x1') || err?.message?.toLowerCase().includes('insufficient')
-          ? 'Not enough devnet SOL. Get free devnet SOL at faucet.solana.com and try again.'
-          : err?.message || 'Solana devnet payment failed.'
-      );
     } finally {
       setWalletPaying(null);
     }
@@ -711,21 +647,19 @@ export default function SubmitNewsModalCorporate({
     </button>
   );
 
-  /* Shared panel for ETH / SOL / NYAX (connect wallet -> pay -> auto submit) */
+  /* Shared panel for USDC / NYAX (connect wallet -> pay -> auto submit) */
   const renderWalletPanel = (
     method: WalletMethod,
     cfg: { title: string; subtitle: string; border: string; titleColor: string; amountText: string; btnLabel: string }
   ) => {
     const useSim = isSimulatedFor(method);
-    const solDevnet = testnet && method === 'sol';
 
     return (
       <div className={`p-4 bg-gray-700/30 border ${cfg.border} rounded-lg space-y-3`}>
         <div className="flex justify-between items-center gap-3">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 bg-gray-800/60 rounded-lg flex items-center justify-center border border-gray-600/40">
-              {method === 'eth' && <Image src="/crypto-icons/color/eth.svg" width={20} height={20} alt="ETH" />}
-              {method === 'sol' && <Image src="/crypto-icons/color/sol.svg" width={20} height={20} alt="SOL" />}
+              {method === 'usdc' && <Image src="/crypto-icons/color/usdc.svg" width={20} height={20} alt="USDC" />}
               {method === 'nyax' && <Image src="/logo.png" width={20} height={20} alt="NYAX" />}
             </div>
             <div>
@@ -743,16 +677,9 @@ export default function SubmitNewsModalCorporate({
             NYAX has no testnet token, so this payment is simulated in Testnet mode.
           </p>
         )}
-        {testnet && method === 'eth' && (
+        {testnet && method === 'usdc' && (
           <p className="text-xs text-yellow-300 bg-yellow-500/10 p-2.5 rounded-lg border border-yellow-500/20">
-            Sepolia test ETH only (capped at {TESTNET_MAX_ETH} ETH). Get free test ETH from a Sepolia faucet.
-          </p>
-        )}
-        {solDevnet && (
-          <p className="text-xs text-yellow-300 bg-yellow-500/10 p-2.5 rounded-lg border border-yellow-500/20">
-            Solana Devnet via Phantom (capped at {TESTNET_MAX_SOL} SOL).{' '}
-            {SOLANA_TEST_RECEIVER ? 'Sent to your test receiver.' : 'No test receiver set, so it is sent back to your own wallet.'}{' '}
-            Free devnet SOL: faucet.solana.com
+            Sepolia USDC is required for testnet payments.
           </p>
         )}
 
@@ -766,21 +693,6 @@ export default function SubmitNewsModalCorporate({
             {walletPaying === method || isSubmitting
               ? 'Simulating payment...'
               : `🧪 Simulate ${method.toUpperCase()} payment ($${finalPrice.toFixed(2)})`}
-          </button>
-        ) : solDevnet ? (
-          <button
-            type="button"
-            onClick={payWithSolanaDevnet}
-            disabled={walletPaying !== null || isSubmitting}
-            className={`w-full py-3 ${BTN_PRIMARY}`}
-          >
-            {walletPaying === 'sol' ? (
-              <span className="inline-flex items-center gap-2">
-                <FaSpinner className="w-4 h-4 animate-spin" /> Confirm in Phantom...
-              </span>
-            ) : (
-              cfg.btnLabel
-            )}
           </button>
         ) : !isConnected ? (
           <div className="text-center py-4 bg-black/30 rounded-lg border border-gray-700/40 space-y-2">
@@ -815,7 +727,7 @@ export default function SubmitNewsModalCorporate({
           </div>
         )}
 
-        {!useSim && !solDevnet && (
+        {!useSim && (
           <details className="text-xs text-gray-400 pt-1">
             <summary className="cursor-pointer font-medium text-gray-400 hover:text-white">
               Or send manually to Treasury address & paste TXID ▾
@@ -864,7 +776,7 @@ export default function SubmitNewsModalCorporate({
         {isTestFlow && (
           <div className="mb-4 p-2 text-center text-xs font-semibold text-yellow-300 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
             {testnet
-              ? '🧪 TESTNET MODE: PayPal Sandbox · Sepolia · Solana Devnet. Test funds only.'
+              ? '🧪 TESTNET MODE: PayPal Sandbox and Sepolia USDC. Test funds only.'
               : '🧪 SIMULATED MODE: no real payment and no network call will be made.'}
           </div>
         )}
@@ -1201,7 +1113,7 @@ export default function SubmitNewsModalCorporate({
                 <p className="text-xs text-gray-400">
                   {payMode === 'live' && 'Real payments with real money.'}
                   {payMode === 'testnet' &&
-                    'PayPal Sandbox, ETH on Sepolia and SOL on Solana Devnet with test funds. NYAX has no testnet token, so it is simulated.'}
+                    'PayPal Sandbox and USDC on Sepolia with test funds. NYAX has no testnet token, so it is simulated.'}
                   {payMode === 'simulate' && 'Fake payments for every method. Nothing is sent to any network.'}
                 </p>
               </div>
@@ -1209,10 +1121,9 @@ export default function SubmitNewsModalCorporate({
 
             <div>
               <label className={LABEL}>Select Payment Method</label>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                {payTab('paypal', 'PayPal & Cards', 'border-blue-500/40 bg-blue-500/20 text-blue-300')}
-                {payTab('eth', 'ETH', 'border-cyan-500/40 bg-cyan-500/20 text-cyan-300')}
-                {payTab('sol', 'SOL', 'border-purple-500/40 bg-purple-500/20 text-purple-300')}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                {payTab('paypal', 'PayPal', 'border-blue-500/40 bg-blue-500/20 text-blue-300')}
+                {payTab('usdc', 'USDC', 'border-cyan-500/40 bg-cyan-500/20 text-cyan-300')}
                 {payTab('nyax', 'NYAX (20% off)', 'border-amber-500/40 bg-amber-500/20 text-amber-300')}
               </div>
             </div>
@@ -1290,32 +1201,15 @@ export default function SubmitNewsModalCorporate({
               </div>
             )}
 
-            {/* ETH */}
-            {payMethod === 'eth' &&
-              renderWalletPanel('eth', {
-                title: testnet ? 'Pay with Sepolia ETH' : 'Pay with ETH',
-                subtitle: testnet ? 'Test ETH on Sepolia from your connected wallet' : 'Sent from your connected wallet',
+            {/* USDC */}
+            {payMethod === 'usdc' &&
+              renderWalletPanel('usdc', {
+                title: `Pay with USDC${testnet ? ' (Sepolia)' : ''}`,
+                subtitle: 'USDC token transfer from your connected wallet',
                 border: 'border-cyan-500/30',
                 titleColor: 'text-cyan-300',
-                amountText: `~${ethPayAmount.toFixed(5)} ETH${testnet ? ' (Sepolia)' : ''}`,
-                btnLabel: testnet
-                  ? `Pay ${ethPayAmount.toFixed(5)} Sepolia ETH`
-                  : `Pay $${finalPrice.toFixed(2)} with ETH`
-              })}
-
-            {/* SOL (ERC-20 SOL token live; native SOL on devnet in testnet mode) */}
-            {payMethod === 'sol' &&
-              renderWalletPanel('sol', {
-                title: testnet ? 'Pay with Devnet SOL' : 'Pay with SOL',
-                subtitle: testnet
-                  ? 'Native SOL on Solana Devnet via Phantom'
-                  : 'SOL token transfer from your connected wallet',
-                border: 'border-purple-500/30',
-                titleColor: 'text-purple-300',
-                amountText: testnet ? `~${solTestAmount.toFixed(4)} SOL (devnet)` : `~${solAmount.toFixed(4)} SOL`,
-                btnLabel: testnet
-                  ? `Pay ${solTestAmount.toFixed(4)} Devnet SOL with Phantom`
-                  : `Pay $${finalPrice.toFixed(2)} with SOL`
+                amountText: `${usdcAmount.toFixed(2)} USDC`,
+                btnLabel: `Pay ${usdcAmount.toFixed(2)} USDC ($${finalPrice.toFixed(2)})`
               })}
 
             {/* NYAX */}
