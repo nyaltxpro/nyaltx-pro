@@ -72,7 +72,7 @@ export default function LandingPage(props?: LandingPageProps) {
             <motion.section
                 className="relative overflow-hidden min-h-[70vh] md:min-h-[78vh] flex flex-col"
                 variants={container}
-                initial="hidden"
+                initial={false}
                 animate="show"
             >
                 <PublicHeader />
@@ -126,7 +126,7 @@ export default function LandingPage(props?: LandingPageProps) {
             <motion.section
                 className="mx-auto max-w-7xl px-6 py-10"
                 variants={container}
-                initial="hidden"
+                initial={false}
                 whileInView="show"
                 viewport={{ once: true, amount: 0.2 }}
             >
@@ -181,7 +181,7 @@ export default function LandingPage(props?: LandingPageProps) {
             <motion.section
                 className="border-y border-white/10 bg-white/[0.03] backdrop-blur"
                 variants={container}
-                initial="hidden"
+                initial={false}
                 whileInView="show"
                 viewport={{ once: true, amount: 0.2 }}
             >
@@ -211,7 +211,7 @@ export default function LandingPage(props?: LandingPageProps) {
             <motion.section
                 className="mx-auto max-w-7xl px-6 py-16 md:py-20"
                 variants={container}
-                initial="hidden"
+                initial={false}
                 whileInView="show"
                 viewport={{ once: true, amount: 0.2 }}
             >
@@ -261,7 +261,7 @@ export default function LandingPage(props?: LandingPageProps) {
             <motion.section
                 className="mx-auto max-w-7xl px-6 py-10"
                 variants={container}
-                initial="hidden"
+                initial={false}
                 whileInView="show"
                 viewport={{ once: true, amount: 0.2 }}
             >
@@ -299,7 +299,7 @@ export default function LandingPage(props?: LandingPageProps) {
             <motion.section
                 className="mx-auto max-w-7xl px-6 py-16 md:py-20"
                 variants={container}
-                initial="hidden"
+                initial={false}
                 whileInView="show"
                 viewport={{ once: true, amount: 0.2 }}
             >
@@ -334,7 +334,7 @@ export default function LandingPage(props?: LandingPageProps) {
             <motion.section
                 className="mx-auto max-w-7xl px-6 py-16 md:py-20"
                 variants={container}
-                initial="hidden"
+                initial={false}
                 whileInView="show"
                 viewport={{ once: true, amount: 0.2 }}
             >
@@ -392,7 +392,7 @@ export default function LandingPage(props?: LandingPageProps) {
             <motion.section
                 className="mx-auto max-w-7xl px-6 py-10"
                 variants={container}
-                initial="hidden"
+                initial={false}
                 whileInView="show"
                 viewport={{ once: true, amount: 0.2 }}
             >
@@ -408,7 +408,7 @@ export default function LandingPage(props?: LandingPageProps) {
             <motion.section
                 className="mx-auto max-w-7xl px-6 py-16 md:py-20"
                 variants={container}
-                initial="hidden"
+                initial={false}
                 whileInView="show"
                 viewport={{ once: true, amount: 0.2 }}
             >
@@ -447,7 +447,7 @@ export default function LandingPage(props?: LandingPageProps) {
             <motion.section
                 className="mx-auto max-w-7xl px-6 py-16 md:py-20"
                 variants={container}
-                initial="hidden"
+                initial={false}
                 whileInView="show"
                 viewport={{ once: true, amount: 0.2 }}
             >
@@ -488,7 +488,7 @@ export default function LandingPage(props?: LandingPageProps) {
             <motion.section
                 className="mx-auto max-w-7xl px-6 py-16 md:py-20"
                 variants={container}
-                initial="hidden"
+                initial={false}
                 whileInView="show"
                 viewport={{ once: true, amount: 0.2 }}
             >

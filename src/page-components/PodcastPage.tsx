@@ -167,7 +167,7 @@ const PodcastPage: React.FC<PodcastPageProps> = ({ tinaData, rssEpisodes = [], r
             </div>
           ) : null}
           <div className="relative mx-auto max-w-5xl px-4 py-20">
-            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+            <motion.div initial={false} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
               {hero.badge ? (
                 <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-sm text-white/80 backdrop-blur">
                   <span>{hero.badge}</span>
@@ -217,7 +217,7 @@ const PodcastPage: React.FC<PodcastPageProps> = ({ tinaData, rssEpisodes = [], r
 
         {sortedEpisodes.length ? (
           <section className="mx-auto max-w-6xl px-4 py-16">
-            <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4 }}>
+            <motion.div initial={false} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4 }}>
               <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                 <div>
                   {schedule.title ? <h2 className="text-3xl font-semibold">{schedule.title}</h2> : null}
@@ -311,7 +311,7 @@ const PodcastPage: React.FC<PodcastPageProps> = ({ tinaData, rssEpisodes = [], r
 
         {cta.title || cta.description ? (
           <section className="mx-auto max-w-4xl px-4 pb-20">
-            <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4 }}>
+            <motion.div initial={false} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4 }}>
               <div className="rounded-3xl border border-cyan-400/30 bg-gradient-to-r from-cyan-500/10 to-indigo-500/10 p-10 text-center backdrop-blur">
                 {cta.title ? <h2 className="text-3xl font-semibold">{cta.title}</h2> : null}
                 {cta.description ? <p className="mt-3 text-sm text-white/70 leading-relaxed">{cta.description}</p> : null}

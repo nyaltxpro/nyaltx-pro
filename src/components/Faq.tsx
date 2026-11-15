@@ -182,7 +182,7 @@ const Faq: React.FC<FaqProps> = ({ baseToken = '', quoteToken = '', className = 
           <motion.div
             key={index}
             className="rounded-xl border border-white/10 bg-white/[0.02] p-4 transition-colors"
-            initial={{ opacity: 0, y: 8 }}
+            initial={false}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}

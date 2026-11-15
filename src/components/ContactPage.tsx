@@ -7,8 +7,8 @@ import { motion } from 'framer-motion';
 import React, { useState } from 'react';
 import { FaEnvelope } from 'react-icons/fa';
 
-const ContactPage: React.FC = () => {
-    const { content, loading, error } = useContactContent();
+const ContactPage: React.FC<{ initialContent?: any }> = ({ initialContent }) => {
+    const { content, loading, error } = useContactContent(initialContent);
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -77,7 +77,7 @@ const ContactPage: React.FC = () => {
         }
     };
 
-    if (loading) {
+    if (loading && !content) {
         return (
             <div className="min-h-screen  text-white">
                 <PublicHeader />
@@ -129,7 +129,7 @@ const ContactPage: React.FC = () => {
                 <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
                     {/* Contact Information */}
                     <motion.div
-                        initial={{ opacity: 0, y: 12 }}
+                        initial={false}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.05 }}
                         className="md:col-span-1"
@@ -191,7 +191,7 @@ const ContactPage: React.FC = () => {
 
                     {/* Contact Form */}
                     <motion.div
-                        initial={{ opacity: 0, y: 12 }}
+                        initial={false}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.1 }}
                         className="md:col-span-2"

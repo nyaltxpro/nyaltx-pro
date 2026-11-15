@@ -107,7 +107,6 @@ export const PricingPage = ({ tinaData }: any) => {
     const [nyaxPrice, setNyaxPrice] = useState<number | null>(null);
     const [busy, setBusy] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const [mounted, setMounted] = useState(false);
     const { open } = useAppKit();
     const router = useRouter();
 
@@ -122,11 +121,6 @@ export const PricingPage = ({ tinaData }: any) => {
         getNYAXPriceUSD()
             .then(setNyaxPrice)
             .catch(() => setNyaxPrice(null));
-    }, []);
-
-    useEffect(() => {
-        const t = setTimeout(() => setMounted(true), 30);
-        return () => clearTimeout(t);
     }, []);
 
     const computeEthAmount = useCallback(
@@ -463,8 +457,7 @@ export const PricingPage = ({ tinaData }: any) => {
                                 return (
                                     <div
                                         key={t.id}
-                                        className={`group relative border border-white/10 rounded-2xl p-5 bg-gradient-to-b from-white/5 to-white/[0.03] backdrop-blur-md flex flex-col min-h-[440px] transition-all duration-500 ease-out hover:-translate-y-1 hover:shadow-[0_0_40px_-10px_rgba(99,102,241,0.4)] ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}
-                                        style={{ transitionDelay: mounted ? (`${idx * 80}ms` as any) : undefined }}
+                                        className="group relative flex min-h-[440px] flex-col border border-white/10 rounded-2xl p-5 bg-gradient-to-b from-white/5 to-white/[0.03] backdrop-blur-md transition-all duration-500 ease-out hover:-translate-y-1 hover:shadow-[0_0_40px_-10px_rgba(99,102,241,0.4)]"
                                     >
                                         {t.isPopular && (
                                             <span className="absolute -top-2 right-4 text-[10px] uppercase tracking-wider px-2 py-1 rounded-full bg-cyan-600 text-black font-bold shadow shadow-cyan-500/30">
@@ -548,8 +541,7 @@ export const PricingPage = ({ tinaData }: any) => {
                                 return (
                                     <div
                                         key={pack.id}
-                                        className={`group relative border border-white/10 rounded-2xl p-5 bg-gradient-to-b from-white/5 to-white/[0.03] backdrop-blur-md flex flex-col min-h-[380px] transition-all duration-500 ease-out hover:-translate-y-1 hover:shadow-[0_0_40px_-10px_rgba(34,197,94,0.4)] ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}
-                                        style={{ transitionDelay: mounted ? (`${idx * 100}ms` as any) : undefined }}
+                                        className="group relative flex min-h-[380px] flex-col border border-white/10 rounded-2xl p-5 bg-gradient-to-b from-white/5 to-white/[0.03] backdrop-blur-md transition-all duration-500 ease-out hover:-translate-y-1 hover:shadow-[0_0_40px_-10px_rgba(34,197,94,0.4)]"
                                     >
                                         {pack.isPopular && (
                                             <span className="absolute -top-2 right-4 text-[10px] uppercase tracking-wider px-2 py-1 rounded-full bg-emerald-600 text-black font-bold shadow shadow-emerald-500/30">

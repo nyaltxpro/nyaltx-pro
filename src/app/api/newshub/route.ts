@@ -1,20 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/mongodb';
-
-// Criteria that strictly marks a submission as a paid user submission (never platform editorial)
-const PAID_CRITERIA = [
-  { isPaid: true },
-  {
-    isPaid: { $ne: false },
-    $or: [
-      { plan: { $in: ['feed', 'slider', 'prem'] } },
-      { amount: { $gt: 0 } },
-      { paymentMethod: { $exists: true, $ne: null } },
-      { paymentStatus: { $in: ['completed', 'paid', 'success'] } },
-      { type: 'pr' },
-    ],
-  },
-];
+import { PAID_CRITERIA } from '@/lib/newshubInitialData';
 
 export async function GET(request: NextRequest) {
   try {

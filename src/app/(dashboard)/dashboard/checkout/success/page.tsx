@@ -46,7 +46,7 @@ function CheckoutSuccessContent() {
                   <FaExclamationTriangle className="w-10 h-10 text-yellow-400" />
                 </div>
                 <h1 className="text-3xl font-bold text-white mb-2">
-                  Payment Successful!
+                  <span>Payment Successful!</span>
                 </h1>
                 <p className="text-yellow-300 text-lg">
                   Payment completed, but token registration failed
@@ -58,7 +58,7 @@ function CheckoutSuccessContent() {
                   <FaCheckCircle className="w-10 h-10 text-green-400" />
                 </div>
                 <h1 className="text-3xl font-bold text-white mb-2">
-                  Payment Successful!
+                  <span>Payment Successful!</span>
                 </h1>
                 <p className="text-gray-300 text-lg">
                   Your token has been registered successfully
@@ -236,7 +236,7 @@ export default function CheckoutSuccessPage() {
             <div className="mx-auto w-20 h-20 bg-blue-500/20 rounded-full flex items-center justify-center mb-4">
               <FaSpinner className="w-10 h-10 text-blue-400 animate-spin" />
             </div>
-            <h1 className="text-2xl font-bold text-white mb-2">Loading...</h1>
+            <h1 className="text-2xl font-bold text-white mb-2"><span>Loading...</span></h1>
             <p className="text-gray-300">Please wait while we load your success page</p>
           </div>
         </div>

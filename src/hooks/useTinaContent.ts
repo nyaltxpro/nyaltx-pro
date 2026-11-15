@@ -363,15 +363,15 @@ export const useAboutPageContent = () => {
   return { content, loading, error };
 };
 
-export const useTeamContent = () => {
-  const [content, setContent] = useState<TeamContent | null>(null);
-  const [loading, setLoading] = useState(true);
+export const useTeamContent = (initialContent?: TeamContent | null) => {
+  const [content, setContent] = useState<TeamContent | null>(initialContent ?? null);
+  const [loading, setLoading] = useState(!initialContent);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchContent = async () => {
       try {
-        setLoading(true);
+        if (!initialContent) setLoading(true);
 
         const response = await fetch('/api/tina/team');
 
@@ -615,15 +615,15 @@ export const useVenturePageContent = () => {
 };
 
 // Hook for FAQ content
-export const useFAQContent = () => {
-  const [content, setContent] = useState<any | null>(null);
-  const [loading, setLoading] = useState(true);
+export const useFAQContent = (initialContent?: any | null) => {
+  const [content, setContent] = useState<any | null>(initialContent ?? null);
+  const [loading, setLoading] = useState(!initialContent);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchContent = async () => {
       try {
-        setLoading(true);
+        if (!initialContent) setLoading(true);
         
         const response = await fetch('/api/tina/faq');
         
@@ -695,15 +695,15 @@ export const usePricingContent = () => {
 };
 
 // Hook for contact content
-export const useContactContent = () => {
-  const [content, setContent] = useState<any | null>(null);
-  const [loading, setLoading] = useState(true);
+export const useContactContent = (initialContent?: any | null) => {
+  const [content, setContent] = useState<any | null>(initialContent ?? null);
+  const [loading, setLoading] = useState(!initialContent);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchContent = async () => {
       try {
-        setLoading(true);
+        if (!initialContent) setLoading(true);
         
         const response = await fetch('/api/tina/contact');
         
