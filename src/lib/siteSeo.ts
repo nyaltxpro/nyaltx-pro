@@ -71,9 +71,6 @@ export async function buildRootMetadata(): Promise<Metadata> {
 
   return {
     metadataBase,
-    alternates: {
-      canonical: baseUrl,
-    },
     title: {
       default: `${seo.siteName || 'NYALTX'} | New York Alt Exchange — Digital Markets & Tokenized Securities`,
       template: `%s | ${seo.siteName || 'NYALTX'}`,

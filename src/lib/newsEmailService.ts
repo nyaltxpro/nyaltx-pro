@@ -143,8 +143,8 @@ export async function verifyNewsPayment(params: VerifyPaymentParams): Promise<Pa
     };
   }
 
-  // 3. Ethereum / NYAX Token Crypto Verification
-  if (paymentMethod === 'eth' || paymentMethod === 'nyax') {
+  // 3. Ethereum / NYAX / USDC Token Crypto Verification
+  if (paymentMethod === 'eth' || paymentMethod === 'nyax' || paymentMethod === 'usdc') {
     const hash = txHash?.trim();
     if (!hash || !/^0x[a-fA-F0-9]{64}$/.test(hash)) {
       return {

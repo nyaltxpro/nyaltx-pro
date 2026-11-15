@@ -77,7 +77,7 @@ export async function middleware(req: NextRequest) {
   const isAdminRoute = pathname.startsWith('/adminpanel');
   const isLoginRoute = pathname === '/adminpanel/login';
 
-  if (!isAdminRoute) return NextResponse.next();
+  if (!isAdminRoute) return nextWithPath(req);
 
   const isAuthed = await hasValidAdminSession(req);
 
@@ -114,15 +114,21 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  return NextResponse.next();
+  return nextWithPath(req);
+}
+
+function nextWithPath(req: NextRequest) {
+  const requestHeaders = new Headers(req.headers);
+  requestHeaders.set('x-pathname', req.nextUrl.pathname);
+  return NextResponse.next({
+    request: { headers: requestHeaders },
+  });
 }
 
 export const config = {
   matcher: [
     '/adminpanel/:path*',
-    '/dashboard/tokenized-securities',
-    '/dashboard/tokenized-securities/go',
-    '/dashboard/trade/go',
-    '/dashboard/trending',
+    '/dashboard',
+    '/dashboard/:path*',
   ],
 };

@@ -45,7 +45,7 @@ async function main() {
 
   const username = (process.env.ADMIN_USERNAME || 'admin').trim();
   const email = (process.env.ADMIN_EMAIL || 'admin@example.com').trim();
-  const password = process.env.ADMIN_PASSWORD || 'admin123';
+  const password = process.env.ADMIN_PASSWORD || 'admin@example.com';
 
   const usernameLower = username.toLowerCase();
   const emailLower = email.toLowerCase();

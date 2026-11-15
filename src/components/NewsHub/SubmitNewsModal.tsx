@@ -4,20 +4,12 @@ import ConnectWalletButton from '@/components/ConnectWalletButton';
 import PayPalCheckout from '@/components/PayPalCheckout';
 import { getNYAXPriceUSD } from '@/utils/nyaxPriceApi';
 import { useAppKit } from '@reown/appkit/react';
-import {
-  Connection,
-  LAMPORTS_PER_SOL,
-  PublicKey,
-  SystemProgram,
-  Transaction,
-  clusterApiUrl
-} from '@solana/web3.js';
 import { AnimatePresence, motion } from 'motion/react';
 import Image from 'next/image';
 import React, { useEffect, useRef, useState } from 'react';
 import { FaCheck, FaNewspaper, FaSpinner, FaTimes, FaUpload } from 'react-icons/fa';
-import { erc20Abi, isAddress, parseEther, parseUnits } from 'viem';
-import { useAccount, useSendTransaction, useSwitchChain, useWriteContract } from 'wagmi';
+import { erc20Abi, isAddress, parseUnits } from 'viem';
+import { useAccount, useSwitchChain, useWriteContract } from 'wagmi';
 
 export interface SubmitNewsModalProps {
   isOpen: boolean;
@@ -27,7 +19,7 @@ export interface SubmitNewsModalProps {
   onSuccess?: (item: any) => void;
 }
 
-type PayMethod = 'paypal' | 'eth' | 'sol' | 'nyax';
+type PayMethod = 'paypal' | 'usdc' | 'nyax';
 type WalletMethod = Exclude<PayMethod, 'paypal'>;
 type PayMode = 'live' | 'testnet' | 'simulate';
 
@@ -95,87 +87,31 @@ const PLANS_CONFIG: Record<'news' | 'pr', PlanItem[]> = {
   pr: PUBLISH_PLANS,
 };
 
-/* ---------- Payment configuration (same as pricing page) ---------- */
-const NYAX_DISCOUNT = 0.2; // 20% off, same as pricing page
-const DEFAULT_RECEIVER: `0x${string}` = '0x81bA7b98E49014Bff22F811E9405640bC2B39cC0';
-// NOTE: this fallback is only 34 hex chars (a valid address has 40). Set NEXT_PUBLIC_NYAX_TOKEN_ADDRESS
-// or replace it with the real NYAX contract address, otherwise isAddress() fails and NYAX payments error out.
+/* ---------- Payment configuration ---------- */
+const NYAX_DISCOUNT = 0.2; // 20% off with NYAX
+const DEFAULT_RECEIVER: `0x${string}` = '0x36537943bb4B3489a7306BBa807571EBbbe70896';
 const DEFAULT_NYAX: `0x${string}` = '0x5eed5621b92be4473f99bacac27deb57d9';
-const DEFAULT_SOL: `0x${string}` =
-  (process.env.NEXT_PUBLIC_SOL_TOKEN_ADDRESS as `0x${string}` | undefined) ??
-  ('0xD31a59c85aE9D8edEFeC411D448f90841571b89c' as `0x${string}`);
+const DEFAULT_USDC: `0x${string}` = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';
+const TESTNET_USDC: `0x${string}` = '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238';
 
 const RECEIVER =
   (process.env.NEXT_PUBLIC_PAYMENT_RECEIVER_ADDRESS as `0x${string}` | undefined) ?? DEFAULT_RECEIVER;
 const NYAX_TOKEN =
   (process.env.NEXT_PUBLIC_NYAX_TOKEN_ADDRESS as `0x${string}` | undefined) ?? DEFAULT_NYAX;
-const SOL_TOKEN = DEFAULT_SOL;
+const USDC_TOKEN =
+  (process.env.NEXT_PUBLIC_USDC_TOKEN_ADDRESS as `0x${string}` | undefined) ?? DEFAULT_USDC;
 const PAYMENT_CHAIN_ID = process.env.NEXT_PUBLIC_PAYMENT_CHAIN_ID
   ? Number(process.env.NEXT_PUBLIC_PAYMENT_CHAIN_ID)
   : 1;
-const FALLBACK_ETH_PRICE = process.env.NEXT_PUBLIC_FALLBACK_ETH_PRICE
-  ? Number(process.env.NEXT_PUBLIC_FALLBACK_ETH_PRICE)
-  : 3000;
-const FALLBACK_SOL_PRICE = 180;
 
 /* ---------- Testnet configuration ---------- */
 // Sepolia chain id (must also be enabled in your wagmi / AppKit networks config)
 const TESTNET_CHAIN_ID = process.env.NEXT_PUBLIC_TESTNET_CHAIN_ID
   ? Number(process.env.NEXT_PUBLIC_TESTNET_CHAIN_ID)
   : 11155111;
-// Optional Solana devnet receiver. If empty, the test SOL is sent back to your own wallet (self-transfer).
-const SOLANA_TEST_RECEIVER = process.env.NEXT_PUBLIC_SOLANA_TEST_RECEIVER_ADDRESS || '';
-// Faucet funds are limited, so testnet payments are capped.
-const TESTNET_MAX_ETH = 0.001;
-const TESTNET_MAX_SOL = 0.05;
 
 // Test mode selector visible in dev, or in production only when NEXT_PUBLIC_ENABLE_TEST_MODE=true
-// (set to true here so you can test on your deployed site; restore the env check before launch)
 const TEST_MODE_ALLOWED = true;
-// process.env.NODE_ENV !== 'production' || process.env.NEXT_PUBLIC_ENABLE_TEST_MODE === 'true';
-
-async function fetchETHPriceUSD(): Promise<number> {
-  try {
-    const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd', { cache: 'no-store' });
-    if (res.ok) {
-      const v = (await res.json())?.ethereum?.usd;
-      if (typeof v === 'number' && v > 0) return v;
-    }
-  } catch { }
-  try {
-    const res = await fetch('https://api.dexscreener.com/latest/dex/tokens/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', { cache: 'no-store' });
-    if (res.ok) {
-      const json = await res.json();
-      const pairs = Array.isArray(json?.pairs) ? json.pairs : [];
-      if (pairs.length) {
-        const best = pairs.reduce((a: any, b: any) =>
-          Number(a?.liquidity?.usd || 0) > Number(b?.liquidity?.usd || 0) ? a : b
-        );
-        const price = parseFloat(best?.priceUsd);
-        if (!Number.isNaN(price) && price > 0) return price;
-      }
-    }
-  } catch { }
-  try {
-    const res = await fetch('https://api.coinbase.com/v2/prices/ETH-USD/spot', { cache: 'no-store' });
-    if (res.ok) {
-      const price = parseFloat((await res.json())?.data?.amount);
-      if (!Number.isNaN(price) && price > 0) return price;
-    }
-  } catch { }
-  return 0;
-}
-
-async function fetchSOLPriceUSD(): Promise<number> {
-  try {
-    const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd', { cache: 'no-store' });
-    if (res.ok) {
-      const v = (await res.json())?.solana?.usd;
-      if (typeof v === 'number' && v > 0) return v;
-    }
-  } catch { }
-  return 0;
-}
 
 const convertToWorkingIPFSUrl = (url: string) =>
   url.replace('https://gateway.pinata.cloud/ipfs/', 'https://ipfs.io/ipfs/');
@@ -188,8 +124,7 @@ const PayPalIcon = () => (
 
 const LOGOS: Record<PayMethod, React.ReactNode> = {
   paypal: <PayPalIcon />,
-  eth: <Image src="/crypto-icons/color/eth.svg" width={16} height={16} alt="ETH" />,
-  sol: <Image src="/crypto-icons/color/sol.svg" width={16} height={16} alt="SOL" />,
+  usdc: <Image src="/crypto-icons/color/usdc.svg" width={16} height={16} alt="USDC" />,
   nyax: <Image src="/logo.png" width={16} height={16} alt="NYAX" />
 };
 
@@ -308,15 +243,12 @@ export default function SubmitNewsModalCorporate({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Prices
-  const [ethPrice, setEthPrice] = useState<number | null>(null);
-  const [solPrice, setSolPrice] = useState<number | null>(null);
   const [nyaxPrice, setNyaxPrice] = useState<number | null>(null);
 
   // Web3 hooks (same as pricing page)
   const { address: walletAddress, isConnected, chain } = useAccount();
   const { open: openAppKit } = useAppKit();
   const { switchChainAsync } = useSwitchChain();
-  const { sendTransactionAsync } = useSendTransaction();
   const { writeContractAsync } = useWriteContract();
   const [walletPaying, setWalletPaying] = useState<WalletMethod | null>(null);
 
@@ -335,8 +267,6 @@ export default function SubmitNewsModalCorporate({
   }, [isOpen, initialType, initialPlan]);
 
   useEffect(() => {
-    fetchETHPriceUSD().then(p => setEthPrice(p > 0 ? p : null)).catch(() => setEthPrice(null));
-    fetchSOLPriceUSD().then(p => setSolPrice(p > 0 ? p : null)).catch(() => setSolPrice(null));
     getNYAXPriceUSD().then(setNyaxPrice).catch(() => setNyaxPrice(null));
   }, []);
 
@@ -354,11 +284,9 @@ export default function SubmitNewsModalCorporate({
       : testnet
         ? m === 'paypal'
           ? 'paypal-sandbox'
-          : m === 'eth'
+          : m === 'usdc'
             ? 'sepolia'
-            : m === 'sol'
-              ? 'solana-devnet'
-              : 'simulated'
+            : 'simulated'
         : 'mainnet';
 
   // Price calculations
@@ -367,15 +295,9 @@ export default function SubmitNewsModalCorporate({
   const basePrice = activePlanObj.price;
   const finalPrice = payMethod === 'nyax' ? basePrice * (1 - NYAX_DISCOUNT) : basePrice;
 
-  const ethRef = ethPrice && ethPrice > 0 ? ethPrice : FALLBACK_ETH_PRICE;
-  const solRef = solPrice && solPrice > 0 ? solPrice : FALLBACK_SOL_PRICE;
   const nyaxRef = nyaxPrice && nyaxPrice > 0 ? nyaxPrice : 1.0;
-  const ethAmount = finalPrice / ethRef;
-  const solAmount = finalPrice / solRef;
   const nyaxAmount = finalPrice / nyaxRef;
-  // Amounts actually sent (capped on testnets because faucet funds are limited)
-  const ethPayAmount = testnet ? Math.min(ethAmount, TESTNET_MAX_ETH) : ethAmount;
-  const solTestAmount = Math.min(solAmount, TESTNET_MAX_SOL);
+  const usdcAmount = finalPrice; // 1 USDC = $1.00 USD
 
   const validEmail = userEmail.trim().length > 0 && userEmail.includes('@');
 
