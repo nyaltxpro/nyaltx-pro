@@ -3,6 +3,7 @@
 import ConnectWalletButton from '@/components/ConnectWalletButton';
 import PayPalCheckout from '@/components/PayPalCheckout';
 import { getNYAXPriceUSD } from '@/utils/nyaxPriceApi';
+import { calculateNewsPrice, NEWS_NYAX_DISCOUNT } from '@/lib/newsPricing';
 import { useAppKit } from '@reown/appkit/react';
 import { AnimatePresence, motion } from 'motion/react';
 import Image from 'next/image';
@@ -105,7 +106,6 @@ const PLANS_CONFIG: Record<'news' | 'pr', PlanItem[]> = {
 };
 
 /* ---------- Payment configuration ---------- */
-const NYAX_DISCOUNT = 0.2; // 20% off with NYAX
 const DEFAULT_RECEIVER: `0x${string}` = '0x36537943bb4B3489a7306BBa807571EBbbe70896';
 const DEFAULT_NYAX: `0x${string}` = '0x5eed5621b92be4473f99bacac27deb57d9';
 const DEFAULT_USDC: `0x${string}` = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';
@@ -241,6 +241,10 @@ export default function SubmitNewsModalCorporate({
   const [summary, setSummary] = useState('');
   const [storyBody, setStoryBody] = useState('');
   const [userEmail, setUserEmail] = useState('');
+  const [promoCodeInput, setPromoCodeInput] = useState('');
+  const [appliedPromo, setAppliedPromo] = useState<{ code: string; discountPercent: number } | null>(null);
+  const [promoError, setPromoError] = useState('');
+  const [isApplyingPromo, setIsApplyingPromo] = useState(false);
   const [formError, setFormError] = useState('');
   const [cryptoTxHash, setCryptoTxHash] = useState('');
   const [copiedReceiver, setCopiedReceiver] = useState(false);
@@ -267,6 +271,9 @@ export default function SubmitNewsModalCorporate({
       setFormError('');
       setImgError('');
       setImgSuccess('');
+      setPromoCodeInput('');
+      setAppliedPromo(null);
+      setPromoError('');
     }
   }, [isOpen, initialType, initialPlan]);
 
@@ -282,16 +289,48 @@ export default function SubmitNewsModalCorporate({
     : PLANS_CONFIG[subType];
   const activePlanObj = currentPlans.find(p => p.id === plan) || currentPlans[0];
   const basePrice = activePlanObj.price;
-  const finalPrice =
+  const finalPrice = calculateNewsPrice(
+    basePrice,
+    plan === 'test' ? 0 : appliedPromo?.discountPercent ?? 0,
     plan !== 'test' && payMethod === 'nyax'
-      ? basePrice * (1 - NYAX_DISCOUNT)
-      : basePrice;
+  );
 
   const nyaxRef = nyaxPrice && nyaxPrice > 0 ? nyaxPrice : 1.0;
   const nyaxAmount = finalPrice / nyaxRef;
   const usdcAmount = finalPrice; // 1 USDC = $1.00 USD
 
   const validEmail = userEmail.trim().length > 0 && userEmail.includes('@');
+
+  const applyPromoCode = async () => {
+    const promoCode = promoCodeInput.trim().toUpperCase();
+    if (!promoCode) {
+      setPromoError('Enter a promo code.');
+      setAppliedPromo(null);
+      return;
+    }
+
+    setIsApplyingPromo(true);
+    setPromoError('');
+    try {
+      const response = await fetch('/api/news/promo/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ promoCode }),
+      });
+      const result = await response.json();
+      if (!response.ok || !result.valid) {
+        throw new Error(result.message || 'This promo code is invalid.');
+      }
+
+      setAppliedPromo({ code: result.code, discountPercent: result.discountPercent });
+      setPromoCodeInput(result.code);
+    } catch (error) {
+      setAppliedPromo(null);
+      setPromoError(error instanceof Error ? error.message : 'Could not validate promo code.');
+    } finally {
+      setIsApplyingPromo(false);
+    }
+  };
 
   /* ---------- IPFS image handling ---------- */
   const clearFileInput = () => {
@@ -445,6 +484,8 @@ export default function SubmitNewsModalCorporate({
       planName: activePlanObj.name,
       paymentMethod: currentPayMethod,
       amount: chosenAmount,
+      promoCode: plan === 'test' ? null : appliedPromo?.code || null,
+      promoDiscount: plan === 'test' ? 0 : appliedPromo?.discountPercent ?? 0,
       txHash: paymentOverride?.txHash || (cryptoTxHash.trim() || null),
       paymentId: paymentOverride?.paymentId || null,
       walletAddress: paymentOverride?.walletAddress || null,
@@ -989,6 +1030,46 @@ export default function SubmitNewsModalCorporate({
               />
             </div>
 
+            {plan !== 'test' && (
+              <div>
+                <label className={LABEL}>Promo code</label>
+                <div className="flex gap-2">
+                  <input
+                    value={promoCodeInput}
+                    onChange={event => {
+                      setPromoCodeInput(event.target.value.toUpperCase());
+                      setAppliedPromo(null);
+                      setPromoError('');
+                    }}
+                    onKeyDown={event => {
+                      if (event.key === 'Enter') {
+                        event.preventDefault();
+                        void applyPromoCode();
+                      }
+                    }}
+                    placeholder="Enter promo code"
+                    className={`flex-1 ${INPUT}`}
+                    maxLength={32}
+                    autoComplete="off"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => void applyPromoCode()}
+                    disabled={isApplyingPromo || !promoCodeInput.trim()}
+                    className={`${BTN_PRIMARY} whitespace-nowrap`}
+                  >
+                    {isApplyingPromo ? 'Checking...' : appliedPromo ? 'Applied' : 'Apply'}
+                  </button>
+                </div>
+                {promoError && <p role="alert" className="mt-2 text-xs text-red-300">{promoError}</p>}
+                {appliedPromo && (
+                  <p role="status" className="mt-2 text-xs text-green-300">
+                    {appliedPromo.discountPercent}% discount applied. It stacks with the 20% NYAX discount when paying with NYAX.
+                  </p>
+                )}
+              </div>
+            )}
+
             <div>
               <label className={LABEL}>Select Payment Method</label>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
@@ -1008,7 +1089,12 @@ export default function SubmitNewsModalCorporate({
                 <span className="text-sm font-semibold text-white">{activePlanObj.name}</span>
                 {payMethod === 'nyax' && plan !== 'test' && (
                   <span className="block text-xs text-amber-400">
-                    {NYAX_DISCOUNT * 100}% NYAX discount applied (was ${basePrice.toFixed(2)})
+                    {NEWS_NYAX_DISCOUNT * 100}% NYAX discount applied
+                  </span>
+                )}
+                {appliedPromo && plan !== 'test' && (
+                  <span className="block text-xs text-green-300">
+                    {appliedPromo.code}: {appliedPromo.discountPercent}% off
                   </span>
                 )}
               </div>
@@ -1072,7 +1158,9 @@ export default function SubmitNewsModalCorporate({
             {/* NYAX */}
             {payMethod === 'nyax' &&
               renderWalletPanel('nyax', {
-                title: plan === 'test' ? 'Pay with NYAX' : `Pay with NYAX (${NYAX_DISCOUNT * 100}% off)`,
+                title: plan === 'test'
+                  ? 'Pay with NYAX'
+                  : `Pay with NYAX (${NEWS_NYAX_DISCOUNT * 100}% off)`,
                 subtitle: 'NYAX token transfer from your connected wallet',
                 border: 'border-amber-500/30',
                 titleColor: 'text-amber-300',
