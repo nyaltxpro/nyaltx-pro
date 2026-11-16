@@ -1,11 +1,22 @@
 import { NextResponse } from 'next/server';
 import { getAdminFromRequest } from '@/lib/adminAuth';
 import { getCollection } from '@/lib/mongodb';
-import type { NewsPromoCode } from '@/lib/newsPromoCodes';
+import { PROMO_PACKAGE_OPTIONS, type NewsPromoCode, type PromoPackageId } from '@/lib/newsPromoCodes';
 
 export const dynamic = 'force-dynamic';
 
 const MAX_DISCOUNT_PERCENT = 99;
+const PACKAGE_IDS = PROMO_PACKAGE_OPTIONS.map(option => option.id);
+const PACKAGE_ID_SET = new Set<string>(PACKAGE_IDS);
+
+function validPackageIds(value: unknown): value is PromoPackageId[] {
+  return (
+    Array.isArray(value) &&
+    value.length > 0 &&
+    new Set(value).size === value.length &&
+    value.every(packageId => typeof packageId === 'string' && PACKAGE_ID_SET.has(packageId))
+  );
+}
 
 function parseExpiration(value: unknown): Date | null | undefined {
   if (value === null || value === '') return null;
@@ -26,7 +37,11 @@ export async function GET() {
   try {
     const promoCodes = await getCollection<NewsPromoCode>('news_promo_codes');
     const codes = await promoCodes.find({}).sort({ createdAt: -1 }).toArray();
-    return NextResponse.json({ success: true, data: codes });
+    const data = codes.map(promo => ({
+      ...promo,
+      packageIds: promo.packageIds ?? ['news:feed', 'news:slider'],
+    }));
+    return NextResponse.json({ success: true, data });
   } catch (error) {
     console.error('Could not load news promo codes:', error);
     return NextResponse.json({ error: 'Could not load promo codes.' }, { status: 500 });
@@ -43,6 +58,7 @@ export async function POST(req: Request) {
     const code = typeof body.code === 'string' ? body.code.trim().toUpperCase() : '';
     const discountPercent = Number(body.discountPercent);
     const expiresAt = parseExpiration(body.expiresAt);
+    const packageIds = body.packageIds;
 
     if (!/^[A-Z0-9][A-Z0-9_-]{2,31}$/.test(code)) {
       return NextResponse.json(
@@ -55,6 +71,9 @@ export async function POST(req: Request) {
         { error: `Discount must be a whole percentage from 1 to ${MAX_DISCOUNT_PERCENT}.` },
         { status: 400 }
       );
+    }
+    if (!validPackageIds(packageIds)) {
+      return NextResponse.json({ error: 'Select at least one valid package for this promo code.' }, { status: 400 });
     }
     if (expiresAt === undefined) {
       return NextResponse.json({ error: 'Enter a valid expiration date or leave it blank.' }, { status: 400 });
@@ -70,6 +89,7 @@ export async function POST(req: Request) {
     const promo: NewsPromoCode = {
       code,
       discountPercent,
+      packageIds,
       active: true,
       expiresAt,
       createdAt: now,

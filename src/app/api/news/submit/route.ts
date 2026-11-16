@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getDb, getCollection } from '@/lib/mongodb';
 import { Order } from '@/app/api/admin/orders/route';
 import { verifyNewsPayment, sendNewsSubmissionConfirmationEmail } from '@/lib/newsEmailService';
-import { findUsableNewsPromoCode } from '@/lib/newsPromoCodes';
+import { findUsablePromoCode } from '@/lib/newsPromoCodes';
 import { calculateNewsPrice } from '@/lib/newsPricing';
 
 const NEWS_TEST_PLAN_ENABLED = process.env.NEXT_PUBLIC_ENABLE_NEWS_TEST_PLAN === 'true';
@@ -62,7 +62,8 @@ export async function POST(req: NextRequest) {
 
     let promoDiscountPercent = 0;
     if (promoCode) {
-      const { promo, message } = await findUsableNewsPromoCode(promoCode);
+      const packageId = plan === 'feed' ? 'news:feed' : 'news:slider';
+      const { promo, message } = await findUsablePromoCode(promoCode, packageId);
       if (!promo) {
         return NextResponse.json({ error: message || 'This promo code is invalid.' }, { status: 400 });
       }

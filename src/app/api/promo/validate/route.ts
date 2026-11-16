@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { findUsablePromoCode, PROMO_PACKAGE_OPTIONS } from '@/lib/newsPromoCodes';
 
 // Define promo codes and their benefits
 const PROMO_CODES = {
@@ -70,9 +71,11 @@ const PROMO_CODES = {
 
 export async function POST(req: Request) {
   try {
-    const { promoCode, tier } = await req.json();
+    const body = await req.json();
+    const promoCode = body.promoCode;
+    const tier = body.tier;
 
-    if (!promoCode || !tier) {
+    if (typeof promoCode !== 'string' || !promoCode.trim() || typeof tier !== 'string' || !tier.trim()) {
       return NextResponse.json(
         {
           valid: false,
@@ -83,6 +86,27 @@ export async function POST(req: Request) {
     }
 
     const code = promoCode.trim().toUpperCase();
+    const normalizedTier = tier.toLowerCase();
+    const pricingPackageId = PROMO_PACKAGE_OPTIONS.find(
+      option => option.id === `pricing:${normalizedTier}`
+    )?.id;
+    if (pricingPackageId) {
+      const managedPromo = await findUsablePromoCode(code, pricingPackageId);
+      if (managedPromo.found) {
+        if (!managedPromo.promo) {
+          return NextResponse.json({ valid: false, message: managedPromo.message });
+        }
+
+        return NextResponse.json({
+          valid: true,
+          type: 'percentage_discount',
+          discount: managedPromo.promo.discountPercent,
+          description: `${managedPromo.promo.discountPercent}% Discount`,
+          isFree: false,
+        });
+      }
+    }
+
     const promo = PROMO_CODES[code as keyof typeof PROMO_CODES];
 
     if (!promo) {
@@ -99,7 +123,7 @@ export async function POST(req: Request) {
       });
     }
 
-    if (!promo.validFor.includes(tier.toLowerCase())) {
+    if (!promo.validFor.includes(normalizedTier)) {
       return NextResponse.json({
         valid: false,
         message: `This promo code is not valid for ${tier}`,
