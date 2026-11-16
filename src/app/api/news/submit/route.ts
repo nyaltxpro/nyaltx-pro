@@ -20,18 +20,24 @@ export async function POST(req: NextRequest) {
       email,
       plan = 'feed', // 'feed' | 'slider' | 'prem'
       paymentMethod = 'paypal', // 'paypal' | 'usdc' | 'nyax'
-      amount = 199,
+      amount = plan === 'slider' || plan === 'prem' ? 199 : 99,
       txHash,
       paymentId,
       walletAddress,
       paymentStatus = 'completed',
-      planName,
-      isTest = false
+      planName
     } = data;
 
     if (!['paypal', 'usdc', 'nyax'].includes(paymentMethod)) {
       return NextResponse.json(
         { error: 'Unsupported payment method. Choose PayPal, USDC, or NYAX.' },
+        { status: 400 }
+      );
+    }
+
+    if (Boolean(data.isTest) || ['test', 'testnet'].includes(paymentStatus)) {
+      return NextResponse.json(
+        { error: 'Test payments are disabled for news submissions.' },
         { status: 400 }
       );
     }
@@ -58,8 +64,7 @@ export async function POST(req: NextRequest) {
       paymentId: paymentId || null,
       txHash: txHash || null,
       amount,
-      paymentStatus,
-      isTest: Boolean(isTest)
+      paymentStatus
     });
 
     if (!paymentVerification.verified) {
@@ -79,8 +84,8 @@ export async function POST(req: NextRequest) {
     const finalSlug = `${baseSlug}-${Date.now().toString(36)}`;
 
     const resolvedPlanName = planName || (plan === 'slider'
-      ? 'Full Service ($499)'
-      : 'Direct Distribution ($199)');
+      ? 'News Publishing & Distribution ($199)'
+      : 'News Publishing ($99)');
 
     const submissionDoc = {
       title: title.trim(),

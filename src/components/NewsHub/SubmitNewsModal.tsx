@@ -21,7 +21,6 @@ export interface SubmitNewsModalProps {
 
 type PayMethod = 'paypal' | 'usdc' | 'nyax';
 type WalletMethod = Exclude<PayMethod, 'paypal'>;
-type PayMode = 'live' | 'testnet' | 'simulate';
 
 /* ---------- Corporate News (admin) theme tokens ---------- */
 const FONT = { fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' } as const;
@@ -48,36 +47,39 @@ export interface PlanItem {
 const PUBLISH_PLANS: PlanItem[] = [
   {
     id: 'feed',
-    badge: 'DO IT YOURSELF',
-    name: 'Direct Distribution',
-    price: 199,
+    badge: 'NEWS PUBLISHING',
+    name: 'News Publishing',
+    price: 99,
     priceLabel: 'flat rate per release',
-    ctaText: 'Start DIY release',
-    desc: 'Publish your story on NYALTX with direct distribution to our News Hub, RSS feed, and social channels.',
+    ctaText: 'Publish Your News',
+    desc: 'Get your company news published and discoverable on the NYALTX News Hub.',
     features: [
-      'Unlimited word count',
-      'Goes live on the NYALTX News Hub after a quick compliance check',
-      'Included in our RSS feed and weekly newsletter',
-      'Shared on NYALTX social channels',
-      'Live in under 24 hours',
-      'Full editorial review and headline help',
+      'Full article published on NYALTX News Hub',
+      'Inclusion in the live industry news feed',
+      'Company logo and featured image',
+      'Links to your website and social channels',
+      'Dedicated, shareable article URL',
+      'SEO-friendly article page',
     ],
   },
   {
     id: 'slider',
-    badge: 'MOST POPULAR',
-    name: 'Full Service',
-    price: 499,
+    badge: 'PREMIUM VISIBILITY & DISTRIBUTION',
+    name: 'News Publishing & Distribution',
+    price: 199,
     priceLabel: 'per release',
-    ctaText: 'Start Full Service',
-    desc: 'Publish your press release on NYALTX, in our RSS feed and newsletter, and push it out through our distribution network. Write it yourself or let our editors polish it first.',
+    ctaText: 'Get Featured',
+    desc: 'Amplify your announcement with featured placement and additional promotional distribution.',
     features: [
-      'Unlimited word count',
-      'Goes live on the NYALTX News Hub after a quick compliance check',
-      'Included in our RSS feed and weekly newsletter',
-      'Shared on NYALTX social channels',
-      'Live in under 24 hours',
-      'Full editorial review and headline help',
+      'Everything in News Publishing',
+      '7-day featured placement on the News Hub',
+      'Priority visibility above standard news',
+      'Inclusion in the NYALTX newsletter',
+      'Promotion across NYALTX social channels',
+      'Custom-branded promotional graphic',
+      'Article editing and headline optimization',
+      'Featured company spotlight',
+      'Scheduled publication option',
     ],
   },
 ];
@@ -92,7 +94,6 @@ const NYAX_DISCOUNT = 0.2; // 20% off with NYAX
 const DEFAULT_RECEIVER: `0x${string}` = '0x36537943bb4B3489a7306BBa807571EBbbe70896';
 const DEFAULT_NYAX: `0x${string}` = '0x5eed5621b92be4473f99bacac27deb57d9';
 const DEFAULT_USDC: `0x${string}` = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';
-const TESTNET_USDC: `0x${string}` = '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238';
 
 const RECEIVER =
   (process.env.NEXT_PUBLIC_PAYMENT_RECEIVER_ADDRESS as `0x${string}` | undefined) ?? DEFAULT_RECEIVER;
@@ -103,15 +104,6 @@ const USDC_TOKEN =
 const PAYMENT_CHAIN_ID = process.env.NEXT_PUBLIC_PAYMENT_CHAIN_ID
   ? Number(process.env.NEXT_PUBLIC_PAYMENT_CHAIN_ID)
   : 1;
-
-/* ---------- Testnet configuration ---------- */
-// Sepolia chain id (must also be enabled in your wagmi / AppKit networks config)
-const TESTNET_CHAIN_ID = process.env.NEXT_PUBLIC_TESTNET_CHAIN_ID
-  ? Number(process.env.NEXT_PUBLIC_TESTNET_CHAIN_ID)
-  : 11155111;
-
-// Test mode selector visible in dev, or in production only when NEXT_PUBLIC_ENABLE_TEST_MODE=true
-const TEST_MODE_ALLOWED = true;
 
 const convertToWorkingIPFSUrl = (url: string) =>
   url.replace('https://gateway.pinata.cloud/ipfs/', 'https://ipfs.io/ipfs/');
@@ -220,9 +212,6 @@ export default function SubmitNewsModalCorporate({
   const [payMethod, setPayMethod] = useState<PayMethod>('paypal');
   const [selectedSwatch] = useState(0);
 
-  // Payment mode: live (real money) | testnet (PayPal sandbox and Sepolia USDC) | simulate (fake, no network)
-  const [payMode, setPayMode] = useState<PayMode>('live');
-
   // Cover image (IPFS / external URL)
   const [uploadedImg, setUploadedImg] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -271,23 +260,6 @@ export default function SubmitNewsModalCorporate({
   }, []);
 
   if (!isOpen) return null;
-
-  // Mode helpers
-  const simulate = payMode === 'simulate';
-  const testnet = payMode === 'testnet';
-  const isTestFlow = payMode !== 'live';
-  // NYAX has no testnet token, so in testnet mode it falls back to a simulated payment.
-  const isSimulatedFor = (m: PayMethod) => simulate || (testnet && m === 'nyax');
-  const networkFor = (m: PayMethod) =>
-    simulate
-      ? 'simulated'
-      : testnet
-        ? m === 'paypal'
-          ? 'paypal-sandbox'
-          : m === 'usdc'
-            ? 'sepolia'
-            : 'simulated'
-        : 'mainnet';
 
   // Price calculations
   const currentPlans = PLANS_CONFIG[subType];
@@ -417,10 +389,7 @@ export default function SubmitNewsModalCorporate({
     paymentId?: string;
     txHash?: string;
     walletAddress?: string;
-    paymentStatus?: string;
     amount?: number;
-    isTest?: boolean;
-    network?: string;
   }) => {
     setIsSubmitting(true);
     setFormError('');
@@ -459,9 +428,7 @@ export default function SubmitNewsModalCorporate({
       txHash: paymentOverride?.txHash || (cryptoTxHash.trim() || null),
       paymentId: paymentOverride?.paymentId || null,
       walletAddress: paymentOverride?.walletAddress || null,
-      paymentStatus: paymentOverride?.paymentStatus || (isTestFlow ? 'test' : 'completed'),
-      isTest: paymentOverride?.isTest ?? isTestFlow,
-      network: paymentOverride?.network ?? networkFor(currentPayMethod)
+      paymentStatus: 'completed'
     };
 
     try {
@@ -498,7 +465,7 @@ export default function SubmitNewsModalCorporate({
     } catch (err: any) {
       const base = err.message || 'Error submitting story. Please try again.';
       setFormError(
-        paymentOverride?.txHash && !simulate
+        paymentOverride?.txHash
           ? `Payment sent (tx ${paymentOverride.txHash.slice(0, 10)}...) but submission failed: ${base}. Click "Submit Story with TX Hash" to retry — do not pay again.`
           : base
       );
@@ -507,7 +474,7 @@ export default function SubmitNewsModalCorporate({
     }
   };
 
-  /* ---------- On-chain EVM payment (Ethereum mainnet, or Sepolia in testnet mode) ---------- */
+  /* ---------- On-chain EVM token payment ---------- */
   const payWithWallet = async (method: WalletMethod) => {
     if (!validEmail) {
       setFormError('Please enter your contact email address above first.');
@@ -524,21 +491,16 @@ export default function SubmitNewsModalCorporate({
     setFormError('');
 
     try {
-      const targetChainId = testnet ? TESTNET_CHAIN_ID : PAYMENT_CHAIN_ID;
+      const targetChainId = PAYMENT_CHAIN_ID;
       if (targetChainId && chain?.id !== targetChainId) {
         try {
           await switchChainAsync({ chainId: targetChainId });
         } catch {
-          throw new Error(
-            testnet
-              ? 'Could not switch to Sepolia. Switch your wallet to Sepolia, and make sure Sepolia is enabled in your wagmi / AppKit networks config.'
-              : 'Please switch to the correct chain to pay'
-          );
+          throw new Error('Please switch to the correct chain to pay.');
         }
       }
 
-      const token =
-        method === 'nyax' ? NYAX_TOKEN : testnet ? TESTNET_USDC : USDC_TOKEN;
+      const token = method === 'nyax' ? NYAX_TOKEN : USDC_TOKEN;
       if (!isAddress(token)) {
         throw new Error(
           method === 'nyax'
@@ -564,51 +526,10 @@ export default function SubmitNewsModalCorporate({
         txHash,
         walletAddress: walletAddress || undefined,
         amount: finalPrice,
-        paymentStatus: testnet ? 'testnet' : 'completed',
-        isTest: testnet,
-        network: networkFor(method)
       });
     } catch (err: any) {
       console.error('Wallet payment failed:', err);
       setFormError(err?.shortMessage || err?.message || 'Wallet transaction failed. You can also send manually and paste the tx hash below.');
-    } finally {
-      setWalletPaying(null);
-    }
-  };
-
-  /* ---------- Simulated payment (no network, no funds) ---------- */
-  const simulateTestPayment = async (method: PayMethod) => {
-    if (!validEmail) {
-      setFormError('Please enter your contact email address above first.');
-      return;
-    }
-    setFormError('');
-    setWalletPaying(method === 'paypal' ? null : (method as WalletMethod));
-    try {
-      await new Promise((r) => setTimeout(r, 800)); // fake processing delay
-      const rand = Array.from({ length: 60 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
-      if (method === 'paypal') {
-        await handlePayAndSubmit({
-          paymentMethod: 'paypal',
-          paymentId: `TEST-PAYPAL-${Date.now()}`,
-          amount: finalPrice,
-          paymentStatus: 'test',
-          isTest: true,
-          network: 'simulated'
-        });
-      } else {
-        const fakeHash = `0xTEST${rand}`;
-        setCryptoTxHash(fakeHash);
-        await handlePayAndSubmit({
-          paymentMethod: method,
-          txHash: fakeHash,
-          walletAddress: '0xTEST000000000000000000000000000000000000',
-          amount: finalPrice,
-          paymentStatus: 'test',
-          isTest: true,
-          network: 'simulated'
-        });
-      }
     } finally {
       setWalletPaying(null);
     }
@@ -632,28 +553,11 @@ export default function SubmitNewsModalCorporate({
     </button>
   );
 
-  const modeBtn = (id: PayMode, label: string, activeCls: string) => (
-    <button
-      key={id}
-      type="button"
-      onClick={() => {
-        setPayMode(id);
-        setFormError('');
-      }}
-      className={`flex-1 px-3 py-2 rounded-md text-xs font-semibold transition-all ${payMode === id ? activeCls : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
-        }`}
-    >
-      {label}
-    </button>
-  );
-
   /* Shared panel for USDC / NYAX (connect wallet -> pay -> auto submit) */
   const renderWalletPanel = (
     method: WalletMethod,
     cfg: { title: string; subtitle: string; border: string; titleColor: string; amountText: string; btnLabel: string }
   ) => {
-    const useSim = isSimulatedFor(method);
-
     return (
       <div className={`p-4 bg-gray-700/30 border ${cfg.border} rounded-lg space-y-3`}>
         <div className="flex justify-between items-center gap-3">
@@ -672,29 +576,7 @@ export default function SubmitNewsModalCorporate({
           </span>
         </div>
 
-        {testnet && method === 'nyax' && (
-          <p className="text-xs text-yellow-300 bg-yellow-500/10 p-2.5 rounded-lg border border-yellow-500/20">
-            NYAX has no testnet token, so this payment is simulated in Testnet mode.
-          </p>
-        )}
-        {testnet && method === 'usdc' && (
-          <p className="text-xs text-yellow-300 bg-yellow-500/10 p-2.5 rounded-lg border border-yellow-500/20">
-            Sepolia USDC is required for testnet payments.
-          </p>
-        )}
-
-        {useSim ? (
-          <button
-            type="button"
-            onClick={() => simulateTestPayment(method)}
-            disabled={isSubmitting || walletPaying !== null}
-            className={`w-full py-3 ${BTN_PRIMARY}`}
-          >
-            {walletPaying === method || isSubmitting
-              ? 'Simulating payment...'
-              : `🧪 Simulate ${method.toUpperCase()} payment ($${finalPrice.toFixed(2)})`}
-          </button>
-        ) : !isConnected ? (
+        {!isConnected ? (
           <div className="text-center py-4 bg-black/30 rounded-lg border border-gray-700/40 space-y-2">
             <p className="text-xs text-gray-400">Connect your Web3 wallet (MetaMask, Coinbase, WalletConnect) to pay:</p>
             <div className="flex justify-center">
@@ -727,27 +609,25 @@ export default function SubmitNewsModalCorporate({
           </div>
         )}
 
-        {!useSim && (
-          <details className="text-xs text-gray-400 pt-1">
-            <summary className="cursor-pointer font-medium text-gray-400 hover:text-white">
-              Or send manually to Treasury address & paste TXID ▾
-            </summary>
-            <div className="mt-2 space-y-2">
-              <div className="flex items-center gap-2">
-                <code className="flex-1 p-2 bg-black/40 rounded border border-gray-700/40 text-[11px] truncate">{RECEIVER}</code>
-                <button type="button" onClick={() => copyAddr(RECEIVER)} className="px-2.5 py-1.5 bg-gray-600/50 hover:bg-gray-600/70 text-xs rounded text-white">
-                  {copiedReceiver ? '✓ Copied' : 'Copy'}
-                </button>
-              </div>
-              <input
-                placeholder="0x... (paste your transaction hash here)"
-                value={cryptoTxHash}
-                onChange={(e) => setCryptoTxHash(e.target.value)}
-                className={INPUT}
-              />
+        <details className="text-xs text-gray-400 pt-1">
+          <summary className="cursor-pointer font-medium text-gray-400 hover:text-white">
+            Or send manually to Treasury address & paste TXID ▾
+          </summary>
+          <div className="mt-2 space-y-2">
+            <div className="flex items-center gap-2">
+              <code className="flex-1 p-2 bg-black/40 rounded border border-gray-700/40 text-[11px] truncate">{RECEIVER}</code>
+              <button type="button" onClick={() => copyAddr(RECEIVER)} className="px-2.5 py-1.5 bg-gray-600/50 hover:bg-gray-600/70 text-xs rounded text-white">
+                {copiedReceiver ? '✓ Copied' : 'Copy'}
+              </button>
             </div>
-          </details>
-        )}
+            <input
+              placeholder="0x... (paste your transaction hash here)"
+              value={cryptoTxHash}
+              onChange={(e) => setCryptoTxHash(e.target.value)}
+              className={INPUT}
+            />
+          </div>
+        </details>
       </div>
     );
   };
@@ -771,15 +651,6 @@ export default function SubmitNewsModalCorporate({
 
         {/* Animated stepper */}
         <ModalStepper current={modalStep} />
-
-        {/* Test mode banner */}
-        {isTestFlow && (
-          <div className="mb-4 p-2 text-center text-xs font-semibold text-yellow-300 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-            {testnet
-              ? '🧪 TESTNET MODE: PayPal Sandbox and Sepolia USDC. Test funds only.'
-              : '🧪 SIMULATED MODE: no real payment and no network call will be made.'}
-          </div>
-        )}
 
         {/* Step 1: Write */}
         {modalStep === 1 && (
@@ -1065,7 +936,7 @@ export default function SubmitNewsModalCorporate({
                           : 'bg-gray-700/70 hover:bg-gray-600 text-white'
                       }`}
                     >
-                      {p.ctaText} (${p.price})
+                      {p.ctaText} — ${p.price}
                     </button>
                   </div>
                 );
@@ -1098,27 +969,6 @@ export default function SubmitNewsModalCorporate({
               />
             </div>
 
-            {/* Payment mode selector: Live / Testnet / Simulated */}
-            {TEST_MODE_ALLOWED && (
-              <div
-                className={`p-3 rounded-lg border space-y-2 ${isTestFlow ? 'border-yellow-500/50 bg-yellow-500/10' : 'border-gray-600/30 bg-gray-700/30'
-                  }`}
-              >
-                <div className="text-sm font-semibold text-yellow-300">🧪 Payment mode</div>
-                <div className="flex gap-1 p-1 bg-gray-800/60 rounded-lg border border-gray-600/30">
-                  {modeBtn('live', 'Live', 'bg-green-500/20 text-green-300 border border-green-500/40')}
-                  {modeBtn('testnet', 'Testnet', 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/40')}
-                  {modeBtn('simulate', 'Simulated', 'bg-purple-500/20 text-purple-300 border border-purple-500/40')}
-                </div>
-                <p className="text-xs text-gray-400">
-                  {payMode === 'live' && 'Real payments with real money.'}
-                  {payMode === 'testnet' &&
-                    'PayPal Sandbox and USDC on Sepolia with test funds. NYAX has no testnet token, so it is simulated.'}
-                  {payMode === 'simulate' && 'Fake payments for every method. Nothing is sent to any network.'}
-                </p>
-              </div>
-            )}
-
             <div>
               <label className={LABEL}>Select Payment Method</label>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
@@ -1150,12 +1000,10 @@ export default function SubmitNewsModalCorporate({
                   </div>
                   <div>
                     <h4 className="text-sm font-semibold text-blue-400">
-                      PayPal & Card Payment{testnet ? ' (Sandbox)' : ''}
+                      PayPal & Card Payment
                     </h4>
                     <p className="text-xs text-gray-400">
-                      {testnet
-                        ? 'Log in with a PayPal sandbox buyer account to test'
-                        : 'Complete payment securely with PayPal or Credit/Debit Card'}
+                      Complete payment securely with PayPal or Credit/Debit Card
                     </p>
                   </div>
                 </div>
@@ -1164,32 +1012,17 @@ export default function SubmitNewsModalCorporate({
                   <p className="text-xs text-amber-300 bg-amber-500/10 p-2.5 rounded-lg border border-amber-500/20">
                     ⚠️ Please enter a valid contact email above to activate PayPal checkout buttons.
                   </p>
-                ) : simulate ? (
-                  <button
-                    type="button"
-                    onClick={() => simulateTestPayment('paypal')}
-                    disabled={isSubmitting}
-                    className={`w-full py-3 ${BTN_PRIMARY}`}
-                  >
-                    {isSubmitting ? 'Submitting...' : `🧪 Simulate PayPal payment ($${finalPrice.toFixed(2)})`}
-                  </button>
                 ) : (
                   <div className="pt-2">
                     <PayPalCheckout
-                      key={payMode} // remount when switching between live and sandbox
                       amount={finalPrice.toFixed(2)}
                       tier={`${subType}_${plan}`}
                       email={userEmail.trim()}
-                      // Sandbox flag for PayPalCheckout (it must read these props to switch to sandbox credentials)
-                      {...({ sandbox: testnet, environment: testnet ? 'sandbox' : 'production' } as any)}
                       onSuccess={(details: any) => {
                         handlePayAndSubmit({
                           paymentMethod: 'paypal',
                           paymentId: details.id,
-                          amount: finalPrice,
-                          paymentStatus: testnet ? 'testnet' : 'completed',
-                          isTest: testnet,
-                          network: testnet ? 'paypal-sandbox' : 'mainnet'
+                          amount: finalPrice
                         });
                       }}
                       onError={(err: any) => {
@@ -1204,7 +1037,7 @@ export default function SubmitNewsModalCorporate({
             {/* USDC */}
             {payMethod === 'usdc' &&
               renderWalletPanel('usdc', {
-                title: `Pay with USDC${testnet ? ' (Sepolia)' : ''}`,
+                title: 'Pay with USDC',
                 subtitle: 'USDC token transfer from your connected wallet',
                 border: 'border-cyan-500/30',
                 titleColor: 'text-cyan-300',
@@ -1229,7 +1062,7 @@ export default function SubmitNewsModalCorporate({
 
             <div className="flex justify-between items-center pt-3 border-t border-gray-700/20">
               <button type="button" onClick={() => setModalStep(2)} className={BTN_GHOST}>← Back</button>
-              {payMethod !== 'paypal' && !isSimulatedFor(payMethod) && (
+              {payMethod !== 'paypal' && (
                 <button
                   type="button"
                   onClick={() => handlePayAndSubmit()}
@@ -1252,13 +1085,6 @@ export default function SubmitNewsModalCorporate({
               Thank you! Your submission is now in our moderation queue and marked as <b>“Pending review”</b>.
               Our editors verify the payment and accuracy, and you will receive an email as soon as it goes live!
             </p>
-            {isTestFlow && (
-              <p className="text-xs text-yellow-300">
-                {testnet
-                  ? '🧪 This was a testnet submission. Only test funds were used.'
-                  : '🧪 This was a simulated submission. No real payment was made.'}
-              </p>
-            )}
             <button onClick={onClose} className={BTN_PRIMARY}>
               Back to News Hub
             </button>

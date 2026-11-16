@@ -25,7 +25,6 @@ export interface VerifyPaymentParams {
   txHash?: string | null;
   amount: number | string;
   paymentStatus?: string | null;
-  isTest?: boolean;
 }
 
 export interface PaymentVerificationResult {
@@ -40,20 +39,7 @@ export interface PaymentVerificationResult {
  * without completing an authentic transaction or payment order.
  */
 export async function verifyNewsPayment(params: VerifyPaymentParams): Promise<PaymentVerificationResult> {
-  const { paymentMethod, paymentId, txHash, amount, paymentStatus, isTest } = params;
-
-  // 1. If explicit test / simulate mode was selected
-  if (isTest || paymentStatus === 'test' || paymentStatus === 'testnet') {
-    return {
-      verified: true,
-      providerDetails: {
-        mode: 'testnet_or_simulation',
-        paymentMethod,
-        ref: paymentId || txHash || 'TEST_SIMULATED',
-        amount: Number(amount)
-      }
-    };
-  }
+  const { paymentMethod, paymentId, txHash, amount, paymentStatus } = params;
 
   // 2. PayPal Verification
   if (paymentMethod === 'paypal') {
