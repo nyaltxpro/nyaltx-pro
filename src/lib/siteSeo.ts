@@ -19,9 +19,9 @@ export type SiteSeoSettings = {
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.nyaltx.pro';
 
 export const FALLBACK_SITE_SEO: SiteSeoSettings = {
-  title: 'NYALTX | Digital Markets & Tokenized Securities Discovery Platform',
+  title: 'NYALTX | New York Alt Exchange, Digital Markets & Tokenized Securities',
   description:
-    'Discover digital markets, tokenized securities, and project visibility on NYALTX — connecting DeFi discovery with tokenized stock market data.',
+    'NYALTX (New York Alt Exchange) links DeFi project discovery with tokenized securities data, market news, and trading tools in one platform.',
   keywords:
     'NYALTX, digital markets, tokenized securities, xStocks, DeFi discovery, capital markets, blockchain, Governa, NYAX',
   authors: 'NYALTX Team',
@@ -72,7 +72,7 @@ export async function buildRootMetadata(): Promise<Metadata> {
   return {
     metadataBase,
     title: {
-      default: `${seo.siteName || 'NYALTX'} | New York Alt Exchange — Digital Markets & Tokenized Securities`,
+      default: `${seo.siteName || 'NYALTX'} | New York Alt Exchange, Digital Markets & Tokenized Securities`,
       template: `%s | ${seo.siteName || 'NYALTX'}`,
     },
     description: seo.description,

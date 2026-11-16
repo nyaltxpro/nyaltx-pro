@@ -88,11 +88,25 @@ interface NewsArticle {
     walletAddress?: string;
     paymentStatus?: string;
     email?: string;
+    isPaid?: boolean;
+    paymentVerified?: boolean;
 }
+
+const isPaidNewsSubmission = (article: NewsArticle) =>
+    Boolean(
+        article.isPaid ||
+        article.paymentVerified ||
+        article.paymentMethod ||
+        article.paymentId ||
+        article.txHash ||
+        article.plan ||
+        article.amount
+    );
 
 function AdminCorporateNewsComponent() {
     const [news, setNews] = useState<NewsArticle[]>([]);
     const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'published' | 'draft'>('all');
+    const [submissionFilter, setSubmissionFilter] = useState<'all' | 'paid' | 'corporate'>('all');
     const [approvingId, setApprovingId] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -211,7 +225,7 @@ function AdminCorporateNewsComponent() {
     const loadNews = async () => {
         try {
             setLoading(true);
-            const response = await fetch('/api/admin/news?status=all&limit=50');
+            const response = await fetch('/api/admin/news?status=all&limit=500');
             if (!response.ok) throw new Error('Failed to load news');
             const data = await response.json();
             setNews(data.news || []);
@@ -243,13 +257,13 @@ function AdminCorporateNewsComponent() {
         setIsCreating(true);
         setNewsForm({
             title: article.title,
-            content: article.content,
-            excerpt: article.excerpt,
+            content: article.content || '',
+            excerpt: article.excerpt || '',
             featuredImage: article.featuredImage || '',
             status: article.status,
             featuredInBanner: Boolean(article.featuredInBanner),
-            tags: article.tags.join(', '),
-            author: article.author,
+            tags: Array.isArray(article.tags) ? article.tags.join(', ') : '',
+            author: article.author || 'Community Submission',
             editorType: 'quill' // Default to quill for existing articles
         });
     };
@@ -278,14 +292,7 @@ function AdminCorporateNewsComponent() {
     const handleApproveNews = async (article: NewsArticle) => {
         try {
             setApprovingId(article._id);
-            const isPaidSubmission = Boolean(
-                (article as any).isPaid ||
-                article.plan ||
-                article.paymentMethod ||
-                article.amount ||
-                article.type === 'pr' ||
-                article.email
-            );
+            const isPaidSubmission = isPaidNewsSubmission(article);
             const shouldBeInBanner = article.plan === 'slider' || article.plan === 'prem' || Boolean(article.featuredInBanner);
             const response = await fetch('/api/admin/news', {
                 method: 'PUT',
@@ -498,15 +505,25 @@ function AdminCorporateNewsComponent() {
         });
     };
 
+    const newsByType = news.filter(article => {
+        if (submissionFilter === 'paid') return isPaidNewsSubmission(article);
+        if (submissionFilter === 'corporate') return !isPaidNewsSubmission(article);
+        return true;
+    });
+    const visibleNews = newsByType.filter(
+        article => statusFilter === 'all' || article.status === statusFilter
+    );
+    const paidNewsCount = news.filter(isPaidNewsSubmission).length;
+
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
                     <h2 className="text-2xl font-semibold text-white" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                        Corporate News Management
+                        News Management
                     </h2>
                     <p className="text-gray-400 text-sm mt-1" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                        Manage corporate news articles and announcements
+                        Review paid submissions and manage corporate announcements separately
                     </p>
                 </div>
                 <div className="flex items-center gap-3">
@@ -545,6 +562,27 @@ function AdminCorporateNewsComponent() {
                     </div>
                 </div>
             )}
+
+            <div className="flex flex-wrap items-center gap-2">
+                <span className="mr-2 text-sm text-gray-400">News type:</span>
+                {([
+                    ['all', 'All News', news.length],
+                    ['paid', 'Paid Submissions', paidNewsCount],
+                    ['corporate', 'Corporate News', news.length - paidNewsCount],
+                ] as const).map(([filter, label, count]) => (
+                    <button
+                        key={filter}
+                        onClick={() => setSubmissionFilter(filter)}
+                        className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+                            submissionFilter === filter
+                                ? 'bg-cyan-500 text-black'
+                                : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                        }`}
+                    >
+                        {label} ({count})
+                    </button>
+                ))}
+            </div>
 
             {/* Create/Edit Form */}
             {isCreating && (
@@ -798,10 +836,14 @@ function AdminCorporateNewsComponent() {
                 <div className="p-6 border-b border-gray-700/20 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <h3 className="font-semibold text-white flex items-center gap-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                         <FaNewspaper className="w-5 h-5 text-cyan-400" />
-                        News Articles & Submissions
-                        {news.length > 0 && (
+                        {submissionFilter === 'paid'
+                            ? 'Paid News Submissions'
+                            : submissionFilter === 'corporate'
+                                ? 'Corporate News'
+                                : 'News Articles & Submissions'}
+                        {newsByType.length > 0 && (
                             <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
-                                {news.length}
+                                {newsByType.length}
                             </span>
                         )}
                     </h3>
@@ -816,21 +858,21 @@ function AdminCorporateNewsComponent() {
                                     : 'bg-gray-700/50 hover:bg-gray-700/80 text-gray-300'
                             }`}
                         >
-                            All ({news.length})
+                            All ({newsByType.length})
                         </button>
                         <button
                             onClick={() => setStatusFilter('pending')}
                             className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
                                 statusFilter === 'pending'
                                     ? 'bg-amber-500 text-black font-bold shadow-md'
-                                    : news.filter(n => n.status === 'pending').length > 0
+                                    : newsByType.filter(n => n.status === 'pending').length > 0
                                     ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse'
                                     : 'bg-gray-700/50 hover:bg-gray-700/80 text-gray-300'
                             }`}
                         >
                             <span>Pending Review</span>
                             <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-black/30 font-bold">
-                                {news.filter(n => n.status === 'pending').length}
+                                {newsByType.filter(n => n.status === 'pending').length}
                             </span>
                         </button>
                         <button
@@ -841,7 +883,7 @@ function AdminCorporateNewsComponent() {
                                     : 'bg-gray-700/50 hover:bg-gray-700/80 text-gray-300'
                             }`}
                         >
-                            Published ({news.filter(n => n.status === 'published').length})
+                            Published ({newsByType.filter(n => n.status === 'published').length})
                         </button>
                         <button
                             onClick={() => setStatusFilter('draft')}
@@ -851,7 +893,7 @@ function AdminCorporateNewsComponent() {
                                     : 'bg-gray-700/50 hover:bg-gray-700/80 text-gray-300'
                             }`}
                         >
-                            Drafts ({news.filter(n => n.status === 'draft').length})
+                            Drafts ({newsByType.filter(n => n.status === 'draft').length})
                         </button>
                     </div>
                 </div>
@@ -862,19 +904,23 @@ function AdminCorporateNewsComponent() {
                             <FaNewspaper className="w-12 h-12 text-gray-400 animate-pulse mx-auto mb-4" />
                             <p className="text-gray-400">Loading news articles...</p>
                         </div>
-                    ) : news.filter(a => statusFilter === 'all' || a.status === statusFilter).length === 0 ? (
+                    ) : visibleNews.length === 0 ? (
                         <div className="text-center py-12">
                             <FaNewspaper className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                             <p className="text-gray-400 font-medium mb-2">No news articles found in this filter</p>
                             <p className="text-gray-500 text-sm">
-                                {statusFilter === 'pending' ? 'No pending submissions awaiting review.' : 'Create your first news article to get started'}
+                                {statusFilter === 'pending'
+                                    ? 'No pending submissions awaiting review.'
+                                    : submissionFilter === 'paid'
+                                        ? 'No paid news submissions found in this filter.'
+                                        : submissionFilter === 'corporate'
+                                            ? 'No corporate news articles found in this filter.'
+                                            : 'Create your first news article to get started'}
                             </p>
                         </div>
                     ) : (
                         <div className="space-y-4">
-                            {news
-                                .filter(article => statusFilter === 'all' || article.status === statusFilter)
-                                .map(article => (
+                            {visibleNews.map(article => (
                                 <div key={article._id} className={`border rounded-xl p-5 transition-all duration-200 ${
                                     article.status === 'pending'
                                         ? 'bg-amber-950/20 border-amber-500/30 hover:bg-amber-950/30'
@@ -896,6 +942,11 @@ function AdminCorporateNewsComponent() {
                                                 {article.type === 'pr' && (
                                                     <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-purple-500/20 text-purple-300 border border-purple-500/30">
                                                         Press Release
+                                                    </span>
+                                                )}
+                                                {isPaidNewsSubmission(article) && (
+                                                    <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                                                        Paid Submission
                                                     </span>
                                                 )}
                                                 {article.featuredInBanner && (
@@ -1023,10 +1074,12 @@ function AdminCorporateNewsComponent() {
                                             )}
                                             <button
                                                 onClick={() => handleEditNews(article)}
-                                                className="p-2 bg-green-500/20 hover:bg-green-500/30 text-green-300 border border-green-500/30 rounded-lg transition-all duration-200"
+                                                className="inline-flex items-center gap-1.5 px-2.5 py-2 bg-green-500/20 hover:bg-green-500/30 text-green-300 border border-green-500/30 rounded-lg transition-all duration-200 text-xs font-medium"
                                                 title="Edit article"
+                                                aria-label={`Edit ${article.title}`}
                                             >
                                                 <FaEdit className="w-4 h-4" />
+                                                Edit
                                             </button>
                                             <button
                                                 onClick={() => handleDeleteNews(article._id)}

@@ -2,16 +2,16 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.nyaltx.pro'),
-  title: 'Meet the NYALTX Team | Leadership & Builders',
+  title: { absolute: 'NYALTX Team: Leaders Behind the Exchange' },
   description:
-    'Meet the multidisciplinary crew of builders, traders, and storytellers behind the New York Alt Exchange (NYALTX).',
+    'Meet the founders, advisors, and specialists building NYALTX and its tokenized securities platform.',
   alternates: {
     canonical: 'https://www.nyaltx.pro/team',
   },
   openGraph: {
-    title: 'Meet the NYALTX Team | Leadership & Builders',
+    title: 'NYALTX Team: Leaders Behind the Exchange',
     description:
-      'Meet the multidisciplinary crew of builders, traders, and storytellers behind the New York Alt Exchange (NYALTX).',
+      'Meet the founders, advisors, and specialists building NYALTX and its tokenized securities platform.',
     url: 'https://www.nyaltx.pro/team',
     siteName: 'NYALTX',
     type: 'website',

@@ -4,18 +4,18 @@ import homeContent from '../../content/landing/home.json';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.nyaltx.pro'),
-  title: 'NYALTX | New York Alt Exchange — Digital Markets & Tokenized Securities',
+  title: { absolute: 'NYALTX | New York Alt Exchange, Digital Markets & Tokenized Securities' },
   description:
-    'NYALTX (New York Alt Exchange) is the premier digital markets and tokenized securities discovery platform — connecting DeFi discovery with institutional tokenized stock market intelligence.',
+    'NYALTX (New York Alt Exchange) links DeFi project discovery with tokenized securities data, market news, and trading tools in one platform.',
   keywords:
     'NYALTX, New York Alt Exchange, NYAX, digital markets, tokenized securities, xStocks, DeFi discovery, capital markets, blockchain, crypto trading, tokenized stocks',
   alternates: {
     canonical: 'https://www.nyaltx.pro',
   },
   openGraph: {
-    title: 'NYALTX | New York Alt Exchange — Digital Markets & Tokenized Securities',
+    title: 'NYALTX | New York Alt Exchange, Digital Markets & Tokenized Securities',
     description:
-      'Discover digital markets, tokenized securities, and project visibility on NYALTX (New York Alt Exchange) — connecting DeFi discovery with tokenized stock market data.',
+      'NYALTX (New York Alt Exchange) links DeFi project discovery with tokenized securities data, market news, and trading tools in one platform.',
     type: 'website',
     url: 'https://www.nyaltx.pro',
     siteName: 'NYALTX',
@@ -38,9 +38,9 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     site: '@nyaltx',
     creator: '@nyaltx',
-    title: 'NYALTX | New York Alt Exchange — Digital Markets & Tokenized Securities',
+    title: 'NYALTX | New York Alt Exchange, Digital Markets & Tokenized Securities',
     description:
-      'Discover digital markets, tokenized securities, and project visibility on NYALTX (New York Alt Exchange).',
+      'NYALTX (New York Alt Exchange) links DeFi project discovery with tokenized securities data, market news, and trading tools in one platform.',
     images: ['https://www.nyaltx.pro/og-image.png'],
   },
   robots: {

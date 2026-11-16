@@ -4,16 +4,16 @@ import contactContent from '../../../../content/contact/contact-data.json';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.nyaltx.pro'),
-  title: 'Contact Us | NYALTX',
+  title: { absolute: 'Contact NYALTX: Support and Partnership Inquiries' },
   description:
-    'Get in touch with the NYALTX team for partnerships, token listings, press releases, or support.',
+    'Reach the NYALTX team for support, listing questions, media requests, or partnership proposals.',
   alternates: {
     canonical: 'https://www.nyaltx.pro/contact',
   },
   openGraph: {
-    title: 'Contact Us | NYALTX',
+    title: 'Contact NYALTX: Support and Partnership Inquiries',
     description:
-      'Get in touch with the NYALTX team for partnerships, token listings, press releases, or support.',
+      'Reach the NYALTX team for support, listing questions, media requests, or partnership proposals.',
     url: 'https://www.nyaltx.pro/contact',
     siteName: 'NYALTX',
     type: 'website',

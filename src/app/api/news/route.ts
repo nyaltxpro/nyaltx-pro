@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/mongodb';
+import { PUBLIC_NEWS_FILTER } from '@/lib/publicNewsQuery';
 
 export async function GET(request: NextRequest) {
   try {
@@ -28,7 +29,7 @@ export async function GET(request: NextRequest) {
     ];
 
     // Build query - only show published articles
-    let query: any = { status: 'published' };
+    let query: any = { ...PUBLIC_NEWS_FILTER };
     
     if (featured === 'true') {
       query.featuredInBanner = true;

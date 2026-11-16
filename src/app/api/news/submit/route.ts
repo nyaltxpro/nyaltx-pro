@@ -131,6 +131,7 @@ export async function POST(req: NextRequest) {
           ? 'News Publishing & Distribution ($199)'
           : 'News Publishing ($99)'
     );
+    const orderId = `order_news_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 
     const submissionDoc = {
       title: title.trim(),
@@ -145,6 +146,7 @@ export async function POST(req: NextRequest) {
       email: email.trim(),
       plan,
       planName: resolvedPlanName,
+      orderId,
       paymentMethod,
       amount: submissionAmount,
       originalAmount: String(planPrice),
@@ -173,21 +175,20 @@ export async function POST(req: NextRequest) {
     const insertResult = await newsCollection.insertOne(submissionDoc);
 
     // 2. Record the verified payment order in 'orders' collection
-    let orderRecord: Order | null = null;
+    let orderRecorded = false;
     try {
       const ordersCollection = await getCollection<Order>('orders');
-      const orderId = `order_news_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
       
       const newOrder: Order & { promoCode?: string; promoDiscount?: number; originalAmount?: string } = {
         id: orderId,
-        type: 'news_submission' as any,
+        type: 'news_submission',
         status: 'completed',
-        paymentMethod: paymentMethod as any,
+        paymentMethod,
         amount: String(submissionAmount),
         promoCode: promoCode || undefined,
         promoDiscount: promoDiscountPercent / 100,
         originalAmount: String(planPrice),
-        currency: (paymentMethod === 'usdc' ? 'USDC' : paymentMethod === 'nyax' ? 'NYAX' : 'USD') as any,
+        currency: paymentMethod === 'usdc' ? 'USDC' : paymentMethod === 'nyax' ? 'NYAX' : 'USD',
         txHash: txHash || undefined,
         paymentId: paymentId || undefined,
         walletAddress: walletAddress || undefined,
@@ -216,9 +217,9 @@ export async function POST(req: NextRequest) {
       };
 
       await ordersCollection.insertOne(newOrder);
-      orderRecord = newOrder;
+      orderRecorded = true;
     } catch (orderErr) {
-      console.warn('Could not record order automatically:', orderErr);
+      console.error('Could not record news submission order; the admin orders API will recover it from the submission:', orderErr);
     }
 
     // 3. Send payment & submission confirmation email to client
@@ -258,7 +259,8 @@ export async function POST(req: NextRequest) {
       success: true,
       id: insertResult.insertedId.toString(),
       slug: finalSlug,
-      orderId: orderRecord?.id || null,
+      orderId,
+      orderRecorded,
       paymentVerified: true,
       emailSent,
       message: 'Payment verified successfully. Your story has been submitted and is pending admin approval.'

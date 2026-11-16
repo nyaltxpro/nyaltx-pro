@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next';
 import { getDb } from '@/lib/mongodb';
+import { PUBLIC_NEWS_FILTER } from '@/lib/publicNewsQuery';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://www.nyaltx.pro';
@@ -156,7 +157,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const db = await getDb();
     const newsArticles = await db
       .collection('corporate_news')
-      .find({ status: 'published' })
+      .find(PUBLIC_NEWS_FILTER)
       .project({ slug: 1, updatedAt: 1, publishedAt: 1 })
       .limit(200)
       .toArray();

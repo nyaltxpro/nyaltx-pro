@@ -1,6 +1,13 @@
 import { tinaClient } from '@/lib/tinaClient';
 import { tinaQueryOrJson } from '@/lib/tinaQuery';
 import VentureGroupPage from '@/page-components/VentureGroupPage';
+import { pageMetadata } from '@/lib/pageMetadata';
+
+export const metadata = pageMetadata(
+  'NYALTX Venture Group: Backing Web3 Projects',
+  'Explore the NYALTX Venture Group, its investment focus, and how early-stage blockchain projects can apply for support.',
+  '/venture-group',
+);
 
 const VentureGroup = async () => {
   const tinaData = await tinaQueryOrJson(

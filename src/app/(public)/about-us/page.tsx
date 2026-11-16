@@ -4,16 +4,16 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.nyaltx.pro'),
-  title: 'About NYALTX – The Project Visibility Platform',
+  title: { absolute: 'About NYALTX: The New York Alt Exchange Story' },
   description:
-    'Learn who we are and how NYALTX helps Web3 projects share their story, showcase their work, and reach a wider audience across digital markets.',
+    'Learn why NYALTX was built, what the New York Alt Exchange stands for, and how it connects DeFi with traditional markets.',
   alternates: {
     canonical: 'https://www.nyaltx.pro/about-us',
   },
   openGraph: {
-    title: 'About NYALTX – The Project Visibility Platform',
+    title: 'About NYALTX: The New York Alt Exchange Story',
     description:
-      'Learn who we are and how NYALTX helps Web3 projects share their story, showcase their work, and reach a wider audience across digital markets.',
+      'Learn why NYALTX was built, what the New York Alt Exchange stands for, and how it connects DeFi with traditional markets.',
     type: 'website',
     url: 'https://www.nyaltx.pro/about-us',
     siteName: 'NYALTX',

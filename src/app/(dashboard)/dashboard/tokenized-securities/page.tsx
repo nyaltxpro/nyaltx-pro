@@ -3,9 +3,9 @@ import type { Metadata } from 'next';
 import { Suspense } from 'react';
 
 export const metadata: Metadata = {
-  title: 'Tokenized Securities – NYALTX',
+  title: { absolute: 'Tokenized Securities and xStocks Prices' },
   description:
-    'Live market-data board comparing traditional equity references with tokenized xStock quotes on NYALTX.',
+    'View live prices and performance for tokenized stocks and xStocks, with market data built for on-chain investors.',
 };
 
 export default function TokenizedSecuritiesPage() {

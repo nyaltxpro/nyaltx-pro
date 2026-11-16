@@ -5,16 +5,16 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.nyaltx.pro'),
-  title: 'NYALTX Podcast – Conversations with Builders & Community Voices',
+  title: { absolute: 'NYALTX Podcast: Crypto, DeFi and Capital Markets' },
   description:
-    'Tune into candid conversations about project visibility, governance, marketing, and community growth across Web3. Fresh episodes from founders, marketers, and the NYALTX team.',
+    'Listen to conversations on tokenization, digital assets, and the future of markets with NYALTX guests and founders.',
   alternates: {
     canonical: 'https://www.nyaltx.pro/podcast',
   },
   openGraph: {
-    title: 'NYALTX Podcast – Conversations with Builders & Community Voices',
+    title: 'NYALTX Podcast: Crypto, DeFi and Capital Markets',
     description:
-      'Discover interviews and updates about project visibility, governance, marketing, and community growth across Web3 with NYALTX.',
+      'Listen to conversations on tokenization, digital assets, and the future of markets with NYALTX guests and founders.',
     url: 'https://www.nyaltx.pro/podcast',
     siteName: 'NYALTX',
     type: 'website',

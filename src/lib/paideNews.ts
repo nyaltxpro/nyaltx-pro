@@ -1,5 +1,6 @@
 import { getCollection } from '@/lib/mongodb';
 import { toReliableIpfsUrl } from '@/utils/ipfsUpload';
+import { PUBLIC_NEWS_FILTER } from '@/lib/publicNewsQuery';
 
 // Must match the collection used by /api/admin/news and /api/news
 const COLLECTION = 'corporate_news';
@@ -69,7 +70,7 @@ function getBaseUrl(): string {
 
 // Published paid news submitted by users and approved by admin
 export const PAID_NEWS_QUERY = {
-  status: 'published',
+  ...PUBLIC_NEWS_FILTER,
   isPaid: { $ne: false },
   author: { $nin: ['NYALTX Team', 'NYALTX Learn'] },
   $or: [

@@ -6,17 +6,17 @@ import { getNewshubInitialData } from '@/lib/newshubInitialData';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.nyaltx.pro'),
-  title: 'NYALTX News Hub – Where Wall Street Meets Web3',
+  title: { absolute: 'NYALTX News Hub: Digital Asset Market Updates' },
   description:
-    'The latest on NYAX, tokenized securities, and the wider crypto market from trusted sources and our community. Submit news, press releases, and feature in our top banner.',
+    'Browse blockchain developments, exchange listings, and tokenized securities coverage from the New York Alt Exchange team.',
   keywords: 'NYALTX news, crypto news hub, press releases, tokenized securities, blockchain news, NYAX token, alt assets',
   alternates: {
     canonical: 'https://www.nyaltx.pro/news-hub',
   },
   openGraph: {
-    title: 'NYALTX News Hub – Where Wall Street Meets Web3',
+    title: 'NYALTX News Hub: Digital Asset Market Updates',
     description:
-      'The latest on NYAX, tokenized securities, and the wider crypto market from trusted sources and our community. Submit news, press releases, and feature in our top banner.',
+      'Browse blockchain developments, exchange listings, and tokenized securities coverage from the New York Alt Exchange team.',
     type: 'website',
     url: 'https://www.nyaltx.pro/news-hub',
     siteName: 'NYALTX',
@@ -33,9 +33,9 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     site: '@nyaltx',
     creator: '@nyaltx',
-    title: 'NYALTX News Hub – Where Wall Street Meets Web3',
+    title: 'NYALTX News Hub: Digital Asset Market Updates',
     description:
-      'The latest on NYAX, tokenized securities, and the wider crypto market. Submit your news and press releases.',
+      'Browse blockchain developments, exchange listings, and tokenized securities coverage from the New York Alt Exchange team.',
     images: ['https://www.nyaltx.pro/og-image.png'],
   },
   robots: {

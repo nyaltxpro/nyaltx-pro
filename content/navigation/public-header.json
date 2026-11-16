@@ -10,6 +10,11 @@
       "enabled": true
     },
     {
+      "label": "News Hub",
+      "href": "/newshub/submit",
+      "enabled": true
+    },
+    {
       "label": "Pricing",
       "href": "/pricing",
       "enabled": true

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
+import { PUBLIC_NEWS_FILTER } from '@/lib/publicNewsQuery';
 
 export async function GET(
   request: NextRequest,
@@ -29,7 +30,7 @@ export async function GET(
     
     // Find the news article by slug or ObjectId and ensure it's published
     const query: any = {
-      status: 'published',
+      ...PUBLIC_NEWS_FILTER,
       $or: [{ slug }]
     };
     if (ObjectId.isValid(slug)) {
