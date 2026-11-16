@@ -4,6 +4,7 @@ import ConnectWalletButton from '@/components/ConnectWalletButton';
 import PayPalCheckout from '@/components/PayPalCheckout';
 import { getNYAXPriceUSD } from '@/utils/nyaxPriceApi';
 import { calculateNewsPrice, NEWS_NYAX_DISCOUNT } from '@/lib/newsPricing';
+import { USDC_NYAX_RECEIVER } from '@/lib/paymentAddresses';
 import { useAppKit } from '@reown/appkit/react';
 import { AnimatePresence, motion } from 'motion/react';
 import Image from 'next/image';
@@ -106,12 +107,9 @@ const PLANS_CONFIG: Record<'news' | 'pr', PlanItem[]> = {
 };
 
 /* ---------- Payment configuration ---------- */
-const DEFAULT_RECEIVER: `0x${string}` = '0x36537943bb4B3489a7306BBa807571EBbbe70896';
 const DEFAULT_NYAX: `0x${string}` = '0x5eed5621b92be4473f99bacac27deb57d9';
 const DEFAULT_USDC: `0x${string}` = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';
 
-const RECEIVER =
-  (process.env.NEXT_PUBLIC_PAYMENT_RECEIVER_ADDRESS as `0x${string}` | undefined) ?? DEFAULT_RECEIVER;
 const NYAX_TOKEN =
   (process.env.NEXT_PUBLIC_NYAX_TOKEN_ADDRESS as `0x${string}` | undefined) ?? DEFAULT_NYAX;
 const USDC_TOKEN = DEFAULT_USDC;
@@ -582,7 +580,7 @@ export default function SubmitNewsModalCorporate({
         abi: erc20Abi,
         address: token,
         functionName: 'transfer',
-        args: [RECEIVER, parseUnits(amount.toFixed(method === 'nyax' ? 6 : 2), decimals)],
+        args: [USDC_NYAX_RECEIVER, parseUnits(amount.toFixed(method === 'nyax' ? 6 : 2), decimals)],
       });
 
       if (!txHash) throw new Error('Transaction was rejected or failed to broadcast.');

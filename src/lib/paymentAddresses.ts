@@ -1,0 +1,1 @@
+export const USDC_NYAX_RECEIVER: `0x${string}` = '0x36537943bb4B3489a7306BBa807571EBbbe70896';

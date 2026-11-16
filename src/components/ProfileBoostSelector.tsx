@@ -15,6 +15,7 @@ import {
 } from 'react-icons/fa';
 import { useAccount, useSendTransaction, useWriteContract, useSwitchChain } from 'wagmi';
 import { parseEther, erc20Abi, parseUnits } from 'viem';
+import { USDC_NYAX_RECEIVER } from '@/lib/paymentAddresses';
 
 interface ProfileBoostPack {
   id: 'starter' | 'growth' | 'pro' | 'elite';
@@ -192,7 +193,7 @@ export default function ProfileBoostSelector({
           abi: erc20Abi,
           address: USDC_TOKEN,
           functionName: 'transfer',
-          args: [RECEIVER, parseUnits(selectedPack.price.usdc.toString(), 6)],
+          args: [USDC_NYAX_RECEIVER, parseUnits(selectedPack.price.usdc.toString(), 6)],
         });
         transactionHash = hash;
       } else {
@@ -201,7 +202,7 @@ export default function ProfileBoostSelector({
           abi: erc20Abi,
           address: NYAX_TOKEN,
           functionName: 'transfer',
-          args: [RECEIVER, parseUnits(selectedPack.price.nyax.toString(), 18)],
+          args: [USDC_NYAX_RECEIVER, parseUnits(selectedPack.price.nyax.toString(), 18)],
         });
         transactionHash = hash;
       }
