@@ -680,8 +680,8 @@ export default function SubmitNewsModalCorporate({
           </summary>
           <div className="mt-2 space-y-2">
             <div className="flex items-center gap-2">
-              <code className="flex-1 p-2 bg-black/40 rounded border border-gray-700/40 text-[11px] truncate">{RECEIVER}</code>
-              <button type="button" onClick={() => copyAddr(RECEIVER)} className="px-2.5 py-1.5 bg-gray-600/50 hover:bg-gray-600/70 text-xs rounded text-white">
+              <code className="flex-1 p-2 bg-black/40 rounded border border-gray-700/40 text-[11px] truncate">{USDC_NYAX_RECEIVER}</code>
+              <button type="button" onClick={() => copyAddr(USDC_NYAX_RECEIVER)} className="px-2.5 py-1.5 bg-gray-600/50 hover:bg-gray-600/70 text-xs rounded text-white">
                 {copiedReceiver ? '✓ Copied' : 'Copy'}
               </button>
             </div>
