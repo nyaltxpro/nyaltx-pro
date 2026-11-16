@@ -181,6 +181,7 @@ export default function AdminSidebar({ isMobileMenuOpen, toggleMobileMenu }: Adm
     { icon: <FaEnvelope />, text: 'Email Management', href: '/adminpanel/email-management' },
     { icon: <FaNewspaper />, text: 'Blog Posts', href: '/adminpanel/blog' },
     { icon: <FaNewspaper />, text: 'Corporate News', href: '/adminpanel/news' },
+    { icon: <FaGift />, text: 'News Promo Codes', href: '/adminpanel/news-promo-codes' },
     { icon: <FaImage />, text: 'Banners', href: '/adminpanel/banners' },
     { icon: <FaNewspaper />, text: 'Newshub Banners', href: '/adminpanel/newshub-banners' },
     { icon: <FaYoutube />, text: 'Trade Videos', href: '/adminpanel/trade-videos' },

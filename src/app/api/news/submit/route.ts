@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getDb, getCollection } from '@/lib/mongodb';
 import { Order } from '@/app/api/admin/orders/route';
 import { verifyNewsPayment, sendNewsSubmissionConfirmationEmail } from '@/lib/newsEmailService';
+import { findUsableNewsPromoCode } from '@/lib/newsPromoCodes';
+import { calculateNewsPrice } from '@/lib/newsPricing';
 
-const NYAX_DISCOUNT = 0.2;
 const NEWS_TEST_PLAN_ENABLED = process.env.NEXT_PUBLIC_ENABLE_NEWS_TEST_PLAN === 'true';
 
 export async function POST(req: NextRequest) {
@@ -54,10 +55,25 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'This news publishing plan is unavailable.' }, { status: 400 });
     }
 
-    const expectedAmount =
+    const promoCode = typeof data.promoCode === 'string' ? data.promoCode.trim().toUpperCase() : '';
+    if (promoCode && plan === 'test') {
+      return NextResponse.json({ error: 'Promo codes cannot be applied to the test plan.' }, { status: 400 });
+    }
+
+    let promoDiscountPercent = 0;
+    if (promoCode) {
+      const { promo, message } = await findUsableNewsPromoCode(promoCode);
+      if (!promo) {
+        return NextResponse.json({ error: message || 'This promo code is invalid.' }, { status: 400 });
+      }
+      promoDiscountPercent = promo.discountPercent;
+    }
+
+    const expectedAmount = calculateNewsPrice(
+      planPrice,
+      promoDiscountPercent,
       paymentMethod === 'nyax' && plan !== 'test'
-        ? planPrice * (1 - NYAX_DISCOUNT)
-        : planPrice;
+    );
     const submissionAmount = amount === undefined ? expectedAmount : Number(amount);
     if (!Number.isFinite(submissionAmount) || Math.abs(submissionAmount - expectedAmount) > 0.001) {
       return NextResponse.json(
@@ -130,6 +146,9 @@ export async function POST(req: NextRequest) {
       planName: resolvedPlanName,
       paymentMethod,
       amount: submissionAmount,
+      originalAmount: String(planPrice),
+      promoCode: promoCode || null,
+      promoDiscount: promoDiscountPercent / 100,
       txHash: txHash || null,
       paymentId: paymentId || null,
       walletAddress: walletAddress || null,
@@ -158,12 +177,15 @@ export async function POST(req: NextRequest) {
       const ordersCollection = await getCollection<Order>('orders');
       const orderId = `order_news_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
       
-      const newOrder: Order = {
+      const newOrder: Order & { promoCode?: string; promoDiscount?: number; originalAmount?: string } = {
         id: orderId,
         type: 'news_submission' as any,
         status: 'completed',
         paymentMethod: paymentMethod as any,
         amount: String(submissionAmount),
+        promoCode: promoCode || undefined,
+        promoDiscount: promoDiscountPercent / 100,
+        originalAmount: String(planPrice),
         currency: (paymentMethod === 'usdc' ? 'USDC' : paymentMethod === 'nyax' ? 'NYAX' : 'USD') as any,
         txHash: txHash || undefined,
         paymentId: paymentId || undefined,
@@ -182,6 +204,9 @@ export async function POST(req: NextRequest) {
           plan,
           planName: resolvedPlanName,
           paymentMethod,
+          promoCode: promoCode || undefined,
+          promoDiscount: promoDiscountPercent / 100,
+          originalAmount: String(planPrice),
           paymentId,
           txHash,
           walletAddress,
