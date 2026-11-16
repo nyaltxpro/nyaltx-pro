@@ -17,12 +17,12 @@ export interface SubmitNewsModalProps {
   onClose: () => void;
   initialType?: 'news' | 'pr';
   initialPlan?: string;
+  enableTestPlan?: boolean;
   onSuccess?: (item: any) => void;
 }
 
 type PayMethod = 'paypal' | 'usdc' | 'nyax';
 type WalletMethod = Exclude<PayMethod, 'paypal'>;
-const ENABLE_NEWS_TEST_PLAN = process.env.NEXT_PUBLIC_ENABLE_NEWS_TEST_PLAN === 'true';
 
 /* ---------- Corporate News (admin) theme tokens ---------- */
 const FONT = { fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' } as const;
@@ -219,6 +219,7 @@ export default function SubmitNewsModalCorporate({
   onClose,
   initialType = 'news',
   initialPlan = 'feed',
+  enableTestPlan = false,
   onSuccess
 }: SubmitNewsModalProps) {
   const [modalStep, setModalStep] = useState(1);
@@ -284,7 +285,7 @@ export default function SubmitNewsModalCorporate({
   if (!isOpen) return null;
 
   // Price calculations
-  const currentPlans = ENABLE_NEWS_TEST_PLAN && initialPlan === 'test'
+  const currentPlans = enableTestPlan
     ? [...PLANS_CONFIG[subType], NEWS_TEST_PLAN]
     : PLANS_CONFIG[subType];
   const activePlanObj = currentPlans.find(p => p.id === plan) || currentPlans[0];

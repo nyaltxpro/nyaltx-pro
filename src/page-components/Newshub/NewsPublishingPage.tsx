@@ -62,9 +62,11 @@ const plans: {
 export default function NewsPublishingPage({
   openModalOnLoad = false,
   initialPlan = 'feed',
+  enableTestPlan = false,
 }: {
   openModalOnLoad?: boolean;
   initialPlan?: PublishingPlan;
+  enableTestPlan?: boolean;
 }) {
   const [selectedPlan, setSelectedPlan] = useState<PublishingPlan>(initialPlan);
   const [modalOpen, setModalOpen] = useState(openModalOnLoad);
@@ -258,6 +260,7 @@ export default function NewsPublishingPage({
           isOpen={modalOpen}
           initialType="news"
           initialPlan={selectedPlan}
+          enableTestPlan={enableTestPlan}
           onClose={() => setModalOpen(false)}
         />
       )}

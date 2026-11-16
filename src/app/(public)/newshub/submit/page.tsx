@@ -32,5 +32,11 @@ export default async function NewsPublishingRoute({ searchParams }: NewsPublishi
       ? 'test'
       : 'feed';
 
-  return <NewsPublishingPage openModalOnLoad={modal === 'open'} initialPlan={initialPlan} />;
+  return (
+    <NewsPublishingPage
+      openModalOnLoad={modal === 'open'}
+      initialPlan={initialPlan}
+      enableTestPlan={testPlanEnabled}
+    />
+  );
 }
