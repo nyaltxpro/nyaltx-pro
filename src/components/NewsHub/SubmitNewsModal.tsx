@@ -245,6 +245,7 @@ export default function SubmitNewsModalCorporate({
   const [cryptoTxHash, setCryptoTxHash] = useState('');
   const [copiedReceiver, setCopiedReceiver] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSwitchingToEthereum, setIsSwitchingToEthereum] = useState(false);
 
   // Prices
   const [nyaxPrice, setNyaxPrice] = useState<number | null>(null);
@@ -600,6 +601,20 @@ export default function SubmitNewsModalCorporate({
     }
   };
 
+  const switchToEthereumMainnet = async () => {
+    if (isSwitchingToEthereum) return;
+    setFormError('');
+    setIsSwitchingToEthereum(true);
+    try {
+      await switchChainAsync({ chainId: PAYMENT_CHAIN_ID });
+    } catch (error) {
+      const reason = error instanceof Error ? ` ${error.message}` : '';
+      setFormError(`Couldn't switch your wallet to Ethereum Mainnet.${reason}`);
+    } finally {
+      setIsSwitchingToEthereum(false);
+    }
+  };
+
   const copyAddr = (addr: string) => {
     navigator.clipboard?.writeText(addr);
     setCopiedReceiver(true);
@@ -657,10 +672,39 @@ export default function SubmitNewsModalCorporate({
               </span>
             </div>
 
+            {chain?.id !== PAYMENT_CHAIN_ID ? (
+              <div className="space-y-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3">
+                <p className="text-xs text-amber-200">
+                  Your wallet is on {chain?.name || 'another network'}. Switch to Ethereum Mainnet before starting payment.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => void switchToEthereumMainnet()}
+                  disabled={walletPaying !== null || isSwitchingToEthereum}
+                  className="w-full rounded-lg border border-amber-400/40 bg-amber-500/20 px-3 py-2 text-sm font-semibold text-amber-100 transition-colors hover:bg-amber-500/30 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isSwitchingToEthereum
+                    ? 'Switching to Ethereum Mainnet...'
+                    : chain?.id === undefined
+                      ? 'Switch to Ethereum Mainnet'
+                      : 'Switch Network to Ethereum'}
+                </button>
+              </div>
+            ) : (
+              <p className="rounded-lg border border-green-500/30 bg-green-500/10 p-2.5 text-xs text-green-300">
+                Wallet is ready on Ethereum Mainnet. Your connected wallet address will stay the same.
+              </p>
+            )}
+
             <button
               type="button"
               onClick={() => payWithWallet(method)}
-              disabled={walletPaying !== null || isSubmitting}
+              disabled={
+                walletPaying !== null ||
+                isSwitchingToEthereum ||
+                isSubmitting ||
+                chain?.id !== PAYMENT_CHAIN_ID
+              }
               className={`w-full py-3 ${BTN_PRIMARY}`}
             >
               {walletPaying === method ? (
