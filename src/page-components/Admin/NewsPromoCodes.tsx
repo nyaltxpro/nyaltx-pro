@@ -2,15 +2,26 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
+import { PROMO_PACKAGE_OPTIONS } from '@/lib/promoPackages';
 
 interface NewsPromoCode {
   code: string;
   discountPercent: number;
+  packageIds: string[];
   active: boolean;
   expiresAt: string | null;
   createdAt: string;
   updatedAt: string;
 }
+
+const PACKAGE_GROUPS = [...new Set(PROMO_PACKAGE_OPTIONS.map(option => option.category))].map(label => ({
+  label,
+  packages: PROMO_PACKAGE_OPTIONS.filter(option => option.category === label),
+}));
+
+const PACKAGE_LABELS = new Map<string, string>(
+  PROMO_PACKAGE_OPTIONS.map(option => [option.id, option.label] as const)
+);
 
 function toLocalDateTime(value: string | null) {
   if (!value) return '';
@@ -25,6 +36,7 @@ export default function NewsPromoCodes() {
   const [promoCodes, setPromoCodes] = useState<NewsPromoCode[]>([]);
   const [code, setCode] = useState('');
   const [discountPercent, setDiscountPercent] = useState('10');
+  const [packageIds, setPackageIds] = useState<string[]>([]);
   const [expiresAt, setExpiresAt] = useState('');
   const [expirationDrafts, setExpirationDrafts] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
@@ -74,6 +86,7 @@ export default function NewsPromoCodes() {
         body: JSON.stringify({
           code,
           discountPercent: Number(discountPercent),
+          packageIds,
           expiresAt: expiresAt ? new Date(expiresAt).toISOString() : null,
         }),
       });
@@ -85,6 +98,7 @@ export default function NewsPromoCodes() {
       if (!response.ok) throw new Error(result.error || 'Could not create promo code.');
       setCode('');
       setDiscountPercent('10');
+      setPackageIds([]);
       setExpiresAt('');
       setNotice(`Promo code ${result.data.code} created.`);
       await loadPromoCodes();
@@ -130,9 +144,9 @@ export default function NewsPromoCodes() {
   return (
     <div className="space-y-6 text-white">
       <header>
-        <h1 className="text-2xl font-semibold">News Promo Codes</h1>
+        <h1 className="text-2xl font-semibold">News &amp; Pricing Promo Codes</h1>
         <p className="mt-1 text-sm text-gray-400">
-          Create percentage discounts for News Hub submissions. Codes can stay active indefinitely or expire on a date you choose.
+          Choose which News Hub or pricing packages each percentage discount applies to. Codes can stay active indefinitely or expire on a date you choose.
         </p>
       </header>
 
@@ -175,12 +189,42 @@ export default function NewsPromoCodes() {
             />
           </label>
         </div>
+        <fieldset className="space-y-3">
+          <legend className="text-sm font-medium text-gray-300">Packages (select one or more)</legend>
+          <div className="grid gap-4 md:grid-cols-2">
+            {PACKAGE_GROUPS.map(group => (
+              <fieldset key={group.label} className="space-y-2 rounded-lg border border-gray-700/60 p-3">
+                <legend className="px-1 text-sm font-medium text-gray-200">{group.label}</legend>
+                {group.packages.map(option => (
+                  <label key={option.id} className="flex items-center gap-2 text-sm text-gray-300">
+                    <input
+                      type="checkbox"
+                      checked={packageIds.includes(option.id)}
+                      onChange={event => {
+                        setPackageIds(current =>
+                          event.target.checked
+                            ? [...current, option.id]
+                            : current.filter(packageId => packageId !== option.id)
+                        );
+                      }}
+                      className="accent-cyan-500"
+                    />
+                    {option.label}
+                  </label>
+                ))}
+              </fieldset>
+            ))}
+          </div>
+          {packageIds.length === 0 && (
+            <p className="text-xs text-amber-300">Select at least one package before creating the code.</p>
+          )}
+        </fieldset>
         <p className="text-xs text-gray-400">
           Leave the expiration blank to keep the code valid until you deactivate it.
         </p>
         <button
           type="submit"
-          disabled={saving}
+          disabled={saving || packageIds.length === 0}
           className="rounded-lg bg-[#00b8d8] px-4 py-2 font-semibold text-white transition hover:bg-cyan-600 disabled:opacity-50"
         >
           {saving ? 'Creating...' : 'Create Promo Code'}
@@ -197,14 +241,15 @@ export default function NewsPromoCodes() {
         {loading ? (
           <p className="p-5 text-sm text-gray-400">Loading promo codes...</p>
         ) : promoCodes.length === 0 ? (
-          <p className="p-5 text-sm text-gray-400">No news promo codes have been created.</p>
+          <p className="p-5 text-sm text-gray-400">No promo codes have been created.</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[850px] text-left text-sm">
+            <table className="w-full min-w-[1000px] text-left text-sm">
               <thead className="bg-gray-900/50 text-xs uppercase text-gray-400">
                 <tr>
                   <th className="px-5 py-3">Code</th>
                   <th className="px-5 py-3">Discount</th>
+                  <th className="px-5 py-3">Packages</th>
                   <th className="px-5 py-3">Expiration</th>
                   <th className="px-5 py-3">Status</th>
                   <th className="px-5 py-3">Actions</th>
@@ -218,6 +263,15 @@ export default function NewsPromoCodes() {
                     <tr key={promo.code}>
                       <td className="px-5 py-4 font-mono font-semibold">{promo.code}</td>
                       <td className="px-5 py-4">{promo.discountPercent}%</td>
+                      <td className="px-5 py-4">
+                        <div className="flex max-w-sm flex-wrap gap-1">
+                          {promo.packageIds.map(packageId => (
+                            <span key={packageId} className="rounded bg-gray-700/70 px-2 py-1 text-xs">
+                              {PACKAGE_LABELS.get(packageId) || packageId}
+                            </span>
+                          ))}
+                        </div>
+                      </td>
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-2">
                           <input

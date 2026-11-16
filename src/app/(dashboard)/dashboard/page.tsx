@@ -236,7 +236,7 @@ export default function Home() {
   const [tokenRaceData, setTokenRaceData] = useState<TokenRaceItem[]>(fallbackTokenRaceData);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const [selectedChain, setSelectedChain] = useState<string>('ethereum');
-  const [isPageLoading, setIsPageLoading] = useState<boolean>(true);
+  const isPageLoading = false;
 
   // State for Tron tokens
   const [tronNewTokens, setTronNewTokens] = useState<TronNewToken[]>([]);
@@ -372,14 +372,6 @@ export default function Home() {
     };
 
     loadTronTokens();
-  }, []);
-
-  // Simulate page loading
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsPageLoading(false);
-    }, 2000);
-    return () => clearTimeout(timer);
   }, []);
 
   return (

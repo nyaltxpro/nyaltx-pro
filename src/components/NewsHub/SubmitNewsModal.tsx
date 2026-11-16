@@ -316,7 +316,7 @@ export default function SubmitNewsModalCorporate({
       const response = await fetch('/api/news/promo/validate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ promoCode }),
+        body: JSON.stringify({ promoCode, plan }),
       });
       const result = await response.json();
       if (!response.ok || !result.valid) {
@@ -331,6 +331,13 @@ export default function SubmitNewsModalCorporate({
     } finally {
       setIsApplyingPromo(false);
     }
+  };
+
+  const selectPlan = (nextPlan: string) => {
+    setPlan(nextPlan);
+    setAppliedPromo(null);
+    setPromoCodeInput('');
+    setPromoError('');
   };
 
   /* ---------- IPFS image handling ---------- */
@@ -723,7 +730,7 @@ export default function SubmitNewsModalCorporate({
                 value={subType}
                 onChange={(e) => {
                   setSubType(e.target.value as 'news' | 'pr');
-                  setPlan('feed');
+                  selectPlan('feed');
                 }}
                 className={INPUT}
               >
@@ -940,7 +947,7 @@ export default function SubmitNewsModalCorporate({
                 return (
                   <div
                     key={p.id}
-                    onClick={() => setPlan(p.id)}
+                    onClick={() => selectPlan(p.id)}
                     className={`relative p-5 rounded-2xl border cursor-pointer transition-all duration-300 flex flex-col justify-between ${
                       isSelected
                         ? isPopular
@@ -989,7 +996,7 @@ export default function SubmitNewsModalCorporate({
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
-                        setPlan(p.id);
+                        selectPlan(p.id);
                         setModalStep(3);
                       }}
                       className={`w-full py-3 px-4 rounded-xl text-xs font-bold transition-all duration-200 ${
