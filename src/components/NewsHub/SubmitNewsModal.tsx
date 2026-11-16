@@ -115,10 +115,7 @@ const RECEIVER =
 const NYAX_TOKEN =
   (process.env.NEXT_PUBLIC_NYAX_TOKEN_ADDRESS as `0x${string}` | undefined) ?? DEFAULT_NYAX;
 const USDC_TOKEN = DEFAULT_USDC;
-const PAYMENT_CHAIN_ID = process.env.NEXT_PUBLIC_PAYMENT_CHAIN_ID
-  ? Number(process.env.NEXT_PUBLIC_PAYMENT_CHAIN_ID)
-  : 1;
-const USDC_PAYMENT_CHAIN_ID = 1;
+const PAYMENT_CHAIN_ID = 1;
 
 const convertToWorkingIPFSUrl = (url: string) =>
   url.replace('https://gateway.pinata.cloud/ipfs/', 'https://ipfs.io/ipfs/');
@@ -560,15 +557,12 @@ export default function SubmitNewsModalCorporate({
     setFormError('');
 
     try {
-      const targetChainId = method === 'usdc' ? USDC_PAYMENT_CHAIN_ID : PAYMENT_CHAIN_ID;
-      if (targetChainId && chain?.id !== targetChainId) {
+      if (chain?.id !== PAYMENT_CHAIN_ID) {
         try {
-          await switchChainAsync({ chainId: targetChainId });
+          await switchChainAsync({ chainId: PAYMENT_CHAIN_ID });
         } catch {
           throw new Error(
-            method === 'usdc'
-              ? 'Please switch to Ethereum Mainnet (ETH) to pay with USDC.'
-              : 'Please switch to the correct chain to pay.'
+            `Please switch to Ethereum Mainnet (ETH) to pay with ${method.toUpperCase()}.`
           );
         }
       }
@@ -585,7 +579,7 @@ export default function SubmitNewsModalCorporate({
       const decimals = method === 'nyax' ? 18 : 6;
       const amount = method === 'nyax' ? nyaxAmount : usdcAmount;
       const txHash = await writeContractAsync({
-        ...(method === 'usdc' ? { chainId: USDC_PAYMENT_CHAIN_ID } : {}),
+        chainId: PAYMENT_CHAIN_ID,
         abi: erc20Abi,
         address: token,
         functionName: 'transfer',
@@ -1174,7 +1168,7 @@ export default function SubmitNewsModalCorporate({
                 title: plan === 'test'
                   ? 'Pay with NYAX'
                   : `Pay with NYAX (${NEWS_NYAX_DISCOUNT * 100}% off)`,
-                subtitle: 'NYAX token transfer from your connected wallet',
+                subtitle: 'Ethereum Mainnet (ETH, chain ID 1) only',
                 border: 'border-amber-500/30',
                 titleColor: 'text-amber-300',
                 amountText: `~${nyaxAmount.toFixed(2)} NYAX`,
