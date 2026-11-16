@@ -24,6 +24,7 @@ import {
 } from 'react-icons/fa';
 import { erc20Abi, parseEther, parseUnits } from 'viem';
 import { useAccount, useSendTransaction, useSwitchChain, useWriteContract } from 'wagmi';
+import { USDC_NYAX_RECEIVER } from '@/lib/paymentAddresses';
 
 // Boost pack configurations
 const BOOST_PACKS = {
@@ -559,7 +560,7 @@ export default function BoostPackCheckout() {
             abi: erc20Abi,
             address: DEFAULT_NYAX,
             functionName: 'transfer',
-            args: [DEFAULT_RECEIVER, parseUnits(nyaxPrice.toFixed(6), 18)],
+            args: [USDC_NYAX_RECEIVER, parseUnits(nyaxPrice.toFixed(6), 18)],
           });
           break;
 

@@ -9,6 +9,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useTina } from 'tinacms/dist/react';
 import { erc20Abi, parseEther, parseUnits } from 'viem';
 import { useAccount, useSendTransaction, useSwitchChain, useWriteContract } from 'wagmi';
+import { USDC_NYAX_RECEIVER } from '@/lib/paymentAddresses';
 
 // Payment configuration
 const DEFAULT_RECEIVER: `0x${string}` = '0x81bA7b98E49014Bff22F811E9405640bC2B39cC0';
@@ -241,7 +242,7 @@ export const PricingPage = ({ tinaData }: any) => {
                     abi: erc20Abi,
                     address: NYAX_TOKEN,
                     functionName: 'transfer',
-                    args: [RECEIVER, value],
+                    args: [USDC_NYAX_RECEIVER, value],
                 });
                 console.log('NYAX payment tx:', hash);
             } catch (e: any) {

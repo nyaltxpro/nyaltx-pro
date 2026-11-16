@@ -10,6 +10,7 @@ import { FaCoins, FaGift, FaSearch, FaStar, FaTrophy } from 'react-icons/fa';
 import { erc20Abi, parseEther, parseUnits } from 'viem';
 import { useAccount, useSendTransaction, useSwitchChain, useWriteContract } from 'wagmi';
 import { PhantomWalletButton } from './PhantomWalletButton';
+import { USDC_NYAX_RECEIVER } from '@/lib/paymentAddresses';
 
 // Store payment order helper function
 const storePaymentOrder = async (params: {
@@ -305,7 +306,7 @@ export default function RaceToLibertyCheckout({
         abi: erc20Abi,
         address: NYAX_TOKEN,
         functionName: 'transfer',
-        args: [RECEIVER, value],
+        args: [USDC_NYAX_RECEIVER, value],
       });
       console.log('NYAX payment tx:', hash);
 
@@ -565,7 +566,7 @@ export default function RaceToLibertyCheckout({
         abi: erc20Abi,
         address: NYAX_TOKEN,
         functionName: 'transfer',
-        args: [RECEIVER, value],
+        args: [USDC_NYAX_RECEIVER, value],
       });
       console.log('NYAX payment tx:', hash);
 
