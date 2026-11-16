@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://www.nyaltx.pro'),
   title: 'Publish Your News | NYALTX News Hub',
   description:
-    'Publish your company announcements and press releases on the NYALTX News Hub with Direct Distribution or Full Service packages.',
+    'Publish your company announcements and press releases on the NYALTX News Hub with News Publishing or News Publishing & Distribution packages.',
   alternates: {
     canonical: 'https://www.nyaltx.pro/newshub/submit',
   },
@@ -25,7 +25,12 @@ interface NewsPublishingRouteProps {
 
 export default async function NewsPublishingRoute({ searchParams }: NewsPublishingRouteProps) {
   const { modal, plan } = await searchParams;
-  const initialPlan = plan === 'slider' ? 'slider' : 'feed';
+  const testPlanEnabled = process.env.NEXT_PUBLIC_ENABLE_NEWS_TEST_PLAN === 'true';
+  const initialPlan = plan === 'slider'
+    ? 'slider'
+    : plan === 'test' && testPlanEnabled
+      ? 'test'
+      : 'feed';
 
   return <NewsPublishingPage openModalOnLoad={modal === 'open'} initialPlan={initialPlan} />;
 }

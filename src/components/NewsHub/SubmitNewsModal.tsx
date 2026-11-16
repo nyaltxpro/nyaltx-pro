@@ -21,6 +21,7 @@ export interface SubmitNewsModalProps {
 
 type PayMethod = 'paypal' | 'usdc' | 'nyax';
 type WalletMethod = Exclude<PayMethod, 'paypal'>;
+const ENABLE_NEWS_TEST_PLAN = process.env.NEXT_PUBLIC_ENABLE_NEWS_TEST_PLAN === 'true';
 
 /* ---------- Corporate News (admin) theme tokens ---------- */
 const FONT = { fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' } as const;
@@ -83,6 +84,20 @@ const PUBLISH_PLANS: PlanItem[] = [
     ],
   },
 ];
+
+const NEWS_TEST_PLAN: PlanItem = {
+  id: 'test',
+  badge: 'TEST PLAN',
+  name: 'Checkout Flow Test',
+  price: 1,
+  priceLabel: 'temporary test release',
+  ctaText: 'Test Checkout',
+  desc: 'A temporary $1 plan for testing the full news submission and checkout flow.',
+  features: [
+    'Complete the standard submission and checkout steps',
+    'Test submission remains subject to moderation',
+  ],
+};
 
 const PLANS_CONFIG: Record<'news' | 'pr', PlanItem[]> = {
   news: PUBLISH_PLANS,
@@ -262,10 +277,15 @@ export default function SubmitNewsModalCorporate({
   if (!isOpen) return null;
 
   // Price calculations
-  const currentPlans = PLANS_CONFIG[subType];
+  const currentPlans = ENABLE_NEWS_TEST_PLAN && initialPlan === 'test'
+    ? [...PLANS_CONFIG[subType], NEWS_TEST_PLAN]
+    : PLANS_CONFIG[subType];
   const activePlanObj = currentPlans.find(p => p.id === plan) || currentPlans[0];
   const basePrice = activePlanObj.price;
-  const finalPrice = payMethod === 'nyax' ? basePrice * (1 - NYAX_DISCOUNT) : basePrice;
+  const finalPrice =
+    plan !== 'test' && payMethod === 'nyax'
+      ? basePrice * (1 - NYAX_DISCOUNT)
+      : basePrice;
 
   const nyaxRef = nyaxPrice && nyaxPrice > 0 ? nyaxPrice : 1.0;
   const nyaxAmount = finalPrice / nyaxRef;
@@ -974,7 +994,11 @@ export default function SubmitNewsModalCorporate({
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 {payTab('paypal', 'PayPal', 'border-blue-500/40 bg-blue-500/20 text-blue-300')}
                 {payTab('usdc', 'USDC', 'border-cyan-500/40 bg-cyan-500/20 text-cyan-300')}
-                {payTab('nyax', 'NYAX (20% off)', 'border-amber-500/40 bg-amber-500/20 text-amber-300')}
+                {payTab(
+                  'nyax',
+                  plan === 'test' ? 'NYAX' : 'NYAX (20% off)',
+                  'border-amber-500/40 bg-amber-500/20 text-amber-300'
+                )}
               </div>
             </div>
 
@@ -982,7 +1006,7 @@ export default function SubmitNewsModalCorporate({
             <div className={`p-3 ${PANEL} flex justify-between items-center`}>
               <div>
                 <span className="text-sm font-semibold text-white">{activePlanObj.name}</span>
-                {payMethod === 'nyax' && (
+                {payMethod === 'nyax' && plan !== 'test' && (
                   <span className="block text-xs text-amber-400">
                     {NYAX_DISCOUNT * 100}% NYAX discount applied (was ${basePrice.toFixed(2)})
                   </span>
@@ -1048,7 +1072,7 @@ export default function SubmitNewsModalCorporate({
             {/* NYAX */}
             {payMethod === 'nyax' &&
               renderWalletPanel('nyax', {
-                title: `Pay with NYAX (${NYAX_DISCOUNT * 100}% off)`,
+                title: plan === 'test' ? 'Pay with NYAX' : `Pay with NYAX (${NYAX_DISCOUNT * 100}% off)`,
                 subtitle: 'NYAX token transfer from your connected wallet',
                 border: 'border-amber-500/30',
                 titleColor: 'text-amber-300',
