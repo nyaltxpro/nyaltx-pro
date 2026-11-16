@@ -2,8 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
 import { sendNewsApprovalEmail } from '@/lib/newsEmailService';
+import { getAdminFromRequest } from '@/lib/adminAuth';
+
+async function requireAdmin() {
+  const admin = await getAdminFromRequest();
+  return admin ? null : NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+}
 
 export async function GET(request: NextRequest) {
+  const unauthorized = await requireAdmin();
+  if (unauthorized) return unauthorized;
+
   try {
     const db = await getDb();
     const collection = db.collection('corporate_news');
@@ -52,6 +61,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const unauthorized = await requireAdmin();
+  if (unauthorized) return unauthorized;
+
   try {
     const db = await getDb();
     const collection = db.collection('corporate_news');
@@ -122,6 +134,9 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
+  const unauthorized = await requireAdmin();
+  if (unauthorized) return unauthorized;
+
   try {
     const db = await getDb();
     const collection = db.collection('corporate_news');
@@ -220,6 +235,9 @@ export async function PUT(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
+  const unauthorized = await requireAdmin();
+  if (unauthorized) return unauthorized;
+
   try {
     const db = await getDb();
     const collection = db.collection('corporate_news');

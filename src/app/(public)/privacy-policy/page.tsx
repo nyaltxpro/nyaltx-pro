@@ -3,8 +3,9 @@ import PrivacyPolicy from '@/page-components/PrivacyPolicy';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy | NYALTX',
-  description: 'Read the NYALTX Privacy Policy to understand how we collect, use, and protect your personal data.',
+  title: { absolute: 'Privacy Policy | NYALTX' },
+  description:
+    'Read how NYALTX collects, uses, and protects your personal data when you visit the site or use the platform, and how to exercise your data rights.',
   alternates: { canonical: 'https://www.nyaltx.pro/privacy-policy' },
 };
 

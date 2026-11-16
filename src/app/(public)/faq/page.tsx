@@ -4,16 +4,16 @@ import faqContent from '../../../../content/faq/faq-data.json';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.nyaltx.pro'),
-  title: 'Frequently Asked Questions (FAQ) | NYALTX',
+  title: { absolute: 'NYALTX FAQ: Answers on Tokens, Trading and Listings' },
   description:
-    'Find answers to common questions about NYALTX, tokenized securities, token listings, Race to Liberty, and digital markets.',
+    'Get quick answers about the NYAX token, tokenized securities, trading, and how to list a project on NYALTX.',
   alternates: {
     canonical: 'https://www.nyaltx.pro/faq',
   },
   openGraph: {
-    title: 'Frequently Asked Questions (FAQ) | NYALTX',
+    title: 'NYALTX FAQ: Answers on Tokens, Trading and Listings',
     description:
-      'Find answers to common questions about NYALTX, tokenized securities, token listings, and digital markets.',
+      'Get quick answers about the NYAX token, tokenized securities, trading, and how to list a project on NYALTX.',
     url: 'https://www.nyaltx.pro/faq',
     siteName: 'NYALTX',
     type: 'website',

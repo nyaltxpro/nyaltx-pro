@@ -1,5 +1,6 @@
 import { getDb } from '@/lib/mongodb';
 import { toReliableIpfsUrl } from '@/utils/ipfsUpload';
+import { PUBLIC_NEWS_FILTER } from '@/lib/publicNewsQuery';
 
 function escapeXml(unsafe: string): string {
   return unsafe
@@ -36,8 +37,7 @@ export async function generateOfficialNewsRss(options?: { feedPath?: string; sit
   // ONLY approved and publicly published news published on our platform
   // Excludes drafts, pending reviews, rejected news, and unpaid submissions
   const query: any = {
-    status: 'published',
-    isPendingReview: { $ne: true },
+    ...PUBLIC_NEWS_FILTER,
     $or: [
       // Official platform news (created by admin/team)
       { plan: { $exists: false } },

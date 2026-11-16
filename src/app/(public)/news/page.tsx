@@ -4,16 +4,16 @@ import NewsGrid from '../../../components/NewsGrid';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.nyaltx.pro'),
-  title: 'NYALTX News – Updates & Announcements',
+  title: { absolute: 'NYALTX Press Room: Announcements and Listings' },
   description:
-    'Stay up to date with the latest NYALTX announcements, platform features, tokenized securities insights, and community updates.',
+    'Read official NYALTX announcements, exchange partnerships, and token listing news in one archive.',
   keywords: 'NYALTX news, crypto news, blockchain updates, platform announcements, partnerships, tokenized securities',
   alternates: {
     canonical: 'https://www.nyaltx.pro/news',
   },
   openGraph: {
-    title: 'NYALTX News – Updates & Announcements',
-    description: 'Stay up to date with the latest NYALTX announcements, platform features, and community updates.',
+    title: 'NYALTX Press Room: Announcements and Listings',
+    description: 'Read official NYALTX announcements, exchange partnerships, and token listing news in one archive.',
     type: 'website',
     url: 'https://www.nyaltx.pro/news',
     siteName: 'NYALTX',
@@ -30,8 +30,8 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     site: '@nyaltx',
     creator: '@nyaltx',
-    title: 'NYALTX News – Updates & Announcements',
-    description: 'Stay up to date with the latest NYALTX announcements, platform features, and community updates.',
+    title: 'NYALTX Press Room: Announcements and Listings',
+    description: 'Read official NYALTX announcements, exchange partnerships, and token listing news in one archive.',
     images: ['https://www.nyaltx.pro/og-image.png'],
   },
 };

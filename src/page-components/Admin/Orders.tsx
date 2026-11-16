@@ -8,9 +8,9 @@ interface Order {
   id: string;
   type: 'race_to_liberty' | 'boost_pack' | 'pro_subscription' | 'token_registration' | 'news_submission';
   status: 'pending' | 'completed' | 'failed' | 'refunded';
-  paymentMethod: 'eth' | 'sol' | 'nyax' | 'paypal' | 'stripe' | 'free_promo';
+  paymentMethod: 'eth' | 'sol' | 'nyax' | 'usdc' | 'paypal' | 'stripe' | 'free_promo';
   amount: string;
-  currency: 'USD' | 'ETH' | 'SOL' | 'NYAX';
+  currency: 'USD' | 'ETH' | 'SOL' | 'NYAX' | 'USDC';
   txHash?: string;
   chainId?: number;
   walletAddress?: string;
@@ -113,6 +113,7 @@ const AdminOrdersComponent = () => {
       eth: 'bg-blue-900 text-blue-300',
       sol: 'bg-purple-900 text-purple-300',
       nyax: 'bg-cyan-900 text-cyan-300',
+      usdc: 'bg-emerald-900 text-emerald-300',
       paypal: 'bg-blue-900 text-blue-300',
       stripe: 'bg-purple-900 text-purple-300',
       free_promo: 'bg-emerald-900 text-emerald-300'
@@ -125,6 +126,7 @@ const AdminOrdersComponent = () => {
       eth: 'Ethereum',
       sol: 'Solana',
       nyax: 'NYAX Token',
+      usdc: 'USDC',
       paypal: 'PayPal',
       stripe: 'Stripe',
       free_promo: 'Free Promo'
@@ -138,6 +140,7 @@ const AdminOrdersComponent = () => {
     if (currency === 'ETH') return `${num.toFixed(6)} ETH`;
     if (currency === 'SOL') return `${num.toFixed(6)} SOL`;
     if (currency === 'NYAX') return `${num.toFixed(2)} NYAX`;
+    if (currency === 'USDC') return `${num.toFixed(2)} USDC`;
     return `${amount} ${currency}`;
   };
 
@@ -212,6 +215,7 @@ const AdminOrdersComponent = () => {
               <option value="eth">ETH</option>
               <option value="sol">SOL</option>
               <option value="nyax">NYAX</option>
+              <option value="usdc">USDC</option>
               <option value="paypal">PayPal</option>
               <option value="stripe">Stripe</option>
               <option value="free_promo">Free Promo</option>
@@ -364,6 +368,8 @@ const AdminOrdersComponent = () => {
                           <FaCoins className="w-4 h-4 text-purple-400" />
                         ) : order.paymentMethod === 'nyax' ? (
                           <FaCoins className="w-4 h-4 text-cyan-400" />
+                        ) : order.paymentMethod === 'usdc' ? (
+                          <FaCoins className="w-4 h-4 text-emerald-400" />
                         ) : order.paymentMethod === 'free_promo' ? (
                           <FaGift className="w-4 h-4 text-green-400" />
                         ) : (

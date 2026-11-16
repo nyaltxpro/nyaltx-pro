@@ -2,6 +2,13 @@
 
 import React from 'react';
 import Header from '../../../components/Header';
+import { pageMetadata } from '@/lib/pageMetadata';
+
+export const metadata = pageMetadata(
+  'Disclaimer | NYALTX',
+  'Important notice that NYALTX content is for information only and is not financial, legal, or investment advice. Read before acting on any content.',
+  '/disclaimer',
+);
 
 export default function DisclaimerPage() {
   return (

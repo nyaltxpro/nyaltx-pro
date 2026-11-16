@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/mongodb';
 import { PAID_CRITERIA } from '@/lib/newshubInitialData';
+import { PUBLIC_NEWS_FILTER } from '@/lib/publicNewsQuery';
 
 export async function GET(request: NextRequest) {
   try {
@@ -37,7 +38,7 @@ export async function GET(request: NextRequest) {
     // These auto-appear in the slider alongside admin banners
     const featuredPaidArticles = await newsCollection
       .find({
-        status: 'published',
+        ...PUBLIC_NEWS_FILTER,
         isPaid: { $ne: false },
         author: { $nin: ['NYALTX Team', 'NYALTX Learn'] },
         $or: PAID_CRITERIA,
@@ -75,7 +76,7 @@ export async function GET(request: NextRequest) {
 
     // ── 3. Feed: ONLY published PAID submissions (exclude editorial) ─────
     const feedQuery: any = {
-      status: 'published',
+      ...PUBLIC_NEWS_FILTER,
       isPaid: { $ne: false },
       author: { $nin: ['NYALTX Team', 'NYALTX Learn'] },
       $or: PAID_CRITERIA,

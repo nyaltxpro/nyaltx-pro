@@ -1,4 +1,5 @@
 import { getDb } from '@/lib/mongodb';
+import { PUBLIC_NEWS_FILTER } from '@/lib/publicNewsQuery';
 import type { Document, ObjectId } from 'mongodb';
 
 interface NewsArticleDocument extends Document {
@@ -49,7 +50,7 @@ export async function getNewshubInitialData() {
   const db = await getDb();
   const collection = db.collection('corporate_news');
   const feedQuery = {
-    status: 'published',
+    ...PUBLIC_NEWS_FILTER,
     isPaid: { $ne: false },
     author: { $nin: ['NYALTX Team', 'NYALTX Learn'] },
     $or: PAID_CRITERIA,

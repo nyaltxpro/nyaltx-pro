@@ -9,9 +9,9 @@ export interface Order {
   status: 'pending' | 'completed' | 'failed' | 'refunded';
   
   // Payment details
-  paymentMethod: 'eth' | 'sol' | 'nyax' | 'paypal' | 'stripe' | 'free_promo';
+  paymentMethod: 'eth' | 'sol' | 'nyax' | 'usdc' | 'paypal' | 'stripe' | 'free_promo';
   amount: string;
-  currency: 'USD' | 'ETH' | 'SOL' | 'NYAX';
+  currency: 'USD' | 'ETH' | 'SOL' | 'NYAX' | 'USDC';
   
   // Blockchain details (for crypto payments)
   txHash?: string;
@@ -71,6 +71,74 @@ export async function GET(req: NextRequest) {
       .find(filter)
       .sort({ createdAt: -1 })
       .toArray();
+
+    const linkedNewsIds = new Set<string>();
+    let recoveredNewsOrders: Order[] = [];
+    if (!type || type === 'news_submission') {
+      const existingNewsOrders = await ordersCollection
+        .find({ type: 'news_submission' }, { projection: { 'metadata.newsId': 1 } })
+        .toArray();
+      existingNewsOrders.forEach(order => {
+        const newsId = String(order.metadata?.newsId || '');
+        if (newsId) linkedNewsIds.add(newsId);
+      });
+
+      const newsCollection = await getCollection('corporate_news');
+      const paidSubmissions = await newsCollection
+        .find({ isPaid: true })
+        .sort({ createdAt: -1 })
+        .toArray();
+
+      recoveredNewsOrders = paidSubmissions
+        .filter((submission: any) => !linkedNewsIds.has(String(submission._id)))
+        .map((submission: any): Order => {
+          const paymentMethod: Order['paymentMethod'] =
+            submission.paymentMethod === 'usdc'
+              ? 'usdc'
+              : submission.paymentMethod === 'nyax'
+                ? 'nyax'
+                : 'paypal';
+          const currency: Order['currency'] =
+            paymentMethod === 'usdc' ? 'USDC' : paymentMethod === 'nyax' ? 'NYAX' : 'USD';
+          const createdDate = new Date(submission.createdAt || Date.now());
+          const createdAt = Number.isNaN(createdDate.getTime())
+            ? new Date().toISOString()
+            : createdDate.toISOString();
+          const verifiedDate = submission.paymentVerifiedAt
+            ? new Date(submission.paymentVerifiedAt)
+            : null;
+          const newsId = String(submission._id);
+
+          return {
+            id: submission.orderId || `news_submission_${newsId}`,
+            type: 'news_submission',
+            status: 'completed',
+            paymentMethod,
+            amount: String(submission.amount ?? '0'),
+            currency,
+            txHash: submission.txHash || undefined,
+            paymentId: submission.paymentId || undefined,
+            walletAddress: submission.walletAddress || undefined,
+            email: submission.email || undefined,
+            productName: `NYALTX News Hub - ${submission.title || 'News Submission'}`,
+            tier: submission.plan || undefined,
+            createdAt,
+            updatedAt: createdAt,
+            completedAt: verifiedDate && !Number.isNaN(verifiedDate.getTime())
+              ? verifiedDate.toISOString()
+              : createdAt,
+            metadata: {
+              source: 'corporate_news_recovery',
+              newsId,
+              headline: submission.title,
+              category: submission.category,
+              submissionType: submission.type,
+              plan: submission.plan,
+              paymentVerified: Boolean(submission.paymentVerified)
+            }
+          };
+        });
+    }
 
     // Get onchain orders and convert to standard format
     const onchainCollection = await getCollection('onchain_orders');
@@ -265,7 +333,7 @@ export async function GET(req: NextRequest) {
     });
 
     // Combine all orders
-    let allOrders = [...mainOrders, ...convertedOnchainOrders, ...convertedBoostOrders, ...convertedTokenOrders, ...convertedSubscriptionOrders];
+    let allOrders = [...mainOrders, ...recoveredNewsOrders, ...convertedOnchainOrders, ...convertedBoostOrders, ...convertedTokenOrders, ...convertedSubscriptionOrders];
 
     // Apply filters to combined data
     if (type) {
@@ -293,6 +361,7 @@ export async function GET(req: NextRequest) {
       },
       sources: {
         mainOrders: mainOrders.length,
+        recoveredNewsOrders: recoveredNewsOrders.length,
         onchainOrders: convertedOnchainOrders.length,
         boostOrders: convertedBoostOrders.length,
         tokenOrders: convertedTokenOrders.length,

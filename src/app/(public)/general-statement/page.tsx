@@ -5,13 +5,14 @@ import type { Metadata } from 'next';
 const baseUrl = 'https://www.nyaltx.pro';
 
 export const metadata: Metadata = {
-  title: 'General Statement | NYALTX',
+  title: { absolute: 'General Statement | NYALTX' },
   description:
-    'Review the NYALTX general terms, severe risk warnings, and legal responsibilities when interacting with crypto-assets and related information services.',
+    'NYALTX’s general statement on the informational nature of its content, the absence of warranties, and the limits of what the site offers.',
   alternates: { canonical: `${baseUrl}/general-statement` },
   openGraph: {
     title: 'General Statement | NYALTX',
-    description: 'General terms, risk warnings and responsibilities for NYALTX platform users.',
+    description:
+      'NYALTX’s general statement on the informational nature of its content, the absence of warranties, and the limits of what the site offers.',
     url: `${baseUrl}/general-statement`,
     siteName: 'NYALTX',
     type: 'website',

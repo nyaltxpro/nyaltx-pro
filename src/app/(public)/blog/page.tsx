@@ -6,18 +6,18 @@ import type { SerializedBlogPost } from "@/lib/blogServer";
 
 export const metadata: Metadata = {
     metadataBase: new URL('https://www.nyaltx.pro'),
-    title: "NYALTX Blog – Web3 Ideas, Insights & Updates",
+    title: { absolute: "NYALTX Blog: Crypto, DeFi and Tokenization Insights" },
     description:
-        "Read articles about governance, project growth, and the Web3 landscape. Simple, useful insight for teams building in the space.",
+        "Expert articles on tokenized securities, altcoin markets, and blockchain capital markets from the NYALTX team.",
     keywords:
         "nyaltx blog, defi insights, platform updates, crypto education, trading tips, nyaltx news",
     alternates: {
         canonical: "https://www.nyaltx.pro/blog",
     },
     openGraph: {
-        title: "NYALTX Blog – Web3 Ideas, Insights & Updates",
+        title: "NYALTX Blog: Crypto, DeFi and Tokenization Insights",
         description:
-            "Read articles about governance, project growth, and the Web3 landscape. Simple, useful insight for teams building in the space.",
+            "Expert articles on tokenized securities, altcoin markets, and blockchain capital markets from the NYALTX team.",
         type: "website",
         url: "https://www.nyaltx.pro/blog",
         siteName: "NYALTX",

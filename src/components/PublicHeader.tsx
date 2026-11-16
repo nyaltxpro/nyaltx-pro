@@ -16,6 +16,7 @@ export default function PublicHeader() {
 
   const fallbackPrimaryLinks = [
     { label: 'Dashboard', href: '/dashboard', enabled: true },
+    { label: 'News Hub', href: '/newshub/submit', enabled: true },
     { label: 'Pricing', href: '/pricing', enabled: true },
     { label: 'Contact us', href: '/contact', enabled: true },
   ];
@@ -32,7 +33,6 @@ export default function PublicHeader() {
         { label: 'Podcast', href: '/podcast', enabled: true },
         { label: 'Team', href: '/team', enabled: true },
         { label: 'Our News', href: '/news', enabled: true },
-        { label: 'News Hub', href: '/news-hub', enabled: true },
         { label: 'Whitepaper', href: '/whitepaper', enabled: true },
 
       ],
@@ -130,14 +130,23 @@ export default function PublicHeader() {
     variant?: 'desktop' | 'mobile';
   }) => {
     const active = pathname === href || (href !== '/' && pathname?.startsWith(href));
+    const isNewsHub = label === 'News Hub';
     const classes =
       variant === 'desktop'
-        ? active
-          ? 'px-3 py-2 text-sm text-cyan-300'
-          : 'px-3 py-2 text-sm text-gray-300 hover:text-white'
-        : active
-          ? 'block w-full rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white'
-          : 'block w-full rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-white';
+        ? isNewsHub
+          ? `rounded-md px-3 py-2 text-sm font-semibold transition-colors ${
+              active ? 'bg-cyan-500 text-black' : 'bg-cyan-600 text-white hover:bg-cyan-500'
+            }`
+          : active
+            ? 'px-3 py-2 text-sm text-cyan-300'
+            : 'px-3 py-2 text-sm text-gray-300 hover:text-white'
+        : isNewsHub
+          ? `block w-full rounded-md px-3 py-2 text-sm font-semibold transition-colors ${
+              active ? 'bg-cyan-500 text-black' : 'bg-cyan-600 text-white hover:bg-cyan-500'
+            }`
+          : active
+            ? 'block w-full rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white'
+            : 'block w-full rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-white';
     return (
       <Link
         href={href}

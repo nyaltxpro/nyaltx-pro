@@ -1,7 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/mongodb';
+import { getAdminFromRequest } from '@/lib/adminAuth';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
+  const admin = await getAdminFromRequest();
+  if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
   try {
     const db = await getDb();
     const collection = db.collection('corporate_news');

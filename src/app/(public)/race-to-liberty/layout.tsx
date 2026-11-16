@@ -2,16 +2,16 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.nyaltx.pro'),
-  title: 'Race to Liberty | NYALTX Gamified Competition',
+  title: { absolute: 'Race to Liberty: NYALTX Community Campaign' },
   description:
-    'Join the Race to Liberty competition! Boost your token visibility with weekly marketing competitions, leaderboards, and boost multipliers on NYALTX.',
+    'Join the NYALTX Race to Liberty and see how the community competes, participates, and earns across the ecosystem.',
   alternates: {
     canonical: 'https://www.nyaltx.pro/race-to-liberty',
   },
   openGraph: {
-    title: 'Race to Liberty | NYALTX Gamified Competition',
+    title: 'Race to Liberty: NYALTX Community Campaign',
     description:
-      'Join the Race to Liberty competition! Boost your token visibility with weekly marketing competitions and leaderboards on NYALTX.',
+      'Join the NYALTX Race to Liberty and see how the community competes, participates, and earns across the ecosystem.',
     url: 'https://www.nyaltx.pro/race-to-liberty',
     siteName: 'NYALTX',
     type: 'website',

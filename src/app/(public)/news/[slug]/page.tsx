@@ -3,7 +3,36 @@ import { getDb } from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { PUBLIC_NEWS_FILTER } from '@/lib/publicNewsQuery';
 import NewsArticle from '../../../../components/NewsArticle';
+
+const NEWS_METADATA_OVERRIDES: Record<string, { title: string; description: string }> = {
+  'new-blockchain-platform-launches-medium-for-alt-coins-and-investors': {
+    title: 'New Blockchain Platform Connects Alt Coins and Investors',
+    description:
+      'NYALTX launches a new medium where alt coin projects meet investors. Read what the platform offers and who it serves.',
+  },
+  'new-alt-coin-platform-collaborates-with-centralized-exchange': {
+    title: 'Alt Coin Platform Partners With Centralized Exchange',
+    description:
+      'Read how NYALTX teams up with a centralized exchange to widen access for alt coin projects and traders.',
+  },
+  'blockchain-platform-launches-medium-for-binance-smart-chain-bep-20-alt-coins': {
+    title: 'New Platform Launches for BEP-20 Alt Coins on BSC',
+    description:
+      'NYALTX introduces a dedicated medium for Binance Smart Chain BEP-20 alt coins. See what it means for BSC projects.',
+  },
+  'new-york-alt-exchange-nyaltx-and-nyax-token-officially-listed-on-coinmarketcap': {
+    title: 'NYALTX and NYAX Token Listed on CoinMarketCap',
+    description:
+      'NYALTX and the NYAX token are now live on CoinMarketCap. Read the announcement and what the listing means for holders.',
+  },
+  'nyaltx-market-outlook-why-tokenization-could-weather-the-broader-market-correction': {
+    title: 'Market Outlook: Can Tokenization Survive a Correction?',
+    description:
+      'NYALTX analyzes why tokenized assets may hold up better during a broad market correction, and where the risks remain.',
+  },
+};
 
 interface NewsData {
   _id: string;
@@ -36,7 +65,7 @@ async function getNewsArticle(slug: string): Promise<NewsData | null> {
 
     // Find the published article by slug or ObjectId
     const query: any = {
-      status: 'published',
+      ...PUBLIC_NEWS_FILTER,
       $or: [{ slug }]
     };
     if (ObjectId.isValid(slug)) {
@@ -85,17 +114,21 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     };
   }
 
+  const override = NEWS_METADATA_OVERRIDES[params.slug];
+  const title = override?.title ?? `${article.title} - NYALTX News`;
+  const description = override?.description ?? article.excerpt;
+
   return {
     metadataBase: new URL('https://www.nyaltx.pro'),
-    title: `${article.title} - NYALTX News`,
-    description: article.excerpt,
+    title: { absolute: title },
+    description,
     keywords: article.tags.join(', '),
     alternates: {
       canonical: `https://www.nyaltx.pro/news/${params.slug}`,
     },
     openGraph: {
-      title: article.title,
-      description: article.excerpt,
+      title,
+      description,
       type: 'article',
       url: `https://www.nyaltx.pro/news/${params.slug}`,
       siteName: 'NYALTX',
@@ -121,8 +154,8 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     twitter: {
       card: 'summary_large_image',
       site: '@nyaltx',
-      title: article.title,
-      description: article.excerpt,
+      title,
+      description,
       images: article.featuredImage ? [article.featuredImage] : ['https://www.nyaltx.pro/og-image.png'],
     },
   };
