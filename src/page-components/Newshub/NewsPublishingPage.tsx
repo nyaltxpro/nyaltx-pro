@@ -24,33 +24,36 @@ const plans: {
   {
     id: 'feed',
     number: '01',
-    name: 'Direct Distribution',
-    price: '$199',
-    nyaxPrice: '$159.20 with NYAX',
-    description:
-      'Publish your story on NYALTX with distribution to our News Hub, RSS feed, newsletter, and social channels.',
+    name: 'News Publishing',
+    price: '$99',
+    nyaxPrice: '$79.20 with NYAX',
+    description: 'Get your company news published and discoverable on the NYALTX News Hub.',
     features: [
-      'Unlimited word count',
-      'News Hub publication after editorial review',
-      'RSS feed and weekly newsletter inclusion',
-      'Promotion on NYALTX social channels',
-      'Editorial review and headline help',
+      'Full article published on NYALTX News Hub',
+      'Inclusion in the live industry news feed',
+      'Company logo and featured image',
+      'Links to your website and social channels',
+      'Dedicated, shareable article URL',
+      'SEO-friendly article page',
     ],
   },
   {
     id: 'slider',
     number: '02',
-    name: 'Full Service',
-    price: '$499',
-    nyaxPrice: '$399.20 with NYAX',
-    description:
-      'Get hands-on editorial support and distribution for your press release across NYALTX channels.',
+    name: 'News Publishing & Distribution',
+    price: '$199',
+    nyaxPrice: '$159.20 with NYAX',
+    description: 'Amplify your announcement with featured placement and additional promotional distribution.',
     features: [
-      'Everything in Direct Distribution',
-      'Full-service release preparation',
-      'News Hub, RSS feed, and newsletter inclusion',
-      'Promotion on NYALTX social channels',
-      'Editorial review and headline help',
+      'Everything in News Publishing',
+      '7-day featured placement on the News Hub',
+      'Priority visibility above standard news',
+      'Inclusion in the NYALTX newsletter',
+      'Promotion across NYALTX social channels',
+      'Custom-branded promotional graphic',
+      'Article editing and headline optimization',
+      'Featured company spotlight',
+      'Scheduled publication option',
     ],
     featured: true,
   },
@@ -76,16 +79,16 @@ export default function NewsPublishingPage({
       <style
         dangerouslySetInnerHTML={{
           __html: `
-            .nps-page{--navy:#e6edf6;--blue:#06b6d4;--green:#22d3ee;--ink:#e6edf6;--muted:#8a99ad;--line:#1e293b;background:radial-gradient(ellipse at 18% 0%,rgba(6,182,212,.12),transparent 34%),radial-gradient(ellipse at 88% 18%,rgba(99,102,241,.12),transparent 30%),#070b12;color:var(--ink);font:16px/1.6 Arial,sans-serif;min-height:100vh}
+            .nps-page{--navy:#e6edf6;--blue:#00b8d8;--green:#00b8d8;--ink:#e6edf6;--muted:#8a99ad;--line:rgba(255,255,255,.1);background:#070b12;color:var(--ink);font:16px/1.6 Arial,sans-serif;min-height:100vh}
             .nps-page *{box-sizing:border-box}
             .nps-wrap{max-width:1180px;margin:0 auto;padding:0 28px}
             .nps-nav{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;padding:22px 0}
             .nps-brand{color:#f8fafc;font-size:25px;font-weight:800;letter-spacing:-1px;text-decoration:none}
-            .nps-brand span{color:#22d3ee}
+            .nps-brand span{color:#00b8d8}
             .nps-brand small{display:block;color:#8a99ad;font-size:10px;letter-spacing:2px}
             .nps-links{display:flex;align-items:center;gap:25px;flex-wrap:wrap;font-size:14px;font-weight:700}
-            .nps-links a{color:#a5f3fc;text-decoration:none}
-            .nps-btn{display:inline-flex;justify-content:center;align-items:center;border:1px solid transparent;border-radius:8px;background:linear-gradient(90deg,#22d3ee,#6366f1);color:#020617!important;cursor:pointer;font:inherit;font-weight:700;padding:12px 20px;text-align:center;text-decoration:none;transition:filter .2s,transform .2s}
+            .nps-links a{color:#00b8d8;text-decoration:none}
+            .nps-btn{display:inline-flex;justify-content:center;align-items:center;border:1px solid transparent;border-radius:8px;background:#00b8d8;color:#fff!important;cursor:pointer;font:inherit;font-weight:700;padding:12px 20px;text-align:center;text-decoration:none;transition:filter .2s,transform .2s}
             .nps-btn:hover{filter:brightness(1.12);transform:translateY(-1px)}
             .nps-btn-outline{background:rgba(15,22,35,.75);border-color:#334155;color:#e6edf6!important}
             .nps-btn-outline:hover{background:#172235}
@@ -93,7 +96,7 @@ export default function NewsPublishingPage({
             .nps-hero-grid{display:grid;grid-template-columns:1.3fr .7fr;gap:60px;align-items:center}
             .nps-eyebrow{color:#22d3ee;font-size:12px;font-weight:800;letter-spacing:2px;text-transform:uppercase}
             .nps-page h1,.nps-page h2,.nps-page h3,.nps-page p{margin:0}
-            .nps-page h1{background:linear-gradient(90deg,#67e8f9,#a5b4fc);background-clip:text;color:transparent;font-size:clamp(36px,5vw,62px);letter-spacing:-2.5px;line-height:1.07;margin:16px 0 20px}
+            .nps-page h1{background:linear-gradient(90deg,#00b8d8,#a5f3fc);background-clip:text;color:transparent;font-size:clamp(36px,5vw,62px);letter-spacing:-2.5px;line-height:1.07;margin:16px 0 20px}
             .nps-page h2{color:#f8fafc;font-size:34px;letter-spacing:-1px;line-height:1.2;margin:8px 0 12px}
             .nps-page h3{color:#f1f5f9;font-size:23px;line-height:1.2}
             .nps-lead{color:#b6c2d2;font-size:19px;max-width:650px}
@@ -122,8 +125,8 @@ export default function NewsPublishingPage({
             .nps-plan ul{flex:1;list-style:none;margin:18px 0 24px;padding:0}
             .nps-plan li{border-top:1px solid #1e293b;font-size:14px;padding:8px 0 8px 22px;position:relative}
             .nps-plan li:before{color:#22d3ee;content:'✓';font-weight:700;left:0;position:absolute}
-            .nps-footer{border-top:1px solid var(--line);color:var(--muted);font-size:13px;padding:28px 0}
-            .nps-footer a{color:#67e8f9;text-decoration:none}
+            .nps-footer{background:#070b12;border-top:1px solid var(--line);color:#fff;font-size:13px;padding:28px 0}
+            .nps-footer a{color:#00b8d8;text-decoration:none}
             @media(max-width:800px){.nps-wrap{padding:0 18px}.nps-hero{padding:42px 0}.nps-hero-grid,.nps-channels,.nps-plans{grid-template-columns:1fr}.nps-hero-grid{gap:25px}.nps-section{padding:42px 0}.nps-description{min-height:0}.nps-links{gap:12px}}
           `,
         }}
@@ -173,7 +176,7 @@ export default function NewsPublishingPage({
             <p><span className="nps-check">✓</span>Dedicated news article with your branding</p>
             <p><span className="nps-check">✓</span>RSS feed and newsletter inclusion</p>
             <p><span className="nps-check">✓</span>Promotion on NYALTX social channels</p>
-            <p><span className="nps-check">✓</span>Packages starting at $199</p>
+            <p><span className="nps-check">✓</span>Packages starting at $99</p>
           </aside>
         </div>
       </section>
@@ -234,7 +237,7 @@ export default function NewsPublishingPage({
                   {plan.features.map(feature => <li key={feature}>{feature}</li>)}
                 </ul>
                 <button className="nps-btn" onClick={() => openSubmitModal(plan.id)} type="button">
-                  {plan.id === 'feed' ? 'Start Direct Distribution' : 'Start Full Service'}
+                  {plan.id === 'feed' ? 'Publish Your News — $99' : 'Get Featured — $199'}
                 </button>
               </article>
             ))}
