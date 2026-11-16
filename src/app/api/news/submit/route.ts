@@ -3,6 +3,9 @@ import { getDb, getCollection } from '@/lib/mongodb';
 import { Order } from '@/app/api/admin/orders/route';
 import { verifyNewsPayment, sendNewsSubmissionConfirmationEmail } from '@/lib/newsEmailService';
 
+const NYAX_DISCOUNT = 0.2;
+const NEWS_TEST_PLAN_ENABLED = process.env.NEXT_PUBLIC_ENABLE_NEWS_TEST_PLAN === 'true';
+
 export async function POST(req: NextRequest) {
   try {
     const data = await req.json();
@@ -20,7 +23,7 @@ export async function POST(req: NextRequest) {
       email,
       plan = 'feed', // 'feed' | 'slider' | 'prem'
       paymentMethod = 'paypal', // 'paypal' | 'usdc' | 'nyax'
-      amount = plan === 'slider' || plan === 'prem' ? 199 : 99,
+      amount,
       txHash,
       paymentId,
       walletAddress,
@@ -38,6 +41,27 @@ export async function POST(req: NextRequest) {
     if (Boolean(data.isTest) || ['test', 'testnet'].includes(paymentStatus)) {
       return NextResponse.json(
         { error: 'Test payments are disabled for news submissions.' },
+        { status: 400 }
+      );
+    }
+
+    const planPrice =
+      plan === 'feed' ? 99 :
+      plan === 'slider' || plan === 'prem' ? 199 :
+      plan === 'test' && NEWS_TEST_PLAN_ENABLED ? 1 :
+      null;
+    if (planPrice === null) {
+      return NextResponse.json({ error: 'This news publishing plan is unavailable.' }, { status: 400 });
+    }
+
+    const expectedAmount =
+      paymentMethod === 'nyax' && plan !== 'test'
+        ? planPrice * (1 - NYAX_DISCOUNT)
+        : planPrice;
+    const submissionAmount = amount === undefined ? expectedAmount : Number(amount);
+    if (!Number.isFinite(submissionAmount) || Math.abs(submissionAmount - expectedAmount) > 0.001) {
+      return NextResponse.json(
+        { error: 'Payment amount does not match the selected publishing plan.' },
         { status: 400 }
       );
     }
@@ -63,7 +87,7 @@ export async function POST(req: NextRequest) {
       paymentMethod,
       paymentId: paymentId || null,
       txHash: txHash || null,
-      amount,
+      amount: submissionAmount,
       paymentStatus
     });
 
@@ -83,9 +107,13 @@ export async function POST(req: NextRequest) {
       .replace(/(^-|-$)/g, '');
     const finalSlug = `${baseSlug}-${Date.now().toString(36)}`;
 
-    const resolvedPlanName = planName || (plan === 'slider'
-      ? 'News Publishing & Distribution ($199)'
-      : 'News Publishing ($99)');
+    const resolvedPlanName = planName || (
+      plan === 'test'
+        ? 'Checkout Flow Test ($1)'
+        : plan === 'slider' || plan === 'prem'
+          ? 'News Publishing & Distribution ($199)'
+          : 'News Publishing ($99)'
+    );
 
     const submissionDoc = {
       title: title.trim(),
@@ -101,7 +129,7 @@ export async function POST(req: NextRequest) {
       plan,
       planName: resolvedPlanName,
       paymentMethod,
-      amount: Number(amount) || 0,
+      amount: submissionAmount,
       txHash: txHash || null,
       paymentId: paymentId || null,
       walletAddress: walletAddress || null,
@@ -135,7 +163,7 @@ export async function POST(req: NextRequest) {
         type: 'news_submission' as any,
         status: 'completed',
         paymentMethod: paymentMethod as any,
-        amount: String(amount),
+        amount: String(submissionAmount),
         currency: (paymentMethod === 'usdc' ? 'USDC' : paymentMethod === 'nyax' ? 'NYAX' : 'USD') as any,
         txHash: txHash || undefined,
         paymentId: paymentId || undefined,
@@ -175,7 +203,7 @@ export async function POST(req: NextRequest) {
         headline: title.trim(),
         category,
         planName: resolvedPlanName,
-        amount: Number(amount) || 0,
+        amount: submissionAmount,
         paymentMethod,
         paymentId: paymentId || undefined,
         txHash: txHash || undefined,

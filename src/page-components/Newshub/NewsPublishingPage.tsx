@@ -9,7 +9,7 @@ const SubmitNewsModal = dynamic(
   { ssr: false }
 );
 
-type PublishingPlan = 'feed' | 'slider';
+type PublishingPlan = 'feed' | 'slider' | 'test';
 
 const plans: {
   id: PublishingPlan;
@@ -237,7 +237,9 @@ export default function NewsPublishingPage({
                   {plan.features.map(feature => <li key={feature}>{feature}</li>)}
                 </ul>
                 <button className="nps-btn" onClick={() => openSubmitModal(plan.id)} type="button">
-                  {plan.id === 'feed' ? 'Publish Your News — $99' : 'Get Featured — $199'}
+                  {plan.id === 'feed'
+                    ? 'Publish Your News — $99'
+                    : 'Get Featured — $199'}
                 </button>
               </article>
             ))}
