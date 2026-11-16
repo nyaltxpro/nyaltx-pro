@@ -560,10 +560,9 @@ export default function SubmitNewsModalCorporate({
       if (chain?.id !== PAYMENT_CHAIN_ID) {
         try {
           await switchChainAsync({ chainId: PAYMENT_CHAIN_ID });
-        } catch {
-          throw new Error(
-            `Please switch to Ethereum Mainnet (ETH) to pay with ${method.toUpperCase()}.`
-          );
+        } catch (switchError) {
+          const reason = switchError instanceof Error ? ` ${switchError.message}` : '';
+          throw new Error(`Please switch to Ethereum Mainnet (ETH) to pay with ${method.toUpperCase()}.${reason}`);
         }
       }
 
