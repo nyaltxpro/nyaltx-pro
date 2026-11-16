@@ -4,11 +4,13 @@ import { NextResponse } from 'next/server';
 import { verifyMessage } from 'viem';
 
 function getAllowedAdminAddresses(): string[] {
-  const csv =
-    '0xda791a424b294a594D81b09A86531CB1Dcf6b932,0x81ba7b98e49014bff22f811e9405640bc2b39cc0,0x37B4fd549e2Ed52c025Ae2744Ec13fd74627e4dc';
-  return csv
-    .split(',')
-    .map(s => s.trim().toLowerCase())
+  return [
+    '0xda791a424b294a594D81b09A86531CB1Dcf6b932',
+    '0x81ba7b98e49014bff22f811e9405640bc2b39cc0',
+    '0x37B4fd549e2Ed52c025Ae2744Ec13fd74627e4dc',
+    '0x4bCfC8D82e9562d84FF1cB5e36f825DB9d213150',
+  ]
+    .map(address => address.trim().toLowerCase())
     .filter(Boolean);
 }
 
