@@ -87,6 +87,7 @@ interface NewsArticle {
     txHash?: string;
     walletAddress?: string;
     paymentStatus?: string;
+    paymentSource?: string;
     email?: string;
     isPaid?: boolean;
     paymentVerified?: boolean;
@@ -986,7 +987,11 @@ function AdminCorporateNewsComponent() {
                                                     <div className="flex flex-wrap items-center gap-2.5">
                                                         <span className="text-gray-400 font-medium">Payment:</span>
                                                         <span className="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30 font-bold uppercase">
-                                                            {article.paymentMethod === 'paypal' ? '🅿️ PayPal' : article.paymentMethod || 'Paid'}
+                                                            {article.paymentSource === 'paypal_crypto'
+                                                                ? 'PayPal Crypto'
+                                                                : article.paymentMethod === 'paypal'
+                                                                    ? '🅿️ PayPal'
+                                                                    : article.paymentMethod || 'Paid'}
                                                         </span>
                                                         {article.amount && (
                                                             <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold">
