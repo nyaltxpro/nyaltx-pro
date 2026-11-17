@@ -1,3 +1,5 @@
+import 'server-only';
+
 import NewsApprovalNotification from '@/emails/NewsApprovalNotification';
 import NewsSubmissionConfirmation from '@/emails/NewsSubmissionConfirmation';
 import { render } from '@react-email/render';

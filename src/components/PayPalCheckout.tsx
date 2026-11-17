@@ -8,7 +8,8 @@ interface PayPalCheckoutProps {
   amount: string;
   tier: string;
   email?: string;
-  onSuccess?: (details: any) => void;
+  onBeforeCryptoRedirect?: () => void;
+  onSuccess?: (details: any) => void | Promise<void>;
   onError?: (error: any) => void;
 }
 
@@ -16,6 +17,7 @@ export default function PayPalCheckout({
   amount,
   tier,
   email,
+  onBeforeCryptoRedirect,
   onSuccess,
   onError,
 }: PayPalCheckoutProps) {
@@ -131,7 +133,7 @@ export default function PayPalCheckout({
       }
 
       if (onSuccess) {
-        onSuccess(details);
+        await onSuccess(details);
       }
     } catch (error) {
       toast.dismiss(processingToast);
@@ -166,6 +168,13 @@ export default function PayPalCheckout({
       return;
     }
 
+    if (cryptoStatus === 'failed') {
+      clearCryptoReturnParams();
+      setCryptoCheckoutOpen(true);
+      toast.error('PayPal could not complete the crypto payment. Please try again or choose another payment method.');
+      return;
+    }
+
     if (cryptoStatus !== 'returned' || !cryptoOrderId) {
       clearCryptoReturnParams();
       setCryptoCheckoutOpen(true);
@@ -178,20 +187,31 @@ export default function PayPalCheckout({
     setCryptoCheckoutOpen(true);
     setCryptoProcessing(true);
 
-    void fetch('/api/paypal/crypto/verify', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ orderId: cryptoOrderId }),
-      cache: 'no-store',
-    })
-      .then(async response => {
+    const verifyCryptoPayment = async () => {
+      const maxAttempts = 5;
+      for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+        const response = await fetch('/api/paypal/crypto/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ orderId: cryptoOrderId }),
+          cache: 'no-store',
+        });
         const result = await response.json();
-        if (!response.ok || !result.success || !result.order) {
+
+        if (response.ok && result.success && result.order) {
+          clearCryptoReturnParams();
+          await handleSuccessRef.current({ ...result.order, paymentSource: result.paymentSource });
+          return;
+        }
+
+        if (response.status !== 409 || attempt === maxAttempts - 1) {
           throw new Error(result.error || 'PayPal has not confirmed the crypto payment.');
         }
-        clearCryptoReturnParams();
-        await handleSuccessRef.current({ ...result.order, paymentSource: result.paymentSource });
-      })
+        await new Promise<void>(resolve => setTimeout(resolve, 2000));
+      }
+    };
+
+    void verifyCryptoPayment()
       .catch(error => {
         console.error('PayPal crypto return verification failed:', error);
         toast.error(error instanceof Error ? error.message : 'Could not verify the crypto payment.');
@@ -235,6 +255,7 @@ export default function PayPalCheckout({
         throw new Error(result.error || 'Could not start PayPal crypto checkout.');
       }
 
+      onBeforeCryptoRedirect?.();
       window.location.assign(result.approvalUrl);
     } catch (error) {
       console.error('PayPal crypto checkout could not start:', error);
@@ -468,7 +489,7 @@ export default function PayPalCheckout({
               toast.dismiss(captureToast);
               
               if (details?.status === 'COMPLETED') {
-                handleSuccess(details);
+                await handleSuccess(details);
               } else {
                 toast.error('❌ Payment not completed');
                 throw new Error('Payment not completed');
