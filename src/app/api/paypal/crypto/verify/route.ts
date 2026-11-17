@@ -12,6 +12,8 @@ interface CryptoOrderRecord {
   amount: string;
   currency: 'USD';
   status: 'creating' | 'pending' | 'completed' | 'failed';
+  captureId?: string;
+  updatedAt?: Date;
 }
 
 interface PayPalOrderDetails {
@@ -38,6 +40,19 @@ export async function POST(request: NextRequest) {
     if (!record) {
       return NextResponse.json({ error: 'PayPal crypto order was not found.' }, { status: 404 });
     }
+    if (record.status === 'failed') {
+      return NextResponse.json(
+        { error: 'PayPal reported that this crypto payment failed.', status: 'FAILED' },
+        { status: 402 },
+      );
+    }
+    if (record.status === 'completed') {
+      return NextResponse.json({
+        success: true,
+        order: { id: orderId, status: 'COMPLETED' },
+        paymentSource: 'paypal_crypto',
+      });
+    }
 
     const { accessToken, apiBaseUrl } = await getPayPalCryptoAccessToken();
     const response = await fetch(
@@ -59,8 +74,10 @@ export async function POST(request: NextRequest) {
     const purchaseUnit = order.purchase_units?.[0];
     if (
       order.id !== record.paypalOrderId ||
-      purchaseUnit?.custom_id !== record.state ||
-      purchaseUnit.amount?.currency_code !== record.currency ||
+      !purchaseUnit ||
+      !purchaseUnit.amount ||
+      purchaseUnit.custom_id !== record.state ||
+      purchaseUnit.amount.currency_code !== record.currency ||
       purchaseUnit.amount.value !== record.amount
     ) {
       console.error('PayPal crypto order verification did not match the stored order.');
@@ -79,7 +96,15 @@ export async function POST(request: NextRequest) {
 
     await records.updateOne(
       { state: record.state, status: { $ne: 'completed' } },
-      { $set: { status: 'completed', updatedAt: new Date() } },
+      {
+        $set: {
+          status: 'completed',
+          captureId: purchaseUnit?.payments?.captures?.find(
+            capture => capture.status?.toUpperCase() === 'COMPLETED',
+          )?.id,
+          updatedAt: new Date(),
+        },
+      },
     );
 
     return NextResponse.json({ success: true, order, paymentSource: 'paypal_crypto' });

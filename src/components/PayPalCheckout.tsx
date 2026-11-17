@@ -26,7 +26,6 @@ export default function PayPalCheckout({
   const [cryptoCheckoutOpen, setCryptoCheckoutOpen] = useState(false);
   const [cryptoGivenName, setCryptoGivenName] = useState('');
   const [cryptoSurname, setCryptoSurname] = useState('');
-  const [cryptoUsCustomer, setCryptoUsCustomer] = useState(false);
   const [cryptoProcessing, setCryptoProcessing] = useState(false);
   const processedCryptoOrderRef = useRef<string | null>(null);
   const cryptoCreateInProgressRef = useRef(false);
@@ -188,7 +187,7 @@ export default function PayPalCheckout({
     setCryptoProcessing(true);
 
     const verifyCryptoPayment = async () => {
-      const maxAttempts = 5;
+      const maxAttempts = 6;
       for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
         const response = await fetch('/api/paypal/crypto/verify', {
           method: 'POST',
@@ -207,7 +206,7 @@ export default function PayPalCheckout({
         if (response.status !== 409 || attempt === maxAttempts - 1) {
           throw new Error(result.error || 'PayPal has not confirmed the crypto payment.');
         }
-        await new Promise<void>(resolve => setTimeout(resolve, 2000));
+        await new Promise<void>(resolve => setTimeout(resolve, 5000));
       }
     };
 
@@ -226,11 +225,6 @@ export default function PayPalCheckout({
       toast.error('Enter your first and last name for PayPal crypto checkout.');
       return;
     }
-    if (!cryptoUsCustomer) {
-      toast.error('PayPal crypto checkout is currently available to eligible US customers only.');
-      return;
-    }
-
     cryptoCreateInProgressRef.current = true;
     setCryptoProcessing(true);
     try {
@@ -246,7 +240,6 @@ export default function PayPalCheckout({
           email,
           givenName: cryptoGivenName,
           surname: cryptoSurname,
-          usCustomerConfirmed: cryptoUsCustomer,
           returnUrl: returnUrl.toString(),
         }),
       });
@@ -539,9 +532,9 @@ export default function PayPalCheckout({
             <div className="mt-3 space-y-3 rounded-lg border border-cyan-500/30 bg-gray-900/50 p-4">
               <p className="text-sm font-medium text-white">Pay with crypto through PayPal</p>
               <p className="text-xs leading-relaxed text-gray-300">
-                PayPal converts your crypto payment to USD for settlement. This option is currently
-                available to eligible US customers only. PayPal must have Pay with crypto enabled
-                for your account.
+                Eligible buyers worldwide can pay with supported cryptocurrencies. PayPal converts
+                the payment to your account&apos;s settlement currency. This feature requires an
+                eligible, verified US PayPal Business account with Pay with crypto enabled.
               </p>
               <div className="grid gap-3 sm:grid-cols-2">
                 <label className="text-xs text-gray-300">
@@ -565,15 +558,6 @@ export default function PayPalCheckout({
                   />
                 </label>
               </div>
-              <label className="flex items-start gap-2 text-xs text-gray-300">
-                <input
-                  type="checkbox"
-                  checked={cryptoUsCustomer}
-                  onChange={event => setCryptoUsCustomer(event.target.checked)}
-                  className="mt-0.5"
-                />
-                I am located in the United States and understand PayPal may determine my eligibility.
-              </label>
               <button
                 type="button"
                 onClick={() => void startCryptoCheckout()}

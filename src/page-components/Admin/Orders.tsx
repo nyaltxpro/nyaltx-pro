@@ -37,6 +37,10 @@ const AdminOrdersComponent = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [showModal, setShowModal] = useState(false);
+  const [cryptoRefundAmount, setCryptoRefundAmount] = useState('');
+  const [cryptoRefundMessage, setCryptoRefundMessage] = useState<string | null>(null);
+  const [cryptoRefundError, setCryptoRefundError] = useState<string | null>(null);
+  const [processingCryptoRefund, setProcessingCryptoRefund] = useState(false);
 
   // Filters
   const [typeFilter, setTypeFilter] = useState<string>('');
@@ -147,11 +151,73 @@ const AdminOrdersComponent = () => {
   const openOrderModal = (order: Order) => {
     setSelectedOrder(order);
     setShowModal(true);
+    setCryptoRefundAmount('');
+    setCryptoRefundMessage(null);
+    setCryptoRefundError(null);
   };
 
   const closeOrderModal = () => {
     setSelectedOrder(null);
     setShowModal(false);
+  };
+
+  const processCryptoRefund = async () => {
+    if (!selectedOrder?.paymentId) return;
+    const refundLabel = cryptoRefundAmount
+      ? `$${Number(cryptoRefundAmount).toFixed(2)}`
+      : 'the remaining balance';
+    if (!window.confirm(`Submit a PayPal crypto refund for ${refundLabel}?`)) return;
+
+    try {
+      setProcessingCryptoRefund(true);
+      setCryptoRefundError(null);
+      setCryptoRefundMessage(null);
+      const response = await fetch(
+        `/api/admin/orders/paypal-crypto/${encodeURIComponent(selectedOrder.paymentId)}/refund`,
+        {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(
+            cryptoRefundAmount ? { amount: cryptoRefundAmount } : {},
+          ),
+        },
+      );
+      const result = await response.json().catch(() => ({}));
+
+      if (response.status === 202) {
+        setCryptoRefundMessage(result.error || 'PayPal is processing the refund. Check again shortly.');
+        return;
+      }
+      if (!response.ok) {
+        throw new Error(result.error || `Refund failed (${response.status}).`);
+      }
+
+      setSelectedOrder(current =>
+        current
+          ? {
+              ...current,
+              status: result.orderStatus || current.status,
+              metadata: {
+                ...current.metadata,
+                cryptoRefundedAmount: result.refundedAmount,
+                cryptoRefunds: result.refunds,
+              },
+            }
+          : current,
+      );
+      setCryptoRefundAmount('');
+      setCryptoRefundMessage(
+        `Refund of $${result.refundAmount} completed. Total refunded: $${result.refundedAmount}.`,
+      );
+      void fetchOrders();
+    } catch (refundError) {
+      setCryptoRefundError(
+        refundError instanceof Error ? refundError.message : 'Could not process the refund.',
+      );
+    } finally {
+      setProcessingCryptoRefund(false);
+    }
   };
 
   return (
@@ -574,6 +640,58 @@ const AdminOrdersComponent = () => {
                     </div>
                   </div>
                 )}
+
+                {selectedOrder.paymentMethod === 'paypal' &&
+                  selectedOrder.metadata?.paymentSource === 'paypal_crypto' &&
+                  selectedOrder.paymentId && (
+                    <div className="space-y-3 rounded-lg border border-amber-500/30 bg-amber-500/5 p-4">
+                      <h4 className="font-medium text-white">PayPal crypto refund</h4>
+                      <p className="text-sm text-gray-300">
+                        Refunds are issued by PayPal in PYUSD. Leave the amount blank to refund the
+                        remaining balance, or enter a partial amount in USD.
+                      </p>
+                      <p className="text-sm text-gray-400">
+                        Already refunded: $
+                        {Number(selectedOrder.metadata?.cryptoRefundedAmount || 0).toFixed(2)}
+                      </p>
+                      {selectedOrder.status !== 'refunded' && (
+                        <>
+                          <label className="block text-sm text-gray-300">
+                            Partial refund amount (USD)
+                            <input
+                              type="number"
+                              min="0.01"
+                              max={Math.max(
+                                0,
+                                Number(selectedOrder.amount) -
+                                  Number(selectedOrder.metadata?.cryptoRefundedAmount || 0),
+                              ).toFixed(2)}
+                              step="0.01"
+                              value={cryptoRefundAmount}
+                              onChange={event => setCryptoRefundAmount(event.target.value)}
+                              placeholder="Blank refunds remaining balance"
+                              className="mt-1 w-full rounded-md border border-gray-600 bg-gray-900 px-3 py-2 text-white"
+                              disabled={processingCryptoRefund}
+                            />
+                          </label>
+                          <button
+                            type="button"
+                            onClick={() => void processCryptoRefund()}
+                            disabled={processingCryptoRefund}
+                            className="rounded-md bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-500 disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            {processingCryptoRefund ? 'Processing refund...' : 'Submit refund'}
+                          </button>
+                        </>
+                      )}
+                      {cryptoRefundMessage && (
+                        <p className="text-sm text-emerald-300">{cryptoRefundMessage}</p>
+                      )}
+                      {cryptoRefundError && (
+                        <p className="text-sm text-red-300">{cryptoRefundError}</p>
+                      )}
+                    </div>
+                  )}
               </div>
 
               <div className="flex justify-end mt-6">

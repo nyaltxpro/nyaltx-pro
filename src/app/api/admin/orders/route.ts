@@ -72,6 +72,57 @@ export async function GET(req: NextRequest) {
       .sort({ createdAt: -1 })
       .toArray();
 
+    const cryptoOrdersCollection = await getCollection('paypal_crypto_orders');
+    const storedCryptoOrders = await cryptoOrdersCollection
+      .find({})
+      .sort({ createdAt: -1 })
+      .toArray();
+    const recordedCryptoPaymentIds = new Set(
+      mainOrders
+        .filter((order: any) => order.metadata?.paymentSource === 'paypal_crypto')
+        .map((order: any) => String(order.paymentId || ''))
+        .filter(Boolean),
+    );
+    const convertedCryptoOrders: Order[] = storedCryptoOrders
+      .filter((order: any) => !recordedCryptoPaymentIds.has(String(order.paypalOrderId || '')))
+      .map((order: any): Order => {
+        const tier = String(order.tier || '');
+        const tierLower = tier.toLowerCase();
+        const type: Order['type'] =
+          tierLower.startsWith('news') || tierLower.startsWith('pr')
+            ? 'news_submission'
+            : tierLower.startsWith('race-')
+              ? 'race_to_liberty'
+              : 'pro_subscription';
+        const refundedAmount = Number(order.refundedAmount || 0);
+        const fullyRefunded =
+          Number.isFinite(refundedAmount) && refundedAmount >= Number(order.amount || 0);
+        const status: Order['status'] =
+          fullyRefunded ? 'refunded' : order.status === 'completed' ? 'completed' : order.status === 'failed' ? 'failed' : 'pending';
+
+        return {
+          id: String(order.paypalOrderId || order.state),
+          type,
+          status,
+          paymentMethod: 'paypal',
+          amount: String(order.amount || '0'),
+          currency: 'USD',
+          paymentId: order.paypalOrderId || undefined,
+          email: order.email || undefined,
+          productName: `PayPal Crypto - ${tier || 'Checkout'}`,
+          tier: tier || undefined,
+          createdAt: new Date(order.createdAt || Date.now()).toISOString(),
+          updatedAt: new Date(order.updatedAt || order.createdAt || Date.now()).toISOString(),
+          completedAt: order.completedAt ? new Date(order.completedAt).toISOString() : undefined,
+          metadata: {
+            paymentSource: 'paypal_crypto',
+            cryptoOrderStatus: order.status,
+            cryptoRefundedAmount: order.refundedAmount || '0.00',
+            cryptoRefunds: order.refunds || [],
+          },
+        };
+      });
+
     const linkedNewsIds = new Set<string>();
     let recoveredNewsOrders: Order[] = [];
     if (!type || type === 'news_submission') {
@@ -333,7 +384,7 @@ export async function GET(req: NextRequest) {
     });
 
     // Combine all orders
-    let allOrders = [...mainOrders, ...recoveredNewsOrders, ...convertedOnchainOrders, ...convertedBoostOrders, ...convertedTokenOrders, ...convertedSubscriptionOrders];
+    let allOrders = [...mainOrders, ...convertedCryptoOrders, ...recoveredNewsOrders, ...convertedOnchainOrders, ...convertedBoostOrders, ...convertedTokenOrders, ...convertedSubscriptionOrders];
 
     // Apply filters to combined data
     if (type) {
@@ -361,6 +412,7 @@ export async function GET(req: NextRequest) {
       },
       sources: {
         mainOrders: mainOrders.length,
+        cryptoOrders: convertedCryptoOrders.length,
         recoveredNewsOrders: recoveredNewsOrders.length,
         onchainOrders: convertedOnchainOrders.length,
         boostOrders: convertedBoostOrders.length,

@@ -84,13 +84,17 @@ export async function verifyNewsPayment(params: VerifyPaymentParams): Promise<Pa
       };
     }
 
-    const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
-    const clientSecret = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_SECRET || process.env.PAYPAL_CLIENT_SECRET;
+    const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID?.trim();
+    const clientSecret =
+      process.env.PAYPAL_CLIENT_SECRET?.trim() || process.env.NEXT_PUBLIC_PAYPAL_CLIENT_SECRET?.trim();
 
     // If PayPal API credentials exist on backend, verify directly with PayPal v2 API
     if (clientId && clientSecret && clientId !== 'test' && clientId !== 'your-paypal-client-id-here') {
       try {
-        const isSandbox = process.env.NODE_ENV !== 'production' || clientId.startsWith('sb-');
+        const environment = process.env.PAYPAL_ENVIRONMENT?.trim().toLowerCase();
+        const isSandbox = environment
+          ? environment === 'sandbox'
+          : process.env.NODE_ENV !== 'production' || clientId.toLowerCase().startsWith('sb-');
         const paypalHost = isSandbox ? 'https://api-m.sandbox.paypal.com' : 'https://api-m.paypal.com';
 
         const basicAuth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
@@ -122,7 +126,13 @@ export async function verifyNewsPayment(params: VerifyPaymentParams): Promise<Pa
           if (orderRes.ok) {
             const orderData = await orderRes.json();
             const orderStatus = (orderData.status || '').toUpperCase();
-            if (orderStatus === 'COMPLETED' || orderStatus === 'APPROVED') {
+            if (orderData.id !== paymentId.trim()) {
+              return {
+                verified: false,
+                reason: 'PayPal returned a different order than the submitted payment ID.'
+              };
+            }
+            if (orderStatus === 'COMPLETED') {
               const orderAmount = orderData.purchase_units?.[0]?.amount;
               const expectedAmount = Number(amount);
               if (
@@ -149,7 +159,7 @@ export async function verifyNewsPayment(params: VerifyPaymentParams): Promise<Pa
             } else {
               return {
                 verified: false,
-                reason: `PayPal order status is ${orderData.status}, expected COMPLETED or APPROVED.`
+                reason: `PayPal order status is ${orderData.status}, expected COMPLETED.`
               };
             }
           }
@@ -157,18 +167,6 @@ export async function verifyNewsPayment(params: VerifyPaymentParams): Promise<Pa
       } catch (err: any) {
         console.error('PayPal API verification error:', err.message);
       }
-    }
-
-    // PayPal fallback verification: validate paymentId structure and status
-    const looksLikePayPalId = /^[A-Z0-9_-]{10,40}$/i.test(paymentId.trim());
-    if (looksLikePayPalId && (paymentStatus === 'completed' || paymentStatus === 'paid')) {
-      return {
-        verified: true,
-        providerDetails: {
-          paymentId: paymentId.trim(),
-          paymentStatus: 'completed'
-        }
-      };
     }
 
     return {
