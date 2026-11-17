@@ -41,17 +41,10 @@ export async function POST(request: NextRequest) {
     const tier = typeof body.tier === 'string' ? body.tier.trim().slice(0, 127) : '';
     const email = typeof body.email === 'string' ? body.email.trim().slice(0, 254) : '';
 
-    if (body.usCustomerConfirmed !== true) {
-      return NextResponse.json(
-        { error: 'PayPal crypto checkout is currently available to eligible US customers only.' },
-        { status: 400 },
-      );
-    }
-
     if (
       !/^\d+(?:\.\d{1,2})?$/.test(amountText) ||
       !Number.isFinite(amount) ||
-      amount <= 0 ||
+      amount < 0.01 ||
       amount > 100000
     ) {
       return NextResponse.json({ error: 'Enter a valid payment amount.' }, { status: 400 });
@@ -164,8 +157,10 @@ export async function POST(request: NextRequest) {
 
     const order: PayPalCreateOrderResponse = await paypalResponse.json();
     const payerActionUrl = order.links?.find(link => link.rel === 'payer-action')?.href;
-    if (!order.id || !payerActionUrl) {
-      console.error('PayPal crypto order response is missing its order ID or payer-action link.');
+    if (order.status !== 'PAYER_ACTION_REQUIRED' || !order.id || !payerActionUrl) {
+      console.error('PayPal crypto order response is missing its expected status, order ID, or payer-action link.', {
+        status: order.status,
+      });
       await records.updateOne({ state }, { $set: { status: 'failed', updatedAt: new Date() } });
       return NextResponse.json(
         { error: 'PayPal did not return a crypto approval link. Please try again.' },
