@@ -1,7 +1,7 @@
 'use client';
 
 import { PayPalButtons, PayPalScriptProvider } from '@paypal/react-paypal-js';
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 
 interface PayPalCheckoutProps {
@@ -21,6 +21,13 @@ export default function PayPalCheckout({
 }: PayPalCheckoutProps) {
   const [processing, setProcessing] = useState(false);
   const [sdkReady, setSdkReady] = useState(false);
+  const [cryptoCheckoutOpen, setCryptoCheckoutOpen] = useState(false);
+  const [cryptoGivenName, setCryptoGivenName] = useState('');
+  const [cryptoSurname, setCryptoSurname] = useState('');
+  const [cryptoUsCustomer, setCryptoUsCustomer] = useState(false);
+  const [cryptoProcessing, setCryptoProcessing] = useState(false);
+  const processedCryptoOrderRef = useRef<string | null>(null);
+  const cryptoCreateInProgressRef = useRef(false);
 
   // Check if PayPal SDK is properly configured
   const isPayPalConfigured =
@@ -30,10 +37,13 @@ export default function PayPalCheckout({
 
   const handleSuccess = async (details: any) => {
     const processingToast = toast.loading('🔄 Processing your payment...');
+    const isCryptoPayment = Boolean(
+      details?.paymentSource === 'paypal_crypto' || details?.payment_source?.crypto,
+    );
     
     try {
       toast.dismiss(processingToast);
-      toast.success('🎉 PayPal payment successful!');
+      toast.success(isCryptoPayment ? '🎉 PayPal crypto payment successful!' : '🎉 PayPal payment successful!');
       
       // Set pro status cookie for nyaltxpro purchases
       if (tier.toLowerCase() === 'nyaltxpro' || tier.toLowerCase() === 'nyaltxpro1') {
@@ -133,6 +143,108 @@ export default function PayPalCheckout({
     }
   };
 
+  const handleSuccessRef = useRef(handleSuccess);
+  handleSuccessRef.current = handleSuccess;
+
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const cryptoStatus = url.searchParams.get('paypalCryptoStatus');
+    const cryptoOrderId = url.searchParams.get('paypalCryptoOrderId');
+
+    if (!cryptoStatus) return;
+
+    const clearCryptoReturnParams = () => {
+      url.searchParams.delete('paypalCryptoStatus');
+      url.searchParams.delete('paypalCryptoOrderId');
+      window.history.replaceState(window.history.state, '', url.toString());
+    };
+
+    if (cryptoStatus === 'cancelled') {
+      clearCryptoReturnParams();
+      setCryptoCheckoutOpen(true);
+      toast('PayPal crypto checkout was cancelled. No payment was completed.');
+      return;
+    }
+
+    if (cryptoStatus !== 'returned' || !cryptoOrderId) {
+      clearCryptoReturnParams();
+      setCryptoCheckoutOpen(true);
+      toast.error('Could not confirm the PayPal crypto checkout return.');
+      return;
+    }
+
+    if (processedCryptoOrderRef.current === cryptoOrderId) return;
+    processedCryptoOrderRef.current = cryptoOrderId;
+    setCryptoCheckoutOpen(true);
+    setCryptoProcessing(true);
+
+    void fetch('/api/paypal/crypto/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId: cryptoOrderId }),
+      cache: 'no-store',
+    })
+      .then(async response => {
+        const result = await response.json();
+        if (!response.ok || !result.success || !result.order) {
+          throw new Error(result.error || 'PayPal has not confirmed the crypto payment.');
+        }
+        clearCryptoReturnParams();
+        await handleSuccessRef.current({ ...result.order, paymentSource: result.paymentSource });
+      })
+      .catch(error => {
+        console.error('PayPal crypto return verification failed:', error);
+        toast.error(error instanceof Error ? error.message : 'Could not verify the crypto payment.');
+        processedCryptoOrderRef.current = null;
+      })
+      .finally(() => setCryptoProcessing(false));
+  }, []);
+
+  const startCryptoCheckout = async () => {
+    if (cryptoCreateInProgressRef.current) return;
+    if (!cryptoGivenName.trim() || !cryptoSurname.trim()) {
+      toast.error('Enter your first and last name for PayPal crypto checkout.');
+      return;
+    }
+    if (!cryptoUsCustomer) {
+      toast.error('PayPal crypto checkout is currently available to eligible US customers only.');
+      return;
+    }
+
+    cryptoCreateInProgressRef.current = true;
+    setCryptoProcessing(true);
+    try {
+      const returnUrl = new URL(window.location.href);
+      returnUrl.searchParams.delete('paypalCryptoStatus');
+      returnUrl.searchParams.delete('paypalCryptoOrderId');
+      const response = await fetch('/api/paypal/crypto/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount,
+          tier,
+          email,
+          givenName: cryptoGivenName,
+          surname: cryptoSurname,
+          usCustomerConfirmed: cryptoUsCustomer,
+          returnUrl: returnUrl.toString(),
+        }),
+      });
+      const result = await response.json();
+      if (!response.ok || !result.approvalUrl) {
+        throw new Error(result.error || 'Could not start PayPal crypto checkout.');
+      }
+
+      window.location.assign(result.approvalUrl);
+    } catch (error) {
+      console.error('PayPal crypto checkout could not start:', error);
+      toast.error(error instanceof Error ? error.message : 'Could not start PayPal crypto checkout.');
+      setCryptoProcessing(false);
+    } finally {
+      cryptoCreateInProgressRef.current = false;
+    }
+  };
+
   const handleError = (error: any) => {
     console.error('PayPal payment error:', error);
     toast.error('❌ PayPal payment failed. Please try again.');
@@ -157,8 +269,16 @@ export default function PayPalCheckout({
         tier: tier,
         status: 'completed',
         metadata: {
-          paypalDetails: paymentDetails,
-          paymentSource: 'paypal_checkout'
+          paypalDetails:
+            paymentDetails?.paymentSource === 'paypal_crypto' ||
+            paymentDetails?.payment_source?.crypto
+              ? { id: paymentDetails.id, status: paymentDetails.status }
+              : paymentDetails,
+          paymentSource:
+            paymentDetails?.paymentSource === 'paypal_crypto' ||
+            paymentDetails?.payment_source?.crypto
+            ? 'paypal_crypto'
+            : 'paypal_checkout'
         }
       };
 
@@ -383,6 +503,69 @@ export default function PayPalCheckout({
           }}
           disabled={processing}
         />
+
+        <div className="mt-4 border-t border-gray-700/50 pt-4">
+          <button
+            type="button"
+            onClick={() => setCryptoCheckoutOpen(open => !open)}
+            disabled={cryptoProcessing}
+            className="w-full rounded-lg border border-cyan-500/40 bg-cyan-500/10 px-4 py-3 text-sm font-semibold text-cyan-200 transition-colors hover:bg-cyan-500/20 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {cryptoCheckoutOpen ? 'Close PayPal crypto option' : 'Pay with crypto using PayPal'}
+          </button>
+
+          {cryptoCheckoutOpen && (
+            <div className="mt-3 space-y-3 rounded-lg border border-cyan-500/30 bg-gray-900/50 p-4">
+              <p className="text-sm font-medium text-white">Pay with crypto through PayPal</p>
+              <p className="text-xs leading-relaxed text-gray-300">
+                PayPal converts your crypto payment to USD for settlement. This option is currently
+                available to eligible US customers only. PayPal must have Pay with crypto enabled
+                for your account.
+              </p>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <label className="text-xs text-gray-300">
+                  First name
+                  <input
+                    autoComplete="given-name"
+                    maxLength={140}
+                    value={cryptoGivenName}
+                    onChange={event => setCryptoGivenName(event.target.value)}
+                    className="mt-1 w-full rounded-md border border-gray-600 bg-gray-800 px-3 py-2 text-sm text-white"
+                  />
+                </label>
+                <label className="text-xs text-gray-300">
+                  Last name
+                  <input
+                    autoComplete="family-name"
+                    maxLength={140}
+                    value={cryptoSurname}
+                    onChange={event => setCryptoSurname(event.target.value)}
+                    className="mt-1 w-full rounded-md border border-gray-600 bg-gray-800 px-3 py-2 text-sm text-white"
+                  />
+                </label>
+              </div>
+              <label className="flex items-start gap-2 text-xs text-gray-300">
+                <input
+                  type="checkbox"
+                  checked={cryptoUsCustomer}
+                  onChange={event => setCryptoUsCustomer(event.target.checked)}
+                  className="mt-0.5"
+                />
+                I am located in the United States and understand PayPal may determine my eligibility.
+              </label>
+              <button
+                type="button"
+                onClick={() => void startCryptoCheckout()}
+                disabled={cryptoProcessing}
+                className="w-full rounded-lg bg-cyan-600 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-cyan-500 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {cryptoProcessing
+                  ? 'Connecting to PayPal...'
+                  : `Continue with PayPal crypto · $${Number(amount).toFixed(2)} USD`}
+              </button>
+            </div>
+          )}
+        </div>
 
         {processing && (
           <div className="mt-4 flex items-center justify-center gap-3 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">

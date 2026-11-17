@@ -376,7 +376,9 @@ const AdminOrdersComponent = () => {
                           <FaCreditCard className="w-4 h-4 text-gray-400" />
                         )}
                         <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getPaymentMethodBadge(order.paymentMethod).replace('bg-', 'bg-').replace('text-', 'text-')} border`} style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                          {getPaymentMethodName(order.paymentMethod)}
+                          {order.paymentMethod === 'paypal' && order.metadata?.paymentSource === 'paypal_crypto'
+                            ? 'PayPal Crypto'
+                            : getPaymentMethodName(order.paymentMethod)}
                         </span>
                       </div>
                       {order.txHash && (

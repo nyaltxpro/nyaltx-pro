@@ -2,6 +2,7 @@ import NewsApprovalNotification from '@/emails/NewsApprovalNotification';
 import NewsSubmissionConfirmation from '@/emails/NewsSubmissionConfirmation';
 import { render } from '@react-email/render';
 import nodemailer from 'nodemailer';
+import { getCollection } from '@/lib/mongodb';
 
 // Create Namecheap / SMTP email transporter (consistent with tokens/contact routes)
 export const createEmailTransporter = () => {
@@ -50,6 +51,37 @@ export async function verifyNewsPayment(params: VerifyPaymentParams): Promise<Pa
       };
     }
 
+    const cryptoOrders = await getCollection<{
+      paypalOrderId: string;
+      amount: string;
+      currency: 'USD';
+      status: string;
+    }>('paypal_crypto_orders');
+    const cryptoOrder = await cryptoOrders.findOne({ paypalOrderId: paymentId.trim() });
+    if (cryptoOrder) {
+      const expectedAmount = Number(amount);
+      if (
+        cryptoOrder.status !== 'completed' ||
+        cryptoOrder.currency !== 'USD' ||
+        !Number.isFinite(expectedAmount) ||
+        Number(cryptoOrder.amount).toFixed(2) !== expectedAmount.toFixed(2)
+      ) {
+        return {
+          verified: false,
+          reason: 'PayPal crypto payment is incomplete or does not match the submission amount.'
+        };
+      }
+
+      return {
+        verified: true,
+        providerDetails: {
+          paypalOrderId: cryptoOrder.paypalOrderId,
+          status: 'COMPLETED',
+          paymentSource: 'paypal_crypto'
+        }
+      };
+    }
+
     const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
     const clientSecret = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_SECRET || process.env.PAYPAL_CLIENT_SECRET;
 
@@ -89,6 +121,20 @@ export async function verifyNewsPayment(params: VerifyPaymentParams): Promise<Pa
             const orderData = await orderRes.json();
             const orderStatus = (orderData.status || '').toUpperCase();
             if (orderStatus === 'COMPLETED' || orderStatus === 'APPROVED') {
+              const orderAmount = orderData.purchase_units?.[0]?.amount;
+              const expectedAmount = Number(amount);
+              if (
+                orderAmount?.currency_code !== 'USD' ||
+                !Number.isFinite(Number(orderAmount.value)) ||
+                !Number.isFinite(expectedAmount) ||
+                Number(orderAmount.value).toFixed(2) !== expectedAmount.toFixed(2)
+              ) {
+                return {
+                  verified: false,
+                  reason: 'PayPal payment amount does not match the submission amount.'
+                };
+              }
+
               return {
                 verified: true,
                 providerDetails: {
