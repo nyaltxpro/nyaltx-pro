@@ -2,6 +2,7 @@
 
 import ConnectWalletButton from '@/components/ConnectWalletButton';
 import PayPalCheckout from '@/components/PayPalCheckout';
+import { NEWS_PAYPAL_CRYPTO_DRAFT_KEY, type NewsPayPalCryptoDraft } from '@/lib/newsCryptoDraft';
 import { getNYAXPriceUSD } from '@/utils/nyaxPriceApi';
 import { calculateNewsPrice, NEWS_NYAX_DISCOUNT } from '@/lib/newsPricing';
 import { USDC_NYAX_RECEIVER } from '@/lib/paymentAddresses';
@@ -246,6 +247,7 @@ export default function SubmitNewsModalCorporate({
   const [copiedReceiver, setCopiedReceiver] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSwitchingToEthereum, setIsSwitchingToEthereum] = useState(false);
+  const [pendingPaypalPaymentId, setPendingPaypalPaymentId] = useState('');
 
   // Prices
   const [nyaxPrice, setNyaxPrice] = useState<number | null>(null);
@@ -261,18 +263,80 @@ export default function SubmitNewsModalCorporate({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (isOpen) {
-      setSubType(initialType);
-      setPlan(initialPlan);
-      setModalStep(1);
+    if (!isOpen) return;
+
+    let savedDraft: NewsPayPalCryptoDraft | null = null;
+    try {
+      const saved = sessionStorage.getItem(NEWS_PAYPAL_CRYPTO_DRAFT_KEY);
+      savedDraft = saved ? (JSON.parse(saved) as NewsPayPalCryptoDraft) : null;
+    } catch (error) {
+      console.error('Could not restore the pending news payment draft:', error);
+    }
+
+    const allowedPlans = (type: 'news' | 'pr') =>
+      enableTestPlan ? [...PLANS_CONFIG[type], NEWS_TEST_PLAN] : PLANS_CONFIG[type];
+    if (
+      savedDraft &&
+      typeof savedDraft.headline === 'string' &&
+      typeof savedDraft.summary === 'string' &&
+      typeof savedDraft.storyBody === 'string' &&
+      typeof savedDraft.userEmail === 'string'
+    ) {
+      const restoredType = savedDraft.subType === 'pr' ? 'pr' : 'news';
+      const restoredPlan = allowedPlans(restoredType).some(item => item.id === savedDraft?.plan)
+        ? savedDraft.plan
+        : initialPlan;
+      const promoCode = typeof savedDraft.promoCode === 'string' ? savedDraft.promoCode : '';
+
+      setSubType(restoredType);
+      setPlan(restoredPlan);
+      setPayMethod('paypal');
+      setHeadline(savedDraft.headline);
+      setCategory(typeof savedDraft.category === 'string' ? savedDraft.category : 'NYAX');
+      setSourceLink(typeof savedDraft.sourceLink === 'string' ? savedDraft.sourceLink : '');
+      setSummary(savedDraft.summary);
+      setStoryBody(savedDraft.storyBody);
+      setUserEmail(savedDraft.userEmail);
+      setUploadedImg(typeof savedDraft.uploadedImg === 'string' ? savedDraft.uploadedImg : null);
+      setPromoCodeInput(promoCode);
+      setAppliedPromo(
+        promoCode
+          ? {
+              code: promoCode,
+              discountPercent: Number.isFinite(savedDraft.promoDiscountPercent)
+                ? savedDraft.promoDiscountPercent
+                : 0,
+            }
+          : null,
+      );
+      setPendingPaypalPaymentId(
+        typeof savedDraft.paymentId === 'string' ? savedDraft.paymentId : '',
+      );
+      setModalStep(3);
       setFormError('');
       setImgError('');
       setImgSuccess('');
-      setPromoCodeInput('');
-      setAppliedPromo(null);
       setPromoError('');
+      return;
     }
-  }, [isOpen, initialType, initialPlan]);
+
+    setSubType(initialType);
+    setPlan(initialPlan);
+    setModalStep(1);
+    setFormError('');
+    setImgError('');
+    setImgSuccess('');
+    setPromoCodeInput('');
+    setAppliedPromo(null);
+    setPromoError('');
+    setPendingPaypalPaymentId('');
+  }, [enableTestPlan, initialPlan, initialType, isOpen]);
+
+  useEffect(() => {
+    if (modalStep === 1 && editorRef.current && editorRef.current.innerHTML !== storyBody) {
+      editorRef.current.innerHTML = storyBody;
+    }
+  }, [modalStep, storyBody]);
 
   useEffect(() => {
     getNYAXPriceUSD().then(setNyaxPrice).catch(() => setNyaxPrice(null));
@@ -446,6 +510,24 @@ export default function SubmitNewsModalCorporate({
     setModalStep(2);
   };
 
+  const saveNewsCryptoDraft = (paymentId?: string) => {
+    const draft: NewsPayPalCryptoDraft = {
+      subType,
+      plan,
+      headline,
+      category,
+      sourceLink,
+      summary,
+      storyBody: editorRef.current?.innerHTML || storyBody,
+      userEmail,
+      uploadedImg,
+      promoCode: appliedPromo?.code || null,
+      promoDiscountPercent: appliedPromo?.discountPercent ?? 0,
+      ...(paymentId ? { paymentId } : {}),
+    };
+    sessionStorage.setItem(NEWS_PAYPAL_CRYPTO_DRAFT_KEY, JSON.stringify(draft));
+  };
+
   /* ---------- Submit (runs only AFTER payment, like token registration) ---------- */
   const handlePayAndSubmit = async (paymentOverride?: {
     paymentMethod?: PayMethod;
@@ -525,6 +607,12 @@ export default function SubmitNewsModalCorporate({
         localStorage.setItem('nyaltx_news_submissions', JSON.stringify([newLocalItem, ...existing]));
       } catch { }
 
+      try {
+        sessionStorage.removeItem(NEWS_PAYPAL_CRYPTO_DRAFT_KEY);
+      } catch (error) {
+        console.error('Could not clear the completed news payment draft:', error);
+      }
+      setPendingPaypalPaymentId('');
       onSuccess?.(newLocalItem);
       setModalStep(4);
     } catch (err: any) {
@@ -532,7 +620,9 @@ export default function SubmitNewsModalCorporate({
       setFormError(
         paymentOverride?.txHash
           ? `Payment sent (tx ${paymentOverride.txHash.slice(0, 10)}...) but submission failed: ${base}. Click "Submit Story with TX Hash" to retry — do not pay again.`
-          : base
+          : paymentOverride?.paymentId
+            ? `PayPal confirmed your payment, but the story submission failed: ${base}. Retry the submission below; you will not be charged again.`
+            : base
       );
     } finally {
       setIsSubmitting(false);
@@ -1166,7 +1256,28 @@ export default function SubmitNewsModalCorporate({
                   </div>
                 </div>
 
-                {!validEmail ? (
+                {pendingPaypalPaymentId ? (
+                  <div className="space-y-3 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3">
+                    <p role="status" className="text-xs text-emerald-200">
+                      PayPal confirmed this payment. Submit the story again if the previous attempt
+                      failed; this will not charge you again.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        void handlePayAndSubmit({
+                          paymentMethod: 'paypal',
+                          paymentId: pendingPaypalPaymentId,
+                          amount: finalPrice,
+                        })
+                      }
+                      disabled={isSubmitting}
+                      className={BTN_PRIMARY}
+                    >
+                      {isSubmitting ? 'Submitting...' : 'Retry story submission'}
+                    </button>
+                  </div>
+                ) : !validEmail ? (
                   <p className="text-xs text-amber-300 bg-amber-500/10 p-2.5 rounded-lg border border-amber-500/20">
                     ⚠️ Please enter a valid contact email above to activate PayPal checkout buttons.
                   </p>
@@ -1176,8 +1287,19 @@ export default function SubmitNewsModalCorporate({
                       amount={finalPrice.toFixed(2)}
                       tier={`${subType}_${plan}`}
                       email={userEmail.trim()}
+                      onBeforeCryptoRedirect={() => saveNewsCryptoDraft()}
                       onSuccess={(details: any) => {
-                        handlePayAndSubmit({
+                        const isCryptoPayment =
+                          details?.paymentSource === 'paypal_crypto' || details?.payment_source?.crypto;
+                        if (isCryptoPayment) {
+                          try {
+                            saveNewsCryptoDraft(details.id);
+                          } catch (error) {
+                            console.error('Could not save the verified PayPal crypto payment:', error);
+                          }
+                        }
+                        setPendingPaypalPaymentId(details.id);
+                        return handlePayAndSubmit({
                           paymentMethod: 'paypal',
                           paymentId: details.id,
                           amount: finalPrice

@@ -144,7 +144,13 @@ export async function POST(request: NextRequest) {
     });
 
     if (!paypalResponse.ok) {
-      console.error('PayPal crypto order creation failed with status:', paypalResponse.status);
+      const paypalError = await paypalResponse.json().catch(() => ({}));
+      console.error('PayPal crypto order creation failed:', {
+        status: paypalResponse.status,
+        name: paypalError.name,
+        message: paypalError.message,
+        debugId: paypalError.debug_id,
+      });
       await records.updateOne({ state }, { $set: { status: 'failed', updatedAt: new Date() } });
       return NextResponse.json(
         {

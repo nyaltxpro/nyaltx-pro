@@ -32,6 +32,8 @@ export async function GET(request: NextRequest) {
         destination.searchParams.set('paypalCryptoStatus', 'returned');
         destination.searchParams.set('paypalCryptoOrderId', returnedOrderId);
       }
+    } else if (searchParams.has('error') || searchParams.has('error_code')) {
+      destination.searchParams.set('paypalCryptoStatus', 'failed');
     } else {
       destination.searchParams.set('paypalCryptoStatus', 'cancelled');
     }

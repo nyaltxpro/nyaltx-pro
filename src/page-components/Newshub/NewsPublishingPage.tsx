@@ -2,7 +2,8 @@
 
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { useState } from 'react';
+import { NEWS_PAYPAL_CRYPTO_DRAFT_KEY } from '@/lib/newsCryptoDraft';
+import { useEffect, useState } from 'react';
 
 const SubmitNewsModal = dynamic(
   () => import('@/components/NewsHub/SubmitNewsModal').then(module => module.default),
@@ -71,9 +72,33 @@ export default function NewsPublishingPage({
   const [selectedPlan, setSelectedPlan] = useState<PublishingPlan>(initialPlan);
   const [modalOpen, setModalOpen] = useState(openModalOnLoad);
 
+  useEffect(() => {
+    const hasCryptoReturn = new URLSearchParams(window.location.search).has('paypalCryptoStatus');
+    let hasSavedDraft = false;
+    try {
+      hasSavedDraft = Boolean(sessionStorage.getItem(NEWS_PAYPAL_CRYPTO_DRAFT_KEY));
+    } catch (error) {
+      console.error('Could not restore the pending news payment draft:', error);
+    }
+
+    if (hasCryptoReturn || hasSavedDraft) setModalOpen(true);
+  }, []);
+
   const openSubmitModal = (plan: PublishingPlan) => {
     setSelectedPlan(plan);
     setModalOpen(true);
+  };
+
+  const closeSubmitModal = () => {
+    try {
+      const savedDraft = sessionStorage.getItem(NEWS_PAYPAL_CRYPTO_DRAFT_KEY);
+      if (!savedDraft || !JSON.parse(savedDraft)?.paymentId) {
+        sessionStorage.removeItem(NEWS_PAYPAL_CRYPTO_DRAFT_KEY);
+      }
+    } catch (error) {
+      console.error('Could not clear the abandoned news payment draft:', error);
+    }
+    setModalOpen(false);
   };
 
   return (
@@ -261,7 +286,7 @@ export default function NewsPublishingPage({
           initialType="news"
           initialPlan={selectedPlan}
           enableTestPlan={enableTestPlan}
-          onClose={() => setModalOpen(false)}
+          onClose={closeSubmitModal}
         />
       )}
     </main>
