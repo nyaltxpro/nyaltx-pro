@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getCollection } from '@/lib/mongodb';
 import {
   getPayPalCryptoAccessToken,
+  PayPalCryptoAuthenticationError,
   PayPalCryptoConfigurationError,
 } from '@/lib/paypalCryptoApi';
 
@@ -85,6 +86,9 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     if (error instanceof PayPalCryptoConfigurationError) {
       return NextResponse.json({ error: error.message }, { status: 503 });
+    }
+    if (error instanceof PayPalCryptoAuthenticationError) {
+      return NextResponse.json({ error: error.message }, { status: 502 });
     }
     console.error('PayPal crypto payment verification error:', error);
     return NextResponse.json(

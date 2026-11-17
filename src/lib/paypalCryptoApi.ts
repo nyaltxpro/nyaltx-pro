@@ -12,6 +12,15 @@ export class PayPalCryptoConfigurationError extends Error {
   }
 }
 
+export class PayPalCryptoAuthenticationError extends Error {
+  constructor() {
+    super(
+      'PayPal authentication failed. Confirm the client ID and secret are from the same PayPal app and PAYPAL_ENVIRONMENT matches its sandbox or live environment.',
+    );
+    this.name = 'PayPalCryptoAuthenticationError';
+  }
+}
+
 export async function getPayPalCryptoAccessToken() {
   const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID?.trim() || '';
   const serverSecret = process.env.PAYPAL_CLIENT_SECRET?.trim() || '';
@@ -36,7 +45,9 @@ export async function getPayPalCryptoAccessToken() {
     );
   }
 
-  const sandbox = environment ? environment === 'sandbox' : process.env.NODE_ENV !== 'production';
+  const sandbox = environment
+    ? environment === 'sandbox'
+    : clientId.toLowerCase().startsWith('sb-') || process.env.NODE_ENV !== 'production';
   const apiBaseUrl = sandbox
     ? 'https://api-m.sandbox.paypal.com'
     : 'https://api-m.paypal.com';
@@ -60,7 +71,7 @@ export async function getPayPalCryptoAccessToken() {
       error: tokenData.error,
       description: tokenData.error_description,
     });
-    throw new Error('PayPal could not authenticate the crypto checkout request.');
+    throw new PayPalCryptoAuthenticationError();
   }
 
   if (!tokenData.access_token) {
