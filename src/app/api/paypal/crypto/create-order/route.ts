@@ -197,7 +197,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 503 });
     }
     if (error instanceof PayPalCryptoAuthenticationError) {
-      return NextResponse.json({ error: error.message }, { status: 502 });
+      return NextResponse.json(
+        {
+          error: error.message,
+          diagnostic: {
+            paypalStatus: error.status,
+            paypalError: error.paypalError,
+            environment: error.environment,
+          },
+        },
+        { status: 502 },
+      );
     }
     console.error('PayPal crypto order creation error:', error);
     return NextResponse.json(

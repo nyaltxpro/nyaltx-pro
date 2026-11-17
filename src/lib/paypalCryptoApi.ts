@@ -13,9 +13,13 @@ export class PayPalCryptoConfigurationError extends Error {
 }
 
 export class PayPalCryptoAuthenticationError extends Error {
-  constructor() {
+  constructor(
+    readonly status: number,
+    readonly paypalError: string | undefined,
+    readonly environment: 'sandbox' | 'live',
+  ) {
     super(
-      'PayPal authentication failed. Confirm the client ID and secret are from the same PayPal app and PAYPAL_ENVIRONMENT matches its sandbox or live environment.',
+      `PayPal rejected crypto checkout authentication (HTTP ${status}, ${environment}${paypalError ? `, ${paypalError}` : ''}). Confirm the client ID and secret are from the same PayPal app and environment.`,
     );
     this.name = 'PayPalCryptoAuthenticationError';
   }
@@ -48,6 +52,7 @@ export async function getPayPalCryptoAccessToken() {
   const sandbox = environment
     ? environment === 'sandbox'
     : clientId.toLowerCase().startsWith('sb-') || process.env.NODE_ENV !== 'production';
+  const paypalEnvironment = sandbox ? 'sandbox' : 'live';
   const apiBaseUrl = sandbox
     ? 'https://api-m.sandbox.paypal.com'
     : 'https://api-m.paypal.com';
@@ -66,12 +71,14 @@ export async function getPayPalCryptoAccessToken() {
     await response.json().catch(() => ({}));
 
   if (!response.ok) {
+    const paypalError =
+      typeof tokenData.error === 'string' ? tokenData.error.slice(0, 100) : undefined;
     console.error('PayPal crypto OAuth failed:', {
       status: response.status,
-      error: tokenData.error,
+      error: paypalError,
       description: tokenData.error_description,
     });
-    throw new PayPalCryptoAuthenticationError();
+    throw new PayPalCryptoAuthenticationError(response.status, paypalError, paypalEnvironment);
   }
 
   if (!tokenData.access_token) {
