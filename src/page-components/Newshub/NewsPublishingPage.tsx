@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { NEWS_PAYPAL_CRYPTO_DRAFT_KEY } from '@/lib/newsCryptoDraft';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 
 const SubmitNewsModal = dynamic(
   () => import('@/components/NewsHub/SubmitNewsModal').then(module => module.default),
@@ -62,6 +62,9 @@ export default function NewsPublishingPage({
 }) {
   const [selectedPlan, setSelectedPlan] = useState<PublishingPlan>(initialPlan);
   const [modalOpen, setModalOpen] = useState(openModalOnLoad);
+  const [inquiryOpen, setInquiryOpen] = useState(false);
+  const [inquirySubject, setInquirySubject] = useState('');
+  const [inquiryStatus, setInquiryStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
 
   useEffect(() => {
     const hasCryptoReturn = new URLSearchParams(window.location.search).has('paypalCryptoStatus');
@@ -90,6 +93,37 @@ export default function NewsPublishingPage({
       console.error('Could not clear the abandoned news payment draft:', error);
     }
     setModalOpen(false);
+  };
+
+  const openInquiryModal = (subject: string) => {
+    setInquirySubject(subject);
+    setInquiryStatus('idle');
+    setInquiryOpen(true);
+  };
+
+  const submitInquiry = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    setInquiryStatus('sending');
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: form.get('name'),
+          email: form.get('email'),
+          subject: inquirySubject,
+          message: form.get('message'),
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Unable to send inquiry');
+      setInquiryStatus('sent');
+    } catch (error) {
+      console.error('Could not send media inquiry:', error);
+      setInquiryStatus('error');
+    }
   };
 
   return (
@@ -170,6 +204,17 @@ export default function NewsPublishingPage({
             .nps-campaign-band{display:flex;align-items:center;justify-content:space-between;gap:28px;margin:62px 0 24px;padding:32px}
             .nps-campaign-band p{color:#b6c2d2;max-width:760px;margin-top:8px}
             .nps-campaign-band .nps-actions{margin:0;flex-shrink:0}
+            .nps-inquiry-backdrop{position:fixed;inset:0;z-index:1000;background:rgba(2,6,23,.82);backdrop-filter:blur(8px);display:grid;place-items:center;padding:20px}
+            .nps-inquiry-modal{width:min(560px,100%);background:#0f1623;border:1px solid #263449;border-radius:16px;box-shadow:0 24px 80px rgba(0,0,0,.55);padding:28px}
+            .nps-inquiry-head{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;margin-bottom:20px}
+            .nps-inquiry-head h2{font-size:26px;margin:0}
+            .nps-inquiry-close{border:0;background:transparent;color:#94a3b8;font-size:24px;cursor:pointer;line-height:1}
+            .nps-inquiry-fields{display:grid;gap:14px}
+            .nps-inquiry-fields label{display:grid;gap:7px;color:#cbd5e1;font-size:13px;font-weight:700}
+            .nps-inquiry-fields input,.nps-inquiry-fields textarea{width:100%;border:1px solid #334155;border-radius:8px;background:#070b12;color:#f8fafc;font:inherit;padding:11px 12px}
+            .nps-inquiry-fields textarea{min-height:120px;resize:vertical}
+            .nps-inquiry-status{font-size:14px;margin:14px 0 0}
+            .nps-inquiry-status.sent{color:#67e8f9}.nps-inquiry-status.error{color:#fda4af}
             @media(max-width:800px){.nps-wrap{padding:0 18px}.nps-hero{padding:42px 0}.nps-hero-grid,.nps-cards,.nps-cards-three,.nps-plans,.nps-card-with-visual{grid-template-columns:1fr}.nps-hero-grid{gap:25px}.nps-section{padding:42px 0}.nps-description{min-height:0}.nps-links{gap:12px}.nps-card-visual{min-height:220px}.nps-card-grid h3,.nps-card-grid p{min-height:0}.nps-campaign-band{display:block}.nps-campaign-band .nps-actions{margin-top:18px}}
           `,
         }}
@@ -344,45 +389,61 @@ export default function NewsPublishingPage({
               </div>
               <p>Prominent branded advertising on the NYALTX dashboard, subject to availability.</p>
               <div className="nps-card-actions">
-                <a
+                <button
                   className="nps-btn"
-                  href="mailto:info@corporateroadshow.com?subject=NYALTX%20Banner%20Inquiry"
+                  onClick={() => openInquiryModal('NYALTX Banner Inquiry')}
+                  type="button"
                 >
                   Request details
-                </a>
+                </button>
               </div>
             </article>
             <article className="nps-card nps-card-grid">
-              <div className="nps-card-tag">Executive Interview</div>
-              <h3>Podcast Silver</h3>
+              <div className="nps-card-tag">Podcast Feature</div>
+              <h3>Executive Podcast Interview</h3>
               <div className="nps-card-price">$3,500</div>
               <p>
-                Executive interview on Off Road with Frank Ferraro, with audio distribution on
-                major podcast platforms.
+                A high-impact interview on Off Road with Frank Ferraro and Andrea Cataneo for
+                investor-focused business visibility.
               </p>
+              <ul>
+                <li>Audio podcast appearance</li>
+                <li>Corporate message positioning</li>
+                <li>Shareable episode and custom graphics</li>
+                <li>Major podcast distribution and social promotion</li>
+              </ul>
               <div className="nps-card-actions">
-                <a
+                <button
                   className="nps-btn"
-                  href="mailto:info@corporateroadshow.com?subject=Podcast%20Silver%20Inquiry"
+                  onClick={() => openInquiryModal('Podcast Feature Inquiry')}
+                  type="button"
                 >
                   Request details
-                </a>
+                </button>
               </div>
             </article>
             <article className="nps-card nps-card-grid">
-              <div className="nps-card-tag">Integrated Media</div>
-              <h3>Podcast Gold</h3>
-              <div className="nps-card-price">$7,500</div>
+              <div className="nps-card-tag">Full Media Package</div>
+              <h3>Podcast, Video &amp; Commercial</h3>
+              <div className="nps-card-price">$8,500</div>
               <p>
-                Expanded podcast and video production, short-form clips and branded media assets.
+                A complete media package with polished video assets for investor relations,
+                social media and future advertising.
               </p>
+              <ul>
+                <li>Two full video edits</li>
+                <li>Two short-form video clips</li>
+                <li>Custom graphics and podcast/audio feature</li>
+                <li>15-30 second commercial and Corporate Roadshow profile</li>
+              </ul>
               <div className="nps-card-actions">
-                <a
+                <button
                   className="nps-btn"
-                  href="mailto:info@corporateroadshow.com?subject=Podcast%20Gold%20Inquiry"
+                  onClick={() => openInquiryModal('Full Media Package Inquiry')}
+                  type="button"
                 >
                   Request details
-                </a>
+                </button>
               </div>
             </article>
           </div>
@@ -402,18 +463,56 @@ export default function NewsPublishingPage({
               <div className="nps-card-tag">Events</div>
               <h3>Live Roadshows</h3>
               <div className="nps-card-price">
-                From <small>$15,000</small>
+                From <small>$20,000</small>
               </div>
               <p>
-                Corporate presentations, event production and investor-focused programming.
+                Curated, in-person investor experiences with executive networking, presentations,
+                private meetings and on-site media coverage.
               </p>
               <div className="nps-card-actions">
-                <a
+                <button
                   className="nps-btn"
-                  href="mailto:info@corporateroadshow.com?subject=Live%20Roadshow%20Inquiry"
+                  onClick={() => openInquiryModal('Live Roadshow Inquiry')}
+                  type="button"
                 >
                   Request proposal
-                </a>
+                </button>
+              </div>
+            </article>
+            <article className="nps-card nps-card-grid">
+              <div className="nps-card-tag">American Roadshow</div>
+              <h3>Featured Company Package</h3>
+              <div className="nps-card-price">$25,000</div>
+              <p>
+                Featured participation in a professionally produced TV series with executive
+                interviews and investor-facing documentary-style storytelling.
+              </p>
+              <div className="nps-card-actions">
+                <button
+                  className="nps-btn"
+                  onClick={() => openInquiryModal('American Roadshow Inquiry')}
+                  type="button"
+                >
+                  Request proposal
+                </button>
+              </div>
+            </article>
+            <article className="nps-card nps-card-grid">
+              <div className="nps-card-tag">National TV Campaign</div>
+              <h3>Commercial Placement</h3>
+              <div className="nps-card-price">$80,000-$150,000+</div>
+              <p>
+                Large-scale commercial campaign options across major business and news networks,
+                with 50-100 commercial spots.
+              </p>
+              <div className="nps-card-actions">
+                <button
+                  className="nps-btn"
+                  onClick={() => openInquiryModal('National TV Campaign Inquiry')}
+                  type="button"
+                >
+                  Request proposal
+                </button>
               </div>
             </article>
           </div>
@@ -428,12 +527,13 @@ export default function NewsPublishingPage({
               </p>
             </div>
             <div className="nps-actions">
-              <a
+              <button
                 className="nps-btn"
-                href="mailto:info@corporateroadshow.com?subject=Custom%20Media%20Campaign"
+                onClick={() => openInquiryModal('Custom Media Campaign')}
+                type="button"
               >
                 Discuss a campaign
-              </a>
+              </button>
             </div>
           </div>
 
@@ -451,6 +551,96 @@ export default function NewsPublishingPage({
           Roadshow
         </div>
       </footer>
+
+      {inquiryOpen && (
+        <div
+          className="nps-inquiry-backdrop"
+          role="presentation"
+          onMouseDown={event => {
+            if (event.target === event.currentTarget) setInquiryOpen(false);
+          }}
+        >
+          <div
+            className="nps-inquiry-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="nps-inquiry-title"
+          >
+            <div className="nps-inquiry-head">
+              <div>
+                <div className="nps-eyebrow">Corporate Roadshow Inquiry</div>
+                <h2 id="nps-inquiry-title">{inquirySubject}</h2>
+              </div>
+              <button
+                className="nps-inquiry-close"
+                type="button"
+                aria-label="Close inquiry"
+                onClick={() => setInquiryOpen(false)}
+              >
+                ×
+              </button>
+            </div>
+            {inquiryStatus === 'sent' ? (
+              <div>
+                <p className="nps-inquiry-status sent">
+                  Your inquiry was sent successfully. Corporate Roadshow will follow up by email.
+                </p>
+                <div className="nps-actions">
+                  <button
+                    className="nps-btn"
+                    type="button"
+                    onClick={() => setInquiryOpen(false)}
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <form onSubmit={submitInquiry}>
+                <div className="nps-inquiry-fields">
+                  <label>
+                    Name
+                    <input name="name" type="text" required autoComplete="name" />
+                  </label>
+                  <label>
+                    Email
+                    <input name="email" type="email" required autoComplete="email" />
+                  </label>
+                  <label>
+                    Message
+                    <textarea
+                      name="message"
+                      required
+                      defaultValue={`I am interested in ${inquirySubject}.`}
+                    />
+                  </label>
+                </div>
+                {inquiryStatus === 'error' && (
+                  <p className="nps-inquiry-status error">
+                    The inquiry could not be sent. Please try again.
+                  </p>
+                )}
+                <div className="nps-actions">
+                  <button
+                    className="nps-btn"
+                    type="submit"
+                    disabled={inquiryStatus === 'sending'}
+                  >
+                    {inquiryStatus === 'sending' ? 'Sending...' : 'Send inquiry'}
+                  </button>
+                  <button
+                    className="nps-btn nps-btn-outline"
+                    type="button"
+                    onClick={() => setInquiryOpen(false)}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
 
       {modalOpen && (
         <SubmitNewsModal

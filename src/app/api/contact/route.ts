@@ -37,9 +37,23 @@ export async function POST(request: NextRequest) {
     const adminHtml = await render(ContactFormAdmin({ name, email, subject, message }));
     
     // Email content for the admin
+    const roadshowSubjectPattern =
+      /Banner|Podcast|Full Media|Roadshow|National TV|Media Campaign/i;
+    const adminRecipient =
+      roadshowSubjectPattern.test(subject)
+        ? 'frank@corporateroadshow.com'
+        : process.env.SMTP_USER;
+
+    if (!adminRecipient) {
+      return NextResponse.json(
+        { error: 'Email configuration error. Please contact support.' },
+        { status: 500 }
+      );
+    }
+
     const adminMailOptions = {
       from: process.env.FROM_EMAIL || process.env.SMTP_USER,
-      to: process.env.SMTP_USER,
+      to: adminRecipient,
       subject: `Contact Form: ${subject}`,
       html: adminHtml,
     };
