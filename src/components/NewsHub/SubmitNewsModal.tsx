@@ -3,6 +3,7 @@
 import ConnectWalletButton from '@/components/ConnectWalletButton';
 import PayPalCheckout from '@/components/PayPalCheckout';
 import { NEWS_PAYPAL_CRYPTO_DRAFT_KEY, type NewsPayPalCryptoDraft } from '@/lib/newsCryptoDraft';
+import { isPaidNewsCategory, PAID_NEWS_CATEGORIES } from '@/lib/paidNewsCategories';
 import { getNYAXPriceUSD } from '@/utils/nyaxPriceApi';
 import { calculateNewsPrice, NEWS_NYAX_DISCOUNT } from '@/lib/newsPricing';
 import { USDC_NYAX_RECEIVER } from '@/lib/paymentAddresses';
@@ -292,7 +293,7 @@ export default function SubmitNewsModalCorporate({
       setPlan(restoredPlan);
       setPayMethod('paypal');
       setHeadline(savedDraft.headline);
-      setCategory(typeof savedDraft.category === 'string' ? savedDraft.category : 'NYAX');
+      setCategory(isPaidNewsCategory(savedDraft.category) ? savedDraft.category : 'Other');
       setSourceLink(typeof savedDraft.sourceLink === 'string' ? savedDraft.sourceLink : '');
       setSummary(savedDraft.summary);
       setStoryBody(savedDraft.storyBody);
@@ -884,13 +885,11 @@ export default function SubmitNewsModalCorporate({
               <div>
                 <label className={LABEL}>Category</label>
                 <select value={category} onChange={(e) => setCategory(e.target.value)} className={INPUT}>
-                  <option>NYAX</option>
-                  <option>Bitcoin</option>
-                  <option>Ethereum</option>
-                  <option>DeFi</option>
-                  <option>Tokenized Stocks</option>
-                  <option>Community</option>
-                  <option>Press Releases</option>
+                  {PAID_NEWS_CATEGORIES.map(option => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div>
