@@ -3,16 +3,16 @@ import NewsPublishingPage from '@/page-components/Newshub/NewsPublishingPage';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.nyaltx.pro'),
-  title: 'Corporate Visibility & Media Solutions | NYALTX',
+  title: 'Submit News | NYALTX',
   description:
-    'Reach fintech, digital asset and capital markets audiences through news publishing, project discovery, executive interviews, advertising and investor events.',
+    'Publish corporate announcements, product launches and industry updates across NYALTX.',
   alternates: {
     canonical: 'https://www.nyaltx.pro/newshub/submit',
   },
   openGraph: {
-    title: 'Corporate Visibility & Media Solutions | NYALTX',
+    title: 'Submit News | NYALTX',
     description:
-      'Explore NYALTX news publishing, project discovery, fintech media and corporate roadshow services.',
+      'Publish corporate announcements, product launches and industry updates across NYALTX.',
     type: 'website',
     url: 'https://www.nyaltx.pro/newshub/submit',
     siteName: 'NYALTX',
