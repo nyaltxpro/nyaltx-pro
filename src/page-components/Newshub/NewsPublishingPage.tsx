@@ -142,6 +142,8 @@ export default function NewsPublishingPage({
             .nps-campaign{border:1px solid #263449;border-radius:14px;background:linear-gradient(145deg,rgba(15,22,35,.96),rgba(10,17,29,.92));margin-top:28px;padding:28px}
             .nps-campaign h2{margin-bottom:10px}
             .nps-campaign p{color:#b6c2d2;max-width:820px}
+            .nps-media-visual{margin-top:28px;overflow:hidden;border:1px solid #263449;border-radius:14px;background:#050914}
+            .nps-media-visual img{display:block;width:100%;height:auto}
             .nps-band{background:linear-gradient(120deg,rgba(15,22,35,.9),rgba(9,15,26,.94));border-block:1px solid #1e293b}
             .nps-plans{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:28px}
             .nps-plan{background:linear-gradient(150deg,#0f1623,#0b1220);border:1px solid #263449;border-radius:14px;display:flex;flex-direction:column;padding:25px}
@@ -323,55 +325,58 @@ export default function NewsPublishingPage({
           </p>
           <div className="nps-cards">
             <article className="nps-card">
-              <div className="nps-card-tag">Advertising</div>
-              <h3>Dashboard Banner</h3>
-              <div className="nps-card-price">
-                $750 <small>/ month</small>
-              </div>
-              <p>Prominent branded advertising on the NYALTX dashboard, subject to availability.</p>
-              <div className="nps-card-actions">
-                <a
-                  className="nps-btn nps-btn-small"
-                  href="mailto:info@corporateroadshow.com?subject=NYALTX%20Banner%20Inquiry"
-                >
-                  Request details
-                </a>
-              </div>
-            </article>
-            <article className="nps-card">
-              <div className="nps-card-tag">Executive Interview</div>
-              <h3>Podcast Silver</h3>
+              <div className="nps-card-tag">Podcast Feature</div>
+              <h3>Executive Podcast Interview</h3>
               <div className="nps-card-price">$3,500</div>
               <p>
-                Executive interview on Off Road with Frank Ferraro, with audio distribution on major
-                podcast platforms.
+                A high-impact interview on Off Road with Frank Ferraro and Andrea Cataneo for
+                investor-focused business visibility.
               </p>
+              <ul>
+                <li>Audio podcast appearance</li>
+                <li>Corporate message positioning</li>
+                <li>Shareable episode and custom graphics</li>
+                <li>Major podcast distribution and social promotion</li>
+              </ul>
               <div className="nps-card-actions">
                 <a
                   className="nps-btn nps-btn-small"
-                  href="mailto:info@corporateroadshow.com?subject=Podcast%20Silver%20Inquiry"
+                  href="mailto:frank@corporateroadshow.com?subject=Podcast%20Feature%20Inquiry"
                 >
                   Request details
                 </a>
               </div>
             </article>
             <article className="nps-card nps-card-featured">
-              <div className="nps-card-tag">Integrated Media</div>
-              <h3>Podcast Gold</h3>
-              <div className="nps-card-price">$7,500</div>
+              <div className="nps-card-tag">Full Media Package</div>
+              <h3>Podcast, Video &amp; Commercial</h3>
+              <div className="nps-card-price">$8,500</div>
               <p>
-                Expanded podcast and video production, short-form clips and branded media assets.
+                A complete media package with polished video assets for investor relations, social
+                media and future advertising.
               </p>
+              <ul>
+                <li>Two full video edits</li>
+                <li>Two short-form video clips</li>
+                <li>Custom graphics and podcast/audio feature</li>
+                <li>15-30 second commercial and Corporate Roadshow profile</li>
+              </ul>
               <div className="nps-card-actions">
                 <a
                   className="nps-btn nps-btn-small"
-                  href="mailto:info@corporateroadshow.com?subject=Podcast%20Gold%20Inquiry"
+                  href="mailto:frank@corporateroadshow.com?subject=Full%20Media%20Package%20Inquiry"
                 >
                   Request details
                 </a>
               </div>
             </article>
           </div>
+          <figure className="nps-media-visual">
+            <img
+              src="/crs-podcast-distribution.png"
+              alt="Corporate Roadshow podcast and media distribution network"
+            />
+          </figure>
         </div>
       </section>
 
@@ -387,12 +392,49 @@ export default function NewsPublishingPage({
             <article className="nps-card">
               <div className="nps-card-tag">Events</div>
               <h3>Live Roadshows</h3>
-              <div className="nps-card-price">From $15,000</div>
-              <p>Corporate presentations, event production and investor-focused programming.</p>
+              <div className="nps-card-price">From $20,000</div>
+              <p>
+                Curated, in-person investor experiences with executive networking, presentations,
+                private meetings and on-site media coverage.
+              </p>
               <div className="nps-card-actions">
                 <a
                   className="nps-btn nps-btn-small"
-                  href="mailto:info@corporateroadshow.com?subject=Live%20Roadshow%20Inquiry"
+                  href="mailto:frank@corporateroadshow.com?subject=Live%20Roadshow%20Inquiry"
+                >
+                  Request proposal
+                </a>
+              </div>
+            </article>
+            <article className="nps-card nps-card-featured">
+              <div className="nps-card-tag">American Roadshow</div>
+              <h3>Featured Company Package</h3>
+              <div className="nps-card-price">$25,000</div>
+              <p>
+                Featured participation in a professionally produced TV series with executive
+                interviews and investor-facing documentary-style storytelling.
+              </p>
+              <div className="nps-card-actions">
+                <a
+                  className="nps-btn nps-btn-small"
+                  href="mailto:frank@corporateroadshow.com?subject=American%20Roadshow%20Inquiry"
+                >
+                  Request proposal
+                </a>
+              </div>
+            </article>
+            <article className="nps-card">
+              <div className="nps-card-tag">National TV Campaign</div>
+              <h3>Commercial Placement</h3>
+              <div className="nps-card-price">$80,000–$150,000+</div>
+              <p>
+                Large-scale commercial campaign options across major business and news networks,
+                with 50-100 commercial spots.
+              </p>
+              <div className="nps-card-actions">
+                <a
+                  className="nps-btn nps-btn-small"
+                  href="mailto:frank@corporateroadshow.com?subject=National%20TV%20Campaign%20Inquiry"
                 >
                   Request proposal
                 </a>
@@ -409,17 +451,16 @@ export default function NewsPublishingPage({
             <div className="nps-actions">
               <a
                 className="nps-btn"
-                href="mailto:info@corporateroadshow.com?subject=Custom%20Media%20Campaign"
+                  href="mailto:frank@corporateroadshow.com?subject=Custom%20Media%20Campaign"
               >
                 Discuss a campaign
               </a>
             </div>
           </div>
           <p className="nps-notice">
-            Concept preview only. Prices and package details are illustrative and subject to
-            confirmation. Distribution is limited to the channels specified for each service;
-            third-party newswire pickup, readership, investment outcomes and search ranking are not
-            guaranteed. Inquiry links are placeholders to be configured before launch.
+            Availability and final package scope are confirmed by Corporate Roadshow. Distribution
+            channels, production schedules and campaign placements may vary by package and
+            third-party platform availability.
           </p>
         </div>
       </section>
