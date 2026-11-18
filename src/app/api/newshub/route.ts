@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/mongodb';
-import { PAID_CRITERIA } from '@/lib/newshubInitialData';
+import {
+  getNewshubArticles,
+  NEWSHUB_CATEGORIES,
+  PAID_CRITERIA,
+} from '@/lib/newshubInitialData';
 import { PUBLIC_NEWS_FILTER } from '@/lib/publicNewsQuery';
 
 export async function GET(request: NextRequest) {
@@ -9,8 +13,6 @@ export async function GET(request: NextRequest) {
     const category = searchParams.get('category');
     const limit = parseInt(searchParams.get('limit') || '12', 10);
     const page = parseInt(searchParams.get('page') || '1', 10);
-    const skip = (page - 1) * limit;
-
     const db = await getDb();
     const bannersCollection = db.collection('newshub_banners');
     const newsCollection = db.collection('corporate_news');
@@ -34,8 +36,7 @@ export async function GET(request: NextRequest) {
       displayOrder: typeof b.displayOrder === 'number' ? b.displayOrder : 0,
     }));
 
-    // ── 2. Published PAID articles marked as featured / Full Service slider ─
-    // These auto-appear in the slider alongside admin banners
+    // ── 2. Published paid articles marked as featured / Full Service slider ─
     const featuredPaidArticles = await newsCollection
       .find({
         ...PUBLIC_NEWS_FILTER,
@@ -74,89 +75,14 @@ export async function GET(request: NextRequest) {
     // If NO admin banners and NO featured articles -> empty slider (no fake defaults)
     const combinedBanners = [...adminBanners, ...articleBanners];
 
-    // ── 3. Feed: ONLY published PAID submissions (exclude editorial) ─────
-    const feedQuery: any = {
-      ...PUBLIC_NEWS_FILTER,
-      isPaid: { $ne: false },
-      author: { $nin: ['NYALTX Team', 'NYALTX Learn'] },
-      $or: PAID_CRITERIA,
-    };
-
-    // Category filter on top of paid filter
-    if (category && category !== 'All') {
-      const categoryFilter = category === 'Press Releases'
-        ? {
-            $or: [
-              { type: 'pr' },
-              { category: 'Press Releases' },
-              { tags: { $in: ['Press Releases', 'PR', 'press-release'] } },
-            ],
-          }
-        : {
-            $or: [
-              { category: { $regex: new RegExp(`^${category}$`, 'i') } },
-              { tags: { $in: [category] } },
-            ],
-          };
-
-      feedQuery.$and = [
-        { isPaid: { $ne: false } },
-        { author: { $nin: ['NYALTX Team', 'NYALTX Learn'] } },
-        { $or: PAID_CRITERIA },
-        categoryFilter,
-      ];
-      delete feedQuery.$or;
-    }
-
-    const totalArticles = await newsCollection.countDocuments(feedQuery);
-
-    const articles = await newsCollection
-      .find(feedQuery)
-      .sort({ publishedAt: -1, createdAt: -1 })
-      .skip(skip)
-      .limit(limit)
-      .project({
-        _id: 1,
-        title: 1,
-        excerpt: 1,
-        featuredImage: 1,
-        publishedAt: 1,
-        createdAt: 1,
-        author: 1,
-        slug: 1,
-        tags: 1,
-        category: 1,
-        coverColor: 1,
-        type: 1,
-        isPaid: 1,
-        plan: 1,
-        planName: 1,
-        sourceUrl: 1,
-      })
-      .toArray();
-
-    const categories = [
-      'All',
-      'NYAX',
-      'Bitcoin',
-      'Ethereum',
-      'DeFi',
-      'Tokenized Stocks',
-      'Community',
-      'Press Releases',
-    ];
+    // ── 3. Merge approved paid submissions with the dashboard RSS feed ──
+    const feed = await getNewshubArticles(category || 'All', page, limit);
 
     return NextResponse.json({
       success: true,
       banners: combinedBanners,
-      articles,
-      pagination: {
-        total: totalArticles,
-        page,
-        limit,
-        pages: Math.ceil(totalArticles / limit) || 1,
-      },
-      categories,
+      ...feed,
+      categories: NEWSHUB_CATEGORIES,
     });
   } catch (error: any) {
     console.error('Error fetching newshub data:', error);
