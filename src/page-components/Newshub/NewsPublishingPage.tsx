@@ -346,7 +346,7 @@ export default function NewsPublishingPage({
               <div className="nps-card-actions">
                 <a
                   className="nps-btn"
-                  href="mailto:info@corporateroadshow.com?subject=NYALTX%20Banner%20Inquiry"
+                  href="mailto:frank@corporateroadshow.com?subject=NYALTX%20Banner%20Inquiry"
                 >
                   Request details
                 </a>
@@ -363,7 +363,7 @@ export default function NewsPublishingPage({
               <div className="nps-card-actions">
                 <a
                   className="nps-btn"
-                  href="mailto:info@corporateroadshow.com?subject=Podcast%20Silver%20Inquiry"
+                  href="mailto:frank@corporateroadshow.com?subject=Podcast%20Silver%20Inquiry"
                 >
                   Request details
                 </a>
@@ -379,7 +379,7 @@ export default function NewsPublishingPage({
               <div className="nps-card-actions">
                 <a
                   className="nps-btn"
-                  href="mailto:info@corporateroadshow.com?subject=Podcast%20Gold%20Inquiry"
+                  href="mailto:frank@corporateroadshow.com?subject=Podcast%20Gold%20Inquiry"
                 >
                   Request details
                 </a>
@@ -402,15 +402,50 @@ export default function NewsPublishingPage({
               <div className="nps-card-tag">Events</div>
               <h3>Live Roadshows</h3>
               <div className="nps-card-price">
-                From <small>$15,000</small>
+                From <small>$20,000</small>
               </div>
               <p>
-                Corporate presentations, event production and investor-focused programming.
+                Curated, in-person investor experiences with executive networking, presentations,
+                private meetings and on-site media coverage.
               </p>
               <div className="nps-card-actions">
                 <a
                   className="nps-btn"
-                  href="mailto:info@corporateroadshow.com?subject=Live%20Roadshow%20Inquiry"
+                  href="mailto:frank@corporateroadshow.com?subject=Live%20Roadshow%20Inquiry"
+                >
+                  Request proposal
+                </a>
+              </div>
+            </article>
+            <article className="nps-card nps-card-grid">
+              <div className="nps-card-tag">American Roadshow</div>
+              <h3>Featured Company Package</h3>
+              <div className="nps-card-price">$25,000</div>
+              <p>
+                Featured participation in a professionally produced TV series with executive
+                interviews and investor-facing documentary-style storytelling.
+              </p>
+              <div className="nps-card-actions">
+                <a
+                  className="nps-btn"
+                  href="mailto:frank@corporateroadshow.com?subject=American%20Roadshow%20Inquiry"
+                >
+                  Request proposal
+                </a>
+              </div>
+            </article>
+            <article className="nps-card nps-card-grid">
+              <div className="nps-card-tag">National TV Campaign</div>
+              <h3>Commercial Placement</h3>
+              <div className="nps-card-price">$80,000-$150,000+</div>
+              <p>
+                Large-scale commercial campaign options across major business and news networks,
+                with 50-100 commercial spots.
+              </p>
+              <div className="nps-card-actions">
+                <a
+                  className="nps-btn"
+                  href="mailto:frank@corporateroadshow.com?subject=National%20TV%20Campaign%20Inquiry"
                 >
                   Request proposal
                 </a>
@@ -430,7 +465,7 @@ export default function NewsPublishingPage({
             <div className="nps-actions">
               <a
                 className="nps-btn"
-                href="mailto:info@corporateroadshow.com?subject=Custom%20Media%20Campaign"
+                href="mailto:frank@corporateroadshow.com?subject=Custom%20Media%20Campaign"
               >
                 Discuss a campaign
               </a>
