@@ -57,7 +57,7 @@ const Footer = () => {
       const data = await response.json();
 
       if (response.ok) {
-        setMessage('🎉 Welcome to NYALTX! Check your email for exclusive crypto insights.');
+        setMessage(data.message || 'Successfully subscribed to the NYALTX newsletter.');
         setMessageType('success');
         setEmail('');
         setName('');
