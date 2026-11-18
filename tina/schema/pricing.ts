@@ -127,6 +127,137 @@ export const pricing: Collection = {
     },
     {
       type: "object",
+      name: "fintechMedia",
+      label: "Fintech Media & Advertising Section",
+      fields: [
+        {
+          type: "string",
+          name: "sectionTitle",
+          label: "Section Label",
+          required: true,
+        },
+        {
+          type: "string",
+          name: "title",
+          label: "Section Title",
+          required: true,
+        },
+        {
+          type: "string",
+          name: "description",
+          label: "Description",
+          required: true,
+          ui: { component: "textarea" },
+        },
+        {
+          type: "object",
+          name: "plans",
+          label: "Media Plans",
+          list: true,
+          ui: {
+            itemProps: item => ({
+              label: item?.name || "Media Plan",
+            }),
+          },
+          fields: [
+            { type: "string", name: "id", label: "ID", required: true },
+            { type: "string", name: "tag", label: "Card Label" },
+            { type: "string", name: "name", label: "Name", required: true },
+            { type: "string", name: "price", label: "Price", required: true },
+            {
+              type: "string",
+              name: "description",
+              label: "Description",
+              required: true,
+              ui: { component: "textarea" },
+            },
+            {
+              type: "object",
+              name: "features",
+              label: "Features",
+              list: true,
+              fields: [
+                { type: "string", name: "text", label: "Feature Text" },
+              ],
+            },
+            { type: "string", name: "ctaText", label: "Button Text", required: true },
+            { type: "string", name: "ctaLink", label: "Button Link", required: true },
+          ],
+        },
+      ],
+    },
+    {
+      type: "object",
+      name: "corporateRoadshow",
+      label: "Corporate Roadshow Section",
+      fields: [
+        {
+          type: "string",
+          name: "sectionTitle",
+          label: "Section Label",
+          required: true,
+        },
+        {
+          type: "string",
+          name: "title",
+          label: "Section Title",
+          required: true,
+        },
+        {
+          type: "string",
+          name: "description",
+          label: "Description",
+          required: true,
+          ui: { component: "textarea" },
+        },
+        {
+          type: "object",
+          name: "plans",
+          label: "Roadshow Plans",
+          list: true,
+          ui: {
+            itemProps: item => ({
+              label: item?.name || "Roadshow Plan",
+            }),
+          },
+          fields: [
+            { type: "string", name: "id", label: "ID", required: true },
+            { type: "string", name: "tag", label: "Card Label" },
+            { type: "string", name: "name", label: "Name", required: true },
+            { type: "string", name: "price", label: "Price", required: true },
+            {
+              type: "string",
+              name: "description",
+              label: "Description",
+              required: true,
+              ui: { component: "textarea" },
+            },
+            { type: "string", name: "ctaText", label: "Button Text", required: true },
+            { type: "string", name: "ctaLink", label: "Button Link", required: true },
+          ],
+        },
+        {
+          type: "object",
+          name: "campaign",
+          label: "Custom Media Campaign",
+          fields: [
+            { type: "string", name: "tag", label: "Card Label" },
+            { type: "string", name: "title", label: "Title", required: true },
+            {
+              type: "string",
+              name: "description",
+              label: "Description",
+              required: true,
+              ui: { component: "textarea" },
+            },
+            { type: "string", name: "ctaText", label: "Button Text", required: true },
+            { type: "string", name: "ctaLink", label: "Button Link", required: true },
+          ],
+        },
+      ],
+    },
+    {
+      type: "object",
       name: "nyaltxPro",
       label: "NyaltxPro Section",
       fields: [
