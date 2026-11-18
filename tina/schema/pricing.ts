@@ -164,6 +164,7 @@ export const pricing: Collection = {
             { type: "string", name: "tag", label: "Card Label" },
             { type: "string", name: "name", label: "Name", required: true },
             { type: "string", name: "price", label: "Price", required: true },
+            { type: "image", name: "image", label: "Package Image" },
             {
               type: "string",
               name: "description",
@@ -183,6 +184,11 @@ export const pricing: Collection = {
             { type: "string", name: "ctaText", label: "Button Text", required: true },
             { type: "string", name: "ctaLink", label: "Button Link", required: true },
           ],
+        },
+        {
+          type: "image",
+          name: "distributionImage",
+          label: "Podcast Distribution Graphic",
         },
       ],
     },
@@ -225,6 +231,7 @@ export const pricing: Collection = {
             { type: "string", name: "tag", label: "Card Label" },
             { type: "string", name: "name", label: "Name", required: true },
             { type: "string", name: "price", label: "Price", required: true },
+            { type: "image", name: "image", label: "Roadshow Image" },
             {
               type: "string",
               name: "description",

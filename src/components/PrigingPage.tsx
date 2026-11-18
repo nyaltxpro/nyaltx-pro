@@ -393,39 +393,63 @@ export const PricingPage = ({ tinaData }: any) => {
                             {content?.fintechMedia?.plans?.map((plan: any) => (
                                 <article
                                     key={plan.id}
-                                    className="relative flex flex-col min-h-[380px] bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-2xl p-8 shadow-2xl"
+                                    className="relative flex flex-col overflow-hidden min-h-[380px] bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-2xl shadow-2xl"
                                 >
-                                    {plan.tag && (
-                                        <span className="text-xs uppercase tracking-wider text-cyan-400 font-bold mb-3">
-                                            {plan.tag}
-                                        </span>
+                                    {plan.image && (
+                                        <div className="relative aspect-[16/9] w-full overflow-hidden border-b border-white/10">
+                                            <Image
+                                                src={plan.image}
+                                                alt={plan.name}
+                                                fill
+                                                sizes="(max-width: 768px) 100vw, 50vw"
+                                                className="object-cover"
+                                            />
+                                        </div>
                                     )}
-                                    <h3 className="text-2xl font-semibold mb-2 text-white" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                                        {plan.name}
-                                    </h3>
-                                    <div className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent mb-4">
-                                        {plan.price}
+                                    <div className="flex flex-col flex-grow p-8">
+                                        {plan.tag && (
+                                            <span className="text-xs uppercase tracking-wider text-cyan-400 font-bold mb-3">
+                                                {plan.tag}
+                                            </span>
+                                        )}
+                                        <h3 className="text-2xl font-semibold mb-2 text-white" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                            {plan.name}
+                                        </h3>
+                                        <div className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent mb-4">
+                                            {plan.price}
+                                        </div>
+                                        <p className="text-gray-300 mb-5">{plan.description}</p>
+                                        {plan.features?.length > 0 && (
+                                            <ul className="text-sm text-gray-300 space-y-2 mb-6 list-none pl-0">
+                                                {plan.features.map((feature: any, idx: number) => (
+                                                    <li key={idx} className="flex items-center gap-3">
+                                                        <span className="w-2 h-2 bg-cyan-400 rounded-full flex-shrink-0"></span>
+                                                        <span>{feature.text}</span>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        )}
+                                        <a
+                                            href={plan.ctaLink}
+                                            className="mt-auto w-full py-3 rounded-xl text-center bg-gradient-to-r from-cyan-600 to-blue-700 text-white font-semibold hover:from-cyan-700 hover:to-blue-800 transition-all duration-300"
+                                        >
+                                            {plan.ctaText}
+                                        </a>
                                     </div>
-                                    <p className="text-gray-300 mb-5">{plan.description}</p>
-                                    {plan.features?.length > 0 && (
-                                        <ul className="text-sm text-gray-300 space-y-2 mb-6 list-none pl-0">
-                                            {plan.features.map((feature: any, idx: number) => (
-                                                <li key={idx} className="flex items-center gap-3">
-                                                    <span className="w-2 h-2 bg-cyan-400 rounded-full flex-shrink-0"></span>
-                                                    <span>{feature.text}</span>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    )}
-                                    <a
-                                        href={plan.ctaLink}
-                                        className="mt-auto w-full py-3 rounded-xl text-center bg-gradient-to-r from-cyan-600 to-blue-700 text-white font-semibold hover:from-cyan-700 hover:to-blue-800 transition-all duration-300"
-                                    >
-                                        {plan.ctaText}
-                                    </a>
                                 </article>
                             ))}
                         </div>
+                        {content?.fintechMedia?.distributionImage && (
+                            <div className="relative mt-8 aspect-[16/9] md:aspect-[16/7] w-full overflow-hidden rounded-2xl border border-white/10 bg-gray-800/40 shadow-2xl">
+                                <Image
+                                    src={content.fintechMedia.distributionImage}
+                                    alt="Podcast distribution channels"
+                                    fill
+                                    sizes="(max-width: 1280px) 100vw, 1280px"
+                                    className="object-cover"
+                                />
+                            </div>
+                        )}
                     </section>
 
                     {/* Corporate Roadshow */}
@@ -446,26 +470,39 @@ export const PricingPage = ({ tinaData }: any) => {
                             {content?.corporateRoadshow?.plans?.map((plan: any) => (
                                 <article
                                     key={plan.id}
-                                    className="relative flex flex-col min-h-[300px] bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-2xl p-6 shadow-2xl"
+                                    className="relative flex flex-col overflow-hidden min-h-[300px] bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-2xl shadow-2xl"
                                 >
-                                    {plan.tag && (
-                                        <span className="text-xs uppercase tracking-wider text-cyan-400 font-bold mb-3">
-                                            {plan.tag}
-                                        </span>
+                                    {plan.image && (
+                                        <div className="relative aspect-[16/9] w-full overflow-hidden border-b border-white/10">
+                                            <Image
+                                                src={plan.image}
+                                                alt={plan.name}
+                                                fill
+                                                sizes="(max-width: 768px) 100vw, (max-width: 1280px) 33vw, 400px"
+                                                className="object-cover"
+                                            />
+                                        </div>
                                     )}
-                                    <h3 className="text-xl font-semibold mb-2 text-white" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                                        {plan.name}
-                                    </h3>
-                                    <div className="text-2xl font-bold text-white mb-4">
-                                        {plan.price}
+                                    <div className="flex flex-col flex-grow p-6">
+                                        {plan.tag && (
+                                            <span className="text-xs uppercase tracking-wider text-cyan-400 font-bold mb-3">
+                                                {plan.tag}
+                                            </span>
+                                        )}
+                                        <h3 className="text-xl font-semibold mb-2 text-white" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                            {plan.name}
+                                        </h3>
+                                        <div className="text-2xl font-bold text-white mb-4">
+                                            {plan.price}
+                                        </div>
+                                        <p className="text-gray-300 text-sm mb-6 flex-grow">{plan.description}</p>
+                                        <a
+                                            href={plan.ctaLink}
+                                            className="mt-auto w-full py-3 rounded-xl text-center border border-cyan-500/40 bg-cyan-500/10 text-cyan-200 font-semibold hover:bg-cyan-500/20 transition-colors"
+                                        >
+                                            {plan.ctaText}
+                                        </a>
                                     </div>
-                                    <p className="text-gray-300 text-sm mb-6 flex-grow">{plan.description}</p>
-                                    <a
-                                        href={plan.ctaLink}
-                                        className="mt-auto w-full py-3 rounded-xl text-center border border-cyan-500/40 bg-cyan-500/10 text-cyan-200 font-semibold hover:bg-cyan-500/20 transition-colors"
-                                    >
-                                        {plan.ctaText}
-                                    </a>
                                 </article>
                             ))}
                         </div>
