@@ -59,6 +59,7 @@
         "tag": "Podcast Feature",
         "name": "Executive Podcast Interview",
         "price": "$3,500",
+        "image": "/crs-podcast-feature.png",
         "description": "A high-impact interview on Off Road with Frank Ferraro and Andrea Cataneo for investor-focused business visibility.",
         "features": [
           { "text": "Audio podcast appearance" },
@@ -74,6 +75,7 @@
         "tag": "Full Media Package",
         "name": "Podcast, Video & Commercial",
         "price": "$8,500",
+        "image": "/crs-full-media.png",
         "description": "A complete media package with polished video assets for investor relations, social media and future advertising.",
         "features": [
           { "text": "Two full video edits" },
@@ -84,7 +86,8 @@
         "ctaText": "Request details",
         "ctaLink": "mailto:frank@corporateroadshow.com?subject=Full%20Media%20Package%20Inquiry"
       }
-    ]
+    ],
+    "distributionImage": "/crs-podcast-distribution.png"
   },
   "corporateRoadshow": {
     "sectionTitle": "Corporate Roadshow",
@@ -96,6 +99,7 @@
         "tag": "Events",
         "name": "Live Roadshows",
         "price": "From $20,000",
+        "image": "/crs-live-roadshow.png",
         "description": "Curated, in-person investor experiences with executive networking, presentations, private meetings and on-site media coverage.",
         "ctaText": "Request proposal",
         "ctaLink": "mailto:frank@corporateroadshow.com?subject=Live%20Roadshow%20Inquiry"
@@ -105,6 +109,7 @@
         "tag": "American Roadshow",
         "name": "Featured Company Package",
         "price": "$25,000",
+        "image": "/crs-american-roadshow.png",
         "description": "Featured participation in a professionally produced TV series with executive interviews and investor-facing documentary-style storytelling.",
         "ctaText": "Request proposal",
         "ctaLink": "mailto:frank@corporateroadshow.com?subject=American%20Roadshow%20Inquiry"
@@ -114,6 +119,7 @@
         "tag": "National TV Campaign",
         "name": "Commercial Placement",
         "price": "$80,000-$150,000+",
+        "image": "/crs-national-tv.png",
         "description": "Large-scale commercial campaign options across major business and news networks, with 50-100 commercial spots.",
         "ctaText": "Request proposal",
         "ctaLink": "mailto:frank@corporateroadshow.com?subject=National%20TV%20Campaign%20Inquiry"
