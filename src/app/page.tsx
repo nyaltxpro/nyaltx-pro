@@ -4,7 +4,7 @@ import homeContent from '../../content/landing/home.json';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.nyaltx.pro'),
-  title: { absolute: 'NYALTX | New York Alt Exchange, Digital Markets & Tokenized Securities' },
+  title: { absolute: 'New York Alt Exchange | Digital Asset Discovery & News | NYALTX' },
   description:
     'NYALTX (New York Alt Exchange) links DeFi project discovery with tokenized securities data, market news, and trading tools in one platform.',
   keywords:
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     canonical: 'https://www.nyaltx.pro',
   },
   openGraph: {
-    title: 'NYALTX | New York Alt Exchange, Digital Markets & Tokenized Securities',
+    title: 'New York Alt Exchange | Digital Asset Discovery & News | NYALTX',
     description:
       'NYALTX (New York Alt Exchange) links DeFi project discovery with tokenized securities data, market news, and trading tools in one platform.',
     type: 'website',
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     site: '@nyaltx',
     creator: '@nyaltx',
-    title: 'NYALTX | New York Alt Exchange, Digital Markets & Tokenized Securities',
+    title: 'New York Alt Exchange | Digital Asset Discovery & News | NYALTX',
     description:
       'NYALTX (New York Alt Exchange) links DeFi project discovery with tokenized securities data, market news, and trading tools in one platform.',
     images: ['https://www.nyaltx.pro/og-image.png'],
