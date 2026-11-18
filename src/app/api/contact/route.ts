@@ -3,6 +3,7 @@ import nodemailer from 'nodemailer';
 import { render } from '@react-email/render';
 import ContactFormAdmin from '@/emails/ContactFormAdmin';
 import ContactFormReply from '@/emails/ContactFormReply';
+import { checkContactRateLimit } from '@/lib/contactRateLimit';
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,6 +18,27 @@ export async function POST(request: NextRequest) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return NextResponse.json({ error: 'Invalid email format' }, { status: 400 });
+    }
+
+    const clientIp =
+      request.headers.get('x-real-ip')?.trim() ||
+      request.headers.get('cf-connecting-ip')?.trim();
+    if (!clientIp) {
+      return NextResponse.json(
+        { error: 'Unable to verify request origin. Please try again later.' },
+        { status: 503 }
+      );
+    }
+
+    const rateLimit = await checkContactRateLimit(clientIp);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: 'Too many messages. Please try again later.' },
+        {
+          status: 429,
+          headers: { 'Retry-After': String(rateLimit.retryAfterSeconds) },
+        }
+      );
     }
 
     // Create transporter for Namecheap email
