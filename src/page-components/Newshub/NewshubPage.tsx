@@ -34,6 +34,8 @@ interface Article {
   isPaid?: boolean;
   plan?: string;
   planName?: string;
+  sourceUrl?: string;
+  isSyndicated?: boolean;
 }
 
 export interface NewshubInitialData {
@@ -56,12 +58,11 @@ const GRADS = [
 const CATEGORIES = [
   'All',
   'NYAX',
-  'Bitcoin',
+  'Solana',
   'Ethereum',
   'DeFi',
-  'Tokenized Stocks',
-  'Community',
-  'Press Releases',
+  'Blockchain',
+  'Other',
 ];
 
 const RSS_URL = 'https://www.nyaltx.pro/rss.xml';
@@ -444,11 +445,11 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
                 ) : articles.length === 0 ? (
                   <div className="nh-side" style={{ textAlign: 'center', padding: '48px 20px' }}>
                     <div style={{ fontSize: 40, marginBottom: 12 }}>📰</div>
-                    <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 8 }}>No paid news published yet</div>
+                    <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 8 }}>No news available right now</div>
                     <div style={{ color: 'var(--nh-muted)', fontSize: 14, marginBottom: 20 }}>
                       {selectedCat === 'All'
-                        ? 'Be the first to submit a press release or sponsored story.'
-                        : `No paid ${selectedCat} articles approved yet. Try a different category or submit your own.`}
+                        ? 'Please check back soon, or submit a story for review.'
+                        : `No ${selectedCat} articles are available right now. Try another category or submit your own.`}
                     </div>
                     <Link href="/newshub/submit" className="nh-btn nh-btn-pri">
                       + Submit your news
@@ -460,7 +461,9 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
                       <div className="nh-thumb" style={{ background: articleThumbnail(art) }} />
                       <div className="nh-article-body">
                         <div className="nh-meta">
-                          {art.type === 'pr' ? (
+                          {art.isSyndicated ? (
+                            <span className="nh-badge">RSS</span>
+                          ) : art.type === 'pr' ? (
                             <span className="nh-badge nh-badge-pr">PRESS RELEASE</span>
                           ) : (
                             <span className="nh-badge nh-badge-paid">SPONSORED</span>
@@ -471,7 +474,16 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
                           <span>{relativeDate(art.publishedAt || art.createdAt)}</span>
                         </div>
                         <h3>
-                          {art.slug ? (
+                          {art.isSyndicated && art.sourceUrl ? (
+                            <a
+                              href={art.sourceUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="nh-article-link"
+                            >
+                              {art.title}
+                            </a>
+                          ) : art.slug ? (
                             <Link href={`/news/${art.slug}`} className="nh-article-link">
                               {art.title}
                             </Link>
@@ -583,8 +595,8 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
           {/* Footer note */}
           <div className="nh-disclaimer">
             <p>
-              NYALTX News Hub features only approved, paid press releases and sponsored stories reviewed by our editorial team.
-              All articles are verified before going live. RSS feed available at{' '}
+              NYALTX News Hub features syndicated headlines from trusted news sources alongside approved paid press releases and sponsored stories.
+              Paid submissions are reviewed before going live. RSS feed available at{' '}
               <a href={RSS_URL} style={{ color: '#06b6d4' }}>{RSS_URL}</a>.
             </p>
           </div>
