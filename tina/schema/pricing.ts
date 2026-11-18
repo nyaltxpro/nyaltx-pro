@@ -30,6 +30,103 @@ export const pricing: Collection = {
     },
     {
       type: "object",
+      name: "newsPublishing",
+      label: "News Publishing Section",
+      fields: [
+        {
+          type: "string",
+          name: "sectionTitle",
+          label: "Section Title",
+          required: true,
+        },
+        {
+          type: "string",
+          name: "description",
+          label: "Description",
+          required: true,
+          ui: {
+            component: "textarea",
+          },
+        },
+        {
+          type: "object",
+          name: "plans",
+          label: "News Publishing Plans",
+          list: true,
+          ui: {
+            itemProps: item => ({
+              label: item?.name || "News Plan",
+            }),
+          },
+          fields: [
+            {
+              type: "string",
+              name: "id",
+              label: "ID",
+              required: true,
+            },
+            {
+              type: "string",
+              name: "name",
+              label: "Name",
+              required: true,
+            },
+            {
+              type: "number",
+              name: "priceUSD",
+              label: "Price (USD)",
+              required: true,
+            },
+            {
+              type: "string",
+              name: "description",
+              label: "Description",
+              required: true,
+              ui: {
+                component: "textarea",
+              },
+            },
+            {
+              type: "boolean",
+              name: "isPopular",
+              label: "Mark as Popular",
+            },
+            {
+              type: "string",
+              name: "popularBadge",
+              label: "Popular Badge Text",
+            },
+            {
+              type: "object",
+              name: "features",
+              label: "Features",
+              list: true,
+              fields: [
+                {
+                  type: "string",
+                  name: "text",
+                  label: "Feature Text",
+                },
+              ],
+            },
+            {
+              type: "string",
+              name: "ctaText",
+              label: "Button Text",
+              required: true,
+            },
+            {
+              type: "string",
+              name: "ctaLink",
+              label: "Button Link",
+              required: true,
+            },
+          ],
+        },
+      ],
+    },
+    {
+      type: "object",
       name: "nyaltxPro",
       label: "NyaltxPro Section",
       fields: [
