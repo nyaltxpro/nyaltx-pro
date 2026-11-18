@@ -4,6 +4,7 @@ import { Order } from '@/app/api/admin/orders/route';
 import { verifyNewsPayment, sendNewsSubmissionConfirmationEmail } from '@/lib/newsEmailService';
 import { findUsablePromoCode } from '@/lib/newsPromoCodes';
 import { calculateNewsPrice } from '@/lib/newsPricing';
+import { isPaidNewsCategory } from '@/lib/paidNewsCategories';
 
 const NEWS_TEST_PLAN_ENABLED = process.env.NEXT_PUBLIC_ENABLE_NEWS_TEST_PLAN === 'true';
 
@@ -35,6 +36,13 @@ export async function POST(req: NextRequest) {
     if (!['paypal', 'usdc', 'nyax'].includes(paymentMethod)) {
       return NextResponse.json(
         { error: 'Unsupported payment method. Choose PayPal, USDC, or NYAX.' },
+        { status: 400 }
+      );
+    }
+
+    if (!isPaidNewsCategory(category)) {
+      return NextResponse.json(
+        { error: 'Choose one of the available news categories.' },
         { status: 400 }
       );
     }
