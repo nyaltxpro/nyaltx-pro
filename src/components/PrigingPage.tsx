@@ -326,6 +326,55 @@ export const PricingPage = ({ tinaData }: any) => {
                         </div>
                     </div>
 
+                    {/* News Publishing Section */}
+                    <section aria-labelledby="news-publishing" className="mb-12">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="w-1 h-8 bg-gradient-to-b from-cyan-400 to-blue-500 rounded-full"></div>
+                            <h2 id="news-publishing" className="text-3xl font-bold text-white" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                {content?.newsPublishing?.sectionTitle}
+                            </h2>
+                        </div>
+                        <p className="text-gray-300 mb-6 max-w-3xl" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                            {content?.newsPublishing?.description}
+                        </p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            {content?.newsPublishing?.plans?.map((plan: any) => (
+                                <article
+                                    key={plan.id}
+                                    className="group relative flex flex-col min-h-[360px] bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-2xl p-8 shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_0_50px_-10px_rgba(6,182,212,0.5)] hover:border-cyan-500/30"
+                                >
+                                    {plan.isPopular && (
+                                        <span className="absolute -top-3 right-6 text-xs uppercase tracking-wider px-3 py-2 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold shadow-lg">
+                                            {plan.popularBadge}
+                                        </span>
+                                    )}
+                                    <h3 className="text-2xl font-semibold mb-2 text-white" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                        {plan.name}
+                                    </h3>
+                                    <div className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent mb-4" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                        ${plan.priceUSD}
+                                        <span className="text-sm font-normal text-gray-400"> / release</span>
+                                    </div>
+                                    <p className="text-gray-300 mb-5">{plan.description}</p>
+                                    <ul className="text-sm text-gray-300 space-y-2 mb-6 list-none pl-0">
+                                        {plan.features?.map((feature: any, idx: number) => (
+                                            <li key={idx} className="flex items-center gap-3">
+                                                <span className="w-2 h-2 bg-cyan-400 rounded-full flex-shrink-0"></span>
+                                                <span>{feature.text}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                    <button
+                                        onClick={() => router.push(plan.ctaLink)}
+                                        className="mt-auto w-full py-3 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-700 text-white font-semibold hover:from-cyan-700 hover:to-blue-800 transition-all duration-300"
+                                    >
+                                        {plan.ctaText}
+                                    </button>
+                                </article>
+                            ))}
+                        </div>
+                    </section>
+
                     {/* NyaltxPro Section */}
                     <section aria-labelledby="nyaltxpro" className="mb-12">
                         <div className="flex items-center gap-3 mb-6">

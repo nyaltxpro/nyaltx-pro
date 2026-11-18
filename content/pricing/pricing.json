@@ -1,7 +1,53 @@
 {
   "hero": {
-    "title": "Pricing",
-    "description": "Start with **NyaltxPro** to unlock your project profile and media. Then upgrade to the **Race to Liberty** campaign for broader visibility."
+    "title": "Corporate Visibility & Media Pricing",
+    "description": "Publish company news, build a project profile, and upgrade visibility with **Race to Liberty** campaigns."
+  },
+  "newsPublishing": {
+    "sectionTitle": "News Publishing",
+    "description": "Straightforward, one-time publishing options for corporate announcements, product launches and industry updates.",
+    "plans": [
+      {
+        "id": "news-release",
+        "name": "News Release",
+        "priceUSD": 99,
+        "description": "Publish your announcement on NYALTX News Hub.",
+        "features": [
+          {
+            "text": "Dedicated article page"
+          },
+          {
+            "text": "Company logo and featured image"
+          },
+          {
+            "text": "Company links and shareable URL"
+          }
+        ],
+        "ctaText": "Publish for $99",
+        "ctaLink": "/newshub/submit?modal=open&plan=feed"
+      },
+      {
+        "id": "featured-news-release",
+        "name": "Featured News Release",
+        "priceUSD": 199,
+        "description": "Give your announcement additional exposure on NYALTX.",
+        "isPopular": true,
+        "popularBadge": "More Visibility",
+        "features": [
+          {
+            "text": "Everything in News Release"
+          },
+          {
+            "text": "Seven days of featured placement"
+          },
+          {
+            "text": "Branded social promotional graphic and NYALTX social posts"
+          }
+        ],
+        "ctaText": "Get Featured for $199",
+        "ctaLink": "/newshub/submit?modal=open&plan=slider"
+      }
+    ]
   },
   "nyaltxPro": {
     "sectionTitle": "NyaltxPro",
