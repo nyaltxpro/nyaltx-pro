@@ -3,16 +3,16 @@ import NewsPublishingPage from '@/page-components/Newshub/NewsPublishingPage';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.nyaltx.pro'),
-  title: 'Publish Your News | NYALTX News Hub',
+  title: 'Corporate Visibility & Media Solutions | NYALTX',
   description:
-    'Publish your company announcements and press releases on the NYALTX News Hub with News Publishing or News Publishing & Distribution packages.',
+    'Reach fintech, digital asset and capital markets audiences through news publishing, project discovery, executive interviews, advertising and investor events.',
   alternates: {
     canonical: 'https://www.nyaltx.pro/newshub/submit',
   },
   openGraph: {
-    title: 'Publish Your News | NYALTX News Hub',
+    title: 'Corporate Visibility & Media Solutions | NYALTX',
     description:
-      'Choose a publishing package and share your company news with the NYALTX community.',
+      'Explore NYALTX news publishing, project discovery, fintech media and corporate roadshow services.',
     type: 'website',
     url: 'https://www.nyaltx.pro/newshub/submit',
     siteName: 'NYALTX',
@@ -26,11 +26,8 @@ interface NewsPublishingRouteProps {
 export default async function NewsPublishingRoute({ searchParams }: NewsPublishingRouteProps) {
   const { modal, plan } = await searchParams;
   const testPlanEnabled = process.env.NEXT_PUBLIC_ENABLE_NEWS_TEST_PLAN === 'true';
-  const initialPlan = plan === 'slider'
-    ? 'slider'
-    : plan === 'test' && testPlanEnabled
-      ? 'test'
-      : 'feed';
+  const initialPlan =
+    plan === 'slider' ? 'slider' : plan === 'test' && testPlanEnabled ? 'test' : 'feed';
 
   return (
     <NewsPublishingPage

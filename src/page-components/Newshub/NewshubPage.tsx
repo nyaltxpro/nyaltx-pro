@@ -292,85 +292,12 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
 
           {/* ── HERO BANNER ──────────────────────────────────────────── */}
           <section className="nyb" aria-label="NYALTX News Hub">
-            {/* Grid SVG */}
-            <svg className="nh-net" viewBox="0 0 800 260" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-              <defs>
-                <pattern id="nh-grd" width="26" height="26" patternUnits="userSpaceOnUse">
-                  <path d="M26 0H0V26" fill="none" stroke="#fff" strokeOpacity={0.08} />
-                </pattern>
-                <g id="nh-cube">
-                  <polygon points="0,-10 10,-5 0,0 -10,-5" fill="#a5f3fc" />
-                  <polygon points="-10,-5 0,0 0,12 -10,7" fill="#0891b2" />
-                  <polygon points="10,-5 0,0 0,12 10,7" fill="#0e7490" />
-                </g>
-              </defs>
-              <rect width="800" height="260" fill="url(#nh-grd)" />
-              <g stroke="#67e8f9" strokeOpacity={0.5} strokeWidth={1.2} fill="none">
-                <path d="M430 70L520 45L610 90L700 60M610 90L560 150M610 90L660 170M700 60L740 130L660 170M430 70L480 120L560 150" />
-              </g>
-              <g fill="#22d3ee">
-                <circle className="nh-pl" cx={430} cy={70} r={3.5} />
-                <circle className="nh-pl" cx={480} cy={120} r={3.5} />
-                <circle className="nh-pl" cx={560} cy={150} r={3.5} />
-                <circle className="nh-pl" cx={660} cy={170} r={3.5} />
-                <circle className="nh-pl" cx={740} cy={130} r={3.5} />
-              </g>
-              <use href="#nh-cube" transform="translate(520 45) scale(1.3)" />
-              <use href="#nh-cube" transform="translate(610 90) scale(1.3)" />
-              <use href="#nh-cube" transform="translate(700 60) scale(1.3)" />
-            </svg>
-
-            {/* NYC Skyline */}
-            <svg className="nh-sk" viewBox="0 0 600 230" preserveAspectRatio="xMaxYMax meet" aria-hidden="true">
-              <defs>
-                <linearGradient id="nh-gld" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0" stopColor="#fde68a" /><stop offset="1" stopColor="#f59e0b" />
-                </linearGradient>
-                <pattern id="nh-win" width="9" height="12" patternUnits="userSpaceOnUse">
-                  <rect x="2" y="3" width="3" height="4" fill="#fcd34d" opacity={0.8} />
-                </pattern>
-                <g id="nh-bld">
-                  <rect x="20" y="130" width="50" height="100" /><rect x="80" y="100" width="40" height="130" />
-                  <rect x="130" y="140" width="60" height="90" /><rect x="200" y="70" width="50" height="160" />
-                  <rect x="260" y="110" width="45" height="120" /><rect x="318" y="80" width="54" height="150" />
-                  <rect x="331" y="50" width="28" height="32" /><rect x="341" y="22" width="8" height="30" />
-                  <rect x="385" y="105" width="55" height="125" /><rect x="450" y="78" width="45" height="152" />
-                  <rect x="505" y="130" width="50" height="100" /><rect x="562" y="110" width="38" height="120" />
-                </g>
-                <clipPath id="nh-clp"><use href="#nh-bld" /></clipPath>
-              </defs>
-              <circle cx={470} cy={46} r={34} fill="url(#nh-gld)" stroke="#b45309" strokeWidth={3} />
-              <circle cx={470} cy={46} r={26} fill="none" stroke="#b45309" strokeWidth={1.5} opacity={0.6} />
-              <text x={470} y={58} textAnchor="middle" fontSize={34} fontWeight={800} fill="#92400e" fontFamily="Georgia,serif">N</text>
-              <g fill="#0a1a33"><use href="#nh-bld" /></g>
-              <rect width="600" height="230" fill="url(#nh-win)" clipPath="url(#nh-clp)" />
-              <g fill="#16325c" stroke="#67e8f9" strokeOpacity={0.6}>
-                <polygon points="52,170 115,140 178,170" />
-                <rect x={52} y={170} width={126} height={8} />
-                <rect x={48} y={214} width={134} height={16} />
-              </g>
-              <g fill="#e2e8f0">
-                {[60, 80, 100, 121, 141, 161].map((x, i) => (
-                  <rect key={i} x={x} y={180} width={9} height={34} />
-                ))}
-              </g>
-            </svg>
-
-            {/* Ticker tape */}
-            <div className="nh-tk" aria-hidden="true">
-              <div>
-                NEW YORK ALT EXCHANGE<i>●</i>NYAX<i>●</i>BTC<i>●</i>ETH<i>●</i>SOL<i>●</i>DEFI<i>●</i>TOKENIZED STOCKS<i>●</i>PRESS RELEASES<i>●</i>ALT ASSETS<i>●</i>NEW YORK ALT EXCHANGE<i>●</i>NYAX<i>●</i>BTC<i>●</i>ETH<i>●</i>TOKENIZED STOCKS<i>●</i>
-              </div>
-            </div>
-
-            {/* Text */}
-            <div className="nh-txt">
-              <div className="nh-eyebrow">NEW YORK ALT EXCHANGE</div>
-              <h2>NYALTX <span>News Hub</span></h2>
-              <p>Where Wall Street meets Web3: news, press releases and market stories for crypto and alt assets.</p>
-            </div>
-            <Link href="/newshub/submit" className="nh-btn-pri nh-submit-cta">
-              + Submit news
+            <Link href="/newshub/submit" className="nh-banner-link" aria-label="Submit news to NYALTX News Hub">
+              <img
+                src="/nyaltx-news-hub-banner.png"
+                alt="New York Alt Exchange NYALTX News Hub"
+                className="nh-banner-image"
+              />
             </Link>
           </section>
 
@@ -664,10 +591,12 @@ const STYLES = `
   /* ─── Hero ─── */
   .nyb {
     position: relative; overflow: hidden; border-radius: 20px;
-    min-height: 270px; margin-bottom: 24px; color: #fff;
-    background: linear-gradient(180deg,#0a2a5c 0%,#1560a6 52%,#f59e0b 150%);
+    aspect-ratio: 2000 / 451; margin-bottom: 24px; color: #fff;
+    background: #07182f;
     box-shadow: 0 10px 32px rgba(0,0,0,.5);
   }
+  .nh-banner-link { position: absolute; inset: 0; z-index: 5; display: block; }
+  .nh-banner-image { display: block; width: 100%; height: 100%; object-fit: cover; }
   .nh-net { position: absolute; inset: 0; width: 100%; height: 100%; }
   .nh-sk  { position: absolute; right: 0; bottom: 0; height: 88%; width: auto; max-width: 78%; }
   .nh-tk  {

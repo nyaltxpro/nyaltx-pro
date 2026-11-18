@@ -15,9 +15,9 @@ type PublishingPlan = 'feed' | 'slider' | 'test';
 const plans: {
   id: PublishingPlan;
   number: string;
+  label: string;
   name: string;
   price: string;
-  nyaxPrice: string;
   description: string;
   features: string[];
   featured?: boolean;
@@ -25,36 +25,27 @@ const plans: {
   {
     id: 'feed',
     number: '01',
-    name: 'News Publishing',
+    label: 'Publish',
+    name: 'News Release',
     price: '$99',
-    nyaxPrice: '$79.20 with NYAX',
-    description: 'Get your company news published and discoverable on the NYALTX News Hub.',
+    description: 'Publish your announcement on NYALTX News Hub.',
     features: [
-      'Full article published on NYALTX News Hub',
-      'Inclusion in the live industry news feed',
+      'Dedicated article page',
       'Company logo and featured image',
-      'Links to your website and social channels',
-      'Dedicated, shareable article URL',
-      'SEO-friendly article page',
+      'Company links and shareable URL',
     ],
   },
   {
     id: 'slider',
     number: '02',
-    name: 'News Publishing & Distribution',
+    label: 'Featured Visibility',
+    name: 'Featured News Release',
     price: '$199',
-    nyaxPrice: '$159.20 with NYAX',
-    description: 'Amplify your announcement with featured placement and additional promotional distribution.',
+    description: 'Give your announcement additional exposure on NYALTX.',
     features: [
-      'Everything in News Publishing',
-      '7-day featured placement on the News Hub',
-      'Priority visibility above standard news',
-      'Inclusion in the NYALTX newsletter',
-      'Promotion across NYALTX social channels',
-      'Custom-branded promotional graphic',
-      'Article editing and headline optimization',
-      'Featured company spotlight',
-      'Scheduled publication option',
+      'Everything in News Release',
+      'Seven days of featured placement',
+      'Branded social promotional graphic and NYALTX social posts',
     ],
     featured: true,
   },
@@ -119,6 +110,7 @@ export default function NewsPublishingPage({
             .nps-btn:hover{filter:brightness(1.12);transform:translateY(-1px)}
             .nps-btn-outline{background:rgba(15,22,35,.75);border-color:#334155;color:#e6edf6!important}
             .nps-btn-outline:hover{background:#172235}
+            .nps-btn-small{font-size:13px;padding:10px 14px}
             .nps-hero{background:linear-gradient(115deg,rgba(15,22,35,.88),rgba(7,11,18,.64) 75%);border-block:1px solid #1e293b;padding:66px 0}
             .nps-hero-grid{display:grid;grid-template-columns:1.3fr .7fr;gap:60px;align-items:center}
             .nps-eyebrow{color:#22d3ee;font-size:12px;font-weight:800;letter-spacing:2px;text-transform:uppercase}
@@ -135,11 +127,21 @@ export default function NewsPublishingPage({
             .nps-section{padding:62px 0}
             .nps-muted{color:var(--muted)}
             .nps-subhead{max-width:750px}
-            .nps-channels{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:26px}
-            .nps-channels div{border-left:3px solid #06b6d4;padding-left:15px}
-            .nps-channels strong{color:#e6edf6;display:block}
-            .nps-channels p{color:var(--muted);font-size:14px;margin-top:5px}
-            .nps-notice{color:var(--muted);font-size:13px;margin-top:15px}
+            .nps-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:28px}
+            .nps-card{background:linear-gradient(150deg,#0f1623,#0b1220);border:1px solid #263449;border-radius:14px;display:flex;flex-direction:column;padding:25px}
+            .nps-card-featured{border:2px solid #06b6d4}
+            .nps-card-tag{color:#67e8f9;font-size:11px;font-weight:700;letter-spacing:1.4px;margin-bottom:12px;text-transform:uppercase}
+            .nps-card p{color:#a7b3c5;font-size:14px;margin:12px 0 18px}
+            .nps-card-price{color:#f8fafc;font-size:26px;font-weight:800;letter-spacing:-.5px;margin-top:14px}
+            .nps-card-price small{color:var(--muted);font-size:13px;font-weight:400}
+            .nps-card ul{flex:1;list-style:none;margin:10px 0 20px;padding:0}
+            .nps-card li{border-top:1px solid #1e293b;font-size:14px;padding:8px 0 8px 22px;position:relative}
+            .nps-card li:before{color:#22d3ee;content:'✓';font-weight:700;left:0;position:absolute}
+            .nps-card-actions{margin-top:auto}
+            .nps-notice{color:var(--muted);font-size:13px;margin-top:22px}
+            .nps-campaign{border:1px solid #263449;border-radius:14px;background:linear-gradient(145deg,rgba(15,22,35,.96),rgba(10,17,29,.92));margin-top:28px;padding:28px}
+            .nps-campaign h2{margin-bottom:10px}
+            .nps-campaign p{color:#b6c2d2;max-width:820px}
             .nps-band{background:linear-gradient(120deg,rgba(15,22,35,.9),rgba(9,15,26,.94));border-block:1px solid #1e293b}
             .nps-plans{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:28px}
             .nps-plan{background:linear-gradient(150deg,#0f1623,#0b1220);border:1px solid #263449;border-radius:14px;display:flex;flex-direction:column;padding:25px}
@@ -154,7 +156,7 @@ export default function NewsPublishingPage({
             .nps-plan li:before{color:#22d3ee;content:'✓';font-weight:700;left:0;position:absolute}
             .nps-footer{background:#070b12;border-top:1px solid var(--line);color:#fff;font-size:13px;padding:28px 0}
             .nps-footer a{color:#00b8d8;text-decoration:none}
-            @media(max-width:800px){.nps-wrap{padding:0 18px}.nps-hero{padding:42px 0}.nps-hero-grid,.nps-channels,.nps-plans{grid-template-columns:1fr}.nps-hero-grid{gap:25px}.nps-section{padding:42px 0}.nps-description{min-height:0}.nps-links{gap:12px}}
+            @media(max-width:800px){.nps-wrap{padding:0 18px}.nps-hero{padding:42px 0}.nps-hero-grid,.nps-cards,.nps-plans{grid-template-columns:1fr}.nps-hero-grid{gap:25px}.nps-section{padding:42px 0}.nps-description{min-height:0}.nps-links{gap:12px}}
           `,
         }}
       />
@@ -166,8 +168,10 @@ export default function NewsPublishingPage({
             <small>NEW YORK ALT EXCHANGE</small>
           </Link>
           <div className="nps-links">
-            <a href="#distribution">Distribution</a>
-            <a href="#packages">Packages</a>
+            <a href="#news">News</a>
+            <a href="#projects">Projects</a>
+            <a href="#media">Media</a>
+            <a href="#roadshows">Roadshows</a>
             <button className="nps-btn" onClick={() => openSubmitModal('feed')} type="button">
               Submit your news
             </button>
@@ -178,105 +182,252 @@ export default function NewsPublishingPage({
       <section className="nps-hero">
         <div className="nps-wrap nps-hero-grid">
           <div>
-            <div className="nps-eyebrow">News publishing &amp; digital media</div>
+            <div className="nps-eyebrow">Corporate Visibility &amp; Media Solutions</div>
             <h1>
-              Your news.
+              Your story deserves
               <br />
-              Beyond the headline.
+              more than a headline.
             </h1>
             <p className="nps-lead">
-              Publish your company announcements, press releases, and industry updates. Reach the
-              digital asset and blockchain community with a publishing package built around real
-              visibility.
+              Reach fintech, digital asset and capital markets audiences through news publishing,
+              project discovery, executive interviews, advertising and investor events.
             </p>
             <div className="nps-actions">
-              <a className="nps-btn" href="#packages">
-                View publishing packages
+              <a className="nps-btn" href="#news">
+                Explore packages
               </a>
-              <Link className="nps-btn nps-btn-outline" href="/newshub">
-                Explore News Hub
-              </Link>
+              <a className="nps-btn nps-btn-outline" href="#media">
+                Media services
+              </a>
             </div>
           </div>
           <aside className="nps-hero-card">
-            <div className="nps-eyebrow">One submission. More visibility.</div>
-            <p><span className="nps-check">✓</span>Dedicated news article with your branding</p>
-            <p><span className="nps-check">✓</span>RSS feed and newsletter inclusion</p>
-            <p><span className="nps-check">✓</span>Promotion on NYALTX social channels</p>
-            <p><span className="nps-check">✓</span>Packages starting at $99</p>
+            <div className="nps-eyebrow">Visibility across the NYALTX ecosystem</div>
+            <p>
+              <span className="nps-check">01</span>News publishing
+            </p>
+            <p>
+              <span className="nps-check">02</span>Project discovery
+            </p>
+            <p>
+              <span className="nps-check">03</span>Fintech media &amp; advertising
+            </p>
+            <p>
+              <span className="nps-check">04</span>Corporate roadshows
+            </p>
           </aside>
         </div>
       </section>
 
-      <section className="nps-section" id="distribution">
+      <section className="nps-section" id="news">
         <div className="nps-wrap">
-          <div className="nps-eyebrow">Distribution &amp; exposure</div>
-          <h2>Where your news goes</h2>
+          <div className="nps-eyebrow">01 / News Hub</div>
+          <h2>Publish your news. Expand your visibility.</h2>
           <p className="nps-muted nps-subhead">
-            Every package starts with publication on NYALTX News Hub. Distribution through our RSS
-            feed, newsletter, and social channels is included, with editorial review for every
-            submission.
+            Straightforward, one-time publishing options for corporate announcements, product
+            launches and industry updates.
           </p>
-          <div className="nps-channels">
-            <div>
-              <strong>NYALTX News Hub</strong>
-              <p>Dedicated article page with company branding and links.</p>
-            </div>
-            <div>
-              <strong>RSS and newsletter</strong>
-              <p>Approved stories are included in our RSS feed and weekly newsletter.</p>
-            </div>
-            <div>
-              <strong>NYALTX social channels</strong>
-              <p>Promotion on NYALTX social channels with each publishing package.</p>
-            </div>
-          </div>
-          <p className="nps-notice">
-            All submissions are subject to editorial review. Distribution does not guarantee
-            third-party newswire pickup, search ranking, readership, or investment results.
-          </p>
-        </div>
-      </section>
-
-      <section className="nps-section nps-band" id="packages">
-        <div className="nps-wrap">
-          <div className="nps-eyebrow">Publishing packages</div>
-          <h2>Choose your level of visibility.</h2>
-          <p className="nps-muted">
-            One-time pricing. Pay with PayPal, USDC, or NYAX. Save 20% when you pay with NYAX.
-          </p>
-          <p className="nps-notice">All submissions are subject to editorial review.</p>
           <div className="nps-plans">
             {plans.map(plan => (
               <article
                 className={`nps-plan${plan.featured ? ' nps-plan-featured' : ''}`}
                 key={plan.id}
               >
-                <div className="nps-plan-tag">{plan.number} / {plan.name}</div>
+                <div className="nps-plan-tag">
+                  {plan.number} / {plan.label}
+                </div>
                 <h3>{plan.name}</h3>
                 <div className="nps-price">
                   {plan.price}
                   <small> / release</small>
                 </div>
-                <div className="nps-discount">{plan.nyaxPrice}</div>
                 <p className="nps-description">{plan.description}</p>
                 <ul>
-                  {plan.features.map(feature => <li key={feature}>{feature}</li>)}
+                  {plan.features.map(feature => (
+                    <li key={feature}>{feature}</li>
+                  ))}
                 </ul>
-                <button className="nps-btn" onClick={() => openSubmitModal(plan.id)} type="button">
-                  {plan.id === 'feed'
-                    ? 'Publish Your News — $99'
-                    : 'Get Featured — $199'}
-                </button>
+                <div className="nps-actions">
+                  <button
+                    className="nps-btn"
+                    onClick={() => openSubmitModal(plan.id)}
+                    type="button"
+                  >
+                    {plan.id === 'feed' ? 'Publish Your News — $99' : 'Get Featured — $199'}
+                  </button>
+                  <a className="nps-btn nps-btn-outline" href="https://www.nyaltx.pro/news-hub">
+                    View News Hub
+                  </a>
+                </div>
               </article>
             ))}
           </div>
         </div>
       </section>
 
+      <section className="nps-section nps-band" id="projects">
+        <div className="nps-wrap">
+          <div className="nps-eyebrow">02 / Project Discovery</div>
+          <h2>Build a stronger NYALTX presence.</h2>
+          <p className="nps-muted nps-subhead">
+            Project profiles and optional Race to Liberty promotional placements. News and media
+            purchases do not require membership.
+          </p>
+          <div className="nps-cards">
+            <article className="nps-card">
+              <div className="nps-card-tag">Project Profile</div>
+              <h3>NYALTX Pro</h3>
+              <div className="nps-card-price">
+                $199 <small>/ year</small>
+              </div>
+              <p>Establish a dedicated project presence with profile details, links and video.</p>
+              <div className="nps-card-actions">
+                <Link className="nps-btn nps-btn-small" href="/pricing">
+                  Explore membership
+                </Link>
+              </div>
+            </article>
+            <article className="nps-card">
+              <div className="nps-card-tag">Race to Liberty</div>
+              <h3>Speed Boat</h3>
+              <div className="nps-card-price">$199</div>
+              <p>Entry-level project visibility with a defined promotional placement period.</p>
+              <div className="nps-card-actions">
+                <Link className="nps-btn nps-btn-small" href="/pricing">
+                  Explore placement
+                </Link>
+              </div>
+            </article>
+            <article className="nps-card nps-card-featured">
+              <div className="nps-card-tag">Race to Liberty</div>
+              <h3>Helicopter / Submarine</h3>
+              <div className="nps-card-price">$349–$599</div>
+              <p>Extended project promotion and premium visibility options.</p>
+              <div className="nps-card-actions">
+                <Link className="nps-btn nps-btn-small" href="/pricing">
+                  Compare options
+                </Link>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section className="nps-section" id="media">
+        <div className="nps-wrap">
+          <div className="nps-eyebrow">03 / Fintech Media &amp; Advertising</div>
+          <h2>Take your story beyond the news feed.</h2>
+          <p className="nps-muted nps-subhead">
+            Professional media services powered by Corporate Roadshow. Packages are customized to
+            your company&apos;s objectives and distribution needs.
+          </p>
+          <div className="nps-cards">
+            <article className="nps-card">
+              <div className="nps-card-tag">Advertising</div>
+              <h3>Dashboard Banner</h3>
+              <div className="nps-card-price">
+                $750 <small>/ month</small>
+              </div>
+              <p>Prominent branded advertising on the NYALTX dashboard, subject to availability.</p>
+              <div className="nps-card-actions">
+                <a
+                  className="nps-btn nps-btn-small"
+                  href="mailto:info@corporateroadshow.com?subject=NYALTX%20Banner%20Inquiry"
+                >
+                  Request details
+                </a>
+              </div>
+            </article>
+            <article className="nps-card">
+              <div className="nps-card-tag">Executive Interview</div>
+              <h3>Podcast Silver</h3>
+              <div className="nps-card-price">$3,500</div>
+              <p>
+                Executive interview on Off Road with Frank Ferraro, with audio distribution on major
+                podcast platforms.
+              </p>
+              <div className="nps-card-actions">
+                <a
+                  className="nps-btn nps-btn-small"
+                  href="mailto:info@corporateroadshow.com?subject=Podcast%20Silver%20Inquiry"
+                >
+                  Request details
+                </a>
+              </div>
+            </article>
+            <article className="nps-card nps-card-featured">
+              <div className="nps-card-tag">Integrated Media</div>
+              <h3>Podcast Gold</h3>
+              <div className="nps-card-price">$7,500</div>
+              <p>
+                Expanded podcast and video production, short-form clips and branded media assets.
+              </p>
+              <div className="nps-card-actions">
+                <a
+                  className="nps-btn nps-btn-small"
+                  href="mailto:info@corporateroadshow.com?subject=Podcast%20Gold%20Inquiry"
+                >
+                  Request details
+                </a>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section className="nps-section nps-band" id="roadshows">
+        <div className="nps-wrap">
+          <div className="nps-eyebrow">04 / Corporate Roadshow</div>
+          <h2>Investor events &amp; premium media campaigns.</h2>
+          <p className="nps-muted nps-subhead">
+            Customized programs for companies seeking deeper storytelling, investor-facing events or
+            large-scale media exposure.
+          </p>
+          <div className="nps-cards">
+            <article className="nps-card">
+              <div className="nps-card-tag">Events</div>
+              <h3>Live Roadshows</h3>
+              <div className="nps-card-price">From $15,000</div>
+              <p>Corporate presentations, event production and investor-focused programming.</p>
+              <div className="nps-card-actions">
+                <a
+                  className="nps-btn nps-btn-small"
+                  href="mailto:info@corporateroadshow.com?subject=Live%20Roadshow%20Inquiry"
+                >
+                  Request proposal
+                </a>
+              </div>
+            </article>
+          </div>
+          <div className="nps-campaign">
+            <div className="nps-card-tag">Custom Media Campaigns</div>
+            <h2>One company story. Multiple channels.</h2>
+            <p>
+              Combine a news release, executive interview, branded video and dashboard advertising
+              into a coordinated visibility campaign.
+            </p>
+            <div className="nps-actions">
+              <a
+                className="nps-btn"
+                href="mailto:info@corporateroadshow.com?subject=Custom%20Media%20Campaign"
+              >
+                Discuss a campaign
+              </a>
+            </div>
+          </div>
+          <p className="nps-notice">
+            Concept preview only. Prices and package details are illustrative and subject to
+            confirmation. Distribution is limited to the channels specified for each service;
+            third-party newswire pickup, readership, investment outcomes and search ranking are not
+            guaranteed. Inquiry links are placeholders to be configured before launch.
+          </p>
+        </div>
+      </section>
+
       <footer className="nps-footer">
         <div className="nps-wrap">
-          NYALTX News Hub · New York Alt Exchange · <Link href="/newshub">Visit News Hub</Link>
+          NYALTX · New York Alt Exchange &nbsp; | &nbsp; Media services powered by Corporate
+          Roadshow
         </div>
       </footer>
 
