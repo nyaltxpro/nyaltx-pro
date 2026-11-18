@@ -4,6 +4,7 @@ import RaceToLibertyCheckout from '@/components/RaceToLibertyCheckout';
 import { use, useState, useEffect } from 'react';
 import { useAccount } from 'wagmi';
 import { RegisteredToken } from '@/types/token';
+import { notFound } from 'next/navigation';
 
 const TIER_PRICES = {
   kayak: 1,
@@ -15,10 +16,14 @@ const TIER_PRICES = {
 export default function RaceToLibertyPage({
   params,
 }: {
-  params: Promise<{ tier: 'kayak' | 'speedboat' | 'helicopter' | 'submarine' }>;
+  params: Promise<{ tier: string }>;
 }) {
   const { tier } = use(params);
-  const amount = TIER_PRICES[tier] || 199;
+  if (!Object.prototype.hasOwnProperty.call(TIER_PRICES, tier)) {
+    notFound();
+  }
+
+  const amount = TIER_PRICES[tier as keyof typeof TIER_PRICES];
   const { address, isConnected } = useAccount();
   const [userTokens, setUserTokens] = useState<RegisteredToken[]>([]);
 
