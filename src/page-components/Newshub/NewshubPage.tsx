@@ -121,6 +121,8 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
   const [rssCopied, setRssCopied] = useState(false);
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterMsg, setNewsletterMsg] = useState('');
+  const [newsletterMsgType, setNewsletterMsgType] = useState<'success' | 'error'>('success');
+  const [newsletterSubmitting, setNewsletterSubmitting] = useState(false);
 
   // ─── Fetch ────────────────────────────────────────────────────────────────
 
@@ -239,18 +241,37 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
 
   const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newsletterEmail || !newsletterEmail.includes('@')) return;
+    if (newsletterSubmitting) return;
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newsletterEmail.trim())) {
+      setNewsletterMsgType('error');
+      setNewsletterMsg('Enter a valid email address.');
+      return;
+    }
+
+    setNewsletterSubmitting(true);
+    setNewsletterMsg('');
     try {
-      await fetch('/api/newsletter', {
+      const response = await fetch('/api/newsletter', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: newsletterEmail }),
+        body: JSON.stringify({ email: newsletterEmail.trim() }),
       });
-      setNewsletterMsg('Subscribed! Check your inbox.');
-      setNewsletterEmail('');
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Could not subscribe. Please try again.');
+      }
+
+      setNewsletterMsgType('success');
+      setNewsletterMsg(result.message || 'Successfully subscribed.');
+      if (result.message !== 'You are already subscribed.') setNewsletterEmail('');
       setTimeout(() => setNewsletterMsg(''), 4000);
-    } catch {
-      setNewsletterMsg('Something went wrong. Please try again.');
+    } catch (error) {
+      setNewsletterMsgType('error');
+      setNewsletterMsg(
+        error instanceof Error ? error.message : 'Something went wrong. Please try again.',
+      );
+    } finally {
+      setNewsletterSubmitting(false);
     }
   };
 
@@ -553,20 +574,34 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
                     type="email"
                     placeholder="you@email.com"
                     value={newsletterEmail}
-                    onChange={e => setNewsletterEmail(e.target.value)}
+                    onChange={e => {
+                      setNewsletterEmail(e.target.value);
+                      setNewsletterMsg('');
+                    }}
                     className="nh-input"
                     aria-label="Newsletter email"
+                    disabled={newsletterSubmitting}
                   />
                   <button
                     type="submit"
                     className="nh-btn nh-btn-pri"
                     style={{ marginTop: 8, width: '100%', justifyContent: 'center' }}
+                    disabled={newsletterSubmitting}
                   >
-                    Subscribe
+                    {newsletterSubmitting ? 'Subscribing…' : 'Subscribe'}
                   </button>
                 </form>
                 {newsletterMsg && (
-                  <div style={{ marginTop: 6, fontSize: 12, color: '#22d3ee' }}>{newsletterMsg}</div>
+                  <div
+                    role={newsletterMsgType === 'error' ? 'alert' : 'status'}
+                    style={{
+                      marginTop: 6,
+                      fontSize: 12,
+                      color: newsletterMsgType === 'error' ? '#fca5a5' : '#22d3ee',
+                    }}
+                  >
+                    {newsletterMsg}
+                  </div>
                 )}
               </div>
 
