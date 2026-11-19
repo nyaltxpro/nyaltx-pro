@@ -320,6 +320,7 @@ export default function NewsPromoCodes() {
       {notice && <Alert variant="success">{notice}</Alert>}
 
       <Filters
+        className="admin-promo-code-filters"
         activeFilters={[
           ...(searchTerm.trim()
             ? [{ id: 'promo-search', label: `Search: ${searchTerm}`, onRemove: () => setSearchTerm('') }]
