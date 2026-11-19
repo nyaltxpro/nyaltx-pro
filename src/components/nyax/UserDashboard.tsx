@@ -13,100 +13,10 @@ import {
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useAccount, useConnect, useDisconnect } from 'wagmi';
-
-// Simple UI Components
-const Card = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
-    <div className={`rounded-lg border bg-card text-card-foreground shadow-sm ${className}`}>{children}</div>
-);
-const CardHeader = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
-    <div className={`flex flex-col space-y-1.5 p-6 ${className}`}>{children}</div>
-);
-const CardTitle = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
-    <h3 className={`text-2xl font-semibold leading-none tracking-tight ${className}`}>{children}</h3>
-);
-const CardDescription = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
-    <p className={`text-sm text-muted-foreground ${className}`}>{children}</p>
-);
-const CardContent = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
-    <div className={`p-6 pt-0 ${className}`}>{children}</div>
-);
-const Button = ({ children, className = '', variant = 'default', onClick, disabled, ...props }: {
-    children: React.ReactNode;
-    className?: string;
-    variant?: 'default' | 'outline';
-    onClick?: () => void;
-    disabled?: boolean;
-    [key: string]: any;
-}) => {
-    const baseClasses = 'inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50';
-    const variantClasses = variant === 'outline'
-        ? 'border border-input bg-background hover:bg-accent hover:text-accent-foreground'
-        : 'bg-primary text-primary-foreground hover:bg-primary/90';
-    return (
-        <button
-            className={`${baseClasses} ${variantClasses} h-10 px-4 py-2 ${className}`}
-            onClick={onClick}
-            disabled={disabled}
-            {...props}
-        >
-            {children}
-        </button>
-    );
-};
-const Badge = ({ children, className = '', variant = 'default' }: {
-    children: React.ReactNode;
-    className?: string;
-    variant?: 'default' | 'outline' | 'secondary';
-}) => {
-    const baseClasses = 'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2';
-    const variantClasses = variant === 'outline'
-        ? 'border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80'
-        : variant === 'secondary'
-            ? 'border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80'
-            : 'border-transparent bg-primary text-primary-foreground hover:bg-primary/80';
-    return <div className={`${baseClasses} ${variantClasses} ${className}`}>{children}</div>;
-};
-const Progress = ({ value, className = '' }: { value: number; className?: string }) => (
-    <div className={`relative h-4 w-full overflow-hidden rounded-full bg-secondary ${className}`}>
-        <div
-            className="h-full w-full flex-1 bg-primary transition-all"
-            style={{ transform: `translateX(-${100 - (value || 0)}%)` }}
-        />
-    </div>
-);
-const Tabs = ({ value, onValueChange, children, className = '' }: {
-    value: string;
-    onValueChange: (value: string) => void;
-    children: React.ReactNode;
-    className?: string;
-}) => (
-    <div className={className}>{children}</div>
-);
-const TabsList = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
-    <div className={`inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground ${className}`}>{children}</div>
-);
-const TabsTrigger = ({ value, children, className = '', onClick }: {
-    value: string;
-    children: React.ReactNode;
-    className?: string;
-    onClick?: () => void;
-}) => (
-    <button
-        onClick={onClick}
-        className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${className}`}
-    >
-        {children}
-    </button>
-);
-const TabsContent = ({ value, children, className = '' }: {
-    value: string;
-    children: React.ReactNode;
-    className?: string;
-}) => (
-    <div className={`mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${className}`}>
-        {children}
-    </div>
-);
+import { Badge } from '@/components/reui/badge';
+import { Button } from '@/components/reui/button';
+import { Card, CardContent, CardHeader } from '@/components/reui/card';
+import { Progress } from '@/components/reui/progress';
 
 interface Transaction {
     id: string;
@@ -187,10 +97,10 @@ export function UserDashboard() {
             <div className="min-h-screen  flex items-center justify-center">
                 <Card className="w-full max-w-md bg-gray-800/50 border-gray-700">
                     <CardHeader className="text-center">
-                        <CardTitle className="text-2xl text-white">Connect Your Wallet</CardTitle>
-                        <CardDescription className="text-gray-300">
+                        <h3 className="text-2xl font-semibold text-white">Connect Your Wallet</h3>
+                        <p className="text-sm text-slate-300">
                             Connect your wallet to access the NYAX Platform
-                        </CardDescription>
+                        </p>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         {connectors.map((connector) => (
@@ -211,7 +121,7 @@ export function UserDashboard() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 p-6">
+        <div className="min-h-screen p-6">
             <div className="max-w-7xl mx-auto space-y-6">
                 {/* Header */}
                 <div className="flex justify-between items-center">
@@ -299,49 +209,49 @@ export function UserDashboard() {
                 </div>
 
                 {/* Main Content Tabs */}
-                <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
-                    <TabsList className="grid w-full grid-cols-4 bg-gray-800/50">
-                        <TabsTrigger
-                            value="overview"
-                            className={`text-white ${selectedTab === 'overview' ? 'bg-gray-700' : ''}`}
+                <div className="space-y-6">
+                    <div className="grid w-full grid-cols-4 rounded-lg border border-white/10 bg-white/5 p-1">
+                        <Button
+                            size="sm"
+                            variant={selectedTab === 'overview' ? 'secondary' : 'ghost'}
                             onClick={() => setSelectedTab('overview')}
                         >
                             Overview
-                        </TabsTrigger>
-                        <TabsTrigger
-                            value="vesting"
-                            className={`text-white ${selectedTab === 'vesting' ? 'bg-gray-700' : ''}`}
+                        </Button>
+                        <Button
+                            size="sm"
+                            variant={selectedTab === 'vesting' ? 'secondary' : 'ghost'}
                             onClick={() => setSelectedTab('vesting')}
                         >
                             Vesting
-                        </TabsTrigger>
-                        <TabsTrigger
-                            value="governance"
-                            className={`text-white ${selectedTab === 'governance' ? 'bg-gray-700' : ''}`}
+                        </Button>
+                        <Button
+                            size="sm"
+                            variant={selectedTab === 'governance' ? 'secondary' : 'ghost'}
                             onClick={() => setSelectedTab('governance')}
                         >
                             Governance
-                        </TabsTrigger>
-                        <TabsTrigger
-                            value="transactions"
-                            className={`text-white ${selectedTab === 'transactions' ? 'bg-gray-700' : ''}`}
+                        </Button>
+                        <Button
+                            size="sm"
+                            variant={selectedTab === 'transactions' ? 'secondary' : 'ghost'}
                             onClick={() => setSelectedTab('transactions')}
                         >
                             Transactions
-                        </TabsTrigger>
-                    </TabsList>
+                        </Button>
+                    </div>
 
                     {/* Overview Tab */}
                     {selectedTab === 'overview' && (
-                        <TabsContent value="overview" className="space-y-6">
+                        <div className="space-y-6">
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                 {/* Token Actions */}
                                 <Card className="bg-gray-800/50 border-gray-700">
                                     <CardHeader>
-                                        <CardTitle className="text-white">Quick Actions</CardTitle>
-                                        <CardDescription className="text-gray-300">
+                                        <h3 className="text-lg font-semibold text-white">Quick Actions</h3>
+                                        <p className="text-sm text-slate-300">
                                             Manage your NYAX tokens
-                                        </CardDescription>
+                                        </p>
                                     </CardHeader>
                                     <CardContent className="space-y-4">
                                         <Button className="w-full bg-blue-600 hover:bg-blue-700">
@@ -362,10 +272,10 @@ export function UserDashboard() {
                                 {/* Portfolio Summary */}
                                 <Card className="bg-gray-800/50 border-gray-700">
                                     <CardHeader>
-                                        <CardTitle className="text-white">Portfolio Summary</CardTitle>
-                                        <CardDescription className="text-gray-300">
+                                        <h3 className="text-lg font-semibold text-white">Portfolio Summary</h3>
+                                        <p className="text-sm text-slate-300">
                                             Your NYAX token distribution
-                                        </CardDescription>
+                                        </p>
                                     </CardHeader>
                                     <CardContent className="space-y-4">
                                         <div className="space-y-2">
@@ -392,18 +302,18 @@ export function UserDashboard() {
                                     </CardContent>
                                 </Card>
                             </div>
-                        </TabsContent>
+                        </div>
                     )}
 
                     {/* Vesting Tab */}
                     {selectedTab === 'vesting' && (
-                        <TabsContent value="vesting" className="space-y-6">
+                        <div className="space-y-6">
                             <Card className="bg-gray-800/50 border-gray-700">
                                 <CardHeader>
-                                    <CardTitle className="text-white">Vesting Schedules</CardTitle>
-                                    <CardDescription className="text-gray-300">
+                                    <h3 className="text-lg font-semibold text-white">Vesting Schedules</h3>
+                                    <p className="text-sm text-slate-300">
                                         Track your token vesting progress
-                                    </CardDescription>
+                                    </p>
                                 </CardHeader>
                                 <CardContent>
                                     <div className="space-y-4">
@@ -451,19 +361,19 @@ export function UserDashboard() {
                                     </div>
                                 </CardContent>
                             </Card>
-                        </TabsContent>
+                        </div>
                     )}
 
                     {/* Governance Tab */}
                     {selectedTab === 'governance' && (
-                        <TabsContent value="governance" className="space-y-6">
+                        <div className="space-y-6">
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                 <Card className="bg-gray-800/50 border-gray-700">
                                     <CardHeader>
-                                        <CardTitle className="text-white">Voting Power</CardTitle>
-                                        <CardDescription className="text-gray-300">
+                                        <h3 className="text-lg font-semibold text-white">Voting Power</h3>
+                                        <p className="text-sm text-slate-300">
                                             Your governance participation
-                                        </CardDescription>
+                                        </p>
                                     </CardHeader>
                                     <CardContent className="space-y-4">
                                         <div className="text-center">
@@ -479,10 +389,10 @@ export function UserDashboard() {
 
                                 <Card className="bg-gray-800/50 border-gray-700">
                                     <CardHeader>
-                                        <CardTitle className="text-white">Active Proposals</CardTitle>
-                                        <CardDescription className="text-gray-300">
+                                        <h3 className="text-lg font-semibold text-white">Active Proposals</h3>
+                                        <p className="text-sm text-slate-300">
                                             Participate in governance
-                                        </CardDescription>
+                                        </p>
                                     </CardHeader>
                                     <CardContent>
                                         <div className="text-center py-8">
@@ -493,18 +403,18 @@ export function UserDashboard() {
                                     </CardContent>
                                 </Card>
                             </div>
-                        </TabsContent>
+                        </div>
                     )}
 
                     {/* Transactions Tab */}
                     {selectedTab === 'transactions' && (
-                        <TabsContent value="transactions" className="space-y-6">
+                        <div className="space-y-6">
                             <Card className="bg-gray-800/50 border-gray-700">
                                 <CardHeader>
-                                    <CardTitle className="text-white">Transaction History</CardTitle>
-                                    <CardDescription className="text-gray-300">
+                                    <h3 className="text-lg font-semibold text-white">Transaction History</h3>
+                                    <p className="text-sm text-slate-300">
                                         Your recent NYAX transactions
-                                    </CardDescription>
+                                    </p>
                                 </CardHeader>
                                 <CardContent>
                                     <div className="space-y-4">
@@ -537,9 +447,9 @@ export function UserDashboard() {
                                     </div>
                                 </CardContent>
                             </Card>
-                        </TabsContent>
+                        </div>
                     )}
-                </Tabs>
+                </div>
             </div>
         </div>
     );
