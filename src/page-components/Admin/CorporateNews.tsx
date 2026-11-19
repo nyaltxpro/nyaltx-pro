@@ -7,11 +7,16 @@ import type { QuillOptions } from 'quill';
 import 'quill/dist/quill.snow.css';
 import React, { useEffect, useRef, useState } from 'react';
 import { Drawer } from '@/components/reui/drawer';
-import { Checkbox } from '@/components/reui/checkbox';
-import { FaClock, FaEdit, FaEye, FaNewspaper, FaSpinner, FaTags, FaTrash, FaUpload, FaUser } from 'react-icons/fa';
-import { Newspaper, Plus, X } from 'lucide-react';
-import { Badge } from '@/components/reui/badge';
-import { Card } from '@/components/reui/card';
+import { Button } from '@/components/reui/button';
+import { Combobox } from '@/components/reui/combobox';
+import { Field } from '@/components/reui/field';
+import { FileUpload } from '@/components/reui/file-upload';
+import { Filters } from '@/components/reui/filters';
+import { Spinner } from '@/components/reui/spinner';
+import { Eye, Grid2X2, LayoutList, Newspaper, Pencil, Plus, Trash2, Upload, X } from 'lucide-react';
+import { Item } from '@/components/reui/item';
+import { Switch } from '@/components/reui/switch';
+import { TimePicker } from '@/components/reui/time-picker';
 import { toReliableIpfsUrl } from '@/utils/ipfsUpload';
 
 const AdminCorporateNewsClient = dynamic(() => Promise.resolve(AdminCorporateNewsComponent), {
@@ -111,6 +116,11 @@ function AdminCorporateNewsComponent() {
     const [news, setNews] = useState<NewsArticle[]>([]);
     const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'published' | 'draft'>('all');
     const [submissionFilter, setSubmissionFilter] = useState<'all' | 'paid' | 'corporate'>('all');
+    const [newsSearch, setNewsSearch] = useState('');
+    const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
+    const [currentPage, setCurrentPage] = useState(1);
+    const pageSize = 10;
+    const [publishTime, setPublishTime] = useState('09:00');
     const [approvingId, setApprovingId] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -226,6 +236,10 @@ function AdminCorporateNewsComponent() {
         loadNews();
     }, []);
 
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [newsSearch, statusFilter, submissionFilter]);
+
     const loadNews = async () => {
         try {
             setLoading(true);
@@ -328,11 +342,21 @@ function AdminCorporateNewsComponent() {
     const handleSaveNews = async () => {
         try {
             const tagsArray = newsForm.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+            const [publishHours = '9', publishMinutes = '0'] = publishTime.split(':');
+            const publishedAt = newsForm.status === 'published'
+                ? new Date(
+                    new Date().getFullYear(),
+                    new Date().getMonth(),
+                    new Date().getDate(),
+                    Number(publishHours),
+                    Number(publishMinutes)
+                ).toISOString()
+                : null;
 
             const newsData = {
                 ...newsForm,
                 tags: tagsArray,
-                publishedAt: newsForm.status === 'published' ? new Date().toISOString() : null
+                publishedAt
             };
 
             console.log('Saving news article:', { editingNews: !!editingNews, newsData });
@@ -392,8 +416,8 @@ function AdminCorporateNewsComponent() {
     };
 
     // IPFS upload function
-    const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
+    const handleFileSelect = (files: File[]) => {
+        const file = files[0];
         if (file) {
             // Validate file type
             const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
@@ -514,18 +538,31 @@ function AdminCorporateNewsComponent() {
         if (submissionFilter === 'corporate') return !isPaidNewsSubmission(article);
         return true;
     });
-    const visibleNews = newsByType.filter(
-        article => statusFilter === 'all' || article.status === statusFilter
-    );
+    const visibleNews = newsByType.filter(article => {
+        if (statusFilter !== 'all' && article.status !== statusFilter) return false;
+        const query = newsSearch.trim().toLowerCase();
+        if (!query) return true;
+        return [article.title, article.author, article.excerpt, ...(article.tags ?? [])]
+            .join(' ')
+            .toLowerCase()
+            .includes(query);
+    });
+    const totalPages = Math.max(1, Math.ceil(visibleNews.length / pageSize));
+    const pagedNews = visibleNews.slice((currentPage - 1) * pageSize, currentPage * pageSize);
     const paidNewsCount = news.filter(isPaidNewsSubmission).length;
 
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-semibold text-white" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                        News Management
-                    </h1>
+                    <div className="flex items-center gap-3">
+                        <div>
+                            <h1 className="text-2xl font-semibold text-white" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                News Management
+                            </h1>
+                            <p className="mt-1 text-sm text-gray-400">Review submissions and publish corporate updates.</p>
+                        </div>
+                    </div>
                     <p className="text-gray-400 text-sm mt-1" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                         Review paid submissions and manage corporate announcements separately
                     </p>
@@ -534,14 +571,14 @@ function AdminCorporateNewsComponent() {
                     <Link href="/admin" className="text-sm text-gray-300 hover:text-white transition-colors" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                         Back to Dashboard
                     </Link>
-                    <button
+                    <Button
+                        variant="outline"
                         onClick={handleCreateNews}
-                        className="inline-flex items-center gap-2 rounded-lg border border-white/15 bg-transparent px-4 py-2 text-sm font-medium text-white/80 transition-colors hover:border-cyan-400/50 hover:text-cyan-200"
                         style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                     >
                         <Plus className="h-4 w-4" aria-hidden="true" />
                         Create News Article
-                    </button>
+                    </Button>
                 </div>
             </div>
 
@@ -574,17 +611,14 @@ function AdminCorporateNewsComponent() {
                     ['paid', 'Paid Submissions', paidNewsCount],
                     ['corporate', 'Corporate News', news.length - paidNewsCount],
                 ] as const).map(([filter, label, count]) => (
-                    <button
+                    <Button
                         key={filter}
+                        size="sm"
+                        variant={submissionFilter === filter ? 'secondary' : 'ghost'}
                         onClick={() => setSubmissionFilter(filter)}
-                        className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
-                            submissionFilter === filter
-                                ? 'bg-cyan-500 text-black'
-                                : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-                        }`}
                     >
                         {label} ({count})
-                    </button>
+                    </Button>
                 ))}
             </div>
 
@@ -598,17 +632,18 @@ function AdminCorporateNewsComponent() {
                 <div className="admin-panel-form flex h-full max-h-screen w-full flex-col overflow-y-auto border-l border-white/10 bg-[#0d0d0d] p-6">
                     <div className="mb-5 flex items-center justify-between gap-4 border-b border-white/10 pb-4">
                         <h2 className="font-semibold text-white flex items-center gap-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                            <Newspaper className="h-5 w-5 text-cyan-300" aria-hidden="true" />
+                            <Newspaper className="h-5 w-5 text-slate-300" aria-hidden="true" />
                             {editingNews ? 'Edit News Article' : 'Create News Article'}
                         </h2>
-                        <button
+                        <Button
+                            variant="ghost"
+                            size="icon"
                             type="button"
                             onClick={handleCancel}
                             aria-label="Close news editor"
-                            className="text-gray-400 transition-colors hover:text-white"
                         >
                             <X size={20} aria-hidden="true" />
-                        </button>
+                        </Button>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -682,7 +717,7 @@ function AdminCorporateNewsComponent() {
                                 {isQuillLoading && (
                                     <div className="absolute inset-0 z-10 flex items-center justify-center bg-gray-900/60 backdrop-blur-sm">
                                         <div className="text-center">
-                                            <FaSpinner className="w-8 h-8 text-cyan-400 animate-spin mx-auto mb-4" />
+                                            <Spinner className="w-8 h-8 text-cyan-400 mx-auto mb-4" />
                                             <p className="text-gray-300">Loading rich text editor...</p>
                                         </div>
                                     </div>
@@ -711,45 +746,40 @@ function AdminCorporateNewsComponent() {
                                 </div>
 
                                 <div className="flex items-center gap-3">
-                                    <input
+                                    <FileUpload
                                         id="ipfs-file-input"
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={handleFileSelect}
-                                        className="hidden"
+                                        accept="image/jpeg,image/png,image/gif,image/webp"
+                                        onFilesSelected={handleFileSelect}
+                                        disabled={isUploadingToIPFS}
+                                        label="Choose featured image"
+                                        description="JPEG, PNG, GIF or WebP, up to 10 MB."
+                                        className="flex-1"
                                     />
-                                    <label
-                                        htmlFor="ipfs-file-input"
-                                        className="flex items-center gap-2 px-3 py-2 bg-gray-600/50 hover:bg-gray-600/70 text-gray-300 rounded-lg cursor-pointer transition-all duration-200 text-sm"
-                                    >
-                                        <FaUpload className="w-4 h-4" />
-                                        Choose File
-                                    </label>
-
                                     {selectedFile && (
                                         <span className="text-sm text-gray-400 flex-1 truncate">
                                             {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
                                         </span>
                                     )}
 
-                                    <button
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
                                         type="button"
                                         onClick={uploadToIPFS}
                                         disabled={!selectedFile || isUploadingToIPFS}
-                                        className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed text-white rounded-lg transition-all duration-200 text-sm font-medium"
                                     >
                                         {isUploadingToIPFS ? (
                                             <>
-                                                <FaSpinner className="w-4 h-4 animate-spin" />
+                                                <Spinner className="w-4 h-4" />
                                                 Uploading...
                                             </>
                                         ) : (
                                             <>
-                                                <FaUpload className="w-4 h-4" />
+                                                <Upload className="w-4 h-4" />
                                                 Upload to IPFS
                                             </>
                                         )}
-                                    </button>
+                                    </Button>
                                 </div>
                             </div>
 
@@ -765,18 +795,19 @@ function AdminCorporateNewsComponent() {
                                         placeholder="https://example.com/image.jpg or IPFS URL"
                                     />
                                     {newsForm.featuredImage.includes('gateway.pinata.cloud') && (
-                                        <button
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
                                             type="button"
                                             onClick={() => {
                                                 const fixedUrl = toReliableIpfsUrl(newsForm.featuredImage);
                                                 setNewsForm(prev => ({ ...prev, featuredImage: fixedUrl }));
                                                 setSuccess('URL converted to working IPFS gateway!');
                                             }}
-                                            className="px-3 py-2 bg-yellow-600/20 hover:bg-yellow-600/30 text-yellow-300 rounded-lg border border-yellow-600/30 transition-all duration-200 text-sm font-medium whitespace-nowrap"
                                             title="Convert Pinata gateway URL to working IPFS.io gateway"
                                         >
                                             Fix URL
-                                        </button>
+                                        </Button>
                                     )}
                                 </div>
                             </div>
@@ -800,24 +831,38 @@ function AdminCorporateNewsComponent() {
                             )}
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">Status</label>
-                            <select
-                                value={newsForm.status}
-                                onChange={(e) => setNewsForm(prev => ({ ...prev, status: e.target.value as 'published' | 'draft' | 'pending' }))}
-                                className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600/50 rounded-lg text-white focus:outline-none focus:border-blue-500/50"
-                            >
-                                <option value="draft">Draft</option>
-                                <option value="published">Published</option>
-                                <option value="pending">Pending Review</option>
-                            </select>
-                            <label className="flex items-center gap-2 mt-3 cursor-pointer">
-                                <Checkbox
-                                    checked={newsForm.featuredInBanner}
-                                    onChange={(e) => setNewsForm(prev => ({ ...prev, featuredInBanner: e.target.checked }))}
-                                    className="rounded border-gray-600 text-cyan-500 focus:ring-cyan-500"
+                            <Field id="news-status" label="Status">
+                                <Combobox
+                                    id="news-status"
+                                    value={newsForm.status}
+                                    options={[
+                                        { value: 'draft', label: 'Draft' },
+                                        { value: 'published', label: 'Published' },
+                                        { value: 'pending', label: 'Pending Review' },
+                                    ]}
+                                    onValueChange={(value) => setNewsForm(prev => ({ ...prev, status: value as 'published' | 'draft' | 'pending' }))}
+                                    placeholder="Select status"
+                                    className="w-full rounded-lg border border-gray-600/50 bg-gray-700/50 px-3 py-2 text-white focus:border-blue-500/50"
                                 />
-                                <span className="text-xs font-medium text-yellow-300">★ Feature in Top Banner Slider</span>
-                            </label>
+                            </Field>
+                            {newsForm.status === 'published' && (
+                                <Field id="publish-time" label="Publish time" className="mt-3">
+                                    <TimePicker
+                                        id="publish-time"
+                                        value={publishTime}
+                                        onChange={(event) => setPublishTime(event.target.value)}
+                                        aria-label="Publish time"
+                                    />
+                                </Field>
+                            )}
+                            <div className="mt-3 flex items-center gap-3">
+                                <Switch
+                                    checked={newsForm.featuredInBanner}
+                                    onCheckedChange={(checked) => setNewsForm(prev => ({ ...prev, featuredInBanner: checked }))}
+                                    aria-label="Feature in top banner slider"
+                                />
+                                <span className="text-xs font-medium text-yellow-300">Feature in Top Banner Slider</span>
+                            </div>
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-300 mb-2">Tags</label>
@@ -832,19 +877,19 @@ function AdminCorporateNewsComponent() {
                     </div>
 
                     <div className="flex gap-3 border-t border-white/10 pt-4">
-                        <button
+                        <Button
+                            variant="outline"
                             onClick={handleCancel}
-                            className="rounded-lg border border-white/15 bg-transparent px-4 py-2 font-medium text-gray-300 transition-colors hover:text-white"
                         >
                             Cancel
-                        </button>
-                        <button
+                        </Button>
+                        <Button
+                            variant="default"
                             onClick={handleSaveNews}
                             disabled={!newsForm.title || !newsForm.content}
-                            className="rounded-lg border border-cyan-400/30 bg-transparent px-4 py-2 font-medium text-cyan-100 transition-colors hover:border-cyan-300/60 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                             {editingNews ? 'Update Article' : 'Create Article'}
-                        </button>
+                        </Button>
                     </div>
                 </div>
             </Drawer>
@@ -853,7 +898,7 @@ function AdminCorporateNewsComponent() {
             <div className="admin-panel-card overflow-hidden">
                 <div className="p-6 border-b border-gray-700/20 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <h3 className="font-semibold text-white flex items-center gap-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                        <FaNewspaper className="w-5 h-5 text-cyan-400" />
+                        <Newspaper className="w-5 h-5 text-slate-300" />
                         {submissionFilter === 'paid'
                             ? 'Paid News Submissions'
                             : submissionFilter === 'corporate'
@@ -868,63 +913,79 @@ function AdminCorporateNewsComponent() {
 
                     {/* Status Filter Tabs */}
                     <div className="flex items-center gap-2 flex-wrap">
-                        <button
+                        <Button
+                            size="sm"
+                            variant="ghost"
                             onClick={() => setStatusFilter('all')}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                                statusFilter === 'all'
-                                    ? 'bg-cyan-500 text-black font-semibold shadow-md'
-                                    : 'bg-gray-700/50 hover:bg-gray-700/80 text-gray-300'
-                            }`}
                         >
                             All ({newsByType.length})
-                        </button>
-                        <button
+                        </Button>
+                        <Button
+                            size="sm"
+                            variant={statusFilter === 'pending' ? 'secondary' : 'ghost'}
                             onClick={() => setStatusFilter('pending')}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
-                                statusFilter === 'pending'
-                                    ? 'bg-amber-500 text-black font-bold shadow-md'
-                                    : newsByType.filter(n => n.status === 'pending').length > 0
-                                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse'
-                                    : 'bg-gray-700/50 hover:bg-gray-700/80 text-gray-300'
-                            }`}
                         >
                             <span>Pending Review</span>
-                            <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-black/30 font-bold">
+                            <span className="rounded-full px-1.5 text-[10px]">
                                 {newsByType.filter(n => n.status === 'pending').length}
                             </span>
-                        </button>
-                        <button
+                        </Button>
+                        <Button
+                            size="sm"
+                            variant={statusFilter === 'published' ? 'secondary' : 'ghost'}
                             onClick={() => setStatusFilter('published')}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                                statusFilter === 'published'
-                                    ? 'bg-green-500 text-black font-semibold shadow-md'
-                                    : 'bg-gray-700/50 hover:bg-gray-700/80 text-gray-300'
-                            }`}
                         >
                             Published ({newsByType.filter(n => n.status === 'published').length})
-                        </button>
-                        <button
+                        </Button>
+                        <Button
+                            size="sm"
+                            variant={statusFilter === 'draft' ? 'secondary' : 'ghost'}
                             onClick={() => setStatusFilter('draft')}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                                statusFilter === 'draft'
-                                    ? 'bg-purple-500 text-white font-semibold shadow-md'
-                                    : 'bg-gray-700/50 hover:bg-gray-700/80 text-gray-300'
-                            }`}
                         >
                             Drafts ({newsByType.filter(n => n.status === 'draft').length})
-                        </button>
+                        </Button>
                     </div>
                 </div>
 
+                <Filters className="border-b border-white/10 px-6 py-3">
+                    <input
+                        type="search"
+                        value={newsSearch}
+                        onChange={(event) => setNewsSearch(event.target.value)}
+                        placeholder="Search articles"
+                        className="h-9 w-48 rounded-lg border border-white/10 bg-black/30 px-3 text-sm text-white placeholder:text-white/40 focus:border-cyan-500/60 focus:outline-none"
+                    />
+                    <div className="ml-auto flex items-center gap-1 rounded-lg border border-white/10 p-1">
+                        <Button
+                            size="icon"
+                            variant={viewMode === 'table' ? 'secondary' : 'ghost'}
+                            type="button"
+                            onClick={() => setViewMode('table')}
+                            aria-label="Table view"
+                        >
+                            <LayoutList className="size-4" aria-hidden="true" />
+                        </Button>
+                        <Button
+                            size="icon"
+                            variant={viewMode === 'cards' ? 'secondary' : 'ghost'}
+                            type="button"
+                            onClick={() => setViewMode('cards')}
+                            aria-label="Card view"
+                        >
+                            <Grid2X2 className="size-4" aria-hidden="true" />
+                        </Button>
+                    </div>
+                </Filters>
+
                 <div className="p-6">
                     {loading ? (
-                        <div className="text-center py-12">
-                            <FaNewspaper className="w-12 h-12 text-gray-400 animate-pulse mx-auto mb-4" />
-                            <p className="text-gray-400">Loading news articles...</p>
+                        <div className="flex items-center gap-3 rounded-lg border border-white/10 bg-white/5 px-4 py-6 text-white/70">
+                            <Spinner className="h-4 w-4" />
+                            Loading news articles...
                         </div>
                     ) : visibleNews.length === 0 ? (
                         <div className="text-center py-12">
-                            <FaNewspaper className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                            <Newspaper className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                             <p className="text-gray-400 font-medium mb-2">No news articles found in this filter</p>
                             <p className="text-gray-500 text-sm">
                                 {statusFilter === 'pending'
@@ -937,187 +998,229 @@ function AdminCorporateNewsComponent() {
                             </p>
                         </div>
                     ) : (
-                        <div className="space-y-4">
-                            {visibleNews.map(article => (
-                                <Card key={article._id} className={`p-5 transition-all duration-200 ${
-                                    article.status === 'pending'
-                                        ? 'border-amber-500/30 hover:border-amber-400/50'
-                                        : 'hover:border-white/20'
-                                }`}>
-                                    <div className="flex items-start justify-between gap-4">
-                                        <div className="flex-1">
-                                            <div className="flex items-center gap-2 mb-2 flex-wrap">
-                                                <h4 className="font-semibold text-white text-lg">{article.title}</h4>
-                                                <Badge
-                                                    size="sm"
-                                                    radius="full"
-                                                    variant={
-                                                    article.status === 'published'
-                                                        ? 'success-light'
-                                                        : article.status === 'pending'
-                                                        ? 'warning-light'
-                                                        : 'warning-light'
-                                                    }
-                                                >
-                                                    {article.status === 'pending' ? '⏳ Pending Review' : article.status}
-                                                </Badge>
-                                                {article.type === 'pr' && (
-                                                    <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-purple-500/20 text-purple-300 border border-purple-500/30">
-                                                        Press Release
-                                                    </span>
-                                                )}
-                                                {isPaidNewsSubmission(article) && (
-                                                    <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-300 border border-blue-500/30">
-                                                        Paid Submission
-                                                    </span>
-                                                )}
-                                                {article.featuredInBanner && (
-                                                    <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 flex items-center gap-1">
-                                                        ★ In Top Banner
-                                                    </span>
-                                                )}
-                                            </Card>
-
-                                            <p className="text-gray-300 text-sm mb-3 line-clamp-2">{article.excerpt}</p>
-
-                                            <div className="flex items-center gap-4 text-xs text-gray-400 flex-wrap mb-3">
-                                                <div className="flex items-center gap-1">
-                                                    <FaUser className="w-3 h-3 text-cyan-400" />
-                                                    {article.author}
-                                                </div>
-                                                <div className="flex items-center gap-1">
-                                                    <FaClock className="w-3 h-3 text-cyan-400" />
-                                                    {formatDate(article.publishedAt || article.createdAt)}
-                                                </div>
-                                                <div className="flex items-center gap-1">
-                                                    <FaEye className="w-3 h-3 text-cyan-400" />
-                                                    {article.views || 0} views
-                                                </div>
-                                                {article.tags && article.tags.length > 0 && (
-                                                    <div className="flex items-center gap-1">
-                                                        <FaTags className="w-3 h-3 text-cyan-400" />
-                                                        {article.tags.slice(0, 3).join(', ')}
-                                                        {article.tags.length > 3 && '...'}
-                                                    </div>
-                                                )}
+                        viewMode === 'cards' ? (
+                            <div className="grid gap-4 lg:grid-cols-2">
+                                {pagedNews.map(article => (
+                                    <Item
+                                        key={article._id}
+                                        leading={
+                                            <Newspaper className="h-5 w-5 text-slate-300" aria-hidden="true" />
+                                        }
+                                        trailing={
+                                            <Switch
+                                                checked={Boolean(article.featuredInBanner)}
+                                                onCheckedChange={() => handleToggleBanner(article)}
+                                                aria-label={`${article.featuredInBanner ? 'Unpin' : 'Pin'} ${article.title}`}
+                                            />
+                                        }
+                                    >
+                                        <div className="flex items-start justify-between gap-3">
+                                            <div className="min-w-0">
+                                                <p className="truncate font-semibold text-white">{article.title}</p>
+                                                <p className="mt-1 line-clamp-2 text-xs text-white/50">{article.excerpt || `By ${article.author}`}</p>
                                             </div>
-
-                                            {/* Payment & Submission Details Banner */}
-                                            {(article.paymentMethod || article.amount || article.plan || article.email) && (
-                                                <div className="p-3 bg-gray-900/80 border border-gray-700/60 rounded-lg flex flex-wrap items-center justify-between gap-3 text-xs mb-2">
-                                                    <div className="flex flex-wrap items-center gap-2.5">
-                                                        <span className="text-gray-400 font-medium">Payment:</span>
-                                                        <span className="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30 font-bold uppercase">
-                                                            {article.paymentSource === 'paypal_crypto'
-                                                                ? 'PayPal Crypto'
-                                                                : article.paymentMethod === 'paypal'
-                                                                    ? '🅿️ PayPal'
-                                                                    : article.paymentMethod || 'Paid'}
-                                                        </span>
-                                                        {article.amount && (
-                                                            <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold">
-                                                                ${article.amount} USD
+                                        </div>
+                                        <div className="mt-3 flex flex-wrap items-center gap-2">
+                                            <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${
+                                                article.status === 'published'
+                                                    ? 'bg-green-500/20 text-green-200'
+                                                    : article.status === 'pending'
+                                                        ? 'bg-amber-500/20 text-amber-200'
+                                                        : 'bg-purple-500/20 text-purple-200'
+                                            }`}>
+                                                {article.status === 'pending' ? 'Pending review' : article.status}
+                                            </span>
+                                            {isPaidNewsSubmission(article) && (
+                                                <span className="rounded-full border border-blue-500/30 bg-blue-500/10 px-2.5 py-1 text-xs text-blue-200">
+                                                    Paid submission
+                                                </span>
+                                            )}
+                                            {article.featuredInBanner && (
+                                                <span className="rounded-full border border-cyan-500/30 bg-cyan-500/10 px-2.5 py-1 text-xs text-cyan-200">
+                                                    Top banner
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div className="mt-3 flex items-center justify-between gap-3 border-t border-white/10 pt-3 text-xs text-white/50">
+                                            <span>{formatDate(article.publishedAt || article.createdAt)}</span>
+                                            <div className="flex gap-2">
+                                                {article.status === 'pending' && (
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        type="button"
+                                                        onClick={() => handleApproveNews(article)}
+                                                        disabled={approvingId === article._id}
+                                                    >
+                                                        {approvingId === article._id ? 'Publishing...' : 'Approve'}
+                                                    </Button>
+                                                )}
+                                                <Button size="icon" variant="ghost" type="button" onClick={() => handleEditNews(article)} aria-label={`Edit ${article.title}`}>
+                                                    <Pencil className="h-3.5 w-3.5" />
+                                                </Button>
+                                                <Button size="icon" variant="destructive" type="button" onClick={() => handleDeleteNews(article._id)} aria-label={`Delete ${article.title}`}>
+                                                    <Trash2 className="h-3.5 w-3.5" />
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </Item>
+                                ))}
+                            </div>
+                        ) : (
+                        <div className="overflow-x-auto rounded-lg border border-white/10">
+                            <table className="w-full min-w-[900px] text-left text-sm">
+                                <thead className="border-b border-white/10 bg-white/[0.03] text-xs uppercase tracking-wider text-white/50">
+                                    <tr>
+                                        <th className="px-4 py-3 font-medium">Article</th>
+                                        <th className="px-4 py-3 font-medium">Status</th>
+                                        <th className="px-4 py-3 font-medium">Submission</th>
+                                        <th className="px-4 py-3 font-medium">Published</th>
+                                        <th className="px-4 py-3 text-right font-medium">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-white/10">
+                                    {pagedNews.map(article => (
+                                        <tr key={article._id} className="transition hover:bg-white/[0.025]">
+                                            <td className="max-w-md px-4 py-4">
+                                                <p className="font-semibold text-white">{article.title}</p>
+                                                <p className="mt-1 line-clamp-1 text-xs text-white/50">
+                                                    {article.excerpt || `By ${article.author}`}
+                                                </p>
+                                                {article.featuredInBanner && (
+                                                    <span className="mt-2 inline-flex rounded-full border border-cyan-500/30 bg-cyan-500/10 px-2 py-0.5 text-[11px] text-cyan-200">
+                                                        In top banner
+                                                    </span>
+                                                )}
+                                            </td>
+                                            <td className="px-4 py-4">
+                                                <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${
+                                                    article.status === 'published'
+                                                        ? 'bg-green-500/20 text-green-200'
+                                                        : article.status === 'pending'
+                                                            ? 'bg-amber-500/20 text-amber-200'
+                                                            : 'bg-purple-500/20 text-purple-200'
+                                                }`}>
+                                                    {article.status === 'pending' ? 'Pending review' : article.status}
+                                                </span>
+                                            </td>
+                                            <td className="px-4 py-4">
+                                                <div className="flex flex-col gap-1 text-xs text-white/60">
+                                                    {isPaidNewsSubmission(article) ? (
+                                                        <>
+                                                            <span className="text-blue-200">
+                                                                {article.paymentSource === 'paypal_crypto'
+                                                                    ? 'PayPal Crypto'
+                                                                    : article.paymentMethod === 'paypal'
+                                                                        ? 'PayPal'
+                                                                        : 'Paid submission'}
                                                             </span>
-                                                        )}
-                                                        {article.plan && (
-                                                            <span className="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-medium">
-                                                                Plan: {article.planName || article.plan.toUpperCase()}
-                                                            </span>
-                                                        )}
-                                                        {article.email && (
-                                                            <span className="text-gray-300">
-                                                                ✉ {article.email}
-                                                            </span>
-                                                        )}
-                                                        {(article.paymentId || article.txHash) && (
-                                                            <span className="text-gray-400 font-mono">
-                                                                ID: {article.txHash ? (
-                                                                    <a
-                                                                        href={article.txHash.length > 50 && !article.txHash.startsWith('0x') ? `https://solscan.io/tx/${article.txHash}` : `https://etherscan.io/tx/${article.txHash}`}
-                                                                        target="_blank"
-                                                                        rel="noreferrer"
-                                                                        className="text-cyan-400 underline hover:text-cyan-300"
-                                                                    >
-                                                                        {article.txHash.slice(0, 10)}... ↗
-                                                                    </a>
-                                                                ) : (
-                                                                    article.paymentId
-                                                                )}
-                                                            </span>
-                                                        )}
-                                                    </div>
-
-                                                    {article.status === 'pending' && (
-                                                        <button
-                                                            onClick={() => handleApproveNews(article)}
-                                                            disabled={approvingId === article._id}
-                                                            className="px-3.5 py-1.5 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 disabled:opacity-50 text-white font-bold rounded-lg shadow-md flex items-center gap-1.5 transition-all"
-                                                        >
-                                                            {approvingId === article._id ? (
-                                                                <>
-                                                                    <FaSpinner className="w-3.5 h-3.5 animate-spin" />
-                                                                    Publishing...
-                                                                </>
-                                                            ) : (
-                                                                <>✓ Approve & Publish Live</>
-                                                            )}
-                                                        </button>
+                                                            {article.amount ? <span>${article.amount} USD</span> : null}
+                                                            {article.email ? <span className="max-w-48 truncate">{article.email}</span> : null}
+                                                        </>
+                                                    ) : (
+                                                        <span>{article.type === 'pr' ? 'Press release' : 'Corporate news'}</span>
                                                     )}
                                                 </div>
-                                            )}
-                                        </div>
-
-                                        <div className="flex flex-col sm:flex-row gap-2 ml-2">
-                                            {article.status === 'pending' && (
-                                                <button
-                                                    onClick={() => handleApproveNews(article)}
-                                                    disabled={approvingId === article._id}
-                                                    className="px-3 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg transition-all duration-200 flex items-center gap-1 shadow-sm whitespace-nowrap"
-                                                    title="Approve and make live on NYALTX News Hub"
-                                                >
-                                                    ✓ Approve
-                                                </button>
-                                            )}
-                                            <button
-                                                onClick={() => handleToggleBanner(article)}
-                                                className={`p-2 rounded-lg transition-all duration-200 border text-xs font-bold whitespace-nowrap ${
-                                                    article.featuredInBanner
-                                                        ? 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border-amber-500/30'
-                                                        : 'bg-gray-700/50 hover:bg-gray-700/70 text-gray-400 border-gray-600/30'
-                                                }`}
-                                                title={article.featuredInBanner ? "Remove from top banner slider" : "Add to top banner slider"}
-                                            >
-                                                ★ {article.featuredInBanner ? 'In Banner' : 'Pin to Banner'}
-                                            </button>
-                                            {article.status === 'published' && (
-                                                <button
-                                                    onClick={() => window.open(`/news/${article.slug}`, '_blank')}
-                                                    className="p-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/30 rounded-lg transition-all duration-200"
-                                                    title="View live article"
-                                                >
-                                                    <FaEye className="w-4 h-4" />
-                                                </button>
-                                            )}
-                                            <button
-                                                onClick={() => handleEditNews(article)}
-                                                className="inline-flex items-center gap-1.5 px-2.5 py-2 bg-green-500/20 hover:bg-green-500/30 text-green-300 border border-green-500/30 rounded-lg transition-all duration-200 text-xs font-medium"
-                                                title="Edit article"
-                                                aria-label={`Edit ${article.title}`}
-                                            >
-                                                <FaEdit className="w-4 h-4" />
-                                                Edit
-                                            </button>
-                                            <button
-                                                onClick={() => handleDeleteNews(article._id)}
-                                                className="p-2 bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30 rounded-lg transition-all duration-200"
-                                                title="Delete article"
-                                            >
-                                                <FaTrash className="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
+                                            </td>
+                                            <td className="whitespace-nowrap px-4 py-4 text-white/60">
+                                                {formatDate(article.publishedAt || article.createdAt)}
+                                            </td>
+                                            <td className="px-4 py-4">
+                                                <div className="flex justify-end gap-2">
+                                                    {article.status === 'pending' && (
+                                                        <Button
+                                                            size="sm"
+                                                            variant="outline"
+                                                            onClick={() => handleApproveNews(article)}
+                                                            disabled={approvingId === article._id}
+                                                        >
+                                                            {approvingId === article._id ? <><Spinner className="h-3.5 w-3.5" /> Publishing</> : 'Approve'}
+                                                        </Button>
+                                                    )}
+                                                    <Button
+                                                        size="sm"
+                                                        variant={article.featuredInBanner ? 'secondary' : 'outline'}
+                                                        onClick={() => handleToggleBanner(article)}
+                                                    >
+                                                        {article.featuredInBanner ? 'Unpin' : 'Pin'}
+                                                    </Button>
+                                                    {article.status === 'published' && (
+                                                        <Button
+                                                            size="icon"
+                                                            variant="outline"
+                                                            onClick={() => window.open(`/news/${article.slug}`, '_blank')}
+                                                            title="View live article"
+                                                        >
+                                                            <Eye className="h-4 w-4" />
+                                                        </Button>
+                                                    )}
+                                                    <Button
+                                                        size="icon"
+                                                        variant="outline"
+                                                        onClick={() => handleEditNews(article)}
+                                                        title="Edit article"
+                                                        aria-label={`Edit ${article.title}`}
+                                                    >
+                                                        <Pencil className="h-4 w-4" />
+                                                    </Button>
+                                                    <Button
+                                                        size="icon"
+                                                        variant="destructive"
+                                                        onClick={() => handleDeleteNews(article._id)}
+                                                        title="Delete article"
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                        )
+                    )}
+                    {visibleNews.length > pageSize && (
+                        <div className="mt-4 flex items-center justify-between gap-3">
+                            <p className="text-xs text-white/50">
+                                Page {currentPage} of {totalPages}
+                            </p>
+                            <div className="flex overflow-hidden rounded-md border border-white/10">
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    type="button"
+                                    onClick={() => setCurrentPage(page => Math.max(1, page - 1))}
+                                    disabled={currentPage === 1}
+                                    className="border-r border-white/10 px-3 py-2 text-sm text-white/70 disabled:opacity-40"
+                                >
+                                    Previous
+                                </Button>
+                                {Array.from({ length: totalPages }, (_, index) => index + 1).slice(
+                                    Math.max(0, currentPage - 2),
+                                    Math.max(3, currentPage + 1)
+                                ).map(page => (
+                                    <Button
+                                        type="button"
+                                        key={page}
+                                        variant={currentPage === page ? 'secondary' : 'ghost'}
+                                        size="sm"
+                                        onClick={() => setCurrentPage(page)}
+                                    >
+                                        {page}
+                                    </Button>
+                                ))}
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    type="button"
+                                    onClick={() => setCurrentPage(page => Math.min(totalPages, page + 1))}
+                                    disabled={currentPage === totalPages}
+                                    className="border-l border-white/10 px-3 py-2 text-sm text-white/70 disabled:opacity-40"
+                                >
+                                    Next
+                                </Button>
+                            </div>
                         </div>
                     )}
                 </div>

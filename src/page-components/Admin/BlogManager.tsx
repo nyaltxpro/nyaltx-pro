@@ -6,15 +6,7 @@ import { CalendarInput } from '@/components/reui/calendar';
 import 'quill/dist/quill.snow.css';
 import type QuillType from 'quill';
 import type { QuillOptions } from 'quill';
-import { MoreHorizontal, Newspaper, Plus, X } from 'lucide-react';
-import {
-  FaEdit,
-  FaSave,
-  FaSpinner,
-  FaTag,
-  FaTrash,
-  FaUpload,
-} from 'react-icons/fa';
+import { MoreHorizontal, Newspaper, Pencil, Plus, Save, Trash2, Upload, X } from 'lucide-react';
 import type { SerializedBlogPost } from '@/lib/blogServer';
 import { Button } from '@/components/reui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/reui/dropdown-menu';
@@ -23,6 +15,9 @@ import { Field } from '@/components/reui/field';
 import { FileType } from '@/components/reui/file-type';
 import { FileUpload } from '@/components/reui/file-upload';
 import { Filters } from '@/components/reui/filters';
+import { Combobox } from '@/components/reui/combobox';
+import { Checkbox } from '@/components/reui/checkbox';
+import { Spinner } from '@/components/reui/spinner';
 
 interface BlogFormState {
   id?: string;
@@ -115,6 +110,8 @@ const AdminBlogManagerComponent = () => {
   const [state, setState] = useState<FetchState>({ loading: false, error: null, success: null });
   const [isListLoading, setIsListLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState<'all' | 'published' | 'draft'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [featuredOnly, setFeaturedOnly] = useState(false);
   const [isUploadingToIPFS, setIsUploadingToIPFS] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const quillContainerRef = useRef<HTMLDivElement | null>(null);
@@ -369,9 +366,17 @@ const AdminBlogManagerComponent = () => {
   };
 
   const filteredPosts = useMemo(() => {
-    if (activeFilter === 'all') return posts;
-    return posts.filter((post) => post.status === activeFilter);
-  }, [posts, activeFilter]);
+    const query = searchQuery.trim().toLowerCase();
+    return posts.filter((post) => {
+      if (activeFilter !== 'all' && post.status !== activeFilter) return false;
+      if (featuredOnly && !post.featuredImage) return false;
+      if (!query) return true;
+      return [post.title, post.author, post.excerpt, ...(post.tags ?? [])]
+        .join(' ')
+        .toLowerCase()
+        .includes(query);
+    });
+  }, [posts, activeFilter, searchQuery, featuredOnly]);
 
   const scheduledEvents = useMemo(() => posts.flatMap(post => {
     if (!post.publishedAt) return [];
@@ -476,13 +481,15 @@ const AdminBlogManagerComponent = () => {
           <h1 className="text-2xl font-semibold text-white">Blog Management</h1>
           <p className="text-sm text-white/60">Create, publish, and maintain NYALTX blog posts.</p>
         </div>
-        <button
+        <Button
+          variant="outline"
+          size="default"
+          type="button"
           onClick={handleCreate}
-          className="inline-flex items-center gap-2 rounded-lg border border-white/15 bg-transparent px-4 py-2 text-sm font-medium text-white/80 transition hover:border-cyan-400/50 hover:text-cyan-200"
         >
           <Plus className="h-4 w-4" aria-hidden="true" />
           New Blog Post
-        </button>
+        </Button>
       </div>
 
       {state.error ? (
@@ -498,18 +505,30 @@ const AdminBlogManagerComponent = () => {
 
       <Filters className="mb-4">
         {(['all', 'published', 'draft'] as const).map((filter) => (
-          <button
+          <Button
             key={filter}
+            variant={activeFilter === filter ? 'secondary' : 'ghost'}
+            size="sm"
+            type="button"
             onClick={() => setActiveFilter(filter)}
-            className={`rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-widest transition ${
-              activeFilter === filter
-                ? 'border-cyan-500/60 bg-cyan-500/20 text-cyan-100'
-                : 'border-white/10 bg-white/5 text-white/50 hover:border-cyan-500/40 hover:text-cyan-100'
-            }`}
+            className="uppercase tracking-widest"
           >
             {filter}
-          </button>
+          </Button>
         ))}
+        <div className="ml-auto flex flex-wrap items-center gap-3">
+          <input
+            type="search"
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+            placeholder="Search posts"
+            className="h-9 w-48 rounded-lg border border-white/10 bg-black/30 px-3 text-sm text-white placeholder:text-white/40 focus:border-cyan-500/60 focus:outline-none"
+          />
+          <label className="flex items-center gap-2 text-sm text-white/70">
+            <Checkbox checked={featuredOnly} onChange={(event) => setFeaturedOnly(event.target.checked)} />
+            Featured image
+          </label>
+        </div>
       </Filters>
 
       <EventCalendar
@@ -524,70 +543,71 @@ const AdminBlogManagerComponent = () => {
       <div className="grid gap-4">
         {isListLoading ? (
           <div className="flex items-center gap-3 rounded-lg border border-white/10 bg-white/5 px-4 py-6 text-white/70">
-            <FaSpinner className="h-4 w-4 animate-spin" /> Loading posts...
+            <Spinner className="h-4 w-4" /> Loading posts...
           </div>
         ) : filteredPosts.length === 0 ? (
           <div className="rounded-lg border border-white/10 bg-white/5 px-4 py-10 text-center text-white/60">
             No blog posts yet.
           </div>
         ) : (
-          filteredPosts.map((post) => (
-            <div key={post._id} className="admin-panel-card p-5">
-              <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                <div className="space-y-3">
-                  <div className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-widest">
-                    <span
-                      className={`rounded-full px-3 py-1 ${
-                        post.status === 'published'
-                          ? 'bg-green-500/20 text-green-200'
-                          : 'bg-yellow-500/20 text-yellow-200'
-                      }`}
-                    >
-                      {post.status}
-                    </span>
-                    {post.publishedAt ? <span className="text-white/60">{new Date(post.publishedAt).toLocaleString()}</span> : null}
-                  </div>
-                  <h2 className="text-xl font-semibold text-white">{post.title}</h2>
-                  <p className="text-sm text-white/70">{post.excerpt}</p>
-                  {post.tags?.length ? (
-                    <div className="flex flex-wrap items-center gap-2 text-xs text-white/60">
-                      <FaTag className="h-3 w-3" />
-                      {post.tags.map((tag) => (
-                        <span key={tag} className="rounded-full border border-white/10 px-2 py-0.5">
-                          #{tag}
-                        </span>
-                      ))}
-                    </div>
-                  ) : null}
-                </div>
-
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="icon" aria-label={`Actions for ${post.title}`}>
-                      <MoreHorizontal aria-hidden="true" className="size-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem
-                      onSelect={() => handleEdit(post)}
-                      className="flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 outline-none focus:bg-white/10"
-                    >
-                      <FaEdit aria-hidden="true" className="size-3.5" />
-                      Edit post
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator className="my-1 h-px bg-white/10" />
-                    <DropdownMenuItem
-                      onSelect={() => handleDelete(post._id)}
-                      className="flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-rose-300 outline-none focus:bg-rose-500/10"
-                    >
-                      <FaTrash aria-hidden="true" className="size-3.5" />
-                      Delete post
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </div>
-          ))
+          <div className="overflow-x-auto rounded-lg border border-white/10">
+            <table className="w-full min-w-[760px] text-left text-sm">
+              <thead className="border-b border-white/10 bg-white/[0.03] text-xs uppercase tracking-wider text-white/50">
+                <tr>
+                  <th className="px-4 py-3 font-medium">Post</th>
+                  <th className="px-4 py-3 font-medium">Status</th>
+                  <th className="px-4 py-3 font-medium">Published</th>
+                  <th className="px-4 py-3 font-medium">Tags</th>
+                  <th className="w-16 px-4 py-3 text-right font-medium">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/10">
+                {filteredPosts.map((post) => (
+                  <tr key={post._id} className="transition hover:bg-white/[0.025]">
+                    <td className="max-w-md px-4 py-4">
+                      <p className="font-semibold text-white">{post.title}</p>
+                      <p className="mt-1 line-clamp-1 text-xs text-white/50">{post.excerpt}</p>
+                    </td>
+                    <td className="px-4 py-4">
+                      <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${post.status === 'published' ? 'bg-green-500/20 text-green-200' : 'bg-yellow-500/20 text-yellow-200'}`}>
+                        {post.status}
+                      </span>
+                    </td>
+                    <td className="px-4 py-4 text-white/60">
+                      {post.publishedAt ? new Date(post.publishedAt).toLocaleString() : 'Not scheduled'}
+                    </td>
+                    <td className="px-4 py-4">
+                      {post.tags?.length ? (
+                        <div className="flex max-w-52 flex-wrap gap-1.5">
+                          {post.tags.slice(0, 3).map((tag) => (
+                            <span key={tag} className="rounded-full border border-white/10 px-2 py-0.5 text-xs text-white/60">#{tag}</span>
+                          ))}
+                        </div>
+                      ) : <span className="text-white/40">—</span>}
+                    </td>
+                    <td className="px-4 py-4 text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="outline" size="icon" aria-label={`Actions for ${post.title}`}>
+                            <MoreHorizontal aria-hidden="true" className="size-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onSelect={() => handleEdit(post)} className="flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 outline-none focus:bg-white/10">
+                            <Pencil aria-hidden="true" className="size-3.5" /> Edit post
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator className="my-1 h-px bg-white/10" />
+                          <DropdownMenuItem onSelect={() => handleDelete(post._id)} className="flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-rose-300 outline-none focus:bg-rose-500/10">
+                            <Trash2 aria-hidden="true" className="size-3.5" /> Delete post
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
 
@@ -605,18 +625,19 @@ const AdminBlogManagerComponent = () => {
                 id="blog-form-modal-title"
                 className="flex items-center gap-2 text-lg font-semibold text-white"
               >
-                <Newspaper className="h-5 w-5 text-cyan-300" aria-hidden="true" />
+                <Newspaper className="h-5 w-5 text-slate-300" aria-hidden="true" />
                 {form.id ? 'Edit Blog Post' : 'Create Blog Post'}
               </h3>
-              <button
+              <Button
+                variant="ghost"
+                size="icon"
                 type="button"
                 onClick={resetForm}
                 disabled={state.loading || isUploadingToIPFS}
                 aria-label="Close"
-                className="rounded-lg border border-white/15 p-2 text-white/60 transition hover:bg-white/10 hover:text-white disabled:opacity-50"
               >
                 <X className="h-4 w-4" aria-hidden="true" />
-              </button>
+              </Button>
             </div>
 
             <div className="flex-1 space-y-4 overflow-y-auto px-5 py-5 sm:px-6">
@@ -686,15 +707,16 @@ const AdminBlogManagerComponent = () => {
                         description="JPEG, PNG, GIF or WebP, up to 10 MB."
                         className="flex-1"
                       />
-                      <button
+                      <Button
+                        variant="outline"
+                        size="sm"
                         type="button"
                         onClick={uploadToIPFS}
                         disabled={isUploadingToIPFS || !selectedFile}
-                        className="inline-flex items-center gap-2 rounded-lg border border-cyan-500/40 bg-cyan-500/20 px-3 py-2 text-xs font-semibold text-cyan-100 transition hover:bg-cyan-500/30 disabled:opacity-60"
                       >
-                        {isUploadingToIPFS ? <FaSpinner className="h-4 w-4 animate-spin" /> : <FaUpload className="h-4 w-4" />}
+                        {isUploadingToIPFS ? <Spinner className="h-4 w-4" /> : <Upload className="h-4 w-4" />}
                         Upload to IPFS
-                      </button>
+                      </Button>
                     </div>
                     {selectedFile ? (
                       <p className="mt-2 flex items-center gap-2 text-xs text-white/50">
@@ -721,17 +743,19 @@ const AdminBlogManagerComponent = () => {
                 </div>
 
                 <div className="space-y-4">
-                  <label className="block text-sm text-white/70">
-                    Status
-                    <select
+                  <Field id="blog-status" label="Status">
+                    <Combobox
+                      id="blog-status"
                       value={form.status}
-                      onChange={(event) => setForm((prev) => ({ ...prev, status: event.target.value as 'draft' | 'published' }))}
-                      className="mt-1 w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white focus:border-cyan-500/60 focus:outline-none"
-                    >
-                      <option value="draft">Draft</option>
-                      <option value="published">Published</option>
-                    </select>
-                  </label>
+                      options={[
+                        { value: 'draft', label: 'Draft' },
+                        { value: 'published', label: 'Published' },
+                      ]}
+                      onValueChange={(value) => setForm((prev) => ({ ...prev, status: value as 'draft' | 'published' }))}
+                      placeholder="Select status"
+                      className="mt-1 rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white focus:border-cyan-500/60 focus:outline-none"
+                    />
+                  </Field>
                   <Field id="blog-published-at" label="Published At (optional)">
                     <CalendarInput
                       id="blog-published-at"
@@ -862,23 +886,24 @@ const AdminBlogManagerComponent = () => {
             </div>
 
             <div className="flex shrink-0 flex-wrap items-center gap-3 border-t border-white/10 px-5 py-4 sm:px-6">
-              <button
+              <Button
+                variant="default"
+                size="default"
                 type="button"
                 onClick={handleSave}
                 disabled={state.loading}
-                className="inline-flex items-center gap-2 rounded-lg border border-cyan-500/40 bg-cyan-500/20 px-4 py-2 text-sm font-semibold text-cyan-100 transition hover:bg-cyan-500/30 disabled:opacity-60"
               >
-                {state.loading ? <FaSpinner className="h-4 w-4 animate-spin" /> : <FaSave className="h-4 w-4" />}
+                {state.loading ? <Spinner className="h-4 w-4" /> : <Save className="h-4 w-4" />}
                 {form.id ? 'Update Post' : 'Create Post'}
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="outline"
                 type="button"
                 onClick={resetForm}
                 disabled={state.loading || isUploadingToIPFS}
-                className="inline-flex items-center gap-2 rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white/70 transition hover:text-white disabled:opacity-50"
               >
                 Cancel
-              </button>
+              </Button>
             </div>
           </div>
       </Drawer>
