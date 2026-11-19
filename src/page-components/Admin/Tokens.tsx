@@ -5,8 +5,26 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { Drawer } from '@/components/reui/drawer';
 import { Checkbox } from '@/components/reui/checkbox';
-import { Coins, Plus, Search, X } from 'lucide-react';
-import { FaCheck, FaTimes, FaTrash, FaChevronLeft, FaChevronRight, FaArrowLeft, FaCrown, FaPause, FaPlay, FaEye, FaEyeSlash, FaSort, FaSortUp, FaSortDown, FaExternalLinkAlt } from 'react-icons/fa';
+import {
+  ArrowLeft,
+  ArrowDownAZ,
+  ArrowUpAZ,
+  ArrowUpDown,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  Coins,
+  Crown,
+  ExternalLink,
+  Eye,
+  EyeOff,
+  Pause,
+  Play,
+  Plus,
+  Search,
+  Trash2,
+  X,
+} from 'lucide-react';
 
 const AdminTokensClient = dynamic(() => Promise.resolve(AdminTokensComponent), {
     ssr: false,
@@ -405,9 +423,9 @@ function AdminTokensComponent() {
                                             className="flex items-center gap-1 hover:text-gray-300 transition-colors"
                                         >
                                             Created
-                                            {sortKey === 'createdAt' && sortDir === 'asc' && <FaSortUp className="w-3 h-3" />}
-                                            {sortKey === 'createdAt' && sortDir === 'desc' && <FaSortDown className="w-3 h-3" />}
-                                            {sortKey !== 'createdAt' && <FaSort className="w-3 h-3 opacity-40" />}
+                                            {sortKey === 'createdAt' && sortDir === 'asc' && <ArrowUpAZ className="w-3 h-3" />}
+                                            {sortKey === 'createdAt' && sortDir === 'desc' && <ArrowDownAZ className="w-3 h-3" />}
+                                            {sortKey !== 'createdAt' && <ArrowUpDown className="w-3 h-3 opacity-40" />}
                                         </button>
                                     </th>
                                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
@@ -416,9 +434,9 @@ function AdminTokensComponent() {
                                             className="flex items-center gap-1 hover:text-gray-300 transition-colors"
                                         >
                                             Token
-                                            {sortKey === 'tokenName' && sortDir === 'asc' && <FaSortUp className="w-3 h-3" />}
-                                            {sortKey === 'tokenName' && sortDir === 'desc' && <FaSortDown className="w-3 h-3" />}
-                                            {sortKey !== 'tokenName' && <FaSort className="w-3 h-3 opacity-40" />}
+                                            {sortKey === 'tokenName' && sortDir === 'asc' && <ArrowUpAZ className="w-3 h-3" />}
+                                            {sortKey === 'tokenName' && sortDir === 'desc' && <ArrowDownAZ className="w-3 h-3" />}
+                                            {sortKey !== 'tokenName' && <ArrowUpDown className="w-3 h-3 opacity-40" />}
                                         </button>
                                     </th>
                                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
@@ -427,9 +445,9 @@ function AdminTokensComponent() {
                                             className="flex items-center gap-1 hover:text-gray-300 transition-colors"
                                         >
                                             Chain
-                                            {sortKey === 'blockchain' && sortDir === 'asc' && <FaSortUp className="w-3 h-3" />}
-                                            {sortKey === 'blockchain' && sortDir === 'desc' && <FaSortDown className="w-3 h-3" />}
-                                            {sortKey !== 'blockchain' && <FaSort className="w-3 h-3 opacity-40" />}
+                                            {sortKey === 'blockchain' && sortDir === 'asc' && <ArrowUpAZ className="w-3 h-3" />}
+                                            {sortKey === 'blockchain' && sortDir === 'desc' && <ArrowDownAZ className="w-3 h-3" />}
+                                            {sortKey !== 'blockchain' && <ArrowUpDown className="w-3 h-3 opacity-40" />}
                                         </button>
                                     </th>
                                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
@@ -586,7 +604,7 @@ function AdminTokensComponent() {
                                                     className="px-3 py-1 rounded-lg text-xs font-medium transition-all duration-200 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/30 text-center"
                                                     style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                                                 >
-                                                    <FaExternalLinkAlt className="w-3 h-3 inline mr-1" />
+                                                    <ExternalLink className="w-3 h-3 inline mr-1" />
                                                     Preview Trade
                                                 </Link>
                                                 
@@ -602,7 +620,7 @@ function AdminTokensComponent() {
                                                         }`}
                                                         style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                                                     >
-                                                        <FaCheck className="w-3 h-3 inline mr-1" />
+                                                        <Check className="w-3 h-3 inline mr-1" />
                                                         {t.status === 'approved' ? 'Approved' : 'Approve'}
                                                     </button>
                                                     <button
@@ -611,7 +629,7 @@ function AdminTokensComponent() {
                                                         className="px-3 py-1 rounded-lg text-xs font-medium transition-all duration-200 bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30"
                                                         style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                                                     >
-                                                        <FaTimes className="w-3 h-3 inline mr-1" />
+                                                        <X className="w-3 h-3 inline mr-1" />
                                                         Reject
                                                     </button>
                                                     <button
@@ -620,7 +638,7 @@ function AdminTokensComponent() {
                                                         className="px-3 py-1 rounded-lg text-xs font-medium transition-all duration-200 bg-gray-500/20 hover:bg-gray-500/30 text-gray-300 border border-gray-500/30"
                                                         style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                                                     >
-                                                        <FaTrash className="w-3 h-3 inline mr-1" />
+                                                        <Trash2 className="w-3 h-3 inline mr-1" />
                                                         Delete
                                                     </button>
                                                 </div>

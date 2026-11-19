@@ -7,6 +7,7 @@ import { PROPOSAL_FUNCTION_PRESETS, encodeProposalPreset } from '@/lib/proposalF
 import { CONTRACT_ADDRESSES } from '@/services/contracts';
 import { FolderInfo, MultisigTransaction } from '@/services/contracts/types';
 import { useAppKitAccount } from '@reown/appkit/react';
+import { Drawer } from '@/components/reui/drawer';
 import { ethers } from 'ethers';
 import { Ban, CircleDollarSign, Filter, Gavel, Loader2, Lock, Plus, PlusIcon, Search, Shield, SplitSquareHorizontal, UserPlus2 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -2417,61 +2418,74 @@ export default function AdminDashboardFixed() {
                     </div>
                 </div>
 
-                {showAddModal && (
-                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-                        <div className="bg-slate-900 rounded-xl p-8 border border-white/20 max-w-md w-full mx-4 space-y-6">
+                <Drawer
+                    open={showAddModal}
+                    onClose={() => setShowAddModal(false)}
+                    title="Create New Folder"
+                    maxWidth="max-w-md"
+                >
+                    <div className="admin-panel-form flex h-full min-h-full w-full flex-col border-l border-white/10 bg-[#0d0d0d]">
+                        <header className="flex items-center justify-between border-b border-white/10 px-6 py-5">
                             <div>
-                                <h3 className="text-2xl font-bold text-white mb-2">Create New Folder</h3>
-                                <p className="text-gray-400 text-sm">Create a new folder using the FolderFactory contract</p>
+                                <h3 className="text-lg font-semibold text-white">Create New Folder</h3>
+                                <p className="mt-1 text-xs text-gray-400">FolderFactory contract</p>
                             </div>
+                            <button
+                                type="button"
+                                onClick={() => setShowAddModal(false)}
+                                aria-label="Close create folder"
+                                className="rounded-md p-1.5 text-gray-400 transition-colors hover:bg-white/5 hover:text-white"
+                            >
+                                ✕
+                            </button>
+                        </header>
 
-                            {/* Basic Information */}
+                        <div className="no-scrollbar flex-1 space-y-6 overflow-y-auto p-6">
                             <div className="space-y-4">
                                 <div>
-                                    <label className="text-gray-400 text-sm mb-2 block">Folder Name *</label>
+                                    <label className="mb-2 block text-sm font-medium text-gray-300">Folder Name *</label>
                                     <input
                                         type="text"
                                         value={newFolderName}
                                         onChange={e => setNewFolderName(e.target.value)}
                                         placeholder="Enter folder name..."
-                                        className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white placeholder-gray-500"
+                                        className="h-11 w-full rounded-lg border border-white/20 bg-white/[0.07] px-4 text-sm text-white placeholder-gray-500 focus:border-cyan-400/50 focus:outline-none focus:ring-2 focus:ring-cyan-400/20"
                                     />
-                                    <p className="text-gray-500 text-xs mt-1">Descriptive name for the folder</p>
+                                    <p className="mt-1 text-xs text-gray-500">Descriptive name for the folder</p>
                                 </div>
 
                                 <div>
-                                    <label className="text-gray-400 text-sm mb-2 block">Token Contract *</label>
-                                    <div className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white">
-                                        <span className="text-gray-300">NYAX Token</span>
-                                        <span className="text-gray-500 text-xs ml-2 font-mono">{CONTRACT_ADDRESSES.nyaxToken?.slice(0, 6)}...{CONTRACT_ADDRESSES.nyaxToken?.slice(-4)}</span>
+                                    <label className="mb-2 block text-sm font-medium text-gray-300">Token Contract *</label>
+                                    <div className="flex h-11 w-full items-center rounded-lg border border-white/20 bg-white/[0.07] px-4 text-white">
+                                        <span className="text-sm text-gray-300">NYAX Token</span>
+                                        <span className="ml-2 font-mono text-xs text-gray-500">{CONTRACT_ADDRESSES.nyaxToken?.slice(0, 6)}...{CONTRACT_ADDRESSES.nyaxToken?.slice(-4)}</span>
                                     </div>
-                                    <p className="text-gray-500 text-xs mt-1">Token used for folder allocations</p>
+                                    <p className="mt-1 text-xs text-gray-500">Token used for folder allocations</p>
                                 </div>
 
                                 <div>
-                                    <label className="text-gray-400 text-sm mb-2 block">Folder Admin *</label>
-                                    <div className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white">
-                                        <span className="text-gray-300">Connected Wallet</span>
+                                    <label className="mb-2 block text-sm font-medium text-gray-300">Folder Admin *</label>
+                                    <div className="flex h-11 w-full items-center rounded-lg border border-white/20 bg-white/[0.07] px-4 text-sm text-gray-300">
+                                        Connected Wallet
                                     </div>
-                                    <p className="text-gray-500 text-xs mt-1">Your wallet will be set as folder administrator</p>
+                                    <p className="mt-1 text-xs text-gray-500">Your wallet will be set as folder administrator</p>
                                 </div>
                             </div>
 
-                            {/* Contract Information */}
-                            <div className="space-y-4">
-                                <h4 className="text-white font-medium mb-3">Contract Information</h4>
-                                <div className="p-4 bg-white/5 rounded-lg border border-white/10 space-y-3">
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-gray-300 text-sm">Factory Contract</span>
-                                        <span className="text-gray-400 text-xs font-mono">{CONTRACT_ADDRESSES.folderEscrowFactory?.slice(0, 6)}...{CONTRACT_ADDRESSES.folderEscrowFactory?.slice(-4)}</span>
+                            <div className="space-y-3">
+                                <h4 className="text-sm font-medium text-white">Contract Information</h4>
+                                <div className="space-y-3 rounded-lg border border-white/10 bg-white/[0.04] p-4">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm text-gray-300">Factory Contract</span>
+                                        <span className="font-mono text-xs text-gray-400">{CONTRACT_ADDRESSES.folderEscrowFactory?.slice(0, 6)}...{CONTRACT_ADDRESSES.folderEscrowFactory?.slice(-4)}</span>
                                     </div>
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-gray-300 text-sm">Network</span>
-                                        <span className="text-blue-400 text-xs">Sepolia Testnet</span>
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm text-gray-300">Network</span>
+                                        <span className="text-xs text-blue-400">Sepolia Testnet</span>
                                     </div>
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-gray-300 text-sm">Governance Required</span>
-                                        <span className="text-yellow-400 text-xs">Yes</span>
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm text-gray-300">Governance Required</span>
+                                        <span className="text-xs text-yellow-400">Yes</span>
                                     </div>
                                 </div>
                             </div>
@@ -2481,25 +2495,25 @@ export default function AdminDashboardFixed() {
                                     {formError}
                                 </div>
                             )}
-
-                            <div className="flex gap-3 pt-4">
-                                <button
-                                    className="flex-1 px-4 py-3 bg-white/10 text-white rounded-lg hover:bg-white/20 transition"
-                                    onClick={() => setShowAddModal(false)}
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    className="flex-1 px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                                    onClick={handleCreateFolder}
-                                    disabled={actionPending || !isConnected || !newFolderName.trim()}
-                                >
-                                    {actionPending ? 'Creating...' : 'Create Folder'}
-                                </button>
-                            </div>
                         </div>
+
+                        <footer className="flex gap-3 border-t border-white/10 p-6">
+                            <button
+                                className="h-11 flex-1 rounded-lg border border-white/15 bg-white/[0.04] text-sm font-medium text-gray-300 transition hover:bg-white/[0.08] hover:text-white"
+                                onClick={() => setShowAddModal(false)}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className="h-11 flex-1 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-500 text-sm font-semibold text-white transition hover:from-indigo-600 hover:to-purple-600 disabled:cursor-not-allowed disabled:opacity-50"
+                                onClick={handleCreateFolder}
+                                disabled={actionPending || !isConnected || !newFolderName.trim()}
+                            >
+                                {actionPending ? 'Creating...' : 'Create Folder'}
+                            </button>
+                        </footer>
                     </div>
-                )}
+                </Drawer>
 
 
                 {showBridgeModal && (
