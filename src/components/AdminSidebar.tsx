@@ -154,8 +154,8 @@ export default function AdminSidebar({
                   />
                 </span>
                 <span className={`min-w-0 flex-1 ${isCollapsed ? 'md:hidden' : ''}`}>
-                  <span className="block truncate text-[13px] font-semibold tracking-tight">NYALTX</span>
-                  <span className="block truncate text-[11px] text-slate-500">Admin workspace</span>
+                  <span className="block truncate text-sm font-semibold tracking-tight">NYALTX</span>
+                  <span className="block truncate text-xs text-slate-500">Admin workspace</span>
                 </span>
                 <ChevronsUpDown
                   className={`h-3.5 w-3.5 shrink-0 text-slate-500 ${isCollapsed ? 'md:hidden' : ''}`}
@@ -211,7 +211,7 @@ export default function AdminSidebar({
           {filteredGroups.map((group) => (
             <section key={group.title} className="space-y-1">
               <div
-                className={`flex h-6 items-center px-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-600 ${
+                className={`flex h-6 items-center px-2 text-xs font-semibold uppercase tracking-[0.14em] text-slate-600 ${
                   isCollapsed ? 'md:hidden' : ''
                 }`}
               >
@@ -230,9 +230,9 @@ export default function AdminSidebar({
                     title={isCollapsed ? item.title : undefined}
                     aria-current={isActive ? 'page' : undefined}
                     onClick={() => isMobileMenuOpen && toggleMobileMenu()}
-                    className={`group relative flex h-9 items-center gap-3 rounded-lg px-2.5 text-[13px] transition-colors ${
+                    className={`group relative flex h-9 items-center gap-3 rounded-lg px-2.5 text-sm font-medium transition-colors ${
                       isActive
-                        ? 'bg-cyan-400/[0.09] font-medium text-cyan-50'
+                        ? 'bg-cyan-400/[0.09] text-cyan-50'
                         : 'text-slate-400 hover:bg-white/[0.045] hover:text-slate-100'
                     } ${isCollapsed ? 'md:justify-center md:px-0' : ''}`}
                   >
@@ -254,7 +254,7 @@ export default function AdminSidebar({
                     </span>
                     {item.badge && (
                       <span
-                        className={`rounded-full bg-white/[0.06] px-1.5 py-0.5 text-[10px] text-slate-400 ${
+                        className={`rounded-full bg-white/[0.06] px-1.5 py-0.5 text-xs text-slate-400 ${
                           isCollapsed ? 'md:hidden' : ''
                         }`}
                       >
@@ -278,12 +278,12 @@ export default function AdminSidebar({
                   isCollapsed ? 'md:justify-center md:px-0' : ''
                 }`}
               >
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-700 text-[11px] font-semibold text-slate-200 ring-1 ring-inset ring-white/10">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-700 text-xs font-semibold text-slate-200 ring-1 ring-inset ring-white/10">
                   AD
                 </span>
                 <span className={`min-w-0 flex-1 ${isCollapsed ? 'md:hidden' : ''}`}>
-                  <span className="block truncate text-[13px] font-medium text-slate-200">Administrator</span>
-                  <span className="block truncate text-[11px] text-slate-500">NYALTX Admin</span>
+                  <span className="block truncate text-sm font-medium text-slate-200">Administrator</span>
+                  <span className="block truncate text-xs text-slate-500">NYALTX Admin</span>
                 </span>
                 <ChevronsUpDown
                   className={`h-3.5 w-3.5 shrink-0 text-slate-500 ${isCollapsed ? 'md:hidden' : ''}`}
@@ -315,7 +315,7 @@ export default function AdminSidebar({
           </DropdownMenu>
 
           <div
-            className={`mt-3 flex items-center gap-2 px-2 text-[10px] text-slate-600 ${
+            className={`mt-3 flex items-center gap-2 px-2 text-xs text-slate-600 ${
               isCollapsed ? 'md:hidden' : ''
             }`}
           >
