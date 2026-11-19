@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { FaChartLine, FaClock, FaDesktop, FaEye, FaGlobe, FaMapMarkerAlt, FaUsers, FaWallet } from 'react-icons/fa';
+import { BarChart3, Clock3, Eye, Globe2, MapPin, Monitor, Users, Wallet } from 'lucide-react';
 import QuickStats from './QuickStats';
 import TrafficLineGraph from './TrafficLineGraph';
 import { Card } from '@/components/reui/card';
@@ -9,6 +9,8 @@ import { IconTile } from '@/components/reui/icon-tile';
 import { Filters } from '@/components/reui/filters';
 import { paginateItems, TablePagination } from '@/components/reui/table-pagination';
 import { Alert } from '@/components/reui/alert';
+import { Badge } from '@/components/reui/badge';
+import { Button } from '@/components/reui/button';
 
 interface AnalyticsData {
   onlineUsers: number;
@@ -127,44 +129,46 @@ export default function AnalyticsDashboard() {
 
   const filteredVisitors = (analytics?.recentVisitors ?? []).filter(visitor => {
     const query = visitorSearch.trim().toLowerCase();
-    return !query || [
-      visitor.city,
-      visitor.region,
-      visitor.country,
-      visitor.ipAddress,
-      visitor.walletAddress ?? '',
-      visitor.walletType ?? '',
-      visitor.isActive ? 'active' : 'inactive',
-    ].some(value => value.toLowerCase().includes(query));
+    return (
+      !query ||
+      [
+        visitor.city,
+        visitor.region,
+        visitor.country,
+        visitor.ipAddress,
+        visitor.walletAddress ?? '',
+        visitor.walletType ?? '',
+        visitor.isActive ? 'active' : 'inactive',
+      ].some(value => value.toLowerCase().includes(query))
+    );
   });
   const paginatedVisitors = paginateItems(filteredVisitors, visitorPage, 10);
 
-  if (loading) {
+  if (loading && !analytics) {
     return (
       <div className="space-y-6">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-700 rounded w-48 mb-6"></div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
+        <div className="animate-pulse space-y-6">
+          <div className="h-8 w-56 rounded bg-white/5"></div>
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-24 bg-gray-700 rounded-xl"></div>
+              <div key={i} className="h-32 rounded-xl border border-white/10 bg-white/[0.03]"></div>
             ))}
           </div>
-          <div className="h-64 bg-gray-700 rounded-xl"></div>
+          <div className="h-80 rounded-xl border border-white/10 bg-white/[0.03]"></div>
         </div>
       </div>
     );
   }
 
-  if (error) {
+  if (error && !analytics) {
     return (
       <div className="text-center py-8">
-        <Alert variant="destructive" className="mb-4">Error loading analytics: {error}</Alert>
-        <button
-          onClick={() => window.location.reload()}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        >
+        <Alert variant="destructive" className="mb-4">
+          Error loading analytics: {error}
+        </Alert>
+        <Button onClick={() => window.location.reload()} variant="outline">
           Retry
-        </button>
+        </Button>
       </div>
     );
   }
@@ -172,33 +176,61 @@ export default function AnalyticsDashboard() {
   if (!analytics) return null;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-semibold text-white flex items-center gap-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-            <FaChartLine className="text-blue-400" />
-            Analytics Dashboard
-          </h2>
-          <p className="text-gray-400 text-sm mt-1" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-            Real-time platform analytics and user insights
-          </p>
+    <div className="admin-panel-analytics space-y-6">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div className="min-w-0">
+          <h1 className="flex items-center gap-2 text-2xl font-semibold text-white">
+            <BarChart3 className="size-5 text-cyan-300" aria-hidden="true" />
+            Platform Statistics
+          </h1>
+          <p className="mt-1 text-sm text-slate-400">Real-time analytics and user insights</p>
         </div>
-        <div className="text-sm text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-          Last updated: {new Date().toLocaleTimeString()}
-        </div>
+        <Badge variant="outline" size="sm" className="text-slate-400">
+          Updated {new Date().toLocaleTimeString()}
+        </Badge>
       </div>
 
+      {error && (
+        <Alert variant="destructive">
+          Analytics refresh failed: {error}. Showing the most recently loaded data.
+        </Alert>
+      )}
+
       {/* Key Metrics */}
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {[
-          { title: 'Online Users', value: analytics.onlineUsers, caption: 'Currently active', tone: 'emerald' as const, icon: FaUsers },
-          { title: 'Page Views Today', value: analytics.pageViews.today, caption: 'Daily traffic', tone: 'cyan' as const, icon: FaEye },
-          { title: 'Unique Visitors Today', value: analytics.uniqueVisitors.today, caption: 'Daily unique users', tone: 'violet' as const, icon: FaGlobe },
-          { title: 'Wallet Connections', value: analytics.walletConnections, caption: 'Total connections', tone: 'amber' as const, icon: FaWallet },
+          {
+            title: 'Online Users',
+            value: analytics.onlineUsers,
+            caption: 'Currently active',
+            tone: 'emerald' as const,
+            icon: Users,
+          },
+          {
+            title: 'Page Views Today',
+            value: analytics.pageViews.today,
+            caption: 'Daily traffic',
+            tone: 'cyan' as const,
+            icon: Eye,
+          },
+          {
+            title: 'Unique Visitors Today',
+            value: analytics.uniqueVisitors.today,
+            caption: 'Daily unique users',
+            tone: 'violet' as const,
+            icon: Globe2,
+          },
+          {
+            title: 'Wallet Connections',
+            value: analytics.walletConnections,
+            caption: 'Total connections',
+            tone: 'amber' as const,
+            icon: Wallet,
+          },
         ].map(metric => {
           const MetricIcon = metric.icon;
           return (
-            <Card key={metric.title} className="p-5">
+            <Card key={metric.title} className="p-4 sm:p-5">
               <div className="flex items-center justify-between gap-3">
                 <h3 className="text-slate-400 text-sm font-medium">{metric.title}</h3>
                 <IconTile tone={metric.tone} className="size-9">
@@ -215,71 +247,53 @@ export default function AnalyticsDashboard() {
             </Card>
           );
         })}
-
       </div>
 
       {/* Recent Visitors */}
-      <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl shadow-xl">
-        <div className="p-6 border-b border-gray-700/20">
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <h3 className="font-semibold text-white flex items-center gap-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-              <FaClock className="text-blue-400" />
-              Recent Visitors
-            </h3>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setVisitorRange('1')}
-                disabled={loading}
-                className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 flex items-center gap-2 ${
-                  visitorRange === '1'
-                    ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-500/50'
-                    : 'bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-gray-600/30'
-                } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
-              >
-                {loading && visitorRange === '1' && (
-                  <span className="animate-spin">⟳</span>
-                )}
-                1 Day
-              </button>
-              <button
-                onClick={() => setVisitorRange('7')}
-                disabled={loading}
-                className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 flex items-center gap-2 ${
-                  visitorRange === '7'
-                    ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-500/50'
-                    : 'bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-gray-600/30'
-                } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
-              >
-                {loading && visitorRange === '7' && (
-                  <span className="animate-spin">⟳</span>
-                )}
-                7 Days
-              </button>
-              <button
-                onClick={() => setVisitorRange('30')}
-                disabled={loading}
-                className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 flex items-center gap-2 ${
-                  visitorRange === '30'
-                    ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-500/50'
-                    : 'bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-gray-600/30'
-                } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
-              >
-                {loading && visitorRange === '30' && (
-                  <span className="animate-spin">⟳</span>
-                )}
-                1 Month
-              </button>
+      <div className="admin-panel-card overflow-hidden">
+        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 px-4 py-4 sm:px-5">
+          <div className="flex items-center gap-3">
+            <IconTile tone="cyan" className="size-9">
+              <Clock3 className="size-4" aria-hidden="true" />
+            </IconTile>
+            <div>
+              <h2 className="font-semibold text-white">Recent Visitors</h2>
+              <p className="text-xs text-slate-500">Visitor activity by selected period</p>
             </div>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {(
+              [
+                ['1', '1 Day'],
+                ['7', '7 Days'],
+                ['30', '1 Month'],
+              ] as const
+            ).map(([range, label]) => (
+              <Button
+                key={range}
+                size="sm"
+                variant={visitorRange === range ? 'secondary' : 'outline'}
+                onClick={() => setVisitorRange(range)}
+                disabled={loading}
+              >
+                {label}
+              </Button>
+            ))}
           </div>
         </div>
         <Filters
-          className="mb-4"
-          activeFilters={visitorSearch.trim()
-            ? [{ id: 'visitor-search', label: `Search: ${visitorSearch}`, onRemove: () => setVisitorSearch('') }]
-            : []}
+          className="admin-panel-analytics-filters"
+          activeFilters={
+            visitorSearch.trim()
+              ? [
+                  {
+                    id: 'visitor-search',
+                    label: `Search: ${visitorSearch}`,
+                    onRemove: () => setVisitorSearch(''),
+                  },
+                ]
+              : []
+          }
         >
           <input
             type="search"
@@ -287,145 +301,154 @@ export default function AnalyticsDashboard() {
             onChange={event => setVisitorSearch(event.target.value)}
             placeholder="Search location, IP, or wallet..."
             aria-label="Search recent visitors"
-            className="w-full max-w-md px-3 py-2"
+            className="h-9 w-full max-w-md rounded-lg border border-white/10 bg-white/[0.03] px-3 text-sm text-white placeholder:text-slate-500 focus:border-cyan-400/40 focus:outline-none focus:ring-2 focus:ring-cyan-400/10"
           />
         </Filters>
-        <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full overflow-hidden">
-              <thead className="bg-gray-700/30 border-b border-gray-600/20">
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[900px] text-left text-xs">
+            <thead className="border-b border-white/10 bg-white/[0.03]">
+              <tr>
+                <th className="whitespace-nowrap px-4 py-3 font-medium uppercase tracking-wide text-slate-500">
+                  Location
+                </th>
+                <th className="whitespace-nowrap px-4 py-3 font-medium uppercase tracking-wide text-slate-500">
+                  IP Address
+                </th>
+                <th className="whitespace-nowrap px-4 py-3 font-medium uppercase tracking-wide text-slate-500">
+                  First Visit
+                </th>
+                <th className="whitespace-nowrap px-4 py-3 font-medium uppercase tracking-wide text-slate-500">
+                  Last Activity
+                </th>
+                <th className="whitespace-nowrap px-4 py-3 font-medium uppercase tracking-wide text-slate-500">
+                  Wallet
+                </th>
+                <th className="whitespace-nowrap px-4 py-3 font-medium uppercase tracking-wide text-slate-500">
+                  Status
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/[0.06]">
+              {paginatedVisitors.length === 0 ? (
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                    Location
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                    IP Address
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                    First Visit
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                    Last Activity
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                    Wallet
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                    Status
-                  </th>
+                  <td colSpan={6} className="px-4 py-10 text-center text-sm text-slate-500">
+                    No recent visitors match the current search.
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-700/20">
-                {paginatedVisitors.map((visitor, index) => (
-                  <tr key={visitor.sessionId} className="hover:bg-gray-700/20 transition-colors duration-200">
-                    <td className="px-4 py-3 text-sm border-r border-gray-700/20">
+              ) : (
+                paginatedVisitors.map(visitor => (
+                  <tr key={visitor.sessionId} className="transition-colors hover:bg-white/[0.025]">
+                    <td className="px-4 py-3 align-middle">
                       <div className="flex items-center gap-3">
-                        <span className="text-lg">{getCountryFlag(visitor.country === 'Unknown' ? 'UN' : visitor.country.slice(0, 2).toUpperCase())}</span>
+                        <span className="text-lg">
+                          {getCountryFlag(
+                            visitor.country === 'Unknown'
+                              ? 'UN'
+                              : visitor.country.slice(0, 2).toUpperCase()
+                          )}
+                        </span>
                         <div>
-                          <div className="font-medium text-white text-sm" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                          <div className="font-medium text-white">
                             {visitor.city}, {visitor.region}
                           </div>
-                          <div className="text-xs text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                            {visitor.country}
-                          </div>
+                          <div className="text-slate-500">{visitor.country}</div>
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-sm border-r border-gray-700/20">
-                      <code className="text-gray-300 bg-gray-700/30 px-2 py-1 rounded border border-gray-600/30 text-xs">
+                    <td className="px-4 py-3 align-middle">
+                      <code className="rounded-md border border-white/10 bg-white/[0.04] px-2 py-1 text-slate-300">
                         {visitor.ipAddress}
                       </code>
                     </td>
-                    <td className="px-4 py-3 text-sm border-r border-gray-700/20">
-                      <span className="text-gray-300 text-xs" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                        {formatTime(visitor.createdAt)}
-                      </span>
+                    <td className="whitespace-nowrap px-4 py-3 align-middle text-slate-400">
+                      <span>{formatTime(visitor.createdAt)}</span>
                     </td>
-                    <td className="px-4 py-3 text-sm border-r border-gray-700/20">
-                      <span className="text-gray-300 text-xs" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                        {formatTime(visitor.lastActivity)}
-                      </span>
+                    <td className="whitespace-nowrap px-4 py-3 align-middle text-slate-400">
+                      <span>{formatTime(visitor.lastActivity)}</span>
                     </td>
-                    <td className="px-4 py-3 text-sm border-r border-gray-700/20">
+                    <td className="px-4 py-3 align-middle">
                       {visitor.walletAddress ? (
                         <div className="flex flex-col gap-1">
-                          <code className="text-green-300 bg-green-500/10 px-2 py-1 rounded border border-green-500/20 text-xs">
+                          <code className="rounded-md border border-white/10 bg-white/[0.04] px-2 py-1 text-slate-300">
                             {visitor.walletAddress.slice(0, 6)}...{visitor.walletAddress.slice(-4)}
                           </code>
                           {visitor.walletType && (
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-500/10 text-blue-300 border border-blue-500/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                            <Badge variant="info-light" size="xs" className="w-fit">
                               {visitor.walletType}
-                            </span>
+                            </Badge>
                           )}
                         </div>
                       ) : (
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-500/10 text-gray-400 border border-gray-500/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                        <Badge variant="secondary" size="xs">
                           Not connected
-                        </span>
+                        </Badge>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-sm">
+                    <td className="px-4 py-3 align-middle">
                       <div className="flex flex-col gap-1">
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${visitor.isActive
-                            ? 'bg-green-500/10 text-green-300 border-green-500/20'
-                            : 'bg-gray-500/10 text-gray-400 border-gray-500/20'
-                          }`} style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                        <Badge
+                          variant={visitor.isActive ? 'success-light' : 'secondary'}
+                          size="xs"
+                          className="w-fit"
+                        >
                           {visitor.isActive ? 'Online' : 'Offline'}
-                        </span>
+                        </Badge>
                         {visitor.deviceType && visitor.deviceType !== 'unknown' && (
-                          <span className="text-xs text-gray-400 capitalize flex items-center gap-1" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                            {visitor.deviceType === 'mobile' ? '📱' : visitor.deviceType === 'tablet' ? '📱' : '💻'} {visitor.deviceType}
+                          <span className="flex items-center gap-1 text-[11px] capitalize text-slate-500">
+                            {visitor.deviceType === 'mobile'
+                              ? '📱'
+                              : visitor.deviceType === 'tablet'
+                                ? '📱'
+                                : '💻'}{' '}
+                            {visitor.deviceType}
                           </span>
                         )}
                       </div>
                     </td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <TablePagination
-            page={visitorPage}
-            pageSize={10}
-            total={filteredVisitors.length}
-            onPageChange={setVisitorPage}
-          />
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
+        <TablePagination
+          page={visitorPage}
+          pageSize={10}
+          total={filteredVisitors.length}
+          onPageChange={setVisitorPage}
+        />
       </div>
       <QuickStats />
       <TrafficLineGraph />
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-2">
         {/* Traffic by Country */}
-        <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl shadow-xl">
-          <div className="p-6 border-b border-gray-700/20">
-            <h3 className="font-semibold text-white flex items-center gap-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-              <FaMapMarkerAlt className="text-green-400" />
+        <div className="admin-panel-card overflow-hidden">
+          <div className="border-b border-white/10 px-4 py-4 sm:px-5">
+            <h3 className="flex items-center gap-2 font-semibold text-white">
+              <MapPin className="size-4 text-slate-400" aria-hidden="true" />
               Traffic by Country (Last 7 Days)
             </h3>
           </div>
-          <div className="p-6">
+          <div className="p-4 sm:p-5">
             <div className="space-y-4">
-              {analytics.trafficByCountry.slice(0, 8).map((country, index) => (
-                <div key={country.country} className="flex items-center justify-between p-3 bg-gray-700/30 border border-gray-600/30 rounded-lg hover:bg-gray-700/40 transition-all duration-200">
+              {analytics.trafficByCountry.slice(0, 8).map(country => (
+                <div
+                  key={country.country}
+                  className="flex items-center justify-between p-3 bg-white/[0.03] border border-white/10 rounded-lg hover:bg-white/[0.06] transition-all duration-200"
+                >
                   <div className="flex items-center gap-3">
                     <span className="text-lg">{getCountryFlag(country.countryCode)}</span>
                     <div>
-                      <div className="font-medium text-white" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                        {country.country}
-                      </div>
-                      <div className="text-xs text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                      <div className="font-medium text-white">{country.country}</div>
+                      <div className="text-xs text-gray-400">
                         {country.uniqueVisitors} unique visitors
                       </div>
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="font-bold text-green-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                      {country.visits}
-                    </div>
-                    <div className="text-xs text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                      visits
-                    </div>
+                    <div className="font-semibold tabular-nums text-white">{country.visits}</div>
+                    <div className="text-xs text-gray-400">visits</div>
                   </div>
                 </div>
               ))}
@@ -434,39 +457,34 @@ export default function AnalyticsDashboard() {
         </div>
 
         {/* Browser Statistics */}
-        <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl shadow-xl">
-          <div className="p-6 border-b border-gray-700/20">
-            <h3 className="font-semibold text-white flex items-center gap-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-              <FaDesktop className="text-purple-400" />
+        <div className="admin-panel-card overflow-hidden">
+          <div className="border-b border-white/10 px-4 py-4 sm:px-5">
+            <h3 className="flex items-center gap-2 font-semibold text-white">
+              <Monitor className="size-4 text-slate-400" aria-hidden="true" />
               Browser Statistics (Last 7 Days)
             </h3>
           </div>
-          <div className="p-6">
+          <div className="p-4 sm:p-5">
             <div className="space-y-4">
-              {analytics.browserStats.map((browser, index) => (
-                <div key={browser.browser} className="flex items-center justify-between p-3 bg-gray-700/30 border border-gray-600/30 rounded-lg hover:bg-gray-700/40 transition-all duration-200">
+              {analytics.browserStats.map(browser => (
+                <div
+                  key={browser.browser}
+                  className="flex items-center justify-between p-3 bg-white/[0.03] border border-white/10 rounded-lg hover:bg-white/[0.06] transition-all duration-200"
+                >
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center border border-purple-500/30">
-                      <span className="text-sm font-bold text-purple-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                        {browser.browser.charAt(0)}
-                      </span>
-                    </div>
+                    <IconTile tone="violet" className="size-9">
+                      <span className="text-sm font-bold">{browser.browser.charAt(0)}</span>
+                    </IconTile>
                     <div>
-                      <div className="font-medium text-white" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                        {browser.browser}
-                      </div>
-                      <div className="text-xs text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                      <div className="font-medium text-white">{browser.browser}</div>
+                      <div className="text-xs text-gray-400">
                         {browser.uniqueVisitors} unique users
                       </div>
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="font-bold text-purple-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                      {browser.visits}
-                    </div>
-                    <div className="text-xs text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                      visits
-                    </div>
+                    <div className="font-semibold tabular-nums text-white">{browser.visits}</div>
+                    <div className="text-xs text-gray-400">visits</div>
                   </div>
                 </div>
               ))}
@@ -476,51 +494,46 @@ export default function AnalyticsDashboard() {
       </div>
 
       {/* Top Cities */}
-      <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl shadow-xl">
-        <div className="p-6 border-b border-gray-700/20">
-          <h3 className="font-semibold text-white flex items-center gap-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-            <FaMapMarkerAlt className="text-cyan-400" />
+      <div className="admin-panel-card overflow-hidden">
+        <div className="border-b border-white/10 px-4 py-4 sm:px-5">
+          <h3 className="flex items-center gap-2 font-semibold text-white">
+            <MapPin className="size-4 text-slate-400" aria-hidden="true" />
             Top Cities (Last 7 Days)
           </h3>
         </div>
-        <div className="p-6">
+        <div className="p-4 sm:p-5">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {analytics.topCities?.map((city, index) => (
-              <div key={`${city.city}-${city.country}`} className="flex items-center justify-between p-4 bg-gray-700/30 border border-gray-600/30 rounded-lg hover:bg-gray-700/40 transition-all duration-200">
-                <div className="flex items-center gap-3">
-                  <div className="flex flex-col items-center">
-                    <span className="text-2xl">{getCountryFlag(city.countryCode)}</span>
-                    <span className="text-xs text-gray-500 mt-1">#{index + 1}</span>
+            {analytics.topCities?.length ? (
+              analytics.topCities.map((city, index) => (
+                <div
+                  key={`${city.city}-${city.country}`}
+                  className="flex items-center justify-between p-4 bg-white/[0.03] border border-white/10 rounded-lg hover:bg-white/[0.06] transition-all duration-200"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="flex flex-col items-center">
+                      <span className="text-2xl">{getCountryFlag(city.countryCode)}</span>
+                      <span className="text-xs text-gray-500 mt-1">#{index + 1}</span>
+                    </div>
+                    <div>
+                      <div className="font-medium text-white text-sm">{city.city}</div>
+                      <div className="text-xs text-gray-400">{city.country}</div>
+                      <div className="text-xs text-gray-500">
+                        {city.uniqueVisitors} unique visitors
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <div className="font-medium text-white text-sm" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                      {city.city}
-                    </div>
-                    <div className="text-xs text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                      {city.country}
-                    </div>
-                    <div className="text-xs text-gray-500" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                      {city.uniqueVisitors} unique visitors
-                    </div>
+                  <div className="text-right">
+                    <div className="font-semibold tabular-nums text-white">{city.visits}</div>
+                    <div className="text-xs text-gray-400">visits</div>
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className="font-bold text-cyan-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                    {city.visits}
-                  </div>
-                  <div className="text-xs text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                    visits
-                  </div>
-                </div>
-              </div>
-            )) || (
+              ))
+            ) : (
               <div className="col-span-full text-center py-8">
                 <div className="w-16 h-16 bg-gray-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <FaMapMarkerAlt className="w-8 h-8 text-gray-400" />
+                  <MapPin className="w-8 h-8 text-gray-400" />
                 </div>
-                <p className="text-gray-400 font-medium" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                  No city data available
-                </p>
+                <p className="text-gray-400 font-medium">No city data available</p>
               </div>
             )}
           </div>
@@ -528,32 +541,27 @@ export default function AnalyticsDashboard() {
       </div>
 
       {/* Top Pages */}
-      <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl shadow-xl">
-        <div className="p-6 border-b border-gray-700/20">
-          <h3 className="font-semibold text-white flex items-center gap-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-            <FaChartLine className="text-blue-400" />
+      <div className="admin-panel-card overflow-hidden">
+        <div className="border-b border-white/10 px-4 py-4 sm:px-5">
+          <h3 className="flex items-center gap-2 font-semibold text-white">
+            <BarChart3 className="size-4 text-slate-400" aria-hidden="true" />
             Top Pages (Last 7 Days)
           </h3>
         </div>
-        <div className="p-6">
+        <div className="p-4 sm:p-5">
           <div className="grid gap-4 sm:grid-cols-2">
-            {analytics.topPages.map((page, index) => (
-              <div key={page.page} className="flex items-center justify-between p-4 bg-gray-700/30 border border-gray-600/30 rounded-lg hover:bg-gray-700/40 transition-all duration-200">
+            {analytics.topPages.map(page => (
+              <div
+                key={page.page}
+                className="flex items-center justify-between p-4 bg-white/[0.03] border border-white/10 rounded-lg hover:bg-white/[0.06] transition-all duration-200"
+              >
                 <div>
-                  <div className="font-medium text-white text-sm" style={{ fontFamily: 'JetBrains Mono, Consolas, Monaco, monospace' }}>
-                    {page.page || '/'}
-                  </div>
-                  <div className="text-xs text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                    {page.uniqueVisitors} unique visitors
-                  </div>
+                  <div className="font-mono text-sm text-slate-200">{page.page || '/'}</div>
+                  <div className="text-xs text-gray-400">{page.uniqueVisitors} unique visitors</div>
                 </div>
                 <div className="text-right">
-                  <div className="font-bold text-blue-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                    {page.visits}
-                  </div>
-                  <div className="text-xs text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                    visits
-                  </div>
+                  <div className="font-semibold tabular-nums text-white">{page.visits}</div>
+                  <div className="text-xs text-gray-400">visits</div>
                 </div>
               </div>
             ))}
@@ -561,132 +569,126 @@ export default function AnalyticsDashboard() {
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-2">
         {/* Wallet Connection Statistics */}
-        <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl shadow-xl">
-          <div className="p-6 border-b border-gray-700/20">
-            <h3 className="font-semibold text-white flex items-center gap-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-              <FaWallet className="text-green-400" />
+        <div className="admin-panel-card overflow-hidden">
+          <div className="border-b border-white/10 px-4 py-4 sm:px-5">
+            <h3 className="flex items-center gap-2 font-semibold text-white">
+              <Wallet className="size-4 text-slate-400" aria-hidden="true" />
               Wallet Connections (Last 7 Days)
             </h3>
           </div>
-          <div className="p-6">
+          <div className="p-4 sm:p-5">
             <div className="space-y-4">
-              {analytics.walletConnectionsStats?.map((wallet, index) => (
-                <div key={wallet.walletType} className="flex items-center justify-between p-4 bg-gray-700/30 border border-gray-600/30 rounded-lg hover:bg-gray-700/40 transition-all duration-200">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center border border-green-500/30">
-                      <FaWallet className="text-green-400 w-5 h-5" />
+              {analytics.walletConnectionsStats?.length ? (
+                analytics.walletConnectionsStats.map(wallet => (
+                  <div
+                    key={wallet.walletType}
+                    className="flex items-center justify-between p-4 bg-white/[0.03] border border-white/10 rounded-lg hover:bg-white/[0.06] transition-all duration-200"
+                  >
+                    <div className="flex items-center gap-3">
+                      <IconTile tone="emerald" className="size-10">
+                        <Wallet className="size-4" aria-hidden="true" />
+                      </IconTile>
+                      <div>
+                        <div className="font-medium text-white">{wallet.walletType}</div>
+                        <div className="text-xs text-gray-400">
+                          {wallet.uniqueUsers} unique users • {wallet.countries} countries
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <div className="font-medium text-white" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                        {wallet.walletType}
+                    <div className="text-right">
+                      <div className="font-semibold tabular-nums text-white">
+                        {wallet.connections}
                       </div>
-                      <div className="text-xs text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                        {wallet.uniqueUsers} unique users • {wallet.countries} countries
-                      </div>
+                      <div className="text-xs text-gray-400">connections</div>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className="font-bold text-green-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                      {wallet.connections}
-                    </div>
-                    <div className="text-xs text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                      connections
-                    </div>
+                ))
+              ) : (
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 bg-gray-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Wallet className="w-8 h-8 text-gray-400" />
                   </div>
+                  <p className="text-gray-400 font-medium">No wallet connection data</p>
                 </div>
-              )) || (
-                  <div className="text-center py-8">
-                    <div className="w-16 h-16 bg-gray-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <FaWallet className="w-8 h-8 text-gray-400" />
-                    </div>
-                    <p className="text-gray-400 font-medium" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                      No wallet connection data
-                    </p>
-                  </div>
-                )}
+              )}
             </div>
           </div>
         </div>
 
         {/* Device Statistics */}
-        <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl shadow-xl">
-          <div className="p-6 border-b border-gray-700/20">
-            <h3 className="font-semibold text-white flex items-center gap-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-              <FaDesktop className="text-blue-400" />
+        <div className="admin-panel-card overflow-hidden">
+          <div className="border-b border-white/10 px-4 py-4 sm:px-5">
+            <h3 className="flex items-center gap-2 font-semibold text-white">
+              <Monitor className="size-4 text-slate-400" aria-hidden="true" />
               Device Statistics (Last 7 Days)
             </h3>
           </div>
-          <div className="p-6">
+          <div className="p-4 sm:p-5">
             <div className="space-y-4">
-              {analytics.deviceStats?.map((device, index) => {
-                const deviceIcon = device.deviceType === 'mobile' ? '📱' :
-                  device.deviceType === 'tablet' ? '📱' : '💻';
-                return (
-                  <div key={device.deviceType} className="flex items-center justify-between p-4 bg-gray-700/30 border border-gray-600/30 rounded-lg hover:bg-gray-700/40 transition-all duration-200">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center border border-blue-500/30">
-                        <span className="text-2xl">{deviceIcon}</span>
-                      </div>
-                      <div>
-                        <div className="font-medium text-white capitalize" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                          {device.deviceType}
+              {analytics.deviceStats?.length ? (
+                analytics.deviceStats.map(device => {
+                  return (
+                    <div
+                      key={device.deviceType}
+                      className="flex items-center justify-between p-4 bg-white/[0.03] border border-white/10 rounded-lg hover:bg-white/[0.06] transition-all duration-200"
+                    >
+                      <div className="flex items-center gap-3">
+                        <IconTile tone="cyan" className="size-10">
+                          <Monitor className="size-4" aria-hidden="true" />
+                        </IconTile>
+                        <div>
+                          <div className="font-medium text-white capitalize">
+                            {device.deviceType}
+                          </div>
+                          <div className="text-xs text-gray-400">
+                            {device.uniqueUsers} unique users
+                          </div>
                         </div>
-                        <div className="text-xs text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                          {device.uniqueUsers} unique users
-                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-semibold tabular-nums text-white">{device.visits}</div>
+                        <div className="text-xs text-gray-400">visits</div>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className="font-bold text-blue-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                        {device.visits}
-                      </div>
-                      <div className="text-xs text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                        visits
-                      </div>
-                    </div>
+                  );
+                })
+              ) : (
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 bg-gray-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Monitor className="w-8 h-8 text-gray-400" />
                   </div>
-                );
-              }) || (
-                  <div className="text-center py-8">
-                    <div className="w-16 h-16 bg-gray-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <FaDesktop className="w-8 h-8 text-gray-400" />
-                    </div>
-                    <p className="text-gray-400 font-medium" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                      No device data
-                    </p>
-                  </div>
-                )}
+                  <p className="text-gray-400 font-medium">No device data</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </div>
 
       {/* Hourly Traffic Pattern */}
-      <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl shadow-xl">
-        <div className="p-6 border-b border-gray-700/20">
-          <h3 className="font-semibold text-white flex items-center gap-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-            <FaClock className="text-orange-400" />
+      <div className="admin-panel-card overflow-hidden">
+        <div className="border-b border-white/10 px-4 py-4 sm:px-5">
+          <h3 className="flex items-center gap-2 font-semibold text-white">
+            <Clock3 className="size-4 text-slate-400" aria-hidden="true" />
             Hourly Traffic Pattern (Last 24 Hours)
           </h3>
         </div>
-        <div className="p-6">
+        <div className="p-4 sm:p-5">
           <div className="flex items-end gap-1 h-32 bg-gray-700/20 rounded-lg p-4">
-            {analytics.hourlyTraffic.map((hour, index) => {
-              const maxVisits = Math.max(...analytics.hourlyTraffic.map(h => h.visits));
+            {analytics.hourlyTraffic.map(hour => {
+              const maxVisits = Math.max(0, ...analytics.hourlyTraffic.map(h => h.visits));
               const height = maxVisits > 0 ? (hour.visits / maxVisits) * 100 : 0;
 
               return (
                 <div key={hour.hour} className="flex-1 flex flex-col items-center">
                   <div
-                    className="w-full bg-gradient-to-t from-orange-500 to-orange-400 rounded-t transition-all duration-300 hover:from-orange-400 hover:to-orange-300 shadow-lg"
+                    className="w-full rounded-t bg-cyan-400/80 transition-colors hover:bg-cyan-300"
                     style={{ height: `${height}%`, minHeight: hour.visits > 0 ? '4px' : '0px' }}
                     title={`${hour.hour}:00 - ${hour.visits} visits`}
                   ></div>
-                  <div className="text-xs text-gray-400 mt-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                    {hour.hour}
-                  </div>
+                  <div className="text-xs text-gray-400 mt-2">{hour.hour}</div>
                 </div>
               );
             })}
@@ -695,67 +697,55 @@ export default function AnalyticsDashboard() {
       </div>
 
       {/* Summary Stats */}
-      <div className="grid gap-6 sm:grid-cols-3">
-        <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl p-6 shadow-xl hover:bg-gray-800/50 transition-all duration-200">
+      <div className="grid gap-4 sm:grid-cols-3">
+        <div className="admin-panel-card p-5">
           <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center border border-blue-500/30">
-              <FaEye className="w-6 h-6 text-blue-400" />
-            </div>
+            <IconTile tone="cyan" className="size-10">
+              <Eye className="size-4" aria-hidden="true" />
+            </IconTile>
             <div className="text-right">
-              <div className="text-2xl font-bold text-blue-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+              <div className="text-2xl font-semibold tabular-nums text-white">
                 {analytics.pageViews.thisWeek.toLocaleString()}
               </div>
             </div>
           </div>
           <div className="space-y-1">
-            <div className="text-sm font-medium text-gray-300" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-              This Week
-            </div>
-            <div className="text-xs text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-              Page Views
-            </div>
+            <div className="text-sm font-medium text-gray-300">This Week</div>
+            <div className="text-xs text-gray-400">Page Views</div>
           </div>
         </div>
 
-        <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl p-6 shadow-xl hover:bg-gray-800/50 transition-all duration-200">
+        <div className="admin-panel-card p-5">
           <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center border border-purple-500/30">
-              <FaEye className="w-6 h-6 text-purple-400" />
-            </div>
+            <IconTile tone="violet" className="size-10">
+              <Eye className="size-4" aria-hidden="true" />
+            </IconTile>
             <div className="text-right">
-              <div className="text-2xl font-bold text-purple-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+              <div className="text-2xl font-semibold tabular-nums text-white">
                 {analytics.pageViews.thisMonth.toLocaleString()}
               </div>
             </div>
           </div>
           <div className="space-y-1">
-            <div className="text-sm font-medium text-gray-300" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-              This Month
-            </div>
-            <div className="text-xs text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-              Page Views
-            </div>
+            <div className="text-sm font-medium text-gray-300">This Month</div>
+            <div className="text-xs text-gray-400">Page Views</div>
           </div>
         </div>
 
-        <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl p-6 shadow-xl hover:bg-gray-800/50 transition-all duration-200">
+        <div className="admin-panel-card p-5">
           <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center border border-green-500/30">
-              <FaUsers className="w-6 h-6 text-green-400" />
-            </div>
+            <IconTile tone="emerald" className="size-10">
+              <Users className="size-4" aria-hidden="true" />
+            </IconTile>
             <div className="text-right">
-              <div className="text-2xl font-bold text-green-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+              <div className="text-2xl font-semibold tabular-nums text-white">
                 {analytics.uniqueVisitors.thisMonth.toLocaleString()}
               </div>
             </div>
           </div>
           <div className="space-y-1">
-            <div className="text-sm font-medium text-gray-300" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-              Monthly Unique
-            </div>
-            <div className="text-xs text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-              Visitors
-            </div>
+            <div className="text-sm font-medium text-gray-300">Monthly Unique</div>
+            <div className="text-xs text-gray-400">Visitors</div>
           </div>
         </div>
       </div>
