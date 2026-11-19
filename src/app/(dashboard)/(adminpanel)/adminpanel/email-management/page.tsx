@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import AdminModal from '@/components/AdminModal';
 import { useEffect, useState } from 'react';
-import { FaCheckCircle, FaChevronDown, FaChevronUp, FaEnvelope, FaHistory, FaPaperPlane, FaPlus, FaTimesCircle, FaTrash, FaUsers } from 'react-icons/fa';
+import { FaCheckCircle, FaChevronDown, FaChevronUp, FaEnvelope, FaHistory, FaInbox, FaPaperPlane, FaPlus, FaReply, FaSearch, FaSync, FaTimesCircle, FaTrash, FaUsers } from 'react-icons/fa';
 
 interface EmailRecipient {
   id: string;
@@ -26,12 +26,40 @@ interface EmailRecord {
   failedRecipients?: string[];
 }
 
+interface MailAddress {
+  name: string;
+  email: string;
+}
+
+interface InboxRecord {
+  uid: number;
+  from: MailAddress[];
+  to: string[];
+  subject: string;
+  date: string;
+  unread: boolean;
+  size: number;
+}
+
+interface InboxMessage {
+  uid: number;
+  from: MailAddress[];
+  to: MailAddress[];
+  cc: MailAddress[];
+  subject: string;
+  date: string;
+  body: string;
+  messageId: string;
+}
+
 export default function EmailManagementPage() {
   const [recipients, setRecipients] = useState<EmailRecipient[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingRecipient, setEditingRecipient] = useState<EmailRecipient | null>(null);
+  const [recipientSearch, setRecipientSearch] = useState('');
+  const [recipientStatusFilter, setRecipientStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
 
   // Form state
   const [formData, setFormData] = useState({
@@ -50,15 +78,31 @@ export default function EmailManagementPage() {
   const [emailMessage, setEmailMessage] = useState('');
   const [sendingEmail, setSendingEmail] = useState(false);
 
+  // Mailbox inbox state
+  const [inboxMessages, setInboxMessages] = useState<InboxRecord[]>([]);
+  const [selectedInboxMessage, setSelectedInboxMessage] = useState<InboxMessage | null>(null);
+  const [loadingInbox, setLoadingInbox] = useState(false);
+  const [inboxError, setInboxError] = useState<string | null>(null);
+  const [inboxSearch, setInboxSearch] = useState('');
+  const [unreadOnly, setUnreadOnly] = useState(false);
+  const [showMailboxComposeModal, setShowMailboxComposeModal] = useState(false);
+  const [mailboxTo, setMailboxTo] = useState('');
+  const [mailboxSubject, setMailboxSubject] = useState('');
+  const [mailboxMessage, setMailboxMessage] = useState('');
+  const [sendingMailboxEmail, setSendingMailboxEmail] = useState(false);
+  const [mailboxComposeError, setMailboxComposeError] = useState<string | null>(null);
+  const [mailboxComposeSuccess, setMailboxComposeSuccess] = useState<string | null>(null);
+
   // Email history state
   const [emailHistory, setEmailHistory] = useState<EmailRecord[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
-  const [activeTab, setActiveTab] = useState<'recipients' | 'history'>('recipients');
+  const [activeTab, setActiveTab] = useState<'inbox' | 'recipients' | 'history'>('inbox');
   const [expandedEmailId, setExpandedEmailId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchRecipients();
     fetchEmailHistory();
+    fetchInbox();
   }, []);
 
   const fetchRecipients = async () => {
@@ -144,6 +188,85 @@ export default function EmailManagementPage() {
     }
   };
 
+  const fetchInbox = async () => {
+    try {
+      setLoadingInbox(true);
+      setInboxError(null);
+      const response = await fetch('/api/admin/mailbox');
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Unable to load inbox');
+      setInboxMessages(data.messages || []);
+    } catch (err) {
+      setInboxError(err instanceof Error ? err.message : 'Unable to load inbox');
+    } finally {
+      setLoadingInbox(false);
+    }
+  };
+
+  const openInboxMessage = async (uid: number) => {
+    setInboxError(null);
+    try {
+      const response = await fetch(`/api/admin/mailbox/${uid}`);
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Unable to open message');
+      setSelectedInboxMessage(data.message);
+      setInboxMessages(current =>
+        current.map(message => message.uid === uid ? { ...message, unread: false } : message)
+      );
+    } catch (err) {
+      setInboxError(err instanceof Error ? err.message : 'Unable to open message');
+    }
+  };
+
+  const closeMailboxCompose = () => {
+    setShowMailboxComposeModal(false);
+    setMailboxTo('');
+    setMailboxSubject('');
+    setMailboxMessage('');
+    setMailboxComposeError(null);
+  };
+
+  const handleReplyToInboxMessage = () => {
+    const sender = selectedInboxMessage?.from.find(address => address.email);
+    if (!selectedInboxMessage || !sender) return;
+    setMailboxTo(sender.email);
+    setMailboxSubject(/^re:/i.test(selectedInboxMessage.subject)
+      ? selectedInboxMessage.subject
+      : `Re: ${selectedInboxMessage.subject}`);
+    setMailboxMessage(
+      `\n\nOn ${new Date(selectedInboxMessage.date).toLocaleString()}, ${sender.email} wrote:\n` +
+      selectedInboxMessage.body.split('\n').map(line => `> ${line}`).join('\n')
+    );
+    setMailboxComposeError(null);
+    setShowMailboxComposeModal(true);
+  };
+
+  const handleSendMailboxEmail = async () => {
+    setMailboxComposeError(null);
+    setMailboxComposeSuccess(null);
+    try {
+      setSendingMailboxEmail(true);
+      const response = await fetch('/api/admin/mailbox/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: mailboxTo,
+          subject: mailboxSubject,
+          message: mailboxMessage,
+        }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Failed to send email');
+      setMailboxComposeSuccess(result.message || 'Email sent successfully.');
+      closeMailboxCompose();
+      await fetchEmailHistory();
+    } catch (err) {
+      setMailboxComposeError(err instanceof Error ? err.message : 'Failed to send email');
+    } finally {
+      setSendingMailboxEmail(false);
+    }
+  };
+
   const handleSendTestEmail = async () => {
     if (!testEmail) {
       alert('Please enter an email address');
@@ -217,13 +340,24 @@ export default function EmailManagementPage() {
     }
   };
 
+  const filteredRecipients = recipients.filter(recipient => {
+    const query = recipientSearch.trim().toLowerCase();
+    const matchesSearch = !query || [recipient.email, recipient.name || '', recipient.role]
+      .some(value => value.toLowerCase().includes(query));
+    const matchesStatus =
+      recipientStatusFilter === 'all' ||
+      (recipientStatusFilter === 'active' && recipient.active) ||
+      (recipientStatusFilter === 'inactive' && !recipient.active);
+    return matchesSearch && matchesStatus;
+  });
+
   return (
     <div className="p-6 max-w-7xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-3xl font-bold text-white mb-2">Email Management</h1>
-          <p className="text-gray-400">Manage admin email recipients and notifications</p>
+          <p className="text-gray-400">Read your mailbox, compose messages, and manage notification recipients</p>
         </div>
         <Link
           href="/adminpanel"
@@ -233,13 +367,13 @@ export default function EmailManagementPage() {
         </Link>
       </div>
 
-      {/* Send Email to Clients Section */}
+      {/* Client broadcast */}
       <div className="bg-gradient-to-r from-purple-900/20 to-pink-900/20 rounded-lg p-6 mb-6 border border-purple-700">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="text-xl font-semibold text-white mb-2 flex items-center gap-2">
               <FaUsers className="text-purple-400" />
-              Send Email to Clients
+              Client Broadcast
             </h2>
             <p className="text-sm text-gray-400">
               Send announcements to all active client recipients ({recipients.filter(r => r.active && r.role !== 'admin').length} clients)
@@ -250,7 +384,7 @@ export default function EmailManagementPage() {
             className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-lg font-medium transition-all shadow-lg"
           >
             <FaPaperPlane />
-            Compose Email
+            Compose Broadcast
           </button>
         </div>
       </div>
@@ -282,6 +416,21 @@ export default function EmailManagementPage() {
       {/* Tabs */}
       <div className="flex gap-2 mb-6">
         <button
+          onClick={() => setActiveTab('inbox')}
+          className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${activeTab === 'inbox'
+              ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white'
+              : 'bg-gray-800 text-gray-400 hover:text-white border border-gray-700'
+            }`}
+        >
+          <FaInbox />
+          Inbox
+          {inboxMessages.filter(message => message.unread).length > 0 && (
+            <span className="rounded-full bg-white/20 px-2 py-0.5 text-xs">
+              {inboxMessages.filter(message => message.unread).length}
+            </span>
+          )}
+        </button>
+        <button
           onClick={() => setActiveTab('recipients')}
           className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${activeTab === 'recipients'
               ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white'
@@ -303,9 +452,176 @@ export default function EmailManagementPage() {
         </button>
       </div>
 
+      {activeTab === 'inbox' && (
+        <section className="overflow-hidden rounded-xl border border-gray-700 bg-gray-800">
+          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-700 px-5 py-4">
+            <div>
+              <h2 className="flex items-center gap-2 text-xl font-semibold text-white">
+                <FaInbox className="text-cyan-400" />
+                Inbox
+              </h2>
+              <p className="mt-1 text-sm text-gray-400">
+                {inboxMessages.length} recent message{inboxMessages.length === 1 ? '' : 's'}
+                {' · '}{inboxMessages.filter(message => message.unread).length} unread
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setUnreadOnly(value => !value)}
+                aria-pressed={unreadOnly}
+                className={`rounded-lg border px-3 py-2 text-sm transition-colors ${unreadOnly
+                  ? 'border-cyan-500 bg-cyan-500/15 text-cyan-200'
+                  : 'border-gray-600 text-gray-300 hover:bg-gray-700'
+                  }`}
+              >
+                Unread
+              </button>
+              <button
+                type="button"
+                onClick={fetchInbox}
+                disabled={loadingInbox}
+                className="flex items-center gap-2 rounded-lg border border-gray-600 px-3 py-2 text-sm text-gray-300 transition-colors hover:bg-gray-700 disabled:opacity-50"
+              >
+                <FaSync className={loadingInbox ? 'animate-spin' : ''} />
+                Refresh
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setMailboxComposeSuccess(null);
+                  setShowMailboxComposeModal(true);
+                }}
+                className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:from-cyan-600 hover:to-blue-600"
+              >
+                <FaPaperPlane />
+                Compose
+              </button>
+            </div>
+          </div>
+
+          {mailboxComposeSuccess && (
+            <div role="status" className="border-b border-green-800 bg-green-900/20 px-5 py-3 text-sm text-green-200">
+              {mailboxComposeSuccess}
+            </div>
+          )}
+          {inboxError && (
+            <div role="alert" className="border-b border-red-800 bg-red-900/20 px-5 py-3 text-sm text-red-200">
+              {inboxError}
+            </div>
+          )}
+
+          <div className="grid min-h-[560px] grid-cols-1 lg:grid-cols-[minmax(280px,360px)_minmax(0,1fr)]">
+            <div className="border-b border-gray-700 lg:border-b-0 lg:border-r">
+              <label className="relative block border-b border-gray-700 p-3">
+                <FaSearch className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-500" />
+                <input
+                  type="search"
+                  value={inboxSearch}
+                  onChange={event => setInboxSearch(event.target.value)}
+                  placeholder="Search inbox"
+                  className="w-full rounded-lg border border-gray-600 bg-gray-900 py-2 pl-9 pr-3 text-sm text-white outline-none focus:border-cyan-500"
+                />
+              </label>
+
+              {loadingInbox && inboxMessages.length === 0 ? (
+                <div className="p-6 text-center text-sm text-gray-400">Connecting to inbox…</div>
+              ) : inboxMessages.length === 0 && !inboxError ? (
+                <div className="p-6 text-center text-sm text-gray-400">Your inbox is empty.</div>
+              ) : (
+                <div className="max-h-[560px] overflow-y-auto">
+                  {inboxMessages
+                    .filter(message => !unreadOnly || message.unread)
+                    .filter(message => {
+                      const sender = message.from.map(address => `${address.name} ${address.email}`).join(' ');
+                      return `${sender} ${message.subject}`.toLowerCase().includes(inboxSearch.toLowerCase());
+                    })
+                    .map(message => {
+                      const sender = message.from[0];
+                      const selected = selectedInboxMessage?.uid === message.uid;
+                      return (
+                        <button
+                          key={message.uid}
+                          type="button"
+                          onClick={() => openInboxMessage(message.uid)}
+                          aria-current={selected ? 'true' : undefined}
+                          className={`block w-full border-b border-gray-700/80 p-4 text-left transition-colors ${selected
+                            ? 'bg-cyan-950/50'
+                            : 'hover:bg-gray-700/50'
+                            }`}
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <span className={`truncate text-sm ${message.unread ? 'font-semibold text-white' : 'text-gray-300'}`}>
+                              {sender?.name || sender?.email || 'Unknown sender'}
+                            </span>
+                            <span className="shrink-0 text-xs text-gray-500">
+                              {new Date(message.date).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <p className={`mt-1 truncate text-sm ${message.unread ? 'font-medium text-white' : 'text-gray-400'}`}>
+                            {message.subject}
+                          </p>
+                          <p className="mt-1 truncate text-xs text-gray-500">{sender?.email || ''}</p>
+                        </button>
+                      );
+                    })}
+                </div>
+              )}
+            </div>
+
+            <div className="min-w-0 bg-gray-900/40">
+              {!selectedInboxMessage ? (
+                <div className="flex h-full min-h-[320px] flex-col items-center justify-center p-8 text-center text-gray-500">
+                  <FaEnvelope className="mb-3 text-3xl text-gray-600" />
+                  <p>Select a message to read it.</p>
+                </div>
+              ) : (
+                <article className="h-full">
+                  <header className="border-b border-gray-700 p-5">
+                    <div className="flex flex-wrap items-start justify-between gap-4">
+                      <div className="min-w-0">
+                        <h3 className="break-words text-xl font-semibold text-white">{selectedInboxMessage.subject}</h3>
+                        <p className="mt-2 text-sm text-gray-400">
+                          From {selectedInboxMessage.from.map(address => address.name
+                            ? `${address.name} <${address.email}>`
+                            : address.email).join(', ')}
+                        </p>
+                        <p className="mt-1 text-xs text-gray-500">
+                          To {selectedInboxMessage.to.map(address => address.email).join(', ')}
+                        </p>
+                        <p className="mt-1 text-xs text-gray-500">
+                          {new Date(selectedInboxMessage.date).toLocaleString()}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleReplyToInboxMessage}
+                        disabled={!selectedInboxMessage.from.some(address => address.email)}
+                        className="flex items-center gap-2 rounded-lg border border-gray-600 px-3 py-2 text-sm text-gray-200 transition-colors hover:bg-gray-700 disabled:opacity-50"
+                      >
+                        <FaReply />
+                        Reply
+                      </button>
+                    </div>
+                    {selectedInboxMessage.cc.length > 0 && (
+                      <p className="mt-2 text-xs text-gray-500">
+                        Cc {selectedInboxMessage.cc.map(address => address.email).join(', ')}
+                      </p>
+                    )}
+                  </header>
+                  <pre className="max-h-[520px] overflow-auto whitespace-pre-wrap break-words p-5 font-sans text-sm leading-7 text-gray-200">
+                    {selectedInboxMessage.body || '(This message has no plain-text body.)'}
+                  </pre>
+                </article>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Recipients List */}
       {activeTab === 'recipients' && (
-        <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+        <div className="admin-panel-card p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold text-white flex items-center gap-2">
               <FaEnvelope className="text-cyan-400" />
@@ -320,6 +636,32 @@ export default function EmailManagementPage() {
             </button>
           </div>
 
+          {!loading && !error && recipients.length > 0 && (
+            <div className="admin-panel-filter-bar mb-4">
+              <div className="relative min-w-[220px] flex-1">
+                <FaSearch className="admin-panel-input-icon" aria-hidden="true" />
+                <input
+                  type="search"
+                  value={recipientSearch}
+                  onChange={event => setRecipientSearch(event.target.value)}
+                  placeholder="Search email, name, or role..."
+                  aria-label="Search email recipients"
+                  className="w-full px-3 py-2"
+                />
+              </div>
+              <select
+                value={recipientStatusFilter}
+                onChange={event => setRecipientStatusFilter(event.target.value as typeof recipientStatusFilter)}
+                aria-label="Filter recipients by status"
+                className="px-3 py-2"
+              >
+                <option value="all">All statuses</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
+          )}
+
           {loading ? (
             <div className="text-center py-8 text-gray-400">Loading recipients...</div>
           ) : error ? (
@@ -328,6 +670,8 @@ export default function EmailManagementPage() {
             <div className="text-center py-8 text-gray-400">
               No recipients configured. Add one to get started.
             </div>
+          ) : filteredRecipients.length === 0 ? (
+            <div className="text-center py-8 text-gray-400">No recipients match these filters.</div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -342,7 +686,7 @@ export default function EmailManagementPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-700">
-                  {recipients.map((recipient) => (
+                  {filteredRecipients.map((recipient) => (
                     <tr key={recipient.id} className="hover:bg-gray-700/30 transition-colors">
                       <td className="px-4 py-3 text-sm text-white">{recipient.email}</td>
                       <td className="px-4 py-3 text-sm text-gray-300">{recipient.name || '-'}</td>
@@ -567,6 +911,85 @@ export default function EmailManagementPage() {
                 className="flex-1 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-lg font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {sendingEmail ? 'Sending...' : 'Send Email'}
+              </button>
+            </div>
+          </div>
+        </AdminModal>
+      )}
+
+      {/* Compose individual mailbox email */}
+      {showMailboxComposeModal && (
+        <AdminModal
+          open={showMailboxComposeModal}
+          onClose={() => {
+            if (!sendingMailboxEmail) closeMailboxCompose();
+          }}
+          title="Compose Email"
+          maxWidth="max-w-2xl"
+        >
+          <div className="rounded-xl border border-gray-700 bg-gray-800 p-6 shadow-2xl">
+            <h3 className="mb-5 flex items-center gap-2 text-xl font-semibold text-white">
+              <FaPaperPlane className="text-cyan-400" />
+              Compose Email
+            </h3>
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="mailbox-to" className="mb-2 block text-sm font-medium text-gray-300">To</label>
+                <input
+                  id="mailbox-to"
+                  type="email"
+                  value={mailboxTo}
+                  onChange={event => setMailboxTo(event.target.value)}
+                  placeholder="name@example.com"
+                  autoComplete="email"
+                  className="w-full rounded-lg border border-gray-600 bg-gray-900 px-4 py-3 text-white outline-none focus:border-cyan-500"
+                />
+              </div>
+              <div>
+                <label htmlFor="mailbox-subject" className="mb-2 block text-sm font-medium text-gray-300">Subject</label>
+                <input
+                  id="mailbox-subject"
+                  type="text"
+                  maxLength={200}
+                  value={mailboxSubject}
+                  onChange={event => setMailboxSubject(event.target.value)}
+                  placeholder="Subject"
+                  className="w-full rounded-lg border border-gray-600 bg-gray-900 px-4 py-3 text-white outline-none focus:border-cyan-500"
+                />
+              </div>
+              <div>
+                <label htmlFor="mailbox-message" className="mb-2 block text-sm font-medium text-gray-300">Message</label>
+                <textarea
+                  id="mailbox-message"
+                  rows={10}
+                  maxLength={50000}
+                  value={mailboxMessage}
+                  onChange={event => setMailboxMessage(event.target.value)}
+                  placeholder="Write your email…"
+                  className="w-full resize-y rounded-lg border border-gray-600 bg-gray-900 px-4 py-3 text-white outline-none focus:border-cyan-500"
+                />
+              </div>
+              {mailboxComposeError && (
+                <p role="alert" className="text-sm text-red-300">{mailboxComposeError}</p>
+              )}
+            </div>
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={closeMailboxCompose}
+                disabled={sendingMailboxEmail}
+                className="rounded-lg border border-gray-600 px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSendMailboxEmail}
+                disabled={sendingMailboxEmail || !mailboxTo || !mailboxSubject.trim() || !mailboxMessage.trim()}
+                className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 px-5 py-2 text-sm font-medium text-white hover:from-cyan-600 hover:to-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <FaPaperPlane />
+                {sendingMailboxEmail ? 'Sending…' : 'Send'}
               </button>
             </div>
           </div>

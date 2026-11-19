@@ -225,9 +225,9 @@ const AdminOrdersComponent = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-semibold text-white" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+          <h1 className="text-2xl font-semibold text-white" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
             All Orders
-          </h2>
+          </h1>
           <p className="text-gray-400 text-sm mt-1" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
             Comprehensive order management and tracking
           </p>
@@ -238,7 +238,7 @@ const AdminOrdersComponent = () => {
       </div>
 
       {/* Filters */}
-      <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl p-6 shadow-xl">
+      <div className="admin-panel-filter-bar">
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           <div>
             <label className="block text-sm text-gray-300 mb-1">Type</label>
@@ -316,7 +316,7 @@ const AdminOrdersComponent = () => {
       </div>
 
       {/* Orders Table */}
-      <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl shadow-xl">
+      <div className="admin-panel-card overflow-hidden">
         {loading ? (
           <div className="text-center py-12">
             <div className="w-16 h-16 bg-gray-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -806,10 +806,10 @@ const AdminOrdersComponent = () => {
       {/* Data Sources Info */}
       <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl shadow-xl">
         <div className="p-6 border-b border-gray-700/20">
-          <h3 className="text-lg font-semibold text-white flex items-center gap-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+          <h2 className="text-lg font-semibold text-white flex items-center gap-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
             <FaFilter className="text-blue-400" />
             Data Sources
-          </h3>
+          </h2>
         </div>
         <div className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

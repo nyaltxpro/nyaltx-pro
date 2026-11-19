@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { Search } from 'lucide-react';
 import { FaChartBar, FaCheck, FaChevronLeft, FaChevronRight, FaCog, FaCoins, FaCrown, FaEye, FaImage, FaListUl, FaTimes, FaTrash, FaUsers } from 'react-icons/fa';
 
 export default function AdminDashboardComponent() {
@@ -14,6 +15,7 @@ export default function AdminDashboardComponent() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [total, setTotal] = useState(0);
+  const [pendingSearch, setPendingSearch] = useState('');
 
   type Status = 'pending' | 'approved' | 'rejected';
   type TokenRegistration = {
@@ -119,6 +121,16 @@ export default function AdminDashboardComponent() {
     }
   }
 
+  const filteredPendingTokens = (pendingTokens || []).filter(token => {
+    const query = pendingSearch.trim().toLowerCase();
+    return !query || [
+      token.tokenName,
+      token.tokenSymbol,
+      token.blockchain,
+      token.contractAddress,
+    ].some(value => value.toLowerCase().includes(query));
+  });
+
   return (
     <div className="min-h-screen  p-6">
       <div className="max-w-7xl mx-auto space-y-8">
@@ -207,14 +219,14 @@ export default function AdminDashboardComponent() {
         </div>
 
         {/* Enhanced Pending Tokens Section */}
-        <div className="bg-black/40 backdrop-blur-xl border border-gray-800/60 rounded-3xl shadow-2xl p-8">
+        <div className="admin-panel-card p-8">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-2xl font-bold text-white flex items-center gap-3" style={{ fontFamily: 'Space Grotesk, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+            <h2 className="text-2xl font-bold text-white flex items-center gap-3" style={{ fontFamily: 'Space Grotesk, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
               <div className="w-8 h-8 bg-gradient-to-r from-amber-500 to-orange-500 rounded-lg flex items-center justify-center">
                 <FaCoins className="w-4 h-4 text-white" />
               </div>
               Pending Token Approvals
-            </h3>
+            </h2>
             <a
               href="/adminpanel/tokens"
               className="flex items-center gap-2 px-4 py-2 bg-gray-800/50 hover:bg-gray-700/50 rounded-xl text-gray-300 hover:text-white transition-all duration-200 backdrop-blur-sm"
@@ -232,6 +244,22 @@ export default function AdminDashboardComponent() {
                 <p className="text-red-300 font-medium" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                   {pendingError}
                 </p>
+              </div>
+            </div>
+          )}
+
+          {pendingTokens && pendingTokens.length > 0 && (
+            <div className="admin-panel-filter-bar mb-4">
+              <div className="relative min-w-[220px] flex-1">
+                <Search className="admin-panel-input-icon" aria-hidden="true" />
+                <input
+                  type="search"
+                  value={pendingSearch}
+                  onChange={event => setPendingSearch(event.target.value)}
+                  placeholder="Search this page by token, chain, or address..."
+                  aria-label="Search current page of pending tokens"
+                  className="w-full px-3 py-2"
+                />
               </div>
             </div>
           )}
@@ -256,7 +284,7 @@ export default function AdminDashboardComponent() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <div className="bg-gray-900/30 rounded-2xl border border-gray-700/30 backdrop-blur-sm overflow-hidden">
+              <div className="admin-panel-card overflow-hidden">
                 <table className="min-w-full">
                   <thead className="bg-gray-800/50">
                     <tr>
@@ -278,7 +306,7 @@ export default function AdminDashboardComponent() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-700/30">
-                    {pendingTokens.map(t => (
+                    {filteredPendingTokens.length > 0 ? filteredPendingTokens.map(t => (
                       <tr key={t.id} className="hover:bg-gray-800/20 transition-colors duration-200">
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                           {new Date(t.createdAt).toLocaleDateString()}
@@ -344,7 +372,13 @@ export default function AdminDashboardComponent() {
                           </div>
                         </td>
                       </tr>
-                    ))}
+                    )) : (
+                      <tr>
+                        <td colSpan={5} className="h-24 text-center text-gray-400">
+                          No pending tokens match this search.
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -382,12 +416,12 @@ export default function AdminDashboardComponent() {
 
         {/* Enhanced Quick Actions Section */}
         <div className="bg-black/40 backdrop-blur-xl border border-gray-800/60 rounded-3xl shadow-2xl p-8">
-          <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-3" style={{ fontFamily: 'Space Grotesk, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+          <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3" style={{ fontFamily: 'Space Grotesk, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
             <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg flex items-center justify-center">
               <FaCog className="w-4 h-4 text-white" />
             </div>
             Quick Actions
-          </h3>
+          </h2>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             <a
               href="/adminpanel/tokens"
@@ -398,9 +432,9 @@ export default function AdminDashboardComponent() {
                   <FaCoins className="w-6 h-6 text-white" />
                 </div>
               </div>
-              <h4 className="font-bold text-white mb-2 text-lg" style={{ fontFamily: 'Space Grotesk, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+              <h3 className="font-bold text-white mb-2 text-lg" style={{ fontFamily: 'Space Grotesk, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                 Manage Tokens
-              </h4>
+              </h3>
               <p className="text-sm text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                 View and manage all token registrations
               </p>
@@ -415,9 +449,9 @@ export default function AdminDashboardComponent() {
                   <FaCrown className="w-6 h-6 text-white" />
                 </div>
               </div>
-              <h4 className="font-bold text-white mb-2 text-lg" style={{ fontFamily: 'Space Grotesk, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+              <h3 className="font-bold text-white mb-2 text-lg" style={{ fontFamily: 'Space Grotesk, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                 Token Points
-              </h4>
+              </h3>
               <p className="text-sm text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                 Manage points for token race ranking
               </p>
@@ -432,9 +466,9 @@ export default function AdminDashboardComponent() {
                   <FaListUl className="w-6 h-6 text-white" />
                 </div>
               </div>
-              <h4 className="font-bold text-white mb-2 text-lg" style={{ fontFamily: 'Space Grotesk, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+              <h3 className="font-bold text-white mb-2 text-lg" style={{ fontFamily: 'Space Grotesk, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                 Orders
-              </h4>
+              </h3>
               <p className="text-sm text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                 View and manage user orders
               </p>
@@ -449,9 +483,9 @@ export default function AdminDashboardComponent() {
                   <FaImage className="w-6 h-6 text-white" />
                 </div>
               </div>
-              <h4 className="font-bold text-white mb-2 text-lg" style={{ fontFamily: 'Space Grotesk, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+              <h3 className="font-bold text-white mb-2 text-lg" style={{ fontFamily: 'Space Grotesk, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                 Banner Management
-              </h4>
+              </h3>
               <p className="text-sm text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                 Upload and manage banner images
               </p>

@@ -96,3 +96,16 @@ npm install stripe
 4. Navigate to `/pro-signup` to activate Pro (demo cookie), then go to `/pricing` to purchase a tier with your preferred method.
 
 # nyaltx-pro
+
+## Admin Email Inbox
+
+The admin Email Management inbox connects to the configured mailbox over IMAP and sends composed messages using the existing SMTP account. IMAP defaults to Namecheap Private Email (`mail.privateemail.com:993`, TLS) and reuses `SMTP_USER`/`SMTP_PASS` unless separate credentials are provided:
+
+```env
+IMAP_HOST=mail.privateemail.com
+IMAP_PORT=993
+IMAP_USER=mailbox@example.com
+IMAP_PASS=your-mailbox-password
+```
+
+`IMAP_USER` and `IMAP_PASS` are optional when the mailbox uses the SMTP credentials. Keep all mail credentials server-side; do not expose them through `NEXT_PUBLIC_*` variables.

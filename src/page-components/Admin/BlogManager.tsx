@@ -5,14 +5,12 @@ import AdminModal from '@/components/AdminModal';
 import 'quill/dist/quill.snow.css';
 import type QuillType from 'quill';
 import type { QuillOptions } from 'quill';
+import { Newspaper, Plus, X } from 'lucide-react';
 import {
   FaEdit,
-  FaNewspaper,
-  FaPlus,
   FaSave,
   FaSpinner,
   FaTag,
-  FaTimes,
   FaTrash,
   FaUpload,
 } from 'react-icons/fa';
@@ -455,14 +453,14 @@ const AdminBlogManagerComponent = () => {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-semibold text-white">Blog Management</h2>
+          <h1 className="text-2xl font-semibold text-white">Blog Management</h1>
           <p className="text-sm text-white/60">Create, publish, and maintain NYALTX blog posts.</p>
         </div>
         <button
           onClick={handleCreate}
-          className="inline-flex items-center gap-2 rounded-lg border border-cyan-500/40 bg-cyan-500/10 px-4 py-2 text-sm font-medium text-cyan-200 transition hover:bg-cyan-500/20"
+          className="inline-flex items-center gap-2 rounded-lg border border-white/15 bg-transparent px-4 py-2 text-sm font-medium text-white/80 transition hover:border-cyan-400/50 hover:text-cyan-200"
         >
-          <FaPlus className="h-4 w-4" />
+          <Plus className="h-4 w-4" aria-hidden="true" />
           New Blog Post
         </button>
       </div>
@@ -505,7 +503,7 @@ const AdminBlogManagerComponent = () => {
           </div>
         ) : (
           filteredPosts.map((post) => (
-            <div key={post._id} className="rounded-xl border border-white/10 bg-white/5 p-5">
+            <div key={post._id} className="admin-panel-card p-5">
               <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                 <div className="space-y-3">
                   <div className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-widest">
@@ -520,7 +518,7 @@ const AdminBlogManagerComponent = () => {
                     </span>
                     {post.publishedAt ? <span className="text-white/60">{new Date(post.publishedAt).toLocaleString()}</span> : null}
                   </div>
-                  <h3 className="text-xl font-semibold text-white">{post.title}</h3>
+                  <h2 className="text-xl font-semibold text-white">{post.title}</h2>
                   <p className="text-sm text-white/70">{post.excerpt}</p>
                   {post.tags?.length ? (
                     <div className="flex flex-wrap items-center gap-2 text-xs text-white/60">
@@ -554,22 +552,22 @@ const AdminBlogManagerComponent = () => {
         )}
       </div>
 
-      {isFormOpen ? (
-        <AdminModal
-          open={isFormOpen}
-          onClose={() => {
-            if (!state.loading && !isUploadingToIPFS) resetForm();
-          }}
-          title={form.id ? 'Edit Blog Post' : 'Create Blog Post'}
-          maxWidth="max-w-5xl"
-        >
-          <div className="my-4 flex max-h-[min(92vh,900px)] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#0d0d0d] shadow-2xl">
+      <AdminModal
+        open={isFormOpen}
+        onClose={() => {
+          if (!state.loading && !isUploadingToIPFS) resetForm();
+        }}
+        title={form.id ? 'Edit Blog Post' : 'Create Blog Post'}
+        maxWidth="max-w-5xl"
+        placement="right"
+      >
+          <div className="admin-panel-form flex h-full max-h-screen w-full max-w-5xl flex-col overflow-hidden rounded-l-2xl border-l border-white/10 bg-[#0d0d0d] shadow-2xl">
             <div className="flex shrink-0 items-center justify-between gap-4 border-b border-white/10 px-5 py-4 sm:px-6">
               <h3
                 id="blog-form-modal-title"
                 className="flex items-center gap-2 text-lg font-semibold text-white"
               >
-                <FaNewspaper className="h-5 w-5 text-cyan-300" />
+                <Newspaper className="h-5 w-5 text-cyan-300" aria-hidden="true" />
                 {form.id ? 'Edit Blog Post' : 'Create Blog Post'}
               </h3>
               <button
@@ -579,7 +577,7 @@ const AdminBlogManagerComponent = () => {
                 aria-label="Close"
                 className="rounded-lg border border-white/15 p-2 text-white/60 transition hover:bg-white/10 hover:text-white disabled:opacity-50"
               >
-                <FaTimes className="h-4 w-4" />
+                <X className="h-4 w-4" aria-hidden="true" />
               </button>
             </div>
 
@@ -843,8 +841,7 @@ const AdminBlogManagerComponent = () => {
               </button>
             </div>
           </div>
-        </AdminModal>
-      ) : null}
+      </AdminModal>
     </div>
   );
 };

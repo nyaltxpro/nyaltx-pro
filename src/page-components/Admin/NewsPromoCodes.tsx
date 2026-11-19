@@ -2,7 +2,9 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
+import AdminModal from '@/components/AdminModal';
 import { PROMO_PACKAGE_OPTIONS } from '@/lib/promoPackages';
+import { CalendarClock, Percent, Plus, Search, Tag, X } from 'lucide-react';
 
 interface NewsPromoCode {
   code: string;
@@ -42,6 +44,9 @@ export default function NewsPromoCodes() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [savingCode, setSavingCode] = useState<string | null>(null);
+  const [isCreateDrawerOpen, setIsCreateDrawerOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive' | 'expired'>('all');
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
 
@@ -101,6 +106,7 @@ export default function NewsPromoCodes() {
       setPackageIds([]);
       setExpiresAt('');
       setNotice(`Promo code ${result.data.code} created.`);
+      setIsCreateDrawerOpen(false);
       await loadPromoCodes();
     } catch (createError) {
       setError(createError instanceof Error ? createError.message : 'Could not create promo code.');
@@ -141,107 +147,200 @@ export default function NewsPromoCodes() {
     void updatePromoCode(promo, { expiresAt: newExpiration }, `Expiration updated for ${promo.code}.`);
   };
 
+  const filteredPromoCodes = promoCodes.filter(promo => {
+    const query = searchTerm.trim().toLowerCase();
+    const matchesSearch = !query || [
+      promo.code,
+      ...promo.packageIds.map(packageId => PACKAGE_LABELS.get(packageId) || packageId),
+    ].some(value => value.toLowerCase().includes(query));
+    const expired = Boolean(promo.expiresAt && new Date(promo.expiresAt).getTime() <= Date.now());
+    const matchesStatus =
+      statusFilter === 'all' ||
+      (statusFilter === 'expired' && expired) ||
+      (statusFilter === 'active' && promo.active && !expired) ||
+      (statusFilter === 'inactive' && !promo.active && !expired);
+    return matchesSearch && matchesStatus;
+  });
+
   return (
-    <div className="space-y-6 text-white">
-      <header>
+    <div className="admin-panel-form space-y-6 text-white">
+      <header className="flex flex-wrap items-start justify-between gap-4">
+        <div>
         <h1 className="text-2xl font-semibold">News &amp; Pricing Promo Codes</h1>
         <p className="mt-1 text-sm text-gray-400">
           Choose which News Hub or pricing packages each percentage discount applies to. Codes can stay active indefinitely or expire on a date you choose.
         </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setIsCreateDrawerOpen(true)}
+          className="inline-flex items-center gap-2 rounded-lg border border-white/15 bg-transparent px-4 py-2 text-sm font-medium text-white/80 transition-colors hover:border-cyan-400/50 hover:text-cyan-200"
+        >
+          <Plus size={16} aria-hidden="true" />
+          Create promo code
+        </button>
       </header>
 
-      <form onSubmit={createPromoCode} className="space-y-4 rounded-xl border border-gray-700/40 bg-gray-800/40 p-5">
-        <h2 className="text-lg font-medium">Create a promo code</h2>
-        <div className="grid gap-4 md:grid-cols-3">
-          <label className="text-sm text-gray-300">
-            Promo code
-            <input
-              value={code}
-              onChange={event => setCode(event.target.value.toUpperCase())}
-              minLength={3}
-              maxLength={32}
-              pattern="[A-Za-z0-9][A-Za-z0-9_-]{2,31}"
-              required
-              placeholder="NEWS10"
-              className="mt-1 w-full rounded-lg border border-gray-600 bg-gray-900/70 px-3 py-2 text-white"
-            />
-          </label>
-          <label className="text-sm text-gray-300">
-            Discount percent (1-99%)
-            <input
-              type="number"
-              min={1}
-              max={99}
-              step={1}
-              value={discountPercent}
-              onChange={event => setDiscountPercent(event.target.value)}
-              required
-              className="mt-1 w-full rounded-lg border border-gray-600 bg-gray-900/70 px-3 py-2 text-white"
-            />
-          </label>
-          <label className="text-sm text-gray-300">
-            Expires at (optional)
-            <input
-              type="datetime-local"
-              value={expiresAt}
-              onChange={event => setExpiresAt(event.target.value)}
-              className="mt-1 w-full rounded-lg border border-gray-600 bg-gray-900/70 px-3 py-2 text-white"
-            />
-          </label>
-        </div>
-        <fieldset className="space-y-3">
-          <legend className="text-sm font-medium text-gray-300">Packages (select one or more)</legend>
-          <div className="grid gap-4 md:grid-cols-2">
-            {PACKAGE_GROUPS.map(group => (
-              <fieldset key={group.label} className="space-y-2 rounded-lg border border-gray-700/60 p-3">
-                <legend className="px-1 text-sm font-medium text-gray-200">{group.label}</legend>
-                {group.packages.map(option => (
-                  <label key={option.id} className="flex items-center gap-2 text-sm text-gray-300">
-                    <input
-                      type="checkbox"
-                      checked={packageIds.includes(option.id)}
-                      onChange={event => {
-                        setPackageIds(current =>
-                          event.target.checked
-                            ? [...current, option.id]
-                            : current.filter(packageId => packageId !== option.id)
-                        );
-                      }}
-                      className="accent-cyan-500"
-                    />
-                    {option.label}
-                  </label>
-                ))}
-              </fieldset>
-            ))}
-          </div>
-          {packageIds.length === 0 && (
-            <p className="text-xs text-amber-300">Select at least one package before creating the code.</p>
-          )}
-        </fieldset>
-        <p className="text-xs text-gray-400">
-          Leave the expiration blank to keep the code valid until you deactivate it.
-        </p>
-        <button
-          type="submit"
-          disabled={saving || packageIds.length === 0}
-          className="rounded-lg bg-[#00b8d8] px-4 py-2 font-semibold text-white transition hover:bg-cyan-600 disabled:opacity-50"
+      {isCreateDrawerOpen && (
+        <AdminModal
+          open={isCreateDrawerOpen}
+          onClose={() => {
+            if (!saving) setIsCreateDrawerOpen(false);
+          }}
+          title="Create Promo Code"
+          maxWidth="max-w-xl"
+          placement="right"
         >
-          {saving ? 'Creating...' : 'Create Promo Code'}
-        </button>
-      </form>
+          <form onSubmit={createPromoCode} className="admin-panel-form flex h-full min-h-full w-full flex-col overflow-hidden border-l border-white/10 bg-[#0d0d0d]">
+            <header className="flex items-center justify-between gap-4 border-b border-white/10 px-6 py-5">
+              <h2 className="flex items-center gap-2 text-lg font-semibold">
+                <Tag size={18} className="text-cyan-300" aria-hidden="true" />
+                Create a promo code
+              </h2>
+              <button
+                type="button"
+                onClick={() => setIsCreateDrawerOpen(false)}
+                disabled={saving}
+                aria-label="Close promo code form"
+                className="text-gray-400 transition-colors hover:text-white disabled:opacity-50"
+              >
+                <X size={20} aria-hidden="true" />
+              </button>
+            </header>
+            <div className="flex-1 space-y-5 overflow-y-auto p-6">
+              <label className="block text-sm text-gray-300">
+                <span className="mb-2 flex items-center gap-2"><Tag size={14} aria-hidden="true" />Promo code</span>
+                <input
+                  value={code}
+                  onChange={event => setCode(event.target.value.toUpperCase())}
+                  minLength={3}
+                  maxLength={32}
+                  pattern="[A-Za-z0-9][A-Za-z0-9_-]{2,31}"
+                  required
+                  placeholder="NEWS10"
+                  className="w-full px-3 py-2"
+                />
+              </label>
+              <label className="block text-sm text-gray-300">
+                <span className="mb-2 flex items-center gap-2"><Percent size={14} aria-hidden="true" />Discount percent (1-99%)</span>
+                <input
+                  type="number"
+                  min={1}
+                  max={99}
+                  step={1}
+                  value={discountPercent}
+                  onChange={event => setDiscountPercent(event.target.value)}
+                  required
+                  className="w-full px-3 py-2"
+                />
+              </label>
+              <label className="block text-sm text-gray-300">
+                <span className="mb-2 flex items-center gap-2"><CalendarClock size={14} aria-hidden="true" />Expires at (optional)</span>
+                <input
+                  type="datetime-local"
+                  value={expiresAt}
+                  onChange={event => setExpiresAt(event.target.value)}
+                  className="w-full px-3 py-2"
+                />
+              </label>
+              <fieldset className="space-y-3">
+                <legend className="flex items-center gap-2 text-sm font-medium text-gray-300">
+                  <Package size={14} aria-hidden="true" />
+                  Packages (select one or more)
+                </legend>
+                <div className="grid gap-3">
+                  {PACKAGE_GROUPS.map(group => (
+                    <fieldset key={group.label} className="space-y-2 rounded-xl border border-white/10 p-4">
+                      <legend className="px-1 text-sm font-medium text-gray-200">{group.label}</legend>
+                      {group.packages.map(option => (
+                        <label key={option.id} className="flex items-center gap-2 text-sm text-gray-300">
+                          <input
+                            type="checkbox"
+                            checked={packageIds.includes(option.id)}
+                            onChange={event => {
+                              setPackageIds(current =>
+                                event.target.checked
+                                  ? [...current, option.id]
+                                  : current.filter(packageId => packageId !== option.id)
+                              );
+                            }}
+                            className="accent-cyan-500"
+                          />
+                          {option.label}
+                        </label>
+                      ))}
+                    </fieldset>
+                  ))}
+                </div>
+                {packageIds.length === 0 && (
+                  <p className="text-xs text-amber-300">Select at least one package before creating the code.</p>
+                )}
+              </fieldset>
+              <p className="text-xs text-gray-400">
+                Leave the expiration blank to keep the code valid until you deactivate it.
+              </p>
+              {error && <p role="alert" className="text-sm text-red-300">{error}</p>}
+            </div>
+            <footer className="flex justify-end gap-3 border-t border-white/10 px-6 py-4">
+              <button
+                type="button"
+                onClick={() => setIsCreateDrawerOpen(false)}
+                disabled={saving}
+                className="rounded-lg border border-white/15 px-4 py-2 text-sm text-gray-300 hover:text-white disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={saving || packageIds.length === 0}
+                className="inline-flex items-center gap-2 rounded-lg border border-cyan-400/30 bg-transparent px-4 py-2 text-sm font-medium text-cyan-100 transition-colors hover:border-cyan-300/60 disabled:opacity-50"
+              >
+                <Plus size={15} aria-hidden="true" />
+                {saving ? 'Creating...' : 'Create Code'}
+              </button>
+            </footer>
+          </form>
+        </AdminModal>
+      )}
 
       {error && <p role="alert" className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">{error}</p>}
       {notice && <p role="status" className="rounded-lg border border-green-500/30 bg-green-500/10 p-3 text-sm text-green-300">{notice}</p>}
 
-      <section className="overflow-hidden rounded-xl border border-gray-700/40 bg-gray-800/40">
+      <div className="admin-panel-filter-bar">
+        <div className="relative min-w-[220px] flex-1">
+          <Search className="admin-panel-input-icon" aria-hidden="true" />
+          <input
+            type="search"
+            value={searchTerm}
+            onChange={event => setSearchTerm(event.target.value)}
+            placeholder="Search code or package..."
+            aria-label="Search promo codes"
+            className="w-full px-3 py-2"
+          />
+        </div>
+        <select
+          value={statusFilter}
+          onChange={event => setStatusFilter(event.target.value as typeof statusFilter)}
+          aria-label="Filter promo codes by status"
+          className="px-3 py-2"
+        >
+          <option value="all">All statuses</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+          <option value="expired">Expired</option>
+        </select>
+      </div>
+
+      <section className="admin-panel-card overflow-hidden">
         <div className="border-b border-gray-700/40 px-5 py-4">
-          <h2 className="text-lg font-medium">Existing codes</h2>
+          <h2 className="text-lg font-medium">Existing codes <span className="text-sm text-gray-400">({filteredPromoCodes.length})</span></h2>
         </div>
         {loading ? (
           <p className="p-5 text-sm text-gray-400">Loading promo codes...</p>
         ) : promoCodes.length === 0 ? (
           <p className="p-5 text-sm text-gray-400">No promo codes have been created.</p>
+        ) : filteredPromoCodes.length === 0 ? (
+          <p className="p-5 text-sm text-gray-400">No promo codes match these filters.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1000px] text-left text-sm">
@@ -256,7 +355,7 @@ export default function NewsPromoCodes() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-700/40">
-                {promoCodes.map(promo => {
+                {filteredPromoCodes.map(promo => {
                   const expired = Boolean(promo.expiresAt && new Date(promo.expiresAt).getTime() <= Date.now());
                   const usable = promo.active && !expired;
                   return (

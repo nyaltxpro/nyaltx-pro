@@ -3,12 +3,19 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { FaCoins, FaSearch, FaCheck, FaTimes, FaTrash, FaChevronLeft, FaChevronRight, FaArrowLeft, FaCrown, FaPause, FaPlay, FaEye, FaEyeSlash, FaSort, FaSortUp, FaSortDown, FaPlusCircle, FaExternalLinkAlt } from 'react-icons/fa';
+import AdminModal from '@/components/AdminModal';
+import { Coins, Plus, Search, X } from 'lucide-react';
+import { FaCheck, FaTimes, FaTrash, FaChevronLeft, FaChevronRight, FaArrowLeft, FaCrown, FaPause, FaPlay, FaEye, FaEyeSlash, FaSort, FaSortUp, FaSortDown, FaExternalLinkAlt } from 'react-icons/fa';
 
 const AdminTokensClient = dynamic(() => Promise.resolve(AdminTokensComponent), {
     ssr: false,
     loading: () => <div className="text-gray-400 py-8 text-center">Loading tokens...</div>
 });
+
+const AdminTokenRegisterDrawer = dynamic(
+    () => import('@/page-components/Admin/AdminTokenRegister'),
+    { ssr: false }
+);
 
 type Status = 'pending' | 'approved' | 'rejected';
 
@@ -52,6 +59,9 @@ function AdminTokensComponent() {
     const [tokens, setTokens] = useState<TokenRegistration[] | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [busyId, setBusyId] = useState<string | null>(null);
+    const [isRegistering, setIsRegistering] = useState(false);
+    const [isRegistrationBusy, setIsRegistrationBusy] = useState(false);
+    const [refreshKey, setRefreshKey] = useState(0);
     // Toast notifications
     const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
     function showToast(type: 'success' | 'error', message: string) {
@@ -80,7 +90,7 @@ function AdminTokensComponent() {
                 setTokens([]);
                 setTotal(0);
             });
-    }, [query]);
+    }, [query, refreshKey]);
 
     async function updateStatus(id: string, status: Status) {
         try {
@@ -242,7 +252,7 @@ function AdminTokensComponent() {
     }
 
     return (
-        <div className="space-y-6">
+        <div className="admin-panel-form space-y-6">
             {/* Toast */}
             {toast && (
                 <div
@@ -256,17 +266,18 @@ function AdminTokensComponent() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-2xl font-semibold">Token Approvals</h2>
+                    <h1 className="text-2xl font-semibold">Token Approvals</h1>
                     <p className="text-sm text-gray-400">Review and manage submitted token listings.</p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <Link 
-                        href="/admin/tokens/register"
-                        className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#00b8d8] to-[#0099b8] hover:from-[#0099b8] hover:to-[#007a98] text-white rounded-lg transition-all font-medium text-sm"
+                    <button
+                        type="button"
+                        onClick={() => setIsRegistering(true)}
+                        className="inline-flex items-center gap-2 rounded-lg border border-white/15 bg-transparent px-4 py-2 text-sm font-medium text-white/80 transition-colors hover:border-cyan-400/50 hover:text-cyan-200"
                     >
-                        <FaPlusCircle />
+                        <Plus size={16} aria-hidden="true" />
                         Register Token
-                    </Link>
+                    </button>
                     <Link href="/admin" className="text-sm underline text-gray-300">
                         Back to Dashboard
                     </Link>
@@ -274,7 +285,7 @@ function AdminTokensComponent() {
             </div>
 
             {/* Filters & Controls */}
-            <div className=" bg-gray-800 rounded-lg shadow-md p-4 border  border-gray-700">
+            <div className="admin-panel-filter-bar">
                 <div className="flex flex-col lg:flex-row lg:items-center gap-4">
                     {/* Status Filter */}
                     <div className="flex items-center gap-3">
@@ -286,7 +297,7 @@ function AdminTokensComponent() {
                         </label>
                         <select
                             id="status-filter"
-                            className=" border border-gray-300  text-sm rounded-lg  block p-2.5 bg-gray-700 border-gray-600placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500"
+                            className="block rounded-lg border border-white/15 bg-transparent p-2.5 text-sm text-white focus:border-cyan-400 focus:ring-cyan-400"
                             value={statusFilter}
                             onChange={e => {
                                 setStatusFilter(e.target.value as any);
@@ -310,7 +321,7 @@ function AdminTokensComponent() {
                         </label>
                         <select
                             id="chain-filter"
-                            className=" border  text-sm rounded-lg block p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500"
+                            className="block rounded-lg border border-white/15 bg-transparent p-2.5 text-sm text-white focus:border-cyan-400 focus:ring-cyan-400"
                             value={chainFilter}
                             onChange={e => setChainFilter(e.target.value)}
                         >
@@ -328,27 +339,11 @@ function AdminTokensComponent() {
                             Search
                         </label>
                         <div className="relative">
-                            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                <svg
-                                    className="w-4 h-4 text-gray-400"
-                                    aria-hidden="true"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 20 20"
-                                >
-                                    <path
-                                        stroke="currentColor"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
-                                    />
-                                </svg>
-                            </div>
+                            <Search className="admin-panel-input-icon" aria-hidden="true" />
                             <input
                                 type="text"
                                 id="table-search"
-                                className="block p-2 pl-10 text-sm  border  rounded-lg w-full   bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500"
+                                className="block w-full rounded-lg border border-white/15 bg-transparent p-2 pl-10 text-sm text-white placeholder-gray-400 focus:border-cyan-400 focus:ring-cyan-400"
                                 placeholder="Search by name, symbol, or contract..."
                                 value={search}
                                 onChange={e => setSearch(e.target.value)}
@@ -366,7 +361,7 @@ function AdminTokensComponent() {
                         </label>
                         <select
                             id="per-page"
-                            className=" border  text-sm rounded-lg  block p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500"
+                            className="block rounded-lg border border-white/15 bg-transparent p-2.5 text-sm text-white focus:border-cyan-400 focus:ring-cyan-400"
                             value={limit}
                             onChange={e => {
                                 setLimit(parseInt(e.target.value, 10));
@@ -385,28 +380,20 @@ function AdminTokensComponent() {
 
             {!tokens ? (
                 <div className="text-center py-12">
-                    <div className="w-16 h-16 bg-gray-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg className="w-8 h-8 text-gray-400 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
-                        </svg>
-                    </div>
+                    <Coins className="mx-auto mb-4 h-8 w-8 animate-pulse text-gray-500" aria-hidden="true" />
                     <p className="text-gray-400 font-medium" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                         Loading tokens...
                     </p>
                 </div>
             ) : viewRows.length === 0 ? (
                 <div className="text-center py-12">
-                    <div className="w-16 h-16 bg-gray-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg className="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
-                        </svg>
-                    </div>
+                    <Search className="mx-auto mb-4 h-8 w-8 text-gray-500" aria-hidden="true" />
                     <p className="text-gray-400 font-medium" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                         No tokens found
                     </p>
                 </div>
             ) : (
-                <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 overflow-hidden shadow-xl">
+                <div className="admin-panel-card overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="w-full overflow-hidden">
                             <thead className="bg-gray-700/30 border-b border-gray-600/20">
@@ -668,6 +655,45 @@ function AdminTokensComponent() {
                     </button>
                 </div>
             </div>
+            <AdminModal
+                open={isRegistering}
+                onClose={() => {
+                    if (!isRegistrationBusy) setIsRegistering(false);
+                }}
+                title="Register Token"
+                maxWidth="max-w-3xl"
+                placement="right"
+            >
+                <div className="admin-panel-form flex h-full min-h-full w-full flex-col overflow-y-auto border-l border-white/10 bg-[#0d0d0d]">
+                    <header className="flex items-center justify-between border-b border-white/10 px-6 py-5">
+                        <h3 className="flex items-center gap-2 text-lg font-semibold text-white">
+                            <Coins className="h-5 w-5 text-cyan-300" aria-hidden="true" />
+                            Register Token
+                        </h3>
+                        <button
+                            type="button"
+                            onClick={() => setIsRegistering(false)}
+                            disabled={isRegistrationBusy}
+                            aria-label="Close token registration"
+                            className="text-gray-400 transition-colors hover:text-white disabled:opacity-50"
+                        >
+                            <X size={20} aria-hidden="true" />
+                        </button>
+                    </header>
+                    <div className="p-6">
+                        <AdminTokenRegisterDrawer
+                            isDrawer
+                            onClose={() => setIsRegistering(false)}
+                            onBusyChange={setIsRegistrationBusy}
+                            onSubmitted={symbol => {
+                                setIsRegistering(false);
+                                setRefreshKey(value => value + 1);
+                                showToast('success', `Token ${symbol} registered successfully.`);
+                            }}
+                        />
+                    </div>
+                </div>
+            </AdminModal>
         </div>
     );
 }

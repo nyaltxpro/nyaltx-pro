@@ -25,12 +25,14 @@ export default function AdminModal({
   title,
   children,
   maxWidth = 'max-w-3xl',
+  placement = 'center',
 }: {
   open: boolean;
   onClose: () => void;
   title: string;
   children: ReactNode;
   maxWidth?: string;
+  placement?: 'center' | 'right';
 }) {
   const [mounted, setMounted] = useState(false);
   const overlayRef = useRef<HTMLDivElement>(null);
@@ -125,13 +127,17 @@ export default function AdminModal({
 
   if (!mounted) return null;
 
+  const isRightDrawer = placement === 'right';
+
   return createPortal(
     <AnimatePresence>
       {open && (
         <motion.div
           key="admin-modal"
           ref={overlayRef}
-          className="fixed inset-0 z-[100] grid place-items-center overflow-y-auto p-4 sm:p-6"
+          className={`fixed inset-0 z-[100] overflow-y-auto ${
+            isRightDrawer ? 'flex justify-end' : 'grid place-items-center p-4 sm:p-6'
+          }`}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -153,10 +159,16 @@ export default function AdminModal({
             aria-modal="true"
             aria-labelledby={titleId}
             tabIndex={-1}
-            className={`relative w-full ${maxWidth} outline-none`}
-            initial={{ opacity: 0, scale: reducedMotion ? 1 : 0.97, y: reducedMotion ? 0 : 10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: reducedMotion ? 1 : 0.98, y: reducedMotion ? 0 : 6 }}
+            className={`admin-panel-content relative w-full ${maxWidth} outline-none ${
+              isRightDrawer ? 'min-h-full' : ''
+            }`}
+            initial={isRightDrawer
+              ? { opacity: 0, x: reducedMotion ? 0 : 36 }
+              : { opacity: 0, scale: reducedMotion ? 1 : 0.97, y: reducedMotion ? 0 : 10 }}
+            animate={isRightDrawer ? { opacity: 1, x: 0 } : { opacity: 1, scale: 1, y: 0 }}
+            exit={isRightDrawer
+              ? { opacity: 0, x: reducedMotion ? 0 : 36 }
+              : { opacity: 0, scale: reducedMotion ? 1 : 0.98, y: reducedMotion ? 0 : 6 }}
             transition={{ duration: reducedMotion ? 0 : 0.18 }}
             onClick={event => event.stopPropagation()}
           >

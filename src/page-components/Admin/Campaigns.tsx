@@ -2,6 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
+import { Search } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 // Ensure this component only renders on the client side
@@ -35,6 +36,7 @@ function CampaignsPageComponent() {
     const [limit, setLimit] = useState(10);
     const [total, setTotal] = useState(0);
     const [statusFilter, setStatusFilter] = useState<string>('all');
+    const [searchTerm, setSearchTerm] = useState('');
 
     // Mock data for now - replace with actual API call
     const mockCampaigns: Campaign[] = [
@@ -100,6 +102,13 @@ function CampaignsPageComponent() {
                 if (statusFilter !== 'all') {
                     filteredCampaigns = mockCampaigns.filter(c => c.status === statusFilter);
                 }
+                const query = searchTerm.trim().toLowerCase();
+                if (query) {
+                    filteredCampaigns = filteredCampaigns.filter(campaign =>
+                        [campaign.name, campaign.description, campaign.status]
+                            .some(value => value.toLowerCase().includes(query))
+                    );
+                }
 
                 // Simulate pagination
                 const startIndex = (page - 1) * limit;
@@ -119,7 +128,7 @@ function CampaignsPageComponent() {
         };
 
         loadCampaigns();
-    }, [page, limit, statusFilter]);
+    }, [page, limit, statusFilter, searchTerm]);
 
     const updateCampaignStatus = async (id: string, newStatus: Campaign['status']) => {
         const loadingToast = toast.loading(`Updating campaign status to ${newStatus}...`);
@@ -195,7 +204,7 @@ function CampaignsPageComponent() {
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-semibold">Campaign Management</h2>
+                <h1 className="text-2xl font-semibold">Campaign Management</h1>
                 <button className="rounded-lg bg-cyan-600 hover:bg-cyan-500 px-4 py-2 text-sm font-medium transition-colors">
                     Create Campaign
                 </button>
@@ -203,23 +212,23 @@ function CampaignsPageComponent() {
 
             {/* Summary Stats */}
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <div className="rounded-xl border border-gray-800 p-4">
+                <div className="admin-panel-card p-4">
                     <div className="text-gray-400 text-sm">Total Campaigns</div>
                     <div className="text-3xl font-bold">{mockCampaigns.length}</div>
                 </div>
-                <div className="rounded-xl border border-gray-800 p-4">
+                <div className="admin-panel-card p-4">
                     <div className="text-gray-400 text-sm">Active Campaigns</div>
                     <div className="text-3xl font-bold">
                         {mockCampaigns.filter(c => c.status === 'active').length}
                     </div>
                 </div>
-                <div className="rounded-xl border border-gray-800 p-4">
+                <div className="admin-panel-card p-4">
                     <div className="text-gray-400 text-sm">Total Budget</div>
                     <div className="text-3xl font-bold">
                         {formatCurrency(mockCampaigns.reduce((sum, c) => sum + c.budget, 0))}
                     </div>
                 </div>
-                <div className="rounded-xl border border-gray-800 p-4">
+                <div className="admin-panel-card p-4">
                     <div className="text-gray-400 text-sm">Total Spent</div>
                     <div className="text-3xl font-bold">
                         {formatCurrency(mockCampaigns.reduce((sum, c) => sum + c.spent, 0))}
@@ -228,7 +237,7 @@ function CampaignsPageComponent() {
             </div>
 
             {/* Filters */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 border border-gray-200 dark:border-gray-700">
+            <div className="admin-panel-filter-bar">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                     <div className="flex items-center gap-3">
                         <label
@@ -240,7 +249,10 @@ function CampaignsPageComponent() {
                         <select
                             id="status-filter"
                             value={statusFilter}
-                            onChange={e => setStatusFilter(e.target.value)}
+                            onChange={e => {
+                                setStatusFilter(e.target.value);
+                                setPage(1);
+                            }}
                             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                         >
                             <option value="all">All Campaigns</option>
@@ -251,35 +263,22 @@ function CampaignsPageComponent() {
                         </select>
                     </div>
 
-                    {/* Search Input for future enhancement */}
                     <div className="flex-1 max-w-md">
                         <label htmlFor="campaign-search" className="sr-only">
                             Search campaigns
                         </label>
                         <div className="relative">
-                            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                <svg
-                                    className="w-4 h-4 text-gray-500 dark:text-gray-400"
-                                    aria-hidden="true"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 20 20"
-                                >
-                                    <path
-                                        stroke="currentColor"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
-                                    />
-                                </svg>
-                            </div>
+                            <Search className="admin-panel-input-icon" aria-hidden="true" />
                             <input
-                                type="text"
+                                type="search"
                                 id="campaign-search"
-                                className="block p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-full bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                className="block w-full rounded-lg border border-white/15 bg-transparent p-2 pl-10 text-sm text-white placeholder-gray-400 focus:border-cyan-400"
                                 placeholder="Search campaigns..."
-                                disabled
+                                value={searchTerm}
+                                onChange={event => {
+                                    setSearchTerm(event.target.value);
+                                    setPage(1);
+                                }}
                             />
                         </div>
                     </div>
@@ -287,9 +286,9 @@ function CampaignsPageComponent() {
             </div>
 
             {/* Campaigns Table */}
-            <div className="rounded-xl border border-gray-800 p-6">
+            <div className="admin-panel-card p-6">
                 <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-semibold text-lg">Campaigns</h3>
+                    <h2 className="font-semibold text-lg">Campaigns</h2>
                 </div>
 
                 {error && (

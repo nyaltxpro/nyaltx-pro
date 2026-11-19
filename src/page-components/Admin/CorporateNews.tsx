@@ -6,16 +6,16 @@ import type QuillType from 'quill';
 import type { QuillOptions } from 'quill';
 import 'quill/dist/quill.snow.css';
 import React, { useEffect, useRef, useState } from 'react';
-import { FaClock, FaEdit, FaEye, FaNewspaper, FaPlus, FaSpinner, FaTags, FaTrash, FaUpload, FaUser } from 'react-icons/fa';
+import AdminModal from '@/components/AdminModal';
+import { FaClock, FaEdit, FaEye, FaNewspaper, FaSpinner, FaTags, FaTrash, FaUpload, FaUser } from 'react-icons/fa';
+import { Newspaper, Plus, X } from 'lucide-react';
 import { toReliableIpfsUrl } from '@/utils/ipfsUpload';
 
 const AdminCorporateNewsClient = dynamic(() => Promise.resolve(AdminCorporateNewsComponent), {
     ssr: false,
     loading: () => (
         <div className="text-center py-12">
-            <div className="w-16 h-16 bg-gray-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
-                <FaNewspaper className="w-8 h-8 text-gray-400 animate-pulse" />
-            </div>
+            <Newspaper className="mx-auto mb-4 h-10 w-10 animate-pulse text-gray-400" aria-hidden="true" />
             <p className="text-gray-400 font-medium" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                 Loading news management...
             </p>
@@ -520,9 +520,9 @@ function AdminCorporateNewsComponent() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-2xl font-semibold text-white" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                    <h1 className="text-2xl font-semibold text-white" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                         News Management
-                    </h2>
+                    </h1>
                     <p className="text-gray-400 text-sm mt-1" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                         Review paid submissions and manage corporate announcements separately
                     </p>
@@ -533,10 +533,10 @@ function AdminCorporateNewsComponent() {
                     </Link>
                     <button
                         onClick={handleCreateNews}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-green-500/30 bg-green-500/20 hover:bg-green-500/30 text-green-300 transition-all duration-200 font-medium"
+                        className="inline-flex items-center gap-2 rounded-lg border border-white/15 bg-transparent px-4 py-2 text-sm font-medium text-white/80 transition-colors hover:border-cyan-400/50 hover:text-cyan-200"
                         style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                     >
-                        <FaPlus className="w-4 h-4" />
+                        <Plus className="h-4 w-4" aria-hidden="true" />
                         Create News Article
                     </button>
                 </div>
@@ -586,12 +586,28 @@ function AdminCorporateNewsComponent() {
             </div>
 
             {/* Create/Edit Form */}
-            {isCreating && (
-                <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-lg p-6 shadow-xl">
-                    <h3 className="font-semibold mb-4 text-white flex items-center gap-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                        <FaNewspaper className="w-5 h-5 text-blue-400" />
-                        {editingNews ? 'Edit News Article' : 'Create New News Article'}
-                    </h3>
+            <AdminModal
+                open={isCreating}
+                onClose={handleCancel}
+                title={editingNews ? 'Edit News Article' : 'Create News Article'}
+                maxWidth="max-w-4xl"
+                placement="right"
+            >
+                <div className="admin-panel-form flex h-full max-h-screen w-full flex-col overflow-y-auto border-l border-white/10 bg-[#0d0d0d] p-6">
+                    <div className="mb-5 flex items-center justify-between gap-4 border-b border-white/10 pb-4">
+                        <h2 className="font-semibold text-white flex items-center gap-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                            <Newspaper className="h-5 w-5 text-cyan-300" aria-hidden="true" />
+                            {editingNews ? 'Edit News Article' : 'Create News Article'}
+                        </h2>
+                        <button
+                            type="button"
+                            onClick={handleCancel}
+                            aria-label="Close news editor"
+                            className="text-gray-400 transition-colors hover:text-white"
+                        >
+                            <X size={20} aria-hidden="true" />
+                        </button>
+                    </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                         <div>
@@ -814,26 +830,26 @@ function AdminCorporateNewsComponent() {
                         </div>
                     </div>
 
-                    <div className="flex gap-3">
+                    <div className="flex gap-3 border-t border-white/10 pt-4">
                         <button
                             onClick={handleCancel}
-                            className="px-4 py-2 bg-gray-600/50 hover:bg-gray-600/70 text-gray-300 rounded-lg transition-all duration-200 font-medium"
+                            className="rounded-lg border border-white/15 bg-transparent px-4 py-2 font-medium text-gray-300 transition-colors hover:text-white"
                         >
                             Cancel
                         </button>
                         <button
                             onClick={handleSaveNews}
                             disabled={!newsForm.title || !newsForm.content}
-                            className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed text-white rounded-lg transition-all duration-200 font-medium"
+                            className="rounded-lg border border-cyan-400/30 bg-transparent px-4 py-2 font-medium text-cyan-100 transition-colors hover:border-cyan-300/60 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                             {editingNews ? 'Update Article' : 'Create Article'}
                         </button>
                     </div>
                 </div>
-            )}
+            </AdminModal>
 
             {/* News List */}
-            <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-lg shadow-xl">
+            <div className="admin-panel-card overflow-hidden">
                 <div className="p-6 border-b border-gray-700/20 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <h3 className="font-semibold text-white flex items-center gap-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                         <FaNewspaper className="w-5 h-5 text-cyan-400" />
@@ -922,10 +938,10 @@ function AdminCorporateNewsComponent() {
                     ) : (
                         <div className="space-y-4">
                             {visibleNews.map(article => (
-                                <div key={article._id} className={`border rounded-xl p-5 transition-all duration-200 ${
+                                <div key={article._id} className={`admin-panel-card p-5 transition-all duration-200 ${
                                     article.status === 'pending'
-                                        ? 'bg-amber-950/20 border-amber-500/30 hover:bg-amber-950/30'
-                                        : 'bg-gray-700/30 border-gray-600/30 hover:bg-gray-700/40'
+                                        ? 'border-amber-500/30 hover:border-amber-400/50'
+                                        : 'hover:border-white/20'
                                 }`}>
                                     <div className="flex items-start justify-between gap-4">
                                         <div className="flex-1">

@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
 import { Menu, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import AdminBreadcrumb from '@/components/AdminBreadcrumb';
 
 const AdminSidebar = dynamic(() => import('@/components/AdminSidebar'), {
   ssr: false,
@@ -16,13 +17,25 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const isLogin = pathname === '/adminpanel/login';
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const pageTitle =
-    pathname
-      .split('/')
-      .filter(Boolean)
-      .at(-1)
-      ?.replace(/-/g, ' ')
-      .replace(/\b\w/g, character => character.toUpperCase()) || 'Dashboard';
+  const formatSegment = (segment: string) =>
+    segment
+      .replace(/-/g, ' ')
+      .replace(/\b\w/g, character => character.toUpperCase());
+
+  const routeSegments = pathname.split('/').filter(Boolean).slice(1);
+  const breadcrumbItems = [
+    { label: 'Admin', href: '/adminpanel' },
+    ...routeSegments.map((segment, index) => {
+      const href = `/adminpanel/${routeSegments.slice(0, index + 1).join('/')}`;
+      const label = formatSegment(segment);
+      const isLast = index === routeSegments.length - 1;
+      return isLast ? { label } : { label, href };
+    }),
+  ];
+
+  if (routeSegments.length === 0) {
+    breadcrumbItems.splice(1);
+  }
 
   if (isLogin) {
     return (
@@ -68,11 +81,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                 <PanelLeftClose className="h-[18px] w-[18px]" strokeWidth={1.7} />
               )}
             </button>
-            <div className="flex min-w-0 items-center gap-2 text-sm text-slate-400">
-              <span className="hidden truncate sm:inline">NYALTX Admin</span>
-              <span className="hidden sm:inline">/</span>
-              <span className="truncate font-medium text-slate-100">{pageTitle}</span>
-            </div>
+            <AdminBreadcrumb items={breadcrumbItems} />
           </div>
           <div
             aria-hidden="true"
@@ -81,7 +90,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             A
           </div>
         </header>
-        <main className="p-4 md:p-6">{children}</main>
+        <main className="admin-panel-content p-4 md:p-6">{children}</main>
       </div>
     </div>
   );
