@@ -17,7 +17,6 @@ import { FileType } from '@/components/reui/file-type';
 import { FileUpload } from '@/components/reui/file-upload';
 import { Filters } from '@/components/reui/filters';
 import { Combobox } from '@/components/reui/combobox';
-import { Checkbox } from '@/components/reui/checkbox';
 import { Spinner } from '@/components/reui/spinner';
 import { paginateItems, TablePagination } from '@/components/reui/table-pagination';
 
@@ -115,7 +114,6 @@ const AdminBlogManagerComponent = () => {
   const [activeFilter, setActiveFilter] = useState<'all' | 'published' | 'draft'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [page, setPage] = useState(1);
-  const [featuredOnly, setFeaturedOnly] = useState(false);
   const [isUploadingToIPFS, setIsUploadingToIPFS] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const quillContainerRef = useRef<HTMLDivElement | null>(null);
@@ -378,14 +376,13 @@ const AdminBlogManagerComponent = () => {
     const query = searchQuery.trim().toLowerCase();
     return posts.filter((post) => {
       if (activeFilter !== 'all' && post.status !== activeFilter) return false;
-      if (featuredOnly && !post.featuredImage) return false;
       if (!query) return true;
       return [post.title, post.author, post.excerpt, ...(post.tags ?? [])]
         .join(' ')
         .toLowerCase()
         .includes(query);
     });
-  }, [posts, activeFilter, searchQuery, featuredOnly]);
+  }, [posts, activeFilter, searchQuery]);
   const paginatedPosts = paginateItems(filteredPosts, page, 10);
 
   const handleFileSelect = (files: File[]) => {
@@ -520,10 +517,6 @@ const AdminBlogManagerComponent = () => {
             placeholder="Search posts"
             className="h-9 w-48 rounded-lg border border-white/10 bg-black/30 px-3 text-sm text-white placeholder:text-white/40 focus:border-cyan-500/60 focus:outline-none"
           />
-          <label className="flex items-center gap-2 text-sm text-white/70">
-            <Checkbox checked={featuredOnly} onChange={(event) => setFeaturedOnly(event.target.checked)} />
-            Featured image
-          </label>
         </div>
       </Filters>
 

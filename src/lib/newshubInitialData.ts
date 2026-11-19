@@ -21,6 +21,7 @@ interface NewsArticleDocument extends Document {
   plan?: string;
   planName?: string;
   sourceUrl?: string;
+  featuredInBanner?: boolean;
 }
 
 export const PAID_CRITERIA = [
@@ -59,6 +60,20 @@ function timestamp(value?: Date | string) {
   return Number.isNaN(parsed) ? 0 : parsed;
 }
 
+function displayAuthor(author?: string) {
+  const normalized = author?.trim();
+  return !normalized || normalized.toLowerCase() === 'you' ? 'NYALTX' : normalized;
+}
+
+function isPinnedArticle(article: {
+  featuredInBanner?: boolean;
+  plan?: string;
+  planName?: string;
+}) {
+  if (typeof article.featuredInBanner === 'boolean') return article.featuredInBanner;
+  return article.plan === 'slider' || article.plan === 'prem' || /full service/i.test(article.planName || '');
+}
+
 function safeExternalUrl(value?: string) {
   if (!value) return undefined;
   try {
@@ -93,7 +108,7 @@ export async function getNewshubArticles(category = 'All', page = 1, limit = 12)
     collection.countDocuments(feedQuery),
     collection
       .find<NewsArticleDocument>(feedQuery)
-      .sort({ publishedAt: -1, createdAt: -1 })
+      .sort({ featuredInBanner: -1, publishedAt: -1, createdAt: -1 })
       .limit(MAX_FEED_ITEMS)
       .project<NewsArticleDocument>({
         _id: 1,
@@ -112,6 +127,7 @@ export async function getNewshubArticles(category = 'All', page = 1, limit = 12)
         plan: 1,
         planName: 1,
         sourceUrl: 1,
+        featuredInBanner: 1,
       })
       .toArray(),
     getNews(),
@@ -120,6 +136,7 @@ export async function getNewshubArticles(category = 'All', page = 1, limit = 12)
   const paidArticles = documents.map((article: NewsArticleDocument) => ({
     ...article,
     _id: String(article._id),
+    author: displayAuthor(article.author),
     publishedAt:
       article.publishedAt instanceof Date
         ? article.publishedAt.toISOString()
@@ -136,16 +153,23 @@ export async function getNewshubArticles(category = 'All', page = 1, limit = 12)
           excerpt: stripHtml(item.description),
           featuredImage: item.image,
           publishedAt: item.pubDate?.toISOString(),
+          createdAt: item.pubDate?.toISOString(),
           author: item.source,
           category: 'DeFi',
           sourceUrl: safeExternalUrl(item.link),
+          featuredInBanner: false,
           isSyndicated: true,
         }))
       : [];
   const combinedArticles = [...paidArticles, ...syndicatedArticles].sort(
-    (left, right) =>
-      timestamp(right.publishedAt || right.createdAt) -
-      timestamp(left.publishedAt || left.createdAt),
+    (left, right) => {
+      const pinDifference = Number(isPinnedArticle(right)) - Number(isPinnedArticle(left));
+      if (pinDifference !== 0) return pinDifference;
+      return (
+        timestamp(right.publishedAt || right.createdAt) -
+        timestamp(left.publishedAt || left.createdAt)
+      );
+    },
   );
   const safeLimit = Number.isFinite(limit) ? Math.min(Math.max(1, limit), 100) : 12;
   const safePage = Number.isFinite(page) ? Math.max(1, page) : 1;
@@ -162,10 +186,74 @@ export async function getNewshubArticles(category = 'All', page = 1, limit = 12)
   };
 }
 
+export async function getNewshubBanners() {
+  const db = await getDb();
+  const bannersCollection = db.collection('newshub_banners');
+  const newsCollection = db.collection('corporate_news');
+
+  const rawAdminBanners = await bannersCollection
+    .find({ isActive: { $ne: false } })
+    .sort({ displayOrder: 1, createdAt: -1 })
+    .toArray();
+
+  const adminBanners = rawAdminBanners.map(b => ({
+    _id: String(b._id),
+    title: b.title || '',
+    description: b.description || '',
+    category: b.category || 'NYAX',
+    imageUrl: b.imageUrl || '',
+    gradientIndex: typeof b.gradientIndex === 'number' ? b.gradientIndex : 0,
+    linkUrl: b.linkUrl || '',
+    isSponsored: Boolean(b.isSponsored),
+    isActive: Boolean(b.isActive !== false),
+    displayOrder: typeof b.displayOrder === 'number' ? b.displayOrder : 0,
+  }));
+
+  const featuredPaidArticles = await newsCollection
+    .find({
+      ...PUBLIC_NEWS_FILTER,
+      isPaid: { $ne: false },
+      author: { $nin: ['NYALTX Team', 'NYALTX Learn'] },
+      $and: [
+        { $or: PAID_CRITERIA },
+        {
+          $or: [
+            { featuredInBanner: true },
+            {
+              featuredInBanner: { $exists: false },
+              $or: [
+                { plan: { $in: ['slider', 'prem'] } },
+                { planName: { $regex: /full service/i } },
+              ],
+            },
+          ],
+        },
+      ],
+    })
+    .sort({ featuredInBanner: -1, publishedAt: -1, createdAt: -1 })
+    .limit(6)
+    .toArray();
+
+  const articleBanners = featuredPaidArticles.map(art => ({
+    _id: String(art._id),
+    title: art.title,
+    description: art.excerpt || '',
+    category: art.category || (art.type === 'pr' ? 'Press Release' : 'Featured'),
+    imageUrl: art.featuredImage || '',
+    gradientIndex: typeof art.coverColor === 'number' ? art.coverColor : 0,
+    linkUrl: `/news/${art.slug}`,
+    isSponsored: true,
+    isActive: true,
+    displayOrder: 10,
+  }));
+
+  return [...adminBanners, ...articleBanners];
+}
+
 export async function getNewshubInitialData() {
-  const feed = await getNewshubArticles();
+  const [feed, banners] = await Promise.all([getNewshubArticles(), getNewshubBanners()]);
   return {
-    banners: [],
+    banners,
     ...feed,
     categories: NEWSHUB_CATEGORIES,
   };
