@@ -9,8 +9,9 @@ import type { QuillOptions } from 'quill';
 import { MoreHorizontal, Newspaper, Pencil, Plus, Save, Trash2, Upload, X } from 'lucide-react';
 import type { SerializedBlogPost } from '@/lib/blogServer';
 import { Button } from '@/components/reui/button';
+import { Alert } from '@/components/reui/alert';
+import { useConfirmDialog } from '@/components/reui/confirm-dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/reui/dropdown-menu';
-import { EventCalendar } from '@/components/reui/event-calendar';
 import { Field } from '@/components/reui/field';
 import { FileType } from '@/components/reui/file-type';
 import { FileUpload } from '@/components/reui/file-upload';
@@ -18,6 +19,7 @@ import { Filters } from '@/components/reui/filters';
 import { Combobox } from '@/components/reui/combobox';
 import { Checkbox } from '@/components/reui/checkbox';
 import { Spinner } from '@/components/reui/spinner';
+import { paginateItems, TablePagination } from '@/components/reui/table-pagination';
 
 interface BlogFormState {
   id?: string;
@@ -104,6 +106,7 @@ const normalizeQuillHtml = (value?: string | null) => {
 };
 
 const AdminBlogManagerComponent = () => {
+  const { confirm, dialog: confirmationDialog } = useConfirmDialog();
   const [posts, setPosts] = useState<SerializedBlogPost[]>([]);
   const [form, setForm] = useState<BlogFormState>(initialFormState);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -111,6 +114,7 @@ const AdminBlogManagerComponent = () => {
   const [isListLoading, setIsListLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState<'all' | 'published' | 'draft'>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [page, setPage] = useState(1);
   const [featuredOnly, setFeaturedOnly] = useState(false);
   const [isUploadingToIPFS, setIsUploadingToIPFS] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -291,7 +295,12 @@ const AdminBlogManagerComponent = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this blog post?')) return;
+    if (!(await confirm({
+      title: 'Delete blog post?',
+      description: 'This post will be permanently deleted.',
+      confirmLabel: 'Delete post',
+      destructive: true,
+    }))) return;
     try {
       setState({ loading: true, error: null, success: null });
       const response = await fetch('/api/admin/blog', {
@@ -377,18 +386,7 @@ const AdminBlogManagerComponent = () => {
         .includes(query);
     });
   }, [posts, activeFilter, searchQuery, featuredOnly]);
-
-  const scheduledEvents = useMemo(() => posts.flatMap(post => {
-    if (!post.publishedAt) return [];
-    const startsAt = new Date(post.publishedAt);
-    if (!Number.isFinite(startsAt.getTime())) return [];
-    return [{
-      id: post._id,
-      title: post.title,
-      startsAt: startsAt.toISOString(),
-      status: post.status,
-    }];
-  }), [posts]);
+  const paginatedPosts = paginateItems(filteredPosts, page, 10);
 
   const handleFileSelect = (files: File[]) => {
     if (!files.length) {
@@ -493,14 +491,10 @@ const AdminBlogManagerComponent = () => {
       </div>
 
       {state.error ? (
-        <div className="rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-200">
-          {state.error}
-        </div>
+        <Alert variant="destructive">{state.error}</Alert>
       ) : null}
       {state.success ? (
-        <div className="rounded-lg border border-green-500/40 bg-green-500/10 px-4 py-3 text-sm text-green-200">
-          {state.success}
-        </div>
+        <Alert variant="success">{state.success}</Alert>
       ) : null}
 
       <Filters className="mb-4">
@@ -531,15 +525,6 @@ const AdminBlogManagerComponent = () => {
         </div>
       </Filters>
 
-      <EventCalendar
-        title="Publishing calendar"
-        events={scheduledEvents}
-        onEventSelect={event => {
-          const post = posts.find(item => item._id === event.id);
-          if (post) handleEdit(post);
-        }}
-      />
-
       <div className="grid gap-4">
         {isListLoading ? (
           <div className="flex items-center gap-3 rounded-lg border border-white/10 bg-white/5 px-4 py-6 text-white/70">
@@ -550,6 +535,7 @@ const AdminBlogManagerComponent = () => {
             No blog posts yet.
           </div>
         ) : (
+          <div className="space-y-3">
           <div className="overflow-x-auto rounded-lg border border-white/10">
             <table className="w-full min-w-[760px] text-left text-sm">
               <thead className="border-b border-white/10 bg-white/[0.03] text-xs uppercase tracking-wider text-white/50">
@@ -562,7 +548,7 @@ const AdminBlogManagerComponent = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/10">
-                {filteredPosts.map((post) => (
+                {paginatedPosts.map((post) => (
                   <tr key={post._id} className="transition hover:bg-white/[0.025]">
                     <td className="max-w-md px-4 py-4">
                       <p className="font-semibold text-white">{post.title}</p>
@@ -608,6 +594,13 @@ const AdminBlogManagerComponent = () => {
               </tbody>
             </table>
           </div>
+          <TablePagination
+            page={page}
+            pageSize={10}
+            total={filteredPosts.length}
+            onPageChange={setPage}
+          />
+          </div>
         )}
       </div>
 
@@ -642,14 +635,10 @@ const AdminBlogManagerComponent = () => {
 
             <div className="flex-1 space-y-4 overflow-y-auto px-5 py-5 sm:px-6">
               {state.error ? (
-                <div className="rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-200">
-                  {state.error}
-                </div>
+                <Alert variant="destructive">{state.error}</Alert>
               ) : null}
               {state.success ? (
-                <div className="rounded-lg border border-green-500/40 bg-green-500/10 px-4 py-3 text-sm text-green-200">
-                  {state.success}
-                </div>
+                <Alert variant="success">{state.success}</Alert>
               ) : null}
 
               <div className="grid gap-4 md:grid-cols-2">
@@ -907,6 +896,7 @@ const AdminBlogManagerComponent = () => {
             </div>
           </div>
       </Drawer>
+      {confirmationDialog}
     </div>
   );
 };

@@ -10,7 +10,6 @@ import AdminBreadcrumb from '@/components/AdminBreadcrumb';
 import VerifiedBadge from '@/components/VerifiedBadge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/reui/badge';
-import { ToasterProvider } from '@/components/reui/sonner';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -60,7 +59,6 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen text-white">
-      <ToasterProvider />
       <AdminSidebar
         isMobileMenuOpen={isMobileMenuOpen}
         toggleMobileMenu={() => setIsMobileMenuOpen(open => !open)}

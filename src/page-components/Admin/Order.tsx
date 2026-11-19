@@ -2,7 +2,11 @@
 
 import Link from 'next/link';
 import { Dialog } from '@/components/reui/dialog';
+import { Alert } from '@/components/reui/alert';
+import { Filters } from '@/components/reui/filters';
+import { paginateItems, TablePagination } from '@/components/reui/table-pagination';
 import React, { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 import { Search } from 'lucide-react';
 import { FaShoppingCart, FaEthereum, FaCoins, FaWallet, FaExternalLinkAlt, FaMoneyBillWave, FaCheck, FaTimes, FaClock, FaExclamationTriangle } from 'react-icons/fa';
 
@@ -67,6 +71,8 @@ const AdminOrdersComponent = () => {
     const [customRefundAmount, setCustomRefundAmount] = useState('');
     const [onchainSearch, setOnchainSearch] = useState('');
     const [subscriptionSearch, setSubscriptionSearch] = useState('');
+    const [onchainPage, setOnchainPage] = useState(1);
+    const [subscriptionPage, setSubscriptionPage] = useState(1);
 
     const filteredOnchainOrders = (onchainOrders || []).filter(order => {
         const query = onchainSearch.trim().toLowerCase();
@@ -92,6 +98,8 @@ const AdminOrdersComponent = () => {
             order.paymentMethod,
         ].some(value => value.toLowerCase().includes(query));
     });
+    const paginatedOnchainOrders = paginateItems(filteredOnchainOrders, onchainPage, 10);
+    const paginatedSubscriptionOrders = paginateItems(filteredSubscriptionOrders, subscriptionPage, 10);
 
     useEffect(() => {
         // Fetch onchain orders
@@ -199,7 +207,7 @@ const AdminOrdersComponent = () => {
 
             closeRefundModal();
         } catch (e: any) {
-            alert(`Refund failed: ${e.message}`);
+            toast.error(`Refund failed: ${e.message}`);
         } finally {
             setRefundingIds(prev => {
                 const newSet = new Set(prev);
@@ -281,7 +289,7 @@ const AdminOrdersComponent = () => {
                         >
                             Save Record
                         </button>
-                        {error && <span className="text-red-400 text-sm">{error}</span>}
+                        {error && <Alert variant="destructive">{error}</Alert>}
                     </div>
                 </form>
 
@@ -308,7 +316,12 @@ const AdminOrdersComponent = () => {
                     </div>
                 ) : (
                     <>
-                    <div className="admin-panel-filter-bar mb-4">
+                    <Filters
+                        className="mb-4"
+                        activeFilters={onchainSearch.trim()
+                            ? [{ id: 'onchain-search', label: `Search: ${onchainSearch}`, onRemove: () => setOnchainSearch('') }]
+                            : []}
+                    >
                         <div className="relative min-w-[220px] flex-1">
                             <Search className="admin-panel-input-icon" aria-hidden="true" />
                             <input
@@ -320,7 +333,7 @@ const AdminOrdersComponent = () => {
                                 className="w-full px-3 py-2"
                             />
                         </div>
-                    </div>
+                    </Filters>
                     <div className="admin-panel-card overflow-hidden">
                         <div className="overflow-x-auto">
                             <table className="w-full overflow-hidden">
@@ -353,7 +366,7 @@ const AdminOrdersComponent = () => {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-700/20">
-                                    {filteredOnchainOrders.length > 0 ? filteredOnchainOrders.map(o => (
+                                    {filteredOnchainOrders.length > 0 ? paginatedOnchainOrders.map(o => (
                                         <tr key={o.id} className="hover:bg-gray-700/20 transition-colors duration-200">
                                             <td className="px-4 py-3 text-sm border-r border-gray-700/20">
                                                 <div className="font-medium text-white text-sm" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
@@ -426,6 +439,12 @@ const AdminOrdersComponent = () => {
                             </table>
                         </div>
                     </div>
+                    <TablePagination
+                        page={onchainPage}
+                        pageSize={10}
+                        total={filteredOnchainOrders.length}
+                        onPageChange={setOnchainPage}
+                    />
                     </>
                 )}
             </section>
@@ -483,7 +502,7 @@ const AdminOrdersComponent = () => {
                         >
                             Save Subscription
                         </button>
-                        {subError && <span className="text-red-400 text-sm">{subError}</span>}
+                        {subError && <Alert variant="destructive">{subError}</Alert>}
                     </div>
                 </form>
 
@@ -493,7 +512,12 @@ const AdminOrdersComponent = () => {
                     <div className="text-gray-400">No subscription orders recorded.</div>
                 ) : (
                     <>
-                    <div className="admin-panel-filter-bar mb-4">
+                    <Filters
+                        className="mb-4"
+                        activeFilters={subscriptionSearch.trim()
+                            ? [{ id: 'subscription-search', label: `Search: ${subscriptionSearch}`, onRemove: () => setSubscriptionSearch('') }]
+                            : []}
+                    >
                         <div className="relative min-w-[220px] flex-1">
                             <Search className="admin-panel-input-icon" aria-hidden="true" />
                             <input
@@ -505,7 +529,7 @@ const AdminOrdersComponent = () => {
                                 className="w-full px-3 py-2"
                             />
                         </div>
-                    </div>
+                    </Filters>
                     <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
                         <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
                             <thead className="text-xs  uppercase bg-gray-700 text-gray-400">
@@ -543,7 +567,7 @@ const AdminOrdersComponent = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {filteredSubscriptionOrders.length > 0 ? filteredSubscriptionOrders.map(s => (
+                                {filteredSubscriptionOrders.length > 0 ? paginatedSubscriptionOrders.map(s => (
                                     <tr
                                         key={s.id}
                                         className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600"
@@ -641,6 +665,12 @@ const AdminOrdersComponent = () => {
                             </tbody>
                         </table>
                     </div>
+                    <TablePagination
+                        page={subscriptionPage}
+                        pageSize={10}
+                        total={filteredSubscriptionOrders.length}
+                        onPageChange={setSubscriptionPage}
+                    />
                     </>
                 )}
             </section>

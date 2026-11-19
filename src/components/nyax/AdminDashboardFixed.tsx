@@ -8,9 +8,12 @@ import { CONTRACT_ADDRESSES } from '@/services/contracts';
 import { FolderInfo, MultisigTransaction } from '@/services/contracts/types';
 import { useAppKitAccount } from '@reown/appkit/react';
 import { Drawer } from '@/components/reui/drawer';
+import { Dialog } from '@/components/reui/dialog';
+import { Alert } from '@/components/reui/alert';
 import { ethers } from 'ethers';
-import { Ban, CircleDollarSign, Filter, Gavel, Loader2, Lock, Plus, PlusIcon, Search, Shield, SplitSquareHorizontal, UserPlus2 } from 'lucide-react';
+import { Ban, CircleDollarSign, Filter, Gavel, Loader2, Lock, Plus, PlusIcon, Search, Shield, SplitSquareHorizontal, UserPlus2, X } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import toast from 'react-hot-toast';
 import { useAccount, useChainId, useSwitchChain } from 'wagmi';
 
 const DAY_IN_SECONDS = 86_400;
@@ -180,7 +183,7 @@ export default function AdminDashboardFixed() {
     // Send to Folder Form
     const [sendToFolderForm, setSendToFolderForm] = useState({ folderAddress: '', amount: '' });
 
-    const [showProposalModal, setShowProposalModal] = useState(false);
+    const [showProposalDrawer, setShowProposalDrawer] = useState(false);
     const [showBridgeModal, setShowBridgeModal] = useState(false);
     const [proposalForm, setProposalForm] = useState({
         title: '',
@@ -1384,7 +1387,7 @@ export default function AdminDashboardFixed() {
 
             await loadFactoryFolders();
             setFormError(null);
-            alert('Folder paused successfully!');
+            toast.success('Folder paused successfully!');
         } catch (err) {
             console.error('❌ Failed to pause folder:', err);
             setFormError(err instanceof Error ? err.message : 'Failed to pause folder');
@@ -1432,7 +1435,7 @@ export default function AdminDashboardFixed() {
 
             await loadFactoryFolders();
             setFormError(null);
-            alert('Folder unpaused successfully!');
+            toast.success('Folder unpaused successfully!');
         } catch (err) {
             console.error('❌ Failed to unpause folder:', err);
             setFormError(err instanceof Error ? err.message : 'Failed to unpause folder');
@@ -1608,7 +1611,7 @@ export default function AdminDashboardFixed() {
             console.log('👥 Beneficiary vesting data:', validVestings);
         } catch (err) {
             console.error('❌ Failed to load beneficiary vestings:', err);
-            alert(`Failed to load beneficiaries: ${err instanceof Error ? err.message : 'Unknown error'}`);
+            toast.error(`Failed to load beneficiaries: ${err instanceof Error ? err.message : 'Unknown error'}`);
         } finally {
             setVestingLoading(false);
         }
@@ -1652,7 +1655,7 @@ export default function AdminDashboardFixed() {
             setProposalAlert({ type: 'success', message: proposalId ? `Proposal submitted (ID: ${proposalId})` : 'Proposal submitted successfully.' });
             setProposalForm({ title: '', description: '' });
             setProposalActions([{ target: '', value: '0', calldata: '0x' }]);
-            setShowProposalModal(false);
+            setShowProposalDrawer(false);
         } catch (err) {
             const message = err instanceof Error ? err.message : 'Failed to create proposal';
             setProposalAlert({ type: 'error', message });
@@ -2020,7 +2023,7 @@ export default function AdminDashboardFixed() {
                                 </button>
                                 <button
                                     className="flex-1 min-w-[140px] px-5 py-3 rounded-2xl border border-white/20 text-white/80 hover:bg-white/10 transition"
-                                    onClick={() => setShowProposalModal(true)}
+                                    onClick={() => setShowProposalDrawer(true)}
                                     disabled={!isConnected || loading}
                                 >
                                     <div className="flex items-center justify-center gap-2">
@@ -2089,8 +2092,13 @@ export default function AdminDashboardFixed() {
                 )}
 
                 {showFolderEditModal && (
-                    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-                        <div className="bg-slate-900 rounded-xl p-8 border border-white/20 max-w-lg w-full mx-4 space-y-4">
+                    <Dialog
+                        open={showFolderEditModal}
+                        onClose={() => setShowFolderEditModal(false)}
+                        title="Update Folder"
+                        maxWidth="max-w-lg"
+                    >
+                        <div className="bg-slate-900 rounded-xl p-8 border border-white/20 max-w-lg w-full space-y-4">
                             <div className="flex items-center justify-between">
                                 <h3 className="text-2xl font-bold text-white">Update Folder</h3>
                                 <button className="text-gray-400 hover:text-white" onClick={() => setShowFolderEditModal(false)}>✕</button>
@@ -2144,7 +2152,7 @@ export default function AdminDashboardFixed() {
                                 />
                                 Revocable schedule
                             </label>
-                            {formError && <p className="text-red-400 text-sm">{formError}</p>}
+                            {formError && <Alert variant="destructive">{formError}</Alert>}
                             <div className="flex gap-3">
                                 <button className="flex-1 px-4 py-3 bg-white/10 text-white rounded-lg" onClick={() => setShowFolderEditModal(false)}>
                                     Cancel
@@ -2158,7 +2166,7 @@ export default function AdminDashboardFixed() {
                                 </button>
                             </div>
                         </div>
-                    </div>
+                    </Dialog>
                 )}
 
                 <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-6">
@@ -2290,9 +2298,12 @@ export default function AdminDashboardFixed() {
                         </button>
                     </div>
                     {bridgeStatus && (
-                        <div className={`mt-4 px-4 py-3 rounded-xl border ${bridgeStatus.type === 'success' ? 'border-emerald-400/40 bg-emerald-400/10 text-emerald-200' : 'border-red-400/40 bg-red-400/10 text-red-200'}`}>
+                        <Alert
+                            variant={bridgeStatus.type === 'success' ? 'success' : 'destructive'}
+                            className="mt-4"
+                        >
                             {bridgeStatus.message}
-                        </div>
+                        </Alert>
                     )}
                 </div>
 
@@ -2323,7 +2334,7 @@ export default function AdminDashboardFixed() {
                                 <h2 className="text-2xl font-semibold">Token folders (Factory Service)</h2>
                             </div>
                             <div className="flex items-center gap-3">
-                                {error && <span className="text-red-400 text-sm">{error}</span>}
+                                {error && <Alert variant="destructive">{error}</Alert>}
                                 <button
                                     onClick={loadFactoryFolders}
                                     className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/15 px-4 py-2 text-sm text-gray-200 hover:bg-white/10 transition"
@@ -2491,9 +2502,7 @@ export default function AdminDashboardFixed() {
                             </div>
 
                             {formError && (
-                                <div className="rounded-lg border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
-                                    {formError}
-                                </div>
+                                <Alert variant="destructive">{formError}</Alert>
                             )}
                         </div>
 
@@ -2517,7 +2526,12 @@ export default function AdminDashboardFixed() {
 
 
                 {showBridgeModal && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
+                    <Dialog
+                        open={showBridgeModal}
+                        onClose={() => setShowBridgeModal(false)}
+                        title="Treasury to Folder"
+                        maxWidth="max-w-2xl"
+                    >
                         <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl border border-white/20 bg-gradient-to-br from-gray-900 via-black to-gray-900 p-8 shadow-2xl">
                             <div className="mb-6 flex items-start justify-between">
                                 <div>
@@ -2530,12 +2544,12 @@ export default function AdminDashboardFixed() {
                             </div>
 
                             {bridgeStatus && (
-                                <div className={`mb-4 rounded-xl border p-4 ${bridgeStatus.type === 'success'
-                                    ? 'border-green-400/40 bg-green-400/10 text-green-200'
-                                    : 'border-red-400/40 bg-red-400/10 text-red-200'
-                                    }`}>
+                                <Alert
+                                    variant={bridgeStatus.type === 'success' ? 'success' : 'destructive'}
+                                    className="mb-4"
+                                >
                                     {bridgeStatus.message}
-                                </div>
+                                </Alert>
                             )}
 
                             <div className="space-y-6">
@@ -2645,12 +2659,17 @@ export default function AdminDashboardFixed() {
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </Dialog>
                 )}
 
                 {showAllocationModal && (
-                    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-                        <div className="bg-slate-900 rounded-xl p-8 border border-white/20 max-w-2xl w-full mx-4 space-y-6">
+                    <Dialog
+                        open={showAllocationModal}
+                        onClose={() => setShowAllocationModal(false)}
+                        title="Add Wallet"
+                        maxWidth="max-w-2xl"
+                    >
+                        <div className="bg-slate-900 rounded-xl p-8 border border-white/20 max-w-2xl w-full space-y-6">
                             <div>
                                 <h3 className="text-2xl font-bold text-white">Add Wallet</h3>
                                 <p className="text-gray-400 text-sm mt-2">Add a new Wallet to a folder with vesting schedule</p>
@@ -2753,9 +2772,7 @@ export default function AdminDashboardFixed() {
                             </div>
 
                             {formError && (
-                                <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3">
-                                    <p className="text-red-400 text-sm">{formError}</p>
-                                </div>
+                                <Alert variant="destructive">{formError}</Alert>
                             )}
 
                             <div className="flex gap-3 pt-4">
@@ -2774,12 +2791,17 @@ export default function AdminDashboardFixed() {
                                 </button>
                             </div>
                         </div>
-                    </div>
+                    </Dialog>
                 )}
 
                 {showApproveFolderModal && (
-                    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-                        <div className="bg-slate-900 rounded-xl p-8 border border-white/20 max-w-md w-full mx-4 space-y-4">
+                    <Dialog
+                        open={showApproveFolderModal}
+                        onClose={() => setShowApproveFolderModal(false)}
+                        title="Approve Folder"
+                        maxWidth="max-w-md"
+                    >
+                        <div className="bg-slate-900 rounded-xl p-8 border border-white/20 max-w-md w-full space-y-4">
                             <h3 className="text-2xl font-bold text-white">Approve Folder</h3>
                             <div>
                                 <label className="text-gray-400 text-sm mb-2 block">Folder Address</label>
@@ -2791,7 +2813,7 @@ export default function AdminDashboardFixed() {
                                     className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white"
                                 />
                             </div>
-                            {formError && <p className="text-red-400 text-sm">{formError}</p>}
+                            {formError && <Alert variant="destructive">{formError}</Alert>}
                             <div className="flex gap-3">
                                 <button className="flex-1 px-4 py-3 bg-white/10 text-white rounded-lg" onClick={() => setShowApproveFolderModal(false)}>
                                     Cancel
@@ -2805,12 +2827,17 @@ export default function AdminDashboardFixed() {
                                 </button>
                             </div>
                         </div>
-                    </div>
+                    </Dialog>
                 )}
 
                 {showSendToFolderModal && (
-                    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-                        <div className="bg-slate-900 rounded-xl p-8 border border-white/20 max-w-md w-full mx-4 space-y-4">
+                    <Dialog
+                        open={showSendToFolderModal}
+                        onClose={() => setShowSendToFolderModal(false)}
+                        title="Fund Folder"
+                        maxWidth="max-w-md"
+                    >
+                        <div className="bg-slate-900 rounded-xl p-8 border border-white/20 max-w-md w-full space-y-4">
                             <h3 className="text-2xl font-bold text-white">Fund Folder</h3>
                             <p className="text-gray-400 text-sm">Send NYAX tokens from treasury to an approved folder</p>
                             <div>
@@ -2835,7 +2862,7 @@ export default function AdminDashboardFixed() {
                                 />
                                 <p className="text-gray-500 text-xs mt-1">Amount of NYAX tokens to transfer</p>
                             </div>
-                            {formError && <p className="text-red-400 text-sm">{formError}</p>}
+                            {formError && <Alert variant="destructive">{formError}</Alert>}
                             <div className="flex gap-3">
                                 <button className="flex-1 px-4 py-3 bg-white/10 text-white rounded-lg" onClick={() => setShowSendToFolderModal(false)}>
                                     Cancel
@@ -2849,12 +2876,17 @@ export default function AdminDashboardFixed() {
                                 </button>
                             </div>
                         </div>
-                    </div>
+                    </Dialog>
                 )}
 
                 {showPermissionsModal && (
-                    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-                        <div className="bg-slate-900 rounded-xl p-8 border border-white/20 max-w-md w-full mx-4 space-y-4">
+                    <Dialog
+                        open={showPermissionsModal}
+                        onClose={() => setShowPermissionsModal(false)}
+                        title="Set Folder Permissions"
+                        maxWidth="max-w-md"
+                    >
+                        <div className="bg-slate-900 rounded-xl p-8 border border-white/20 max-w-md w-full space-y-4">
                             <h3 className="text-2xl font-bold text-white">Set Folder Permissions</h3>
                             <div>
                                 <label className="text-gray-400 text-sm mb-2 block">Folder ID</label>
@@ -2887,12 +2919,17 @@ export default function AdminDashboardFixed() {
                                 </button>
                             </div>
                         </div>
-                    </div>
+                    </Dialog>
                 )}
 
                 {showVestingModal && (
-                    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-                        <div className="bg-slate-900 rounded-xl p-8 border border-white/20 max-w-md w-full mx-4 space-y-4">
+                    <Dialog
+                        open={showVestingModal}
+                        onClose={() => setShowVestingModal(false)}
+                        title="Update Vesting Template"
+                        maxWidth="max-w-md"
+                    >
+                        <div className="bg-slate-900 rounded-xl p-8 border border-white/20 max-w-md w-full space-y-4">
                             <h3 className="text-2xl font-bold text-white">Update Vesting Template</h3>
                             <div>
                                 <label className="text-gray-400 text-sm mb-2 block">Folder ID</label>
@@ -2945,34 +2982,39 @@ export default function AdminDashboardFixed() {
                                 </button>
                             </div>
                         </div>
-                    </div>
+                    </Dialog>
                 )}
 
-                {showProposalModal && (
-                    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-                        <div className="bg-slate-900 rounded-2xl p-8 border border-white/20 max-w-4xl w-full mx-4 space-y-5">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-xs uppercase tracking-[0.35em] text-purple-300/70">Governance</p>
-                                    <h3 className="text-2xl font-bold text-white flex items-center gap-2 mt-1">
-                                        <Gavel className="w-6 h-6 text-purple-300" />
-                                        Draft proposal payload
-                                    </h3>
-                                </div>
-                                <button className="text-gray-400 hover:text-white" onClick={() => setShowProposalModal(false)}>
-                                    ✕
-                                </button>
+                <Drawer
+                    open={showProposalDrawer}
+                    onClose={() => setShowProposalDrawer(false)}
+                    title="Create governance proposal"
+                    maxWidth="max-w-4xl"
+                >
+                    <div className="admin-panel-form flex h-dvh min-h-full flex-col border-l border-white/10 bg-[#0d0d0d]">
+                        <header className="flex shrink-0 items-center justify-between border-b border-white/10 px-6 py-5">
+                            <div>
+                                <p className="text-xs uppercase tracking-[0.35em] text-purple-300/70">Governance</p>
+                                <h3 className="text-2xl font-bold text-white flex items-center gap-2 mt-1">
+                                    <Gavel className="w-6 h-6 text-purple-300" />
+                                    Draft proposal payload
+                                </h3>
                             </div>
+                            <button
+                                type="button"
+                                aria-label="Close proposal drawer"
+                                className="rounded-md p-1.5 text-gray-400 transition-colors hover:bg-white/5 hover:text-white"
+                                onClick={() => setShowProposalDrawer(false)}
+                            >
+                                <X className="size-5" />
+                            </button>
+                        </header>
 
+                        <div className="no-scrollbar min-h-0 flex-1 space-y-5 overflow-y-auto p-6">
                             {proposalAlert && (
-                                <div
-                                    className={`rounded-2xl border px-4 py-3 text-sm ${proposalAlert.type === 'success'
-                                        ? 'border-emerald-400/40 bg-emerald-400/10 text-emerald-200'
-                                        : 'border-red-400/40 bg-red-400/10 text-red-200'
-                                        }`}
-                                >
+                                <Alert variant={proposalAlert.type === 'success' ? 'success' : 'destructive'}>
                                     {proposalAlert.message}
-                                </div>
+                                </Alert>
                             )}
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -3123,9 +3165,8 @@ export default function AdminDashboardFixed() {
                                 )}
                             </div>
                         </div>
-
                     </div>
-                )}
+                </Drawer>
             </div>
         </div>
 

@@ -135,7 +135,7 @@ export default function AdminSidebar({
         }`}
       >
         <div className="flex h-14 shrink-0 items-center border-b border-white/[0.08] px-3">
-          <DropdownMenu>
+          <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
@@ -163,7 +163,7 @@ export default function AdminSidebar({
                 />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-56">
+            <DropdownMenuContent side="bottom" align="start" className="z-[10000] w-56">
               <DropdownMenuLabel className="px-3 py-2 text-xs text-slate-400">
                 Admin workspace
               </DropdownMenuLabel>
@@ -269,7 +269,7 @@ export default function AdminSidebar({
         </nav>
 
         <div className="border-t border-white/[0.08] p-3">
-          <DropdownMenu>
+          <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
@@ -291,7 +291,7 @@ export default function AdminSidebar({
                 />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" side="top" className="w-56">
+            <DropdownMenuContent align="start" side="top" className="z-[10000] w-56">
               <DropdownMenuLabel className="px-3 py-2 text-xs text-slate-400">
                 Administrator
               </DropdownMenuLabel>

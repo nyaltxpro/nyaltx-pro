@@ -1,10 +1,10 @@
 import Footer from '@/components/Footer';
+import { ToasterProvider } from '@/components/reui/sonner';
 import { buildRootMetadata, getSiteSeoSettings } from '@/lib/siteSeo';
 import '@solana/wallet-adapter-react-ui/styles.css';
 
 import type { Metadata, Viewport } from 'next';
 import { Inter, Poppins, Roboto } from "next/font/google";
-import { Toaster } from 'react-hot-toast';
 import "./globals.css";
 import Providers from './providers';
 
@@ -240,6 +240,7 @@ export default async function RootLayout({
             "'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
         }} >
         <Providers>
+          <ToasterProvider />
           {/* Decorative only — never block clicks */}
           <div className="dex-bg-pattern pointer-events-none fixed inset-0 -z-10" aria-hidden />
 
@@ -249,45 +250,6 @@ export default async function RootLayout({
             </main>
             <Footer />
           </div>
-          <Toaster
-            position="top-right"
-            toastOptions={{
-              duration: 4000,
-              style: {
-                background: 'rgba(0, 0, 0, 0.95)',
-                color: '#ffffff',
-                border: '1px solid rgba(59, 130, 246, 0.2)',
-                borderRadius: '12px',
-                backdropFilter: 'blur(16px)',
-                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
-                fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
-              },
-              success: {
-                style: {
-                  background: 'rgba(16, 185, 129, 0.1)',
-                  color: '#10b981',
-                  border: '1px solid rgba(16, 185, 129, 0.3)',
-                  backdropFilter: 'blur(16px)',
-                },
-                iconTheme: {
-                  primary: '#10b981',
-                  secondary: '#ffffff',
-                },
-              },
-              error: {
-                style: {
-                  background: 'rgba(239, 68, 68, 0.1)',
-                  color: '#ef4444',
-                  border: '1px solid rgba(239, 68, 68, 0.3)',
-                  backdropFilter: 'blur(16px)',
-                },
-                iconTheme: {
-                  primary: '#ef4444',
-                  secondary: '#ffffff',
-                },
-              },
-            }}
-          />
         </Providers>
       </body>
     </html>

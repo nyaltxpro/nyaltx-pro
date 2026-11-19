@@ -1,6 +1,7 @@
 'use client';
 
 import AnalyticsDashboard from '@/components/admin/AnalyticsDashboard';
+import { Alert } from '@/components/reui/alert';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
@@ -52,16 +53,7 @@ function AdminStatsComponent() {
                 </Link>
             </div>
 
-            {error && (
-                <div className="p-4 rounded-lg border border-red-500/30 bg-red-500/10 text-red-300 backdrop-blur-sm">
-                    <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-red-400 rounded-full"></div>
-                        <span className="font-medium" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                            {error}
-                        </span>
-                    </div>
-                </div>
-            )}
+            {error && <Alert variant="destructive">{error}</Alert>}
 
             {!stats ? (
                 <div className="text-center py-12">

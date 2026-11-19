@@ -3,6 +3,8 @@
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { Dialog } from '@/components/reui/dialog';
+import { useConfirmDialog } from '@/components/reui/confirm-dialog';
+import { Alert } from '@/components/reui/alert';
 import { Checkbox } from '@/components/reui/checkbox';
 import React, { useEffect, useState } from 'react';
 import {
@@ -66,6 +68,7 @@ const AdminNewshubBannersClient = dynamic(() => Promise.resolve(NewshubBannersCo
 });
 
 function NewshubBannersComponent() {
+  const { confirm, dialog: confirmationDialog } = useConfirmDialog();
   const [banners, setBanners] = useState<NewshubBanner[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -253,9 +256,12 @@ function NewshubBannersComponent() {
   };
 
   const handleDeleteBanner = async (banner: NewshubBanner) => {
-    if (!confirm(`Are you sure you want to delete banner "${banner.title}"?`)) {
-      return;
-    }
+    if (!(await confirm({
+      title: 'Delete banner?',
+      description: `Delete "${banner.title}"? This action cannot be undone.`,
+      confirmLabel: 'Delete banner',
+      destructive: true,
+    }))) return;
 
     try {
       setError(null);
@@ -274,6 +280,7 @@ function NewshubBannersComponent() {
 
   return (
     <div className="space-y-6">
+      {confirmationDialog}
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -316,20 +323,24 @@ function NewshubBannersComponent() {
 
       {/* Status Messages */}
       {error && (
-        <div className="p-4 rounded-xl border border-red-500/30 bg-red-500/10 text-red-300 backdrop-blur-sm flex items-center justify-between">
-          <span>{error}</span>
-          <button onClick={() => setError(null)} className="text-red-400 hover:text-red-200 ml-2">
-            <X />
-          </button>
-        </div>
+        <Alert variant="destructive" className="items-center">
+          <div className="flex items-center justify-between gap-3">
+            <span>{error}</span>
+            <button type="button" onClick={() => setError(null)} className="text-current/70 hover:text-current">
+              <X aria-label="Dismiss error" className="size-4" />
+            </button>
+          </div>
+        </Alert>
       )}
       {success && (
-        <div className="p-4 rounded-xl border border-green-500/30 bg-green-500/10 text-green-300 backdrop-blur-sm flex items-center justify-between">
-          <span>{success}</span>
-          <button onClick={() => setSuccess(null)} className="text-green-400 hover:text-green-200 ml-2">
-            <X />
-          </button>
-        </div>
+        <Alert variant="success" className="items-center">
+          <div className="flex items-center justify-between gap-3">
+            <span>{success}</span>
+            <button type="button" onClick={() => setSuccess(null)} className="text-current/70 hover:text-current">
+              <X aria-label="Dismiss success message" className="size-4" />
+            </button>
+          </div>
+        </Alert>
       )}
 
       {/* Guide Banner */}

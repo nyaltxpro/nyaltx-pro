@@ -18,7 +18,7 @@ const Footer = () => {
   const [messageType, setMessageType] = useState<'success' | 'error'>('success');
 
   // Docs/whitepaper layout is full-bleed; site footer clashes with Fumadocs chrome
-  if (pathname?.startsWith('/whitepaper')) {
+  if (pathname?.startsWith('/whitepaper') || pathname?.startsWith('/adminpanel')) {
     return null;
   }
 

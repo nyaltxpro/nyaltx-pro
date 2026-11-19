@@ -10,9 +10,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/reui/dropdown-menu';
 import { Filters } from '@/components/reui/filters';
+import { Alert } from '@/components/reui/alert';
 import { Input } from '@/components/reui/input';
 import { NativeSelect } from '@/components/reui/native-select';
 import { Badge } from '@/components/reui/badge';
+import { paginateItems, TablePagination } from '@/components/reui/table-pagination';
 import React, { useEffect, useState } from 'react';
 import {
   Coins,
@@ -61,6 +63,7 @@ const AdminUsersComponent = () => {
   // Filters
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [sourceFilter, setSourceFilter] = useState<string>('');
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     fetchUsers();
@@ -112,6 +115,7 @@ const AdminUsersComponent = () => {
       if (sourceFilter && !user.source.includes(sourceFilter)) return false;
       return true;
     }) || [];
+  const paginatedUsers = paginateItems(filteredUsers, page, 10);
 
   const formatCurrency = (amount: number) => {
     return `$${amount.toFixed(2)}`;
@@ -199,9 +203,7 @@ const AdminUsersComponent = () => {
         <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
           <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl p-6 shadow-xl hover:bg-gray-800/50 transition-all duration-200">
             <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-cyan-500/20 rounded-lg flex items-center justify-center border border-cyan-500/30">
-                <User className="w-6 h-6 text-slate-500" />
-              </div>
+              <User className="size-5 text-slate-400" aria-hidden="true" />
               <div className="text-right">
                 <div
                   className="text-2xl font-bold text-cyan-400"
@@ -235,9 +237,7 @@ const AdminUsersComponent = () => {
 
           <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl p-6 shadow-xl hover:bg-gray-800/50 transition-all duration-200">
             <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center border border-green-500/30">
-                <Mail className="w-6 h-6 text-slate-500" />
-              </div>
+              <Mail className="size-5 text-slate-400" aria-hidden="true" />
               <div className="text-right">
                 <div
                   className="text-2xl font-bold text-green-400"
@@ -275,9 +275,7 @@ const AdminUsersComponent = () => {
 
           <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl p-6 shadow-xl hover:bg-gray-800/50 transition-all duration-200">
             <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center border border-purple-500/30">
-                <Wallet className="w-6 h-6 text-slate-500" />
-              </div>
+              <Wallet className="size-5 text-slate-400" aria-hidden="true" />
               <div className="text-right">
                 <div
                   className="text-2xl font-bold text-purple-400"
@@ -311,9 +309,7 @@ const AdminUsersComponent = () => {
 
           <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl p-6 shadow-xl hover:bg-gray-800/50 transition-all duration-200">
             <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-yellow-500/20 rounded-lg flex items-center justify-center border border-yellow-500/30">
-                <Coins className="w-6 h-6 text-slate-500" />
-              </div>
+              <Coins className="size-5 text-slate-400" aria-hidden="true" />
               <div className="text-right">
                 <div
                   className="text-2xl font-bold text-yellow-400"
@@ -347,9 +343,7 @@ const AdminUsersComponent = () => {
 
           <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl p-6 shadow-xl hover:bg-gray-800/50 transition-all duration-200">
             <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center border border-green-500/30">
-                <Coins className="w-6 h-6 text-slate-500" />
-              </div>
+              <Coins className="size-5 text-slate-400" aria-hidden="true" />
               <div className="text-right">
                 <div
                   className="text-2xl font-bold text-green-400"
@@ -385,7 +379,7 @@ const AdminUsersComponent = () => {
 
       {/* Filters */}
       <Filters
-        className="grid grid-cols-1 md:grid-cols-3 gap-3"
+        className="admin-users-filters"
         activeFilters={[
           ...(searchTerm
             ? [{ id: 'search', label: `Search: ${searchTerm}`, onRemove: () => setSearchTerm('') }]
@@ -410,7 +404,7 @@ const AdminUsersComponent = () => {
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
               placeholder="Email, wallet address..."
-              className="h-11 pl-10"
+              className="pl-10"
             />
           </div>
         </div>
@@ -420,7 +414,6 @@ const AdminUsersComponent = () => {
           <NativeSelect
             value={sourceFilter}
             onChange={e => setSourceFilter(e.target.value)}
-            className="h-11"
           >
             <option value="">All Sources</option>
             <option value="orders">Orders</option>
@@ -434,7 +427,7 @@ const AdminUsersComponent = () => {
         <div className="flex items-end">
           <button
             onClick={fetchUsers}
-            className="flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-cyan-600 px-4 text-sm font-medium text-white transition hover:bg-cyan-500"
+            className="flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-cyan-600 px-4 text-sm font-medium text-white transition hover:bg-cyan-500"
           >
             <Filter />
             Apply Filters
@@ -462,14 +455,7 @@ const AdminUsersComponent = () => {
           <div className="w-16 h-16 bg-gray-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
             <Search className="w-8 h-8 text-slate-400" />
           </div>
-          <p
-            className="text-red-400 font-medium"
-            style={{
-              fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
-            }}
-          >
-            Error: {error}
-          </p>
+          <Alert variant="destructive" className="mx-auto max-w-xl">Error: {error}</Alert>
         </div>
       ) : filteredUsers.length === 0 ? (
         <div className="text-center py-12">
@@ -488,7 +474,7 @@ const AdminUsersComponent = () => {
       ) : (
         <div className="admin-panel-card overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full overflow-hidden">
+            <table className="w-full min-w-[1200px] overflow-hidden">
               <thead className="bg-gray-700/30 border-b border-gray-600/20">
                 <tr>
                   <th
@@ -566,7 +552,7 @@ const AdminUsersComponent = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-700/20">
-                {filteredUsers.map(user => (
+                {paginatedUsers.map(user => (
                   <tr key={user.id} className="hover:bg-gray-700/20 transition-colors duration-200">
                     <td className="px-4 py-3 text-sm border-r border-gray-700/20">
                       <div className="flex items-center gap-3">
@@ -733,6 +719,12 @@ const AdminUsersComponent = () => {
               </tbody>
             </table>
           </div>
+          <TablePagination
+            page={page}
+            pageSize={10}
+            total={filteredUsers.length}
+            onPageChange={setPage}
+          />
         </div>
       )}
 

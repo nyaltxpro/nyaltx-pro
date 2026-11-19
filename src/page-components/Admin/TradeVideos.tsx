@@ -5,6 +5,8 @@ import { FaPlus, FaRegSave, FaTrash, FaYoutube } from 'react-icons/fa';
 import { HiRefresh } from 'react-icons/hi';
 import toast from 'react-hot-toast';
 import { Checkbox } from '@/components/reui/checkbox';
+import { Alert } from '@/components/reui/alert';
+import { useConfirmDialog } from '@/components/reui/confirm-dialog';
 
 interface TradeVideo {
   _id: string;
@@ -28,6 +30,7 @@ const defaultFormState = {
 };
 
 export default function AdminTradeVideos() {
+  const { confirm, dialog: confirmationDialog } = useConfirmDialog();
   const [videos, setVideos] = useState<TradeVideo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -141,7 +144,12 @@ export default function AdminTradeVideos() {
   };
 
   const handleDelete = async (id: string) => {
-    const confirmed = window.confirm('Are you sure you want to delete this video? This action cannot be undone.');
+    const confirmed = await confirm({
+      title: 'Delete video?',
+      description: 'This action cannot be undone.',
+      confirmLabel: 'Delete video',
+      destructive: true,
+    });
     if (!confirmed) return;
 
     const deletingToast = toast.loading('Deleting video...');
@@ -189,9 +197,7 @@ export default function AdminTradeVideos() {
           </h2>
 
           {error && (
-            <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">
-              {error}
-            </div>
+            <Alert variant="destructive">{error}</Alert>
           )}
 
           <div className="space-y-2">
@@ -382,6 +388,7 @@ export default function AdminTradeVideos() {
           </div>
         )}
       </div>
+      {confirmationDialog}
     </div>
   );
 }

@@ -5,6 +5,10 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { Drawer } from '@/components/reui/drawer';
 import { Checkbox } from '@/components/reui/checkbox';
+import { Badge } from '@/components/reui/badge';
+import { Filters } from '@/components/reui/filters';
+import { Alert } from '@/components/reui/alert';
+import toast from 'react-hot-toast';
 import {
   ArrowLeft,
   ArrowDownAZ,
@@ -81,11 +85,9 @@ function AdminTokensComponent() {
     const [isRegistering, setIsRegistering] = useState(false);
     const [isRegistrationBusy, setIsRegistrationBusy] = useState(false);
     const [refreshKey, setRefreshKey] = useState(0);
-    // Toast notifications
-    const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
     function showToast(type: 'success' | 'error', message: string) {
-        setToast({ type, message });
-        setTimeout(() => setToast(null), 2500);
+        if (type === 'success') toast.success(message);
+        else toast.error(message);
     }
 
     const query = useMemo(() => {
@@ -272,16 +274,6 @@ function AdminTokensComponent() {
 
     return (
         <div className="admin-panel-form space-y-6">
-            {/* Toast */}
-            {toast && (
-                <div
-                    className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-md shadow-lg border text-sm ${toast.type === 'success' ? 'bg-emerald-900/70 border-emerald-700 text-emerald-200' : 'bg-rose-900/70 border-rose-700 text-rose-200'}`}
-                    role="status"
-                    aria-live="polite"
-                >
-                    {toast.message}
-                </div>
-            )}
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
@@ -304,7 +296,19 @@ function AdminTokensComponent() {
             </div>
 
             {/* Filters & Controls */}
-            <div className="admin-panel-filter-bar">
+            <Filters
+                activeFilters={[
+                    ...(statusFilter !== 'pending'
+                        ? [{ id: 'token-status', label: `Status: ${statusFilter}`, onRemove: () => setStatusFilter('pending') }]
+                        : []),
+                    ...(chainFilter !== 'all'
+                        ? [{ id: 'token-chain', label: `Chain: ${chainFilter}`, onRemove: () => setChainFilter('all') }]
+                        : []),
+                    ...(search.trim()
+                        ? [{ id: 'token-search', label: `Search: ${search}`, onRemove: () => setSearch('') }]
+                        : []),
+                ]}
+            >
                 <div className="flex flex-col lg:flex-row lg:items-center gap-4">
                     {/* Status Filter */}
                     <div className="flex items-center gap-3">
@@ -393,9 +397,9 @@ function AdminTokensComponent() {
                         </select>
                     </div>
                 </div>
-            </div>
+            </Filters>
 
-            {error && <div className="text-sm text-red-400">{error}</div>}
+            {error && <Alert variant="destructive">{error}</Alert>}
 
             {!tokens ? (
                 <div className="text-center py-12">
@@ -414,7 +418,7 @@ function AdminTokensComponent() {
             ) : (
                 <div className="admin-panel-card overflow-hidden">
                     <div className="overflow-x-auto">
-                        <table className="w-full overflow-hidden">
+                        <table className="w-full min-w-[1280px] overflow-hidden">
                             <thead className="bg-gray-700/30 border-b border-gray-600/20">
                                 <tr>
                                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
@@ -499,9 +503,9 @@ function AdminTokensComponent() {
                                             </div>
                                         </td>
                                         <td className="px-4 py-3 text-sm text-gray-300 border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-500/10 text-blue-300 border border-blue-500/20">
+                                            <Badge variant="info-light" size="default" radius="default">
                                                 {t.blockchain}
-                                            </span>
+                                            </Badge>
                                         </td>
                                         <td className="px-4 py-3 text-sm text-gray-300 border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                                             <code className="text-xs bg-gray-700/30 px-2 py-1 rounded border border-gray-600/30">
@@ -509,26 +513,30 @@ function AdminTokensComponent() {
                                             </code>
                                         </td>
                                         <td className="px-4 py-3 text-sm border-r border-gray-700/20">
-                                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                                                t.status === 'approved' 
-                                                    ? 'bg-green-500/10 text-green-300 border border-green-500/20'
-                                                    : t.status === 'rejected'
-                                                    ? 'bg-red-500/10 text-red-300 border border-red-500/20'
-                                                    : 'bg-yellow-500/10 text-yellow-300 border border-yellow-500/20'
-                                            }`} style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                            <Badge
+                                                variant={
+                                                    t.status === 'approved'
+                                                        ? 'success-light'
+                                                        : t.status === 'rejected'
+                                                          ? 'destructive-light'
+                                                          : 'warning-light'
+                                                }
+                                                size="default"
+                                                radius="default"
+                                            >
                                                 {t.status}
-                                            </span>
+                                            </Badge>
                                         </td>
                                         <td className="px-4 py-3 text-sm border-r border-gray-700/20">
                                             {t.status === 'approved' ? (
                                                 <div className="flex flex-col gap-2">
-                                                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                                                        t.inRace 
-                                                            ? 'bg-yellow-500/10 text-yellow-300 border border-yellow-500/20'
-                                                            : 'bg-gray-500/10 text-gray-400 border border-gray-500/20'
-                                                    }`} style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                                    <Badge
+                                                        variant={t.inRace ? 'warning-light' : 'secondary'}
+                                                        size="default"
+                                                        radius="default"
+                                                    >
                                                         {t.inRace ? '🏁 In Race' : 'Not in Race'}
-                                                    </span>
+                                                    </Badge>
                                                     <button
                                                         disabled={busyId === t.id}
                                                         onClick={() => toggleRaceStatus(t.id, !t.inRace)}
@@ -543,9 +551,9 @@ function AdminTokensComponent() {
                                                     </button>
                                                 </div>
                                             ) : (
-                                                <span className="text-xs text-gray-500" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                                <Badge variant="warning-light" size="default" radius="default">
                                                     Approve first
-                                                </span>
+                                                </Badge>
                                             )}
                                         </td>
                                         <td className="px-4 py-3 text-sm border-r border-gray-700/20">
@@ -556,9 +564,13 @@ function AdminTokensComponent() {
                                                     disabled={busyId === t.id}
                                                     onChange={e => patchToken(t.id, { paused: e.target.checked })}
                                                 />
-                                                <span className={`text-xs font-medium ${t.paused ? 'text-red-300' : 'text-green-300'}`} style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                                <Badge
+                                                    variant={t.paused ? 'destructive-light' : 'success-light'}
+                                                    size="default"
+                                                    radius="default"
+                                                >
                                                     {t.paused ? 'Paused' : 'Active'}
-                                                </span>
+                                                </Badge>
                                             </label>
                                         </td>
                                         <td className="px-4 py-3 text-sm border-r border-gray-700/20">

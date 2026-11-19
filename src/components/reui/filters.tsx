@@ -18,7 +18,7 @@ export function Filters({ children, activeFilters = [], className = '' }: Filter
     <div data-slot="filters" className={`admin-panel-filter-bar ${className}`}>
       {children}
       {activeFilters.length > 0 && (
-        <div className="flex w-full flex-wrap items-center gap-2">
+        <div data-slot="active-filters" className="flex w-full flex-wrap items-center gap-2">
           <span className="text-xs text-slate-500">Active filters:</span>
           {activeFilters.map(filter => (
             <button

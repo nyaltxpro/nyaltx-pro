@@ -2,6 +2,12 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
+import toast from 'react-hot-toast';
+import { Badge } from '@/components/reui/badge';
+import { Button } from '@/components/reui/button';
+import { Card } from '@/components/reui/card';
+import { Filters } from '@/components/reui/filters';
+import { paginateItems, TablePagination } from '@/components/reui/table-pagination';
 
 interface Token {
   id: string;
@@ -18,6 +24,7 @@ export default function TokenPointsManager() {
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     fetchTokens();
@@ -53,11 +60,11 @@ export default function TokenPointsManager() {
         // Update local state
         setTokens(prev => prev.map(token => (token.id === tokenId ? { ...token, points } : token)));
       } else {
-        alert('Failed to update points: ' + result.error);
+        toast.error(`Failed to update points: ${result.error}`);
       }
     } catch (error) {
       console.error('Failed to update points:', error);
-      alert('Failed to update points');
+      toast.error('Failed to update points');
     } finally {
       setUpdating(null);
     }
@@ -68,6 +75,7 @@ export default function TokenPointsManager() {
       token.tokenName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       token.tokenSymbol.toLowerCase().includes(searchTerm.toLowerCase())
   );
+  const paginatedTokens = paginateItems(filteredTokens, page, 10);
 
   if (loading) {
     return (
@@ -93,21 +101,29 @@ export default function TokenPointsManager() {
         </p>
 
         {/* Search */}
-        <div className="mb-4">
-          <input
-            type="text"
-            placeholder="Search tokens..."
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-            className="w-full max-w-md px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg focus:outline-none focus:border-[#00c3ff]"
-          />
-        </div>
+        <Filters
+          className="mb-4"
+          activeFilters={searchTerm.trim()
+            ? [{ id: 'points-search', label: `Search: ${searchTerm}`, onRemove: () => setSearchTerm('') }]
+            : []}
+        >
+          <div className="max-w-md flex-1">
+            <input
+              type="search"
+              placeholder="Search tokens..."
+              aria-label="Search token points"
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              className="w-full px-3 py-2"
+            />
+          </div>
+        </Filters>
       </div>
 
-      <div className="bg-gray-800 rounded-lg overflow-hidden">
+      <Card className="overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-700">
+          <table className="w-full min-w-[800px]">
+            <thead>
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                   Token
@@ -127,7 +143,7 @@ export default function TokenPointsManager() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-600">
-              {filteredTokens.map(token => (
+              {paginatedTokens.map(token => (
                 <TokenRow
                   key={token.id}
                   token={token}
@@ -138,7 +154,13 @@ export default function TokenPointsManager() {
             </tbody>
           </table>
         </div>
-      </div>
+        <TablePagination
+          page={page}
+          pageSize={10}
+          total={filteredTokens.length}
+          onPageChange={setPage}
+        />
+      </Card>
 
       {filteredTokens.length === 0 && (
         <div className="text-center py-8 text-gray-400">No tokens found matching your search.</div>
@@ -194,9 +216,9 @@ function TokenRow({ token, updating, onUpdatePoints }: TokenRowProps) {
         </div>
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
-        <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+        <Badge variant="info-light">
           {token.blockchain}
-        </span>
+        </Badge>
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
         {isEditing ? (
@@ -204,47 +226,44 @@ function TokenRow({ token, updating, onUpdatePoints }: TokenRowProps) {
             type="number"
             value={points}
             onChange={e => setPoints(Number(e.target.value))}
-            className="w-20 px-2 py-1 bg-gray-700 border border-gray-600 rounded text-sm focus:outline-none focus:border-[#00c3ff]"
+            className="w-24"
             min="0"
           />
         ) : (
-          <span className="text-lg font-bold text-[#00c3ff]">{token.points || 0}</span>
+          <span className="text-sm font-semibold text-cyan-300">{token.points || 0}</span>
         )}
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
-        <span
-          className={`px-2 py-1 text-xs font-medium rounded-full ${
-            token.inRace ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-          }`}
-        >
+        <Badge variant={token.inRace ? 'success-light' : 'secondary'}>
           {token.inRace ? 'In Race' : 'Not in Race'}
-        </span>
+        </Badge>
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-sm">
         {isEditing ? (
           <div className="flex space-x-2">
-            <button
+            <Button
+              size="sm"
               onClick={handleSave}
               disabled={updating}
-              className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-xs disabled:opacity-50"
             >
               {updating ? 'Saving...' : 'Save'}
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={handleCancel}
               disabled={updating}
-              className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded text-xs disabled:opacity-50"
             >
               Cancel
-            </button>
+            </Button>
           </div>
         ) : (
-          <button
+          <Button
+            size="sm"
             onClick={() => setIsEditing(true)}
-            className="bg-[#00c3ff] hover:bg-[#00a8cc] text-black px-3 py-1 rounded text-xs font-medium"
           >
             Edit Points
-          </button>
+          </Button>
         )}
       </td>
     </tr>

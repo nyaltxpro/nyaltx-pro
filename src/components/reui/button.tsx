@@ -12,7 +12,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variants: Record<ButtonVariant, string> = {
   default: 'border border-transparent bg-cyan-500 text-white hover:bg-cyan-400',
-  secondary: 'border border-transparent bg-slate-700 text-slate-100 hover:bg-slate-600',
+  secondary: 'border border-transparent bg-cyan-500 text-white hover:bg-cyan-400',
   outline: 'border border-white/15 bg-transparent text-slate-200 hover:bg-white/5',
   ghost: 'border border-transparent bg-transparent text-slate-300 hover:bg-white/5 hover:text-white',
   destructive: 'border border-transparent bg-red-500/15 text-red-200 hover:bg-red-500/25',
@@ -20,9 +20,9 @@ const variants: Record<ButtonVariant, string> = {
 };
 
 const sizes: Record<ButtonSize, string> = {
-  sm: 'h-8 gap-1.5 rounded-md px-3 text-xs',
+  sm: 'h-9 gap-2 rounded-lg px-4 text-sm',
   default: 'h-9 gap-2 rounded-lg px-4 text-sm',
-  lg: 'h-10 gap-2 rounded-lg px-5 text-sm',
+  lg: 'h-9 gap-2 rounded-lg px-4 text-sm',
   icon: 'size-9 rounded-lg p-0',
 };
 
