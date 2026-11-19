@@ -30,9 +30,13 @@ export class FolderRegistryService {
     const count = await this.getFolderCount();
     if (count === 0) return [];
 
-    const folderIds = Array.from({ length: count }, (_, idx) => idx + 1);
-    const folders = await Promise.all(folderIds.map(id => this.getFolder(id)));
-    return folders.filter((folder): folder is FolderInfo => folder !== null);
+    const folders: FolderInfo[] = [];
+    for (let folderId = 1; folderId <= count; folderId += 1) {
+      const folder = await this.getFolder(folderId);
+      if (folder) folders.push(folder);
+    }
+
+    return folders;
   }
 
   async getAllFolders(): Promise<FolderInfo[]> {

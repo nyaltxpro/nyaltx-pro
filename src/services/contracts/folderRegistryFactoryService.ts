@@ -190,22 +190,17 @@ export class FolderRegistryFactoryService {
   // Utility Methods
   async getFoldersWithDetails(): Promise<Array<FolderInfo & { address: string }>> {
     const allFolders = await this.getAllFolders();
-    console.log('getAllFolders returned:', allFolders);
-    
-    const foldersWithDetails = await Promise.all(
-      allFolders.map(async (address) => {
-        const info = await this.getFolderInfo(address);
-        console.log(`Folder ${address} info:`, info);
-        return {
-          name: info.name,
-          folder: info.folder,
-          createdAt: info.createdAt,
-          address
-        };
-      })
-    );
-    
-    console.log('getFoldersWithDetails final result:', foldersWithDetails);
+    const foldersWithDetails: Array<FolderInfo & { address: string }> = [];
+    for (const address of allFolders) {
+      const info = await this.getFolderInfo(address);
+      foldersWithDetails.push({
+        name: info.name,
+        folder: info.folder,
+        createdAt: info.createdAt,
+        address,
+      });
+    }
+
     return foldersWithDetails;
   }
 

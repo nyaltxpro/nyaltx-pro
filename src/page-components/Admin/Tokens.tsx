@@ -8,7 +8,7 @@ import { Checkbox } from '@/components/reui/checkbox';
 import { Badge } from '@/components/reui/badge';
 import { Filters } from '@/components/reui/filters';
 import { Alert } from '@/components/reui/alert';
-import { NativeSelect } from '@/components/reui/native-select';
+import { DropdownSelect } from '@/components/reui/dropdown-select';
 import {
     Tooltip,
     TooltipContent,
@@ -332,20 +332,21 @@ function AdminTokensComponent() {
                         >
                             Status:
                         </label>
-                        <NativeSelect
+                        <DropdownSelect
                             id="status-filter"
                             className="!w-[102px] px-2.5"
                             value={statusFilter}
-                            onChange={e => {
-                                setStatusFilter(e.target.value as any);
+                            onValueChange={value => {
+                                setStatusFilter(value as Status | 'all');
                                 setPage(1);
                             }}
-                        >
-                            <option value="pending">Pending</option>
-                            <option value="approved">Approved</option>
-                            <option value="rejected">Rejected</option>
-                            <option value="all">All</option>
-                        </NativeSelect>
+                            options={[
+                                { value: 'pending', label: 'Pending' },
+                                { value: 'approved', label: 'Approved' },
+                                { value: 'rejected', label: 'Rejected' },
+                                { value: 'all', label: 'All' },
+                            ]}
+                        />
                     </div>
 
                     {/* Chain Filter */}
@@ -356,18 +357,16 @@ function AdminTokensComponent() {
                         >
                             Chain:
                         </label>
-                        <NativeSelect
+                        <DropdownSelect
                             id="chain-filter"
                             className="!w-[103px] px-2.5"
                             value={chainFilter}
-                            onChange={e => setChainFilter(e.target.value)}
-                        >
-                            {chains.map(c => (
-                                <option key={c} value={c}>
-                                    {c === 'all' ? 'All Chains' : c}
-                                </option>
-                            ))}
-                        </NativeSelect>
+                            onValueChange={setChainFilter}
+                            options={chains.map(chain => ({
+                                value: chain,
+                                label: chain === 'all' ? 'All Chains' : chain,
+                            }))}
+                        />
                     </div>
 
                     {/* Search Input */}
@@ -396,19 +395,20 @@ function AdminTokensComponent() {
                         >
                             Show:
                         </label>
-                        <NativeSelect
+                        <DropdownSelect
                             id="per-page"
                             className="!w-[51px] px-2.5"
-                            value={limit}
-                            onChange={e => {
-                                setLimit(parseInt(e.target.value, 10));
+                            value={String(limit)}
+                            onValueChange={value => {
+                                setLimit(Number(value));
                                 setPage(1);
                             }}
-                        >
-                            <option value={10}>10</option>
-                            <option value={25}>25</option>
-                            <option value={50}>50</option>
-                        </NativeSelect>
+                            options={[
+                                { value: '10', label: '10' },
+                                { value: '25', label: '25' },
+                                { value: '50', label: '50' },
+                            ]}
+                        />
                     </div>
                 </div>
             </Filters>

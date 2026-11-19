@@ -85,6 +85,45 @@ const formatDuration = (seconds?: number) => {
     return `${seconds}s`;
 };
 
+function containsRpcRateLimit(error: unknown, seen = new Set<object>(), depth = 0): boolean {
+    if (depth > 6 || error == null) return false;
+    if (typeof error === 'string') return /too many requests|rate.?limit/i.test(error);
+    if (typeof error !== 'object') return false;
+    if (seen.has(error)) return false;
+    seen.add(error);
+
+    if (Array.isArray(error)) {
+        return error.some(item => containsRpcRateLimit(item, seen, depth + 1));
+    }
+
+    const record = error as Record<string, unknown>;
+    if (String(record.code) === '-32005' || /too many requests|rate.?limit/i.test(
+        `${String(record.message ?? '')} ${String(record.shortMessage ?? '')}`,
+    )) {
+        return true;
+    }
+
+    return ['error', 'info', 'cause', 'value', 'data', 'payload'].some(key =>
+        containsRpcRateLimit(record[key], seen, depth + 1),
+    );
+}
+
+function getFolderRpcErrorMessage(error: unknown): string {
+    if (containsRpcRateLimit(error)) {
+        return 'The RPC provider is rate-limiting folder requests. No automatic retries were made; use Refresh data after the limit clears.';
+    }
+
+    const record = error && typeof error === 'object' ? error as Record<string, unknown> : {};
+    if (
+        record.code === 'BAD_DATA' ||
+        /missing response for request|incomplete response/i.test(String(record.message ?? ''))
+    ) {
+        return 'The RPC provider returned an incomplete response. Folder data could not be loaded; use Refresh data to try again later.';
+    }
+
+    return 'Folder data could not be loaded. Use Refresh data to try again later.';
+}
+
 export default function NYALTXGovernance() {
     const { address, isConnected } = useAccount();
     const chainId = useChainId();
@@ -303,18 +342,18 @@ export default function NYALTXGovernance() {
         };
     }, [daoService]);
 
-    const loadFolderSummaries = useCallback(async () => {
-        if (!daoService) return;
+    const loadFolderSummaries = useCallback(async (isCancelled: () => boolean) => {
+        if (!daoService || isCancelled()) return;
         setFolderSummariesLoading(true);
         setFolderSummariesError(null);
         try {
             const factoryService = daoService.folderFactory;
             const registryService = daoService.folders;
 
-            const [folderDetails, registryFolders] = await Promise.all([
-                factoryService.getFoldersWithDetails().catch(() => []),
-                registryService.getAllFolders().catch(() => []),
-            ]);
+            const folderDetails = await factoryService.getFoldersWithDetails();
+            if (isCancelled()) return;
+            const registryFolders = await registryService.getAllFolders();
+            if (isCancelled()) return;
 
             if (!folderDetails.length) {
                 setFolderSummaries([]);
@@ -349,68 +388,75 @@ export default function NYALTXGovernance() {
             const { FolderEscrowService } = await import('@/services/contracts/folderEscrowService');
             const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL || NETWORK_CONFIG?.rpcUrl || 'https://sepolia.infura.io/v3/8f6f3d84b5c648babc3f6example';
             const readOnlyProvider = new ethers.JsonRpcProvider(rpcUrl);
+            const summaries: FolderSummary[] = [];
+            const folderFailures: unknown[] = [];
+            for (const [index, detail] of folderDetails.entries()) {
+                if (isCancelled()) return;
+                try {
+                    const escrow = new FolderEscrowService(detail.address, readOnlyProvider as any);
+                    const stats = await escrow.getFolderStatsOptimized();
 
-            const summaries = await Promise.all(
-                folderDetails.map(async (detail, index) => {
-                    try {
-                        const escrow = new FolderEscrowService(detail.address, readOnlyProvider as any);
-                        const stats = await escrow.getFolderStatsOptimized();
+                    const totalAllocated = parseFloat(ethers.formatEther(stats.totalAllocated));
+                    const totalUnlocked = parseFloat(ethers.formatEther(stats.totalVested));
+                    const totalClaimed = parseFloat(ethers.formatEther(stats.totalClaimed));
+                    const claimable = Math.max(totalUnlocked - totalClaimed, 0);
+                    const progress = totalAllocated > 0 ? Math.min((totalUnlocked / totalAllocated) * 100, 100) : 0;
+                    const matchedFolder = detail.name ? nameMap.get(detail.name.toLowerCase()) : undefined;
+                    const canonicalName = matchedFolder?.name ?? detail.name ?? `Folder ${index + 1}`;
+                    const folderId = matchedFolder?.id ?? index + 1;
 
-                        const totalAllocated = parseFloat(ethers.formatEther(stats.totalAllocated));
-                        const totalUnlocked = parseFloat(ethers.formatEther(stats.totalVested));
-                        const totalClaimed = parseFloat(ethers.formatEther(stats.totalClaimed));
-                        const claimable = Math.max(totalUnlocked - totalClaimed, 0);
-                        const progress = totalAllocated > 0 ? Math.min((totalUnlocked / totalAllocated) * 100, 100) : 0;
-                        const matchedFolder = detail.name ? nameMap.get(detail.name.toLowerCase()) : undefined;
-                        const canonicalName = matchedFolder?.name ?? detail.name ?? `Folder ${index + 1}`;
-                        const folderId = matchedFolder?.id ?? index + 1;
+                    summaries.push({
+                        id: folderId,
+                        name: canonicalName,
+                        address: detail.address,
+                        memberCount: stats.totalBeneficiaries,
+                        totalAllocated,
+                        totalUnlocked,
+                        totalClaimed,
+                        claimable,
+                        progress,
+                        locked: stats.isPaused,
+                        folderBalance: parseFloat(ethers.formatEther(stats.folderBalance)),
+                        createdAt: detail.createdAt ? Number(detail.createdAt) : undefined,
+                        template: {
+                            cliff: stats.vestingCliff || matchedFolder?.template.cliff || 0,
+                            duration: stats.vestingDuration || matchedFolder?.template.duration || 0,
+                            revocable: matchedFolder?.template.revocable ?? false,
+                        },
+                    });
+                } catch (folderError) {
+                    console.error(`Failed to load stats for folder ${detail.address}`, folderError);
+                    folderFailures.push(folderError);
+                }
+            }
 
-                        return {
-                            id: folderId,
-                            name: canonicalName,
-                            address: detail.address,
-                            memberCount: stats.totalBeneficiaries,
-                            totalAllocated,
-                            totalUnlocked,
-                            totalClaimed,
-                            claimable,
-                            progress,
-                            locked: stats.isPaused,
-                            folderBalance: parseFloat(ethers.formatEther(stats.folderBalance)),
-                            createdAt: detail.createdAt ? Number(detail.createdAt) : undefined,
-                            template: {
-                                cliff: stats.vestingCliff || matchedFolder?.template.cliff || 0,
-                                duration: stats.vestingDuration || matchedFolder?.template.duration || 0,
-                                revocable: matchedFolder?.template.revocable ?? false,
-                            },
-                        } as FolderSummary;
-                    } catch (folderError) {
-                        console.error(`Failed to load stats for folder ${detail?.address}`, folderError);
-                        return null;
-                    }
-                })
-            );
-
-            setFolderSummaries(summaries.filter((summary): summary is FolderSummary => Boolean(summary)));
+            if (isCancelled()) return;
+            setFolderSummaries(summaries);
+            if (folderFailures.length > 0) {
+                setFolderSummariesError(
+                    folderFailures.some(folderFailure => containsRpcRateLimit(folderFailure))
+                        ? `The RPC provider rate-limited ${folderFailures.length} folder request(s). No automatic retries were made.`
+                        : `Could not load stats for ${folderFailures.length} folder(s).`,
+                );
+            }
         } catch (error) {
-            console.error('Failed to load folder summaries', error);
-            setFolderSummariesError(error instanceof Error ? error.message : 'Failed to load folder data');
+            if (!isCancelled()) {
+                console.error('Failed to load folder summaries', error);
+                setFolderSummariesError(getFolderRpcErrorMessage(error));
+            }
         } finally {
-            setFolderSummariesLoading(false);
+            if (!isCancelled()) setFolderSummariesLoading(false);
         }
     }, [daoService]);
 
     useEffect(() => {
-        if (!daoService) return;
+        if (activeTab !== 'folders' || !daoService) return;
         let cancelled = false;
-        const fetchFolders = async () => {
-            await loadFolderSummaries();
-        };
-        fetchFolders();
+        void loadFolderSummaries(() => cancelled);
         return () => {
             cancelled = true;
         };
-    }, [daoService, loadFolderSummaries, foldersReloadNonce]);
+    }, [activeTab, daoService, loadFolderSummaries, foldersReloadNonce]);
 
     useEffect(() => {
         let cancelled = false;
@@ -1748,7 +1794,7 @@ export default function NYALTXGovernance() {
                         )}
 
                         {!folderSummariesLoading && folderSummaries.length > 0 && (
-                            <div className="grid gap-4">
+                            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                                 {folderSummaries.map((folder) => (
                                     <div
                                         key={folder.id}

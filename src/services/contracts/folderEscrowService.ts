@@ -412,35 +412,24 @@ export class FolderEscrowService {
     vestingCliff: number;
     vestingDuration: number;
   }> {
-    // Fetch all basic data in parallel
-    const [beneficiaryCount, totalAllocated, isPaused, folderBalance] = await Promise.all([
-      this.getBeneficiaryCount(),
-      this.getTotalAllocated(),
-      this.isPaused(),
-      this.getFolderBalance()
-    ]);
+    const beneficiaryCount = await this.getBeneficiaryCount();
+    const totalAllocated = await this.getTotalAllocated();
+    const isPaused = await this.isPaused();
+    const folderBalance = await this.getFolderBalance();
 
-    // Get all beneficiaries in parallel
     const beneficiaries: Beneficiary[] = [];
-    const beneficiaryPromises = [];
     for (let i = 0; i < beneficiaryCount; i++) {
-      beneficiaryPromises.push(this.getBeneficiaryById(i));
+      beneficiaries.push(await this.getBeneficiaryById(i));
     }
-    const fetchedBeneficiaries = await Promise.all(beneficiaryPromises);
-    beneficiaries.push(...fetchedBeneficiaries);
 
-    // Calculate totals from beneficiary data (already fetched)
     let totalClaimed = BigInt(0);
     let totalVested = BigInt(0);
-    
-    // Get all vested amounts in parallel
-    const vestedPromises = beneficiaries.map(b => this.getVestedAmount(Number(b.id)));
-    const vestedAmounts = await Promise.all(vestedPromises);
-    
-    beneficiaries.forEach((b, index) => {
-      totalClaimed += b.claimed;
-      totalVested += vestedAmounts[index];
-    });
+
+    for (const beneficiary of beneficiaries) {
+      const vestedAmount = await this.getVestedAmount(Number(beneficiary.id));
+      totalClaimed += beneficiary.claimed;
+      totalVested += vestedAmount;
+    }
 
     // Get vesting time info from first beneficiary
     let vestingStart = 0;

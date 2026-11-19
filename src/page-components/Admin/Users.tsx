@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { Dialog } from '@/components/reui/dialog';
 import { Button } from '@/components/reui/button';
+import { DropdownSelect } from '@/components/reui/dropdown-select';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,7 +13,6 @@ import {
 import { Filters } from '@/components/reui/filters';
 import { Alert } from '@/components/reui/alert';
 import { Input } from '@/components/reui/input';
-import { NativeSelect } from '@/components/reui/native-select';
 import { Badge } from '@/components/reui/badge';
 import { paginateItems, TablePagination } from '@/components/reui/table-pagination';
 import React, { useEffect, useState } from 'react';
@@ -410,18 +410,25 @@ const AdminUsersComponent = () => {
         </div>
 
         <div className="space-y-1.5">
-          <label className="block text-xs font-medium text-slate-400">Source</label>
-          <NativeSelect
-            value={sourceFilter}
-            onChange={e => setSourceFilter(e.target.value)}
+          <label
+            htmlFor="source-filter"
+            className="block text-xs font-medium text-slate-400"
           >
-            <option value="">All Sources</option>
-            <option value="orders">Orders</option>
-            <option value="onchain_orders">Onchain Orders</option>
-            <option value="favorites">Favorites</option>
-            <option value="token_registrations">Token Registrations</option>
-            <option value="newsletter">Newsletter</option>
-          </NativeSelect>
+            Source
+          </label>
+          <DropdownSelect
+            id="source-filter"
+            value={sourceFilter}
+            onValueChange={setSourceFilter}
+            options={[
+              { value: '', label: 'All Sources' },
+              { value: 'orders', label: 'Orders' },
+              { value: 'onchain_orders', label: 'Onchain Orders' },
+              { value: 'favorites', label: 'Favorites' },
+              { value: 'token_registrations', label: 'Token Registrations' },
+              { value: 'newsletter', label: 'Newsletter' },
+            ]}
+          />
         </div>
 
         <div className="flex items-end">
