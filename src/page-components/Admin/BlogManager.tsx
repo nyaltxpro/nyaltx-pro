@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import AdminModal from '@/components/AdminModal';
 import 'quill/dist/quill.snow.css';
 import type QuillType from 'quill';
 import type { QuillOptions } from 'quill';
@@ -554,16 +555,13 @@ const AdminBlogManagerComponent = () => {
       </div>
 
       {isFormOpen ? (
-        <div
-          className="fixed inset-0 z-[80] flex items-start justify-center overflow-y-auto bg-black/70 p-4 backdrop-blur-sm sm:items-center"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="blog-form-modal-title"
-          onClick={(event) => {
-            if (event.target === event.currentTarget && !state.loading && !isUploadingToIPFS) {
-              resetForm();
-            }
+        <AdminModal
+          open={isFormOpen}
+          onClose={() => {
+            if (!state.loading && !isUploadingToIPFS) resetForm();
           }}
+          title={form.id ? 'Edit Blog Post' : 'Create Blog Post'}
+          maxWidth="max-w-5xl"
         >
           <div className="my-4 flex max-h-[min(92vh,900px)] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#0d0d0d] shadow-2xl">
             <div className="flex shrink-0 items-center justify-between gap-4 border-b border-white/10 px-5 py-4 sm:px-6">
@@ -845,7 +843,7 @@ const AdminBlogManagerComponent = () => {
               </button>
             </div>
           </div>
-        </div>
+        </AdminModal>
       ) : null}
     </div>
   );

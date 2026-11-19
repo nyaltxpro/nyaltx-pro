@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import AdminModal from '@/components/AdminModal';
 import React, { useEffect, useState } from 'react';
 import { FaEye, FaSearch, FaWallet, FaEnvelope, FaUser, FaCoins, FaStar, FaFilter } from 'react-icons/fa';
 import toast from 'react-hot-toast';
@@ -470,7 +471,12 @@ const AdminUsersComponent = () => {
 
       {/* User Details Modal */}
       {showModal && selectedUser && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <AdminModal
+          open={showModal}
+          onClose={closeUserModal}
+          title="User Details"
+          maxWidth="max-w-3xl"
+        >
           <div className="bg-gray-800 border border-gray-700 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
@@ -578,7 +584,7 @@ const AdminUsersComponent = () => {
               </div>
             </div>
           </div>
-        </div>
+        </AdminModal>
       )}
 
       {/* Summary */}

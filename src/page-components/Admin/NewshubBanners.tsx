@@ -2,6 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
+import AdminModal from '@/components/AdminModal';
 import React, { useEffect, useState } from 'react';
 import {
   FaCopy,
@@ -504,7 +505,12 @@ function NewshubBannersComponent() {
 
       {/* Create / Edit Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm overflow-y-auto">
+        <AdminModal
+          open={isModalOpen}
+          onClose={handleCloseModal}
+          title={editingBannerId ? 'Edit Newshub Banner' : 'Add Newshub Banner'}
+          maxWidth="max-w-3xl"
+        >
           <div className="relative w-full max-w-2xl bg-[#0f172a] border border-gray-700/80 rounded-2xl shadow-2xl p-6 text-white my-8">
             <div className="flex items-center justify-between border-b border-gray-800 pb-4 mb-5">
               <div>
@@ -728,7 +734,7 @@ function NewshubBannersComponent() {
               </div>
             </form>
           </div>
-        </div>
+        </AdminModal>
       )}
     </div>
   );

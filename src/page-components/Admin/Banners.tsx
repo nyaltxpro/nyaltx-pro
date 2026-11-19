@@ -2,6 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
+import AdminModal from '@/components/AdminModal';
 import React, { useEffect, useState } from 'react';
 import { FaCopy, FaEye, FaTrash, FaUpload, FaImage, FaDownload } from 'react-icons/fa';
 
@@ -453,7 +454,12 @@ function AdminBannersComponent() {
 
             {/* Metadata Edit Modal */}
             {editingMetadata && (
-                <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                <AdminModal
+                    open={Boolean(editingMetadata)}
+                    onClose={handleCancelEdit}
+                    title="Edit Banner Metadata"
+                    maxWidth="max-w-lg"
+                >
                     <div className="bg-gray-800/95 backdrop-blur-xl border border-gray-700/50 rounded-2xl p-6 w-full max-w-md shadow-2xl">
                         <h3 className="text-xl font-semibold text-white mb-4" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                             Edit Banner Metadata
@@ -523,7 +529,7 @@ function AdminBannersComponent() {
                             </button>
                         </div>
                     </div>
-                </div>
+                </AdminModal>
             )}
 
             {/* Usage Examples */}

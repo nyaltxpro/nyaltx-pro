@@ -1,317 +1,232 @@
 'use client';
 
-import { AnimatePresence, motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
-  FaChartPie,
-  FaCoins,
-  FaEnvelope,
-  FaGift,
-  FaHome,
-  FaImage,
-  FaNewspaper,
-  FaPlusCircle,
-  FaShoppingCart,
-  FaSignOutAlt,
-  FaUserFriends,
-  FaYoutube,
-} from 'react-icons/fa';
+  Activity,
+  BarChart3,
+  Coins,
+  Gift,
+  Image as ImageIcon,
+  LayoutDashboard,
+  LogOut,
+  Mail,
+  Newspaper,
+  Plus,
+  Search,
+  ShoppingCart,
+  Tags,
+  Users,
+  Video,
+  type LucideIcon,
+} from 'lucide-react';
 
 interface AdminSidebarProps {
   isMobileMenuOpen: boolean;
   toggleMobileMenu: () => void;
+  isCollapsed: boolean;
+  toggleCollapsed: () => void;
 }
 
-interface SidebarItemProps {
-  icon: React.ReactNode;
-  text: string;
+interface AdminNavItem {
+  title: string;
   href: string;
-  isActive: any;
-  isExpanded: boolean;
+  icon: LucideIcon;
 }
 
-const SidebarItem = ({ icon, text, href, isActive, isExpanded }: SidebarItemProps) => {
-  return (
-    <motion.div
-      className="w-full"
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
-      transition={{ type: 'spring', stiffness: 400, damping: 17 }}
-    >
-      <Link
-        href={href}
-        className={`group flex items-center w-full py-3 px-3 mb-2 rounded-lg transition-all duration-200 ${isActive
-          ? 'bg-linear-to-r from-[#00b8d8]/20 to-[#00b8d8]/10 text-[#00b8d8] border border-[#00b8d8]/30 shadow-lg backdrop-blur-sm'
-          : 'text-gray-300 hover:bg-gray-700/30 hover:text-white hover:border hover:border-gray-600/30 hover:shadow-md hover:backdrop-blur-sm'
-          }`}
-        style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
-      >
-        <motion.div
-          className={`text-xl ${isActive ? 'text-[#00b8d8]' : 'text-gray-400 group-hover:text-white'} transition-colors duration-200`}
-          animate={{ rotate: isActive ? 360 : 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          {icon}
-        </motion.div>
-        <AnimatePresence>
-          {isExpanded && (
-            <motion.span
-              className={`ml-3 whitespace-nowrap font-medium ${isActive ? 'text-[#00b8d8]' : 'text-gray-300 group-hover:text-white'} transition-colors duration-200`}
-              initial={{ opacity: 0, width: 0 }}
-              animate={{ opacity: 1, width: 'auto' }}
-              exit={{ opacity: 0, width: 0 }}
-              transition={{
-                duration: 0.2,
-                ease: 'easeInOut',
-              }}
-            >
-              {text}
-            </motion.span>
-          )}
-        </AnimatePresence>
-      </Link>
-    </motion.div>
-  );
-};
+interface AdminNavGroup {
+  title: string;
+  items: AdminNavItem[];
+}
 
-const LogoutButton = ({ isExpanded }: { isExpanded: boolean }) => {
-  const handleLogout = async (e: React.FormEvent) => {
-    e.preventDefault();
+const navGroups: AdminNavGroup[] = [
+  {
+    title: 'Overview',
+    items: [
+      { title: 'Dashboard', href: '/adminpanel', icon: LayoutDashboard },
+      { title: 'NYAX Admin', href: '/adminpanel/nyax-admin', icon: Coins },
+      { title: 'Tokens', href: '/adminpanel/tokens', icon: Coins },
+      { title: 'Register Token', href: '/adminpanel/tokens/register', icon: Plus },
+      { title: 'Orders', href: '/adminpanel/orders', icon: ShoppingCart },
+      { title: 'Users', href: '/adminpanel/users', icon: Users },
+      { title: 'Analytics', href: '/adminpanel/statistics', icon: BarChart3 },
+    ],
+  },
+  {
+    title: 'Operations',
+    items: [
+      { title: 'Token Points', href: '/adminpanel/points', icon: Gift },
+      { title: 'Email Management', href: '/adminpanel/email-management', icon: Mail },
+      { title: 'Blog Posts', href: '/adminpanel/blog', icon: Newspaper },
+      { title: 'Corporate News', href: '/adminpanel/news', icon: Newspaper },
+      { title: 'News Promo Codes', href: '/adminpanel/news-promo-codes', icon: Tags },
+      { title: 'Banners', href: '/adminpanel/banners', icon: ImageIcon },
+      { title: 'Newshub Banners', href: '/adminpanel/newshub-banners', icon: ImageIcon },
+      { title: 'Trade Videos', href: '/adminpanel/trade-videos', icon: Video },
+    ],
+  },
+];
+
+export default function AdminSidebar({
+  isMobileMenuOpen,
+  toggleMobileMenu,
+  isCollapsed,
+  toggleCollapsed,
+}: AdminSidebarProps) {
+  const pathname = usePathname();
+  const [search, setSearch] = useState('');
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const filteredGroups = navGroups
+    .map(group => ({
+      ...group,
+      items: group.items.filter(item => item.title.toLowerCase().includes(search.toLowerCase())),
+    }))
+    .filter(group => group.items.length > 0);
+
+  const handleLogout = async () => {
+    if (isLoggingOut) return;
+    setIsLoggingOut(true);
 
     try {
-      console.log('🚪 Attempting admin logout...');
-
       const response = await fetch('/api/admin/logout', {
         method: 'POST',
         credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
       });
-
-      if (response.ok) {
-        console.log('✅ Logout successful');
-        // Check if it's a redirect response
-        if (response.redirected) {
-          window.location.href = response.url;
-        } else {
-          // Fallback: manually redirect to login page
-          window.location.href = '/adminpanel/login';
-        }
-      } else {
-        console.error('❌ Logout failed:', response.status, response.statusText);
-        // Force redirect even if API fails
-        window.location.href = '/adminpanel/login';
-      }
+      if (!response.ok) throw new Error(`Logout failed with status ${response.status}`);
     } catch (error) {
-      console.error('❌ Logout error:', error);
-      // Force redirect on any error
-      window.location.href = '/adminpanel/login';
+      console.error('Admin logout failed:', error);
+    } finally {
+      window.location.assign('/adminpanel/login');
     }
   };
 
   return (
-    <motion.div
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
-      transition={{ type: 'spring', stiffness: 400, damping: 17 }}
-    >
-      <form onSubmit={handleLogout} className="w-full">
-        <button
-          type="submit"
-          className="group flex items-center py-3 px-3 mb-2 rounded-lg transition-all duration-200 text-red-400 hover:bg-red-500/20 hover:text-red-300 hover:border hover:border-red-500/30 hover:shadow-md hover:backdrop-blur-sm w-full"
-          style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
-        >
-          <motion.div
-            className="text-xl text-red-400 group-hover:text-red-300 transition-colors duration-200"
-            whileHover={{ rotate: 15 }}
-            transition={{ duration: 0.3 }}
-          >
-            <FaSignOutAlt />
-          </motion.div>
-          <AnimatePresence>
-            {isExpanded && (
-              <motion.span
-                className="ml-3 whitespace-nowrap font-medium text-red-400 group-hover:text-red-300 transition-colors duration-200"
-                initial={{ opacity: 0, width: 0 }}
-                animate={{ opacity: 1, width: 'auto' }}
-                exit={{ opacity: 0, width: 0 }}
-                transition={{
-                  duration: 0.2,
-                  ease: 'easeInOut',
-                }}
-              >
-                Logout
-              </motion.span>
-            )}
-          </AnimatePresence>
-        </button>
-      </form>
-    </motion.div>
-  );
-};
-
-export default function AdminSidebar({ isMobileMenuOpen, toggleMobileMenu }: AdminSidebarProps) {
-  const [isDesktop, setIsDesktop] = useState(true);
-  const [isExpanded, setIsExpanded] = useState(false);
-  const pathname = usePathname();
-
-  useEffect(() => {
-    const checkIsDesktop = () => {
-      setIsDesktop(window.innerWidth >= 768); // md breakpoint
-    };
-
-    checkIsDesktop();
-    window.addEventListener('resize', checkIsDesktop);
-    return () => window.removeEventListener('resize', checkIsDesktop);
-  }, []);
-
-  const navItems = [
-    { icon: <FaHome />, text: 'Dashboard', href: '/adminpanel' },
-    { icon: <FaCoins />, text: 'NYAX Admin', href: '/adminpanel/nyax-admin' },
-    { icon: <FaCoins />, text: 'Tokens', href: '/adminpanel/tokens' },
-    { icon: <FaPlusCircle />, text: 'Register Token', href: '/adminpanel/tokens/register' },
-    { icon: <FaShoppingCart />, text: 'Orders', href: '/adminpanel/orders' },
-    { icon: <FaUserFriends />, text: 'Users', href: '/adminpanel/users' },
-    { icon: <FaChartPie />, text: 'Analytics', href: '/adminpanel/statistics' },
-    { icon: <FaGift />, text: 'Token Points', href: '/adminpanel/points' },
-    { icon: <FaEnvelope />, text: 'Email Management', href: '/adminpanel/email-management' },
-    { icon: <FaNewspaper />, text: 'Blog Posts', href: '/adminpanel/blog' },
-    { icon: <FaNewspaper />, text: 'Corporate News', href: '/adminpanel/news' },
-    { icon: <FaGift />, text: 'News Promo Codes', href: '/adminpanel/news-promo-codes' },
-    { icon: <FaImage />, text: 'Banners', href: '/adminpanel/banners' },
-    { icon: <FaNewspaper />, text: 'Newshub Banners', href: '/adminpanel/newshub-banners' },
-    { icon: <FaYoutube />, text: 'Trade Videos', href: '/adminpanel/trade-videos' },
-    // { icon: <FaRocket />, text: 'Campaigns', href: '/admin/campaigns' },
-    // { icon: <FaFootballBall />, text: 'Footer Settings', href: '/admin/footer-settings' },
-  ];
-
-  const sidebarExpanded = isDesktop ? isExpanded : isMobileMenuOpen;
-
-  return (
     <>
-      {!isDesktop && isMobileMenuOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-40" onClick={toggleMobileMenu} />
+      {isMobileMenuOpen && (
+        <button
+          type="button"
+          aria-label="Close admin navigation"
+          className="fixed inset-0 z-40 bg-black/60 md:hidden"
+          onClick={toggleMobileMenu}
+        />
       )}
-      <motion.div
-        className={`fixed left-0 top-0 h-full bg-linear-to-b from-[#0f1923] via-[#1a2932] to-[#0f1923] backdrop-blur-xl border-r border-gray-700/20 shadow-2xl z-50 flex flex-col ${!isDesktop && (isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full')
-          }`}
-        initial={false}
-        animate={{
-          width: isDesktop ? (isExpanded ? 224 : 64) : 224, // 224px = 14rem, 64px = 4rem
-          x: !isDesktop && !isMobileMenuOpen ? -224 : 0,
-        }}
-        transition={{
-          type: 'spring',
-          stiffness: 300,
-          damping: 30,
-          duration: 0.3,
-        }}
-        onMouseEnter={() => isDesktop && setIsExpanded(true)}
-        onMouseLeave={() => isDesktop && setIsExpanded(false)}
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 flex w-[260px] flex-col border-r border-white/10 bg-[#0f1623] p-3 text-white shadow-xl transition-[width,transform] duration-200 md:translate-x-0 ${
+          isCollapsed ? 'md:w-[68px]' : 'md:w-[260px]'
+        } ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}
       >
-        <div className="flex items-center h-16 border-b border-gray-700/30 px-4 bg-gray-800/20 backdrop-blur-sm">
-          <div className="flex items-center">
-            <motion.div
-              animate={{ rotate: isExpanded ? 360 : 0 }}
-              transition={{ duration: 0.5 }}
-              className="w-8 h-8 bg-linear-to-br from-[#00b8d8] to-[#0099b8] rounded-lg flex items-center justify-center shadow-lg"
-            >
-              <Image src="/logo.png" alt="Logo" width={20} height={20} className="brightness-0 invert" />
-            </motion.div>
-            <AnimatePresence>
-              {sidebarExpanded && (
-                <motion.div
-                  className="ml-3 flex flex-col"
-                  initial={{ opacity: 0, width: 0 }}
-                  animate={{ opacity: 1, width: 'auto' }}
-                  exit={{ opacity: 0, width: 0 }}
-                  transition={{ duration: 0.2, ease: 'easeInOut' }}
-                >
-                  <span className="font-bold text-white whitespace-nowrap" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                    NYALTX
-                  </span>
-                  <span className="text-xs text-gray-400 whitespace-nowrap" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                    Admin Panel
-                  </span>
-                </motion.div>
-              )}
-            </AnimatePresence>
+        <Link
+          href="/adminpanel"
+          aria-label="NYALTX Admin Dashboard"
+          onClick={() => isMobileMenuOpen && toggleMobileMenu()}
+          className={`mb-4 flex h-12 items-center gap-3 rounded-lg px-2 transition-colors hover:bg-white/5 ${
+            isCollapsed ? 'md:justify-center md:px-0' : ''
+          }`}
+        >
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-cyan-500/15">
+            <Image src="/logo.png" alt="" width={22} height={22} className="brightness-0 invert" />
+          </span>
+          <span className={`min-w-0 ${isCollapsed ? 'md:hidden' : ''}`}>
+            <span className="block truncate text-[13px] font-semibold">NYALTX</span>
+            <span className="block truncate text-[11px] text-slate-400">Admin Panel</span>
+          </span>
+        </Link>
+
+        <label
+          onClick={() => {
+            if (isCollapsed) toggleCollapsed();
+          }}
+          className={`mb-4 flex h-9 items-center gap-2 rounded-md border border-white/10 bg-white/[0.03] px-2.5 text-slate-400 ${
+            isCollapsed ? 'md:justify-center md:border-transparent md:bg-transparent md:px-0' : ''
+          }`}
+        >
+          <Search className="h-4 w-4 shrink-0" strokeWidth={1.7} />
+          <input
+            type="search"
+            value={search}
+            onChange={event => setSearch(event.target.value)}
+            placeholder="Filter navigation"
+            aria-label="Filter admin navigation"
+            className={`min-w-0 flex-1 bg-transparent text-xs text-white outline-none placeholder:text-slate-500 ${
+              isCollapsed ? 'md:hidden' : ''
+            }`}
+          />
+        </label>
+
+        <nav aria-label="Admin navigation" className="flex-1 space-y-5 overflow-y-auto">
+          {filteredGroups.map(group => (
+            <section key={group.title}>
+              <h2
+                className={`mb-1.5 px-2.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500 ${
+                  isCollapsed ? 'md:hidden' : ''
+                }`}
+              >
+                {group.title}
+              </h2>
+              <div className="space-y-0.5">
+                {group.items.map(item => {
+                  const isActive =
+                    pathname === item.href ||
+                    (item.href !== '/adminpanel' && pathname.startsWith(`${item.href}/`));
+                  const Icon = item.icon;
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      title={isCollapsed ? item.title : undefined}
+                      aria-current={isActive ? 'page' : undefined}
+                      onClick={() => isMobileMenuOpen && toggleMobileMenu()}
+                      className={`group flex h-9 items-center gap-2.5 rounded-md px-2.5 text-[13px] transition-colors ${
+                        isActive
+                          ? 'bg-white/10 font-medium text-white'
+                          : 'text-slate-400 hover:bg-white/[0.06] hover:text-slate-100'
+                      } ${isCollapsed ? 'md:justify-center md:px-0' : ''}`}
+                    >
+                      <Icon
+                        className={`h-4 w-4 shrink-0 ${
+                          isActive ? 'text-cyan-300' : 'text-slate-500 group-hover:text-slate-300'
+                        }`}
+                        strokeWidth={1.7}
+                      />
+                      <span className={`truncate ${isCollapsed ? 'md:hidden' : ''}`}>
+                        {item.title}
+                      </span>
+                    </Link>
+                  );
+                })}
+              </div>
+            </section>
+          ))}
+        </nav>
+
+        <div className="mt-3 border-t border-white/10 pt-3">
+          <button
+            type="button"
+            onClick={handleLogout}
+            disabled={isLoggingOut}
+            title={isCollapsed ? 'Log out' : undefined}
+            className={`flex h-9 w-full items-center gap-2.5 rounded-md px-2.5 text-[13px] text-rose-300 transition-colors hover:bg-rose-400/10 disabled:opacity-60 ${
+              isCollapsed ? 'md:justify-center md:px-0' : ''
+            }`}
+          >
+            <LogOut className="h-4 w-4 shrink-0" strokeWidth={1.7} />
+            <span className={isCollapsed ? 'md:hidden' : ''}>
+              {isLoggingOut ? 'Logging out...' : 'Log out'}
+            </span>
+          </button>
+          <div
+            className={`mt-3 flex items-center gap-2 px-2 text-[10px] text-slate-500 ${
+              isCollapsed ? 'md:hidden' : ''
+            }`}
+          >
+            <Activity className="h-3.5 w-3.5" />
+            <span>Administration</span>
           </div>
         </div>
-
-        <div className="p-3 flex-1 overflow-y-auto">
-          {/* Main Navigation */}
-          <div className="mb-6">
-            <AnimatePresence>
-              {sidebarExpanded && (
-                <motion.div
-                  className="px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider border-b border-gray-700/20 mb-3"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                  style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
-                >
-                  Overview
-                </motion.div>
-              )}
-            </AnimatePresence>
-            {navItems.slice(0, 7).map(item => (
-              <SidebarItem
-                key={item.href}
-                icon={item.icon}
-                text={item.text}
-                href={item.href}
-                isActive={
-                  pathname === item.href ||
-                  (item.href !== '/adminpanel' && pathname?.startsWith(item.href))
-                }
-                isExpanded={sidebarExpanded}
-              />
-            ))}
-          </div>
-
-          {/* Operations Section */}
-          <div className="mb-6">
-            <AnimatePresence>
-              {sidebarExpanded && (
-                <motion.div
-                  className="px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider border-b border-gray-700/20 mb-3"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                  style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
-                >
-                  Operations
-                </motion.div>
-              )}
-            </AnimatePresence>
-            {navItems.slice(7).map(item => (
-              <SidebarItem
-                key={item.href}
-                icon={item.icon}
-                text={item.text}
-                href={item.href}
-                isActive={
-                  pathname === item.href ||
-                  (item.href !== '/adminpanel' && pathname?.startsWith(item.href))
-                }
-                isExpanded={sidebarExpanded}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Logout Button at Bottom */}
-        <div className="p-2 mt-auto">
-          <LogoutButton isExpanded={sidebarExpanded} />
-        </div>
-      </motion.div>
+      </aside>
     </>
   );
 }
