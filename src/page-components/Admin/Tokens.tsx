@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Drawer } from '@/components/reui/drawer';
 import { Checkbox } from '@/components/reui/checkbox';
 import { Badge } from '@/components/reui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Filters } from '@/components/reui/filters';
 import { Alert } from '@/components/reui/alert';
 import { DropdownSelect } from '@/components/reui/dropdown-select';
@@ -54,6 +55,19 @@ const AdminTokenRegisterDrawer = dynamic(
 );
 
 type Status = 'pending' | 'approved' | 'rejected';
+
+function getTokenInitials(name?: string) {
+    const initials = name
+        ?.trim()
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map(part => part[0])
+        .join('')
+        .toUpperCase();
+
+    return initials || '?';
+}
 
 type TokenRegistration = {
     id: string;
@@ -320,7 +334,7 @@ function AdminTokensComponent() {
                         : []),
                 ]}
             >
-                <div className="flex flex-col lg:flex-row lg:items-center gap-4">
+                <div className="grid grid-cols-2 items-center gap-4 lg:grid-cols-4">
                     {/* Status Filter */}
                     <div className="flex items-center gap-3">
                         <label
@@ -497,13 +511,17 @@ function AdminTokensComponent() {
                                         </td>
                                         <td className="px-4 py-3 border-r border-gray-700/20">
                                             <div className="flex items-center gap-3">
-                                                {t.imageUri && (
-                                                    <img 
-                                                        src={t.imageUri.replace('gateway.pinata.cloud', 'ipfs.io')} 
-                                                        alt="Token logo" 
-                                                        className="w-8 h-8 rounded-full object-cover border border-gray-600/30"
-                                                    />
-                                                )}
+                                                <Avatar size="sm" className="border border-gray-600/30 bg-slate-800">
+                                                    {t.imageUri && (
+                                                        <AvatarImage
+                                                            src={t.imageUri.replace('gateway.pinata.cloud', 'ipfs.io')}
+                                                            alt={`${t.tokenName} logo`}
+                                                        />
+                                                    )}
+                                                    <AvatarFallback className="text-xs">
+                                                        {getTokenInitials(t.tokenName)}
+                                                    </AvatarFallback>
+                                                </Avatar>
                                                 <div className="min-w-0 flex-1">
                                                     <div className="font-medium text-white text-sm" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                                                         {t.tokenName}

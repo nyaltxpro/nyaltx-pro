@@ -14,28 +14,24 @@
 
 .admin-panel-content.admin-panel-content h1 {
   font-size: 24px !important;
-  font-family: inherit !important;
   font-weight: 600;
   line-height: 1.25;
 }
 
 .admin-panel-content.admin-panel-content h2 {
   font-size: 20px !important;
-  font-family: inherit !important;
   font-weight: 600;
   line-height: 1.3;
 }
 
 .admin-panel-content.admin-panel-content h3 {
   font-size: 18px !important;
-  font-family: inherit !important;
   font-weight: 600;
   line-height: 1.4;
 }
 
 .admin-panel-content.admin-panel-content h4 {
   font-size: 16px !important;
-  font-family: inherit !important;
   font-weight: 600;
   line-height: 1.4;
 }
@@ -273,13 +269,13 @@
   .admin-panel-filter-bar.admin-orders-filters {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .admin-panel-filter-bar.admin-orders-filters > :last-child {
+    grid-column: 1 / -1;
+  }
 }
 
-@media (max-width: 639px) {
-  .admin-panel-filter-bar.admin-orders-filters {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
+@media (max-width: 479px) {
   .admin-panel-filter-bar.admin-users-filters {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -311,4 +307,17 @@
 
 .admin-panel-input-icon + input {
   padding-left: 2.5rem;
+}
+
+.admin-panel-shell {
+  --admin-font-sans: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: var(--admin-font-sans);
+}
+
+.admin-panel-shell :where(*:not(svg):not(code):not(pre):not(.font-mono):not(h1):not(h2)) {
+  font-family: var(--admin-font-sans) !important;
+}
+
+.admin-panel-shell :is(h1, h2) {
+  font-family: Georgia, 'Times New Roman', serif !important;
 }

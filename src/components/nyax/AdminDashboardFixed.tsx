@@ -4,7 +4,9 @@ import ConnectWalletButton from '@/components/ConnectWalletButton';
 import { useDAOService } from '@/hooks/useDAOService';
 import { useFolderRegistry } from '@/hooks/useFolderRegistry';
 import { PROPOSAL_FUNCTION_PRESETS, encodeProposalPreset } from '@/lib/proposalFunctionPresets';
-import { CONTRACT_ADDRESSES } from '@/services/contracts';
+import { CONTRACT_ADDRESSES, NETWORK_CONFIG } from '@/services/contracts';
+import { FolderEscrowService } from '@/services/contracts/folderEscrowService';
+import { getRpcErrorMessage, isIncompleteRpcResponse, isRpcRateLimitError } from '@/services/contracts/rpcErrors';
 import { FolderInfo, MultisigTransaction } from '@/services/contracts/types';
 import { useAppKitAccount } from '@reown/appkit/react';
 import { Drawer } from '@/components/reui/drawer';
@@ -33,7 +35,7 @@ import {
     UsersRound,
     X,
 } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useAccount, useChainId, useSwitchChain } from 'wagmi';
 
@@ -134,16 +136,13 @@ export default function AdminDashboardFixed() {
     }
     const [factoryFolders, setFactoryFolders] = useState<FactoryFolder[]>([]);
     const [factoryLoading, setFactoryLoading] = useState(false);
+    const [factoryLoadError, setFactoryLoadError] = useState<string | null>(null);
     const [permissionsLoading, setPermissionsLoading] = useState(false);
-
-    // Token statistics from FolderFactory
-    const [tokenStats, setTokenStats] = useState<{
-        totalSupply: string;
-        circulating: string;
-        stakedValue: string;
-        totalHolders: string;
-    } | null>(null);
-    const [tokenStatsLoading, setTokenStatsLoading] = useState(false);
+    const factoryLoadLock = useRef(false);
+    const readOnlyProvider = useMemo(
+        () => new ethers.JsonRpcProvider(NETWORK_CONFIG.rpcUrl),
+        [],
+    );
 
     // Beneficiary vesting details
     interface BeneficiaryVesting {
@@ -867,119 +866,75 @@ export default function AdminDashboardFixed() {
         }
     };
 
-    const loadTokenStats = async () => {
-        if (!daoService) {
-            console.warn('DAO service unavailable for loading token stats');
-            return;
-        }
-
-        setTokenStatsLoading(true);
-        try {
-            const stats = await daoService.folderFactory.getAllTokenStats();
-            setTokenStats({
-                totalSupply: ethers.formatEther(stats.totalSupply),
-                circulating: ethers.formatEther(stats.circulating),
-                stakedValue: ethers.formatEther(stats.stakedValue),
-                totalHolders: stats.totalHolders.toString()
-            });
-            console.log('Token stats loaded from FolderFactory:', stats);
-        } catch (err) {
-            console.error('Failed to load token stats from FolderFactory:', err);
-        } finally {
-            setTokenStatsLoading(false);
-        }
-    };
-
     const loadFactoryFolders = async () => {
         if (!daoService) {
             console.warn('DAO service unavailable for loading factory folders');
             return;
         }
+        if (factoryLoadLock.current) return;
 
+        factoryLoadLock.current = true;
         setFactoryLoading(true);
+        setFactoryLoadError(null);
         try {
-            // Get folders from factory service
-            const factoryFoldersList = await daoService.folderFactory.getAllFolders();
-            console.log('Loading folders from factory service:', factoryFoldersList);
-
             // Get detailed folder information
             const folderDetails = await daoService.folderFactory.getFoldersWithDetails();
-            console.log('Factory folder details:', folderDetails);
+            const enhancedFolders: FactoryFolder[] = [];
+            const folderFailures: unknown[] = [];
+            let stoppedAfterRpcError = false;
 
-            // Enhance with escrow stats for each folder using optimized batch method
-            const enhancedFolders: FactoryFolder[] = await Promise.all(
-                folderDetails.map(async (folder: any, index: number) => {
-                    try {
-                        // Import FolderEscrowService dynamically
-                        const { FolderEscrowService } = await import('@/services/contracts/folderEscrowService');
-                        const { ethers: ethersLib } = await import('ethers');
+            for (const [index, folder] of folderDetails.entries()) {
+                try {
+                    const folderEscrow = new FolderEscrowService(folder.address, readOnlyProvider);
+                    const stats = await folderEscrow.getFolderStatsOptimized();
 
-                        // Create provider for read operations
-                        const provider = new ethersLib.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL || 'https://sepolia.infura.io/v3/YOUR_INFURA_KEY');
-                        const folderEscrow = new FolderEscrowService(folder.address, provider as any);
-
-                        // Use optimized method to get all stats in fewer blockchain calls
-                        const stats = await folderEscrow.getFolderStatsOptimized();
-
-                        console.log(`📊 Folder ${folder.name} Stats (optimized):`, {
-                            totalAllocated: ethersLib.formatEther(stats.totalAllocated),
-                            totalVested: ethersLib.formatEther(stats.totalVested),
-                            totalClaimed: ethersLib.formatEther(stats.totalClaimed),
-                            beneficiaryCount: stats.totalBeneficiaries,
-                            folderBalance: ethersLib.formatEther(stats.folderBalance),
-                            vestingPercentage: stats.totalAllocated > 0
-                                ? ((Number(stats.totalVested) / Number(stats.totalAllocated)) * 100).toFixed(2) + '%'
-                                : '0%',
-                            vestingStart: stats.vestingStart,
-                            vestingCliff: stats.vestingCliff,
-                            vestingDuration: stats.vestingDuration
-                        });
-
-                        return {
-                            id: index,
-                            name: folder.name,
-                            address: folder.address,
-                            createdAt: Number(folder.createdAt),
-                            totalAllocated: ethersLib.formatEther(stats.totalAllocated),
-                            totalClaimed: ethersLib.formatEther(stats.totalClaimed),
-                            totalVested: ethersLib.formatEther(stats.totalVested),
-                            isPaused: stats.isPaused,
-                            beneficiaryCount: stats.totalBeneficiaries,
-                            vestingStart: stats.vestingStart,
-                            vestingCliff: stats.vestingCliff,
-                            vestingDuration: stats.vestingDuration,
-                            folderBalance: ethersLib.formatEther(stats.folderBalance)
-                        };
-                    } catch (err) {
-                        console.error(`Failed to load stats for folder ${folder.name}:`, err);
-                        return {
-                            id: index,
-                            name: folder.name,
-                            address: folder.address,
-                            createdAt: Number(folder.createdAt),
-                            totalAllocated: '0',
-                            totalClaimed: '0',
-                            totalVested: '0',
-                            isPaused: false,
-                            beneficiaryCount: 0,
-                            vestingStart: 0,
-                            vestingCliff: 0,
-                            vestingDuration: 0,
-                            folderBalance: '0'
-                        };
+                    enhancedFolders.push({
+                        id: index,
+                        name: folder.name,
+                        address: folder.address,
+                        createdAt: Number(folder.createdAt),
+                        totalAllocated: ethers.formatEther(stats.totalAllocated),
+                        totalClaimed: ethers.formatEther(stats.totalClaimed),
+                        totalVested: ethers.formatEther(stats.totalVested),
+                        isPaused: stats.isPaused,
+                        beneficiaryCount: stats.totalBeneficiaries,
+                        vestingStart: stats.vestingStart,
+                        vestingCliff: stats.vestingCliff,
+                        vestingDuration: stats.vestingDuration,
+                        folderBalance: ethers.formatEther(stats.folderBalance),
+                    });
+                } catch (err) {
+                    console.error(`Failed to load stats for folder ${folder.name}:`, err);
+                    folderFailures.push(err);
+                    if (isRpcRateLimitError(err) || isIncompleteRpcResponse(err)) {
+                        stoppedAfterRpcError = true;
+                        break;
                     }
-                })
-            );
+                }
+            }
 
             setFactoryFolders(enhancedFolders);
-            console.log(`Successfully loaded ${enhancedFolders.length} folders from factory with stats`);
-
-            // Also load token statistics
-            await loadTokenStats();
+            if (folderFailures.length > 0) {
+                const representativeError =
+                    folderFailures.find(isRpcRateLimitError) ??
+                    folderFailures.find(isIncompleteRpcResponse) ??
+                    folderFailures[0];
+                const unattemptedCount = folderDetails.length - enhancedFolders.length - folderFailures.length;
+                const stoppedMessage = stoppedAfterRpcError && unattemptedCount > 0
+                    ? ` Loading stopped before ${unattemptedCount} additional folders to avoid further RPC requests.`
+                    : '';
+                const failedRequestsMessage = folderFailures.length === 1
+                    ? 'One folder request failed.'
+                    : `${folderFailures.length} folder requests failed.`;
+                setFactoryLoadError(
+                    `${failedRequestsMessage}${stoppedMessage} ${getRpcErrorMessage(representativeError, 'Refresh folders')}`,
+                );
+            }
         } catch (err) {
             console.error('Failed to load factory folders:', err);
-            setFormError(err instanceof Error ? err.message : 'Failed to load factory folders');
+            setFactoryLoadError(getRpcErrorMessage(err, 'Refresh folders'));
         } finally {
+            factoryLoadLock.current = false;
             setFactoryLoading(false);
         }
     };
@@ -1178,6 +1133,10 @@ export default function AdminDashboardFixed() {
                 errorMessage = 'Insufficient funds for gas fees';
             } else if (err.message?.includes('not approved')) {
                 errorMessage = 'Folder is not approved. Please approve the folder first.';
+            } else if (isRpcRateLimitError(err)) {
+                errorMessage = 'The RPC provider is rate-limiting this request. No automatic retries were made; wait for the limit to clear before submitting again.';
+            } else if (isIncompleteRpcResponse(err)) {
+                errorMessage = 'The RPC provider returned an incomplete response. No automatic retries were made; try again later.';
             } else if (err.message?.includes('nonce')) {
                 errorMessage = 'Transaction nonce error. Please try again.';
             } else if (err.message) {
@@ -2033,7 +1992,6 @@ export default function AdminDashboardFixed() {
                         onClick={() => setShowProposalDrawer(true)}
                         disabled={!isConnected || loading}
                     >
-                        <Gavel className="size-4" aria-hidden="true" />
                         Create proposal
                     </Button>
                 </div>
@@ -2279,7 +2237,10 @@ export default function AdminDashboardFixed() {
                             </div>
                         </div>
                         <Button
-                            onClick={() => setShowSendToFolderModal(true)}
+                            onClick={() => {
+                                setFormError(null);
+                                setShowSendToFolderModal(true);
+                            }}
                             disabled={!isConnected}
                         >
                             Fund folder
@@ -2331,6 +2292,7 @@ export default function AdminDashboardFixed() {
                         </div>
 
                         {error && <Alert variant="destructive" className="mt-4">{error}</Alert>}
+                        {factoryLoadError && <Alert variant="destructive" className="mt-4">{factoryLoadError}</Alert>}
                         {filteredDisplayFolders.length === 0 ? (
                             <div className="mt-4 rounded-xl border border-dashed border-white/15 p-8 text-center text-gray-400">
                                 {factoryFolders.length === 0 ? (
@@ -2802,47 +2764,74 @@ export default function AdminDashboardFixed() {
                 {showSendToFolderModal && (
                     <Dialog
                         open={showSendToFolderModal}
-                        onClose={() => setShowSendToFolderModal(false)}
+                        onClose={() => {
+                            setShowSendToFolderModal(false);
+                            setFormError(null);
+                        }}
                         title="Fund Folder"
                         maxWidth="max-w-md"
                     >
-                        <div className="bg-slate-900 rounded-xl p-8 border border-white/20 max-w-md w-full space-y-4">
-                            <h3 className="text-2xl font-bold text-white">Fund Folder</h3>
-                            <p className="text-gray-400 text-sm">Send NYAX tokens from treasury to an approved folder</p>
-                            <div>
-                                <label className="text-gray-400 text-sm mb-2 block">Folder Address</label>
-                                <input
-                                    type="text"
-                                    value={sendToFolderForm.folderAddress}
-                                    onChange={e => setSendToFolderForm(prev => ({ ...prev, folderAddress: e.target.value }))}
-                                    placeholder="0x..."
-                                    className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white"
-                                />
-                                <p className="text-gray-500 text-xs mt-1">Enter the approved folder contract address</p>
-                            </div>
-                            <div>
-                                <label className="text-gray-400 text-sm mb-2 block">Amount (NYAX)</label>
-                                <input
-                                    type="text"
-                                    value={sendToFolderForm.amount}
-                                    onChange={e => setSendToFolderForm(prev => ({ ...prev, amount: e.target.value }))}
-                                    placeholder="Amount to send"
-                                    className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white"
-                                />
-                                <p className="text-gray-500 text-xs mt-1">Amount of NYAX tokens to transfer</p>
-                            </div>
-                            {formError && <Alert variant="destructive">{formError}</Alert>}
-                            <div className="flex gap-3">
-                                <button className="flex-1 px-4 py-3 bg-white/10 text-white rounded-lg" onClick={() => setShowSendToFolderModal(false)}>
-                                    Cancel
-                                </button>
-                                <button
-                                    className="flex-1 px-4 py-3 bg-green-600 text-white rounded-lg disabled:opacity-50"
-                                    onClick={handleSendToFolder}
-                                    disabled={actionPending || !isConnected}
+                        <div className="admin-panel-form overflow-hidden rounded-xl border border-white/10 bg-[#0d0d0d]">
+                            <header className="border-b border-white/10 px-5 py-4">
+                                <p className="text-xs font-medium uppercase tracking-wide text-cyan-300">Treasury</p>
+                                <h3 className="mt-1 text-base font-semibold text-white">Fund Folder</h3>
+                                <p className="mt-1 text-sm text-slate-400">Send NYAX tokens from treasury to an approved folder.</p>
+                            </header>
+                            <div className="space-y-5 p-5">
+                                <Field
+                                    id="fund-folder-address"
+                                    label="Folder Address"
+                                    required
+                                    description="Enter the approved folder contract address."
                                 >
-                                    {actionPending ? 'Funding...' : 'Fund Folder'}
-                                </button>
+                                    <Input
+                                        id="fund-folder-address"
+                                        value={sendToFolderForm.folderAddress}
+                                        onChange={e => {
+                                            setSendToFolderForm(prev => ({ ...prev, folderAddress: e.target.value }));
+                                            setFormError(null);
+                                        }}
+                                        placeholder="0x..."
+                                        autoComplete="off"
+                                        spellCheck={false}
+                                    />
+                                </Field>
+                                <Field
+                                    id="fund-folder-amount"
+                                    label="Amount (NYAX)"
+                                    required
+                                    description="Amount of NYAX tokens to transfer."
+                                >
+                                    <Input
+                                        id="fund-folder-amount"
+                                        inputMode="decimal"
+                                        value={sendToFolderForm.amount}
+                                        onChange={e => {
+                                            setSendToFolderForm(prev => ({ ...prev, amount: e.target.value }));
+                                            setFormError(null);
+                                        }}
+                                        placeholder="0.00"
+                                    />
+                                </Field>
+                                {formError && <Alert variant="destructive">{formError}</Alert>}
+                                {!isConnected && <Alert variant="warning">Connect your wallet to fund a folder.</Alert>}
+                                <div className="flex justify-end gap-3 border-t border-white/10 pt-4">
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => {
+                                            setShowSendToFolderModal(false);
+                                            setFormError(null);
+                                        }}
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button
+                                        onClick={handleSendToFolder}
+                                        disabled={localActionPending || !isConnected}
+                                    >
+                                        {localActionPending ? 'Funding...' : 'Fund Folder'}
+                                    </Button>
+                                </div>
                             </div>
                         </div>
                     </Dialog>

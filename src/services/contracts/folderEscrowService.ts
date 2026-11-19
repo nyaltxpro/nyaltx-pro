@@ -37,10 +37,8 @@ export interface VestingCalculation {
 
 export class FolderEscrowService {
   private contract: ethers.Contract;
-  private provider: ethers.BrowserProvider;
 
-  constructor(contractAddress: string, provider: ethers.BrowserProvider) {
-    this.provider = provider;
+  constructor(contractAddress: string, provider: ethers.Provider) {
     const abi = CONTRACT_ABIS.folderEscrow;
     
     if (!contractAddress) {
@@ -469,7 +467,7 @@ export class FolderEscrowService {
 // Factory function to create service instances
 export const createFolderEscrowService = (
   contractAddress: string,
-  provider: ethers.BrowserProvider
+  provider: ethers.Provider
 ): FolderEscrowService => {
   return new FolderEscrowService(contractAddress, provider);
 };
