@@ -138,12 +138,12 @@ export default function Sidebar({ isMobileMenuOpen, toggleMobileMenu }: SidebarP
     <>
       {!isDesktop && isMobileMenuOpen && (
         <div
-          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[999998] sidebar-mobile-backdrop"
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[2147483646] sidebar-mobile-backdrop"
           onClick={toggleMobileMenu}
         />
       )}
       <motion.div
-        className={`fixed left-0 top-0 h-full bg-black/95 backdrop-blur-xl border-r border-gray-800/50 z-[999999] sidebar-container sidebar-desktop ${!isDesktop && (isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full')
+        className={`fixed left-0 top-0 h-full bg-black/95 backdrop-blur-xl border-r border-gray-800/50 z-[2147483647] sidebar-container sidebar-desktop ${!isDesktop && (isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full')
           }`}
         style={{
           background: 'linear-gradient(180deg, rgba(0, 0, 0, 0.95) 0%, rgba(10, 10, 10, 0.95) 50%, rgba(0, 0, 0, 0.95) 100%)',
