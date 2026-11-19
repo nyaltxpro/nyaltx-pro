@@ -3,6 +3,8 @@
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 import { Search } from 'lucide-react';
+import { Filters } from '@/components/reui/filters';
+import { Alert } from '@/components/reui/alert';
 import { Button } from '@/components/reui/button';
 import toast from 'react-hot-toast';
 
@@ -238,7 +240,16 @@ function CampaignsPageComponent() {
             </div>
 
             {/* Filters */}
-            <div className="admin-panel-filter-bar">
+            <Filters
+                activeFilters={[
+                    ...(statusFilter !== 'all'
+                        ? [{ id: 'campaign-status', label: `Status: ${statusFilter}`, onRemove: () => setStatusFilter('all') }]
+                        : []),
+                    ...(searchTerm.trim()
+                        ? [{ id: 'campaign-search', label: `Search: ${searchTerm}`, onRemove: () => setSearchTerm('') }]
+                        : []),
+                ]}
+            >
                 <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                     <div className="flex items-center gap-3">
                         <label
@@ -284,7 +295,7 @@ function CampaignsPageComponent() {
                         </div>
                     </div>
                 </div>
-            </div>
+            </Filters>
 
             {/* Campaigns Table */}
             <div className="admin-panel-card p-6">
@@ -293,9 +304,7 @@ function CampaignsPageComponent() {
                 </div>
 
                 {error && (
-                    <div className="text-sm text-red-400 mb-4 p-3 rounded bg-red-900/20 border border-red-800">
-                        {error}
-                    </div>
+                    <Alert variant="destructive" className="mb-4">{error}</Alert>
                 )}
 
                 {loading ? (

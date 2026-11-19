@@ -2,6 +2,7 @@
 
 import { useAppKit } from '@reown/appkit/react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { Alert } from '@/components/reui/alert';
 import { FormEvent, useState } from 'react';
 import { FaEye, FaEyeSlash, FaLock, FaShieldAlt, FaWallet } from 'react-icons/fa';
 import { useAccount, useSignMessage } from 'wagmi';
@@ -210,11 +211,7 @@ export default function AdminLoginComponent() {
           </div>
 
           {error && (
-            <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-xl backdrop-blur-sm">
-              <p className="text-red-300 text-sm text-center" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                {error}
-              </p>
-            </div>
+            <Alert variant="destructive">{error}</Alert>
           )}
 
           <button

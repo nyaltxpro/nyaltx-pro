@@ -3,13 +3,15 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Drawer } from '@/components/reui/drawer';
+import { Alert } from '@/components/reui/alert';
 import { Checkbox } from '@/components/reui/checkbox';
 import { CalendarInput } from '@/components/reui/calendar';
 import { Button } from '@/components/reui/button';
 import { Field } from '@/components/reui/field';
 import { Filters } from '@/components/reui/filters';
+import { paginateItems, TablePagination } from '@/components/reui/table-pagination';
 import { PROMO_PACKAGE_OPTIONS } from '@/lib/promoPackages';
-import { Plus, Search, Tag, X } from 'lucide-react';
+import { Package, Plus, Search, Tag, X } from 'lucide-react';
 
 interface NewsPromoCode {
   code: string;
@@ -52,6 +54,7 @@ export default function NewsPromoCodes() {
   const [isCreateDrawerOpen, setIsCreateDrawerOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive' | 'expired'>('all');
+  const [page, setPage] = useState(1);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
 
@@ -166,21 +169,23 @@ export default function NewsPromoCodes() {
       (statusFilter === 'inactive' && !promo.active && !expired);
     return matchesSearch && matchesStatus;
   });
+  const paginatedPromoCodes = paginateItems(filteredPromoCodes, page, 10);
 
   return (
     <div className="admin-panel-form space-y-6 text-white">
-      <header className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-        <h1 className="text-2xl font-semibold">News &amp; Pricing Promo Codes</h1>
-        <p className="mt-1 text-sm text-gray-400">
-          Choose which News Hub or pricing packages each percentage discount applies to. Codes can stay active indefinitely or expire on a date you choose.
-        </p>
+      <header className="flex min-w-0 items-start justify-between gap-4">
+        <div className="min-w-0 flex-1">
+          <h1 className="text-2xl font-semibold">News &amp; Pricing Promo Codes</h1>
+          <p className="mt-1 text-sm text-gray-400">
+            Choose which News Hub or pricing packages each percentage discount applies to. Codes can stay active indefinitely or expire on a date you choose.
+          </p>
         </div>
         <Button
           variant="outline"
           size="sm"
           type="button"
           onClick={() => setIsCreateDrawerOpen(true)}
+          className="shrink-0"
         >
           <Plus size={16} aria-hidden="true" />
           Create promo code
@@ -284,7 +289,7 @@ export default function NewsPromoCodes() {
               <p className="text-xs text-gray-400">
                 Leave the expiration blank to keep the code valid until you deactivate it.
               </p>
-              {error && <p role="alert" className="text-sm text-red-300">{error}</p>}
+              {error && <Alert variant="destructive">{error}</Alert>}
             </div>
             <footer className="flex justify-end gap-3 border-t border-white/10 px-6 py-4">
               <Button
@@ -310,8 +315,8 @@ export default function NewsPromoCodes() {
         </Drawer>
       )}
 
-      {error && <p role="alert" className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">{error}</p>}
-      {notice && <p role="status" className="rounded-lg border border-green-500/30 bg-green-500/10 p-3 text-sm text-green-300">{notice}</p>}
+      {error && <Alert variant="destructive">{error}</Alert>}
+      {notice && <Alert variant="success">{notice}</Alert>}
 
       <Filters
         activeFilters={[
@@ -371,7 +376,7 @@ export default function NewsPromoCodes() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-700/40">
-                {filteredPromoCodes.map(promo => {
+                {paginatedPromoCodes.map(promo => {
                   const expired = Boolean(promo.expiresAt && new Date(promo.expiresAt).getTime() <= Date.now());
                   const usable = promo.active && !expired;
                   return (
@@ -433,6 +438,14 @@ export default function NewsPromoCodes() {
               </tbody>
             </table>
           </div>
+        )}
+        {!loading && filteredPromoCodes.length > 0 && (
+          <TablePagination
+            page={page}
+            pageSize={10}
+            total={filteredPromoCodes.length}
+            onPageChange={setPage}
+          />
         )}
       </section>
     </div>

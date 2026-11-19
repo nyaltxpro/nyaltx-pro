@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Check, Coins, LoaderCircle, Upload, X } from 'lucide-react';
+import { ArrowLeft, Check, Coins, LoaderCircle, Upload } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { Checkbox } from '@/components/reui/checkbox';
 import { Combobox } from '@/components/reui/combobox';
 import { Button } from '@/components/reui/button';
@@ -55,7 +56,6 @@ export default function AdminTokenRegister({
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploadingToIPFS, setIsUploadingToIPFS] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
@@ -72,8 +72,8 @@ export default function AdminTokenRegister({
   ];
 
   const showToast = (type: 'success' | 'error', message: string) => {
-    setToast({ type, message });
-    setTimeout(() => setToast(null), 5000);
+    if (type === 'success') toast.success(message);
+    else toast.error(message);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -260,28 +260,6 @@ export default function AdminTokenRegister({
 
   return (
     <div className="admin-panel-form space-y-6">
-      {/* Toast Notification */}
-      {toast && (
-        <div
-          className={`fixed top-4 right-4 z-50 px-6 py-4 rounded-lg shadow-lg border ${
-            toast.type === 'success'
-              ? 'bg-emerald-900/90 border-emerald-700 text-emerald-200'
-              : 'bg-rose-900/90 border-rose-700 text-rose-200'
-          }`}
-          role="status"
-          aria-live="polite"
-        >
-          <div className="flex items-center gap-3">
-            {toast.type === 'success' ? (
-              <Check className="w-5 h-5" />
-            ) : (
-              <X className="w-5 h-5" />
-            )}
-            <span className="font-medium">{toast.message}</span>
-          </div>
-        </div>
-      )}
-
       {/* Header */}
       {!isDrawer && <div className="flex items-center justify-between">
         <div>

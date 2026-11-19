@@ -5,12 +5,31 @@ import { Dialog } from '@/components/reui/dialog';
 import { Checkbox } from '@/components/reui/checkbox';
 import { Card } from '@/components/reui/card';
 import { Button } from '@/components/reui/button';
+import { Badge } from '@/components/reui/badge';
 import { EmojiPicker } from '@/components/reui/emoji-picker';
 import { Field } from '@/components/reui/field';
 import { Filters } from '@/components/reui/filters';
+import { paginateItems, TablePagination } from '@/components/reui/table-pagination';
+import { Alert } from '@/components/reui/alert';
+import { useConfirmDialog } from '@/components/reui/confirm-dialog';
+import { Input } from '@/components/reui/input';
+import { NativeSelect } from '@/components/reui/native-select';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useEffect, useRef, useState } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
-import { FaCheckCircle, FaChevronDown, FaChevronUp, FaEnvelope, FaHistory, FaInbox, FaPaperPlane, FaPlus, FaReply, FaSearch, FaSync, FaTimesCircle, FaTrash, FaUsers } from 'react-icons/fa';
+import toast from 'react-hot-toast';
+import {
+  CircleX,
+  History,
+  Inbox,
+  Mail,
+  Plus,
+  RefreshCw,
+  Reply,
+  Send,
+  Trash2,
+  Users,
+} from 'lucide-react';
 
 interface EmailRecipient {
   id: string;
@@ -59,25 +78,32 @@ interface InboxMessage {
   messageId: string;
 }
 
+function getInitials(name?: string, email?: string) {
+  const source = (name?.trim() || email?.split('@')[0] || 'User').trim();
+  const parts = source.split(/\s+/).filter(Boolean);
+  return (parts.length > 1 ? `${parts[0][0]}${parts[1][0]}` : source.slice(0, 2)).toUpperCase();
+}
+
 export default function EmailManagementPage() {
+  const { confirm, dialog: confirmationDialog } = useConfirmDialog();
   const [recipients, setRecipients] = useState<EmailRecipient[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [editingRecipient, setEditingRecipient] = useState<EmailRecipient | null>(null);
   const [recipientSearch, setRecipientSearch] = useState('');
-  const [recipientStatusFilter, setRecipientStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
+  const [recipientStatusFilter, setRecipientStatusFilter] = useState<'all' | 'active' | 'inactive'>(
+    'all'
+  );
+  const [recipientPage, setRecipientPage] = useState(1);
+  const [selectedRecipientIds, setSelectedRecipientIds] = useState<string[]>([]);
+  const [bulkRecipientBusy, setBulkRecipientBusy] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
     email: '',
     name: '',
-    role: 'admin'
+    role: 'admin',
   });
-
-  // Test email state
-  const [testEmail, setTestEmail] = useState('');
-  const [sendingTest, setSendingTest] = useState(false);
 
   // Client email state
   const [showSendEmailModal, setShowSendEmailModal] = useState(false);
@@ -93,6 +119,8 @@ export default function EmailManagementPage() {
   const [inboxError, setInboxError] = useState<string | null>(null);
   const [inboxSearch, setInboxSearch] = useState('');
   const [unreadOnly, setUnreadOnly] = useState(false);
+  const [inboxPage, setInboxPage] = useState(1);
+  const [selectedInboxUids, setSelectedInboxUids] = useState<number[]>([]);
   const [showMailboxComposeModal, setShowMailboxComposeModal] = useState(false);
   const [mailboxTo, setMailboxTo] = useState('');
   const [mailboxSubject, setMailboxSubject] = useState('');
@@ -100,13 +128,16 @@ export default function EmailManagementPage() {
   const mailboxMessageRef = useRef<HTMLTextAreaElement>(null);
   const [sendingMailboxEmail, setSendingMailboxEmail] = useState(false);
   const [mailboxComposeError, setMailboxComposeError] = useState<string | null>(null);
-  const [mailboxComposeSuccess, setMailboxComposeSuccess] = useState<string | null>(null);
 
   // Email history state
   const [emailHistory, setEmailHistory] = useState<EmailRecord[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [activeTab, setActiveTab] = useState<'inbox' | 'recipients' | 'history'>('inbox');
-  const [expandedEmailId, setExpandedEmailId] = useState<string | null>(null);
+  const [historySearch, setHistorySearch] = useState('');
+  const [historyStatusFilter, setHistoryStatusFilter] = useState<'all' | 'sent' | 'failed'>('all');
+  const [historyPage, setHistoryPage] = useState(1);
+  const [selectedHistoryId, setSelectedHistoryId] = useState<string | null>(null);
+  const [recipientRoleFilter, setRecipientRoleFilter] = useState('all');
 
   const insertEmoji = (
     textarea: HTMLTextAreaElement | null,
@@ -154,7 +185,7 @@ export default function EmailManagementPage() {
       const response = await fetch('/api/admin/email-recipients', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(formData),
       });
 
       if (response.ok) {
@@ -163,10 +194,10 @@ export default function EmailManagementPage() {
         setFormData({ email: '', name: '', role: 'admin' });
       } else {
         const error = await response.json();
-        alert(error.message || 'Failed to add recipient');
+        toast.error(error.message || 'Failed to add recipient');
       }
     } catch (err) {
-      alert('Error adding recipient');
+      toast.error('Error adding recipient');
     }
   };
 
@@ -175,30 +206,89 @@ export default function EmailManagementPage() {
       const response = await fetch('/api/admin/email-recipients', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, ...updates })
+        body: JSON.stringify({ id, ...updates }),
       });
 
       if (response.ok) {
         await fetchRecipients();
       }
     } catch (err) {
-      alert('Error updating recipient');
+      toast.error('Error updating recipient');
     }
   };
 
   const handleDeleteRecipient = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this recipient?')) return;
+    if (
+      !(await confirm({
+        title: 'Delete recipient?',
+        description: 'This will remove the recipient from email lists.',
+        confirmLabel: 'Delete recipient',
+        destructive: true,
+      }))
+    )
+      return;
 
     try {
       const response = await fetch(`/api/admin/email-recipients?id=${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
       });
 
       if (response.ok) {
         await fetchRecipients();
+        setSelectedRecipientIds(current => current.filter(selectedId => selectedId !== id));
       }
     } catch (err) {
-      alert('Error deleting recipient');
+      toast.error('Error deleting recipient');
+    }
+  };
+
+  const handleBulkRecipientUpdate = async (active: boolean) => {
+    if (selectedRecipientIds.length === 0) return;
+    setBulkRecipientBusy(true);
+    try {
+      await Promise.all(
+        selectedRecipientIds.map(id =>
+          fetch('/api/admin/email-recipients', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id, active }),
+          })
+        )
+      );
+      await fetchRecipients();
+      setSelectedRecipientIds([]);
+    } catch (err) {
+      toast.error('Error updating selected recipients');
+    } finally {
+      setBulkRecipientBusy(false);
+    }
+  };
+
+  const handleBulkRecipientDelete = async () => {
+    if (selectedRecipientIds.length === 0) return;
+    if (
+      !(await confirm({
+        title: 'Delete selected recipients?',
+        description: `Delete ${selectedRecipientIds.length} selected recipient${selectedRecipientIds.length === 1 ? '' : 's'}?`,
+        confirmLabel: 'Delete recipients',
+        destructive: true,
+      }))
+    )
+      return;
+
+    setBulkRecipientBusy(true);
+    try {
+      await Promise.all(
+        selectedRecipientIds.map(id =>
+          fetch(`/api/admin/email-recipients?id=${id}`, { method: 'DELETE' })
+        )
+      );
+      await fetchRecipients();
+      setSelectedRecipientIds([]);
+    } catch (err) {
+      toast.error('Error deleting selected recipients');
+    } finally {
+      setBulkRecipientBusy(false);
     }
   };
 
@@ -240,7 +330,7 @@ export default function EmailManagementPage() {
       if (!response.ok) throw new Error(data.error || 'Unable to open message');
       setSelectedInboxMessage(data.message);
       setInboxMessages(current =>
-        current.map(message => message.uid === uid ? { ...message, unread: false } : message)
+        current.map(message => (message.uid === uid ? { ...message, unread: false } : message))
       );
     } catch (err) {
       setInboxError(err instanceof Error ? err.message : 'Unable to open message');
@@ -259,12 +349,17 @@ export default function EmailManagementPage() {
     const sender = selectedInboxMessage?.from.find(address => address.email);
     if (!selectedInboxMessage || !sender) return;
     setMailboxTo(sender.email);
-    setMailboxSubject(/^re:/i.test(selectedInboxMessage.subject)
-      ? selectedInboxMessage.subject
-      : `Re: ${selectedInboxMessage.subject}`);
+    setMailboxSubject(
+      /^re:/i.test(selectedInboxMessage.subject)
+        ? selectedInboxMessage.subject
+        : `Re: ${selectedInboxMessage.subject}`
+    );
     setMailboxMessage(
       `\n\nOn ${new Date(selectedInboxMessage.date).toLocaleString()}, ${sender.email} wrote:\n` +
-      selectedInboxMessage.body.split('\n').map(line => `> ${line}`).join('\n')
+        selectedInboxMessage.body
+          .split('\n')
+          .map(line => `> ${line}`)
+          .join('\n')
     );
     setMailboxComposeError(null);
     setShowMailboxComposeModal(true);
@@ -272,7 +367,6 @@ export default function EmailManagementPage() {
 
   const handleSendMailboxEmail = async () => {
     setMailboxComposeError(null);
-    setMailboxComposeSuccess(null);
     try {
       setSendingMailboxEmail(true);
       const response = await fetch('/api/admin/mailbox/send', {
@@ -286,7 +380,7 @@ export default function EmailManagementPage() {
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || 'Failed to send email');
-      setMailboxComposeSuccess(result.message || 'Email sent successfully.');
+      toast.success(result.message || 'Email sent successfully.');
       closeMailboxCompose();
       await fetchEmailHistory();
     } catch (err) {
@@ -296,48 +390,26 @@ export default function EmailManagementPage() {
     }
   };
 
-  const handleSendTestEmail = async () => {
-    if (!testEmail) {
-      alert('Please enter an email address');
-      return;
-    }
-
-    try {
-      setSendingTest(true);
-      const response = await fetch('/api/admin/email-test', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ to: testEmail })
-      });
-
-      if (response.ok) {
-        alert('Test email sent successfully!');
-        setTestEmail('');
-      } else {
-        alert('Failed to send test email');
-      }
-    } catch (err) {
-      alert('Error sending test email');
-    } finally {
-      setSendingTest(false);
-    }
-  };
-
   const handleSendClientEmail = async () => {
     if (!emailSubject || !emailMessage) {
-      alert('Please enter both subject and message');
+      toast.error('Please enter both subject and message');
       return;
     }
 
     const activeRecipients = recipients.filter(r => r.active && r.role !== 'admin');
     if (activeRecipients.length === 0) {
-      alert('No active client recipients found. Please add client recipients first.');
+      toast.error('No active client recipients found. Please add client recipients first.');
       return;
     }
 
-    if (!confirm(`Send email to ${activeRecipients.length} client(s)?`)) {
+    if (
+      !(await confirm({
+        title: 'Send client email?',
+        description: `Send this email to ${activeRecipients.length} active client${activeRecipients.length === 1 ? '' : 's'}?`,
+        confirmLabel: 'Send email',
+      }))
+    )
       return;
-    }
 
     try {
       setSendingEmail(true);
@@ -347,23 +419,23 @@ export default function EmailManagementPage() {
         body: JSON.stringify({
           subject: emailSubject,
           message: emailMessage,
-          recipients: activeRecipients.map(r => r.email)
-        })
+          recipients: activeRecipients.map(r => r.email),
+        }),
       });
 
       if (response.ok) {
         const result = await response.json();
-        alert(`Email sent successfully to ${result.sentCount} recipient(s)!`);
+        toast.success(`Email sent successfully to ${result.sentCount} recipient(s)!`);
         setShowSendEmailModal(false);
         setEmailSubject('');
         setEmailMessage('');
         fetchEmailHistory(); // Refresh history
       } else {
         const error = await response.json();
-        alert(error.message || 'Failed to send email');
+        toast.error(error.message || 'Failed to send email');
       }
     } catch (err) {
-      alert('Error sending email');
+      toast.error('Error sending email');
     } finally {
       setSendingEmail(false);
     }
@@ -371,226 +443,326 @@ export default function EmailManagementPage() {
 
   const filteredRecipients = recipients.filter(recipient => {
     const query = recipientSearch.trim().toLowerCase();
-    const matchesSearch = !query || [recipient.email, recipient.name || '', recipient.role]
-      .some(value => value.toLowerCase().includes(query));
+    const matchesSearch =
+      !query ||
+      [recipient.email, recipient.name || '', recipient.role].some(value =>
+        value.toLowerCase().includes(query)
+      );
     const matchesStatus =
       recipientStatusFilter === 'all' ||
       (recipientStatusFilter === 'active' && recipient.active) ||
       (recipientStatusFilter === 'inactive' && !recipient.active);
+    const matchesRole = recipientRoleFilter === 'all' || recipient.role === recipientRoleFilter;
+    return matchesSearch && matchesStatus && matchesRole;
+  });
+  const paginatedRecipients = paginateItems(filteredRecipients, recipientPage, 10);
+  const filteredInboxMessages = inboxMessages
+    .filter(message => !unreadOnly || message.unread)
+    .filter(message => {
+      const sender = message.from.map(address => `${address.name} ${address.email}`).join(' ');
+      return `${sender} ${message.subject} ${message.to.join(' ')}`
+        .toLowerCase()
+        .includes(inboxSearch.trim().toLowerCase());
+    });
+  const paginatedInboxMessages = paginateItems(filteredInboxMessages, inboxPage, 10);
+  const filteredEmailHistory = emailHistory.filter(record => {
+    const query = historySearch.trim().toLowerCase();
+    const matchesSearch =
+      !query ||
+      [record.subject, record.message, record.sentBy, ...record.recipients].some(value =>
+        value.toLowerCase().includes(query)
+      );
+    const matchesStatus = historyStatusFilter === 'all' || record.status === historyStatusFilter;
     return matchesSearch && matchesStatus;
   });
+  const paginatedEmailHistory = paginateItems(filteredEmailHistory, historyPage, 10);
+  const selectedHistoryRecord =
+    emailHistory.find(record => record.id === selectedHistoryId) ?? null;
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+    <div className="admin-panel-form mx-auto max-w-7xl space-y-6 p-4 md:p-6">
+      <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2">Email Management</h1>
-          <p className="text-gray-400">Read your mailbox, compose messages, and manage notification recipients</p>
+          <h1 className="text-2xl font-semibold text-white">Email Management</h1>
+          <p className="mt-1 text-sm text-slate-400">
+            Manage your inbox, email recipients, and outbound messages.
+          </p>
         </div>
-        <Link
-          href="/adminpanel"
-          className="text-sm text-cyan-400 hover:text-cyan-300 underline"
-        >
-          Back to Dashboard
-        </Link>
-      </div>
-
-      {/* Client broadcast */}
-      <div className="bg-gradient-to-r from-purple-900/20 to-pink-900/20 rounded-lg p-6 mb-6 border border-purple-700">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h2 className="text-xl font-semibold text-white mb-2 flex items-center gap-2">
-              <FaUsers className="text-purple-400" />
-              Client Broadcast
-            </h2>
-            <p className="text-sm text-gray-400">
-              Send announcements to all active client recipients ({recipients.filter(r => r.active && r.role !== 'admin').length} clients)
-            </p>
-          </div>
-          <Button size="lg"
-            onClick={() => setShowSendEmailModal(true)}
-          >
-            <FaPaperPlane />
-            Compose Broadcast
+        <div className="flex items-center gap-2">
+          <Button asChild variant="outline">
+            <Link href="/adminpanel">Back to dashboard</Link>
+          </Button>
+          <Button onClick={() => setShowSendEmailModal(true)}>
+            <Send aria-hidden="true" className="size-4" />
+            Compose broadcast
           </Button>
         </div>
-      </div>
+      </header>
 
-      {/* Test Email Section */}
-      <div className="bg-gray-800 rounded-lg p-6 mb-6 border border-gray-700">
-        <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
-          <FaPaperPlane className="text-cyan-400" />
-          Send Test Email
-        </h2>
-        <div className="flex gap-3">
-          <input
-            type="email"
-            value={testEmail}
-            onChange={(e) => setTestEmail(e.target.value)}
-            placeholder="Enter email address..."
-            className="flex-1 px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-          />
-          <Button size="sm"
-            onClick={handleSendTestEmail}
-            disabled={sendingTest}
-          >
-            {sendingTest ? 'Sending...' : 'Send Test'}
-          </Button>
+      <Card className="overflow-hidden p-2">
+        <div role="tablist" aria-label="Email management sections" className="flex flex-wrap gap-2">
+          {(
+            [
+              { id: 'inbox', label: 'Inbox', icon: Inbox },
+              { id: 'recipients', label: 'Recipients', icon: Users },
+              { id: 'history', label: 'Email history', icon: History },
+            ] as const
+          ).map(tab => {
+            const Icon = tab.icon;
+            const selected = activeTab === tab.id;
+            return (
+              <Button
+                key={tab.id}
+                id={`email-tab-${tab.id}`}
+                role="tab"
+                aria-selected={selected}
+                aria-controls={`email-panel-${tab.id}`}
+                tabIndex={selected ? 0 : -1}
+                variant={selected ? 'default' : 'ghost'}
+                onClick={() => setActiveTab(tab.id)}
+                className="gap-2"
+              >
+                <Icon aria-hidden="true" className="size-4" />
+                {tab.label}
+              </Button>
+            );
+          })}
         </div>
-      </div>
-
-      {/* Tabs */}
-      <div className="flex gap-2 mb-6">
-        <button
-          onClick={() => setActiveTab('inbox')}
-          className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${activeTab === 'inbox'
-              ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white'
-              : 'bg-gray-800 text-gray-400 hover:text-white border border-gray-700'
-            }`}
-        >
-          <FaInbox />
-          Inbox
-          {inboxMessages.filter(message => message.unread).length > 0 && (
-            <span className="rounded-full bg-white/20 px-2 py-0.5 text-xs">
-              {inboxMessages.filter(message => message.unread).length}
-            </span>
-          )}
-        </button>
-        <button
-          onClick={() => setActiveTab('recipients')}
-          className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${activeTab === 'recipients'
-              ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white'
-              : 'bg-gray-800 text-gray-400 hover:text-white border border-gray-700'
-            }`}
-        >
-          <FaEnvelope />
-          Recipients
-        </button>
-        <button
-          onClick={() => setActiveTab('history')}
-          className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${activeTab === 'history'
-              ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white'
-              : 'bg-gray-800 text-gray-400 hover:text-white border border-gray-700'
-            }`}
-        >
-          <FaHistory />
-          Email History
-        </button>
-      </div>
+      </Card>
 
       {activeTab === 'inbox' && (
-        <section className="overflow-hidden rounded-xl border border-gray-700 bg-gray-800">
+        <section
+          id="email-panel-inbox"
+          role="tabpanel"
+          aria-labelledby="email-tab-inbox"
+          className="overflow-hidden rounded-xl border border-white/10 bg-[#0d141b]"
+        >
           <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-700 px-5 py-4">
             <div>
               <h2 className="flex items-center gap-2 text-xl font-semibold text-white">
-                <FaInbox className="text-cyan-400" />
+                <Inbox aria-hidden="true" className="size-5 text-cyan-400" />
                 Inbox
               </h2>
               <p className="mt-1 text-sm text-gray-400">
                 {inboxMessages.length} recent message{inboxMessages.length === 1 ? '' : 's'}
-                {' · '}{inboxMessages.filter(message => message.unread).length} unread
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setUnreadOnly(value => !value)}
-                aria-pressed={unreadOnly}
-                className={`rounded-lg border px-3 py-2 text-sm transition-colors ${unreadOnly
-                  ? 'border-cyan-500 bg-cyan-500/15 text-cyan-200'
-                  : 'border-gray-600 text-gray-300 hover:bg-gray-700'
-                  }`}
-              >
-                Unread
-              </button>
-              <button
-                type="button"
-                onClick={fetchInbox}
-                disabled={loadingInbox}
-                className="flex items-center gap-2 rounded-lg border border-gray-600 px-3 py-2 text-sm text-gray-300 transition-colors hover:bg-gray-700 disabled:opacity-50"
-              >
-                <FaSync className={loadingInbox ? 'animate-spin' : ''} />
-                Refresh
-              </button>
               <Button
                 type="button"
+                variant={unreadOnly ? 'default' : 'outline'}
                 onClick={() => {
-                  setMailboxComposeSuccess(null);
-                  setShowMailboxComposeModal(true);
+                  setUnreadOnly(value => !value);
+                  setInboxPage(1);
                 }}
+                aria-pressed={unreadOnly}
               >
-                <FaPaperPlane />
+                {unreadOnly ? 'Unread only' : 'All messages'}
+              </Button>
+              <Button type="button" variant="outline" onClick={fetchInbox} disabled={loadingInbox}>
+                <RefreshCw
+                  aria-hidden="true"
+                  className={`size-4 ${loadingInbox ? 'animate-spin' : ''}`}
+                />
+                Refresh
+              </Button>
+              <Button type="button" onClick={() => setShowMailboxComposeModal(true)}>
+                <Send aria-hidden="true" className="size-4" />
                 Compose
               </Button>
             </div>
           </div>
 
-          {mailboxComposeSuccess && (
-            <div role="status" className="border-b border-green-800 bg-green-900/20 px-5 py-3 text-sm text-green-200">
-              {mailboxComposeSuccess}
-            </div>
-          )}
           {inboxError && (
-            <div role="alert" className="border-b border-red-800 bg-red-900/20 px-5 py-3 text-sm text-red-200">
+            <Alert variant="destructive" className="rounded-none border-x-0 border-t-0">
               {inboxError}
-            </div>
+            </Alert>
           )}
 
           <div className="grid min-h-[560px] grid-cols-1 lg:grid-cols-[minmax(280px,360px)_minmax(0,1fr)]">
             <div className="border-b border-gray-700 lg:border-b-0 lg:border-r">
-              <label className="relative block border-b border-gray-700 p-3">
-                <FaSearch className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-500" />
-                <input
-                  type="search"
-                  value={inboxSearch}
-                  onChange={event => setInboxSearch(event.target.value)}
-                  placeholder="Search inbox"
-                  className="w-full rounded-lg border border-gray-600 bg-gray-900 py-2 pl-9 pr-3 text-sm text-white outline-none focus:border-cyan-500"
-                />
-              </label>
+              <div className="border-b border-gray-700 p-3">
+                <Filters
+                  activeFilters={[
+                    ...(inboxSearch.trim()
+                      ? [
+                          {
+                            id: 'inbox-search',
+                            label: `Search: ${inboxSearch}`,
+                            onRemove: () => setInboxSearch(''),
+                          },
+                        ]
+                      : []),
+                    ...(unreadOnly
+                      ? [
+                          {
+                            id: 'inbox-unread',
+                            label: 'Unread only',
+                            onRemove: () => setUnreadOnly(false),
+                          },
+                        ]
+                      : []),
+                  ]}
+                >
+                  <Input
+                    type="search"
+                    value={inboxSearch}
+                    onChange={event => {
+                      setInboxSearch(event.target.value);
+                      setInboxPage(1);
+                    }}
+                    placeholder="Search inbox"
+                    aria-label="Search inbox"
+                  />
+                </Filters>
+              </div>
 
               {loadingInbox && inboxMessages.length === 0 ? (
                 <div className="p-6 text-center text-sm text-gray-400">Connecting to inbox…</div>
               ) : inboxMessages.length === 0 && !inboxError ? (
                 <div className="p-6 text-center text-sm text-gray-400">Your inbox is empty.</div>
               ) : (
-                <div className="max-h-[560px] overflow-y-auto">
-                  {inboxMessages
-                    .filter(message => !unreadOnly || message.unread)
-                    .filter(message => {
-                      const sender = message.from.map(address => `${address.name} ${address.email}`).join(' ');
-                      return `${sender} ${message.subject}`.toLowerCase().includes(inboxSearch.toLowerCase());
-                    })
-                    .map(message => {
-                      const sender = message.from[0];
-                      const selected = selectedInboxMessage?.uid === message.uid;
+                <div>
+                  {selectedInboxUids.length > 0 && (
+                    <div className="sticky top-0 z-10 flex items-center gap-2 border-b border-cyan-500/30 bg-cyan-950/95 px-3 py-2">
+                      <span className="mr-auto text-xs font-medium text-cyan-100">
+                        {selectedInboxUids.length} selected
+                      </span>
+                      <button
+                        type="button"
+                        className="rounded-md border border-cyan-500/30 px-2 py-1 text-xs text-cyan-200 hover:bg-cyan-900/50"
+                        onClick={async () => {
+                          await Promise.all(
+                            selectedInboxUids.map(async uid => {
+                              const response = await fetch(`/api/admin/mailbox/${uid}`);
+                              if (response.ok) {
+                                await response.json();
+                              }
+                            })
+                          );
+                          setInboxMessages(current =>
+                            current.map(message =>
+                              selectedInboxUids.includes(message.uid)
+                                ? { ...message, unread: false }
+                                : message
+                            )
+                          );
+                          setSelectedInboxUids([]);
+                        }}
+                      >
+                        Mark read
+                      </button>
+                      <button
+                        type="button"
+                        className="text-xs text-gray-400 hover:text-white"
+                        onClick={() => setSelectedInboxUids([])}
+                      >
+                        Clear
+                      </button>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-3 border-b border-gray-700 px-4 py-2">
+                    {(() => {
+                      const visibleInboxMessages = paginatedInboxMessages;
                       return (
+                        <Checkbox
+                          aria-label="Select all inbox messages"
+                          checked={
+                            visibleInboxMessages.length > 0 &&
+                            visibleInboxMessages.every(message =>
+                              selectedInboxUids.includes(message.uid)
+                            )
+                          }
+                          onChange={event =>
+                            setSelectedInboxUids(current =>
+                              event.target.checked
+                                ? Array.from(
+                                    new Set([
+                                      ...current,
+                                      ...visibleInboxMessages.map(message => message.uid),
+                                    ])
+                                  )
+                                : current.filter(
+                                    uid =>
+                                      !visibleInboxMessages.some(message => message.uid === uid)
+                                  )
+                            )
+                          }
+                        />
+                      );
+                    })()}
+                    <span className="text-xs text-gray-500">Select all</span>
+                  </div>
+                  {paginatedInboxMessages.map(message => {
+                    const sender = message.from[0];
+                    const selected = selectedInboxMessage?.uid === message.uid;
+                    return (
+                      <div
+                        key={message.uid}
+                        className={`flex items-start gap-3 border-b border-gray-700/80 p-3 transition-colors ${
+                          selected ? 'bg-cyan-950/50' : 'hover:bg-gray-700/50'
+                        }`}
+                      >
+                        <Checkbox
+                          className="mt-1"
+                          aria-label={`Select email from ${sender?.name || sender?.email || 'unknown sender'}`}
+                          checked={selectedInboxUids.includes(message.uid)}
+                          onChange={event =>
+                            setSelectedInboxUids(current =>
+                              event.target.checked
+                                ? [...current, message.uid]
+                                : current.filter(uid => uid !== message.uid)
+                            )
+                          }
+                        />
                         <button
-                          key={message.uid}
                           type="button"
                           onClick={() => openInboxMessage(message.uid)}
                           aria-current={selected ? 'true' : undefined}
-                          className={`block w-full border-b border-gray-700/80 p-4 text-left transition-colors ${selected
-                            ? 'bg-cyan-950/50'
-                            : 'hover:bg-gray-700/50'
-                            }`}
+                          className="min-w-0 flex-1 text-left"
                         >
-                          <div className="flex items-start justify-between gap-3">
-                            <span className={`truncate text-sm ${message.unread ? 'font-semibold text-white' : 'text-gray-300'}`}>
-                              {sender?.name || sender?.email || 'Unknown sender'}
-                            </span>
-                            <span className="shrink-0 text-xs text-gray-500">
-                              {new Date(message.date).toLocaleDateString()}
-                            </span>
+                          <div className="flex items-start gap-3">
+                            <Avatar size="sm">
+                              <AvatarFallback className="bg-slate-700 text-xs text-slate-200">
+                                {getInitials(sender?.name, sender?.email)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-start justify-between gap-2">
+                                <span
+                                  className={`truncate text-sm ${message.unread ? 'font-semibold text-white' : 'text-gray-300'}`}
+                                >
+                                  {sender?.name || sender?.email || 'Unknown sender'}
+                                </span>
+                                <span className="shrink-0 text-[11px] text-gray-500">
+                                  {new Date(message.date).toLocaleDateString()}
+                                </span>
+                              </div>
+                              <p
+                                className={`mt-1 truncate text-sm ${message.unread ? 'font-medium text-white' : 'text-gray-400'}`}
+                              >
+                                {message.subject}
+                              </p>
+                              <p className="mt-1 truncate text-xs text-gray-500">
+                                {sender?.email || ''}
+                              </p>
+                            </div>
                           </div>
-                          <p className={`mt-1 truncate text-sm ${message.unread ? 'font-medium text-white' : 'text-gray-400'}`}>
-                            {message.subject}
-                          </p>
-                          <p className="mt-1 truncate text-xs text-gray-500">{sender?.email || ''}</p>
                         </button>
-                      );
-                    })}
+                      </div>
+                    );
+                  })}
+                  {filteredInboxMessages.length === 0 && (
+                    <p className="px-4 py-8 text-center text-sm text-gray-500">
+                      No messages match these filters.
+                    </p>
+                  )}
+                  <TablePagination
+                    page={inboxPage}
+                    pageSize={10}
+                    total={filteredInboxMessages.length}
+                    onPageChange={setInboxPage}
+                  />
                 </div>
               )}
             </div>
@@ -598,7 +770,7 @@ export default function EmailManagementPage() {
             <div className="min-w-0 bg-gray-900/40">
               {!selectedInboxMessage ? (
                 <div className="flex h-full min-h-[320px] flex-col items-center justify-center p-8 text-center text-gray-500">
-                  <FaEnvelope className="mb-3 text-3xl text-gray-600" />
+                  <Mail aria-hidden="true" className="mb-3 size-8 text-gray-600" />
                   <p>Select a message to read it.</p>
                 </div>
               ) : (
@@ -606,12 +778,22 @@ export default function EmailManagementPage() {
                   <header className="border-b border-gray-700 p-5">
                     <div className="flex flex-wrap items-start justify-between gap-4">
                       <div className="min-w-0">
-                        <h3 className="break-words text-xl font-semibold text-white">{selectedInboxMessage.subject}</h3>
-                        <p className="mt-2 text-sm text-gray-400">
-                          From {selectedInboxMessage.from.map(address => address.name
-                            ? `${address.name} <${address.email}>`
-                            : address.email).join(', ')}
-                        </p>
+                        <h3 className="break-words text-xl font-semibold text-white">
+                          {selectedInboxMessage.subject}
+                        </h3>
+                        {selectedInboxMessage.from.map(address => (
+                          <div key={address.email} className="mt-3 flex items-center gap-3">
+                            <Avatar>
+                              <AvatarFallback className="bg-cyan-950 text-cyan-200">
+                                {getInitials(address.name, address.email)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <p className="text-sm text-gray-300">
+                              From{' '}
+                              {address.name ? `${address.name} <${address.email}>` : address.email}
+                            </p>
+                          </div>
+                        ))}
                         <p className="mt-1 text-xs text-gray-500">
                           To {selectedInboxMessage.to.map(address => address.email).join(', ')}
                         </p>
@@ -625,7 +807,7 @@ export default function EmailManagementPage() {
                         disabled={!selectedInboxMessage.from.some(address => address.email)}
                         className="flex items-center gap-2 rounded-lg border border-gray-600 px-3 py-2 text-sm text-gray-200 transition-colors hover:bg-gray-700 disabled:opacity-50"
                       >
-                        <FaReply />
+                        <Reply aria-hidden="true" className="size-4" />
                         Reply
                       </button>
                     </div>
@@ -645,62 +827,145 @@ export default function EmailManagementPage() {
         </section>
       )}
 
-      {/* Recipients List */}
       {activeTab === 'recipients' && (
         <Card className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-white flex items-center gap-2">
-              <FaEnvelope className="text-cyan-400" />
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <h2 className="flex items-center gap-2 text-xl font-semibold text-white">
+              <Mail aria-hidden="true" className="size-5 text-cyan-400" />
               Email Recipients
             </h2>
-            <Button
-              onClick={() => setShowAddModal(true)}
-            >
-              <FaPlus />
+            <Button onClick={() => setShowAddModal(true)}>
+              <Plus aria-hidden="true" className="size-4" />
               Add Recipient
             </Button>
           </div>
 
-          {!loading && !error && recipients.length > 0 && (
-            <Filters
-              className="mb-4"
-              activeFilters={[
-                ...(recipientSearch.trim()
-                  ? [{ id: 'recipient-search', label: `Search: ${recipientSearch}`, onRemove: () => setRecipientSearch('') }]
-                  : []),
-                ...(recipientStatusFilter !== 'all'
-                  ? [{ id: 'recipient-status', label: `Status: ${recipientStatusFilter}`, onRemove: () => setRecipientStatusFilter('all') }]
-                  : []),
-              ]}
+          <Filters
+            className="mb-4"
+            activeFilters={[
+              ...(recipientSearch.trim()
+                ? [
+                    {
+                      id: 'recipient-search',
+                      label: `Search: ${recipientSearch}`,
+                      onRemove: () => setRecipientSearch(''),
+                    },
+                  ]
+                : []),
+              ...(recipientStatusFilter !== 'all'
+                ? [
+                    {
+                      id: 'recipient-status',
+                      label: `Status: ${recipientStatusFilter}`,
+                      onRemove: () => setRecipientStatusFilter('all'),
+                    },
+                  ]
+                : []),
+              ...(recipientRoleFilter !== 'all'
+                ? [
+                    {
+                      id: 'recipient-role',
+                      label: `Role: ${recipientRoleFilter}`,
+                      onRemove: () => setRecipientRoleFilter('all'),
+                    },
+                  ]
+                : []),
+            ]}
+          >
+            <Input
+              type="search"
+              value={recipientSearch}
+              onChange={event => {
+                setRecipientSearch(event.target.value);
+                setRecipientPage(1);
+              }}
+              placeholder="Search email, name, or role..."
+              aria-label="Search email recipients"
+              className="min-w-[220px] flex-1"
+            />
+            <NativeSelect
+              value={recipientStatusFilter}
+              onChange={event => {
+                setRecipientStatusFilter(event.target.value as typeof recipientStatusFilter);
+                setRecipientPage(1);
+              }}
+              aria-label="Filter recipients by status"
+              className="sm:w-44"
             >
-              <div className="relative min-w-[220px] flex-1">
-                <FaSearch className="admin-panel-input-icon" aria-hidden="true" />
-                <input
-                  type="search"
-                  value={recipientSearch}
-                  onChange={event => setRecipientSearch(event.target.value)}
-                  placeholder="Search email, name, or role..."
-                  aria-label="Search email recipients"
-                  className="w-full px-3 py-2"
-                />
-              </div>
-              <select
-                value={recipientStatusFilter}
-                onChange={event => setRecipientStatusFilter(event.target.value as typeof recipientStatusFilter)}
-                aria-label="Filter recipients by status"
-                className="px-3 py-2"
-              >
-                <option value="all">All statuses</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-              </select>
-            </Filters>
+              <option value="all">All statuses</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </NativeSelect>
+            <NativeSelect
+              value={recipientRoleFilter}
+              onChange={event => {
+                setRecipientRoleFilter(event.target.value);
+                setRecipientPage(1);
+              }}
+              aria-label="Filter recipients by role"
+              className="sm:w-44"
+            >
+              <option value="all">All roles</option>
+              {Array.from(new Set(recipients.map(recipient => recipient.role)))
+                .sort()
+                .map(role => (
+                  <option key={role} value={role}>
+                    {role}
+                  </option>
+                ))}
+            </NativeSelect>
+          </Filters>
+
+          {!loading && !error && (
+            <>
+              {selectedRecipientIds.length > 0 && (
+                <div className="mb-4 flex flex-wrap items-center gap-2 rounded-lg border border-cyan-500/30 bg-cyan-950/30 px-4 py-3">
+                  <span className="mr-auto text-sm font-medium text-cyan-100">
+                    {selectedRecipientIds.length} selected
+                  </span>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={bulkRecipientBusy}
+                    onClick={() => handleBulkRecipientUpdate(true)}
+                  >
+                    Activate
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={bulkRecipientBusy}
+                    onClick={() => handleBulkRecipientUpdate(false)}
+                  >
+                    Deactivate
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={bulkRecipientBusy}
+                    onClick={handleBulkRecipientDelete}
+                  >
+                    <Trash2 aria-hidden="true" className="size-4" />
+                    Delete
+                  </Button>
+                  <button
+                    type="button"
+                    className="text-xs text-gray-400 hover:text-white"
+                    onClick={() => setSelectedRecipientIds([])}
+                  >
+                    Clear
+                  </button>
+                </div>
+              )}
+            </>
           )}
 
           {loading ? (
             <div className="text-center py-8 text-gray-400">Loading recipients...</div>
           ) : error ? (
-            <div className="text-center py-8 text-red-400">{error}</div>
+            <Alert variant="destructive" className="my-4">
+              {error}
+            </Alert>
           ) : recipients.length === 0 ? (
             <div className="text-center py-8 text-gray-400">
               No recipients configured. Add one to get started.
@@ -708,68 +973,189 @@ export default function EmailManagementPage() {
           ) : filteredRecipients.length === 0 ? (
             <div className="text-center py-8 text-gray-400">No recipients match these filters.</div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-700/50 border-b border-gray-600">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">Email</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">Name</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">Role</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">Status</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">Added</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-300 uppercase">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-700">
-                  {filteredRecipients.map((recipient) => (
-                    <tr key={recipient.id} className="hover:bg-gray-700/30 transition-colors">
-                      <td className="px-4 py-3 text-sm text-white">{recipient.email}</td>
-                      <td className="px-4 py-3 text-sm text-gray-300">{recipient.name || '-'}</td>
-                      <td className="px-4 py-3 text-sm">
-                        <span className="px-2 py-1 bg-blue-500/20 text-blue-300 rounded text-xs font-medium">
-                          {recipient.role}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-sm">
-                        <label className="inline-flex items-center cursor-pointer">
-                          <Checkbox
-                            checked={recipient.active}
-                            onChange={(e) => handleUpdateRecipient(recipient.id, { active: e.target.checked })}
-                            className="w-4 h-4 text-cyan-600 bg-gray-700 border-gray-600 rounded focus:ring-cyan-500"
-                          />
-                          <span className={`ml-2 text-xs font-medium ${recipient.active ? 'text-green-300' : 'text-red-300'}`}>
-                            {recipient.active ? 'Active' : 'Inactive'}
-                          </span>
-                        </label>
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-400">
-                        {new Date(recipient.createdAt).toLocaleDateString()}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-right">
-                        <button
-                          onClick={() => handleDeleteRecipient(recipient.id)}
-                          className="px-3 py-1 bg-red-500/20 hover:bg-red-500/30 text-red-300 rounded-lg text-xs font-medium transition-all"
-                        >
-                          <FaTrash className="inline mr-1" />
-                          Delete
-                        </button>
-                      </td>
+            <>
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[760px] text-sm">
+                  <thead className="border-b border-white/10 bg-white/[0.03]">
+                    <tr>
+                      <th className="w-12 px-4 py-3">
+                        <Checkbox
+                          aria-label="Select all visible recipients"
+                          checked={
+                            paginatedRecipients.length > 0 &&
+                            paginatedRecipients.every(recipient =>
+                              selectedRecipientIds.includes(recipient.id)
+                            )
+                          }
+                          onChange={event =>
+                            setSelectedRecipientIds(current =>
+                              event.target.checked
+                                ? Array.from(
+                                    new Set([
+                                      ...current,
+                                      ...paginatedRecipients.map(recipient => recipient.id),
+                                    ])
+                                  )
+                                : current.filter(
+                                    id =>
+                                      !paginatedRecipients.some(recipient => recipient.id === id)
+                                  )
+                            )
+                          }
+                        />
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-400">
+                        Email
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-400">
+                        Name
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-400">
+                        Role
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-400">
+                        Status
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-400">
+                        Added
+                      </th>
+                      <th className="px-4 py-3 text-right text-xs font-medium uppercase text-gray-400">
+                        Actions
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y divide-white/5">
+                    {paginatedRecipients.map(recipient => (
+                      <tr key={recipient.id} className="transition-colors hover:bg-white/[0.03]">
+                        <td className="px-4 py-3">
+                          <Checkbox
+                            aria-label={`Select ${recipient.name || recipient.email}`}
+                            checked={selectedRecipientIds.includes(recipient.id)}
+                            onChange={event =>
+                              setSelectedRecipientIds(current =>
+                                event.target.checked
+                                  ? [...current, recipient.id]
+                                  : current.filter(id => id !== recipient.id)
+                              )
+                            }
+                          />
+                        </td>
+                        <td className="px-4 py-3 text-white">
+                          <div className="flex items-center gap-3">
+                            <Avatar size="sm">
+                              <AvatarFallback className="bg-slate-800 text-xs text-slate-200">
+                                {getInitials(recipient.name, recipient.email)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <span>{recipient.email}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-gray-300">{recipient.name || '-'}</td>
+                        <td className="px-4 py-3">
+                          <Badge variant="secondary">{recipient.role}</Badge>
+                        </td>
+                        <td className="px-4 py-3">
+                          <label className="inline-flex cursor-pointer items-center gap-2">
+                            <Checkbox
+                              checked={recipient.active}
+                              onChange={event =>
+                                handleUpdateRecipient(recipient.id, {
+                                  active: event.target.checked,
+                                })
+                              }
+                            />
+                            <Badge variant={recipient.active ? 'success-light' : 'secondary'}>
+                              {recipient.active ? 'Active' : 'Inactive'}
+                            </Badge>
+                          </label>
+                        </td>
+                        <td className="px-4 py-3 text-gray-400">
+                          {new Date(recipient.createdAt).toLocaleDateString()}
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleDeleteRecipient(recipient.id)}
+                          >
+                            <Trash2 aria-hidden="true" className="size-4" />
+                            Delete
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <TablePagination
+                page={recipientPage}
+                pageSize={10}
+                total={filteredRecipients.length}
+                onPageChange={setRecipientPage}
+              />
+            </>
           )}
         </Card>
       )}
 
-      {/* Email History Tab */}
       {activeTab === 'history' && (
         <Card className="p-6">
-          <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
-            <FaHistory className="text-cyan-400" />
-            Email History
-          </h2>
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <h2 className="flex items-center gap-2 text-xl font-semibold text-white">
+              <History aria-hidden="true" className="size-5 text-cyan-400" />
+              Email History
+            </h2>
+          </div>
+
+          <Filters
+            className="mb-4"
+            activeFilters={[
+              ...(historySearch.trim()
+                ? [
+                    {
+                      id: 'history-search',
+                      label: `Search: ${historySearch}`,
+                      onRemove: () => setHistorySearch(''),
+                    },
+                  ]
+                : []),
+              ...(historyStatusFilter !== 'all'
+                ? [
+                    {
+                      id: 'history-status',
+                      label: `Status: ${historyStatusFilter}`,
+                      onRemove: () => setHistoryStatusFilter('all'),
+                    },
+                  ]
+                : []),
+            ]}
+          >
+            <Input
+              type="search"
+              value={historySearch}
+              onChange={event => {
+                setHistorySearch(event.target.value);
+                setHistoryPage(1);
+              }}
+              placeholder="Search subject, sender, or recipient"
+              aria-label="Search email history"
+              className="min-w-[220px] flex-1"
+            />
+            <NativeSelect
+              value={historyStatusFilter}
+              onChange={event => {
+                setHistoryStatusFilter(event.target.value as typeof historyStatusFilter);
+                setHistoryPage(1);
+              }}
+              aria-label="Filter email history by status"
+              className="sm:w-44"
+            >
+              <option value="all">All statuses</option>
+              <option value="sent">Sent</option>
+              <option value="failed">Failed</option>
+            </NativeSelect>
+          </Filters>
 
           {loadingHistory ? (
             <div className="text-center py-8 text-gray-400">Loading history...</div>
@@ -777,110 +1163,126 @@ export default function EmailManagementPage() {
             <div className="text-center py-8 text-gray-400">
               No emails sent yet. Send your first email to clients to see history here.
             </div>
+          ) : filteredEmailHistory.length === 0 ? (
+            <div className="text-center py-8 text-gray-400">No emails match these filters.</div>
           ) : (
-            <div className="space-y-4">
-              {emailHistory.map((record) => (
-                <div
-                  key={record.id}
-                  className="bg-gray-700/30 rounded-lg border border-gray-600/50 hover:border-gray-500/50 transition-colors overflow-hidden"
-                >
-                  <div className="p-4">
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex-1">
-                        <h3 className="text-white font-semibold text-lg">{record.subject}</h3>
-                        <p className="text-gray-400 text-sm mt-1 line-clamp-2">{record.message}</p>
-                      </div>
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-medium ${record.status === 'sent'
-                            ? 'bg-green-500/20 text-green-300'
-                            : 'bg-red-500/20 text-red-300'
-                          }`}
-                      >
-                        {record.status}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-4 text-xs text-gray-400 mt-3">
-                      <span className="flex items-center gap-1">
-                        <FaUsers className="text-purple-400" />
-                        {record.recipientCount} recipient{record.recipientCount !== 1 ? 's' : ''}
-                      </span>
-                      <span>Sent by: {record.sentBy}</span>
-                      <span>{new Date(record.sentAt).toLocaleString()}</span>
-                    </div>
-
-                    {/* View Recipients Button */}
-                    <Button
-                      variant="link"
-                      size="sm"
-                      className="mt-3"
-                      onClick={() => setExpandedEmailId(expandedEmailId === record.id ? null : record.id)}
-                    >
-                      {expandedEmailId === record.id ? <FaChevronUp /> : <FaChevronDown />}
-                      {expandedEmailId === record.id ? 'Hide' : 'View'} Recipients
-                    </Button>
-                  </div>
-
-                  {/* Expandable Recipients List */}
-                  {expandedEmailId === record.id && (
-                    <div className="bg-gray-800/50 border-t border-gray-600/50 p-4">
-                      <h4 className="text-white font-medium mb-3 flex items-center gap-2">
-                        <FaEnvelope className="text-cyan-400" />
-                        Email Recipients ({record.recipients?.length || 0})
-                      </h4>
-
-                      {/* Successful Recipients */}
-                      {record.recipients && record.recipients.length > 0 && (
-                        <div className="mb-4">
-                          <p className="text-green-300 text-sm font-medium mb-2 flex items-center gap-2">
-                            <FaCheckCircle />
-                            Successfully Sent ({record.recipients.length - (record.failedRecipients?.length || 0)})
-                          </p>
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                            {record.recipients
-                              .filter(email => !record.failedRecipients?.includes(email))
-                              .map((email, idx) => (
-                                <div
-                                  key={idx}
-                                  className="bg-gray-700/50 px-3 py-2 rounded text-sm text-gray-300 flex items-center gap-2"
-                                >
-                                  <FaCheckCircle className="text-green-400 text-xs" />
-                                  {email}
-                                </div>
-                              ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Failed Recipients */}
-                      {record.failedRecipients && record.failedRecipients.length > 0 && (
-                        <div>
-                          <p className="text-red-300 text-sm font-medium mb-2 flex items-center gap-2">
-                            <FaTimesCircle />
-                            Failed to Send ({record.failedRecipients.length})
-                          </p>
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                            {record.failedRecipients.map((email, idx) => (
-                              <div
-                                key={idx}
-                                className="bg-red-900/20 border border-red-700/50 px-3 py-2 rounded text-sm text-red-300 flex items-center gap-2"
-                              >
-                                <FaTimesCircle className="text-red-400 text-xs" />
-                                {email}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
+            <>
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[720px] text-sm">
+                  <thead className="border-b border-white/10 bg-white/[0.03]">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-400">
+                        Subject
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-400">
+                        Recipients
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-400">
+                        Sent by
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-400">
+                        Date
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-400">
+                        Status
+                      </th>
+                      <th className="px-4 py-3 text-right text-xs font-medium uppercase text-gray-400">
+                        Details
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5">
+                    {paginatedEmailHistory.map(record => (
+                      <tr key={record.id} className="hover:bg-white/[0.03]">
+                        <td className="max-w-[360px] px-4 py-3">
+                          <p className="truncate font-medium text-white">{record.subject}</p>
+                          <p className="mt-1 truncate text-xs text-gray-400">{record.message}</p>
+                        </td>
+                        <td className="px-4 py-3 text-gray-300">{record.recipientCount}</td>
+                        <td className="px-4 py-3 text-gray-300">{record.sentBy}</td>
+                        <td className="px-4 py-3 text-gray-400">
+                          {new Date(record.sentAt).toLocaleString()}
+                        </td>
+                        <td className="px-4 py-3">
+                          <Badge
+                            variant={
+                              record.status === 'sent' ? 'success-light' : 'destructive-light'
+                            }
+                          >
+                            {record.status}
+                          </Badge>
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setSelectedHistoryId(record.id)}
+                          >
+                            View details
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <TablePagination
+                page={historyPage}
+                pageSize={10}
+                total={filteredEmailHistory.length}
+                onPageChange={setHistoryPage}
+              />
+            </>
           )}
         </Card>
       )}
 
-      {/* Send Client Email Modal */}
+      {selectedHistoryRecord && (
+        <Dialog
+          open
+          onClose={() => setSelectedHistoryId(null)}
+          title="Email details"
+          maxWidth="max-w-2xl"
+        >
+          <div className="space-y-5">
+            <div>
+              <h3 className="text-lg font-semibold text-white">{selectedHistoryRecord.subject}</h3>
+              <p className="mt-1 text-sm text-gray-400">
+                Sent by {selectedHistoryRecord.sentBy} ·{' '}
+                {new Date(selectedHistoryRecord.sentAt).toLocaleString()}
+              </p>
+            </div>
+            <Badge
+              variant={
+                selectedHistoryRecord.status === 'sent' ? 'success-light' : 'destructive-light'
+              }
+            >
+              {selectedHistoryRecord.status}
+            </Badge>
+            <div className="max-h-52 overflow-y-auto whitespace-pre-wrap rounded-lg border border-white/10 bg-white/[0.03] p-4 text-sm text-gray-200">
+              {selectedHistoryRecord.message}
+            </div>
+            <div>
+              <h4 className="mb-2 text-sm font-medium text-white">
+                Recipients ({selectedHistoryRecord.recipients.length})
+              </h4>
+              <div className="flex max-h-48 flex-wrap gap-2 overflow-y-auto">
+                {selectedHistoryRecord.recipients.map(email => {
+                  const failed = selectedHistoryRecord.failedRecipients?.includes(email) ?? false;
+                  return (
+                    <Badge key={email} variant={failed ? 'destructive-light' : 'secondary'}>
+                      {failed && <CircleX aria-hidden="true" className="size-3" />}
+                      {email}
+                    </Badge>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </Dialog>
+      )}
+
       {showSendEmailModal && (
         <Dialog
           open={showSendEmailModal}
@@ -891,53 +1293,54 @@ export default function EmailManagementPage() {
           }}
           title="Compose Email to Clients"
         >
-          <div className="bg-gray-800 rounded-lg p-6 max-w-2xl w-full mx-4 border border-gray-700">
-            <h3 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
-              <FaPaperPlane className="text-purple-400" />
+          <div className="w-full rounded-xl border border-white/10 bg-[#0d141b] p-6 shadow-2xl">
+            <h3 className="mb-5 flex items-center gap-2 text-xl font-semibold text-white">
+              <Send aria-hidden="true" className="size-5 text-cyan-400" />
               Compose Email to Clients
             </h3>
 
             <div className="space-y-4">
               <Field id="broadcast-subject" label="Subject" required>
-                <input
+                <Input
                   id="broadcast-subject"
                   type="text"
                   value={emailSubject}
-                  onChange={(e) => setEmailSubject(e.target.value)}
+                  onChange={e => setEmailSubject(e.target.value)}
                   placeholder="Enter email subject..."
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
                   required
                 />
               </Field>
 
               <Field id="broadcast-message" label="Message" required>
                 <div className="flex justify-end">
-                  <EmojiPicker onSelect={emoji => insertEmoji(emailMessageRef.current, setEmailMessage, emoji)} />
+                  <EmojiPicker
+                    onSelect={emoji => insertEmoji(emailMessageRef.current, setEmailMessage, emoji)}
+                  />
                 </div>
                 <textarea
                   id="broadcast-message"
                   ref={emailMessageRef}
                   value={emailMessage}
-                  onChange={(e) => setEmailMessage(e.target.value)}
+                  onChange={e => setEmailMessage(e.target.value)}
                   placeholder="Enter your message..."
                   rows={8}
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full resize-y rounded-lg border border-white/15 bg-white/[0.03] px-3 py-2 text-sm text-slate-100 outline-none placeholder:text-slate-500 focus:border-cyan-400/70 focus:ring-3 focus:ring-cyan-400/10"
                   required
                 />
               </Field>
 
-              <div className="bg-purple-900/20 border border-purple-700/50 rounded-lg p-3">
+              <Alert variant="info">
                 <p className="text-sm text-gray-300">
-                  <strong className="text-purple-400">Recipients:</strong> This email will be sent to{' '}
-                  <strong>{recipients.filter(r => r.active && r.role !== 'admin').length}</strong> active client(s)
+                  <strong>Recipients:</strong> This email will be sent to{' '}
+                  <strong>{recipients.filter(r => r.active && r.role !== 'admin').length}</strong>{' '}
+                  active client(s)
                 </p>
-              </div>
+              </Alert>
             </div>
 
-            <div className="flex gap-3 mt-6">
+            <div className="mt-6 flex justify-end gap-3">
               <Button
                 variant="outline"
-                className="flex-1"
                 onClick={() => {
                   setShowSendEmailModal(false);
                   setEmailSubject('');
@@ -946,7 +1349,7 @@ export default function EmailManagementPage() {
               >
                 Cancel
               </Button>
-              <Button className="flex-1"
+              <Button
                 onClick={handleSendClientEmail}
                 disabled={sendingEmail || !emailSubject || !emailMessage}
               >
@@ -967,37 +1370,39 @@ export default function EmailManagementPage() {
           title="Compose Email"
           maxWidth="max-w-2xl"
         >
-          <div className="rounded-xl border border-gray-700 bg-gray-800 p-6 shadow-2xl">
+          <div className="rounded-xl border border-white/10 bg-[#0d141b] p-6 shadow-2xl">
             <h3 className="mb-5 flex items-center gap-2 text-xl font-semibold text-white">
-              <FaPaperPlane className="text-cyan-400" />
+              <Send aria-hidden="true" className="size-5 text-cyan-400" />
               Compose Email
             </h3>
             <div className="space-y-4">
               <Field id="mailbox-to" label="To">
-                <input
+                <Input
                   id="mailbox-to"
                   type="email"
                   value={mailboxTo}
                   onChange={event => setMailboxTo(event.target.value)}
                   placeholder="name@example.com"
                   autoComplete="email"
-                  className="w-full rounded-lg border border-gray-600 bg-gray-900 px-4 py-3 text-white outline-none focus:border-cyan-500"
                 />
               </Field>
               <Field id="mailbox-subject" label="Subject">
-                <input
+                <Input
                   id="mailbox-subject"
                   type="text"
                   maxLength={200}
                   value={mailboxSubject}
                   onChange={event => setMailboxSubject(event.target.value)}
                   placeholder="Subject"
-                  className="w-full rounded-lg border border-gray-600 bg-gray-900 px-4 py-3 text-white outline-none focus:border-cyan-500"
                 />
               </Field>
               <Field id="mailbox-message" label="Message">
                 <div className="flex justify-end">
-                  <EmojiPicker onSelect={emoji => insertEmoji(mailboxMessageRef.current, setMailboxMessage, emoji)} />
+                  <EmojiPicker
+                    onSelect={emoji =>
+                      insertEmoji(mailboxMessageRef.current, setMailboxMessage, emoji)
+                    }
+                  />
                 </div>
                 <textarea
                   ref={mailboxMessageRef}
@@ -1007,12 +1412,10 @@ export default function EmailManagementPage() {
                   value={mailboxMessage}
                   onChange={event => setMailboxMessage(event.target.value)}
                   placeholder="Write your email…"
-                  className="w-full resize-y rounded-lg border border-gray-600 bg-gray-900 px-4 py-3 text-white outline-none focus:border-cyan-500"
+                  className="w-full resize-y rounded-lg border border-white/15 bg-white/[0.03] px-3 py-2 text-sm text-slate-100 outline-none placeholder:text-slate-500 focus:border-cyan-400/70 focus:ring-3 focus:ring-cyan-400/10"
                 />
               </Field>
-              {mailboxComposeError && (
-                <p role="alert" className="text-sm text-red-300">{mailboxComposeError}</p>
-              )}
+              {mailboxComposeError && <Alert variant="destructive">{mailboxComposeError}</Alert>}
             </div>
             <div className="mt-6 flex justify-end gap-3">
               <Button
@@ -1026,9 +1429,14 @@ export default function EmailManagementPage() {
               <Button
                 type="button"
                 onClick={handleSendMailboxEmail}
-                disabled={sendingMailboxEmail || !mailboxTo || !mailboxSubject.trim() || !mailboxMessage.trim()}
+                disabled={
+                  sendingMailboxEmail ||
+                  !mailboxTo ||
+                  !mailboxSubject.trim() ||
+                  !mailboxMessage.trim()
+                }
               >
-                <FaPaperPlane />
+                <Send aria-hidden="true" className="size-4" />
                 {sendingMailboxEmail ? 'Sending…' : 'Send'}
               </Button>
             </div>
@@ -1047,46 +1455,43 @@ export default function EmailManagementPage() {
           title="Add Email Recipient"
           maxWidth="max-w-lg"
         >
-          <div className="bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4 border border-gray-700">
+          <div className="w-full rounded-xl border border-white/10 bg-[#0d141b] p-6 shadow-2xl">
             <h3 className="text-xl font-semibold text-white mb-4">Add Email Recipient</h3>
 
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Email Address *</label>
-                <input
+              <Field id="recipient-email" label="Email address" required>
+                <Input
+                  id="recipient-email"
                   type="email"
                   value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  onChange={e => setFormData({ ...formData, email: e.target.value })}
                   placeholder="admin@example.com"
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500"
                   required
                 />
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Name (Optional)</label>
-                <input
+              <Field id="recipient-name" label="Name (optional)">
+                <Input
+                  id="recipient-name"
                   type="text"
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={e => setFormData({ ...formData, name: e.target.value })}
                   placeholder="John Doe"
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500"
                 />
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Role</label>
-                <select
+              <Field id="recipient-role" label="Role">
+                <NativeSelect
+                  id="recipient-role"
                   value={formData.role}
-                  onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                  onChange={e => setFormData({ ...formData, role: e.target.value })}
                 >
                   <option value="admin">Admin (won't receive client emails)</option>
                   <option value="client">Client (receives announcements)</option>
                   <option value="moderator">Moderator</option>
                   <option value="support">Support</option>
-                </select>
-              </div>
+                </NativeSelect>
+              </Field>
             </div>
 
             <div className="flex gap-3 mt-6">
@@ -1100,16 +1505,14 @@ export default function EmailManagementPage() {
               >
                 Cancel
               </Button>
-              <Button className="flex-1"
-                onClick={handleAddRecipient}
-                disabled={!formData.email}
-              >
+              <Button className="flex-1" onClick={handleAddRecipient} disabled={!formData.email}>
                 Add Recipient
               </Button>
             </div>
           </div>
         </Dialog>
       )}
+      {confirmationDialog}
     </div>
   );
 }

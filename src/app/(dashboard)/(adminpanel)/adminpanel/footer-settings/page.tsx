@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { FaSave, FaPlus, FaTrash, FaEye, FaEyeSlash } from 'react-icons/fa';
 import { motion } from 'framer-motion';
+import { Alert } from '@/components/reui/alert';
 
 interface FooterSettings {
   title: string;
@@ -167,13 +168,10 @@ export default function FooterSettingsPage() {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className={`mb-6 p-4 rounded-lg ${
-            message.type === 'success' 
-              ? 'bg-green-500/20 border border-green-500/30 text-green-400' 
-              : 'bg-red-500/20 border border-red-500/30 text-red-400'
-          }`}
         >
-          {message.text}
+          <Alert variant={message.type === 'success' ? 'success' : 'destructive'} className="mb-6">
+            {message.text}
+          </Alert>
         </motion.div>
       )}
 

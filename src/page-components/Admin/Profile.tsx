@@ -4,6 +4,10 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import { Search } from 'lucide-react';
+import { Alert } from '@/components/reui/alert';
+import { Filters } from '@/components/reui/filters';
+import { paginateItems, TablePagination } from '@/components/reui/table-pagination';
+import { useConfirmDialog } from '@/components/reui/confirm-dialog';
 
 const AdminProfilesClient = dynamic(() => Promise.resolve(AdminProfilesComponent), {
     ssr: true,
@@ -22,6 +26,7 @@ type Profile = {
 };
 
 function AdminProfilesComponent() {
+    const { confirm, dialog: confirmationDialog } = useConfirmDialog();
     const [profiles, setProfiles] = useState<Profile[] | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [busy, setBusy] = useState(false);
@@ -45,6 +50,7 @@ function AdminProfilesComponent() {
     const [editing, setEditing] = useState<Profile | null>(null);
     const [profileSearch, setProfileSearch] = useState('');
     const [profileStatusFilter, setProfileStatusFilter] = useState<'all' | Profile['status']>('all');
+    const [profilePage, setProfilePage] = useState(1);
 
     const filteredProfiles = (profiles || []).filter(profile => {
         const query = profileSearch.trim().toLowerCase();
@@ -57,6 +63,7 @@ function AdminProfilesComponent() {
         const matchesStatus = profileStatusFilter === 'all' || profile.status === profileStatusFilter;
         return matchesSearch && matchesStatus;
     });
+    const paginatedProfiles = paginateItems(filteredProfiles, profilePage, 10);
 
     const load = () => {
         fetch('/api/admin/profiles')
@@ -123,7 +130,12 @@ function AdminProfilesComponent() {
     };
 
     const remove = async (id: string) => {
-        if (!confirm('Delete this profile?')) return;
+        if (!(await confirm({
+            title: 'Delete profile?',
+            description: 'This profile will be permanently removed.',
+            confirmLabel: 'Delete profile',
+            destructive: true,
+        }))) return;
         setBusy(true);
         setError(null);
         try {
@@ -149,7 +161,7 @@ function AdminProfilesComponent() {
                 </Link>
             </div>
 
-            {error && <div className="text-sm text-red-400">{error}</div>}
+            {error && <Alert variant="destructive">{error}</Alert>}
 
             {/* Create new profile */}
             <div className="admin-panel-card p-4">
@@ -213,7 +225,17 @@ function AdminProfilesComponent() {
             {/* List + edit */}
             <div className="admin-panel-card p-4">
                 <h2 className="mb-2 font-semibold">Profiles</h2>
-                <div className="admin-panel-filter-bar mb-4">
+                <Filters
+                    className="mb-4"
+                    activeFilters={[
+                        ...(profileSearch.trim()
+                            ? [{ id: 'profile-search', label: `Search: ${profileSearch}`, onRemove: () => setProfileSearch('') }]
+                            : []),
+                        ...(profileStatusFilter !== 'all'
+                            ? [{ id: 'profile-status', label: `Status: ${profileStatusFilter}`, onRemove: () => setProfileStatusFilter('all') }]
+                            : []),
+                    ]}
+                >
                     <div className="relative min-w-[220px] flex-1">
                         <Search className="admin-panel-input-icon" aria-hidden="true" />
                         <input
@@ -235,7 +257,7 @@ function AdminProfilesComponent() {
                         <option value="active">Active</option>
                         <option value="inactive">Inactive</option>
                     </select>
-                </div>
+                </Filters>
                 {!profiles ? (
                     <div className="text-gray-400">Loading…</div>
                 ) : profiles.length === 0 ? (
@@ -243,7 +265,8 @@ function AdminProfilesComponent() {
                 ) : filteredProfiles.length === 0 ? (
                     <div className="py-8 text-center text-gray-400">No profiles match these filters.</div>
                 ) : (
-                    <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
+                    <div className="space-y-3">
+                      <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
                         <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
                             <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                                 <tr>
@@ -271,7 +294,7 @@ function AdminProfilesComponent() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {filteredProfiles.map(p => (
+                                {paginatedProfiles.map(p => (
                                     <tr
                                         key={p.id}
                                         className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600"
@@ -314,8 +337,16 @@ function AdminProfilesComponent() {
                                 ))}
                             </tbody>
                         </table>
+                      </div>
+                      <TablePagination
+                        page={profilePage}
+                        pageSize={10}
+                        total={filteredProfiles.length}
+                        onPageChange={setProfilePage}
+                      />
                     </div>
                 )}
+                {confirmationDialog}
             </div>
 
             {/* Edit modal/section */}

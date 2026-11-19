@@ -77,10 +77,24 @@
 ) {
   min-height: 2.5rem;
   border-color: rgb(255 255 255 / 15%) !important;
-  border-radius: 0.75rem !important;
+  border-radius: 0.5rem !important;
   background-color: rgb(255 255 255 / 3%) !important;
   color: #f4f4f5 !important;
   color-scheme: dark;
+}
+
+.admin-panel-content :is(input:not([type='checkbox']):not([type='radio']):not([type='file']), select),
+.admin-panel-form :is(input:not([type='checkbox']):not([type='radio']):not([type='file']), select) {
+  box-sizing: border-box;
+  height: 2.5rem;
+  padding-block: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.admin-panel-content textarea,
+.admin-panel-form textarea {
+  box-sizing: border-box;
+  font-size: 0.875rem;
 }
 
 .admin-panel-content :is(input, textarea, select)::placeholder,
@@ -104,6 +118,7 @@
   border-collapse: separate;
   border-spacing: 0;
   color: #e4e4e7;
+  font-family: var(--font-sans, inherit);
   font-size: 13px;
   line-height: 1.45;
 }
@@ -155,8 +170,56 @@
   padding: 16px;
 }
 
+.admin-panel-filter-bar.admin-orders-filters {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  background: rgb(17 17 17 / 88%);
+}
+
+.admin-panel-filter-bar.admin-orders-filters > [data-slot='active-filters'] {
+  grid-column: 1 / -1;
+}
+
+.admin-panel-filter-bar.admin-users-filters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
+}
+
+.admin-panel-filter-bar.admin-users-filters > [data-slot='active-filters'] {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 1023px) {
+  .admin-panel-filter-bar.admin-orders-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 639px) {
+  .admin-panel-filter-bar.admin-orders-filters {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .admin-panel-filter-bar.admin-users-filters {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 .admin-panel-filter-bar > :is(.grid, .flex) {
   width: 100%;
+}
+
+.admin-panel-content table[data-slot='orders-table'] {
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.admin-panel-content table[data-slot='orders-table'] :is(th, td, th *, td *) {
+  font-size: 12px !important;
 }
 
 .admin-panel-input-icon {

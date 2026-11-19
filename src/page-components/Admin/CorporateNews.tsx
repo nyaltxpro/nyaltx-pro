@@ -7,12 +7,14 @@ import type { QuillOptions } from 'quill';
 import 'quill/dist/quill.snow.css';
 import React, { useEffect, useRef, useState } from 'react';
 import { Drawer } from '@/components/reui/drawer';
+import { Alert } from '@/components/reui/alert';
 import { Button } from '@/components/reui/button';
 import { Combobox } from '@/components/reui/combobox';
 import { Field } from '@/components/reui/field';
 import { FileUpload } from '@/components/reui/file-upload';
 import { Filters } from '@/components/reui/filters';
 import { Spinner } from '@/components/reui/spinner';
+import { useConfirmDialog } from '@/components/reui/confirm-dialog';
 import { Eye, Grid2X2, LayoutList, Newspaper, Pencil, Plus, Trash2, Upload, X } from 'lucide-react';
 import { Item } from '@/components/reui/item';
 import { Switch } from '@/components/reui/switch';
@@ -113,6 +115,7 @@ const isPaidNewsSubmission = (article: NewsArticle) =>
     );
 
 function AdminCorporateNewsComponent() {
+    const { confirm, dialog: confirmationDialog } = useConfirmDialog();
     const [news, setNews] = useState<NewsArticle[]>([]);
     const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'published' | 'draft'>('all');
     const [submissionFilter, setSubmissionFilter] = useState<'all' | 'paid' | 'corporate'>('all');
@@ -393,7 +396,12 @@ function AdminCorporateNewsComponent() {
     };
 
     const handleDeleteNews = async (id: string) => {
-        if (!confirm('Are you sure you want to delete this news article?')) return;
+        if (!(await confirm({
+            title: 'Delete news article?',
+            description: 'This article will be permanently deleted.',
+            confirmLabel: 'Delete article',
+            destructive: true,
+        }))) return;
 
         try {
             console.log('Deleting article with ID:', id);
@@ -553,6 +561,7 @@ function AdminCorporateNewsComponent() {
 
     return (
         <div className="space-y-6">
+            {confirmationDialog}
             <div className="flex items-center justify-between">
                 <div>
                     <div className="flex items-center gap-3">
@@ -583,26 +592,8 @@ function AdminCorporateNewsComponent() {
             </div>
 
             {/* Status Messages */}
-            {error && (
-                <div className="p-4 rounded-lg border border-red-500/30 bg-red-500/10 text-red-300 backdrop-blur-sm">
-                    <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-red-400 rounded-full"></div>
-                        <span className="font-medium" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                            {error}
-                        </span>
-                    </div>
-                </div>
-            )}
-            {success && (
-                <div className="p-4 rounded-lg border border-green-500/30 bg-green-500/10 text-green-300 backdrop-blur-sm">
-                    <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                        <span className="font-medium" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                            {success}
-                        </span>
-                    </div>
-                </div>
-            )}
+            {error && <Alert variant="destructive">{error}</Alert>}
+            {success && <Alert variant="success">{success}</Alert>}
 
             <div className="flex flex-wrap items-center gap-2">
                 <span className="mr-2 text-sm text-gray-400">News type:</span>

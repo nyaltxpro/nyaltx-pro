@@ -3,6 +3,8 @@
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { Dialog } from '@/components/reui/dialog';
+import { useConfirmDialog } from '@/components/reui/confirm-dialog';
+import { Alert } from '@/components/reui/alert';
 import React, { useEffect, useState } from 'react';
 import { Copy, Download, Eye, ImageIcon, Trash2, Upload } from 'lucide-react';
 
@@ -36,6 +38,7 @@ interface BannerMetadata {
 }
 
 function AdminBannersComponent() {
+    const { confirm, dialog: confirmationDialog } = useConfirmDialog();
     const [banners, setBanners] = useState<BannerFile[]>([]);
     const [bannerMetadata, setBannerMetadata] = useState<BannerMetadata[]>([]);
     const [loading, setLoading] = useState(true);
@@ -129,7 +132,12 @@ function AdminBannersComponent() {
     };
 
     const handleDelete = async (filename: string) => {
-        if (!confirm(`Are you sure you want to delete ${filename}?`)) return;
+        if (!(await confirm({
+            title: 'Delete banner?',
+            description: `Delete ${filename}? This action cannot be undone.`,
+            confirmLabel: 'Delete banner',
+            destructive: true,
+        }))) return;
 
         try {
             const response = await fetch('/api/admin/banners', {
@@ -244,26 +252,8 @@ function AdminBannersComponent() {
             </div>
 
             {/* Status Messages */}
-            {error && (
-                <div className="p-4 rounded-lg border border-red-500/30 bg-red-500/10 text-red-300 backdrop-blur-sm">
-                    <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-red-400 rounded-full"></div>
-                        <span className="font-medium" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                            {error}
-                        </span>
-                    </div>
-                </div>
-            )}
-            {success && (
-                <div className="p-4 rounded-lg border border-green-500/30 bg-green-500/10 text-green-300 backdrop-blur-sm">
-                    <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                        <span className="font-medium" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                            {success}
-                        </span>
-                    </div>
-                </div>
-            )}
+            {error && <Alert variant="destructive">{error}</Alert>}
+            {success && <Alert variant="success">{success}</Alert>}
 
             {/* Upload Instructions */}
             <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-lg p-6 shadow-xl">
@@ -533,6 +523,7 @@ function AdminBannersComponent() {
             )}
 
             {/* Usage Examples */}
+            {confirmationDialog}
         </div>
     );
 }

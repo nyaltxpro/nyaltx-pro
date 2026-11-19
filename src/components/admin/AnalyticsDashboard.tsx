@@ -6,6 +6,9 @@ import QuickStats from './QuickStats';
 import TrafficLineGraph from './TrafficLineGraph';
 import { Card } from '@/components/reui/card';
 import { IconTile } from '@/components/reui/icon-tile';
+import { Filters } from '@/components/reui/filters';
+import { paginateItems, TablePagination } from '@/components/reui/table-pagination';
+import { Alert } from '@/components/reui/alert';
 
 interface AnalyticsData {
   onlineUsers: number;
@@ -84,6 +87,8 @@ export default function AnalyticsDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [visitorRange, setVisitorRange] = useState<'1' | '7' | '30'>('7');
+  const [visitorPage, setVisitorPage] = useState(1);
+  const [visitorSearch, setVisitorSearch] = useState('');
 
   useEffect(() => {
     const fetchAnalytics = async () => {
@@ -120,6 +125,20 @@ export default function AnalyticsDashboard() {
     );
   };
 
+  const filteredVisitors = (analytics?.recentVisitors ?? []).filter(visitor => {
+    const query = visitorSearch.trim().toLowerCase();
+    return !query || [
+      visitor.city,
+      visitor.region,
+      visitor.country,
+      visitor.ipAddress,
+      visitor.walletAddress ?? '',
+      visitor.walletType ?? '',
+      visitor.isActive ? 'active' : 'inactive',
+    ].some(value => value.toLowerCase().includes(query));
+  });
+  const paginatedVisitors = paginateItems(filteredVisitors, visitorPage, 10);
+
   if (loading) {
     return (
       <div className="space-y-6">
@@ -139,7 +158,7 @@ export default function AnalyticsDashboard() {
   if (error) {
     return (
       <div className="text-center py-8">
-        <div className="text-red-400 mb-4">Error loading analytics: {error}</div>
+        <Alert variant="destructive" className="mb-4">Error loading analytics: {error}</Alert>
         <button
           onClick={() => window.location.reload()}
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
@@ -256,6 +275,21 @@ export default function AnalyticsDashboard() {
             </div>
           </div>
         </div>
+        <Filters
+          className="mb-4"
+          activeFilters={visitorSearch.trim()
+            ? [{ id: 'visitor-search', label: `Search: ${visitorSearch}`, onRemove: () => setVisitorSearch('') }]
+            : []}
+        >
+          <input
+            type="search"
+            value={visitorSearch}
+            onChange={event => setVisitorSearch(event.target.value)}
+            placeholder="Search location, IP, or wallet..."
+            aria-label="Search recent visitors"
+            className="w-full max-w-md px-3 py-2"
+          />
+        </Filters>
         <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full overflow-hidden">
@@ -282,7 +316,7 @@ export default function AnalyticsDashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-700/20">
-                {analytics.recentVisitors.slice(0, 20).map((visitor, index) => (
+                {paginatedVisitors.map((visitor, index) => (
                   <tr key={visitor.sessionId} className="hover:bg-gray-700/20 transition-colors duration-200">
                     <td className="px-4 py-3 text-sm border-r border-gray-700/20">
                       <div className="flex items-center gap-3">
@@ -350,6 +384,12 @@ export default function AnalyticsDashboard() {
               </tbody>
             </table>
           </div>
+          <TablePagination
+            page={visitorPage}
+            pageSize={10}
+            total={filteredVisitors.length}
+            onPageChange={setVisitorPage}
+          />
         </div>
       </div>
       <QuickStats />

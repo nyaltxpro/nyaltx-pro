@@ -13,6 +13,9 @@ import { Filters } from '@/components/reui/filters';
 import { Input } from '@/components/reui/input';
 import { NativeSelect } from '@/components/reui/native-select';
 import { Badge } from '@/components/reui/badge';
+import { Alert } from '@/components/reui/alert';
+import { paginateItems, TablePagination } from '@/components/reui/table-pagination';
+import { useConfirmDialog } from '@/components/reui/confirm-dialog';
 import { useEffect, useState } from 'react';
 import {
   CircleDollarSign,
@@ -61,6 +64,7 @@ interface Order {
 }
 
 const AdminOrdersComponent = () => {
+  const { confirm, dialog: confirmationDialog } = useConfirmDialog();
   const [orders, setOrders] = useState<Order[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -76,6 +80,7 @@ const AdminOrdersComponent = () => {
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [paymentMethodFilter, setPaymentMethodFilter] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     fetchOrders();
@@ -131,6 +136,7 @@ const AdminOrdersComponent = () => {
       }
       return true;
     }) || [];
+  const paginatedOrders = paginateItems(filteredOrders, page, 10);
 
   const getStatusBadge = (status: string) => {
     const colors = {
@@ -196,7 +202,12 @@ const AdminOrdersComponent = () => {
     const refundLabel = cryptoRefundAmount
       ? `$${Number(cryptoRefundAmount).toFixed(2)}`
       : 'the remaining balance';
-    if (!window.confirm(`Submit a PayPal crypto refund for ${refundLabel}?`)) return;
+    if (!(await confirm({
+      title: 'Submit PayPal crypto refund?',
+      description: `Submit a refund for ${refundLabel}?`,
+      confirmLabel: 'Submit refund',
+      destructive: true,
+    }))) return;
 
     try {
       setProcessingCryptoRefund(true);
@@ -284,7 +295,7 @@ const AdminOrdersComponent = () => {
 
       {/* Filters */}
       <Filters
-        className="grid grid-cols-1 md:grid-cols-5 gap-3"
+        className="admin-orders-filters"
         activeFilters={[
           ...(typeFilter
             ? [
@@ -323,7 +334,6 @@ const AdminOrdersComponent = () => {
           <NativeSelect
             value={typeFilter}
             onChange={e => setTypeFilter(e.target.value)}
-            className="h-11"
           >
             <option value="">All Types</option>
             <option value="race_to_liberty">Race to Liberty</option>
@@ -339,7 +349,6 @@ const AdminOrdersComponent = () => {
           <NativeSelect
             value={statusFilter}
             onChange={e => setStatusFilter(e.target.value)}
-            className="h-11"
           >
             <option value="">All Status</option>
             <option value="completed">Completed</option>
@@ -354,7 +363,6 @@ const AdminOrdersComponent = () => {
           <NativeSelect
             value={paymentMethodFilter}
             onChange={e => setPaymentMethodFilter(e.target.value)}
-            className="h-11"
           >
             <option value="">All Methods</option>
             <option value="eth">ETH</option>
@@ -376,7 +384,7 @@ const AdminOrdersComponent = () => {
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
               placeholder="ID, email, wallet..."
-              className="h-11 pl-10"
+              className="pl-10"
             />
           </div>
         </div>
@@ -384,7 +392,7 @@ const AdminOrdersComponent = () => {
         <div className="flex items-end">
           <button
             onClick={fetchOrders}
-            className="flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-cyan-600 px-4 text-sm font-medium text-white transition hover:bg-cyan-500"
+            className="flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-cyan-600 px-4 text-sm font-medium text-white transition hover:bg-cyan-500"
           >
             <Filter />
             Apply Filters
@@ -413,22 +421,9 @@ const AdminOrdersComponent = () => {
             <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
               <ExternalLink className="w-8 h-8 text-slate-400" />
             </div>
-            <p
-              className="text-red-400 font-medium mb-2"
-              style={{
-                fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
-              }}
-            >
-              Error loading orders
-            </p>
-            <p
-              className="text-gray-400 text-sm"
-              style={{
-                fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
-              }}
-            >
-              {error}
-            </p>
+            <Alert variant="destructive" className="mx-auto max-w-xl">
+              <span className="font-medium">Error loading orders.</span> {error}
+            </Alert>
           </div>
         ) : filteredOrders.length === 0 ? (
           <div className="text-center py-12">
@@ -453,8 +448,9 @@ const AdminOrdersComponent = () => {
             </p>
           </div>
         ) : (
+          <>
           <div className="overflow-x-auto">
-            <table className="w-full overflow-hidden">
+            <table data-slot="orders-table" className="w-full overflow-hidden">
               <thead className="bg-gray-700/30 border-b border-gray-600/20">
                 <tr>
                   <th
@@ -541,7 +537,7 @@ const AdminOrdersComponent = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-700/20">
-                {filteredOrders.map(order => (
+                {paginatedOrders.map(order => (
                   <tr
                     key={order.id}
                     className="hover:bg-gray-700/20 transition-colors duration-200"
@@ -751,6 +747,13 @@ const AdminOrdersComponent = () => {
               </tbody>
             </table>
           </div>
+          <TablePagination
+            page={page}
+            pageSize={10}
+            total={filteredOrders.length}
+            onPageChange={setPage}
+          />
+          </>
         )}
       </div>
 
@@ -902,7 +905,7 @@ const AdminOrdersComponent = () => {
                 {selectedOrder.paymentMethod === 'paypal' &&
                   selectedOrder.metadata?.paymentSource === 'paypal_crypto' &&
                   selectedOrder.paymentId && (
-                    <div className="space-y-3 rounded-lg border border-amber-500/30 bg-amber-500/5 p-4">
+                    <Alert variant="warning" className="flex-col">
                       <h4 className="font-medium text-white">PayPal crypto refund</h4>
                       <p className="text-sm text-gray-300">
                         Refunds are issued by PayPal in PYUSD. Leave the amount blank to refund the
@@ -942,13 +945,9 @@ const AdminOrdersComponent = () => {
                           </button>
                         </>
                       )}
-                      {cryptoRefundMessage && (
-                        <p className="text-sm text-emerald-300">{cryptoRefundMessage}</p>
-                      )}
-                      {cryptoRefundError && (
-                        <p className="text-sm text-red-300">{cryptoRefundError}</p>
-                      )}
-                    </div>
+                      {cryptoRefundMessage && <Alert variant="success">{cryptoRefundMessage}</Alert>}
+                      {cryptoRefundError && <Alert variant="destructive">{cryptoRefundError}</Alert>}
+                    </Alert>
                   )}
               </div>
 
@@ -1238,6 +1237,7 @@ const AdminOrdersComponent = () => {
           </div>
         </div>
       </div>
+      {confirmationDialog}
     </div>
   );
 };

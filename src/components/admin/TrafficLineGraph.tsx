@@ -5,6 +5,7 @@ import { RefreshCw, TrendingUp } from 'lucide-react';
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { Card } from '@/components/reui/card';
 import { Button } from '@/components/reui/button';
+import { Alert } from '@/components/reui/alert';
 
 interface TrafficTrendsData {
   trends: Array<{ date: string; displayDate: string; visits: number; visitors: number }>;
@@ -38,7 +39,7 @@ export default function TrafficLineGraph() {
   if (error) {
     return (
       <Card className="p-6">
-        <p className="mb-4 text-red-300">Error: {error}</p>
+        <Alert variant="destructive" className="mb-4">Error: {error}</Alert>
         <Button onClick={fetchData}>Retry</Button>
       </Card>
     );

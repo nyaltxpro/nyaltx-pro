@@ -8,6 +8,7 @@ import { FormEvent, Suspense, useState } from "react";
 import { ChevronLeftIcon, LoaderCircleIcon } from "lucide-react";
 import { useAccount, useSignMessage } from "wagmi";
 import { Button } from "@/components/reui/button";
+import { Alert } from "@/components/reui/alert";
 
 export default function AdminLoginPage() {
   return (
@@ -152,14 +153,10 @@ function AdminLoginInner() {
           </div>
 
           {error && (
-            <div className="mb-4 rounded-md border border-red-500/30 bg-red-500/10 text-red-300 px-3 py-2 text-sm">
-              {error}
-            </div>
+            <Alert variant="destructive" className="mb-4">{error}</Alert>
           )}
           {wError && (
-            <div className="mb-4 rounded-md border border-red-500/30 bg-red-500/10 text-red-300 px-3 py-2 text-sm">
-              {wError}
-            </div>
+            <Alert variant="destructive" className="mb-4">{wError}</Alert>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">

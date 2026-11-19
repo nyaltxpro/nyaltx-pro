@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import {
   ChartNoAxesColumn,
@@ -21,14 +22,42 @@ import { Card } from '@/components/reui/card';
 import { Button } from '@/components/reui/button';
 import { IconTile } from '@/components/reui/icon-tile';
 import { Badge } from '@/components/reui/badge';
+import { Filters } from '@/components/reui/filters';
+import { Alert } from '@/components/reui/alert';
+import { EventCalendar } from '@/components/reui/event-calendar';
+import type { CalendarEvent } from '@/components/reui/event-calendar';
+
+function TokenAvatar({ imageUri, tokenName }: { imageUri?: string; tokenName: string }) {
+  const [imageFailed, setImageFailed] = useState(false);
+
+  return (
+    <div className="size-10 shrink-0 overflow-hidden rounded-full border border-slate-700 bg-slate-800">
+      {imageUri && !imageFailed ? (
+        <img
+          src={imageUri}
+          alt={`${tokenName} logo`}
+          className="size-full object-cover"
+          onError={() => setImageFailed(true)}
+        />
+      ) : (
+        <div className="flex size-full items-center justify-center">
+          <Coins className="size-5 text-slate-400" aria-hidden="true" />
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function AdminDashboardComponent() {
+  const router = useRouter();
   const [membershipsCount, setMembershipsCount] = useState<number | null>(null);
   const [tokensRegisteredCount, setTokensRegisteredCount] = useState<number | null>(null);
   const [usersCount, setUsersCount] = useState<number | null>(null);
   const [listingsCount, setListingsCount] = useState<number | null>(null);
   const [pendingTokens, setPendingTokens] = useState<TokenRegistration[] | null>(null);
   const [pendingError, setPendingError] = useState<string | null>(null);
+  const [scheduledEvents, setScheduledEvents] = useState<CalendarEvent[] | null>(null);
+  const [publishingCalendarError, setPublishingCalendarError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -68,6 +97,45 @@ export default function AdminDashboardComponent() {
         setUsersCount(0);
         setListingsCount(0);
       });
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+
+    fetch('/api/admin/blog?status=all&limit=100', { credentials: 'include' })
+      .then(async response => {
+        if (!response.ok) throw new Error('Failed to load scheduled blog posts');
+        const data = (await response.json()) as {
+          posts?: Array<{
+            _id?: string;
+            title?: string;
+            publishedAt?: string;
+            status?: string;
+          }>;
+        };
+        return (data.posts ?? []).flatMap(post => {
+          if (!post._id || !post.title || !post.publishedAt) return [];
+          const startsAt = new Date(post.publishedAt);
+          if (!Number.isFinite(startsAt.getTime())) return [];
+          return [{
+            id: post._id,
+            title: post.title,
+            startsAt: startsAt.toISOString(),
+            status: post.status,
+          }];
+        });
+      })
+      .then(events => {
+        if (active) setScheduledEvents(events);
+      })
+      .catch(error => {
+        console.error('Failed to load dashboard publishing calendar', error);
+        if (active) setPublishingCalendarError('Unable to load the publishing calendar.');
+      });
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   // Load paginated pending tokens whenever page/limit changes
@@ -178,16 +246,15 @@ export default function AdminDashboardComponent() {
               </p>
             </div>
           </div>
+
         </div>
 
         {/* Enhanced Stats Cards */}
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          <Card className="p-5">
+          <div className="p-5">
             <div className="flex items-center justify-between gap-3">
               <h3 className="text-slate-400 text-sm font-medium">Total Memberships</h3>
-              <IconTile tone="violet" className="size-9" aria-hidden="true">
-                <Crown className="size-4" />
-              </IconTile>
+              <Crown className="size-4 text-slate-400" aria-hidden="true" />
             </div>
             <div className="mt-5 space-y-2.5">
               <div className="text-2xl font-medium tracking-tight tabular-nums text-white">
@@ -196,14 +263,12 @@ export default function AdminDashboardComponent() {
               <div className="h-px bg-white/10" />
               <div className="text-xs text-slate-500">Live membership count</div>
             </div>
-          </Card>
+          </div>
 
-          <Card className="p-5">
+          <div className="p-5">
             <div className="flex items-center justify-between gap-3">
               <h3 className="text-slate-400 text-sm font-medium">Registered Tokens</h3>
-              <IconTile tone="cyan" className="size-9" aria-hidden="true">
-                <Coins className="size-4" />
-              </IconTile>
+              <Coins className="size-4 text-slate-400" aria-hidden="true" />
             </div>
             <div className="mt-5 space-y-2.5">
               <div className="text-2xl font-medium tracking-tight tabular-nums text-white">
@@ -212,14 +277,12 @@ export default function AdminDashboardComponent() {
               <div className="h-px bg-white/10" />
               <div className="text-xs text-slate-500">Tokens in the registry</div>
             </div>
-          </Card>
+          </div>
 
-          <Card className="p-5">
+          <div className="p-5">
             <div className="flex items-center justify-between gap-3">
               <h3 className="text-slate-400 text-sm font-medium">Total Users</h3>
-              <IconTile tone="cyan" className="size-9" aria-hidden="true">
-                <Users className="size-4" />
-              </IconTile>
+              <Users className="size-4 text-slate-400" aria-hidden="true" />
             </div>
             <div className="mt-5 space-y-2.5">
               <div className="text-2xl font-medium tracking-tight tabular-nums text-white">
@@ -228,14 +291,12 @@ export default function AdminDashboardComponent() {
               <div className="h-px bg-white/10" />
               <div className="text-xs text-slate-500">Registered platform users</div>
             </div>
-          </Card>
+          </div>
 
-          <Card className="p-5">
+          <div className="p-5">
             <div className="flex items-center justify-between gap-3">
               <h3 className="text-slate-400 text-sm font-medium">Active Listings</h3>
-              <IconTile tone="amber" className="size-9" aria-hidden="true">
-                <List className="size-4" />
-              </IconTile>
+              <List className="size-4 text-slate-400" aria-hidden="true" />
             </div>
             <div className="mt-5 space-y-2.5">
               <div className="text-2xl font-medium tracking-tight tabular-nums text-white">
@@ -244,7 +305,7 @@ export default function AdminDashboardComponent() {
               <div className="h-px bg-white/10" />
               <div className="text-xs text-slate-500">Current active listings</div>
             </div>
-          </Card>
+          </div>
         </div>
 
         {/* Enhanced Pending Tokens Section */}
@@ -274,24 +335,15 @@ export default function AdminDashboardComponent() {
             </a>
           </div>
 
-          {pendingError && (
-            <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-2xl backdrop-blur-sm mb-6">
-              <div className="flex items-center gap-3">
-                <X className="size-4 text-red-400" />
-                <p
-                  className="text-red-300 font-medium"
-                  style={{
-                    fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
-                  }}
-                >
-                  {pendingError}
-                </p>
-              </div>
-            </div>
-          )}
+          {pendingError && <Alert variant="destructive" className="mb-6">{pendingError}</Alert>}
 
           {pendingTokens && pendingTokens.length > 0 && (
-            <div className="admin-panel-filter-bar mb-4">
+            <Filters
+              className="mb-4"
+              activeFilters={pendingSearch.trim()
+                ? [{ id: 'pending-token-search', label: `Search: ${pendingSearch}`, onRemove: () => setPendingSearch('') }]
+                : []}
+            >
               <div className="relative min-w-[220px] flex-1">
                 <Search className="admin-panel-input-icon" aria-hidden="true" />
                 <input
@@ -303,7 +355,7 @@ export default function AdminDashboardComponent() {
                   className="w-full px-3 py-2"
                 />
               </div>
-            </div>
+            </Filters>
           )}
 
           {!pendingTokens ? (
@@ -336,7 +388,7 @@ export default function AdminDashboardComponent() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <Card className="overflow-hidden">
+              <div className="overflow-hidden rounded-xl border border-slate-800">
                 <table className="min-w-full">
                   <thead className="bg-gray-800/50">
                     <tr>
@@ -405,17 +457,7 @@ export default function AdminDashboardComponent() {
                           </td>
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
-                              {t.imageUri ? (
-                                <img
-                                  src={t.imageUri}
-                                  alt="logo"
-                                  className="w-10 h-10 rounded-xl border border-gray-600/30"
-                                />
-                              ) : (
-                                <div className="w-10 h-10 bg-gray-700/50 rounded-xl flex items-center justify-center">
-                                  <Coins className="size-5 text-slate-400" />
-                                </div>
-                              )}
+                              <TokenAvatar imageUri={t.imageUri} tokenName={t.tokenName} />
                               <div className="min-w-0">
                                 <div
                                   className="font-semibold text-white"
@@ -506,7 +548,7 @@ export default function AdminDashboardComponent() {
                     )}
                   </tbody>
                 </table>
-              </Card>
+              </div>
 
               {/* Enhanced Pagination */}
               <div className="flex items-center justify-between mt-6 p-4 bg-gray-900/30 rounded-2xl border border-gray-700/30 backdrop-blur-sm">
@@ -556,16 +598,14 @@ export default function AdminDashboardComponent() {
         </Card>
 
         {/* Enhanced Quick Actions Section */}
-        <div className="bg-black/40 backdrop-blur-xl border border-gray-800/60 rounded-3xl shadow-2xl p-8">
+        <div className="space-y-6">
           <h2
             className="text-2xl font-bold text-white mb-6 flex items-center gap-3"
             style={{
               fontFamily: 'Space Grotesk, -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
             }}
           >
-            <IconTile tone="emerald" className="size-8 rounded-lg [&_svg]:size-4">
-              <Settings aria-hidden="true" />
-            </IconTile>
+            <Settings className="size-4 text-slate-400" aria-hidden="true" />
             Quick Actions
           </h2>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -682,6 +722,22 @@ export default function AdminDashboardComponent() {
             </a>
           </div>
         </div>
+
+        {publishingCalendarError ? (
+          <Card className="p-5">
+            <p className="text-sm text-red-300">{publishingCalendarError}</p>
+          </Card>
+        ) : scheduledEvents ? (
+          <EventCalendar
+            title="Publishing calendar"
+            events={scheduledEvents}
+            onEventSelect={() => router.push('/adminpanel/blog')}
+          />
+        ) : (
+          <Card className="p-5">
+            <p className="text-sm text-slate-400">Loading publishing calendar...</p>
+          </Card>
+        )}
       </div>
     </div>
   );

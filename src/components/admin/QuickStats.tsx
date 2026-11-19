@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { ChevronDown, ChevronUp, RefreshCw, Users } from 'lucide-react';
 import { Card } from '@/components/reui/card';
 import { Button } from '@/components/reui/button';
+import { Alert } from '@/components/reui/alert';
 
 interface QuickStatsData {
   onlineUsers: number;
@@ -47,7 +48,7 @@ export default function QuickStats() {
   if (error) {
     return (
       <Card className="p-6">
-        <p className="mb-4 text-red-300">Error: {error}</p>
+        <Alert variant="destructive" className="mb-4">Error: {error}</Alert>
         <Button onClick={fetchStats}>Retry</Button>
       </Card>
     );
