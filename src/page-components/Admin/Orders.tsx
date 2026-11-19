@@ -449,8 +449,8 @@ const AdminOrdersComponent = () => {
           </div>
         ) : (
           <>
-          <div className="overflow-x-auto">
-            <table data-slot="orders-table" className="w-full overflow-hidden">
+          <div className="max-w-full overflow-x-auto">
+            <table data-slot="orders-table" className="w-full min-w-[1100px]">
               <thead className="bg-gray-700/30 border-b border-gray-600/20">
                 <tr>
                   <th
