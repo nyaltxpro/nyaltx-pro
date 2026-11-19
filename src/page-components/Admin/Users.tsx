@@ -136,9 +136,9 @@ const AdminUsersComponent = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-semibold text-white" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+          <h1 className="text-2xl font-semibold text-white" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
             User Records
-          </h2>
+          </h1>
           <p className="text-gray-400 text-sm mt-1" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
             Comprehensive user management and email collection tracking
           </p>
@@ -259,7 +259,7 @@ const AdminUsersComponent = () => {
       )}
 
       {/* Filters */}
-      <div className="bg-gray-800 rounded-xl p-4 border border-gray-700">
+      <div className="admin-panel-filter-bar">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm text-gray-300 mb-1">Search</label>
@@ -332,7 +332,7 @@ const AdminUsersComponent = () => {
           </p>
         </div>
       ) : (
-        <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 overflow-hidden shadow-xl">
+        <div className="admin-panel-card overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full overflow-hidden">
               <thead className="bg-gray-700/30 border-b border-gray-600/20">

@@ -3,6 +3,7 @@
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
+import { Search } from 'lucide-react';
 
 const AdminProfilesClient = dynamic(() => Promise.resolve(AdminProfilesComponent), {
     ssr: true,
@@ -42,6 +43,20 @@ function AdminProfilesComponent() {
     });
 
     const [editing, setEditing] = useState<Profile | null>(null);
+    const [profileSearch, setProfileSearch] = useState('');
+    const [profileStatusFilter, setProfileStatusFilter] = useState<'all' | Profile['status']>('all');
+
+    const filteredProfiles = (profiles || []).filter(profile => {
+        const query = profileSearch.trim().toLowerCase();
+        const matchesSearch = !query || [
+            profile.projectName,
+            profile.contactEmail || '',
+            profile.website || '',
+            profile.paidTier || '',
+        ].some(value => value.toLowerCase().includes(query));
+        const matchesStatus = profileStatusFilter === 'all' || profile.status === profileStatusFilter;
+        return matchesSearch && matchesStatus;
+    });
 
     const load = () => {
         fetch('/api/admin/profiles')
@@ -128,7 +143,7 @@ function AdminProfilesComponent() {
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-semibold">Profiles (Paid)</h2>
+                <h1 className="text-2xl font-semibold">Profiles (Paid)</h1>
                 <Link href="/admin" className="text-sm underline text-gray-300">
                     Back to Dashboard
                 </Link>
@@ -137,8 +152,8 @@ function AdminProfilesComponent() {
             {error && <div className="text-sm text-red-400">{error}</div>}
 
             {/* Create new profile */}
-            <div className="rounded-xl border border-gray-800 p-4">
-                <h3 className="font-semibold mb-2">Create Profile</h3>
+            <div className="admin-panel-card p-4">
+                <h2 className="mb-2 font-semibold">Create Profile</h2>
                 <form onSubmit={submitCreate} className="grid grid-cols-1 md:grid-cols-6 gap-2">
                     <input
                         required
@@ -196,12 +211,37 @@ function AdminProfilesComponent() {
             </div>
 
             {/* List + edit */}
-            <div className="rounded-xl border border-gray-800 p-4">
-                <h3 className="font-semibold mb-2">Profiles</h3>
+            <div className="admin-panel-card p-4">
+                <h2 className="mb-2 font-semibold">Profiles</h2>
+                <div className="admin-panel-filter-bar mb-4">
+                    <div className="relative min-w-[220px] flex-1">
+                        <Search className="admin-panel-input-icon" aria-hidden="true" />
+                        <input
+                            type="search"
+                            value={profileSearch}
+                            onChange={event => setProfileSearch(event.target.value)}
+                            placeholder="Search project, contact, website, tier..."
+                            aria-label="Search profiles"
+                            className="w-full px-3 py-2"
+                        />
+                    </div>
+                    <select
+                        value={profileStatusFilter}
+                        onChange={event => setProfileStatusFilter(event.target.value as 'all' | Profile['status'])}
+                        aria-label="Filter profiles by status"
+                        className="px-3 py-2"
+                    >
+                        <option value="all">All statuses</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
                 {!profiles ? (
                     <div className="text-gray-400">Loading…</div>
                 ) : profiles.length === 0 ? (
                     <div className="text-gray-400">No profiles yet.</div>
+                ) : filteredProfiles.length === 0 ? (
+                    <div className="py-8 text-center text-gray-400">No profiles match these filters.</div>
                 ) : (
                     <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
                         <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
@@ -231,7 +271,7 @@ function AdminProfilesComponent() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {profiles.map(p => (
+                                {filteredProfiles.map(p => (
                                     <tr
                                         key={p.id}
                                         className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600"
@@ -280,8 +320,8 @@ function AdminProfilesComponent() {
 
             {/* Edit modal/section */}
             {editing && (
-                <div className="rounded-xl border border-gray-800 p-4">
-                    <h3 className="font-semibold mb-2">Edit Profile</h3>
+                <div className="admin-panel-card p-4">
+                    <h2 className="mb-2 font-semibold">Edit Profile</h2>
                     <form onSubmit={submitEdit} className="grid grid-cols-1 md:grid-cols-6 gap-2">
                         <input
                             required

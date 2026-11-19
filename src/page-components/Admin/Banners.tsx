@@ -209,9 +209,9 @@ function AdminBannersComponent() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-2xl font-semibold text-white" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                    <h1 className="text-2xl font-semibold text-white" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                         Banner Management
-                    </h2>
+                    </h1>
                     <p className="text-gray-400 text-sm mt-1" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                         Manage promotional banners and images
                     </p>
@@ -267,15 +267,15 @@ function AdminBannersComponent() {
 
             {/* Upload Instructions */}
             <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-lg p-6 shadow-xl">
-                <h3 className="font-semibold mb-4 text-white flex items-center gap-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                <h2 className="font-semibold mb-4 text-white flex items-center gap-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                     <FaImage className="w-5 h-5 text-blue-400" />
                     Upload Instructions
-                </h3>
+                </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <h4 className="text-sm font-medium text-gray-300 mb-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                        <h3 className="text-sm font-medium text-gray-300 mb-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                             Supported Formats
-                        </h4>
+                        </h3>
                         <ul className="text-sm text-gray-400 space-y-1" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                             <li className="flex items-center gap-2">
                                 <div className="w-1 h-1 bg-blue-400 rounded-full"></div>
@@ -288,9 +288,9 @@ function AdminBannersComponent() {
                         </ul>
                     </div>
                     <div>
-                        <h4 className="text-sm font-medium text-gray-300 mb-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                        <h3 className="text-sm font-medium text-gray-300 mb-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                             Best Practices
-                        </h4>
+                        </h3>
                         <ul className="text-sm text-gray-400 space-y-1" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                             <li className="flex items-center gap-2">
                                 <div className="w-1 h-1 bg-green-400 rounded-full"></div>
@@ -309,7 +309,7 @@ function AdminBannersComponent() {
             <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-lg shadow-xl">
                 <div className="p-6 border-b border-gray-700/20">
                     <div className="flex items-center justify-between">
-                        <h3 className="font-semibold text-white flex items-center gap-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                        <h2 className="font-semibold text-white flex items-center gap-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                             <FaImage className="w-5 h-5 text-cyan-400" />
                             Current Banners
                             {banners.length > 0 && (
@@ -317,7 +317,7 @@ function AdminBannersComponent() {
                                     {banners.length}
                                 </span>
                             )}
-                        </h3>
+                        </h2>
                     </div>
                 </div>
 

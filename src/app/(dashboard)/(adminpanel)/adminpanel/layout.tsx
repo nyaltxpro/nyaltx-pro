@@ -90,7 +90,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             A
           </div>
         </header>
-        <main className="p-4 md:p-6">{children}</main>
+        <main className="admin-panel-content p-4 md:p-6">{children}</main>
       </div>
     </div>
   );

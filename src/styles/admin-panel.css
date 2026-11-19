@@ -1,0 +1,175 @@
+.admin-panel-card {
+  border: 1px solid rgb(255 255 255 / 9%);
+  border-radius: 1rem;
+  background: rgb(17 17 17 / 88%);
+  box-shadow: 0 18px 48px rgb(0 0 0 / 22%);
+}
+
+.admin-panel-content {
+  color: #e4e4e7;
+  font-family: var(--font-poppins, Arial), -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.admin-panel-content .text-xs {
+  font-size: 12px !important;
+}
+
+.admin-panel-content .text-sm {
+  font-size: 13px !important;
+}
+
+.admin-panel-content .text-base {
+  font-size: 14px !important;
+}
+
+.admin-panel-content .text-lg {
+  font-size: 16px !important;
+}
+
+.admin-panel-content .text-xl {
+  font-size: 18px !important;
+}
+
+.admin-panel-content :is(.text-2xl, .text-3xl, .text-4xl, .text-5xl) {
+  font-size: 24px !important;
+}
+
+.admin-panel-content.admin-panel-content h1 {
+  font-size: 24px !important;
+  font-family: inherit !important;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.admin-panel-content.admin-panel-content h2 {
+  font-size: 20px !important;
+  font-family: inherit !important;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.admin-panel-content.admin-panel-content h3 {
+  font-size: 16px !important;
+  font-family: inherit !important;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.admin-panel-content.admin-panel-content h4 {
+  font-size: 14px !important;
+  font-family: inherit !important;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.admin-panel-content.admin-panel-content p {
+  font-size: 14px !important;
+  line-height: 1.5;
+}
+
+.admin-panel-content :is(input:not([type='checkbox']):not([type='radio']):not([type='file']), textarea, select),
+.admin-panel-form :is(
+  input:not([type='checkbox']):not([type='radio']):not([type='file']),
+  textarea,
+  select
+) {
+  min-height: 2.5rem;
+  border-color: rgb(255 255 255 / 15%) !important;
+  border-radius: 0.75rem !important;
+  background-color: rgb(255 255 255 / 3%) !important;
+  color: #f4f4f5 !important;
+  color-scheme: dark;
+}
+
+.admin-panel-content :is(input, textarea, select)::placeholder,
+.admin-panel-form :is(input, textarea, select)::placeholder {
+  color: rgb(161 161 170 / 75%);
+}
+
+.admin-panel-content :is(input, textarea, select):focus,
+.admin-panel-form :is(input, textarea, select):focus {
+  border-color: rgb(0 184 216 / 75%) !important;
+  box-shadow: 0 0 0 3px rgb(0 184 216 / 12%);
+  outline: none;
+}
+
+.admin-panel-content :is(div, section):has(> table) {
+  overflow-x: auto;
+}
+
+.admin-panel-content table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  color: #e4e4e7;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.admin-panel-content table thead th {
+  padding: 12px 14px !important;
+  border: 0 !important;
+  border-bottom: 1px solid rgb(255 255 255 / 10%) !important;
+  background: #14171d !important;
+  color: #a1a1aa !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.04em;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.admin-panel-content table tbody :is(td, th) {
+  padding: 12px 14px !important;
+  border: 0 !important;
+  border-bottom: 1px solid rgb(255 255 255 / 7%) !important;
+  background-color: transparent !important;
+  color: #e4e4e7 !important;
+  font-size: 13px !important;
+  vertical-align: middle;
+}
+
+.admin-panel-content table tbody tr {
+  background: transparent;
+  transition: background-color 140ms ease;
+}
+
+.admin-panel-content table tbody tr:hover {
+  background: rgb(255 255 255 / 4%);
+}
+
+.admin-panel-content table tbody tr:last-child :is(td, th) {
+  border-bottom: 0 !important;
+}
+
+.admin-panel-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+  border: 1px solid rgb(255 255 255 / 9%);
+  border-radius: 1rem;
+  background: rgb(17 17 17 / 88%);
+  padding: 16px;
+}
+
+.admin-panel-filter-bar > :is(.grid, .flex) {
+  width: 100%;
+}
+
+.admin-panel-input-icon {
+  position: absolute;
+  top: 50%;
+  left: 0.875rem;
+  width: 1rem;
+  height: 1rem;
+  transform: translateY(-50%);
+  color: rgb(161 161 170 / 85%);
+  pointer-events: none;
+}
+
+.admin-panel-input-icon + input {
+  padding-left: 2.5rem;
+}

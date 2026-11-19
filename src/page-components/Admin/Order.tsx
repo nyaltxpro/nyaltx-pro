@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import AdminModal from '@/components/AdminModal';
 import React, { useEffect, useState } from 'react';
+import { Search } from 'lucide-react';
 import { FaShoppingCart, FaEthereum, FaCoins, FaWallet, FaExternalLinkAlt, FaMoneyBillWave, FaCheck, FaTimes, FaClock, FaExclamationTriangle } from 'react-icons/fa';
 
 
@@ -64,6 +65,33 @@ const AdminOrdersComponent = () => {
     const [refundModalOpen, setRefundModalOpen] = useState(false);
     const [selectedSubscription, setSelectedSubscription] = useState<SubscriptionOrder | null>(null);
     const [customRefundAmount, setCustomRefundAmount] = useState('');
+    const [onchainSearch, setOnchainSearch] = useState('');
+    const [subscriptionSearch, setSubscriptionSearch] = useState('');
+
+    const filteredOnchainOrders = (onchainOrders || []).filter(order => {
+        const query = onchainSearch.trim().toLowerCase();
+        return !query || [
+            order.id,
+            order.method,
+            order.tierId,
+            order.wallet,
+            order.txHash,
+            order.amount,
+            String(order.chainId),
+        ].some(value => value.toLowerCase().includes(query));
+    });
+
+    const filteredSubscriptionOrders = (subscriptionOrders || []).filter(order => {
+        const query = subscriptionSearch.trim().toLowerCase();
+        return !query || [
+            order.id,
+            order.userId || '',
+            order.email || '',
+            order.plan,
+            order.status,
+            order.paymentMethod,
+        ].some(value => value.toLowerCase().includes(query));
+    });
 
     useEffect(() => {
         // Fetch onchain orders
@@ -185,9 +213,9 @@ const AdminOrdersComponent = () => {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-2xl font-semibold text-white" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                    <h1 className="text-2xl font-semibold text-white" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                         Order Management
-                    </h2>
+                    </h1>
                     <p className="text-gray-400 text-sm mt-1" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                         Manage on-chain payments and subscriptions
                     </p>
@@ -197,8 +225,8 @@ const AdminOrdersComponent = () => {
                 </Link>
             </div>
 
-            <section className="rounded-xl border border-gray-800 p-4">
-                <h3 className="font-semibold mb-3">On-chain Payments (ETH/NYAX)</h3>
+            <section className="admin-panel-card p-4">
+                <h2 className="mb-3 font-semibold">On-chain Payments (ETH/NYAX)</h2>
                 <form onSubmit={submitOnchain} className="grid grid-cols-1 md:grid-cols-6 gap-3 mb-4">
                     <select
                         className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
@@ -279,7 +307,21 @@ const AdminOrdersComponent = () => {
                         </p>
                     </div>
                 ) : (
-                    <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 overflow-hidden shadow-xl">
+                    <>
+                    <div className="admin-panel-filter-bar mb-4">
+                        <div className="relative min-w-[220px] flex-1">
+                            <Search className="admin-panel-input-icon" aria-hidden="true" />
+                            <input
+                                type="search"
+                                value={onchainSearch}
+                                onChange={event => setOnchainSearch(event.target.value)}
+                                placeholder="Search ID, wallet, transaction, chain..."
+                                aria-label="Search on-chain orders"
+                                className="w-full px-3 py-2"
+                            />
+                        </div>
+                    </div>
+                    <div className="admin-panel-card overflow-hidden">
                         <div className="overflow-x-auto">
                             <table className="w-full overflow-hidden">
                                 <thead className="bg-gray-700/30 border-b border-gray-600/20">
@@ -311,7 +353,7 @@ const AdminOrdersComponent = () => {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-700/20">
-                                    {onchainOrders.map(o => (
+                                    {filteredOnchainOrders.length > 0 ? filteredOnchainOrders.map(o => (
                                         <tr key={o.id} className="hover:bg-gray-700/20 transition-colors duration-200">
                                             <td className="px-4 py-3 text-sm border-r border-gray-700/20">
                                                 <div className="font-medium text-white text-sm" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
@@ -373,17 +415,24 @@ const AdminOrdersComponent = () => {
                                                 </span>
                                             </td>
                                         </tr>
-                                    ))}
+                                    )) : (
+                                        <tr>
+                                            <td colSpan={8} className="h-24 text-center text-gray-400">
+                                                No on-chain orders match this search.
+                                            </td>
+                                        </tr>
+                                    )}
                                 </tbody>
                             </table>
                         </div>
                     </div>
+                    </>
                 )}
             </section>
 
             {/* Subscription Orders Section */}
-            <section className="rounded-xl border border-gray-800 p-4">
-                <h3 className="font-semibold mb-3">Pro Subscriptions</h3>
+            <section className="admin-panel-card p-4">
+                <h2 className="mb-3 font-semibold">Pro Subscriptions</h2>
                 <form onSubmit={submitSubscription} className="grid grid-cols-1 md:grid-cols-6 gap-3 mb-4">
                     <input
                         placeholder="User ID (optional)"
@@ -443,6 +492,20 @@ const AdminOrdersComponent = () => {
                 ) : subscriptionOrders.length === 0 ? (
                     <div className="text-gray-400">No subscription orders recorded.</div>
                 ) : (
+                    <>
+                    <div className="admin-panel-filter-bar mb-4">
+                        <div className="relative min-w-[220px] flex-1">
+                            <Search className="admin-panel-input-icon" aria-hidden="true" />
+                            <input
+                                type="search"
+                                value={subscriptionSearch}
+                                onChange={event => setSubscriptionSearch(event.target.value)}
+                                placeholder="Search ID, user, email, status..."
+                                aria-label="Search subscription orders"
+                                className="w-full px-3 py-2"
+                            />
+                        </div>
+                    </div>
                     <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
                         <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
                             <thead className="text-xs  uppercase bg-gray-700 text-gray-400">
@@ -480,7 +543,7 @@ const AdminOrdersComponent = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {subscriptionOrders.map(s => (
+                                {filteredSubscriptionOrders.length > 0 ? filteredSubscriptionOrders.map(s => (
                                     <tr
                                         key={s.id}
                                         className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600"
@@ -568,10 +631,17 @@ const AdminOrdersComponent = () => {
                                             </div>
                                         </td>
                                     </tr>
-                                ))}
+                                )) : (
+                                    <tr>
+                                        <td colSpan={10} className="h-24 text-center text-gray-400">
+                                            No subscriptions match this search.
+                                        </td>
+                                    </tr>
+                                )}
                             </tbody>
                         </table>
                     </div>
+                    </>
                 )}
             </section>
 

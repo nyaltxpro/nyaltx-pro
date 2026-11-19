@@ -3,6 +3,7 @@
 @import 'fumadocs-ui/css/black.css';
 @import 'fumadocs-ui/css/preset.css';
 @import '../styles/dexscreener-theme.css';
+@import '../styles/admin-panel.css';
 
 :root {
   /* DexScreener-inspired color palette - Dark Black Theme */

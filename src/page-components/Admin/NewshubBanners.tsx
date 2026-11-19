@@ -283,12 +283,12 @@ function NewshubBannersComponent() {
             <span className="px-2.5 py-0.5 rounded text-xs font-semibold bg-[#00b8d8]/20 text-[#00b8d8] border border-[#00b8d8]/30">
               News Hub Page
             </span>
-            <h2
+            <h1
               className="text-2xl font-bold text-white tracking-tight"
               style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
             >
               Newshub Banners
-            </h2>
+            </h1>
           </div>
           <p className="text-gray-400 text-sm mt-1">
             Upload and manage the featured carousel banners displayed on the{' '}
@@ -341,7 +341,7 @@ function NewshubBannersComponent() {
             <FaImage className="w-5 h-5 text-[#00b8d8]" />
           </div>
           <div className="text-sm">
-            <h4 className="font-semibold text-white">How Newshub Banners Work</h4>
+            <h2 className="font-semibold text-white">How Newshub Banners Work</h2>
             <p className="text-gray-300 mt-1">
               Banners added here appear dynamically in the top sliding carousel on{' '}
               <strong className="text-white">https://www.nyaltx.pro/newshub</strong>.
@@ -364,7 +364,7 @@ function NewshubBannersComponent() {
           <div className="w-16 h-16 bg-gray-800/80 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-gray-700">
             <FaImage className="w-8 h-8 text-gray-500" />
           </div>
-          <h3 className="text-lg font-semibold text-white mb-1">No custom Newshub banners yet</h3>
+          <h2 className="text-lg font-semibold text-white mb-1">No custom Newshub banners yet</h2>
           <p className="text-gray-400 text-sm max-w-md mx-auto mb-6">
             Default platform banners are currently shown on /newshub. Add your first custom promotional banner to take full control of the slider!
           </p>

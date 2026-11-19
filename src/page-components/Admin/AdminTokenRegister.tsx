@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { FaArrowLeft, FaCheck, FaCoins, FaTimes, FaUpload, FaSpinner } from 'react-icons/fa';
+import { Coins } from 'lucide-react';
+import { FaArrowLeft, FaCheck, FaTimes, FaUpload, FaSpinner } from 'react-icons/fa';
 
 interface TokenFormData {
   tokenName: string;
@@ -20,7 +21,19 @@ interface TokenFormData {
   addToRace: boolean;
 }
 
-export default function AdminTokenRegister() {
+interface AdminTokenRegisterProps {
+  isDrawer?: boolean;
+  onClose?: () => void;
+  onBusyChange?: (busy: boolean) => void;
+  onSubmitted?: (tokenSymbol: string) => void;
+}
+
+export default function AdminTokenRegister({
+  isDrawer = false,
+  onClose,
+  onBusyChange,
+  onSubmitted,
+}: AdminTokenRegisterProps) {
   const [formData, setFormData] = useState<TokenFormData>({
     tokenName: '',
     tokenSymbol: '',
@@ -97,6 +110,7 @@ export default function AdminTokenRegister() {
     }
 
     setIsUploadingToIPFS(true);
+    onBusyChange?.(true);
     setUploadProgress(0);
 
     try {
@@ -130,6 +144,7 @@ export default function AdminTokenRegister() {
       showToast('error', err.message || 'Failed to upload to IPFS');
     } finally {
       setIsUploadingToIPFS(false);
+      onBusyChange?.(false);
       setTimeout(() => setUploadProgress(0), 2000);
     }
   };
@@ -152,6 +167,7 @@ export default function AdminTokenRegister() {
     }
 
     setIsSubmitting(true);
+    onBusyChange?.(true);
 
     try {
       // Step 1: Register the token
@@ -227,17 +243,19 @@ export default function AdminTokenRegister() {
         autoApprove: true,
         addToRace: false,
       });
+      onSubmitted?.(formData.tokenSymbol.trim().toUpperCase());
 
     } catch (error: any) {
       console.error('Token registration error:', error);
       showToast('error', error.message || 'Failed to register token');
     } finally {
       setIsSubmitting(false);
+      onBusyChange?.(false);
     }
   };
 
   return (
-    <div className="space-y-6">
+    <div className="admin-panel-form space-y-6">
       {/* Toast Notification */}
       {toast && (
         <div
@@ -261,12 +279,12 @@ export default function AdminTokenRegister() {
       )}
 
       {/* Header */}
-      <div className="flex items-center justify-between">
+      {!isDrawer && <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-semibold text-white flex items-center gap-3">
-            <FaCoins className="text-[#00b8d8]" />
+          <h1 className="text-2xl font-semibold text-white flex items-center gap-3">
+            <Coins className="h-5 w-5 text-cyan-300" aria-hidden="true" />
             Admin Token Registration
-          </h2>
+          </h1>
           <p className="text-sm text-gray-400 mt-1">
             Register tokens directly without payment or checkout
           </p>
@@ -278,16 +296,16 @@ export default function AdminTokenRegister() {
           <FaArrowLeft />
           Back to Tokens
         </Link>
-      </div>
+      </div>}
 
       {/* Registration Form */}
-      <form onSubmit={handleSubmit} className="bg-gray-800/40 backdrop-blur-lg rounded-lg shadow-xl border border-gray-700/20 p-6">
+      <form onSubmit={handleSubmit} className="admin-panel-card p-6">
         <div className="space-y-6">
           {/* Basic Information */}
           <div>
-            <h3 className="text-lg font-semibold text-white mb-4 border-b border-gray-700/50 pb-2">
+            <h2 className="text-lg font-semibold text-white mb-4 border-b border-gray-700/50 pb-2">
               Basic Information
-            </h3>
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label htmlFor="tokenName" className="block text-sm font-medium text-gray-300 mb-2">
@@ -361,12 +379,12 @@ export default function AdminTokenRegister() {
 
           {/* Media & Links */}
           <div>
-            <h3 className="text-lg font-semibold text-white mb-4 border-b border-gray-700/50 pb-2">
+            <h2 className="text-lg font-semibold text-white mb-4 border-b border-gray-700/50 pb-2">
               Media & Links
-            </h3>
+            </h2>
 
             {/* IPFS Upload Section */}
-            <div className="mb-4 p-4 bg-gradient-to-r from-cyan-900/20 to-blue-900/20 border border-cyan-700/30 rounded-lg">
+            <div className="admin-panel-card mb-4 p-4">
               <div className="flex items-center gap-3 mb-3">
                 <FaUpload className="text-cyan-400" />
                 <span className="text-sm font-semibold text-cyan-300">Upload Image to IPFS</span>
@@ -531,9 +549,9 @@ export default function AdminTokenRegister() {
 
           {/* Contact & Options */}
           <div>
-            <h3 className="text-lg font-semibold text-white mb-4 border-b border-gray-700/50 pb-2">
+            <h2 className="text-lg font-semibold text-white mb-4 border-b border-gray-700/50 pb-2">
               Contact & Options
-            </h3>
+            </h2>
             <div className="space-y-4">
               <div>
                 <label htmlFor="userEmail" className="block text-sm font-medium text-gray-300 mb-2">
@@ -553,7 +571,7 @@ export default function AdminTokenRegister() {
                 </p>
               </div>
 
-              <div className="flex items-start gap-4 p-4 bg-gray-700/30 rounded-lg border border-gray-600/30">
+              <div className="flex items-start gap-4 rounded-xl border border-white/10 p-4">
                 <div className="flex items-center">
                   <input
                     type="checkbox"
@@ -572,7 +590,7 @@ export default function AdminTokenRegister() {
                 </p>
               </div>
 
-              <div className="flex items-start gap-4 p-4 bg-gray-700/30 rounded-lg border border-gray-600/30">
+              <div className="flex items-start gap-4 rounded-xl border border-white/10 p-4">
                 <div className="flex items-center">
                   <input
                     type="checkbox"
@@ -596,16 +614,27 @@ export default function AdminTokenRegister() {
 
           {/* Submit Button */}
           <div className="flex items-center justify-end gap-4 pt-4 border-t border-gray-700/50">
-            <Link
-              href="/admin/tokens"
-              className="px-6 py-2.5 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors font-medium"
-            >
-              Cancel
-            </Link>
+            {isDrawer ? (
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={isSubmitting || isUploadingToIPFS}
+                className="rounded-lg border border-white/15 px-6 py-2.5 font-medium text-gray-300 transition-colors hover:text-white disabled:opacity-50"
+              >
+                Cancel
+              </button>
+            ) : (
+              <Link
+                href="/admin/tokens"
+                className="rounded-lg border border-white/15 px-6 py-2.5 font-medium text-gray-300 transition-colors hover:text-white"
+              >
+                Cancel
+              </Link>
+            )}
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-6 py-2.5 bg-gradient-to-r from-[#00b8d8] to-[#0099b8] hover:from-[#0099b8] hover:to-[#007a98] text-white rounded-lg transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="inline-flex items-center gap-2 rounded-lg border border-cyan-400/30 bg-transparent px-6 py-2.5 font-medium text-cyan-100 transition-colors hover:border-cyan-300/60 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isSubmitting ? (
                 <>
@@ -627,7 +656,7 @@ export default function AdminTokenRegister() {
       </form>
 
       {/* Info Card */}
-      <div className="bg-blue-900/20 border border-blue-700/30 rounded-lg p-4">
+      {!isDrawer && <div className="admin-panel-card p-4">
         <h4 className="text-sm font-semibold text-blue-300 mb-2">Admin Registration Benefits</h4>
         <ul className="text-sm text-gray-300 space-y-1">
           <li>• No payment or checkout required</li>
@@ -637,7 +666,7 @@ export default function AdminTokenRegister() {
           <li>• All social links and metadata can be configured</li>
           <li>• Email notifications still sent if provided</li>
         </ul>
-      </div>
+      </div>}
     </div>
   );
 }
