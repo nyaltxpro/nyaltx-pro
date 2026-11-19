@@ -156,69 +156,69 @@ export default function AdminDashboardComponent() {
 
         {/* Enhanced Stats Cards */}
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="bg-black/40 backdrop-blur-xl border border-gray-800/60 rounded-3xl p-6 shadow-2xl hover:shadow-[#00d4aa]/20 transition-all duration-300">
-            <div className="flex items-center gap-4">
-              <IconTile tone="violet">
-                <FaCrown className="w-6 h-6 text-white" />
+          <Card className="p-5">
+            <div className="flex items-center justify-between gap-3">
+              <h3 className="text-slate-400 text-sm font-medium">Total Memberships</h3>
+              <IconTile tone="violet" className="size-9" aria-hidden="true">
+                <FaCrown className="w-4 h-4" />
               </IconTile>
-              <div>
-                <div className="text-gray-400 text-sm font-medium" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                  Total Memberships
-                </div>
-                <div className="text-3xl font-bold text-white" style={{ fontFamily: 'Space Grotesk, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                  {membershipsCount ?? '—'}
-                </div>
-              </div>
             </div>
-          </div>
+            <div className="mt-5 space-y-2.5">
+              <div className="text-2xl font-medium tracking-tight tabular-nums text-white">
+                {membershipsCount ?? '—'}
+              </div>
+              <div className="h-px bg-white/10" />
+              <div className="text-xs text-slate-500">Live membership count</div>
+            </div>
+          </Card>
 
-          <div className="bg-black/40 backdrop-blur-xl border border-gray-800/60 rounded-3xl p-6 shadow-2xl hover:shadow-[#3b82f6]/20 transition-all duration-300">
-            <div className="flex items-center gap-4">
-              <IconTile tone="cyan">
-                <FaCoins className="w-6 h-6 text-white" />
+          <Card className="p-5">
+            <div className="flex items-center justify-between gap-3">
+              <h3 className="text-slate-400 text-sm font-medium">Registered Tokens</h3>
+              <IconTile tone="cyan" className="size-9" aria-hidden="true">
+                <FaCoins className="w-4 h-4" />
               </IconTile>
-              <div>
-                <div className="text-gray-400 text-sm font-medium" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                  Registered Tokens
-                </div>
-                <div className="text-3xl font-bold text-white" style={{ fontFamily: 'Space Grotesk, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                  {tokensRegisteredCount ?? '—'}
-                </div>
-              </div>
             </div>
-          </div>
+            <div className="mt-5 space-y-2.5">
+              <div className="text-2xl font-medium tracking-tight tabular-nums text-white">
+                {tokensRegisteredCount ?? '—'}
+              </div>
+              <div className="h-px bg-white/10" />
+              <div className="text-xs text-slate-500">Tokens in the registry</div>
+            </div>
+          </Card>
 
-          <div className="bg-black/40 backdrop-blur-xl border border-gray-800/60 rounded-3xl p-6 shadow-2xl hover:shadow-cyan-500/20 transition-all duration-300">
-            <div className="flex items-center gap-4">
-              <IconTile tone="cyan">
-                <FaUsers className="w-6 h-6 text-white" />
+          <Card className="p-5">
+            <div className="flex items-center justify-between gap-3">
+              <h3 className="text-slate-400 text-sm font-medium">Total Users</h3>
+              <IconTile tone="cyan" className="size-9" aria-hidden="true">
+                <FaUsers className="w-4 h-4" />
               </IconTile>
-              <div>
-                <div className="text-gray-400 text-sm font-medium" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                  Total Users
-                </div>
-                <div className="text-3xl font-bold text-white" style={{ fontFamily: 'Space Grotesk, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                  {usersCount ?? '—'}
-                </div>
-              </div>
             </div>
-          </div>
+            <div className="mt-5 space-y-2.5">
+              <div className="text-2xl font-medium tracking-tight tabular-nums text-white">
+                {usersCount ?? '—'}
+              </div>
+              <div className="h-px bg-white/10" />
+              <div className="text-xs text-slate-500">Registered platform users</div>
+            </div>
+          </Card>
 
-          <div className="bg-black/40 backdrop-blur-xl border border-gray-800/60 rounded-3xl p-6 shadow-2xl hover:shadow-orange-500/20 transition-all duration-300">
-            <div className="flex items-center gap-4">
-              <IconTile tone="amber">
-                <FaListUl className="w-6 h-6 text-white" />
+          <Card className="p-5">
+            <div className="flex items-center justify-between gap-3">
+              <h3 className="text-slate-400 text-sm font-medium">Active Listings</h3>
+              <IconTile tone="amber" className="size-9" aria-hidden="true">
+                <FaListUl className="w-4 h-4" />
               </IconTile>
-              <div>
-                <div className="text-gray-400 text-sm font-medium" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                  Active Listings
-                </div>
-                <div className="text-3xl font-bold text-white" style={{ fontFamily: 'Space Grotesk, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                  {listingsCount ?? '—'}
-                </div>
-              </div>
             </div>
-          </div>
+            <div className="mt-5 space-y-2.5">
+              <div className="text-2xl font-medium tracking-tight tabular-nums text-white">
+                {listingsCount ?? '—'}
+              </div>
+              <div className="h-px bg-white/10" />
+              <div className="text-xs text-slate-500">Current active listings</div>
+            </div>
+          </Card>
         </div>
 
         {/* Enhanced Pending Tokens Section */}

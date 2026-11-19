@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import { FaChartLine, FaClock, FaDesktop, FaEye, FaGlobe, FaMapMarkerAlt, FaUsers, FaWallet } from 'react-icons/fa';
 import QuickStats from './QuickStats';
 import TrafficLineGraph from './TrafficLineGraph';
+import { Card } from '@/components/reui/card';
+import { IconTile } from '@/components/reui/icon-tile';
 
 interface AnalyticsData {
   onlineUsers: number;
@@ -169,89 +171,32 @@ export default function AnalyticsDashboard() {
 
       {/* Key Metrics */}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl p-6 shadow-xl hover:bg-gray-800/50 transition-all duration-200">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center border border-green-500/30">
-              <FaUsers className="w-6 h-6 text-green-400" />
-            </div>
-            <div className="text-right">
-              <div className="text-2xl font-bold text-green-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                {analytics.onlineUsers}
+        {[
+          { title: 'Online Users', value: analytics.onlineUsers, caption: 'Currently active', tone: 'emerald' as const, icon: FaUsers },
+          { title: 'Page Views Today', value: analytics.pageViews.today, caption: 'Daily traffic', tone: 'cyan' as const, icon: FaEye },
+          { title: 'Unique Visitors Today', value: analytics.uniqueVisitors.today, caption: 'Daily unique users', tone: 'violet' as const, icon: FaGlobe },
+          { title: 'Wallet Connections', value: analytics.walletConnections, caption: 'Total connections', tone: 'amber' as const, icon: FaWallet },
+        ].map(metric => {
+          const MetricIcon = metric.icon;
+          return (
+            <Card key={metric.title} className="p-5">
+              <div className="flex items-center justify-between gap-3">
+                <h3 className="text-slate-400 text-sm font-medium">{metric.title}</h3>
+                <IconTile tone={metric.tone} className="size-9">
+                  <MetricIcon className="size-4" aria-hidden="true" />
+                </IconTile>
               </div>
-            </div>
-          </div>
-          <div className="space-y-1">
-            <div className="text-sm font-medium text-gray-300" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-              Online Users
-            </div>
-            <div className="text-xs text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-              Currently active
-            </div>
-          </div>
-        </div>
+              <div className="mt-5 space-y-2.5">
+                <div className="text-2xl font-medium tracking-tight tabular-nums text-white">
+                  {metric.value}
+                </div>
+                <div className="h-px bg-white/10" />
+                <div className="text-xs text-slate-500">{metric.caption}</div>
+              </div>
+            </Card>
+          );
+        })}
 
-        <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl p-6 shadow-xl hover:bg-gray-800/50 transition-all duration-200">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center border border-blue-500/30">
-              <FaEye className="w-6 h-6 text-blue-400" />
-            </div>
-            <div className="text-right">
-              <div className="text-2xl font-bold text-blue-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                {analytics.pageViews.today}
-              </div>
-            </div>
-          </div>
-          <div className="space-y-1">
-            <div className="text-sm font-medium text-gray-300" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-              Page Views Today
-            </div>
-            <div className="text-xs text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-              Daily traffic
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl p-6 shadow-xl hover:bg-gray-800/50 transition-all duration-200">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center border border-purple-500/30">
-              <FaGlobe className="w-6 h-6 text-purple-400" />
-            </div>
-            <div className="text-right">
-              <div className="text-2xl font-bold text-purple-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                {analytics.uniqueVisitors.today}
-              </div>
-            </div>
-          </div>
-          <div className="space-y-1">
-            <div className="text-sm font-medium text-gray-300" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-              Unique Visitors Today
-            </div>
-            <div className="text-xs text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-              Daily unique users
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl p-6 shadow-xl hover:bg-gray-800/50 transition-all duration-200">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-orange-500/20 rounded-lg flex items-center justify-center border border-orange-500/30">
-              <FaWallet className="w-6 h-6 text-orange-400" />
-            </div>
-            <div className="text-right">
-              <div className="text-2xl font-bold text-orange-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                {analytics.walletConnections}
-              </div>
-            </div>
-          </div>
-          <div className="space-y-1">
-            <div className="text-sm font-medium text-gray-300" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-              Wallet Connections
-            </div>
-            <div className="text-xs text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-              Total connections
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Recent Visitors */}
