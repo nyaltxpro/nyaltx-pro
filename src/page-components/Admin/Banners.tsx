@@ -1,7 +1,6 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import Link from 'next/link';
 import { Dialog } from '@/components/reui/dialog';
 import { useConfirmDialog } from '@/components/reui/confirm-dialog';
 import { Alert } from '@/components/reui/alert';
@@ -225,9 +224,6 @@ function AdminBannersComponent() {
                     </p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <Link href="/admin" className="text-sm text-gray-300 hover:text-white transition-colors" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                        Back to Dashboard
-                    </Link>
                     <div className="relative">
                         <input
                             type="file"

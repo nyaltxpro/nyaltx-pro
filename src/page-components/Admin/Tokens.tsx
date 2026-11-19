@@ -302,9 +302,6 @@ function AdminTokensComponent() {
                         <Plus size={16} aria-hidden="true" />
                         Register Token
                     </button>
-                    <Link href="/admin" className="text-sm underline text-gray-300">
-                        Back to Dashboard
-                    </Link>
                 </div>
             </div>
 
