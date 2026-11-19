@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import AdminModal from '@/components/AdminModal';
 import React, { useEffect, useState } from 'react';
 import { FaShoppingCart, FaEthereum, FaCoins, FaWallet, FaExternalLinkAlt, FaMoneyBillWave, FaCheck, FaTimes, FaClock, FaExclamationTriangle } from 'react-icons/fa';
 
@@ -576,7 +577,12 @@ const AdminOrdersComponent = () => {
 
             {/* Refund Modal */}
             {refundModalOpen && selectedSubscription && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <AdminModal
+                    open={refundModalOpen}
+                    onClose={closeRefundModal}
+                    title="Process Refund"
+                    maxWidth="max-w-lg"
+                >
                     <div className="bg-gray-900 border border-gray-700 rounded-lg p-6 max-w-md w-full mx-4">
                         <h3 className="text-lg font-semibold mb-4 text-white">💰 Process Refund</h3>
 
@@ -638,7 +644,7 @@ const AdminOrdersComponent = () => {
                             </button>
                         </div>
                     </div>
-                </div>
+                </AdminModal>
             )}
         </div>
     );

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import AdminModal from '@/components/AdminModal';
 import { useEffect, useState } from 'react';
 import { FaExternalLinkAlt, FaEye, FaFilter, FaSearch, FaShoppingCart, FaCoins, FaEthereum, FaWallet, FaCreditCard, FaGift } from 'react-icons/fa';
 
@@ -508,7 +509,12 @@ const AdminOrdersComponent = () => {
 
       {/* Order Details Modal */}
       {showModal && selectedOrder && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <AdminModal
+          open={showModal}
+          onClose={closeOrderModal}
+          title="Order Details"
+          maxWidth="max-w-3xl"
+        >
           <div className="bg-gray-800 border border-gray-700 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
@@ -704,7 +710,7 @@ const AdminOrdersComponent = () => {
               </div>
             </div>
           </div>
-        </div>
+        </AdminModal>
       )}
 
       {/* Summary Stats */}

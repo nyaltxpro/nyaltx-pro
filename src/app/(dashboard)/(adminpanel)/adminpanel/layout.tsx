@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
+import { Menu, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 
 const AdminSidebar = dynamic(() => import('@/components/AdminSidebar'), {
   ssr: false,
@@ -14,10 +15,14 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const isLogin = pathname === '/adminpanel/login';
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const pageTitle =
+    pathname
+      .split('/')
+      .filter(Boolean)
+      .at(-1)
+      ?.replace(/-/g, ' ')
+      .replace(/\b\w/g, character => character.toUpperCase()) || 'Dashboard';
 
   if (isLogin) {
     return (
@@ -28,35 +33,55 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen  text-white">
-      {/* Admin Sidebar */}
-      <AdminSidebar isMobileMenuOpen={isMobileMenuOpen} toggleMobileMenu={toggleMobileMenu} />
+    <div className="min-h-screen text-white">
+      <AdminSidebar
+        isMobileMenuOpen={isMobileMenuOpen}
+        toggleMobileMenu={() => setIsMobileMenuOpen(open => !open)}
+        isCollapsed={isCollapsed}
+        toggleCollapsed={() => setIsCollapsed(collapsed => !collapsed)}
+      />
 
-      {/* Main Content Area */}
-      <div className="md:ml-16 transition-all duration-300">
-        {/* Mobile Header */}
-        <header className="md:hidden sticky top-0 z-30 bg-[#0b0f14]/95 backdrop-blur border-b border-gray-800">
-          <div className="flex items-center justify-between px-4 h-14">
+      <div
+        className={`min-h-screen transition-[margin] duration-200 ${
+          isCollapsed ? 'md:ml-[68px]' : 'md:ml-[260px]'
+        }`}
+      >
+        <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-white/10 bg-[#0b111b]/95 px-4 backdrop-blur md:px-6">
+          <div className="flex min-w-0 items-center gap-3">
             <button
-              onClick={toggleMobileMenu}
-              className="p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
+              type="button"
+              onClick={() => setIsMobileMenuOpen(open => !open)}
+              aria-label={isMobileMenuOpen ? 'Close navigation' : 'Open navigation'}
+              className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-white/5 hover:text-white md:hidden"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
+              <Menu className="h-[18px] w-[18px]" strokeWidth={1.7} />
             </button>
-            <h1 className="text-lg font-semibold">NYAX Admin</h1>
-            <div className="w-10"></div> {/* Spacer for centering */}
+            <button
+              type="button"
+              onClick={() => setIsCollapsed(collapsed => !collapsed)}
+              aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              className="hidden rounded-md p-1.5 text-slate-400 transition-colors hover:bg-white/5 hover:text-white md:block"
+            >
+              {isCollapsed ? (
+                <PanelLeftOpen className="h-[18px] w-[18px]" strokeWidth={1.7} />
+              ) : (
+                <PanelLeftClose className="h-[18px] w-[18px]" strokeWidth={1.7} />
+              )}
+            </button>
+            <div className="flex min-w-0 items-center gap-2 text-sm text-slate-400">
+              <span className="hidden truncate sm:inline">NYALTX Admin</span>
+              <span className="hidden sm:inline">/</span>
+              <span className="truncate font-medium text-slate-100">{pageTitle}</span>
+            </div>
+          </div>
+          <div
+            aria-hidden="true"
+            className="flex h-8 w-8 items-center justify-center rounded-full border border-cyan-400/20 bg-cyan-400/10 text-xs font-semibold text-cyan-200"
+          >
+            A
           </div>
         </header>
-
-        {/* Main Content */}
-        <main className="p-6">{children}</main>
+        <main className="p-4 md:p-6">{children}</main>
       </div>
     </div>
   );

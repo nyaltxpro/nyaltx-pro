@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import AdminModal from '@/components/AdminModal';
 import { useEffect, useState } from 'react';
 import { FaCheckCircle, FaChevronDown, FaChevronUp, FaEnvelope, FaHistory, FaPaperPlane, FaPlus, FaTimesCircle, FaTrash, FaUsers } from 'react-icons/fa';
 
@@ -501,7 +502,15 @@ export default function EmailManagementPage() {
 
       {/* Send Client Email Modal */}
       {showSendEmailModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <AdminModal
+          open={showSendEmailModal}
+          onClose={() => {
+            setShowSendEmailModal(false);
+            setEmailSubject('');
+            setEmailMessage('');
+          }}
+          title="Compose Email to Clients"
+        >
           <div className="bg-gray-800 rounded-lg p-6 max-w-2xl w-full mx-4 border border-gray-700">
             <h3 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
               <FaPaperPlane className="text-purple-400" />
@@ -561,12 +570,20 @@ export default function EmailManagementPage() {
               </button>
             </div>
           </div>
-        </div>
+        </AdminModal>
       )}
 
       {/* Add Recipient Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <AdminModal
+          open={showAddModal}
+          onClose={() => {
+            setShowAddModal(false);
+            setFormData({ email: '', name: '', role: 'admin' });
+          }}
+          title="Add Email Recipient"
+          maxWidth="max-w-lg"
+        >
           <div className="bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4 border border-gray-700">
             <h3 className="text-xl font-semibold text-white mb-4">Add Email Recipient</h3>
 
@@ -628,7 +645,7 @@ export default function EmailManagementPage() {
               </button>
             </div>
           </div>
-        </div>
+        </AdminModal>
       )}
     </div>
   );
