@@ -1,11 +1,12 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import AdminModal from '@/components/AdminModal';
+import { Drawer } from '@/components/reui/drawer';
+import { CalendarInput } from '@/components/reui/calendar';
 import 'quill/dist/quill.snow.css';
 import type QuillType from 'quill';
 import type { QuillOptions } from 'quill';
-import { Newspaper, Plus, X } from 'lucide-react';
+import { MoreHorizontal, Newspaper, Plus, X } from 'lucide-react';
 import {
   FaEdit,
   FaSave,
@@ -15,6 +16,13 @@ import {
   FaUpload,
 } from 'react-icons/fa';
 import type { SerializedBlogPost } from '@/lib/blogServer';
+import { Button } from '@/components/reui/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/reui/dropdown-menu';
+import { EventCalendar } from '@/components/reui/event-calendar';
+import { Field } from '@/components/reui/field';
+import { FileType } from '@/components/reui/file-type';
+import { FileUpload } from '@/components/reui/file-upload';
+import { Filters } from '@/components/reui/filters';
 
 interface BlogFormState {
   id?: string;
@@ -365,13 +373,25 @@ const AdminBlogManagerComponent = () => {
     return posts.filter((post) => post.status === activeFilter);
   }, [posts, activeFilter]);
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (!event.target.files?.length) {
+  const scheduledEvents = useMemo(() => posts.flatMap(post => {
+    if (!post.publishedAt) return [];
+    const startsAt = new Date(post.publishedAt);
+    if (!Number.isFinite(startsAt.getTime())) return [];
+    return [{
+      id: post._id,
+      title: post.title,
+      startsAt: startsAt.toISOString(),
+      status: post.status,
+    }];
+  }), [posts]);
+
+  const handleFileSelect = (files: File[]) => {
+    if (!files.length) {
       setSelectedFile(null);
       return;
     }
 
-    const file = event.target.files[0];
+    const file = files[0];
     const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
     if (!validTypes.includes(file.type)) {
       setSelectedFile(null);
@@ -476,7 +496,7 @@ const AdminBlogManagerComponent = () => {
         </div>
       ) : null}
 
-      <div className="flex flex-wrap items-center gap-2">
+      <Filters className="mb-4">
         {(['all', 'published', 'draft'] as const).map((filter) => (
           <button
             key={filter}
@@ -490,7 +510,16 @@ const AdminBlogManagerComponent = () => {
             {filter}
           </button>
         ))}
-      </div>
+      </Filters>
+
+      <EventCalendar
+        title="Publishing calendar"
+        events={scheduledEvents}
+        onEventSelect={event => {
+          const post = posts.find(item => item._id === event.id);
+          if (post) handleEdit(post);
+        }}
+      />
 
       <div className="grid gap-4">
         {isListLoading ? (
@@ -532,34 +561,43 @@ const AdminBlogManagerComponent = () => {
                   ) : null}
                 </div>
 
-                <div className="flex items-center gap-2 self-end">
-                  <button
-                    onClick={() => handleEdit(post)}
-                    className="inline-flex items-center gap-2 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-xs font-medium text-white/80 transition hover:border-cyan-500/40 hover:text-cyan-100"
-                  >
-                    <FaEdit className="h-3.5 w-3.5" /> Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(post._id)}
-                    className="inline-flex items-center gap-2 rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-xs font-medium text-red-200 transition hover:bg-red-500/20"
-                  >
-                    <FaTrash className="h-3.5 w-3.5" /> Delete
-                  </button>
-                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="icon" aria-label={`Actions for ${post.title}`}>
+                      <MoreHorizontal aria-hidden="true" className="size-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem
+                      onSelect={() => handleEdit(post)}
+                      className="flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 outline-none focus:bg-white/10"
+                    >
+                      <FaEdit aria-hidden="true" className="size-3.5" />
+                      Edit post
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator className="my-1 h-px bg-white/10" />
+                    <DropdownMenuItem
+                      onSelect={() => handleDelete(post._id)}
+                      className="flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-rose-300 outline-none focus:bg-rose-500/10"
+                    >
+                      <FaTrash aria-hidden="true" className="size-3.5" />
+                      Delete post
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
           ))
         )}
       </div>
 
-      <AdminModal
+      <Drawer
         open={isFormOpen}
         onClose={() => {
           if (!state.loading && !isUploadingToIPFS) resetForm();
         }}
         title={form.id ? 'Edit Blog Post' : 'Create Blog Post'}
         maxWidth="max-w-5xl"
-        placement="right"
       >
           <div className="admin-panel-form flex h-full max-h-screen w-full max-w-5xl flex-col overflow-hidden rounded-l-2xl border-l border-white/10 bg-[#0d0d0d] shadow-2xl">
             <div className="flex shrink-0 items-center justify-between gap-4 border-b border-white/10 px-5 py-4 sm:px-6">
@@ -639,12 +677,14 @@ const AdminBlogManagerComponent = () => {
                       Select an image to upload via the existing IPFS uploader. When the upload finishes, the image URL will be added automatically.
                     </p>
                     <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center">
-                      <input
+                      <FileUpload
                         id="blog-ipfs-file"
-                        type="file"
                         accept="image/jpeg,image/png,image/gif,image/webp"
-                        onChange={handleFileSelect}
-                        className="text-sm text-white/70 file:mr-3 file:rounded-md file:border-0 file:bg-cyan-500/20 file:px-3 file:py-2 file:text-sm file:font-medium file:text-cyan-100 hover:file:bg-cyan-500/30"
+                        onFilesSelected={handleFileSelect}
+                        disabled={isUploadingToIPFS}
+                        label="Choose featured image"
+                        description="JPEG, PNG, GIF or WebP, up to 10 MB."
+                        className="flex-1"
                       />
                       <button
                         type="button"
@@ -657,8 +697,8 @@ const AdminBlogManagerComponent = () => {
                       </button>
                     </div>
                     {selectedFile ? (
-                      <p className="mt-2 text-xs text-white/50">
-                        Selected file: <span className="font-medium text-white">{selectedFile.name}</span>
+                      <p className="mt-2 flex items-center gap-2 text-xs text-white/50">
+                        Selected file: <FileType fileName={selectedFile.name} /> <span className="font-medium text-white">{selectedFile.name}</span>
                       </p>
                     ) : null}
                     {form.featuredImage ? (
@@ -692,15 +732,15 @@ const AdminBlogManagerComponent = () => {
                       <option value="published">Published</option>
                     </select>
                   </label>
-                  <label className="block text-sm text-white/70">
-                    Published At (optional)
-                    <input
+                  <Field id="blog-published-at" label="Published At (optional)">
+                    <CalendarInput
+                      id="blog-published-at"
                       type="datetime-local"
                       value={form.publishedAt}
                       onChange={(event) => setForm((prev) => ({ ...prev, publishedAt: event.target.value }))}
-                      className="mt-1 w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white focus:border-cyan-500/60 focus:outline-none"
+                      className="rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white focus:border-cyan-500/60 focus:outline-none"
                     />
-                  </label>
+                  </Field>
                   <label className="block text-sm text-white/70">
                     Reading Time Label
                     <input
@@ -841,7 +881,7 @@ const AdminBlogManagerComponent = () => {
               </button>
             </div>
           </div>
-      </AdminModal>
+      </Drawer>
     </div>
   );
 };

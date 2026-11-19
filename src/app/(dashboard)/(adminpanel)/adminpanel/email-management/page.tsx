@@ -1,8 +1,15 @@
 'use client';
 
 import Link from 'next/link';
-import AdminModal from '@/components/AdminModal';
-import { useEffect, useState } from 'react';
+import { Dialog } from '@/components/reui/dialog';
+import { Checkbox } from '@/components/reui/checkbox';
+import { Card } from '@/components/reui/card';
+import { Button } from '@/components/reui/button';
+import { EmojiPicker } from '@/components/reui/emoji-picker';
+import { Field } from '@/components/reui/field';
+import { Filters } from '@/components/reui/filters';
+import { useEffect, useRef, useState } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
 import { FaCheckCircle, FaChevronDown, FaChevronUp, FaEnvelope, FaHistory, FaInbox, FaPaperPlane, FaPlus, FaReply, FaSearch, FaSync, FaTimesCircle, FaTrash, FaUsers } from 'react-icons/fa';
 
 interface EmailRecipient {
@@ -76,6 +83,7 @@ export default function EmailManagementPage() {
   const [showSendEmailModal, setShowSendEmailModal] = useState(false);
   const [emailSubject, setEmailSubject] = useState('');
   const [emailMessage, setEmailMessage] = useState('');
+  const emailMessageRef = useRef<HTMLTextAreaElement>(null);
   const [sendingEmail, setSendingEmail] = useState(false);
 
   // Mailbox inbox state
@@ -89,6 +97,7 @@ export default function EmailManagementPage() {
   const [mailboxTo, setMailboxTo] = useState('');
   const [mailboxSubject, setMailboxSubject] = useState('');
   const [mailboxMessage, setMailboxMessage] = useState('');
+  const mailboxMessageRef = useRef<HTMLTextAreaElement>(null);
   const [sendingMailboxEmail, setSendingMailboxEmail] = useState(false);
   const [mailboxComposeError, setMailboxComposeError] = useState<string | null>(null);
   const [mailboxComposeSuccess, setMailboxComposeSuccess] = useState<string | null>(null);
@@ -98,6 +107,26 @@ export default function EmailManagementPage() {
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [activeTab, setActiveTab] = useState<'inbox' | 'recipients' | 'history'>('inbox');
   const [expandedEmailId, setExpandedEmailId] = useState<string | null>(null);
+
+  const insertEmoji = (
+    textarea: HTMLTextAreaElement | null,
+    setValue: Dispatch<SetStateAction<string>>,
+    emoji: string
+  ) => {
+    if (!textarea) {
+      setValue(current => `${current}${emoji}`);
+      return;
+    }
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    setValue(current => `${current.slice(0, start)}${emoji}${current.slice(end)}`);
+    requestAnimationFrame(() => {
+      textarea.focus();
+      const cursor = start + emoji.length;
+      textarea.setSelectionRange(cursor, cursor);
+    });
+  };
 
   useEffect(() => {
     fetchRecipients();
@@ -379,13 +408,12 @@ export default function EmailManagementPage() {
               Send announcements to all active client recipients ({recipients.filter(r => r.active && r.role !== 'admin').length} clients)
             </p>
           </div>
-          <button
+          <Button size="lg"
             onClick={() => setShowSendEmailModal(true)}
-            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-lg font-medium transition-all shadow-lg"
           >
             <FaPaperPlane />
             Compose Broadcast
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -403,13 +431,12 @@ export default function EmailManagementPage() {
             placeholder="Enter email address..."
             className="flex-1 px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500"
           />
-          <button
+          <Button size="sm"
             onClick={handleSendTestEmail}
             disabled={sendingTest}
-            className="px-6 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white rounded-lg font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {sendingTest ? 'Sending...' : 'Send Test'}
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -486,17 +513,16 @@ export default function EmailManagementPage() {
                 <FaSync className={loadingInbox ? 'animate-spin' : ''} />
                 Refresh
               </button>
-              <button
+              <Button
                 type="button"
                 onClick={() => {
                   setMailboxComposeSuccess(null);
                   setShowMailboxComposeModal(true);
                 }}
-                className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:from-cyan-600 hover:to-blue-600"
               >
                 <FaPaperPlane />
                 Compose
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -621,23 +647,32 @@ export default function EmailManagementPage() {
 
       {/* Recipients List */}
       {activeTab === 'recipients' && (
-        <div className="admin-panel-card p-6">
+        <Card className="p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold text-white flex items-center gap-2">
               <FaEnvelope className="text-cyan-400" />
               Email Recipients
             </h2>
-            <button
+            <Button
               onClick={() => setShowAddModal(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white rounded-lg font-medium transition-all"
             >
               <FaPlus />
               Add Recipient
-            </button>
+            </Button>
           </div>
 
           {!loading && !error && recipients.length > 0 && (
-            <div className="admin-panel-filter-bar mb-4">
+            <Filters
+              className="mb-4"
+              activeFilters={[
+                ...(recipientSearch.trim()
+                  ? [{ id: 'recipient-search', label: `Search: ${recipientSearch}`, onRemove: () => setRecipientSearch('') }]
+                  : []),
+                ...(recipientStatusFilter !== 'all'
+                  ? [{ id: 'recipient-status', label: `Status: ${recipientStatusFilter}`, onRemove: () => setRecipientStatusFilter('all') }]
+                  : []),
+              ]}
+            >
               <div className="relative min-w-[220px] flex-1">
                 <FaSearch className="admin-panel-input-icon" aria-hidden="true" />
                 <input
@@ -659,7 +694,7 @@ export default function EmailManagementPage() {
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
               </select>
-            </div>
+            </Filters>
           )}
 
           {loading ? (
@@ -697,8 +732,7 @@ export default function EmailManagementPage() {
                       </td>
                       <td className="px-4 py-3 text-sm">
                         <label className="inline-flex items-center cursor-pointer">
-                          <input
-                            type="checkbox"
+                          <Checkbox
                             checked={recipient.active}
                             onChange={(e) => handleUpdateRecipient(recipient.id, { active: e.target.checked })}
                             className="w-4 h-4 text-cyan-600 bg-gray-700 border-gray-600 rounded focus:ring-cyan-500"
@@ -726,12 +760,12 @@ export default function EmailManagementPage() {
               </table>
             </div>
           )}
-        </div>
+        </Card>
       )}
 
       {/* Email History Tab */}
       {activeTab === 'history' && (
-        <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+        <Card className="p-6">
           <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
             <FaHistory className="text-cyan-400" />
             Email History
@@ -775,13 +809,15 @@ export default function EmailManagementPage() {
                     </div>
 
                     {/* View Recipients Button */}
-                    <button
+                    <Button
+                      variant="link"
+                      size="sm"
+                      className="mt-3"
                       onClick={() => setExpandedEmailId(expandedEmailId === record.id ? null : record.id)}
-                      className="mt-3 flex items-center gap-2 text-cyan-400 hover:text-cyan-300 text-sm font-medium transition-colors"
                     >
                       {expandedEmailId === record.id ? <FaChevronUp /> : <FaChevronDown />}
                       {expandedEmailId === record.id ? 'Hide' : 'View'} Recipients
-                    </button>
+                    </Button>
                   </div>
 
                   {/* Expandable Recipients List */}
@@ -841,12 +877,12 @@ export default function EmailManagementPage() {
               ))}
             </div>
           )}
-        </div>
+        </Card>
       )}
 
       {/* Send Client Email Modal */}
       {showSendEmailModal && (
-        <AdminModal
+        <Dialog
           open={showSendEmailModal}
           onClose={() => {
             setShowSendEmailModal(false);
@@ -862,9 +898,9 @@ export default function EmailManagementPage() {
             </h3>
 
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Subject *</label>
+              <Field id="broadcast-subject" label="Subject" required>
                 <input
+                  id="broadcast-subject"
                   type="text"
                   value={emailSubject}
                   onChange={(e) => setEmailSubject(e.target.value)}
@@ -872,11 +908,15 @@ export default function EmailManagementPage() {
                   className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
                   required
                 />
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Message *</label>
+              <Field id="broadcast-message" label="Message" required>
+                <div className="flex justify-end">
+                  <EmojiPicker onSelect={emoji => insertEmoji(emailMessageRef.current, setEmailMessage, emoji)} />
+                </div>
                 <textarea
+                  id="broadcast-message"
+                  ref={emailMessageRef}
                   value={emailMessage}
                   onChange={(e) => setEmailMessage(e.target.value)}
                   placeholder="Enter your message..."
@@ -884,7 +924,7 @@ export default function EmailManagementPage() {
                   className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
                   required
                 />
-              </div>
+              </Field>
 
               <div className="bg-purple-900/20 border border-purple-700/50 rounded-lg p-3">
                 <p className="text-sm text-gray-300">
@@ -895,31 +935,31 @@ export default function EmailManagementPage() {
             </div>
 
             <div className="flex gap-3 mt-6">
-              <button
+              <Button
+                variant="outline"
+                className="flex-1"
                 onClick={() => {
                   setShowSendEmailModal(false);
                   setEmailSubject('');
                   setEmailMessage('');
                 }}
-                className="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition-all"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button className="flex-1"
                 onClick={handleSendClientEmail}
                 disabled={sendingEmail || !emailSubject || !emailMessage}
-                className="flex-1 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-lg font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {sendingEmail ? 'Sending...' : 'Send Email'}
-              </button>
+              </Button>
             </div>
           </div>
-        </AdminModal>
+        </Dialog>
       )}
 
       {/* Compose individual mailbox email */}
       {showMailboxComposeModal && (
-        <AdminModal
+        <Dialog
           open={showMailboxComposeModal}
           onClose={() => {
             if (!sendingMailboxEmail) closeMailboxCompose();
@@ -933,8 +973,7 @@ export default function EmailManagementPage() {
               Compose Email
             </h3>
             <div className="space-y-4">
-              <div>
-                <label htmlFor="mailbox-to" className="mb-2 block text-sm font-medium text-gray-300">To</label>
+              <Field id="mailbox-to" label="To">
                 <input
                   id="mailbox-to"
                   type="email"
@@ -944,9 +983,8 @@ export default function EmailManagementPage() {
                   autoComplete="email"
                   className="w-full rounded-lg border border-gray-600 bg-gray-900 px-4 py-3 text-white outline-none focus:border-cyan-500"
                 />
-              </div>
-              <div>
-                <label htmlFor="mailbox-subject" className="mb-2 block text-sm font-medium text-gray-300">Subject</label>
+              </Field>
+              <Field id="mailbox-subject" label="Subject">
                 <input
                   id="mailbox-subject"
                   type="text"
@@ -956,10 +994,13 @@ export default function EmailManagementPage() {
                   placeholder="Subject"
                   className="w-full rounded-lg border border-gray-600 bg-gray-900 px-4 py-3 text-white outline-none focus:border-cyan-500"
                 />
-              </div>
-              <div>
-                <label htmlFor="mailbox-message" className="mb-2 block text-sm font-medium text-gray-300">Message</label>
+              </Field>
+              <Field id="mailbox-message" label="Message">
+                <div className="flex justify-end">
+                  <EmojiPicker onSelect={emoji => insertEmoji(mailboxMessageRef.current, setMailboxMessage, emoji)} />
+                </div>
                 <textarea
+                  ref={mailboxMessageRef}
                   id="mailbox-message"
                   rows={10}
                   maxLength={50000}
@@ -968,37 +1009,36 @@ export default function EmailManagementPage() {
                   placeholder="Write your email…"
                   className="w-full resize-y rounded-lg border border-gray-600 bg-gray-900 px-4 py-3 text-white outline-none focus:border-cyan-500"
                 />
-              </div>
+              </Field>
               {mailboxComposeError && (
                 <p role="alert" className="text-sm text-red-300">{mailboxComposeError}</p>
               )}
             </div>
             <div className="mt-6 flex justify-end gap-3">
-              <button
+              <Button
+                variant="outline"
                 type="button"
                 onClick={closeMailboxCompose}
                 disabled={sendingMailboxEmail}
-                className="rounded-lg border border-gray-600 px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 disabled:opacity-50"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 onClick={handleSendMailboxEmail}
                 disabled={sendingMailboxEmail || !mailboxTo || !mailboxSubject.trim() || !mailboxMessage.trim()}
-                className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 px-5 py-2 text-sm font-medium text-white hover:from-cyan-600 hover:to-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <FaPaperPlane />
                 {sendingMailboxEmail ? 'Sending…' : 'Send'}
-              </button>
+              </Button>
             </div>
           </div>
-        </AdminModal>
+        </Dialog>
       )}
 
       {/* Add Recipient Modal */}
       {showAddModal && (
-        <AdminModal
+        <Dialog
           open={showAddModal}
           onClose={() => {
             setShowAddModal(false);
@@ -1050,25 +1090,25 @@ export default function EmailManagementPage() {
             </div>
 
             <div className="flex gap-3 mt-6">
-              <button
+              <Button
+                variant="outline"
+                className="flex-1"
                 onClick={() => {
                   setShowAddModal(false);
                   setFormData({ email: '', name: '', role: 'admin' });
                 }}
-                className="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition-all"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button className="flex-1"
                 onClick={handleAddRecipient}
                 disabled={!formData.email}
-                className="flex-1 px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white rounded-lg font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Add Recipient
-              </button>
+              </Button>
             </div>
           </div>
-        </AdminModal>
+        </Dialog>
       )}
     </div>
   );

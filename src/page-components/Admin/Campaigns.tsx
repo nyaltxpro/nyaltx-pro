@@ -3,6 +3,7 @@
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 import { Search } from 'lucide-react';
+import { Button } from '@/components/reui/button';
 import toast from 'react-hot-toast';
 
 // Ensure this component only renders on the client side
@@ -205,9 +206,9 @@ function CampaignsPageComponent() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <h1 className="text-2xl font-semibold">Campaign Management</h1>
-                <button className="rounded-lg bg-cyan-600 hover:bg-cyan-500 px-4 py-2 text-sm font-medium transition-colors">
+                <Button>
                     Create Campaign
-                </button>
+                </Button>
             </div>
 
             {/* Summary Stats */}

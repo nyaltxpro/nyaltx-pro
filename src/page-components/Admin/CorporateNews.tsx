@@ -6,7 +6,8 @@ import type QuillType from 'quill';
 import type { QuillOptions } from 'quill';
 import 'quill/dist/quill.snow.css';
 import React, { useEffect, useRef, useState } from 'react';
-import AdminModal from '@/components/AdminModal';
+import { Drawer } from '@/components/reui/drawer';
+import { Checkbox } from '@/components/reui/checkbox';
 import { FaClock, FaEdit, FaEye, FaNewspaper, FaSpinner, FaTags, FaTrash, FaUpload, FaUser } from 'react-icons/fa';
 import { Newspaper, Plus, X } from 'lucide-react';
 import { toReliableIpfsUrl } from '@/utils/ipfsUpload';
@@ -586,12 +587,11 @@ function AdminCorporateNewsComponent() {
             </div>
 
             {/* Create/Edit Form */}
-            <AdminModal
+            <Drawer
                 open={isCreating}
                 onClose={handleCancel}
                 title={editingNews ? 'Edit News Article' : 'Create News Article'}
                 maxWidth="max-w-4xl"
-                placement="right"
             >
                 <div className="admin-panel-form flex h-full max-h-screen w-full flex-col overflow-y-auto border-l border-white/10 bg-[#0d0d0d] p-6">
                     <div className="mb-5 flex items-center justify-between gap-4 border-b border-white/10 pb-4">
@@ -809,8 +809,7 @@ function AdminCorporateNewsComponent() {
                                 <option value="pending">Pending Review</option>
                             </select>
                             <label className="flex items-center gap-2 mt-3 cursor-pointer">
-                                <input
-                                    type="checkbox"
+                                <Checkbox
                                     checked={newsForm.featuredInBanner}
                                     onChange={(e) => setNewsForm(prev => ({ ...prev, featuredInBanner: e.target.checked }))}
                                     className="rounded border-gray-600 text-cyan-500 focus:ring-cyan-500"
@@ -846,7 +845,7 @@ function AdminCorporateNewsComponent() {
                         </button>
                     </div>
                 </div>
-            </AdminModal>
+            </Drawer>
 
             {/* News List */}
             <div className="admin-panel-card overflow-hidden">

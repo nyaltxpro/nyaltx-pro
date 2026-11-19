@@ -3,6 +3,11 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { Coins } from 'lucide-react';
+import { Checkbox } from '@/components/reui/checkbox';
+import { Combobox } from '@/components/reui/combobox';
+import { Button } from '@/components/reui/button';
+import { FileType } from '@/components/reui/file-type';
+import { FileUpload } from '@/components/reui/file-upload';
 import { FaArrowLeft, FaCheck, FaTimes, FaUpload, FaSpinner } from 'react-icons/fa';
 
 interface TokenFormData {
@@ -83,8 +88,8 @@ export default function AdminTokenRegister({
     }
   };
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const handleFileSelect = (files: File[]) => {
+    const file = files[0];
     if (!file) return;
 
     // Validate file type
@@ -343,20 +348,18 @@ export default function AdminTokenRegister({
                 <label htmlFor="blockchain" className="block text-sm font-medium text-gray-300 mb-2">
                   Blockchain <span className="text-red-400">*</span>
                 </label>
-                <select
+                <Combobox
                   id="blockchain"
                   name="blockchain"
                   value={formData.blockchain}
-                  onChange={handleInputChange}
+                  options={blockchains}
+                  onValueChange={blockchain =>
+                    setFormData(previous => ({ ...previous, blockchain }))
+                  }
+                  placeholder="Search blockchains..."
                   className="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#00b8d8] focus:border-transparent"
                   required
-                >
-                  {blockchains.map(chain => (
-                    <option key={chain.value} value={chain.value}>
-                      {chain.label}
-                    </option>
-                  ))}
-                </select>
+                />
               </div>
 
               <div>
@@ -397,24 +400,21 @@ export default function AdminTokenRegister({
 
               <div className="flex flex-col gap-3">
                 <div className="flex items-center gap-3">
-                  <input
+                  <FileUpload
                     id="ipfs-file-input"
-                    type="file"
                     accept="image/*"
-                    onChange={handleFileSelect}
-                    className="hidden"
+                    onFilesSelected={handleFileSelect}
+                    disabled={isUploadingToIPFS}
+                    label="Choose File"
+                    description="Drag an image here or browse."
+                    className="min-w-[170px]"
                   />
-                  <label
-                    htmlFor="ipfs-file-input"
-                    className="flex items-center gap-2 px-4 py-2 bg-gray-700/70 hover:bg-gray-700 text-gray-300 rounded-lg cursor-pointer transition-all duration-200 text-sm font-medium border border-gray-600"
-                  >
-                    <FaUpload className="w-4 h-4" />
-                    Choose File
-                  </label>
 
                   {selectedFile && (
-                    <span className="text-sm text-gray-300 flex-1 truncate bg-gray-800/50 px-3 py-2 rounded border border-gray-700">
-                      {selectedFile.name} <span className="text-cyan-400">({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)</span>
+                    <span className="flex min-w-0 flex-1 items-center gap-2 truncate rounded border border-gray-700 bg-gray-800/50 px-3 py-2 text-sm text-gray-300">
+                      <FileType fileName={selectedFile.name} />
+                      <span className="truncate">{selectedFile.name}</span>
+                      <span className="shrink-0 text-cyan-400">({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)</span>
                     </span>
                   )}
 
@@ -573,8 +573,7 @@ export default function AdminTokenRegister({
 
               <div className="flex items-start gap-4 rounded-xl border border-white/10 p-4">
                 <div className="flex items-center">
-                  <input
-                    type="checkbox"
+                  <Checkbox
                     id="autoApprove"
                     name="autoApprove"
                     checked={formData.autoApprove}
@@ -592,8 +591,7 @@ export default function AdminTokenRegister({
 
               <div className="flex items-start gap-4 rounded-xl border border-white/10 p-4">
                 <div className="flex items-center">
-                  <input
-                    type="checkbox"
+                  <Checkbox
                     id="addToRace"
                     name="addToRace"
                     checked={formData.addToRace}
@@ -631,10 +629,10 @@ export default function AdminTokenRegister({
                 Cancel
               </Link>
             )}
-            <button
+            <Button
+              size="lg"
               type="submit"
               disabled={isSubmitting}
-              className="inline-flex items-center gap-2 rounded-lg border border-cyan-400/30 bg-transparent px-6 py-2.5 font-medium text-cyan-100 transition-colors hover:border-cyan-300/60 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isSubmitting ? (
                 <>
@@ -650,7 +648,7 @@ export default function AdminTokenRegister({
                   Register Token
                 </>
               )}
-            </button>
+            </Button>
           </div>
         </div>
       </form>

@@ -1,8 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import AdminModal from '@/components/AdminModal';
+import { Dialog } from '@/components/reui/dialog';
+import { Button } from '@/components/reui/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/reui/dropdown-menu';
 import { useEffect, useState } from 'react';
+import { MoreHorizontal } from 'lucide-react';
 import { FaExternalLinkAlt, FaEye, FaFilter, FaSearch, FaShoppingCart, FaCoins, FaEthereum, FaWallet, FaCreditCard, FaGift } from 'react-icons/fa';
 
 interface Order {
@@ -491,13 +494,22 @@ const AdminOrdersComponent = () => {
                       </span>
                     </td>
                     <td className="px-4 py-3 text-sm">
-                      <button
-                        onClick={() => openOrderModal(order)}
-                        className="flex items-center justify-center w-8 h-8 text-cyan-400 hover:text-cyan-300 hover:bg-gray-700/30 rounded-lg transition-all duration-200"
-                        title="View Details"
-                      >
-                        <FaEye className="w-4 h-4" />
-                      </button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="outline" size="icon" aria-label={`Actions for order ${order.id}`}>
+                            <MoreHorizontal className="size-4" aria-hidden="true" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onSelect={() => openOrderModal(order)}
+                            className="flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 outline-none focus:bg-white/10"
+                          >
+                            <FaEye className="size-3.5" aria-hidden="true" />
+                            View details
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </td>
                   </tr>
                 ))}
@@ -509,7 +521,7 @@ const AdminOrdersComponent = () => {
 
       {/* Order Details Modal */}
       {showModal && selectedOrder && (
-        <AdminModal
+        <Dialog
           open={showModal}
           onClose={closeOrderModal}
           title="Order Details"
@@ -710,7 +722,7 @@ const AdminOrdersComponent = () => {
               </div>
             </div>
           </div>
-        </AdminModal>
+        </Dialog>
       )}
 
       {/* Summary Stats */}
