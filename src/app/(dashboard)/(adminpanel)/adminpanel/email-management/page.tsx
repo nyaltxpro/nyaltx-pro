@@ -499,8 +499,12 @@ export default function EmailManagementPage() {
         </div>
       </header>
 
-      <Card className="overflow-hidden p-2">
-        <div role="tablist" aria-label="Email management sections" className="flex flex-wrap gap-2">
+      <Card className="w-fit max-w-full overflow-hidden p-2">
+        <div
+          role="tablist"
+          aria-label="Email management sections"
+          className="flex flex-nowrap gap-2 overflow-x-auto"
+        >
           {(
             [
               { id: 'inbox', label: 'Inbox', icon: Inbox },
@@ -518,12 +522,18 @@ export default function EmailManagementPage() {
                 aria-selected={selected}
                 aria-controls={`email-panel-${tab.id}`}
                 tabIndex={selected ? 0 : -1}
-                variant={selected ? 'default' : 'ghost'}
+                variant="ghost"
                 onClick={() => setActiveTab(tab.id)}
-                className="gap-2"
+                className="h-auto shrink-0 gap-0 rounded-md p-0 hover:bg-transparent"
               >
-                <Icon aria-hidden="true" className="size-4" />
-                {tab.label}
+                <Badge
+                  variant={selected ? 'primary-light' : 'outline'}
+                  size="sm"
+                  className="gap-1.5"
+                >
+                  <Icon aria-hidden="true" className="size-3" />
+                  {tab.label}
+                </Badge>
               </Button>
             );
           })}
@@ -535,7 +545,7 @@ export default function EmailManagementPage() {
           id="email-panel-inbox"
           role="tabpanel"
           aria-labelledby="email-tab-inbox"
-          className="overflow-hidden rounded-xl border border-white/10 bg-[#0d141b]"
+          className="overflow-hidden border border-white/10 bg-[#0d141b]"
         >
           <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-700 px-5 py-4">
             <div>
@@ -582,39 +592,40 @@ export default function EmailManagementPage() {
           <div className="grid min-h-[560px] grid-cols-1 lg:grid-cols-[minmax(280px,360px)_minmax(0,1fr)]">
             <div className="border-b border-gray-700 lg:border-b-0 lg:border-r">
               <div className="border-b border-gray-700 p-3">
-                <Filters
-                  activeFilters={[
-                    ...(inboxSearch.trim()
-                      ? [
-                          {
-                            id: 'inbox-search',
-                            label: `Search: ${inboxSearch}`,
-                            onRemove: () => setInboxSearch(''),
-                          },
-                        ]
-                      : []),
-                    ...(unreadOnly
-                      ? [
-                          {
-                            id: 'inbox-unread',
-                            label: 'Unread only',
-                            onRemove: () => setUnreadOnly(false),
-                          },
-                        ]
-                      : []),
-                  ]}
-                >
-                  <Input
-                    type="search"
-                    value={inboxSearch}
-                    onChange={event => {
-                      setInboxSearch(event.target.value);
-                      setInboxPage(1);
-                    }}
-                    placeholder="Search inbox"
-                    aria-label="Search inbox"
-                  />
-                </Filters>
+                <Input
+                  type="search"
+                  value={inboxSearch}
+                  onChange={event => {
+                    setInboxSearch(event.target.value);
+                    setInboxPage(1);
+                  }}
+                  placeholder="Search inbox"
+                  aria-label="Search inbox"
+                />
+                {(inboxSearch.trim() || unreadOnly) && (
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {inboxSearch.trim() && (
+                      <button
+                        type="button"
+                        onClick={() => setInboxSearch('')}
+                        className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-slate-300 hover:bg-white/10"
+                      >
+                        <span className="truncate">Search: {inboxSearch}</span>
+                        <CircleX aria-hidden="true" className="size-3 shrink-0" />
+                      </button>
+                    )}
+                    {unreadOnly && (
+                      <button
+                        type="button"
+                        onClick={() => setUnreadOnly(false)}
+                        className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-slate-300 hover:bg-white/10"
+                      >
+                        Unread only
+                        <CircleX aria-hidden="true" className="size-3 shrink-0" />
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
 
               {loadingInbox && inboxMessages.length === 0 ? (
@@ -699,7 +710,7 @@ export default function EmailManagementPage() {
                     return (
                       <div
                         key={message.uid}
-                        className={`flex items-start gap-3 border-b border-gray-700/80 p-3 transition-colors ${
+                        className={`flex items-start gap-3 border-b border-gray-700/80 p-2.5 transition-colors ${
                           selected ? 'bg-cyan-950/50' : 'hover:bg-gray-700/50'
                         }`}
                       >
@@ -730,7 +741,7 @@ export default function EmailManagementPage() {
                             <div className="min-w-0 flex-1">
                               <div className="flex items-start justify-between gap-2">
                                 <span
-                                  className={`truncate text-sm ${message.unread ? 'font-semibold text-white' : 'text-gray-300'}`}
+                                  className={`truncate text-xs ${message.unread ? 'font-semibold text-white' : 'text-gray-300'}`}
                                 >
                                   {sender?.name || sender?.email || 'Unknown sender'}
                                 </span>
@@ -739,7 +750,7 @@ export default function EmailManagementPage() {
                                 </span>
                               </div>
                               <p
-                                className={`mt-1 truncate text-sm ${message.unread ? 'font-medium text-white' : 'text-gray-400'}`}
+                                className={`mt-1 truncate text-xs ${message.unread ? 'font-medium text-white' : 'text-gray-400'}`}
                               >
                                 {message.subject}
                               </p>

@@ -559,13 +559,13 @@ function AdminCorporateNewsComponent() {
     const paidNewsCount = news.filter(isPaidNewsSubmission).length;
 
     return (
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-6">
             {confirmationDialog}
-            <div className="flex items-center justify-between">
-                <div>
+            <div className="flex flex-wrap items-start justify-between gap-4">
+                <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-3">
-                        <div>
-                            <h1 className="text-2xl font-semibold text-white" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                        <div className="min-w-0">
+                            <h1 className="break-words text-xl font-semibold text-white sm:text-2xl" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                                 News Management
                             </h1>
                             <p className="mt-1 text-sm text-gray-400">Review submissions and publish corporate updates.</p>
@@ -575,7 +575,7 @@ function AdminCorporateNewsComponent() {
                         Review paid submissions and manage corporate announcements separately
                     </p>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex shrink-0 items-center gap-3">
                     <Button
                         variant="outline"
                         onClick={handleCreateNews}
