@@ -137,12 +137,85 @@ export default function AdminDashboardFixed() {
     const [factoryFolders, setFactoryFolders] = useState<FactoryFolder[]>([]);
     const [factoryLoading, setFactoryLoading] = useState(false);
     const [factoryLoadError, setFactoryLoadError] = useState<string | null>(null);
+    const [factoryFoldersFromCache, setFactoryFoldersFromCache] = useState(false);
+    const [factoryCacheSavedAt, setFactoryCacheSavedAt] = useState<number | null>(null);
     const [permissionsLoading, setPermissionsLoading] = useState(false);
     const factoryLoadLock = useRef(false);
+    const factoryFoldersCacheKey = `nyaltx:factory-folders:v1:${NETWORK_CONFIG.chainId}:${CONTRACT_ADDRESSES.folderEscrowFactory.toLowerCase()}`;
     const readOnlyProvider = useMemo(
         () => new ethers.JsonRpcProvider(NETWORK_CONFIG.rpcUrl),
         [],
     );
+
+    const isFactoryFolder = (value: unknown): value is FactoryFolder => {
+        if (typeof value !== 'object' || value === null) return false;
+        const folder = value as Record<string, unknown>;
+        return Number.isInteger(folder.id) &&
+            typeof folder.name === 'string' &&
+            typeof folder.address === 'string' &&
+            ethers.isAddress(folder.address) &&
+            Number.isFinite(folder.createdAt) &&
+            typeof folder.totalAllocated === 'string' &&
+            (folder.totalClaimed === undefined || typeof folder.totalClaimed === 'string') &&
+            (folder.totalVested === undefined || typeof folder.totalVested === 'string') &&
+            (folder.isPaused === undefined || typeof folder.isPaused === 'boolean') &&
+            (folder.beneficiaryCount === undefined || Number.isInteger(folder.beneficiaryCount)) &&
+            (folder.defaultPermissions === undefined || Number.isInteger(folder.defaultPermissions)) &&
+            (folder.vestingStart === undefined || Number.isFinite(folder.vestingStart)) &&
+            (folder.vestingCliff === undefined || Number.isFinite(folder.vestingCliff)) &&
+            (folder.vestingDuration === undefined || Number.isFinite(folder.vestingDuration)) &&
+            (folder.folderBalance === undefined || typeof folder.folderBalance === 'string');
+    };
+
+    const readFactoryFolderCache = (): { savedAt: number; folders: FactoryFolder[] } | null => {
+        try {
+            const rawCache = window.localStorage.getItem(factoryFoldersCacheKey);
+            if (!rawCache) return null;
+
+            const parsed: unknown = JSON.parse(rawCache);
+            if (typeof parsed !== 'object' || parsed === null) {
+                console.warn('Ignoring invalid cached factory folder snapshot');
+                return null;
+            }
+
+            const cache = parsed as Record<string, unknown>;
+            if (
+                cache.version !== 1 ||
+                !Number.isFinite(cache.savedAt) ||
+                !Array.isArray(cache.folders) ||
+                !cache.folders.every(isFactoryFolder)
+            ) {
+                console.warn('Ignoring invalid cached factory folder snapshot');
+                return null;
+            }
+
+            return { savedAt: cache.savedAt as number, folders: cache.folders };
+        } catch (err) {
+            console.warn('Unable to read cached factory folder snapshot:', err);
+            return null;
+        }
+    };
+
+    const writeFactoryFolderCache = (folders: FactoryFolder[]): number | null => {
+        const savedAt = Date.now();
+        try {
+            window.localStorage.setItem(factoryFoldersCacheKey, JSON.stringify({
+                version: 1,
+                savedAt,
+                folders,
+            }));
+            return savedAt;
+        } catch (err) {
+            console.warn('Unable to save factory folder snapshot:', err);
+            return null;
+        }
+    };
+
+    const ensureFreshFactoryFolders = () => {
+        if (!factoryFoldersFromCache) return true;
+        setFactoryLoadError('Cached folder data is read-only. Refresh folders before making changes.');
+        return false;
+    };
 
     // Beneficiary vesting details
     interface BeneficiaryVesting {
@@ -683,6 +756,7 @@ export default function AdminDashboardFixed() {
     };
 
     const handleSetAllocation = async () => {
+        if (!ensureFreshFactoryFolders()) return;
         if (!await ensureSepolia(setFormError)) return;
 
         // Comprehensive validation
@@ -876,6 +950,12 @@ export default function AdminDashboardFixed() {
         factoryLoadLock.current = true;
         setFactoryLoading(true);
         setFactoryLoadError(null);
+        const cachedSnapshot = readFactoryFolderCache();
+        if (cachedSnapshot && (factoryFolders.length === 0 || factoryFoldersFromCache)) {
+            setFactoryFolders(cachedSnapshot.folders);
+            setFactoryFoldersFromCache(true);
+            setFactoryCacheSavedAt(cachedSnapshot.savedAt);
+        }
         try {
             // Get detailed folder information
             const folderDetails = await daoService.folderFactory.getFoldersWithDetails();
@@ -913,7 +993,13 @@ export default function AdminDashboardFixed() {
                 }
             }
 
-            setFactoryFolders(enhancedFolders);
+            if (folderFailures.length === 0) {
+                setFactoryFolders(enhancedFolders);
+                setFactoryFoldersFromCache(false);
+                setFactoryCacheSavedAt(writeFactoryFolderCache(enhancedFolders));
+                return;
+            }
+
             if (folderFailures.length > 0) {
                 const representativeError =
                     folderFailures.find(isRpcRateLimitError) ??
@@ -926,13 +1012,33 @@ export default function AdminDashboardFixed() {
                 const failedRequestsMessage = folderFailures.length === 1
                     ? 'One folder request failed.'
                     : `${folderFailures.length} folder requests failed.`;
+                if (cachedSnapshot) {
+                    setFactoryFolders(cachedSnapshot.folders);
+                    setFactoryFoldersFromCache(true);
+                    setFactoryCacheSavedAt(cachedSnapshot.savedAt);
+                } else {
+                    setFactoryFolders(enhancedFolders);
+                    setFactoryFoldersFromCache(false);
+                    setFactoryCacheSavedAt(null);
+                }
+                const cachedMessage = cachedSnapshot
+                    ? ` Showing saved folder data from ${new Date(cachedSnapshot.savedAt).toLocaleString()}.`
+                    : '';
                 setFactoryLoadError(
-                    `${failedRequestsMessage}${stoppedMessage} ${getRpcErrorMessage(representativeError, 'Refresh folders')}`,
+                    `${failedRequestsMessage}${stoppedMessage} ${getRpcErrorMessage(representativeError, 'Refresh folders')}${cachedMessage}`,
                 );
             }
         } catch (err) {
             console.error('Failed to load factory folders:', err);
-            setFactoryLoadError(getRpcErrorMessage(err, 'Refresh folders'));
+            if (cachedSnapshot) {
+                setFactoryFolders(cachedSnapshot.folders);
+                setFactoryFoldersFromCache(true);
+                setFactoryCacheSavedAt(cachedSnapshot.savedAt);
+            }
+            const cachedMessage = cachedSnapshot
+                ? ` Showing saved folder data from ${new Date(cachedSnapshot.savedAt).toLocaleString()}.`
+                : '';
+            setFactoryLoadError(`${getRpcErrorMessage(err, 'Refresh folders')}${cachedMessage}`);
         } finally {
             factoryLoadLock.current = false;
             setFactoryLoading(false);
@@ -940,6 +1046,7 @@ export default function AdminDashboardFixed() {
     };
 
     const handleFolderUpdate = async () => {
+        if (!ensureFreshFactoryFolders()) return;
         if (!folderEditForm.folderId) {
             setFormError('Folder ID missing.');
             return;
@@ -972,6 +1079,7 @@ export default function AdminDashboardFixed() {
     };
 
     const handleRevoke = async (folderId: number, account: string) => {
+        if (!ensureFreshFactoryFolders()) return;
         if (!await ensureSepolia(setFormError)) return;
         try {
             await revokeAllocation(folderId, account);
@@ -981,6 +1089,7 @@ export default function AdminDashboardFixed() {
     };
 
     const handleApproveFolder = async () => {
+        if (!ensureFreshFactoryFolders()) return;
         if (!await ensureSepolia(setFormError)) return;
 
         // Comprehensive validation
@@ -1057,6 +1166,7 @@ export default function AdminDashboardFixed() {
     };
 
     const handleSendToFolder = async () => {
+        if (!ensureFreshFactoryFolders()) return;
         if (!await ensureSepolia(setFormError)) return;
 
         // Comprehensive validation
@@ -1150,6 +1260,7 @@ export default function AdminDashboardFixed() {
     };
 
     const handlePermissionsUpdate = async () => {
+        if (!ensureFreshFactoryFolders()) return;
         if (!daoService) {
             setFormError('DAO service unavailable');
             return;
@@ -1174,6 +1285,7 @@ export default function AdminDashboardFixed() {
     };
 
     const handleVestingUpdate = async () => {
+        if (!ensureFreshFactoryFolders()) return;
         if (!vestingForm.folderId) return;
         if (!await ensureSepolia(setFormError)) return;
         try {
@@ -1229,6 +1341,7 @@ export default function AdminDashboardFixed() {
     };
 
     const handlePauseBeneficiary = async (folderAddress: string, beneficiaryId: number) => {
+        if (!ensureFreshFactoryFolders()) return;
         if (!await ensureSepolia(setFormError)) return;
         if (!daoService) {
             setFormError('DAO service unavailable');
@@ -1259,6 +1372,7 @@ export default function AdminDashboardFixed() {
     };
 
     const handleResumeBeneficiary = async (folderAddress: string, beneficiaryId: number) => {
+        if (!ensureFreshFactoryFolders()) return;
         if (!await ensureSepolia(setFormError)) return;
         if (!daoService) {
             setFormError('DAO service unavailable');
@@ -1289,6 +1403,7 @@ export default function AdminDashboardFixed() {
     };
 
     const handleCancelBeneficiary = async (folderAddress: string, beneficiaryId: number) => {
+        if (!ensureFreshFactoryFolders()) return;
         if (!await ensureSepolia(setFormError)) return;
         if (!daoService) {
             setFormError('DAO service unavailable');
@@ -1319,6 +1434,7 @@ export default function AdminDashboardFixed() {
     };
 
     const handlePauseFolder = async (folderAddress: string) => {
+        if (!ensureFreshFactoryFolders()) return;
         if (!folderAddress) {
             console.error('❌ No folder address provided for pause');
             setFormError('Folder address is required');
@@ -1367,6 +1483,7 @@ export default function AdminDashboardFixed() {
     };
 
     const handleUnpauseFolder = async (folderAddress: string) => {
+        if (!ensureFreshFactoryFolders()) return;
         if (!folderAddress) {
             console.error('❌ No folder address provided for unpause');
             setFormError('Folder address is required');
@@ -2299,7 +2416,18 @@ export default function AdminDashboardFixed() {
                         </div>
 
                         {error && <Alert variant="destructive" className="mt-4">{error}</Alert>}
-                        {factoryLoadError && <Alert variant="destructive" className="mt-4">{factoryLoadError}</Alert>}
+                        {factoryLoadError ? (
+                            <Alert variant={factoryFoldersFromCache ? 'warning' : 'destructive'} className="mt-4">
+                                {factoryLoadError}
+                                {factoryFoldersFromCache && ' Cached folder data is read-only; refresh before making changes.'}
+                            </Alert>
+                        ) : factoryFoldersFromCache ? (
+                            <Alert variant="warning" className="mt-4">
+                                Showing cached folder data from {factoryCacheSavedAt
+                                    ? new Date(factoryCacheSavedAt).toLocaleString()
+                                    : 'a previous successful refresh'}. Folder changes are disabled until fresh data is loaded.
+                            </Alert>
+                        ) : null}
                         {filteredDisplayFolders.length === 0 ? (
                             <div className="mt-4 rounded-xl border border-dashed border-white/15 p-8 text-center text-gray-400">
                                 {factoryFolders.length === 0 ? (

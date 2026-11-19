@@ -13,7 +13,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/reui/dropdown-menu';
 import {
-  Activity,
   BarChart3,
   ChevronDown,
   Coins,
@@ -33,7 +32,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import VerifiedBadge from '@/components/VerifiedBadge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 interface AdminSidebarProps {
   isMobileMenuOpen: boolean;
@@ -298,11 +297,7 @@ export default function AdminSidebar({
               >
                 <span className="relative shrink-0">
                   <Avatar size="sm" aria-label="Administrator account">
-                    <AvatarImage
-                      src="https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=96&h=96&dpr=2&q=80"
-                      alt="Aron Thompson"
-                    />
-                    <AvatarFallback>AT</AvatarFallback>
+                    <AvatarFallback>AD</AvatarFallback>
                   </Avatar>
                   <span
                     aria-label="Verified administrator"
@@ -364,14 +359,6 @@ export default function AdminSidebar({
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <div
-            className={`mt-3 flex items-center gap-2 px-2 text-xs text-slate-600 ${
-              isCollapsed ? 'md:hidden' : ''
-            }`}
-          >
-            <Activity className="h-3.5 w-3.5" aria-hidden="true" />
-            <span>Administration</span>
-          </div>
         </div>
       </aside>
     </>

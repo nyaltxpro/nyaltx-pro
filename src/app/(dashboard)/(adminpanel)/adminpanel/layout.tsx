@@ -8,7 +8,7 @@ import { useState } from 'react';
 import { ChevronDown, LayoutDashboard, Mail, Menu, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import AdminBreadcrumb from '@/components/AdminBreadcrumb';
 import VerifiedBadge from '@/components/VerifiedBadge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/reui/badge';
 import {
   DropdownMenu,
@@ -107,11 +107,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                 </Badge>
                 <div className="relative">
                   <Avatar size="default" aria-label="Administrator account">
-                    <AvatarImage
-                      src="https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=96&h=96&dpr=2&q=80"
-                      alt="Aron Thompson"
-                    />
-                    <AvatarFallback>AT</AvatarFallback>
+                    <AvatarFallback>AD</AvatarFallback>
                   </Avatar>
                   <span
                     aria-label="Verified administrator"
