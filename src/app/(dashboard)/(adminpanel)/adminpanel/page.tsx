@@ -1,9 +1,9 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import {
-  ChartNoAxesColumn,
   Check,
   ChevronLeft,
   ChevronRight,
@@ -12,7 +12,6 @@ import {
   Eye,
   Image as ImageIcon,
   List,
-  Settings,
   Trash2,
   Users,
   X,
@@ -218,95 +217,29 @@ export default function AdminDashboardComponent() {
   });
 
   return (
-    <div className="min-h-screen  p-6">
-      <div className="max-w-7xl mx-auto space-y-8">
-        {/* Enhanced Header */}
-        <div className="text-center mb-12">
-          <div className="flex items-center justify-center gap-4 mb-6">
-            <IconTile tone="cyan" className="size-16 rounded-3xl [&_svg]:size-7">
-              <ChartNoAxesColumn aria-hidden="true" />
-            </IconTile>
-            <div>
-              <h1
-                className="text-5xl font-bold text-white mb-2"
-                style={{
-                  fontFamily:
-                    'Space Grotesk, -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
-                }}
-              >
-                Admin Dashboard
-              </h1>
-              <p
-                className="text-xl text-gray-400"
-                style={{
-                  fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
-                }}
-              >
-                Manage your NYALTX platform
-              </p>
-            </div>
-          </div>
+    <div className="admin-panel-form mx-auto max-w-7xl space-y-6 p-4 md:p-6">
+      <header>
+        <h1 className="text-2xl font-semibold tracking-tight text-white">Admin Dashboard</h1>
+        <p className="mt-1 text-sm text-slate-400">Manage your NYALTX platform</p>
+      </header>
 
-        </div>
-
-        {/* Enhanced Stats Cards */}
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="p-5">
-            <div className="flex items-center justify-between gap-3">
-              <h3 className="text-slate-400 text-sm font-medium">Total Memberships</h3>
-              <Crown className="size-4 text-slate-400" aria-hidden="true" />
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {[
+          { label: 'Total Memberships', value: membershipsCount ?? '—', description: 'Live membership count', icon: Crown },
+          { label: 'Registered Tokens', value: tokensRegisteredCount ?? '—', description: 'Tokens in the registry', icon: Coins },
+          { label: 'Total Users', value: usersCount ?? '—', description: 'Registered platform users', icon: Users },
+          { label: 'Active Listings', value: listingsCount ?? '—', description: 'Current active listings', icon: List },
+        ].map(stat => (
+          <Card key={stat.label} className="flex items-center gap-3 p-4">
+            <IconTile icon={<stat.icon className="size-5" aria-hidden="true" />} />
+            <div className="min-w-0">
+              <p className="truncate text-sm font-medium text-slate-300">{stat.label}</p>
+              <p className="mt-1 text-xl font-semibold tabular-nums text-white">{stat.value}</p>
+              <p className="mt-1 text-xs text-slate-500">{stat.description}</p>
             </div>
-            <div className="mt-5 space-y-2.5">
-              <div className="text-2xl font-medium tracking-tight tabular-nums text-white">
-                {membershipsCount ?? '—'}
-              </div>
-              <div className="h-px bg-white/10" />
-              <div className="text-xs text-slate-500">Live membership count</div>
-            </div>
-          </div>
-
-          <div className="p-5">
-            <div className="flex items-center justify-between gap-3">
-              <h3 className="text-slate-400 text-sm font-medium">Registered Tokens</h3>
-              <Coins className="size-4 text-slate-400" aria-hidden="true" />
-            </div>
-            <div className="mt-5 space-y-2.5">
-              <div className="text-2xl font-medium tracking-tight tabular-nums text-white">
-                {tokensRegisteredCount ?? '—'}
-              </div>
-              <div className="h-px bg-white/10" />
-              <div className="text-xs text-slate-500">Tokens in the registry</div>
-            </div>
-          </div>
-
-          <div className="p-5">
-            <div className="flex items-center justify-between gap-3">
-              <h3 className="text-slate-400 text-sm font-medium">Total Users</h3>
-              <Users className="size-4 text-slate-400" aria-hidden="true" />
-            </div>
-            <div className="mt-5 space-y-2.5">
-              <div className="text-2xl font-medium tracking-tight tabular-nums text-white">
-                {usersCount ?? '—'}
-              </div>
-              <div className="h-px bg-white/10" />
-              <div className="text-xs text-slate-500">Registered platform users</div>
-            </div>
-          </div>
-
-          <div className="p-5">
-            <div className="flex items-center justify-between gap-3">
-              <h3 className="text-slate-400 text-sm font-medium">Active Listings</h3>
-              <List className="size-4 text-slate-400" aria-hidden="true" />
-            </div>
-            <div className="mt-5 space-y-2.5">
-              <div className="text-2xl font-medium tracking-tight tabular-nums text-white">
-                {listingsCount ?? '—'}
-              </div>
-              <div className="h-px bg-white/10" />
-              <div className="text-xs text-slate-500">Current active listings</div>
-            </div>
-          </div>
-        </div>
+          </Card>
+        ))}
+      </div>
 
         {/* Enhanced Pending Tokens Section */}
         <Card className="p-8">
@@ -597,131 +530,43 @@ export default function AdminDashboardComponent() {
           )}
         </Card>
 
-        {/* Enhanced Quick Actions Section */}
-        <div className="space-y-6">
-          <h2
-            className="text-2xl font-bold text-white mb-6 flex items-center gap-3"
-            style={{
-              fontFamily: 'Space Grotesk, -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
-            }}
-          >
-            <Settings className="size-4 text-slate-400" aria-hidden="true" />
-            Quick Actions
-          </h2>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            <a
-              href="/adminpanel/tokens"
-              className="group block p-6 bg-gray-900/30 hover:bg-gray-800/40 rounded-2xl border border-gray-700/30 transition-all duration-300 hover:shadow-lg hover:shadow-[#00d4aa]/10 backdrop-blur-sm"
-            >
-              <div className="flex items-center gap-4 mb-4">
-                <IconTile tone="cyan" className="size-12 rounded-2xl [&_svg]:size-5">
-                  <Coins aria-hidden="true" />
-                </IconTile>
-              </div>
-              <h3
-                className="font-bold text-white mb-2 text-lg"
-                style={{
-                  fontFamily:
-                    'Space Grotesk, -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
-                }}
-              >
-                Manage Tokens
-              </h3>
-              <p
-                className="text-sm text-gray-400"
-                style={{
-                  fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
-                }}
-              >
-                View and manage all token registrations
-              </p>
-            </a>
-
-            <a
-              href="/adminpanel/points"
-              className="group block p-6 bg-gray-900/30 hover:bg-gray-800/40 rounded-2xl border border-gray-700/30 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/10 backdrop-blur-sm"
-            >
-              <div className="flex items-center gap-4 mb-4">
-                <IconTile tone="violet" className="size-12 rounded-2xl [&_svg]:size-5">
-                  <Crown aria-hidden="true" />
-                </IconTile>
-              </div>
-              <h3
-                className="font-bold text-white mb-2 text-lg"
-                style={{
-                  fontFamily:
-                    'Space Grotesk, -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
-                }}
-              >
-                Token Points
-              </h3>
-              <p
-                className="text-sm text-gray-400"
-                style={{
-                  fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
-                }}
-              >
-                Manage points for token race ranking
-              </p>
-            </a>
-
-            <a
-              href="/adminpanel/orders"
-              className="group block p-6 bg-gray-900/30 hover:bg-gray-800/40 rounded-2xl border border-gray-700/30 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/10 backdrop-blur-sm"
-            >
-              <div className="flex items-center gap-4 mb-4">
-                <IconTile tone="cyan" className="size-12 rounded-2xl [&_svg]:size-5">
-                  <List aria-hidden="true" />
-                </IconTile>
-              </div>
-              <h3
-                className="font-bold text-white mb-2 text-lg"
-                style={{
-                  fontFamily:
-                    'Space Grotesk, -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
-                }}
-              >
-                Orders
-              </h3>
-              <p
-                className="text-sm text-gray-400"
-                style={{
-                  fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
-                }}
-              >
-                View and manage user orders
-              </p>
-            </a>
-
-            <a
-              href="/adminpanel/banners"
-              className="group block p-6 bg-gray-900/30 hover:bg-gray-800/40 rounded-2xl border border-gray-700/30 transition-all duration-300 hover:shadow-lg hover:shadow-orange-500/10 backdrop-blur-sm"
-            >
-              <div className="flex items-center gap-4 mb-4">
-                <IconTile tone="amber" className="size-12 rounded-2xl [&_svg]:size-5">
-                  <ImageIcon aria-hidden="true" />
-                </IconTile>
-              </div>
-              <h3
-                className="font-bold text-white mb-2 text-lg"
-                style={{
-                  fontFamily:
-                    'Space Grotesk, -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
-                }}
-              >
-                Banner Management
-              </h3>
-              <p
-                className="text-sm text-gray-400"
-                style={{
-                  fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
-                }}
-              >
-                Upload and manage banner images
-              </p>
-            </a>
+        <section aria-labelledby="quick-actions-heading" className="space-y-4">
+          <div>
+            <h2 id="quick-actions-heading" className="text-lg font-semibold text-white">
+              Quick Actions
+            </h2>
           </div>
-        </div>
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <Link href="/adminpanel/tokens" className="group block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/50">
+              <Card className="h-full p-4 transition-colors group-hover:border-cyan-400/30">
+                <IconTile icon={<Coins aria-hidden="true" className="size-5" />} />
+                <h3 className="mt-4 font-medium text-white">Manage Tokens</h3>
+                <p className="mt-1 text-sm text-slate-400">View and manage all token registrations</p>
+              </Card>
+            </Link>
+            <Link href="/adminpanel/points" className="group block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/50">
+              <Card className="h-full p-4 transition-colors group-hover:border-cyan-400/30">
+                <IconTile icon={<Crown aria-hidden="true" className="size-5" />} />
+                <h3 className="mt-4 font-medium text-white">Token Points</h3>
+                <p className="mt-1 text-sm text-slate-400">Manage points for token race ranking</p>
+              </Card>
+            </Link>
+            <Link href="/adminpanel/orders" className="group block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/50">
+              <Card className="h-full p-4 transition-colors group-hover:border-cyan-400/30">
+                <IconTile icon={<List aria-hidden="true" className="size-5" />} />
+                <h3 className="mt-4 font-medium text-white">Orders</h3>
+                <p className="mt-1 text-sm text-slate-400">View and manage user orders</p>
+              </Card>
+            </Link>
+            <Link href="/adminpanel/banners" className="group block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/50">
+              <Card className="h-full p-4 transition-colors group-hover:border-cyan-400/30">
+                <IconTile icon={<ImageIcon aria-hidden="true" className="size-5" />} />
+                <h3 className="mt-4 font-medium text-white">Banner Management</h3>
+                <p className="mt-1 text-sm text-slate-400">Upload and manage banner images</p>
+              </Card>
+            </Link>
+          </div>
+        </section>
 
         {publishingCalendarError ? (
           <Card className="p-5">
@@ -738,7 +583,6 @@ export default function AdminDashboardComponent() {
             <p className="text-sm text-slate-400">Loading publishing calendar...</p>
           </Card>
         )}
-      </div>
     </div>
   );
 }

@@ -100,13 +100,13 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
               <button
                 type="button"
                 aria-label="Open admin account menu"
-                className="flex items-center gap-3 rounded-lg px-2 py-1.5 transition-colors hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/50"
+                className="flex shrink-0 items-center gap-3 rounded-lg px-2 py-1 transition-colors hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/50"
               >
                 <Badge variant="info-light" size="sm" radius="full">
                   Admin
                 </Badge>
                 <div className="relative">
-                  <Avatar size="lg" aria-label="Administrator account">
+                  <Avatar size="default" aria-label="Administrator account">
                     <AvatarImage
                       src="https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=96&h=96&dpr=2&q=80"
                       alt="Aron Thompson"

@@ -10,8 +10,27 @@ import { useAppKitAccount } from '@reown/appkit/react';
 import { Drawer } from '@/components/reui/drawer';
 import { Dialog } from '@/components/reui/dialog';
 import { Alert } from '@/components/reui/alert';
+import { Badge } from '@/components/reui/badge';
+import { Button } from '@/components/reui/button';
+import { Card } from '@/components/reui/card';
+import { Filters } from '@/components/reui/filters';
+import { IconTile } from '@/components/reui/icon-tile';
+import { Input } from '@/components/reui/input';
 import { ethers } from 'ethers';
-import { Ban, CircleDollarSign, Filter, Gavel, Loader2, Lock, Plus, PlusIcon, Search, Shield, SplitSquareHorizontal, UserPlus2, X } from 'lucide-react';
+import {
+    Activity,
+    CircleDollarSign,
+    Copy,
+    FolderOpen,
+    Gavel,
+    Loader2,
+    Lock,
+    Plus,
+    RefreshCw,
+    Shield,
+    UsersRound,
+    X,
+} from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useAccount, useChainId, useSwitchChain } from 'wagmi';
@@ -55,14 +74,6 @@ const formatNumber = (value: string | number) => {
 
 const describePermissions = (mask: number) =>
     PERMISSION_FLAGS.filter(flag => (mask & flag.bit) !== 0).map(flag => flag.label);
-
-const TOOL_BUTTON_CLASSES =
-    'flex flex-col items-center gap-2 p-4 bg-white/5 rounded-lg border border-white/10 text-gray-300 text-sm hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed';
-
-const PLACEHOLDER_TOOL_CLASSES =
-    'flex flex-col items-center justify-center gap-2 p-4 min-h-[96px] rounded-lg border border-dashed border-white/20 bg-white/[0.03] text-gray-300 text-sm cursor-default';
-
-type ActiveTab = 'folders' | 'staking';
 
 export default function AdminDashboardFixed() {
     const {
@@ -1756,105 +1767,104 @@ export default function AdminDashboardFixed() {
         }
 
         return (
-            <div
+            <Card
                 key={folder.id}
                 onClick={() => handleSelectFolder(folder.id)}
-                className={`bg-white/10 backdrop-blur-lg rounded-xl p-6 border transition-all cursor-pointer ${selectedFolderId === folder.id ? 'border-purple-500 bg-white/20' : 'border-white/20 hover:border-white/40'
+                className={`cursor-pointer p-5 transition-colors ${selectedFolderId === folder.id ? 'border-cyan-400/40 bg-cyan-400/[0.04]' : 'hover:border-white/20'
                     }`}
             >
-                <div className="flex items-center justify-between mb-4">
-                    <div>
-                        <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                            {folder.name}
-                            {folder.isPaused && (
-                                <span className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-red-500/20 text-red-200">
-                                    <Lock className="w-3 h-3" /> Locked
-                                </span>
-                            )}
+                <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+                    <div className="flex min-w-0 items-start gap-3">
+                        <IconTile tone="cyan" icon={<FolderOpen className="size-5" aria-hidden="true" />} />
+                        <div className="min-w-0">
+                            <div className="flex flex-wrap items-center gap-2">
+                                <h3 className="truncate text-base font-semibold text-white">{folder.name}</h3>
+                                {folder.isPaused && (
+                                    <Badge variant="warning-light" size="sm">
+                                        <Lock className="size-3" aria-hidden="true" /> Paused
+                                    </Badge>
+                                )}
+                            </div>
                             {folder.address && (
-                                <div className="flex items-center gap-2 mt-1">
-                                    <p className="text-gray-400 text-sm font-mono">
+                                <div className="mt-1 flex items-center gap-1.5">
+                                    <p className="truncate font-mono text-xs text-gray-400">
                                         {folder.address.slice(0, 6)}...{folder.address.slice(-4)}
                                     </p>
                                     <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
+                                        type="button"
+                                        onClick={event => {
+                                            event.stopPropagation();
                                             navigator.clipboard.writeText(folder.address);
                                         }}
-                                        className="text-gray-400 hover:text-white transition-colors"
+                                        className="rounded p-1 text-gray-500 hover:bg-white/5 hover:text-white"
                                         title="Copy address"
+                                        aria-label={`Copy ${folder.name} address`}
                                     >
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                        </svg>
+                                        <Copy className="size-3.5" aria-hidden="true" />
                                     </button>
                                 </div>
                             )}
-                        </h3>
-                        <div className="text-right">
-                            <div className="text-sm text-gray-400">Members</div>
-                            <div className="text-lg font-semibold text-white">{folder.beneficiaryCount}</div>
                         </div>
+                    </div>
+                    <div className="text-right">
+                        <p className="text-xs text-gray-500">Members</p>
+                        <p className="text-sm font-semibold text-white">{folder.beneficiaryCount ?? memberCount}</p>
                     </div>
                 </div>
 
                 <div className="space-y-3">
                     <div className="grid grid-cols-2 gap-3">
-                        <div className="bg-purple-500/10 rounded-lg p-3">
-                            <div className="text-xs text-purple-400 mb-1">Total Allocations</div>
-                            <div className="text-lg font-bold text-purple-300">{formatNumber(folder.totalAllocated)}</div>
-                            <div className="text-xs text-purple-500">NYAX sent to folder</div>
+                        <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
+                            <div className="mb-1 text-xs text-gray-400">Total allocations</div>
+                            <div className="text-base font-semibold text-white">{formatNumber(folder.totalAllocated)}</div>
+                            <div className="text-xs text-gray-500">NYAX sent to folder</div>
                         </div>
-                        <div className="bg-green-500/10 rounded-lg p-3">
-                            <div className="text-xs text-green-400 mb-1">Folder Balance</div>
-                            <div className="text-lg font-bold text-green-300">{formatNumber(folder.folderBalance || '0')}</div>
-                            <div className="text-xs text-green-500">NYAX in escrow</div>
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3">
-                        <div className="bg-white/5 rounded-lg p-3">
-                            <div className="text-xs text-gray-400 mb-1">Vested Amount</div>
-                            <div className="text-lg font-bold text-white">{formatNumber(folder.totalVested || '0')}</div>
-                            <div className="text-xs text-gray-500">NYAX allocated</div>
-                        </div>
-                        <div className="bg-blue-500/10 rounded-lg p-3">
-                            <div className="text-xs text-blue-400 mb-1">Claimed</div>
-                            <div className="text-lg font-bold text-blue-300">{formatNumber(folder.totalClaimed || '0')}</div>
-                            <div className="text-xs text-blue-500">NYAX</div>
+                        <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
+                            <div className="mb-1 text-xs text-gray-400">Folder balance</div>
+                            <div className="text-base font-semibold text-white">{formatNumber(folder.folderBalance || '0')}</div>
+                            <div className="text-xs text-gray-500">NYAX in escrow</div>
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-3">
-                        <div className="bg-purple-500/10 rounded-lg p-3">
-                            <div className="text-xs text-purple-400 mb-1">Claimable</div>
-                            <div className="text-lg font-bold text-purple-300">
-                                {formatNumber((parseFloat(folder.totalVested || '0') - parseFloat(folder.totalClaimed || '0')).toString())}
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                        {[
+                            { label: 'Vested', value: formatNumber(folder.totalVested || '0') },
+                            { label: 'Claimed', value: formatNumber(folder.totalClaimed || '0') },
+                            {
+                                label: 'Claimable',
+                                value: formatNumber(
+                                    (parseFloat(folder.totalVested || '0') - parseFloat(folder.totalClaimed || '0')).toString()
+                                ),
+                            },
+                        ].map(metric => (
+                            <div key={metric.label} className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
+                                <div className="mb-1 text-xs text-gray-400">{metric.label}</div>
+                                <div className="text-base font-semibold text-white">{metric.value}</div>
+                                <div className="text-xs text-gray-500">NYAX</div>
                             </div>
-                            <div className="text-xs text-purple-500">NYAX</div>
-                        </div>
+                        ))}
                     </div>
 
                     <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                            <span className="text-gray-400 text-sm">Vesting Progress</span>
-                            <span className="text-gray-300 text-sm">{vestingProgress.percentage.toFixed(1)}%</span>
+                        <div className="flex items-center justify-between gap-3">
+                            <span className="text-sm text-gray-400">Vesting progress</span>
+                            <Badge variant="secondary">{vestingProgress.percentage.toFixed(1)}%</Badge>
                         </div>
-                        <div className="w-full bg-gray-700 rounded-full h-2">
+                        <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/10">
                             <div
-                                className="bg-green-500 h-2 rounded-full transition-all duration-300"
+                                className="h-full rounded-full bg-cyan-400 transition-all duration-300"
                                 style={{ width: `${vestingProgress.percentage}%` }}
                             ></div>
                         </div>
-                        <div className="flex items-center justify-between text-xs">
-                            <span className="text-gray-500">{vestingProgress.status}</span>
-                            <span className="text-gray-500">Time remaining: {vestingProgress.timeRemaining}</span>
+                        <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-gray-500">
+                            <span>{vestingProgress.status}</span>
+                            <span>{vestingProgress.timeRemaining} remaining</span>
                         </div>
                     </div>
 
-                    <div className="flex items-center justify-between pt-2 border-t border-white/10">
-                        <span className="text-gray-400 text-sm">Created</span>
-                        <span className="text-gray-300 text-sm">
+                    <div className="flex items-center justify-between border-t border-white/10 pt-3">
+                        <span className="text-sm text-gray-500">Created</span>
+                        <span className="text-sm text-gray-300">
                             {folder.createdAt ? new Date(folder.createdAt * 1000).toLocaleDateString() : 'N/A'}
                         </span>
                     </div>
@@ -1871,9 +1881,9 @@ export default function AdminDashboardFixed() {
                                             handlePauseFolder(folder.address);
                                         }
                                     }}
-                                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${folder.isPaused
-                                        ? 'bg-green-500/20 hover:bg-green-500/30 text-green-200'
-                                        : 'bg-red-500/20 hover:bg-red-500/30 text-red-200'
+                                    className={`h-9 w-full rounded-lg border px-3 text-sm font-medium transition-colors ${folder.isPaused
+                                        ? 'border-white/15 bg-transparent text-slate-200 hover:bg-white/5'
+                                        : 'border-white/15 bg-transparent text-slate-200 hover:bg-white/5'
                                         }`}
                                 >
                                     {folder.isPaused ? (
@@ -1899,7 +1909,7 @@ export default function AdminDashboardFixed() {
                                         loadBeneficiaryVestings(folder.address, folder.id);
                                     }}
                                     disabled={vestingLoading}
-                                    className="px-4 py-2 bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-200 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+                                    className="h-9 rounded-lg border border-white/15 bg-transparent px-3 text-sm font-medium text-slate-200 transition-colors hover:bg-white/5 disabled:opacity-50"
                                 >
                                     {vestingLoading ? (
                                         <span className="flex items-center justify-center gap-1">
@@ -1977,118 +1987,128 @@ export default function AdminDashboardFixed() {
                         </div>
                     )}
                 </div>
-            </div>
+            </Card>
         );
     };
 
+    const factoryTotalAllocated = factoryFolders.reduce(
+        (sum, folder) => sum + parseFloat(folder.totalAllocated || '0'),
+        0
+    );
+    const factoryTotalMembers = factoryFolders.reduce(
+        (sum, folder) => sum + (folder.beneficiaryCount || 0),
+        0
+    );
+
     return (
-        <div className="min-h-screen  text-white">
-            <div className="max-w-7xl mx-auto space-y-10 px-4 py-10">
-                <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl px-6 py-8 sm:px-8 sm:py-10 shadow-[0_25px_70px_rgba(7,13,30,0.55)]">
-                    <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-                        <div className="space-y-4">
-                            <div className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.4em] text-indigo-200/70">
-                                <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" /> NYAX Admin
-                            </div>
-                            <div>
-                                <h1 className="text-4xl font-semibold">Governance Command Center</h1>
-                                <p className="text-gray-300 mt-2 max-w-2xl">
-                                    Operate the NYAX folder registry, vesting templates, and proposal tooling with a single, secure console.
-                                    Inspired by the nyaltx.pro admin interface, this surface keeps mission critical actions within reach.
-                                </p>
-                            </div>
-                            <div className="flex flex-wrap gap-3 text-xs">
-                                <span className={`flex items-center gap-2 rounded-full px-4 py-1.5 border ${isConnected ? 'border-emerald-400/40 text-emerald-200' : 'border-red-400/30 text-red-200'}`}>
-                                    <span className={`h-2 w-2 rounded-full ${isConnected ? 'bg-emerald-400' : 'bg-red-400'}`} />
-                                    {isConnected ? 'Wallet connected' : 'Connect wallet to act'}
-                                </span>
-                                <span className={`flex items-center gap-2 rounded-full px-4 py-1.5 border ${onRequiredNetwork ? 'border-indigo-400/40 text-indigo-100' : 'border-amber-400/40 text-amber-100'}`}>
-                                    <span className={`h-2 w-2 rounded-full ${onRequiredNetwork ? 'bg-indigo-400' : 'bg-amber-400'}`} />
-                                    {onRequiredNetwork ? 'Sepolia network detected' : 'Switch to Sepolia to transact'}
-                                </span>
-                            </div>
-                        </div>
-                        <div className="flex flex-col gap-3 w-full max-w-sm">
-
-                            <div className="flex gap-3 flex-wrap">
-                                {!isConnected && <ConnectWalletButton className="flex-1 min-w-[140px] px-5 py-3 rounded-2xl bg-linear-to-r from-indigo-500 to-purple-500 font-semibold disabled:opacity-50 disabled:cursor-not-allowed" />}
-                                <button
-                                    onClick={() => setShowAddModal(true)}
-                                    disabled={!isConnected}
-                                    className="flex-1 min-w-[140px] px-5 py-3 rounded-2xl bg-linear-to-r from-indigo-500 to-purple-500 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    <div className="flex items-center justify-center gap-2">
-                                        <Plus className="w-4 h-4" /> Create Folder
-                                    </div>
-                                </button>
-                                <button
-                                    className="flex-1 min-w-[140px] px-5 py-3 rounded-2xl border border-white/20 text-white/80 hover:bg-white/10 transition"
-                                    onClick={() => setShowProposalDrawer(true)}
-                                    disabled={!isConnected || loading}
-                                >
-                                    <div className="flex items-center justify-center gap-2">
-                                        <Gavel className="w-4 h-4" /> Create Proposal
-                                    </div>
-                                </button>
-
-
-                            </div>
-                            <p className="text-xs text-gray-400">{selectedFolder ? `Allocations armed for ${selectedFolder.name}` : 'Select a folder card below to unlock allocation tooling.'}</p>
-                        </div>
+        <div className="admin-panel-form mx-auto max-w-7xl space-y-6 p-4 md:p-6">
+            <header className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+                <div className="min-w-0 space-y-3">
+                    <Badge variant="primary-light" size="sm">NYAX administration</Badge>
+                    <div>
+                        <h1 className="text-2xl font-semibold tracking-tight text-white">NYAX Admin</h1>
+                        <p className="mt-1 max-w-2xl text-sm text-gray-400">
+                            Manage token folders, treasury funding, vesting, and governance proposals.
+                        </p>
                     </div>
-
-                    <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-                        {(() => {
-                            // Calculate totals from factory folders
-                            const factoryTotalAllocated = factoryFolders.reduce((sum, folder) =>
-                                sum + parseFloat(folder.totalAllocated || '0'), 0
-                            );
-                            const factoryTotalMembers = factoryFolders.reduce((sum, folder) =>
-                                sum + (folder.beneficiaryCount || 0), 0
-                            );
-
-                            return [
-                                { label: 'Treasury Balance', value: treasuryBalanceLoading ? 'Loading...' : treasuryBalanceError ? 'Error' : treasuryBalance ? `${formatNumber(treasuryBalance)} NYAX` : 'N/A', accent: 'bg-green-500/20 text-green-200', icon: '💰', badge: 'Live balance' },
-                                { label: 'Allocated NYAX', value: `${formatNumber(factoryTotalAllocated.toString())} NYAX`, accent: 'bg-indigo-500/20 text-indigo-200', badge: 'Factory service' },
-                                { label: 'Active members', value: formatNumber(factoryTotalMembers.toString()), accent: 'bg-emerald-500/15 text-emerald-200', badge: 'Factory service' },
-                                { label: 'Folders live', value: factoryFolders.length, accent: 'bg-blue-500/15 text-blue-200', badge: 'Factory service' },
-                                { label: 'Action queue', value: `${filteredDisplayFolders.length} folders`, accent: 'bg-purple-500/15 text-purple-200', badge: 'Live folders in view' },
-                            ].map(card => (
-                                <div key={card.label} className="rounded-2xl border border-white/10 bg-black/30 p-5">
-                                    <p className="text-xs uppercase tracking-[0.25em] text-gray-400 flex items-center gap-2">
-                                        {card.icon && <span>{card.icon}</span>}
-                                        {card.label}
-                                    </p>
-                                    <p className="text-2xl font-semibold mt-2 break-words overflow-wrap-anywhere">{card.value}</p>
-                                    <span className={`inline-flex mt-3 px-3 py-1 rounded-full text-xs ${card.accent}`}>
-                                        {card.badge}
-                                    </span>
-                                </div>
-                            ));
-                        })()}
+                    <div className="flex flex-wrap gap-2">
+                        <Badge variant={isConnected ? 'success-light' : 'warning-light'}>
+                            {isConnected ? 'Wallet connected' : 'Wallet not connected'}
+                        </Badge>
+                        <Badge variant={isConnected && onRequiredNetwork ? 'success-light' : 'warning-light'}>
+                            {!isConnected ? 'Network unavailable' : onRequiredNetwork ? 'Sepolia' : 'Switch to Sepolia'}
+                        </Badge>
                     </div>
                 </div>
+                <div className="flex flex-wrap gap-2">
+                    {!isConnected && <ConnectWalletButton className="h-9 rounded-lg border border-transparent bg-cyan-500 px-4 text-sm font-medium text-white hover:bg-cyan-400" />}
+                    <Button onClick={() => setShowAddModal(true)} disabled={!isConnected || loading}>
+                        <Plus className="size-4" aria-hidden="true" />
+                        Create folder
+                    </Button>
+                    <Button
+                        variant="outline"
+                        onClick={() => setShowProposalDrawer(true)}
+                        disabled={!isConnected || loading}
+                    >
+                        <Gavel className="size-4" aria-hidden="true" />
+                        Create proposal
+                    </Button>
+                </div>
+            </header>
+
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+                {[
+                    {
+                        label: 'Treasury balance',
+                        value: treasuryBalanceLoading
+                            ? 'Loading…'
+                            : treasuryBalanceError
+                              ? 'Unavailable'
+                              : `${formatNumber(treasuryBalance || '0')} NYAX`,
+                        note: 'Current balance',
+                        icon: CircleDollarSign,
+                    },
+                    {
+                        label: 'Allocated NYAX',
+                        value: `${formatNumber(factoryTotalAllocated)} NYAX`,
+                        note: 'Across live folders',
+                        icon: Shield,
+                    },
+                    {
+                        label: 'Active members',
+                        value: formatNumber(factoryTotalMembers),
+                        note: 'Folder beneficiaries',
+                        icon: UsersRound,
+                    },
+                    {
+                        label: 'Live folders',
+                        value: formatNumber(factoryFolders.length),
+                        note: 'Factory registry',
+                        icon: FolderOpen,
+                    },
+                    {
+                        label: 'Folders in view',
+                        value: formatNumber(filteredDisplayFolders.length),
+                        note: 'Based on search',
+                        icon: Activity,
+                    },
+                ].map(metric => (
+                    <Card key={metric.label} className="flex min-w-0 items-center gap-3 p-4">
+                        <IconTile icon={<metric.icon className="size-5" aria-hidden="true" />} />
+                        <div className="min-w-0">
+                            <p className="truncate text-xs text-gray-400">{metric.label}</p>
+                            <p className="mt-1 truncate text-base font-semibold text-white">{metric.value}</p>
+                            <p className="mt-1 text-xs text-gray-500">{metric.note}</p>
+                        </div>
+                    </Card>
+                ))}
+            </div>
 
 
                 {!isConnected && (
-                    <div className={`rounded-2xl border border-yellow-500 /30 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-200`}>
+                    <Alert variant="warning">
                         Wallet connection is required to create, edit, or revoke allocations.
-                    </div>
+                    </Alert>
                 )}
                 {isConnected && !onRequiredNetwork && (
-                    <div className="rounded-2xl border border-amber-300/40 bg-amber-400/10 px-4 py-4 text-sm text-amber-100 flex flex-col gap-3">
-                        <div className="font-semibold text-amber-200">Action required: switch to Ethereum Sepolia</div>
-                        <p>Admin tools execute against Sepolia contracts. Please switch your wallet network before changing folders, minting, or submitting proposals.</p>
-                        <div>
-                            <button
+                    <Alert variant="warning">
+                        <div className="flex flex-wrap items-center justify-between gap-3">
+                            <div>
+                                <p className="font-medium">Switch to Ethereum Sepolia</p>
+                                <p className="mt-1 text-sm">
+                                    Admin actions require the Sepolia network.
+                                </p>
+                            </div>
+                            <Button
+                                variant="outline"
                                 onClick={handleSwitchNetwork}
                                 disabled={isSwitchingChain}
-                                className="rounded-full bg-amber-400 px-5 py-2 text-sm font-semibold text-slate-900 transition hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-70"
                             >
                                 {isSwitchingChain ? 'Switching…' : 'Switch to Sepolia'}
-                            </button>
+                            </Button>
                         </div>
-                    </div>
+                    </Alert>
                 )}
 
                 {showFolderEditModal && (
@@ -2169,26 +2189,30 @@ export default function AdminDashboardFixed() {
                     </Dialog>
                 )}
 
-                <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-6">
+                <Card className="p-5">
                     <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                        <div className="space-y-2">
-                            <h2 className="text-2xl font-semibold flex items-center gap-3">
-                                <Shield className="w-5 h-5 text-purple-300" /> Registry Toolkit
+                        <div>
+                            <h2 className="flex items-center gap-3 text-lg font-semibold text-white">
+                                <IconTile icon={<Shield className="size-5" aria-hidden="true" />} />
+                                Registry toolkit
                             </h2>
-                            <p className="text-gray-400 text-sm">Quick actions for folder lifecycle management, mirroring the nyaltx admin workflow.</p>
+                            <p className="mt-2 text-sm text-gray-400">
+                                Folder lifecycle and treasury actions.
+                            </p>
                         </div>
-                        <div className="flex gap-2 text-xs text-gray-400">
-                            <span className="px-3 py-1 rounded-full border border-white/10">Selected folder {selectedFolder ? `#${selectedFolder.id}` : '—'}</span>
-                            <span className="px-3 py-1 rounded-full border border-white/10">Tools react to wallet state</span>
+                        <div className="flex flex-wrap items-center gap-2">
+                            <Badge variant="outline">
+                                Selected folder {selectedFolder ? `#${selectedFolder.id}` : '—'}
+                            </Badge>
+                            <Badge variant={isConnected ? 'success-light' : 'secondary'}>
+                                {isConnected ? 'Wallet actions enabled' : 'Connect wallet to act'}
+                            </Badge>
                         </div>
                     </div>
-                    <div className="mt-6 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                        <button className={TOOL_BUTTON_CLASSES} onClick={() => setShowAddModal(true)} disabled={!isConnected || loading}>
-                            <Plus className="w-5 h-5" />
-                            Create Folder
-                        </button>
-                        <button
-                            className={TOOL_BUTTON_CLASSES}
+                    <div className="mt-5 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+                        <Button
+                            variant="outline"
+                            className="h-auto min-h-16 w-full justify-start gap-3 whitespace-normal px-3 py-3 text-left"
                             onClick={() => {
                                 refresh();
                                 loadFactoryFolders();
@@ -2196,106 +2220,68 @@ export default function AdminDashboardFixed() {
                             }}
                             disabled={loading || factoryLoading || treasuryBalanceLoading}
                         >
-                            <Loader2 className={`w-5 h-5 ${(loading || factoryLoading || treasuryBalanceLoading) ? 'animate-spin' : ''}`} />
-                            Refresh Data
-                        </button>
-
-
-                        <button
+                            <IconTile className="size-9 rounded-lg" icon={<RefreshCw className={`size-4 ${(loading || factoryLoading || treasuryBalanceLoading) ? 'animate-spin' : ''}`} aria-hidden="true" />} />
+                            Refresh data
+                        </Button>
+                        <Button
+                            variant="outline"
+                            className="h-auto min-h-16 w-full justify-start gap-3 whitespace-normal px-3 py-3 text-left"
                             onClick={handleTreasuryPause}
                             disabled={pauseLoading === 'treasury' || treasuryPaused === null || !isConnected}
-                            className={`w-full px-4 py-2 rounded-lg border font-medium transition disabled:opacity-50 disabled:cursor-not-allowed ${treasuryPaused
-                                ? 'border-green-400/40 text-green-200 hover:bg-green-500/10'
-                                : 'border-red-400/40 text-red-200 hover:bg-red-500/10'
-                                }`}
                         >
-                            {pauseLoading === 'treasury' ? 'Processing...' :
-                                treasuryPaused ? 'Unpause Treasury' : 'Pause Treasury'}
-                        </button>
-
-                        <button
-                            className="flex-1 min-w-[140px] px-5 py-3 rounded-2xl border border-white/20 text-white/80 hover:bg-white/10 transition"
-                            onClick={() => setShowSendToFolderModal(true)}
-                            disabled={!isConnected || loading}
-                        >
-                            <div className="flex items-center justify-center gap-2">
-                                <PlusIcon className="w-4 h-4" /> Fund Folder
-                            </div>
-                        </button>
-                        <button
-                            className="flex-1 min-w-[140px] px-5 py-3 rounded-2xl border border-white/20 text-white/80 hover:bg-white/10 transition"
+                            <IconTile className="size-9 rounded-lg" icon={<Lock className="size-4" aria-hidden="true" />} />
+                            {pauseLoading === 'treasury' ? 'Processing…' : treasuryPaused ? 'Unpause treasury' : 'Pause treasury'}
+                        </Button>
+                        <Button
+                            variant="outline"
+                            className="h-auto min-h-16 w-full justify-start gap-3 whitespace-normal px-3 py-3 text-left"
                             onClick={() => setShowAllocationModal(true)}
                             disabled={!isConnected || loading}
                         >
-                            <div className="flex items-center justify-center gap-2">
-                                <UserPlus2 className="w-4 h-4" /> Add Wallets to Folder
-                            </div>
-                        </button>
-                        <button
-                            className="flex-1 min-w-[140px] px-5 py-3 rounded-2xl border border-white/20 text-white/80 hover:bg-white/10 transition"
+                            <IconTile className="size-9 rounded-lg" icon={<UsersRound className="size-4" aria-hidden="true" />} />
+                            Add wallets
+                        </Button>
+                        <Button
+                            variant="outline"
+                            className="h-auto min-h-16 w-full justify-start gap-3 whitespace-normal px-3 py-3 text-left"
                             onClick={() => setShowApproveFolderModal(true)}
                             disabled={!isConnected || loading}
                         >
-                            <div className="flex items-center justify-center gap-2">
-                                <Plus className="w-4 h-4" /> Approve Folder
-                            </div>
-                        </button>
-                        <button
-                            className="flex-1 min-w-[140px] px-5 py-3 rounded-2xl border border-white/20 text-white/80 hover:bg-white/10 transition"
-                            onClick={() => setShowSendToFolderModal(true)}
-                            disabled={!isConnected || loading}
-                        >
-                            <div className="flex items-center justify-center gap-2">
-                                <Shield className="w-4 h-4" /> Send to Folder
-                            </div>
-                        </button>
-
-                        <div className={PLACEHOLDER_TOOL_CLASSES} title="Coming soon">
-                            <Ban className="w-5 h-5 text-red-300" />
-                            <span className="font-medium text-white">Cancel</span>
-                            <span className="text-[10px] uppercase tracking-wider text-gray-500">Preview</span>
-                        </div>
-                        <div className={PLACEHOLDER_TOOL_CLASSES} title="Coming soon">
-                            <SplitSquareHorizontal className="w-5 h-5 text-cyan-300" />
-                            <span className="font-medium text-white">Splits</span>
-                            <span className="text-[10px] uppercase tracking-wider text-gray-500">Preview</span>
-                        </div>
-                        <div className={PLACEHOLDER_TOOL_CLASSES} title="Coming soon">
-                            <CircleDollarSign className="w-5 h-5 text-emerald-300" />
-                            <span className="font-medium text-white">Dividend</span>
-                            <span className="text-[10px] uppercase tracking-wider text-gray-500">Preview</span>
-                        </div>
-
+                            <IconTile className="size-9 rounded-lg" icon={<Shield className="size-4" aria-hidden="true" />} />
+                            Approve folder
+                        </Button>
                     </div>
-                </div>
+                </Card>
 
-                <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-6">
+                <Card className="p-5">
                     <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                        <div className="space-y-2">
-                            <h2 className="text-2xl font-semibold flex items-center gap-3">
-                                <Shield className="w-5 h-5 text-green-300" /> Treasury → Folder Funding
+                        <div>
+                            <h2 className="flex items-center gap-3 text-lg font-semibold text-white">
+                                <IconTile icon={<CircleDollarSign className="size-5" aria-hidden="true" />} />
+                                Treasury to folder funding
                             </h2>
-                            <p className="text-gray-400 text-sm">Send ERC20 from the governance treasury bridge into a folder escrow.</p>
-                            <div className="flex items-center gap-2 mt-2">
-                                <span className="text-gray-400 text-sm">Treasury Balance:</span>
+                            <p className="mt-2 text-sm text-gray-400">
+                                Transfer NYAX from the governance treasury into an approved folder.
+                            </p>
+                            <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
+                                <span className="text-gray-400">Treasury balance</span>
                                 {treasuryBalanceLoading ? (
-                                    <span className="text-yellow-300 font-semibold">Loading...</span>
+                                    <Badge variant="secondary">Loading…</Badge>
                                 ) : treasuryBalanceError ? (
-                                    <span className="text-red-300 font-semibold">Error loading balance</span>
+                                    <Badge variant="destructive-light">Unavailable</Badge>
                                 ) : treasuryBalance ? (
-                                    <span className="text-white font-semibold">{formatNumber(treasuryBalance)} NYAX</span>
+                                    <span className="font-medium text-white">{formatNumber(treasuryBalance)} NYAX</span>
                                 ) : (
-                                    <span className="text-gray-400 font-semibold">0 NYAX</span>
+                                    <span className="font-medium text-white">0 NYAX</span>
                                 )}
                             </div>
                         </div>
-                        <button
+                        <Button
                             onClick={() => setShowSendToFolderModal(true)}
                             disabled={!isConnected}
-                            className="px-6 py-3 rounded-2xl bg-linear-to-r from-green-500 to-emerald-600 font-semibold text-white disabled:opacity-40 hover:from-green-600 hover:to-emerald-700 transition-all"
                         >
-                            Fund Folders
-                        </button>
+                            Fund folder
+                        </Button>
                     </div>
                     {bridgeStatus && (
                         <Alert
@@ -2305,126 +2291,115 @@ export default function AdminDashboardFixed() {
                             {bridgeStatus.message}
                         </Alert>
                     )}
-                </div>
+                </Card>
 
-
-
-
-                <div className="flex flex-col gap-4 lg:flex-row">
-                    <div className="flex-1 relative">
-                        <Search className="w-5 h-5 text-gray-500 absolute left-4 top-1/2 -translate-y-1/2" />
-                        <input
-                            type="text"
-                            value={searchValue}
-                            onChange={e => setSearchValue(e.target.value)}
-                            placeholder="Search folders, holders, or metadata"
-                            className="w-full pl-12 pr-4 py-3 rounded-2xl border border-white/10 bg-black/30 text-white placeholder-gray-500 focus:outline-none focus:border-purple-400"
-                        />
-                    </div>
-                    <button className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/15 px-6 py-3 text-sm text-gray-200 hover:bg-white/10 transition">
-                        <Filter className="w-5 h-5" /> Advanced filters
-                    </button>
-                </div>
+                <Filters
+                    activeFilters={searchValue.trim()
+                        ? [{ id: 'folder-search', label: `Search: ${searchValue}`, onRemove: () => setSearchValue('') }]
+                        : []}
+                >
+                    <Input
+                        type="search"
+                        value={searchValue}
+                        onChange={event => setSearchValue(event.target.value)}
+                        placeholder="Search folders"
+                        aria-label="Search token folders"
+                        className="min-w-[220px] flex-1"
+                    />
+                </Filters>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div className="lg:col-span-2 space-y-4">
-                        <div className="flex items-center justify-between">
+                        <Card className="p-5">
+                        <div className="flex flex-wrap items-center justify-between gap-3">
                             <div>
-                                <p className="text-xs uppercase tracking-[0.4em] text-gray-400">Registry</p>
-                                <h2 className="text-2xl font-semibold">Token folders (Factory Service)</h2>
+                                <p className="text-xs font-medium uppercase tracking-wide text-gray-500">Registry</p>
+                                <h2 className="mt-1 text-lg font-semibold text-white">Token folders</h2>
                             </div>
-                            <div className="flex items-center gap-3">
-                                {error && <Alert variant="destructive">{error}</Alert>}
-                                <button
-                                    onClick={loadFactoryFolders}
-                                    className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/15 px-4 py-2 text-sm text-gray-200 hover:bg-white/10 transition"
-                                >
-                                    <Loader2 className="w-4 h-4" /> Load Factory Folders
-                                </button>
-                            </div>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={loadFactoryFolders}
+                                disabled={factoryLoading}
+                            >
+                                <RefreshCw className={`size-4 ${factoryLoading ? 'animate-spin' : ''}`} aria-hidden="true" />
+                                Refresh folders
+                            </Button>
                         </div>
 
+                        {error && <Alert variant="destructive" className="mt-4">{error}</Alert>}
                         {filteredDisplayFolders.length === 0 ? (
-                            <div className="rounded-2xl border border-dashed border-white/15 p-10 text-center text-gray-400">
+                            <div className="mt-4 rounded-xl border border-dashed border-white/15 p-8 text-center text-gray-400">
                                 {factoryFolders.length === 0 ? (
                                     <div>
-                                        <p className="mb-2">No folders loaded yet</p>
-                                        <p className="text-sm">Click "Load Factory Folders" to fetch folders from the factory service</p>
+                                        <p className="mb-1 font-medium text-gray-200">No folders loaded</p>
+                                        <p className="text-sm">Refresh folders to load the factory registry.</p>
                                     </div>
                                 ) : (
                                     <div>
-                                        <p className="mb-2">No folders matched your search criteria</p>
-                                        <p className="text-sm">Try adjusting your search filters</p>
+                                        <p className="mb-1 font-medium text-gray-200">No matching folders</p>
+                                        <p className="text-sm">Clear the search or try another name.</p>
                                     </div>
                                 )}
                             </div>
                         ) : (
-                            <div className="grid gap-4">
-                                {factoryFolders.map(folder => renderFolderCard(folder))}
+                            <div className="mt-4 grid gap-4 xl:grid-cols-2">
+                                {filteredDisplayFolders.map(folder => renderFolderCard(folder))}
                             </div>
                         )}
+                        </Card>
 
                     </div>
 
-                    <div className="space-y-6">
-                        <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-                            <h3 className="text-lg font-semibold mb-4">Platform telemetry</h3>
-                            <div className="space-y-3 text-sm text-gray-300">
-                                {/* <div className="flex justify-between">
-                                    <span>Allocated NYAX</span>
-                                    <div className="text-right">
-                                        <span className="text-white font-semibold">{formatNumber(summary.totalAllocated)} NYAX</span>
-                                        <div className="text-xs text-green-400">Real-time</div>
-                                    </div>
-                                </div> */}
-                                <div className="flex justify-between">
-                                    <span>Active members</span>
-                                    <div className="text-right">
-                                        <span className="text-yellow-300 font-semibold">{formatNumber(summary.totalMembers)}</span>
-                                        <div className="text-xs text-green-400">Real-time</div>
-                                    </div>
+                    <div className="space-y-4">
+                        <Card className="p-5">
+                            <div className="mb-4 flex items-center justify-between gap-3">
+                                <h3 className="text-base font-semibold text-white">Platform telemetry</h3>
+                                <Badge variant="success-light" size="sm">Live</Badge>
+                            </div>
+                            <div className="space-y-3 text-sm">
+                                <div className="flex items-center justify-between gap-3 border-b border-white/5 pb-3">
+                                    <span className="text-gray-400">Active members</span>
+                                    <span className="font-medium text-white">{formatNumber(summary.totalMembers)}</span>
                                 </div>
-                                <div className="flex justify-between">
-                                    <span>Folders live</span>
-                                    <div className="text-right">
-                                        <span className="text-green-300 font-semibold">{factoryFolders.length || summary.folderCount}</span>
-                                        <div className="text-xs text-green-400">Real-time</div>
-                                    </div>
+                                <div className="flex items-center justify-between gap-3 border-b border-white/5 pb-3">
+                                    <span className="text-gray-400">Live folders</span>
+                                    <span className="font-medium text-white">{factoryFolders.length || summary.folderCount}</span>
                                 </div>
-                                <div className="flex justify-between">
-                                    <span>Action queue</span>
-                                    <div className="text-right">
-                                        <span className="text-blue-300 font-semibold">{factoryFolders.length || summary.folderCount} folders</span>
-                                        <div className="text-xs text-green-400">Real-time</div>
-                                    </div>
+                                <div className="flex items-center justify-between gap-3">
+                                    <span className="text-gray-400">Folders in view</span>
+                                    <span className="font-medium text-white">{filteredDisplayFolders.length}</span>
                                 </div>
                             </div>
-                        </div>
+                        </Card>
 
-                        {selectedFolderId && membersByFolder[selectedFolderId] && (
-                            <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-                                <div className="flex items-center justify-between mb-3">
-                                    <h3 className="text-lg font-semibold">Folder members</h3>
-                                    <span className="text-xs text-gray-400">#{selectedFolderId}</span>
+                        {selectedFolderId !== null && membersByFolder[selectedFolderId] && (
+                            <Card className="p-5">
+                                <div className="mb-3 flex items-center justify-between gap-3">
+                                    <h3 className="text-base font-semibold text-white">Folder members</h3>
+                                    <Badge variant="secondary">#{selectedFolderId}</Badge>
                                 </div>
-                                <div className="space-y-2 max-h-64 overflow-auto pr-1">
+                                <div className="max-h-64 space-y-2 overflow-auto pr-1">
                                     {membersByFolder[selectedFolderId]!.map(member => (
-                                        <div key={member.account} className="flex items-center justify-between text-sm text-gray-200 border-b border-white/10 pb-1">
-                                            <span className="font-mono text-xs">{member.account.slice(0, 6)}...{member.account.slice(-4)}</span>
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-purple-300">{formatNumber(member.unlockedAmount)} NYAX</span>
-                                                <button
-                                                    className="text-xs text-red-300 hover:text-red-200"
+                                        <div key={member.account} className="flex items-center justify-between gap-3 border-b border-white/5 pb-2 text-sm text-gray-200">
+                                            <span className="truncate font-mono text-xs">{member.account.slice(0, 6)}...{member.account.slice(-4)}</span>
+                                            <div className="flex shrink-0 items-center gap-2">
+                                                <span className="text-gray-300">{formatNumber(member.unlockedAmount)} NYAX</span>
+                                                <Button
+                                                    type="button"
+                                                    variant="destructive"
+                                                    size="sm"
                                                     onClick={() => handleRevoke(selectedFolderId, member.account)}
                                                     disabled={!isConnected}
                                                 >
                                                     Revoke
-                                                </button>
+                                                </Button>
                                             </div>
                                         </div>
                                     ))}
                                 </div>
-                            </div>
+                            </Card>
                         )}
                     </div>
                 </div>
@@ -3167,7 +3142,6 @@ export default function AdminDashboardFixed() {
                         </div>
                     </div>
                 </Drawer>
-            </div>
         </div>
 
 
