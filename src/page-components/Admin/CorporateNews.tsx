@@ -14,8 +14,7 @@ import { FileUpload } from '@/components/reui/file-upload';
 import { Filters } from '@/components/reui/filters';
 import { Spinner } from '@/components/reui/spinner';
 import { useConfirmDialog } from '@/components/reui/confirm-dialog';
-import { Eye, Grid2X2, LayoutList, Newspaper, Pencil, Plus, Trash2, Upload, X } from 'lucide-react';
-import { Item } from '@/components/reui/item';
+import { Eye, Newspaper, Pencil, Pin, PinOff, Plus, Trash2, Upload, X } from 'lucide-react';
 import { Switch } from '@/components/reui/switch';
 import { TimePicker } from '@/components/reui/time-picker';
 import { toReliableIpfsUrl } from '@/utils/ipfsUpload';
@@ -119,7 +118,6 @@ function AdminCorporateNewsComponent() {
     const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'published' | 'draft'>('all');
     const [submissionFilter, setSubmissionFilter] = useState<'all' | 'paid' | 'corporate'>('all');
     const [newsSearch, setNewsSearch] = useState('');
-    const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
     const [currentPage, setCurrentPage] = useState(1);
     const pageSize = 10;
     const [publishTime, setPublishTime] = useState('09:00');
@@ -565,7 +563,7 @@ function AdminCorporateNewsComponent() {
                 <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-3">
                         <div className="min-w-0">
-                            <h1 className="admin-panel-font-sans break-words text-xl font-semibold text-white sm:text-2xl">
+                            <h1 className="break-words text-xl font-semibold text-white sm:text-2xl">
                                 News Management
                             </h1>
                             <p className="mt-1 text-sm text-gray-400">Review submissions and publish corporate updates.</p>
@@ -591,7 +589,6 @@ function AdminCorporateNewsComponent() {
             {success && <Alert variant="success">{success}</Alert>}
 
             <div className="flex flex-wrap items-center gap-2">
-                <span className="mr-2 text-sm text-gray-400">News type:</span>
                 {([
                     ['all', 'All News', news.length],
                     ['paid', 'Paid Submissions', paidNewsCount],
@@ -941,26 +938,6 @@ function AdminCorporateNewsComponent() {
                         placeholder="Search articles"
                         className="h-9 w-48 rounded-lg border border-white/10 bg-black/30 px-3 text-sm text-white placeholder:text-white/40 focus:border-cyan-500/60 focus:outline-none"
                     />
-                    <div className="ml-auto flex items-center gap-1 rounded-lg border border-white/10 p-1">
-                        <Button
-                            size="icon"
-                            variant={viewMode === 'table' ? 'secondary' : 'ghost'}
-                            type="button"
-                            onClick={() => setViewMode('table')}
-                            aria-label="Table view"
-                        >
-                            <LayoutList className="size-4" aria-hidden="true" />
-                        </Button>
-                        <Button
-                            size="icon"
-                            variant={viewMode === 'cards' ? 'secondary' : 'ghost'}
-                            type="button"
-                            onClick={() => setViewMode('cards')}
-                            aria-label="Card view"
-                        >
-                            <Grid2X2 className="size-4" aria-hidden="true" />
-                        </Button>
-                    </div>
                 </Filters>
 
                 <div className="p-6">
@@ -984,77 +961,8 @@ function AdminCorporateNewsComponent() {
                             </p>
                         </div>
                     ) : (
-                        viewMode === 'cards' ? (
-                            <div className="grid gap-4 lg:grid-cols-2">
-                                {pagedNews.map(article => (
-                                    <Item
-                                        key={article._id}
-                                        leading={
-                                            <Newspaper className="h-5 w-5 text-slate-300" aria-hidden="true" />
-                                        }
-                                        trailing={
-                                            <Switch
-                                                checked={Boolean(article.featuredInBanner)}
-                                                onCheckedChange={() => handleToggleBanner(article)}
-                                                aria-label={`${article.featuredInBanner ? 'Unpin' : 'Pin'} ${article.title}`}
-                                            />
-                                        }
-                                    >
-                                        <div className="flex items-start justify-between gap-3">
-                                            <div className="min-w-0">
-                                                <p className="truncate font-semibold text-white">{article.title}</p>
-                                                <p className="mt-1 line-clamp-2 text-xs text-white/50">{article.excerpt || `By ${article.author}`}</p>
-                                            </div>
-                                        </div>
-                                        <div className="mt-3 flex flex-wrap items-center gap-2">
-                                            <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${
-                                                article.status === 'published'
-                                                    ? 'bg-green-500/20 text-green-200'
-                                                    : article.status === 'pending'
-                                                        ? 'bg-amber-500/20 text-amber-200'
-                                                        : 'bg-purple-500/20 text-purple-200'
-                                            }`}>
-                                                {article.status === 'pending' ? 'Pending review' : article.status}
-                                            </span>
-                                            {isPaidNewsSubmission(article) && (
-                                                <span className="rounded-full border border-blue-500/30 bg-blue-500/10 px-2.5 py-1 text-xs text-blue-200">
-                                                    Paid submission
-                                                </span>
-                                            )}
-                                            {article.featuredInBanner && (
-                                                <span className="rounded-full border border-cyan-500/30 bg-cyan-500/10 px-2.5 py-1 text-xs text-cyan-200">
-                                                    Top banner
-                                                </span>
-                                            )}
-                                        </div>
-                                        <div className="mt-3 flex items-center justify-between gap-3 border-t border-white/10 pt-3 text-xs text-white/50">
-                                            <span>{formatDate(article.publishedAt || article.createdAt)}</span>
-                                            <div className="flex gap-2">
-                                                {article.status === 'pending' && (
-                                                    <Button
-                                                        size="sm"
-                                                        variant="outline"
-                                                        type="button"
-                                                        onClick={() => handleApproveNews(article)}
-                                                        disabled={approvingId === article._id}
-                                                    >
-                                                        {approvingId === article._id ? 'Publishing...' : 'Approve'}
-                                                    </Button>
-                                                )}
-                                                <Button size="icon" variant="ghost" type="button" onClick={() => handleEditNews(article)} aria-label={`Edit ${article.title}`}>
-                                                    <Pencil className="h-3.5 w-3.5" />
-                                                </Button>
-                                                <Button size="icon" variant="destructive" type="button" onClick={() => handleDeleteNews(article._id)} aria-label={`Delete ${article.title}`}>
-                                                    <Trash2 className="h-3.5 w-3.5" />
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    </Item>
-                                ))}
-                            </div>
-                        ) : (
                         <div className="overflow-x-auto rounded-lg border border-white/10">
-                            <table className="w-full min-w-[900px] text-left text-sm">
+                            <table className="w-full min-w-[900px] text-left text-xs">
                                 <thead className="border-b border-white/10 bg-white/[0.03] text-xs uppercase tracking-wider text-white/50">
                                     <tr>
                                         <th className="px-4 py-3 font-medium">Article</th>
@@ -1124,11 +1032,17 @@ function AdminCorporateNewsComponent() {
                                                         </Button>
                                                     )}
                                                     <Button
-                                                        size="sm"
+                                                        size="icon"
                                                         variant={article.featuredInBanner ? 'secondary' : 'outline'}
                                                         onClick={() => handleToggleBanner(article)}
+                                                        aria-label={`${article.featuredInBanner ? 'Unpin' : 'Pin'} ${article.title}`}
+                                                        title={article.featuredInBanner ? 'Unpin article' : 'Pin article'}
                                                     >
-                                                        {article.featuredInBanner ? 'Unpin' : 'Pin'}
+                                                        {article.featuredInBanner ? (
+                                                            <PinOff className="size-4" aria-hidden="true" />
+                                                        ) : (
+                                                            <Pin className="size-4" aria-hidden="true" />
+                                                        )}
                                                     </Button>
                                                     {article.status === 'published' && (
                                                         <Button
@@ -1164,7 +1078,6 @@ function AdminCorporateNewsComponent() {
                                 </tbody>
                             </table>
                         </div>
-                        )
                     )}
                     {visibleNews.length > pageSize && (
                         <div className="mt-4 flex items-center justify-between gap-3">

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
-import { ChevronDown, Menu, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { ChevronDown, LayoutDashboard, Mail, Menu, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import AdminBreadcrumb from '@/components/AdminBreadcrumb';
 import VerifiedBadge from '@/components/VerifiedBadge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -100,7 +100,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
               <button
                 type="button"
                 aria-label="Open admin account menu"
-                className="flex shrink-0 items-center gap-3 rounded-lg px-2 py-1 transition-colors hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/50"
+                className="group flex shrink-0 items-center gap-3 rounded-lg px-2 py-1 transition-colors hover:bg-white/5 data-[state=open]:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/50"
               >
                 <Badge variant="info-light" size="sm" radius="full">
                   Admin
@@ -122,21 +122,50 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                   </span>
                 </div>
                 <ChevronDown
-                  className="size-4 shrink-0 text-slate-400 transition-transform data-[state=open]:rotate-180"
+                  className="size-4 shrink-0 text-slate-400 transition-transform group-data-[state=open]:rotate-180"
                   aria-hidden="true"
                 />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel className="px-3 py-2 text-xs text-slate-400">
-                NYALTX administrator
+            <DropdownMenuContent align="end" side="bottom" sideOffset={8} className="w-64 p-1.5">
+              <DropdownMenuLabel className="px-3 py-2.5">
+                <span className="block text-sm font-medium text-slate-100">Administrator</span>
+                <span className="mt-0.5 block text-xs font-normal text-slate-500">
+                  NYALTX Admin account
+                </span>
               </DropdownMenuLabel>
-              <DropdownMenuSeparator className="my-1 h-px bg-white/10" />
-              <DropdownMenuItem asChild className="cursor-pointer rounded-md px-3 py-2 outline-none focus:bg-white/10">
-                <Link href="/adminpanel">Admin overview</Link>
+              <DropdownMenuSeparator className="my-1.5 h-px bg-white/10" />
+              <DropdownMenuItem
+                asChild
+                className="flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-slate-200 outline-none transition-colors focus:bg-white/10 focus:text-white data-[highlighted]:bg-white/10 data-[highlighted]:text-white"
+              >
+                <Link href="/adminpanel" className="flex w-full items-center gap-3">
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-white/5 text-slate-400">
+                    <LayoutDashboard className="size-4" aria-hidden="true" />
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block text-sm">Admin overview</span>
+                    <span className="mt-0.5 block text-xs text-slate-500">
+                      View the administration dashboard
+                    </span>
+                  </span>
+                </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild className="cursor-pointer rounded-md px-3 py-2 outline-none focus:bg-white/10">
-                <Link href="/adminpanel/email-management">Email management</Link>
+              <DropdownMenuItem
+                asChild
+                className="flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-slate-200 outline-none transition-colors focus:bg-white/10 focus:text-white data-[highlighted]:bg-white/10 data-[highlighted]:text-white"
+              >
+                <Link href="/adminpanel/email-management" className="flex w-full items-center gap-3">
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-white/5 text-slate-400">
+                    <Mail className="size-4" aria-hidden="true" />
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block text-sm">Email management</span>
+                    <span className="mt-0.5 block text-xs text-slate-500">
+                      Manage administrator email
+                    </span>
+                  </span>
+                </Link>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
