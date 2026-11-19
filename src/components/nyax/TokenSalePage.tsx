@@ -3,81 +3,11 @@
 import { useNYAXToken } from '@/hooks/useNYAXContracts';
 import React, { useState } from 'react';
 import { useAccount, useConnect } from 'wagmi';
-
-// Simple UI Components
-const Card = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
-    <div className={`rounded-lg border bg-card text-card-foreground shadow-sm ${className}`}>{children}</div>
-);
-const CardHeader = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
-    <div className={`flex flex-col space-y-1.5 p-6 ${className}`}>{children}</div>
-);
-const CardTitle = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
-    <h3 className={`text-2xl font-semibold leading-none tracking-tight ${className}`}>{children}</h3>
-);
-const CardContent = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
-    <div className={`p-6 pt-0 ${className}`}>{children}</div>
-);
-const Button = ({ children, className = '', variant = 'default', onClick, disabled, ...props }: {
-    children: React.ReactNode;
-    className?: string;
-    variant?: 'default' | 'outline';
-    onClick?: () => void;
-    disabled?: boolean;
-    [key: string]: any;
-}) => {
-    const baseClasses = 'inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50';
-    const variantClasses = variant === 'outline'
-        ? 'border border-input bg-background hover:bg-accent hover:text-accent-foreground'
-        : 'bg-primary text-primary-foreground hover:bg-primary/90';
-    return (
-        <button
-            className={`${baseClasses} ${variantClasses} h-10 px-4 py-2 ${className}`}
-            onClick={onClick}
-            disabled={disabled}
-            {...props}
-        >
-            {children}
-        </button>
-    );
-};
-const Input = ({ className = '', type = 'text', value, onChange, placeholder, ...props }: {
-    className?: string;
-    type?: string;
-    value?: string;
-    onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    placeholder?: string;
-    [key: string]: any;
-}) => (
-    <input
-        type={type}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
-        {...props}
-    />
-);
-const Badge = ({ children, className = '', variant = 'default' }: {
-    children: React.ReactNode;
-    className?: string;
-    variant?: 'default' | 'outline' | 'secondary';
-}) => {
-    const baseClasses = 'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2';
-    const variantClasses = variant === 'outline'
-        ? 'border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80'
-        : variant === 'secondary'
-            ? 'border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80'
-            : 'border-transparent bg-primary text-primary-foreground hover:bg-primary/80';
-    return <div className={`${baseClasses} ${variantClasses} ${className}`}>{children}</div>;
-};
-const Progress = ({ value, className = '' }: { value: number; className?: string }) => (
-    <div className={`relative h-4 w-full overflow-hidden rounded-full bg-secondary ${className}`}>
-        <div
-            className="h-full w-full flex-1 bg-primary transition-all"
-            style={{ transform: `translateX(-${100 - (value || 0)}%)` }}
-        />
-    </div>
-);
+import { Badge } from '@/components/reui/badge';
+import { Button } from '@/components/reui/button';
+import { Card, CardContent, CardHeader } from '@/components/reui/card';
+import { Input } from '@/components/reui/input';
+import { Progress } from '@/components/reui/progress';
 
 import {
     Clock,
@@ -182,10 +112,10 @@ export function TokenSalePage() {
                     {/* Purchase Form */}
                     <Card className="bg-gray-800/50 border-gray-700">
                         <CardHeader>
-                            <CardTitle className="text-white flex items-center">
+                            <h3 className="flex items-center text-lg font-semibold text-white">
                                 <Coins className="w-6 h-6 mr-2" />
                                 Purchase NYAX Tokens
-                            </CardTitle>
+                            </h3>
                         </CardHeader>
                         <CardContent className="space-y-6">
                             {!isConnected ? (
@@ -289,10 +219,10 @@ export function TokenSalePage() {
                     <div className="space-y-6">
                         <Card className="bg-gray-800/50 border-gray-700">
                             <CardHeader>
-                                <CardTitle className="text-white flex items-center">
+                                <h3 className="flex items-center text-lg font-semibold text-white">
                                     <Clock className="w-6 h-6 mr-2" />
                                     Sale Details
-                                </CardTitle>
+                                </h3>
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <div className="flex justify-between">
@@ -316,10 +246,10 @@ export function TokenSalePage() {
 
                         <Card className="bg-gray-800/50 border-gray-700">
                             <CardHeader>
-                                <CardTitle className="text-white flex items-center">
+                                <h3 className="flex items-center text-lg font-semibold text-white">
                                     <TrendingUp className="w-6 h-6 mr-2" />
                                     Token Utility
-                                </CardTitle>
+                                </h3>
                             </CardHeader>
                             <CardContent className="space-y-3">
                                 <div className="flex items-start space-x-3">

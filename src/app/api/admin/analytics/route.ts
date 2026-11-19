@@ -159,7 +159,7 @@ export async function GET(request: NextRequest) {
         $match: {
           timestamp: { $gte: oneWeekAgo },
           city: { $ne: 'Unknown' },
-          city: { $exists: true, $ne: null, $ne: '' }
+          city: { $exists: true, $ne: null }
         }
       },
       {
