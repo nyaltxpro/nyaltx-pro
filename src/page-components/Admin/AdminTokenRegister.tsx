@@ -2,13 +2,12 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Coins } from 'lucide-react';
+import { ArrowLeft, Check, Coins, LoaderCircle, Upload, X } from 'lucide-react';
 import { Checkbox } from '@/components/reui/checkbox';
 import { Combobox } from '@/components/reui/combobox';
 import { Button } from '@/components/reui/button';
 import { FileType } from '@/components/reui/file-type';
 import { FileUpload } from '@/components/reui/file-upload';
-import { FaArrowLeft, FaCheck, FaTimes, FaUpload, FaSpinner } from 'react-icons/fa';
 
 interface TokenFormData {
   tokenName: string;
@@ -274,9 +273,9 @@ export default function AdminTokenRegister({
         >
           <div className="flex items-center gap-3">
             {toast.type === 'success' ? (
-              <FaCheck className="w-5 h-5" />
+              <Check className="w-5 h-5" />
             ) : (
-              <FaTimes className="w-5 h-5" />
+              <X className="w-5 h-5" />
             )}
             <span className="font-medium">{toast.message}</span>
           </div>
@@ -298,7 +297,7 @@ export default function AdminTokenRegister({
           href="/admin/tokens"
           className="flex items-center gap-2 text-sm text-gray-300 hover:text-white transition-colors"
         >
-          <FaArrowLeft />
+          <ArrowLeft />
           Back to Tokens
         </Link>
       </div>}
@@ -322,7 +321,7 @@ export default function AdminTokenRegister({
                   name="tokenName"
                   value={formData.tokenName}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00b8d8] focus:border-transparent"
+                  className="h-11 w-full rounded-lg border border-gray-600 bg-gray-700/50 px-4 text-sm text-white placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#00b8d8]"
                   placeholder="Bitcoin"
                   required
                 />
@@ -338,7 +337,7 @@ export default function AdminTokenRegister({
                   name="tokenSymbol"
                   value={formData.tokenSymbol}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00b8d8] focus:border-transparent uppercase"
+                  className="h-11 w-full rounded-lg border border-gray-600 bg-gray-700/50 px-4 text-sm text-white placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#00b8d8] uppercase"
                   placeholder="BTC"
                   required
                 />
@@ -357,7 +356,7 @@ export default function AdminTokenRegister({
                     setFormData(previous => ({ ...previous, blockchain }))
                   }
                   placeholder="Search blockchains..."
-                  className="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#00b8d8] focus:border-transparent"
+                  className="h-11 w-full rounded-lg border border-gray-600 bg-gray-700/50 px-4 text-sm text-white focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#00b8d8]"
                   required
                 />
               </div>
@@ -372,7 +371,7 @@ export default function AdminTokenRegister({
                   name="contractAddress"
                   value={formData.contractAddress}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00b8d8] focus:border-transparent font-mono text-sm"
+                  className="h-11 w-full rounded-lg border border-gray-600 bg-gray-700/50 px-4 font-mono text-sm text-white placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#00b8d8]"
                   placeholder="0x..."
                   required
                 />
@@ -389,7 +388,7 @@ export default function AdminTokenRegister({
             {/* IPFS Upload Section */}
             <div className="admin-panel-card mb-4 p-4">
               <div className="flex items-center gap-3 mb-3">
-                <FaUpload className="text-cyan-400" />
+                <Upload className="text-slate-500" />
                 <span className="text-sm font-semibold text-cyan-300">Upload Image to IPFS</span>
                 <div className="flex-1 h-px bg-cyan-600/30"></div>
               </div>
@@ -426,12 +425,12 @@ export default function AdminTokenRegister({
                   >
                     {isUploadingToIPFS ? (
                       <>
-                        <FaSpinner className="w-4 h-4 animate-spin" />
+                        <LoaderCircle className="w-4 h-4 animate-spin" />
                         Uploading...
                       </>
                     ) : (
                       <>
-                        <FaUpload className="w-4 h-4" />
+                        <Upload className="w-4 h-4" />
                         Upload to IPFS
                       </>
                     )}
@@ -460,7 +459,7 @@ export default function AdminTokenRegister({
                   name="imageUri"
                   value={formData.imageUri}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00b8d8] focus:border-transparent"
+                  className="h-11 w-full rounded-lg border border-gray-600 bg-gray-700/50 px-4 text-sm text-white placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#00b8d8]"
                   placeholder="https://... or ipfs://..."
                 />
                 {formData.imageUri && (
@@ -480,7 +479,7 @@ export default function AdminTokenRegister({
                   name="website"
                   value={formData.website}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00b8d8] focus:border-transparent"
+                  className="h-11 w-full rounded-lg border border-gray-600 bg-gray-700/50 px-4 text-sm text-white placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#00b8d8]"
                   placeholder="https://example.com"
                 />
               </div>
@@ -495,7 +494,7 @@ export default function AdminTokenRegister({
                   name="twitter"
                   value={formData.twitter}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00b8d8] focus:border-transparent"
+                  className="h-11 w-full rounded-lg border border-gray-600 bg-gray-700/50 px-4 text-sm text-white placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#00b8d8]"
                   placeholder="https://twitter.com/..."
                 />
               </div>
@@ -510,7 +509,7 @@ export default function AdminTokenRegister({
                   name="telegram"
                   value={formData.telegram}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00b8d8] focus:border-transparent"
+                  className="h-11 w-full rounded-lg border border-gray-600 bg-gray-700/50 px-4 text-sm text-white placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#00b8d8]"
                   placeholder="https://t.me/..."
                 />
               </div>
@@ -525,7 +524,7 @@ export default function AdminTokenRegister({
                   name="discord"
                   value={formData.discord}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00b8d8] focus:border-transparent"
+                  className="h-11 w-full rounded-lg border border-gray-600 bg-gray-700/50 px-4 text-sm text-white placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#00b8d8]"
                   placeholder="https://discord.gg/..."
                 />
               </div>
@@ -540,7 +539,7 @@ export default function AdminTokenRegister({
                   name="github"
                   value={formData.github}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00b8d8] focus:border-transparent"
+                  className="h-11 w-full rounded-lg border border-gray-600 bg-gray-700/50 px-4 text-sm text-white placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#00b8d8]"
                   placeholder="https://github.com/..."
                 />
               </div>
@@ -563,7 +562,7 @@ export default function AdminTokenRegister({
                   name="userEmail"
                   value={formData.userEmail}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00b8d8] focus:border-transparent"
+                  className="h-11 w-full rounded-lg border border-gray-600 bg-gray-700/50 px-4 text-sm text-white placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#00b8d8]"
                   placeholder="user@example.com"
                 />
                 <p className="text-xs text-gray-400 mt-1">
@@ -644,7 +643,7 @@ export default function AdminTokenRegister({
                 </>
               ) : (
                 <>
-                  <FaCheck />
+                  <Check />
                   Register Token
                 </>
               )}

@@ -4,7 +4,7 @@ import AnalyticsDashboard from '@/components/admin/AnalyticsDashboard';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { FaBullhorn, FaChartBar, FaEye, FaGlobe, FaServer, FaShoppingCart, FaUsers, FaWallet } from 'react-icons/fa';
+import { BarChart3, Eye, Globe2, Megaphone, Server, ShoppingCart, Users, Wallet } from 'lucide-react';
 
 const AdminStatsClient = dynamic(() => Promise.resolve(AdminStatsComponent), {
     ssr: true,
@@ -66,7 +66,7 @@ function AdminStatsComponent() {
             {!stats ? (
                 <div className="text-center py-12">
                     <div className="w-16 h-16 bg-gray-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <FaChartBar className="w-8 h-8 text-gray-400 animate-pulse" />
+                        <BarChart3 className="w-8 h-8 text-slate-400 animate-pulse" />
                     </div>
                     <p className="text-gray-400 font-medium" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                         Loading statistics...
@@ -78,7 +78,7 @@ function AdminStatsComponent() {
                         <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-lg p-6 shadow-xl hover:bg-gray-800/50 transition-all duration-200">
                             <div className="flex items-center justify-between mb-4">
                                 <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center border border-blue-500/30">
-                                    <FaUsers className="w-6 h-6 text-blue-400" />
+                                    <Users className="w-6 h-6 text-slate-500" />
                                 </div>
                                 <div className="text-right">
                                     <div className="text-2xl font-bold text-white" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
@@ -99,7 +99,7 @@ function AdminStatsComponent() {
                         <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-lg p-6 shadow-xl hover:bg-gray-800/50 transition-all duration-200">
                             <div className="flex items-center justify-between mb-4">
                                 <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center border border-green-500/30">
-                                    <FaGlobe className="w-6 h-6 text-green-400" />
+                                    <Globe2 className="w-6 h-6 text-slate-500" />
                                 </div>
                                 <div className="text-right">
                                     <div className="text-2xl font-bold text-green-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
@@ -120,7 +120,7 @@ function AdminStatsComponent() {
                         <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-lg p-6 shadow-xl hover:bg-gray-800/50 transition-all duration-200">
                             <div className="flex items-center justify-between mb-4">
                                 <div className="w-12 h-12 bg-cyan-500/20 rounded-lg flex items-center justify-center border border-cyan-500/30">
-                                    <FaEye className="w-6 h-6 text-cyan-400" />
+                                    <Eye className="w-6 h-6 text-slate-500" />
                                 </div>
                                 <div className="text-right">
                                     <div className="text-2xl font-bold text-cyan-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
@@ -141,7 +141,7 @@ function AdminStatsComponent() {
                         <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-lg p-6 shadow-xl hover:bg-gray-800/50 transition-all duration-200">
                             <div className="flex items-center justify-between mb-4">
                                 <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center border border-purple-500/30">
-                                    <FaWallet className="w-6 h-6 text-purple-400" />
+                                    <Wallet className="w-6 h-6 text-slate-500" />
                                 </div>
                                 <div className="text-right">
                                     <div className="text-2xl font-bold text-purple-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
@@ -164,7 +164,7 @@ function AdminStatsComponent() {
                     <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-lg shadow-xl">
                         <div className="p-6 border-b border-gray-700/20">
                             <h3 className="font-semibold text-white flex items-center gap-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                                <FaServer className="w-5 h-5 text-blue-400" />
+                                <Server className="w-5 h-5 text-slate-500" />
                                 Platform Summary
                             </h3>
                         </div>
@@ -172,7 +172,7 @@ function AdminStatsComponent() {
                             <div className="grid gap-6 sm:grid-cols-3">
                                 <div className="text-center bg-gray-700/30 border border-gray-600/30 rounded-lg p-6 hover:bg-gray-700/40 transition-all duration-200">
                                     <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center border border-blue-500/30 mx-auto mb-4">
-                                        <FaUsers className="w-6 h-6 text-blue-400" />
+                                        <Users className="w-6 h-6 text-slate-500" />
                                     </div>
                                     <div className="text-2xl font-bold text-white mb-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                                         {stats.profiles.count}
@@ -187,7 +187,7 @@ function AdminStatsComponent() {
 
                                 <div className="text-center bg-gray-700/30 border border-gray-600/30 rounded-lg p-6 hover:bg-gray-700/40 transition-all duration-200">
                                     <div className="w-12 h-12 bg-orange-500/20 rounded-lg flex items-center justify-center border border-orange-500/30 mx-auto mb-4">
-                                        <FaShoppingCart className="w-6 h-6 text-orange-400" />
+                                        <ShoppingCart className="w-6 h-6 text-slate-500" />
                                     </div>
                                     <div className="text-2xl font-bold text-white mb-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                                         {stats.orders.onchain.count}
@@ -199,7 +199,7 @@ function AdminStatsComponent() {
 
                                 <div className="text-center bg-gray-700/30 border border-gray-600/30 rounded-lg p-6 hover:bg-gray-700/40 transition-all duration-200">
                                     <div className="w-12 h-12 bg-pink-500/20 rounded-lg flex items-center justify-center border border-pink-500/30 mx-auto mb-4">
-                                        <FaBullhorn className="w-6 h-6 text-pink-400" />
+                                        <Megaphone className="w-6 h-6 text-slate-500" />
                                     </div>
                                     <div className="text-2xl font-bold text-white mb-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                                         {stats.campaigns.count}

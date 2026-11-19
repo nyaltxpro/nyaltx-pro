@@ -4,14 +4,14 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { Dialog } from '@/components/reui/dialog';
 import React, { useEffect, useState } from 'react';
-import { FaCopy, FaEye, FaTrash, FaUpload, FaImage, FaDownload } from 'react-icons/fa';
+import { Copy, Download, Eye, ImageIcon, Trash2, Upload } from 'lucide-react';
 
 const AdminBannersClient = dynamic(() => Promise.resolve(AdminBannersComponent), {
     ssr: false,
     loading: () => (
         <div className="text-center py-12">
             <div className="w-16 h-16 bg-gray-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
-                <FaImage className="w-8 h-8 text-gray-400 animate-pulse" />
+                <ImageIcon className="w-8 h-8 text-slate-400 animate-pulse" />
             </div>
             <p className="text-gray-400 font-medium" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                 Loading banners...
@@ -236,7 +236,7 @@ function AdminBannersComponent() {
                                 }`}
                             style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                         >
-                            <FaUpload className="w-4 h-4" />
+                            <Upload className="w-4 h-4" />
                             {uploading ? 'Uploading...' : 'Upload Banners'}
                         </label>
                     </div>
@@ -268,7 +268,7 @@ function AdminBannersComponent() {
             {/* Upload Instructions */}
             <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-lg p-6 shadow-xl">
                 <h2 className="font-semibold mb-4 text-white flex items-center gap-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                    <FaImage className="w-5 h-5 text-blue-400" />
+                    <ImageIcon className="w-5 h-5 text-slate-500" />
                     Upload Instructions
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -310,7 +310,7 @@ function AdminBannersComponent() {
                 <div className="p-6 border-b border-gray-700/20">
                     <div className="flex items-center justify-between">
                         <h2 className="font-semibold text-white flex items-center gap-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                            <FaImage className="w-5 h-5 text-cyan-400" />
+                            <ImageIcon className="w-5 h-5 text-slate-500" />
                             Current Banners
                             {banners.length > 0 && (
                                 <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
@@ -325,7 +325,7 @@ function AdminBannersComponent() {
                     {loading ? (
                         <div className="text-center py-12">
                             <div className="w-16 h-16 bg-gray-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <FaImage className="w-8 h-8 text-gray-400 animate-pulse" />
+                                <ImageIcon className="w-8 h-8 text-slate-400 animate-pulse" />
                             </div>
                             <p className="text-gray-400 font-medium" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                                 Loading banners...
@@ -334,7 +334,7 @@ function AdminBannersComponent() {
                     ) : banners.length === 0 ? (
                         <div className="text-center py-12">
                             <div className="w-16 h-16 bg-gray-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <FaImage className="w-8 h-8 text-gray-400" />
+                                <ImageIcon className="w-8 h-8 text-slate-400" />
                             </div>
                             <p className="text-gray-400 font-medium mb-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                                 No banners found
@@ -411,7 +411,7 @@ function AdminBannersComponent() {
                                                 title="View full size"
                                                 style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                                             >
-                                                <FaEye className="w-3 h-3" />
+                                                <Eye className="w-3 h-3" />
                                                 View
                                             </button>
                                             <button
@@ -420,7 +420,7 @@ function AdminBannersComponent() {
                                                 title="Copy URL"
                                                 style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                                             >
-                                                <FaCopy className="w-3 h-3" />
+                                                <Copy className="w-3 h-3" />
                                                 Copy
                                             </button>
                                         </div>
@@ -431,7 +431,7 @@ function AdminBannersComponent() {
                                                 title="Edit hyperlink & metadata"
                                                 style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                                             >
-                                                <FaUpload className="w-3 h-3" />
+                                                <Upload className="w-3 h-3" />
                                                 Edit
                                             </button>
                                             <button
@@ -440,7 +440,7 @@ function AdminBannersComponent() {
                                                 title="Delete banner"
                                                 style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                                             >
-                                                <FaTrash className="w-3 h-3" />
+                                                <Trash2 className="w-3 h-3" />
                                                 Delete
                                             </button>
                                         </div>
