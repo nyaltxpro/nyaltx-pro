@@ -226,6 +226,20 @@
   margin-left: 0;
 }
 
+.admin-panel-filter-bar.admin-panel-news-filters {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 12px 24px;
+}
+
+.admin-panel-filter-bar.admin-promo-code-filters {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
+}
+
 .admin-panel-filter-bar.admin-blog-filters input[type='search'] {
   min-width: 0;
   max-width: 12rem;
@@ -320,4 +334,8 @@
 
 .admin-panel-shell :is(h1, h2) {
   font-family: Georgia, 'Times New Roman', serif !important;
+}
+
+.admin-panel-shell :is(h1, h2).admin-panel-font-sans {
+  font-family: var(--admin-font-sans) !important;
 }

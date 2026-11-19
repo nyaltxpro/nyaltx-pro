@@ -16,7 +16,6 @@ import {
   Activity,
   BarChart3,
   ChevronDown,
-  ChevronsUpDown,
   Coins,
   Gift,
   Image as ImageIcon,
@@ -160,8 +159,10 @@ export default function AdminSidebar({
                   <span className="block truncate text-sm font-semibold tracking-tight">NYALTX</span>
                   <span className="block truncate text-xs text-slate-500">Admin workspace</span>
                 </span>
-                <ChevronsUpDown
-                  className={`h-3.5 w-3.5 shrink-0 text-slate-500 ${isCollapsed ? 'md:hidden' : ''}`}
+                <ChevronDown
+                  className={`size-4 shrink-0 text-slate-400 transition-transform group-data-[state=open]:rotate-180 ${
+                    isCollapsed ? 'md:hidden' : ''
+                  }`}
                   aria-hidden="true"
                 />
               </button>
@@ -170,16 +171,30 @@ export default function AdminSidebar({
               <DropdownMenuLabel className="px-3 py-2 text-xs text-slate-400">
                 Admin workspace
               </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link href="/adminpanel" onClick={() => isMobileMenuOpen && toggleMobileMenu()}>
-                  <LayoutDashboard className="mr-2 h-4 w-4" aria-hidden="true" />
+              <DropdownMenuSeparator className="my-1 h-px bg-white/10" />
+              <DropdownMenuItem
+                asChild
+                className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 outline-none transition-colors focus:bg-white/10 focus:text-white data-[highlighted]:bg-white/10 data-[highlighted]:text-white"
+              >
+                <Link
+                  href="/adminpanel"
+                  className="flex w-full items-center gap-2.5"
+                  onClick={() => isMobileMenuOpen && toggleMobileMenu()}
+                >
+                  <LayoutDashboard className="size-4 shrink-0 text-slate-400" aria-hidden="true" />
                   Dashboard
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/adminpanel/profiles" onClick={() => isMobileMenuOpen && toggleMobileMenu()}>
-                  <Users className="mr-2 h-4 w-4" aria-hidden="true" />
+              <DropdownMenuItem
+                asChild
+                className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 outline-none transition-colors focus:bg-white/10 focus:text-white data-[highlighted]:bg-white/10 data-[highlighted]:text-white"
+              >
+                <Link
+                  href="/adminpanel/profiles"
+                  className="flex w-full items-center gap-2.5"
+                  onClick={() => isMobileMenuOpen && toggleMobileMenu()}
+                >
+                  <Users className="size-4 shrink-0 text-slate-400" aria-hidden="true" />
                   Profiles
                 </Link>
               </DropdownMenuItem>
@@ -309,24 +324,41 @@ export default function AdminSidebar({
                 />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" side="top" className="z-[10000] w-56">
-              <DropdownMenuLabel className="px-3 py-2 text-xs text-slate-400">
-                Administrator
+            <DropdownMenuContent align="start" side="top" className="z-[10000] w-64">
+              <DropdownMenuLabel className="px-3 py-2.5">
+                <span className="block text-sm font-medium text-slate-100">Administrator</span>
+                <span className="mt-0.5 block text-xs font-normal text-slate-500">
+                  NYALTX Admin account
+                </span>
               </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link href="/adminpanel/profiles" onClick={() => isMobileMenuOpen && toggleMobileMenu()}>
-                  <Settings className="mr-2 h-4 w-4" aria-hidden="true" />
-                  Profiles
+              <DropdownMenuSeparator className="my-1.5 h-px bg-white/10" />
+              <DropdownMenuItem
+                asChild
+                className="flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-slate-200 outline-none transition-colors focus:bg-white/10 focus:text-white data-[highlighted]:bg-white/10 data-[highlighted]:text-white"
+              >
+                <Link
+                  href="/adminpanel/profiles"
+                  className="flex w-full items-center gap-3"
+                  onClick={() => isMobileMenuOpen && toggleMobileMenu()}
+                >
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-white/5 text-slate-400">
+                    <Settings className="size-4" aria-hidden="true" />
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block text-sm">Profile settings</span>
+                    <span className="mt-0.5 block text-xs text-slate-500">
+                      Manage administrator profile
+                    </span>
+                  </span>
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuSeparator />
+              <DropdownMenuSeparator className="my-1.5 h-px bg-white/10" />
               <DropdownMenuItem
                 onSelect={handleLogout}
                 disabled={isLoggingOut}
-                className="cursor-pointer text-rose-300"
+                className="flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-rose-300 outline-none transition-colors focus:bg-rose-500/10 focus:text-rose-200 data-[highlighted]:bg-rose-500/10 data-[highlighted]:text-rose-200 disabled:opacity-50"
               >
-                <LogOut className="mr-2 h-4 w-4" aria-hidden="true" />
+                <LogOut className="size-4 shrink-0" aria-hidden="true" />
                 {isLoggingOut ? 'Logging out...' : 'Log out'}
               </DropdownMenuItem>
             </DropdownMenuContent>

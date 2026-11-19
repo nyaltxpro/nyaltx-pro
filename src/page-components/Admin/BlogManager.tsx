@@ -473,7 +473,7 @@ const AdminBlogManagerComponent = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="min-w-0 space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold text-white">Blog Management</h1>
@@ -527,7 +527,7 @@ const AdminBlogManagerComponent = () => {
         </div>
       </Filters>
 
-      <div className="grid gap-4">
+      <div className="grid min-w-0 gap-4">
         {isListLoading ? (
           <div className="flex items-center gap-3 rounded-lg border border-white/10 bg-white/5 px-4 py-6 text-white/70">
             <Spinner className="h-4 w-4" /> Loading posts...
@@ -537,9 +537,9 @@ const AdminBlogManagerComponent = () => {
             No blog posts yet.
           </div>
         ) : (
-          <div className="space-y-3">
-          <div className="max-w-full overflow-x-auto rounded-lg border border-white/10">
-            <table data-slot="blog-table" className="w-full min-w-[900px] text-left">
+          <div className="min-w-0 space-y-3">
+          <div className="w-full min-w-0 max-w-full overflow-x-auto rounded-lg border border-white/10 md:w-fit">
+            <table data-slot="blog-table" className="w-max min-w-[900px] text-left">
               <thead className="border-b border-white/10 bg-white/[0.03] text-xs uppercase tracking-wider text-white/50">
                 <tr>
                   <th className="px-4 py-3 font-medium">Post</th>

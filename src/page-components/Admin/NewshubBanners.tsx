@@ -343,25 +343,6 @@ function NewshubBannersComponent() {
         </Alert>
       )}
 
-      {/* Guide Banner */}
-      <div className="bg-linear-to-r from-[#0a2a5c]/50 via-[#1560a6]/20 to-[#0a2a5c]/50 border border-[#00b8d8]/20 rounded-xl p-5 backdrop-blur-md">
-        <div className="flex items-start gap-4">
-          <div className="w-10 h-10 rounded-lg bg-[#00b8d8]/20 border border-[#00b8d8]/40 flex items-center justify-center shrink-0">
-            <ImageIcon className="w-5 h-5 text-slate-500" />
-          </div>
-          <div className="text-sm">
-            <h2 className="font-semibold text-white">How Newshub Banners Work</h2>
-            <p className="newshub-banners-guide text-gray-300 mt-1">
-              Banners added here appear dynamically in the top sliding carousel on{' '}
-              <strong className="text-white">https://www.nyaltx.pro/newshub</strong>.
-              Recommended banner aspect ratio is <strong>8:3</strong> (e.g. 1600×600 px or minimum 1200×450 px).
-              In addition, approved user-submitted paid news that choose the <em>Full Service / Featured Slider</em> plan
-              also integrate automatically into the carousel.
-            </p>
-          </div>
-        </div>
-      </div>
-
       {/* Banners List / Grid */}
       {loading ? (
         <div className="text-center py-16">

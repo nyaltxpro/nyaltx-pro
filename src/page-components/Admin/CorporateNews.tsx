@@ -25,7 +25,7 @@ const AdminCorporateNewsClient = dynamic(() => Promise.resolve(AdminCorporateNew
     loading: () => (
         <div className="text-center py-12">
             <Newspaper className="mx-auto mb-4 h-10 w-10 animate-pulse text-gray-400" aria-hidden="true" />
-            <p className="text-gray-400 font-medium" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+            <p className="text-gray-400 font-medium">
                 Loading news management...
             </p>
         </div>
@@ -559,27 +559,26 @@ function AdminCorporateNewsComponent() {
     const paidNewsCount = news.filter(isPaidNewsSubmission).length;
 
     return (
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-6">
             {confirmationDialog}
-            <div className="flex items-center justify-between">
-                <div>
+            <div className="flex flex-wrap items-start justify-between gap-4">
+                <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-3">
-                        <div>
-                            <h1 className="text-2xl font-semibold text-white" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                        <div className="min-w-0">
+                            <h1 className="admin-panel-font-sans break-words text-xl font-semibold text-white sm:text-2xl">
                                 News Management
                             </h1>
                             <p className="mt-1 text-sm text-gray-400">Review submissions and publish corporate updates.</p>
                         </div>
                     </div>
-                    <p className="text-gray-400 text-sm mt-1" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                    <p className="text-gray-400 text-sm mt-1">
                         Review paid submissions and manage corporate announcements separately
                     </p>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex shrink-0 items-center gap-3">
                     <Button
                         variant="outline"
                         onClick={handleCreateNews}
-                        style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                     >
                         <Plus className="h-4 w-4" aria-hidden="true" />
                         Create News Article
@@ -618,7 +617,7 @@ function AdminCorporateNewsComponent() {
             >
                 <div className="admin-panel-form flex h-full max-h-screen w-full flex-col overflow-y-auto border-l border-white/10 bg-[#0d0d0d] p-6">
                     <div className="mb-5 flex items-center justify-between gap-4 border-b border-white/10 pb-4">
-                        <h2 className="font-semibold text-white flex items-center gap-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                        <h2 className="font-semibold text-white flex items-center gap-2">
                             <Newspaper className="h-5 w-5 text-slate-300" aria-hidden="true" />
                             {editingNews ? 'Edit News Article' : 'Create News Article'}
                         </h2>
@@ -882,9 +881,9 @@ function AdminCorporateNewsComponent() {
             </Drawer>
 
             {/* News List */}
-            <div className="admin-panel-card overflow-hidden">
+            <div className="min-w-0 overflow-hidden">
                 <div className="p-6 border-b border-gray-700/20 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <h3 className="font-semibold text-white flex items-center gap-2" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                    <h3 className="font-semibold text-white flex items-center gap-2">
                         <Newspaper className="w-5 h-5 text-slate-300" />
                         {submissionFilter === 'paid'
                             ? 'Paid News Submissions'
@@ -934,7 +933,7 @@ function AdminCorporateNewsComponent() {
                     </div>
                 </div>
 
-                <Filters className="border-b border-white/10 px-6 py-3">
+                <Filters className="admin-panel-news-filters px-6 py-3">
                     <input
                         type="search"
                         value={newsSearch}
