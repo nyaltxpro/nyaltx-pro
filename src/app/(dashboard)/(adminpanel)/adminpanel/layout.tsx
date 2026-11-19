@@ -1,11 +1,24 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
 import { Menu, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import AdminBreadcrumb from '@/components/AdminBreadcrumb';
+import VerifiedBadge from '@/components/VerifiedBadge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/reui/badge';
+import { ToasterProvider } from '@/components/reui/sonner';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/reui/dropdown-menu';
 
 const AdminSidebar = dynamic(() => import('@/components/AdminSidebar'), {
   ssr: false,
@@ -47,6 +60,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen text-white">
+      <ToasterProvider />
       <AdminSidebar
         isMobileMenuOpen={isMobileMenuOpen}
         toggleMobileMenu={() => setIsMobileMenuOpen(open => !open)}
@@ -83,12 +97,47 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             </button>
             <AdminBreadcrumb items={breadcrumbItems} />
           </div>
-          <div
-            aria-hidden="true"
-            className="flex h-8 w-8 items-center justify-center rounded-full border border-cyan-400/20 bg-cyan-400/10 text-xs font-semibold text-cyan-200"
-          >
-            A
-          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                aria-label="Open admin account menu"
+                className="flex items-center gap-3 rounded-lg px-2 py-1.5 transition-colors hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/50"
+              >
+                <Badge variant="info-light" size="sm" radius="full">
+                  Admin
+                </Badge>
+                <div className="relative">
+                  <Avatar size="lg" aria-label="Administrator account">
+                    <AvatarImage
+                      src="https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=96&h=96&dpr=2&q=80"
+                      alt="Aron Thompson"
+                    />
+                    <AvatarFallback>AT</AvatarFallback>
+                  </Avatar>
+                  <span
+                    aria-label="Verified administrator"
+                    role="img"
+                    className="absolute -bottom-0.5 -right-0.5"
+                  >
+                    <VerifiedBadge />
+                  </span>
+                </div>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel className="px-3 py-2 text-xs text-slate-400">
+                NYALTX administrator
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator className="my-1 h-px bg-white/10" />
+              <DropdownMenuItem asChild className="cursor-pointer rounded-md px-3 py-2 outline-none focus:bg-white/10">
+                <Link href="/adminpanel">Admin overview</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild className="cursor-pointer rounded-md px-3 py-2 outline-none focus:bg-white/10">
+                <Link href="/adminpanel/email-management">Email management</Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </header>
         <main className="admin-panel-content p-4 md:p-6">{children}</main>
       </div>

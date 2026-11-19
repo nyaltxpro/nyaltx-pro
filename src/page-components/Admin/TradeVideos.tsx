@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { FaPlus, FaRegSave, FaTrash, FaYoutube } from 'react-icons/fa';
 import { HiRefresh } from 'react-icons/hi';
 import toast from 'react-hot-toast';
+import { Checkbox } from '@/components/reui/checkbox';
 
 interface TradeVideo {
   _id: string;
@@ -244,8 +245,7 @@ export default function AdminTradeVideos() {
               />
             </div>
             <label className="flex items-center gap-3 text-sm text-gray-300">
-              <input
-                type="checkbox"
+              <Checkbox
                 name="isActive"
                 checked={formState.isActive}
                 onChange={handleInputChange}
@@ -332,8 +332,7 @@ export default function AdminTradeVideos() {
 
                   <div className="flex flex-wrap items-center gap-3">
                     <label className="flex items-center gap-2 text-sm text-gray-300">
-                      <input
-                        type="checkbox"
+                      <Checkbox
                         checked={video.isActive}
                         onChange={e => handleUpdate(video._id, { isActive: e.target.checked })}
                         className="h-4 w-4 rounded border-gray-700 bg-[#0c141c]"

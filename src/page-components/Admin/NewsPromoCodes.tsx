@@ -2,9 +2,14 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
-import AdminModal from '@/components/AdminModal';
+import { Drawer } from '@/components/reui/drawer';
+import { Checkbox } from '@/components/reui/checkbox';
+import { CalendarInput } from '@/components/reui/calendar';
+import { Button } from '@/components/reui/button';
+import { Field } from '@/components/reui/field';
+import { Filters } from '@/components/reui/filters';
 import { PROMO_PACKAGE_OPTIONS } from '@/lib/promoPackages';
-import { CalendarClock, Percent, Plus, Search, Tag, X } from 'lucide-react';
+import { Plus, Search, Tag, X } from 'lucide-react';
 
 interface NewsPromoCode {
   code: string;
@@ -171,25 +176,25 @@ export default function NewsPromoCodes() {
           Choose which News Hub or pricing packages each percentage discount applies to. Codes can stay active indefinitely or expire on a date you choose.
         </p>
         </div>
-        <button
+        <Button
+          variant="outline"
+          size="sm"
           type="button"
           onClick={() => setIsCreateDrawerOpen(true)}
-          className="inline-flex items-center gap-2 rounded-lg border border-white/15 bg-transparent px-4 py-2 text-sm font-medium text-white/80 transition-colors hover:border-cyan-400/50 hover:text-cyan-200"
         >
           <Plus size={16} aria-hidden="true" />
           Create promo code
-        </button>
+        </Button>
       </header>
 
       {isCreateDrawerOpen && (
-        <AdminModal
+        <Drawer
           open={isCreateDrawerOpen}
           onClose={() => {
             if (!saving) setIsCreateDrawerOpen(false);
           }}
           title="Create Promo Code"
           maxWidth="max-w-xl"
-          placement="right"
         >
           <form onSubmit={createPromoCode} className="admin-panel-form flex h-full min-h-full w-full flex-col overflow-hidden border-l border-white/10 bg-[#0d0d0d]">
             <header className="flex items-center justify-between gap-4 border-b border-white/10 px-6 py-5">
@@ -197,20 +202,21 @@ export default function NewsPromoCodes() {
                 <Tag size={18} className="text-cyan-300" aria-hidden="true" />
                 Create a promo code
               </h2>
-              <button
+              <Button
+                variant="ghost"
+                size="icon"
                 type="button"
                 onClick={() => setIsCreateDrawerOpen(false)}
                 disabled={saving}
                 aria-label="Close promo code form"
-                className="text-gray-400 transition-colors hover:text-white disabled:opacity-50"
               >
                 <X size={20} aria-hidden="true" />
-              </button>
+              </Button>
             </header>
             <div className="flex-1 space-y-5 overflow-y-auto p-6">
-              <label className="block text-sm text-gray-300">
-                <span className="mb-2 flex items-center gap-2"><Tag size={14} aria-hidden="true" />Promo code</span>
+              <Field id="promo-code" label="Promo code">
                 <input
+                  id="promo-code"
                   value={code}
                   onChange={event => setCode(event.target.value.toUpperCase())}
                   minLength={3}
@@ -220,10 +226,10 @@ export default function NewsPromoCodes() {
                   placeholder="NEWS10"
                   className="w-full px-3 py-2"
                 />
-              </label>
-              <label className="block text-sm text-gray-300">
-                <span className="mb-2 flex items-center gap-2"><Percent size={14} aria-hidden="true" />Discount percent (1-99%)</span>
+              </Field>
+              <Field id="promo-discount" label="Discount percent (1-99%)" required>
                 <input
+                  id="promo-discount"
                   type="number"
                   min={1}
                   max={99}
@@ -233,16 +239,16 @@ export default function NewsPromoCodes() {
                   required
                   className="w-full px-3 py-2"
                 />
-              </label>
-              <label className="block text-sm text-gray-300">
-                <span className="mb-2 flex items-center gap-2"><CalendarClock size={14} aria-hidden="true" />Expires at (optional)</span>
-                <input
+              </Field>
+              <Field id="promo-expires-at" label="Expires at (optional)">
+                <CalendarInput
+                  id="promo-expires-at"
                   type="datetime-local"
                   value={expiresAt}
                   onChange={event => setExpiresAt(event.target.value)}
                   className="w-full px-3 py-2"
                 />
-              </label>
+              </Field>
               <fieldset className="space-y-3">
                 <legend className="flex items-center gap-2 text-sm font-medium text-gray-300">
                   <Package size={14} aria-hidden="true" />
@@ -254,8 +260,7 @@ export default function NewsPromoCodes() {
                       <legend className="px-1 text-sm font-medium text-gray-200">{group.label}</legend>
                       {group.packages.map(option => (
                         <label key={option.id} className="flex items-center gap-2 text-sm text-gray-300">
-                          <input
-                            type="checkbox"
+                          <Checkbox
                             checked={packageIds.includes(option.id)}
                             onChange={event => {
                               setPackageIds(current =>
@@ -282,31 +287,42 @@ export default function NewsPromoCodes() {
               {error && <p role="alert" className="text-sm text-red-300">{error}</p>}
             </div>
             <footer className="flex justify-end gap-3 border-t border-white/10 px-6 py-4">
-              <button
+              <Button
+                variant="outline"
+                size="sm"
                 type="button"
                 onClick={() => setIsCreateDrawerOpen(false)}
                 disabled={saving}
-                className="rounded-lg border border-white/15 px-4 py-2 text-sm text-gray-300 hover:text-white disabled:opacity-50"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="default"
+                size="sm"
                 type="submit"
                 disabled={saving || packageIds.length === 0}
-                className="inline-flex items-center gap-2 rounded-lg border border-cyan-400/30 bg-transparent px-4 py-2 text-sm font-medium text-cyan-100 transition-colors hover:border-cyan-300/60 disabled:opacity-50"
               >
                 <Plus size={15} aria-hidden="true" />
                 {saving ? 'Creating...' : 'Create Code'}
-              </button>
+              </Button>
             </footer>
           </form>
-        </AdminModal>
+        </Drawer>
       )}
 
       {error && <p role="alert" className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">{error}</p>}
       {notice && <p role="status" className="rounded-lg border border-green-500/30 bg-green-500/10 p-3 text-sm text-green-300">{notice}</p>}
 
-      <div className="admin-panel-filter-bar">
+      <Filters
+        activeFilters={[
+          ...(searchTerm.trim()
+            ? [{ id: 'promo-search', label: `Search: ${searchTerm}`, onRemove: () => setSearchTerm('') }]
+            : []),
+          ...(statusFilter !== 'all'
+            ? [{ id: 'promo-status', label: `Status: ${statusFilter}`, onRemove: () => setStatusFilter('all') }]
+            : []),
+        ]}
+      >
         <div className="relative min-w-[220px] flex-1">
           <Search className="admin-panel-input-icon" aria-hidden="true" />
           <input
@@ -329,7 +345,7 @@ export default function NewsPromoCodes() {
           <option value="inactive">Inactive</option>
           <option value="expired">Expired</option>
         </select>
-      </div>
+      </Filters>
 
       <section className="admin-panel-card overflow-hidden">
         <div className="border-b border-gray-700/40 px-5 py-4">
@@ -373,11 +389,12 @@ export default function NewsPromoCodes() {
                       </td>
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-2">
-                          <input
+                          <CalendarInput
                             type="datetime-local"
+                            showIcon={false}
                             value={expirationDrafts[promo.code] ?? ''}
                             onChange={event => setExpirationDrafts(current => ({ ...current, [promo.code]: event.target.value }))}
-                            className="rounded border border-gray-600 bg-gray-900 px-2 py-1 text-xs text-white"
+                            className="min-w-[12rem] rounded border border-gray-600 bg-gray-900 px-2 py-1 text-xs text-white"
                             aria-label={`Expiration date for ${promo.code}`}
                           />
                           <button

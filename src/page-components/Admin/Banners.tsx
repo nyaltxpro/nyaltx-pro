@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import AdminModal from '@/components/AdminModal';
+import { Dialog } from '@/components/reui/dialog';
 import React, { useEffect, useState } from 'react';
 import { FaCopy, FaEye, FaTrash, FaUpload, FaImage, FaDownload } from 'react-icons/fa';
 
@@ -454,7 +454,7 @@ function AdminBannersComponent() {
 
             {/* Metadata Edit Modal */}
             {editingMetadata && (
-                <AdminModal
+                <Dialog
                     open={Boolean(editingMetadata)}
                     onClose={handleCancelEdit}
                     title="Edit Banner Metadata"
@@ -529,7 +529,7 @@ function AdminBannersComponent() {
                             </button>
                         </div>
                     </div>
-                </AdminModal>
+                </Dialog>
             )}
 
             {/* Usage Examples */}

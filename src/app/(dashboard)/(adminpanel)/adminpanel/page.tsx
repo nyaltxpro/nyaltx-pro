@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { Search } from 'lucide-react';
+import { Card } from '@/components/reui/card';
+import { Button } from '@/components/reui/button';
+import { IconTile } from '@/components/reui/icon-tile';
 import { FaChartBar, FaCheck, FaChevronLeft, FaChevronRight, FaCog, FaCoins, FaCrown, FaEye, FaImage, FaListUl, FaTimes, FaTrash, FaUsers } from 'react-icons/fa';
 
 export default function AdminDashboardComponent() {
@@ -155,9 +158,9 @@ export default function AdminDashboardComponent() {
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           <div className="bg-black/40 backdrop-blur-xl border border-gray-800/60 rounded-3xl p-6 shadow-2xl hover:shadow-[#00d4aa]/20 transition-all duration-300">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center">
+              <IconTile tone="violet">
                 <FaCrown className="w-6 h-6 text-white" />
-              </div>
+              </IconTile>
               <div>
                 <div className="text-gray-400 text-sm font-medium" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                   Total Memberships
@@ -171,9 +174,9 @@ export default function AdminDashboardComponent() {
 
           <div className="bg-black/40 backdrop-blur-xl border border-gray-800/60 rounded-3xl p-6 shadow-2xl hover:shadow-[#3b82f6]/20 transition-all duration-300">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-gradient-to-r from-[#00d4aa] to-[#3b82f6] rounded-2xl flex items-center justify-center">
+              <IconTile tone="cyan">
                 <FaCoins className="w-6 h-6 text-white" />
-              </div>
+              </IconTile>
               <div>
                 <div className="text-gray-400 text-sm font-medium" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                   Registered Tokens
@@ -187,9 +190,9 @@ export default function AdminDashboardComponent() {
 
           <div className="bg-black/40 backdrop-blur-xl border border-gray-800/60 rounded-3xl p-6 shadow-2xl hover:shadow-cyan-500/20 transition-all duration-300">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-2xl flex items-center justify-center">
+              <IconTile tone="cyan">
                 <FaUsers className="w-6 h-6 text-white" />
-              </div>
+              </IconTile>
               <div>
                 <div className="text-gray-400 text-sm font-medium" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                   Total Users
@@ -203,9 +206,9 @@ export default function AdminDashboardComponent() {
 
           <div className="bg-black/40 backdrop-blur-xl border border-gray-800/60 rounded-3xl p-6 shadow-2xl hover:shadow-orange-500/20 transition-all duration-300">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl flex items-center justify-center">
+              <IconTile tone="amber">
                 <FaListUl className="w-6 h-6 text-white" />
-              </div>
+              </IconTile>
               <div>
                 <div className="text-gray-400 text-sm font-medium" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                   Active Listings
@@ -219,7 +222,7 @@ export default function AdminDashboardComponent() {
         </div>
 
         {/* Enhanced Pending Tokens Section */}
-        <div className="admin-panel-card p-8">
+        <Card className="p-8">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-white flex items-center gap-3" style={{ fontFamily: 'Space Grotesk, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
               <div className="w-8 h-8 bg-gradient-to-r from-amber-500 to-orange-500 rounded-lg flex items-center justify-center">
@@ -284,7 +287,7 @@ export default function AdminDashboardComponent() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <div className="admin-panel-card overflow-hidden">
+              <Card className="overflow-hidden">
                 <table className="min-w-full">
                   <thead className="bg-gray-800/50">
                     <tr>
@@ -342,33 +345,35 @@ export default function AdminDashboardComponent() {
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex gap-2">
-                            <button
+                            <Button
+                              size="sm"
                               disabled={busyId === t.id}
                               onClick={() => updateStatus(t.id, 'approved')}
-                              className="flex items-center gap-2 px-4 py-2 bg-green-500/20 hover:bg-green-500/30 text-green-300 rounded-xl transition-all duration-200 disabled:opacity-50 border border-green-500/30"
                               style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                             >
                               <FaCheck className="w-3 h-3" />
                               Approve
-                            </button>
-                            <button
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="destructive"
                               disabled={busyId === t.id}
                               onClick={() => updateStatus(t.id, 'rejected')}
-                              className="flex items-center gap-2 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-300 rounded-xl transition-all duration-200 disabled:opacity-50 border border-red-500/30"
                               style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                             >
                               <FaTimes className="w-3 h-3" />
                               Reject
-                            </button>
-                            <button
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="destructive"
                               disabled={busyId === t.id}
                               onClick={() => remove(t.id)}
-                              className="flex items-center gap-2 px-4 py-2 bg-gray-500/20 hover:bg-gray-500/30 text-gray-300 rounded-xl transition-all duration-200 disabled:opacity-50 border border-gray-500/30"
                               style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                             >
                               <FaTrash className="w-3 h-3" />
                               Delete
-                            </button>
+                            </Button>
                           </div>
                         </td>
                       </tr>
@@ -381,7 +386,7 @@ export default function AdminDashboardComponent() {
                     )}
                   </tbody>
                 </table>
-              </div>
+              </Card>
 
               {/* Enhanced Pagination */}
               <div className="flex items-center justify-between mt-6 p-4 bg-gray-900/30 rounded-2xl border border-gray-700/30 backdrop-blur-sm">
@@ -390,29 +395,31 @@ export default function AdminDashboardComponent() {
                   Total <span className="font-semibold text-white">{total}</span> tokens
                 </div>
                 <div className="flex items-center gap-3">
-                  <button
-                    className="flex items-center gap-2 px-4 py-2 bg-gray-800/50 hover:bg-gray-700/50 rounded-xl text-gray-300 hover:text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  <Button
+                    variant="outline"
+                    size="sm"
                     disabled={page <= 1}
                     onClick={() => setPage(p => Math.max(1, p - 1))}
                     style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                   >
                     <FaChevronLeft className="w-3 h-3" />
                     Previous
-                  </button>
-                  <button
-                    className="flex items-center gap-2 px-4 py-2 bg-gray-800/50 hover:bg-gray-700/50 rounded-xl text-gray-300 hover:text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
                     disabled={page >= Math.max(1, Math.ceil(total / limit))}
                     onClick={() => setPage(p => p + 1)}
                     style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
                   >
                     Next
                     <FaChevronRight className="w-3 h-3" />
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
           )}
-        </div>
+        </Card>
 
         {/* Enhanced Quick Actions Section */}
         <div className="bg-black/40 backdrop-blur-xl border border-gray-800/60 rounded-3xl shadow-2xl p-8">

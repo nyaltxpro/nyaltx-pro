@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import AdminModal from '@/components/AdminModal';
+import { Dialog } from '@/components/reui/dialog';
 import React, { useEffect, useState } from 'react';
 import { Search } from 'lucide-react';
 import { FaShoppingCart, FaEthereum, FaCoins, FaWallet, FaExternalLinkAlt, FaMoneyBillWave, FaCheck, FaTimes, FaClock, FaExclamationTriangle } from 'react-icons/fa';
@@ -647,7 +647,7 @@ const AdminOrdersComponent = () => {
 
             {/* Refund Modal */}
             {refundModalOpen && selectedSubscription && (
-                <AdminModal
+                <Dialog
                     open={refundModalOpen}
                     onClose={closeRefundModal}
                     title="Process Refund"
@@ -714,7 +714,7 @@ const AdminOrdersComponent = () => {
                             </button>
                         </div>
                     </div>
-                </AdminModal>
+                </Dialog>
             )}
         </div>
     );

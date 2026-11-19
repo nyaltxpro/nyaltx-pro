@@ -2,7 +2,8 @@
 
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import AdminModal from '@/components/AdminModal';
+import { Dialog } from '@/components/reui/dialog';
+import { Checkbox } from '@/components/reui/checkbox';
 import React, { useEffect, useState } from 'react';
 import {
   FaCopy,
@@ -505,7 +506,7 @@ function NewshubBannersComponent() {
 
       {/* Create / Edit Modal */}
       {isModalOpen && (
-        <AdminModal
+        <Dialog
           open={isModalOpen}
           onClose={handleCloseModal}
           title={editingBannerId ? 'Edit Newshub Banner' : 'Add Newshub Banner'}
@@ -684,8 +685,7 @@ function NewshubBannersComponent() {
               {/* Additional Toggles */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 border-t border-gray-800">
                 <label className="flex items-center gap-2.5 text-xs text-gray-300 cursor-pointer">
-                  <input
-                    type="checkbox"
+                  <Checkbox
                     checked={form.isSponsored}
                     onChange={e => setForm({ ...form, isSponsored: e.target.checked })}
                     className="w-4 h-4 rounded text-[#00b8d8] bg-gray-900 border-gray-700 focus:ring-0"
@@ -694,8 +694,7 @@ function NewshubBannersComponent() {
                 </label>
 
                 <label className="flex items-center gap-2.5 text-xs text-gray-300 cursor-pointer">
-                  <input
-                    type="checkbox"
+                  <Checkbox
                     checked={form.isActive}
                     onChange={e => setForm({ ...form, isActive: e.target.checked })}
                     className="w-4 h-4 rounded text-[#00b8d8] bg-gray-900 border-gray-700 focus:ring-0"
@@ -734,7 +733,7 @@ function NewshubBannersComponent() {
               </div>
             </form>
           </div>
-        </AdminModal>
+        </Dialog>
       )}
     </div>
   );

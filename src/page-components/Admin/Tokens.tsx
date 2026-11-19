@@ -3,7 +3,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import AdminModal from '@/components/AdminModal';
+import { Drawer } from '@/components/reui/drawer';
+import { Checkbox } from '@/components/reui/checkbox';
 import { Coins, Plus, Search, X } from 'lucide-react';
 import { FaCheck, FaTimes, FaTrash, FaChevronLeft, FaChevronRight, FaArrowLeft, FaCrown, FaPause, FaPlay, FaEye, FaEyeSlash, FaSort, FaSortUp, FaSortDown, FaExternalLinkAlt } from 'react-icons/fa';
 
@@ -531,8 +532,7 @@ function AdminTokensComponent() {
                                         </td>
                                         <td className="px-4 py-3 text-sm border-r border-gray-700/20">
                                             <label className="inline-flex items-center gap-2 cursor-pointer">
-                                                <input
-                                                    type="checkbox"
+                                                <Checkbox
                                                     className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2"
                                                     checked={Boolean(t.paused)}
                                                     disabled={busyId === t.id}
@@ -655,14 +655,13 @@ function AdminTokensComponent() {
                     </button>
                 </div>
             </div>
-            <AdminModal
+            <Drawer
                 open={isRegistering}
                 onClose={() => {
                     if (!isRegistrationBusy) setIsRegistering(false);
                 }}
                 title="Register Token"
                 maxWidth="max-w-3xl"
-                placement="right"
             >
                 <div className="admin-panel-form flex h-full min-h-full w-full flex-col overflow-y-auto border-l border-white/10 bg-[#0d0d0d]">
                     <header className="flex items-center justify-between border-b border-white/10 px-6 py-5">
@@ -693,7 +692,7 @@ function AdminTokensComponent() {
                         />
                     </div>
                 </div>
-            </AdminModal>
+            </Drawer>
         </div>
     );
 }
@@ -737,8 +736,7 @@ function SocialSwitch({
     return (
         <label className="flex items-center justify-between gap-3 text-xs">
             <span className="text-gray-300">{label}</span>
-            <input
-                type="checkbox"
+            <Checkbox
                 className="accent-cyan-600"
                 checked={checked}
                 disabled={disabled}

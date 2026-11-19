@@ -4,6 +4,7 @@ import PublicHeader from '@/components/PublicHeader';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { FaCookie } from 'react-icons/fa';
+import { Checkbox } from '@/components/reui/checkbox';
 
 export default function CookiesSettings() {
     // Cookie consent state
@@ -142,8 +143,7 @@ export default function CookiesSettings() {
                                         </p>
                                     </div>
                                     <div className="flex items-center">
-                                        <input
-                                            type="checkbox"
+                                        <Checkbox
                                             checked={cookieConsent.necessary}
                                             disabled={true}
                                             className="w-5 h-5 accent-sky-400"
@@ -160,8 +160,7 @@ export default function CookiesSettings() {
                                         </p>
                                     </div>
                                     <div className="flex items-center">
-                                        <input
-                                            type="checkbox"
+                                        <Checkbox
                                             checked={cookieConsent.functional}
                                             onChange={e =>
                                                 setCookieConsent({ ...cookieConsent, functional: e.target.checked })
@@ -180,8 +179,7 @@ export default function CookiesSettings() {
                                         </p>
                                     </div>
                                     <div className="flex items-center">
-                                        <input
-                                            type="checkbox"
+                                        <Checkbox
                                             checked={cookieConsent.analytics}
                                             onChange={e =>
                                                 setCookieConsent({ ...cookieConsent, analytics: e.target.checked })
@@ -201,8 +199,7 @@ export default function CookiesSettings() {
                                         </p>
                                     </div>
                                     <div className="flex items-center">
-                                        <input
-                                            type="checkbox"
+                                        <Checkbox
                                             checked={cookieConsent.marketing}
                                             onChange={e =>
                                                 setCookieConsent({ ...cookieConsent, marketing: e.target.checked })

@@ -1,8 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import AdminModal from '@/components/AdminModal';
+import { Dialog } from '@/components/reui/dialog';
+import { Button } from '@/components/reui/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/reui/dropdown-menu';
 import React, { useEffect, useState } from 'react';
+import { MoreHorizontal } from 'lucide-react';
 import { FaEye, FaSearch, FaWallet, FaEnvelope, FaUser, FaCoins, FaStar, FaFilter } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 
@@ -451,15 +454,22 @@ const AdminUsersComponent = () => {
                       </span>
                     </td>
                     <td className="px-4 py-3 text-sm">
-                      <button
-                        onClick={() => openUserModal(user)}
-                        className="px-3 py-1 rounded-lg text-xs font-medium transition-all duration-200 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/30"
-                        title="View Details"
-                        style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
-                      >
-                        <FaEye className="w-3 h-3 inline mr-1" />
-                        View
-                      </button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="outline" size="icon" aria-label={`Actions for ${user.name || user.email || user.id}`}>
+                            <MoreHorizontal className="size-4" aria-hidden="true" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onSelect={() => openUserModal(user)}
+                            className="flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 outline-none focus:bg-white/10"
+                          >
+                            <FaEye className="size-3.5" aria-hidden="true" />
+                            View details
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </td>
                   </tr>
                 ))}
@@ -471,7 +481,7 @@ const AdminUsersComponent = () => {
 
       {/* User Details Modal */}
       {showModal && selectedUser && (
-        <AdminModal
+        <Dialog
           open={showModal}
           onClose={closeUserModal}
           title="User Details"
@@ -584,7 +594,7 @@ const AdminUsersComponent = () => {
               </div>
             </div>
           </div>
-        </AdminModal>
+        </Dialog>
       )}
 
       {/* Summary */}

@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
+import { Collapsible } from '@/components/reui/collapsible';
 import {
   Activity,
   BarChart3,
@@ -164,47 +165,54 @@ export default function AdminSidebar({
 
         <nav aria-label="Admin navigation" className="flex-1 space-y-5 overflow-y-auto">
           {filteredGroups.map(group => (
-            <section key={group.title}>
-              <h2
-                className={`mb-1.5 px-2.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500 ${
-                  isCollapsed ? 'md:hidden' : ''
-                }`}
-              >
-                {group.title}
-              </h2>
-              <div className="space-y-0.5">
-                {group.items.map(item => {
-                  const isActive =
-                    pathname === item.href ||
-                    (item.href !== '/adminpanel' && pathname.startsWith(`${item.href}/`));
-                  const Icon = item.icon;
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      title={isCollapsed ? item.title : undefined}
-                      aria-current={isActive ? 'page' : undefined}
-                      onClick={() => isMobileMenuOpen && toggleMobileMenu()}
-                      className={`group flex h-9 items-center gap-2.5 rounded-md px-2.5 text-[13px] transition-colors ${
-                        isActive
-                          ? 'bg-white/10 font-medium text-white'
-                          : 'text-slate-400 hover:bg-white/[0.06] hover:text-slate-100'
-                      } ${isCollapsed ? 'md:justify-center md:px-0' : ''}`}
-                    >
-                      <Icon
-                        className={`h-4 w-4 shrink-0 ${
-                          isActive ? 'text-cyan-300' : 'text-slate-500 group-hover:text-slate-300'
-                        }`}
-                        strokeWidth={1.7}
-                      />
-                      <span className={`truncate ${isCollapsed ? 'md:hidden' : ''}`}>
-                        {item.title}
-                      </span>
-                    </Link>
-                  );
-                })}
-              </div>
-            </section>
+            <Collapsible
+              key={group.title}
+              title={
+                <span
+                  className={`truncate text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500 ${
+                    isCollapsed ? 'md:hidden' : ''
+                  }`}
+                >
+                  {group.title}
+                </span>
+              }
+              defaultOpen
+              open={isCollapsed ? true : undefined}
+              triggerClassName={isCollapsed ? 'hidden' : 'mb-1.5 px-2.5'}
+              contentClassName="space-y-0.5"
+              className="space-y-0.5"
+            >
+              {group.items.map(item => {
+                const isActive =
+                  pathname === item.href ||
+                  (item.href !== '/adminpanel' && pathname.startsWith(`${item.href}/`));
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    title={isCollapsed ? item.title : undefined}
+                    aria-current={isActive ? 'page' : undefined}
+                    onClick={() => isMobileMenuOpen && toggleMobileMenu()}
+                    className={`group flex h-9 items-center gap-2.5 rounded-md px-2.5 text-[13px] transition-colors ${
+                      isActive
+                        ? 'bg-white/10 font-medium text-white'
+                        : 'text-slate-400 hover:bg-white/[0.06] hover:text-slate-100'
+                    } ${isCollapsed ? 'md:justify-center md:px-0' : ''}`}
+                  >
+                    <Icon
+                      className={`h-4 w-4 shrink-0 ${
+                        isActive ? 'text-cyan-300' : 'text-slate-500 group-hover:text-slate-300'
+                      }`}
+                      strokeWidth={1.7}
+                    />
+                    <span className={`truncate ${isCollapsed ? 'md:hidden' : ''}`}>
+                      {item.title}
+                    </span>
+                  </Link>
+                );
+              })}
+            </Collapsible>
           ))}
         </nav>
 
