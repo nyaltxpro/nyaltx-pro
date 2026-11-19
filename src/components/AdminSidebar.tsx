@@ -126,8 +126,14 @@ export default function AdminSidebar({
             isCollapsed ? 'md:justify-center md:px-0' : ''
           }`}
         >
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-cyan-500/15">
-            <Image src="/logo.png" alt="" width={22} height={22} className="brightness-0 invert" />
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-cyan-500/10 ring-1 ring-cyan-400/15">
+            <Image
+              src="/nyaltxpro.png"
+              alt="NYALTX"
+              width={30}
+              height={30}
+              className="h-7 w-7 object-contain"
+            />
           </span>
           <span className={`min-w-0 ${isCollapsed ? 'md:hidden' : ''}`}>
             <span className="block truncate text-[13px] font-semibold">NYALTX</span>
