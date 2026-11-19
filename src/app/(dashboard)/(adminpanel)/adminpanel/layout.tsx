@@ -170,7 +170,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             </DropdownMenuContent>
           </DropdownMenu>
         </header>
-        <main className="admin-panel-content p-4 md:p-6">{children}</main>
+        <main className="admin-panel-content px-2 py-3 md:px-3 md:py-4">{children}</main>
       </div>
     </div>
   );

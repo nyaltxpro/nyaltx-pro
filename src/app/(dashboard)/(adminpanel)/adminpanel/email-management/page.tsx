@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { Dialog } from '@/components/reui/dialog';
 import { Checkbox } from '@/components/reui/checkbox';
 import { Card } from '@/components/reui/card';
@@ -480,7 +479,7 @@ export default function EmailManagementPage() {
     emailHistory.find(record => record.id === selectedHistoryId) ?? null;
 
   return (
-    <div className="admin-panel-form mx-auto max-w-7xl space-y-6 p-4 md:p-6">
+    <div className="admin-panel-form mx-auto max-w-7xl space-y-6">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold text-white">Email Management</h1>
@@ -489,9 +488,6 @@ export default function EmailManagementPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button asChild variant="outline">
-            <Link href="/adminpanel">Back to dashboard</Link>
-          </Button>
           <Button onClick={() => setShowSendEmailModal(true)}>
             <Send aria-hidden="true" className="size-4" />
             Compose broadcast
@@ -499,11 +495,11 @@ export default function EmailManagementPage() {
         </div>
       </header>
 
-      <Card className="w-fit max-w-full overflow-hidden p-2">
+      <Card className="w-fit max-w-full overflow-hidden p-1">
         <div
           role="tablist"
           aria-label="Email management sections"
-          className="flex flex-nowrap gap-2 overflow-x-auto"
+          className="flex max-w-full flex-nowrap gap-1 overflow-x-auto"
         >
           {(
             [
@@ -522,18 +518,12 @@ export default function EmailManagementPage() {
                 aria-selected={selected}
                 aria-controls={`email-panel-${tab.id}`}
                 tabIndex={selected ? 0 : -1}
-                variant="ghost"
+                variant={selected ? 'secondary' : 'ghost'}
                 onClick={() => setActiveTab(tab.id)}
-                className="h-auto shrink-0 gap-0 rounded-md p-0 hover:bg-transparent"
+                className="h-9 shrink-0 gap-2 rounded-lg px-3"
               >
-                <Badge
-                  variant={selected ? 'primary-light' : 'outline'}
-                  size="sm"
-                  className="gap-1.5"
-                >
-                  <Icon aria-hidden="true" className="size-3" />
-                  {tab.label}
-                </Badge>
+                <Icon aria-hidden="true" className="size-4" />
+                {tab.label}
               </Button>
             );
           })}
