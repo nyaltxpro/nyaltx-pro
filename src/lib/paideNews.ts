@@ -61,6 +61,17 @@ function fixImage(url?: string): string | undefined {
   }
 }
 
+function displayAuthor(author?: string): string {
+  const normalized = author?.trim();
+  return !normalized || normalized.toLowerCase() === 'you' ? 'NYALTX' : normalized;
+}
+
+function isPinned(doc: Pick<NewsDoc, 'featuredInBanner' | 'plan'>): boolean {
+  return typeof doc.featuredInBanner === 'boolean'
+    ? doc.featuredInBanner
+    : doc.plan === 'slider' || doc.plan === 'prem';
+}
+
 function getBaseUrl(): string {
   if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL;
   if (process.env.NEXT_PUBLIC_BASE_URL) return process.env.NEXT_PUBLIC_BASE_URL;
@@ -89,7 +100,7 @@ async function fromDb(limit: number): Promise<PaidNewsItem[]> {
 
   const docs = await collection
     .find(PAID_NEWS_QUERY as any)
-    .sort({ publishedAt: -1, createdAt: -1 })
+    .sort({ featuredInBanner: -1, publishedAt: -1, createdAt: -1 })
     .limit(limit)
     .toArray();
 
@@ -100,11 +111,11 @@ async function fromDb(limit: number): Promise<PaidNewsItem[]> {
       title: d.title,
       description: d.excerpt || stripHtml(d.content).slice(0, 220),
       image: fixImage(d.featuredImage),
-      source: d.author || 'NYALTX Partner',
+      source: displayAuthor(d.author),
       pubDate: d.publishedAt || d.createdAt || undefined,
       href: `/news/${d.slug || id}`,
       isPaid: true as const,
-      pinned: Boolean(d.featuredInBanner) || d.plan === 'slider' || d.plan === 'prem',
+      pinned: isPinned(d),
     };
   });
 }
@@ -123,11 +134,11 @@ async function fromApi(limit: number): Promise<PaidNewsItem[]> {
     title: d.title,
     description: d.excerpt || '',
     image: fixImage(d.featuredImage),
-    source: d.author || 'NYALTX Partner',
+    source: displayAuthor(d.author),
     pubDate: d.publishedAt || d.createdAt,
     href: `/news/${d.slug || d._id}`,
     isPaid: true as const,
-    pinned: Boolean(d.featuredInBanner) || d.plan === 'slider' || d.plan === 'prem',
+    pinned: isPinned(d),
   }));
 }
 

@@ -58,7 +58,11 @@ export async function GET(request: NextRequest) {
     // Get published news articles with pagination
     const news = await collection
       .find(query)
-      .sort({ publishedAt: -1, createdAt: -1 })
+      .sort(
+        paidParam === 'true' || paidParam === 'only'
+          ? { featuredInBanner: -1, publishedAt: -1, createdAt: -1 }
+          : { publishedAt: -1, createdAt: -1 },
+      )
       .skip(skip)
       .limit(limit)
       .project({

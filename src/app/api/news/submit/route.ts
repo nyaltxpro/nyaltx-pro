@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
       sourceUrl,
       featuredImage,
       coverColor = 0,
-      author = 'Community Submission',
+      author = 'NYALTX',
       email,
       plan = 'feed', // 'feed' | 'slider' | 'prem'
       paymentMethod = 'paypal', // 'paypal' | 'usdc' | 'nyax'
@@ -139,6 +139,7 @@ export async function POST(req: NextRequest) {
           ? 'News Publishing & Distribution ($199)'
           : 'News Publishing ($99)'
     );
+    const authorName = typeof author === 'string' ? author.trim() : '';
     const orderId = `order_news_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 
     const submissionDoc = {
@@ -150,7 +151,9 @@ export async function POST(req: NextRequest) {
       sourceUrl: sourceUrl?.trim() || null,
       featuredImage: featuredImage || null,
       coverColor: Number(coverColor) || 0,
-      author: author.trim() || (type === 'pr' ? 'Press Release' : 'Community Submission'),
+      author: authorName.toLowerCase() === 'you'
+        ? 'NYALTX'
+        : authorName || (type === 'pr' ? 'Press Release' : 'NYALTX'),
       email: email.trim(),
       plan,
       planName: resolvedPlanName,

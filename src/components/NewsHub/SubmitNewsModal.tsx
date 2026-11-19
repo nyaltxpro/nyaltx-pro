@@ -565,7 +565,7 @@ export default function SubmitNewsModalCorporate({
       sourceUrl: sourceLink.trim() || null,
       featuredImage: uploadedImg,
       coverColor: selectedSwatch,
-      author: subType === 'pr' ? 'Press Release' : 'You',
+      author: subType === 'pr' ? 'Press Release' : 'NYALTX',
       email: userEmail.trim(),
       plan,
       planName: activePlanObj.name,
