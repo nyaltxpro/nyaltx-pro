@@ -6,20 +6,20 @@ import { getNewshubInitialData } from '@/lib/newshubInitialData';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.nyaltx.pro'),
-  title: { absolute: 'NYALTX News Hub: Digital Asset Market Updates' },
+  title: { absolute: 'Digital Asset & Tokenization News Hub' },
   description:
-    'Browse blockchain developments, exchange listings, and tokenized securities coverage from the New York Alt Exchange team.',
+    'Stay informed with the latest digital asset news, market developments, token launches, DeFi innovations, and tokenized securities. Discover industry headlines, company announcements, and press releases—all in one place.',
   keywords: 'NYALTX news, crypto news hub, press releases, tokenized securities, blockchain news, NYAX token, alt assets',
   alternates: {
     canonical: 'https://www.nyaltx.pro/news-hub',
   },
   openGraph: {
-    title: 'NYALTX News Hub: Digital Asset Market Updates',
+    title: 'Digital Asset & Tokenization News Hub',
     description:
-      'Browse blockchain developments, exchange listings, and tokenized securities coverage from the New York Alt Exchange team.',
+      'Stay informed with the latest digital asset news, market developments, token launches, DeFi innovations, and tokenized securities. Discover industry headlines, company announcements, and press releases—all in one place.',
     type: 'website',
     url: 'https://www.nyaltx.pro/news-hub',
-    siteName: 'NYALTX',
+    siteName: 'NYALTX | New York Alt Exchange',
     images: [
       {
         url: 'https://www.nyaltx.pro/og-image.png',
@@ -33,9 +33,9 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     site: '@nyaltx',
     creator: '@nyaltx',
-    title: 'NYALTX News Hub: Digital Asset Market Updates',
+    title: 'Digital Asset & Tokenization News Hub',
     description:
-      'Browse blockchain developments, exchange listings, and tokenized securities coverage from the New York Alt Exchange team.',
+      'Stay informed with the latest digital asset news, market developments, token launches, DeFi innovations, and tokenized securities. Discover industry headlines, company announcements, and press releases—all in one place.',
     images: ['https://www.nyaltx.pro/og-image.png'],
   },
   robots: {
