@@ -2195,7 +2195,10 @@ export default function AdminDashboardFixed() {
                         <Button
                             variant="outline"
                             className="h-auto min-h-16 w-full justify-start gap-3 whitespace-normal px-3 py-3 text-left"
-                            onClick={() => setShowAllocationModal(true)}
+                            onClick={() => {
+                                setFormError(null);
+                                setShowAllocationModal(true);
+                            }}
                             disabled={!isConnected || loading}
                         >
                             <IconTile className="size-9 rounded-lg" icon={<UsersRound className="size-4" aria-hidden="true" />} />
@@ -2204,7 +2207,10 @@ export default function AdminDashboardFixed() {
                         <Button
                             variant="outline"
                             className="h-auto min-h-16 w-full justify-start gap-3 whitespace-normal px-3 py-3 text-left"
-                            onClick={() => setShowApproveFolderModal(true)}
+                            onClick={() => {
+                                setFormError(null);
+                                setShowApproveFolderModal(true);
+                            }}
                             disabled={!isConnected || loading}
                         >
                             <IconTile className="size-9 rounded-lg" icon={<Shield className="size-4" aria-hidden="true" />} />
@@ -2257,6 +2263,7 @@ export default function AdminDashboardFixed() {
                 </Card>
 
                 <Filters
+                    className="admin-panel-folder-filters"
                     activeFilters={searchValue.trim()
                         ? [{ id: 'folder-search', label: `Search: ${searchValue}`, onRemove: () => setSearchValue('') }]
                         : []}
@@ -2273,7 +2280,7 @@ export default function AdminDashboardFixed() {
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div className="lg:col-span-2 space-y-4">
-                        <Card className="p-5">
+                        <Card className="admin-panel-folder-registry p-5">
                         <div className="flex flex-wrap items-center justify-between gap-3">
                             <div>
                                 <p className="text-xs font-medium uppercase tracking-wide text-gray-500">Registry</p>
@@ -2308,7 +2315,7 @@ export default function AdminDashboardFixed() {
                                 )}
                             </div>
                         ) : (
-                            <div className="mt-4 grid gap-4 xl:grid-cols-2">
+                            <div className="mt-4 grid gap-4">
                                 {filteredDisplayFolders.map(folder => renderFolderCard(folder))}
                             </div>
                         )}
@@ -2596,130 +2603,171 @@ export default function AdminDashboardFixed() {
                 {showAllocationModal && (
                     <Dialog
                         open={showAllocationModal}
-                        onClose={() => setShowAllocationModal(false)}
+                        onClose={() => {
+                            setShowAllocationModal(false);
+                            setFormError(null);
+                        }}
                         title="Add Wallet"
                         maxWidth="max-w-2xl"
                     >
-                        <div className="bg-slate-900 rounded-xl p-8 border border-white/20 max-w-2xl w-full space-y-6">
-                            <div>
-                                <h3 className="text-2xl font-bold text-white">Add Wallet</h3>
-                                <p className="text-gray-400 text-sm mt-2">Add a new Wallet to a folder with vesting schedule</p>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-4">
-                                    <div>
-                                        <label className="text-gray-400 text-sm mb-2 block">Folder</label>
-                                        <select
+                        <div className="admin-panel-form overflow-hidden rounded-xl border border-white/10 bg-[#0d0d0d]">
+                            <header className="border-b border-white/10 px-5 py-4">
+                                <p className="text-xs font-medium uppercase tracking-wide text-cyan-300">Vesting</p>
+                                <h3 className="mt-1 text-base font-semibold text-white">Add wallet</h3>
+                                <p className="mt-1 text-sm text-slate-400">
+                                    Assign a beneficiary and allocation to a folder.
+                                </p>
+                            </header>
+                            <div className="space-y-5 p-5">
+                                <div className="grid gap-4 sm:grid-cols-2">
+                                    <Field
+                                        id="allocation-folder"
+                                        label="Folder"
+                                        required
+                                        description="Choose the folder that will hold this allocation."
+                                    >
+                                        <NativeSelect
+                                            id="allocation-folder"
                                             value={allocationForm.folderId}
-                                            onChange={e => setAllocationForm(prev => ({ ...prev, folderId: Number(e.target.value) }))}
-                                            className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white"
+                                            onChange={e => {
+                                                setAllocationForm(prev => ({ ...prev, folderId: Number(e.target.value) }));
+                                                setFormError(null);
+                                            }}
                                         >
                                             <option value={-1}>Select a folder</option>
                                             {factoryFolders.map(folder => (
                                                 <option key={folder.id} value={folder.id}>
-                                                    {folder.name || 'Unnamed Folder'} (ID: {folder.address})
+                                                    {folder.name || 'Unnamed Folder'} ({folder.address})
                                                 </option>
                                             ))}
-                                        </select>
-                                        <p className="text-gray-500 text-xs mt-1">Target folder for beneficiary</p>
-                                    </div>
-
-                                    <div>
-                                        <label className="text-gray-400 text-sm mb-2 block">Beneficiary Address</label>
-                                        <input
-                                            type="text"
+                                        </NativeSelect>
+                                    </Field>
+                                    <Field
+                                        id="allocation-beneficiary"
+                                        label="Beneficiary address"
+                                        required
+                                        description="Wallet address that will receive the allocation."
+                                    >
+                                        <Input
+                                            id="allocation-beneficiary"
                                             value={allocationForm.account}
-                                            onChange={e => setAllocationForm(prev => ({ ...prev, account: e.target.value }))}
+                                            onChange={e => {
+                                                setAllocationForm(prev => ({ ...prev, account: e.target.value }));
+                                                setFormError(null);
+                                            }}
                                             placeholder="0x..."
-                                            className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white"
+                                            autoComplete="off"
+                                            spellCheck={false}
                                         />
-                                        <p className="text-gray-500 text-xs mt-1">Wallet address of the beneficiary</p>
-                                    </div>
-
-                                    <div>
-                                        <label className="text-gray-400 text-sm mb-2 block">Wallet Name</label>
-                                        <input
-                                            type="text"
+                                    </Field>
+                                    <Field
+                                        id="allocation-wallet-name"
+                                        label="Wallet name"
+                                        required
+                                        description="A human-readable name for this beneficiary."
+                                    >
+                                        <Input
+                                            id="allocation-wallet-name"
                                             value={allocationForm.walletName}
-                                            onChange={e => setAllocationForm(prev => ({ ...prev, walletName: e.target.value }))}
-                                            placeholder="John Doe - Founder"
-                                            className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white"
+                                            onChange={e => {
+                                                setAllocationForm(prev => ({ ...prev, walletName: e.target.value }));
+                                                setFormError(null);
+                                            }}
+                                            placeholder="e.g. Founder"
                                         />
-                                        <p className="text-gray-500 text-xs mt-1">Human-readable name for this wallet</p>
-                                    </div>
-
-                                    <div>
-                                        <label className="text-gray-400 text-sm mb-2 block">Amount (NYAX)</label>
-                                        <input
-                                            type="text"
+                                    </Field>
+                                    <Field
+                                        id="allocation-amount"
+                                        label="Amount (NYAX)"
+                                        required
+                                        description="Token allocation amount."
+                                    >
+                                        <Input
+                                            id="allocation-amount"
+                                            inputMode="decimal"
                                             value={allocationForm.amount}
-                                            onChange={e => setAllocationForm(prev => ({ ...prev, amount: e.target.value }))}
-                                            placeholder="1000"
-                                            className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white"
+                                            onChange={e => {
+                                                setAllocationForm(prev => ({ ...prev, amount: e.target.value }));
+                                                setFormError(null);
+                                            }}
+                                            placeholder="0.00"
                                         />
-                                        <p className="text-gray-500 text-xs mt-1">Token allocation amount</p>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-4">
-                                    <div>
-                                        <label className="text-gray-400 text-sm mb-2 block">Start Date</label>
-                                        <input
+                                    </Field>
+                                    <Field
+                                        id="allocation-start-date"
+                                        label="Start date"
+                                        description="Leave blank to start vesting immediately."
+                                    >
+                                        <Input
+                                            id="allocation-start-date"
                                             type="date"
                                             value={allocationForm.startDate}
-                                            onChange={e => setAllocationForm(prev => ({ ...prev, startDate: e.target.value }))}
-                                            className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white"
+                                            onChange={e => {
+                                                setAllocationForm(prev => ({ ...prev, startDate: e.target.value }));
+                                                setFormError(null);
+                                            }}
                                         />
-                                        <p className="text-gray-500 text-xs mt-1">Vesting start date (optional)</p>
-                                    </div>
-
-                                    <div>
-                                        <label className="text-gray-400 text-sm mb-2 block">Cliff Period (days)</label>
-                                        <input
+                                    </Field>
+                                    <Field
+                                        id="allocation-cliff-days"
+                                        label="Cliff period (days)"
+                                        description="Number of days before vesting begins."
+                                    >
+                                        <Input
+                                            id="allocation-cliff-days"
                                             type="number"
-                                            value={allocationForm.cliffDays}
-                                            onChange={e => setAllocationForm(prev => ({ ...prev, cliffDays: e.target.value }))}
-                                            placeholder="0"
                                             min="0"
-                                            className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white"
+                                            value={allocationForm.cliffDays}
+                                            onChange={e => {
+                                                setAllocationForm(prev => ({ ...prev, cliffDays: e.target.value }));
+                                                setFormError(null);
+                                            }}
                                         />
-                                        <p className="text-gray-500 text-xs mt-1">Days before vesting begins</p>
-                                    </div>
-
-                                    <div>
-                                        <label className="text-gray-400 text-sm mb-2 block">Duration (days)</label>
-                                        <input
+                                    </Field>
+                                    <Field
+                                        id="allocation-duration-days"
+                                        label="Duration (days)"
+                                        description="Total vesting period; defaults to 365 days."
+                                    >
+                                        <Input
+                                            id="allocation-duration-days"
                                             type="number"
-                                            value={allocationForm.durationDays}
-                                            onChange={e => setAllocationForm(prev => ({ ...prev, durationDays: e.target.value }))}
-                                            placeholder="365"
                                             min="1"
-                                            className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white"
+                                            value={allocationForm.durationDays}
+                                            onChange={e => {
+                                                setAllocationForm(prev => ({ ...prev, durationDays: e.target.value }));
+                                                setFormError(null);
+                                            }}
                                         />
-                                        <p className="text-gray-500 text-xs mt-1">Total vesting duration</p>
-                                    </div>
+                                    </Field>
                                 </div>
-                            </div>
-
-                            {formError && (
-                                <Alert variant="destructive">{formError}</Alert>
-                            )}
-
-                            <div className="flex gap-3 pt-4">
-                                <button
-                                    className="flex-1 px-4 py-3 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors"
-                                    onClick={() => setShowAllocationModal(false)}
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    className="flex-1 px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                    onClick={handleSetAllocation}
-                                    disabled={actionPending || !isConnected || allocationForm.folderId === -1 || !allocationForm.account || !allocationForm.amount}
-                                >
-                                    {actionPending ? 'Adding Beneficiary...' : 'Add Beneficiary'}
-                                </button>
+                                {formError && <Alert variant="destructive">{formError}</Alert>}
+                                {!isConnected && <Alert variant="warning">Connect your wallet to add a beneficiary.</Alert>}
+                                <div className="flex justify-end gap-3 border-t border-white/10 pt-4">
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => {
+                                            setShowAllocationModal(false);
+                                            setFormError(null);
+                                        }}
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button
+                                        onClick={handleSetAllocation}
+                                        disabled={
+                                            localActionPending ||
+                                            actionPending ||
+                                            !isConnected ||
+                                            allocationForm.folderId === -1 ||
+                                            !allocationForm.account ||
+                                            !allocationForm.walletName.trim() ||
+                                            !allocationForm.amount
+                                        }
+                                    >
+                                        {localActionPending ? 'Adding wallet...' : 'Add wallet'}
+                                    </Button>
+                                </div>
                             </div>
                         </div>
                     </Dialog>
@@ -2728,34 +2776,59 @@ export default function AdminDashboardFixed() {
                 {showApproveFolderModal && (
                     <Dialog
                         open={showApproveFolderModal}
-                        onClose={() => setShowApproveFolderModal(false)}
+                        onClose={() => {
+                            setShowApproveFolderModal(false);
+                            setFormError(null);
+                        }}
                         title="Approve Folder"
                         maxWidth="max-w-md"
                     >
-                        <div className="bg-slate-900 rounded-xl p-8 border border-white/20 max-w-md w-full space-y-4">
-                            <h3 className="text-2xl font-bold text-white">Approve Folder</h3>
-                            <div>
-                                <label className="text-gray-400 text-sm mb-2 block">Folder Address</label>
-                                <input
-                                    type="text"
-                                    value={approveFolderForm.folderAddress}
-                                    onChange={e => setApproveFolderForm(prev => ({ ...prev, folderAddress: e.target.value }))}
-                                    placeholder="0x..."
-                                    className="w-full px-4 py-3 bg-white/10 rounded-lg border border-white/20 text-white"
-                                />
-                            </div>
-                            {formError && <Alert variant="destructive">{formError}</Alert>}
-                            <div className="flex gap-3">
-                                <button className="flex-1 px-4 py-3 bg-white/10 text-white rounded-lg" onClick={() => setShowApproveFolderModal(false)}>
-                                    Cancel
-                                </button>
-                                <button
-                                    className="flex-1 px-4 py-3 bg-green-600 text-white rounded-lg disabled:opacity-50"
-                                    onClick={handleApproveFolder}
-                                    disabled={actionPending || !isConnected}
+                        <div className="admin-panel-form overflow-hidden rounded-xl border border-white/10 bg-[#0d0d0d]">
+                            <header className="border-b border-white/10 px-5 py-4">
+                                <p className="text-xs font-medium uppercase tracking-wide text-cyan-300">Treasury access</p>
+                                <h3 className="mt-1 text-base font-semibold text-white">Approve folder</h3>
+                                <p className="mt-1 text-sm text-slate-400">
+                                    Authorize this folder to receive NYAX from the governance treasury.
+                                </p>
+                            </header>
+                            <div className="space-y-5 p-5">
+                                <Field
+                                    id="approve-folder-address"
+                                    label="Folder address"
+                                    required
+                                    description="Enter the approved folder contract address."
                                 >
-                                    {actionPending ? 'Approving...' : 'Approve Folder'}
-                                </button>
+                                    <Input
+                                        id="approve-folder-address"
+                                        value={approveFolderForm.folderAddress}
+                                        onChange={e => {
+                                            setApproveFolderForm(prev => ({ ...prev, folderAddress: e.target.value }));
+                                            setFormError(null);
+                                        }}
+                                        placeholder="0x..."
+                                        autoComplete="off"
+                                        spellCheck={false}
+                                    />
+                                </Field>
+                                {formError && <Alert variant="destructive">{formError}</Alert>}
+                                {!isConnected && <Alert variant="warning">Connect your wallet to approve a folder.</Alert>}
+                                <div className="flex justify-end gap-3 border-t border-white/10 pt-4">
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => {
+                                            setShowApproveFolderModal(false);
+                                            setFormError(null);
+                                        }}
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button
+                                        onClick={handleApproveFolder}
+                                        disabled={localActionPending || actionPending || !isConnected}
+                                    >
+                                        {localActionPending ? 'Approving...' : 'Approve folder'}
+                                    </Button>
+                                </div>
                             </div>
                         </div>
                     </Dialog>

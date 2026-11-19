@@ -146,7 +146,7 @@ export default function AdminSidebar({
                   isCollapsed ? 'md:justify-center md:px-0' : ''
                 }`}
               >
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-cyan-400/10 ring-1 ring-inset ring-cyan-300/15">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-lg">
                   <Image
                     src="/nyaltxpro.png"
                     alt=""
