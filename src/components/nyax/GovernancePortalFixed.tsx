@@ -4,6 +4,7 @@ import { useDAOService } from '@/hooks/useDAOService';
 import { useMigrationVault } from '@/hooks/useMigrationVault';
 import { PROPOSAL_FUNCTION_PRESETS, encodeProposalPreset } from '@/lib/proposalFunctionPresets';
 import { NETWORK_CONFIG } from '@/services/contracts';
+import { getRpcErrorMessage, isRpcRateLimitError } from '@/services/contracts/rpcErrors';
 import { GovernanceStats, ProposalData, StakingStats, TreasuryTransfer } from '@/services/contracts/types';
 import { ethers } from 'ethers';
 import { ArrowUpRight, CheckCircle, Coins, Shield, TrendingUp, Users, XCircle } from 'lucide-react';
@@ -84,45 +85,6 @@ const formatDuration = (seconds?: number) => {
     if (minutes > 0) return `${minutes}m`;
     return `${seconds}s`;
 };
-
-function containsRpcRateLimit(error: unknown, seen = new Set<object>(), depth = 0): boolean {
-    if (depth > 6 || error == null) return false;
-    if (typeof error === 'string') return /too many requests|rate.?limit/i.test(error);
-    if (typeof error !== 'object') return false;
-    if (seen.has(error)) return false;
-    seen.add(error);
-
-    if (Array.isArray(error)) {
-        return error.some(item => containsRpcRateLimit(item, seen, depth + 1));
-    }
-
-    const record = error as Record<string, unknown>;
-    if (String(record.code) === '-32005' || /too many requests|rate.?limit/i.test(
-        `${String(record.message ?? '')} ${String(record.shortMessage ?? '')}`,
-    )) {
-        return true;
-    }
-
-    return ['error', 'info', 'cause', 'value', 'data', 'payload'].some(key =>
-        containsRpcRateLimit(record[key], seen, depth + 1),
-    );
-}
-
-function getFolderRpcErrorMessage(error: unknown): string {
-    if (containsRpcRateLimit(error)) {
-        return 'The RPC provider is rate-limiting folder requests. No automatic retries were made; use Refresh data after the limit clears.';
-    }
-
-    const record = error && typeof error === 'object' ? error as Record<string, unknown> : {};
-    if (
-        record.code === 'BAD_DATA' ||
-        /missing response for request|incomplete response/i.test(String(record.message ?? ''))
-    ) {
-        return 'The RPC provider returned an incomplete response. Folder data could not be loaded; use Refresh data to try again later.';
-    }
-
-    return 'Folder data could not be loaded. Use Refresh data to try again later.';
-}
 
 export default function NYALTXGovernance() {
     const { address, isConnected } = useAccount();
@@ -434,7 +396,7 @@ export default function NYALTXGovernance() {
             setFolderSummaries(summaries);
             if (folderFailures.length > 0) {
                 setFolderSummariesError(
-                    folderFailures.some(folderFailure => containsRpcRateLimit(folderFailure))
+                    folderFailures.some(folderFailure => isRpcRateLimitError(folderFailure))
                         ? `The RPC provider rate-limited ${folderFailures.length} folder request(s). No automatic retries were made.`
                         : `Could not load stats for ${folderFailures.length} folder(s).`,
                 );
@@ -442,7 +404,7 @@ export default function NYALTXGovernance() {
         } catch (error) {
             if (!isCancelled()) {
                 console.error('Failed to load folder summaries', error);
-                setFolderSummariesError(getFolderRpcErrorMessage(error));
+                setFolderSummariesError(getRpcErrorMessage(error, 'Refresh data'));
             }
         } finally {
             if (!isCancelled()) setFolderSummariesLoading(false);

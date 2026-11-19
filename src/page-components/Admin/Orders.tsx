@@ -10,9 +10,9 @@ import {
 } from '@/components/reui/dropdown-menu';
 import { Filters } from '@/components/reui/filters';
 import { Input } from '@/components/reui/input';
-import { NativeSelect } from '@/components/reui/native-select';
 import { Badge } from '@/components/reui/badge';
 import { Alert } from '@/components/reui/alert';
+import { DropdownSelect } from '@/components/reui/dropdown-select';
 import { paginateItems, TablePagination } from '@/components/reui/table-pagination';
 import { useConfirmDialog } from '@/components/reui/confirm-dialog';
 import { useEffect, useState } from 'react';
@@ -320,49 +320,70 @@ const AdminOrdersComponent = () => {
         ]}
       >
         <div className="space-y-1.5">
-          <label className="block text-xs font-medium text-slate-400">Type</label>
-          <NativeSelect
+          <label
+            htmlFor="order-type-filter"
+            className="block text-xs font-medium text-slate-400"
+          >
+            Type
+          </label>
+          <DropdownSelect
+            id="order-type-filter"
             value={typeFilter}
-            onChange={e => setTypeFilter(e.target.value)}
-          >
-            <option value="">All Types</option>
-            <option value="race_to_liberty">Race to Liberty</option>
-            <option value="boost_pack">Boost Pack</option>
-            <option value="pro_subscription">Pro Subscription</option>
-            <option value="token_registration">Token Registration</option>
-            <option value="news_submission">News Submission</option>
-          </NativeSelect>
+            onValueChange={setTypeFilter}
+            options={[
+              { value: '', label: 'All Types' },
+              { value: 'race_to_liberty', label: 'Race to Liberty' },
+              { value: 'boost_pack', label: 'Boost Pack' },
+              { value: 'pro_subscription', label: 'Pro Subscription' },
+              { value: 'token_registration', label: 'Token Registration' },
+              { value: 'news_submission', label: 'News Submission' },
+            ]}
+          />
         </div>
 
         <div className="space-y-1.5">
-          <label className="block text-xs font-medium text-slate-400">Status</label>
-          <NativeSelect
+          <label
+            htmlFor="order-status-filter"
+            className="block text-xs font-medium text-slate-400"
+          >
+            Status
+          </label>
+          <DropdownSelect
+            id="order-status-filter"
             value={statusFilter}
-            onChange={e => setStatusFilter(e.target.value)}
-          >
-            <option value="">All Status</option>
-            <option value="completed">Completed</option>
-            <option value="pending">Pending</option>
-            <option value="failed">Failed</option>
-            <option value="refunded">Refunded</option>
-          </NativeSelect>
+            onValueChange={setStatusFilter}
+            options={[
+              { value: '', label: 'All Status' },
+              { value: 'completed', label: 'Completed' },
+              { value: 'pending', label: 'Pending' },
+              { value: 'failed', label: 'Failed' },
+              { value: 'refunded', label: 'Refunded' },
+            ]}
+          />
         </div>
 
         <div className="space-y-1.5">
-          <label className="block text-xs font-medium text-slate-400">Payment Method</label>
-          <NativeSelect
-            value={paymentMethodFilter}
-            onChange={e => setPaymentMethodFilter(e.target.value)}
+          <label
+            htmlFor="order-payment-filter"
+            className="block text-xs font-medium text-slate-400"
           >
-            <option value="">All Methods</option>
-            <option value="eth">ETH</option>
-            <option value="sol">SOL</option>
-            <option value="nyax">NYAX</option>
-            <option value="usdc">USDC</option>
-            <option value="paypal">PayPal</option>
-            <option value="stripe">Stripe</option>
-            <option value="free_promo">Free Promo</option>
-          </NativeSelect>
+            Payment Method
+          </label>
+          <DropdownSelect
+            id="order-payment-filter"
+            value={paymentMethodFilter}
+            onValueChange={setPaymentMethodFilter}
+            options={[
+              { value: '', label: 'All Methods' },
+              { value: 'eth', label: 'ETH' },
+              { value: 'sol', label: 'SOL' },
+              { value: 'nyax', label: 'NYAX' },
+              { value: 'usdc', label: 'USDC' },
+              { value: 'paypal', label: 'PayPal' },
+              { value: 'stripe', label: 'Stripe' },
+              { value: 'free_promo', label: 'Free Promo' },
+            ]}
+          />
         </div>
 
         <div className="space-y-1.5">
@@ -553,7 +574,7 @@ const AdminOrdersComponent = () => {
                     </td>
                     <td className="px-4 py-3 text-sm border-r border-gray-700/20">
                       <span
-                        className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-500/10 text-purple-300 border border-purple-500/20 capitalize"
+                        className="inline-flex shrink-0 items-center whitespace-nowrap px-2 py-1 rounded-full text-xs font-medium bg-purple-500/10 text-purple-300 border border-purple-500/20 capitalize"
                         style={{
                           fontFamily:
                             'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif',

@@ -51,14 +51,14 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
   if (isLogin) {
     return (
-      <div className="min-h-screen w-full">
+      <div className="admin-panel-shell min-h-screen w-full">
         <main className="min-h-screen w-full flex items-center justify-center">{children}</main>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen text-white">
+    <div className="admin-panel-shell min-h-screen text-white">
       <AdminSidebar
         isMobileMenuOpen={isMobileMenuOpen}
         toggleMobileMenu={() => setIsMobileMenuOpen(open => !open)}

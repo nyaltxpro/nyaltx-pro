@@ -1,4 +1,5 @@
 import { FolderAllocationScheduleInput, FolderInfo, FolderMemberInfo, FolderTemplate } from '@/services/contracts/types';
+import { getRpcErrorMessage } from '@/services/contracts/rpcErrors';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDAOService } from './useDAOService';
 
@@ -38,7 +39,7 @@ export function useFolderRegistry() {
       setFolders(list);
     } catch (err) {
       console.error('Failed to fetch folders', err);
-      setError(err instanceof Error ? err.message : 'Failed to load folders');
+      setError(getRpcErrorMessage(err, 'Refresh folders'));
     } finally {
       setLoading(false);
     }
