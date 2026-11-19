@@ -1,13 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
 import toast from 'react-hot-toast';
 import { Badge } from '@/components/reui/badge';
 import { Button } from '@/components/reui/button';
 import { Card } from '@/components/reui/card';
 import { Filters } from '@/components/reui/filters';
 import { paginateItems, TablePagination } from '@/components/reui/table-pagination';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface Token {
   id: string;
@@ -96,25 +96,25 @@ export default function TokenPointsManager() {
     <div className="p-6">
       <div className="mb-6">
         <h2 className="text-2xl font-bold mb-4">Token Points Manager</h2>
-        <p className="text-gray-400 mb-4">
+        <p className="admin-points-description text-xs text-gray-400 mb-3">
           Manage points for tokens to control their ranking in the Token Race
         </p>
 
         {/* Search */}
         <Filters
-          className="mb-4"
+          className="admin-points-filters mb-4"
           activeFilters={searchTerm.trim()
             ? [{ id: 'points-search', label: `Search: ${searchTerm}`, onRemove: () => setSearchTerm('') }]
             : []}
         >
-          <div className="max-w-md flex-1">
+          <div className="max-w-xs flex-1">
             <input
               type="search"
               placeholder="Search tokens..."
               aria-label="Search token points"
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
-              className="w-full px-3 py-2"
+              className="admin-points-search w-full px-3 py-2"
             />
           </div>
         </Filters>
@@ -193,22 +193,10 @@ function TokenRow({ token, updating, onUpdatePoints }: TokenRowProps) {
     <tr className="hover:bg-gray-700">
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="flex items-center">
-          <div className="flex-shrink-0 h-10 w-10">
-            {token.imageUri ? (
-              <Image
-                src={token.imageUri}
-                alt={token.tokenSymbol}
-                width={40}
-                height={40}
-                className="rounded-full"
-                unoptimized
-              />
-            ) : (
-              <div className="h-10 w-10 bg-gray-600 rounded-full flex items-center justify-center">
-                <span className="text-sm font-bold">{token.tokenSymbol.charAt(0)}</span>
-              </div>
-            )}
-          </div>
+          <Avatar size="default" className="border border-white/10 bg-slate-800">
+            <AvatarImage src={token.imageUri} alt={token.tokenSymbol} />
+            <AvatarFallback>{token.tokenSymbol.charAt(0).toUpperCase()}</AvatarFallback>
+          </Avatar>
           <div className="ml-4">
             <div className="text-sm font-medium text-white">{token.tokenName}</div>
             <div className="text-sm text-gray-400">{token.tokenSymbol}</div>

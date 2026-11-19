@@ -8,6 +8,7 @@ import { Checkbox } from '@/components/reui/checkbox';
 import { Badge } from '@/components/reui/badge';
 import { Filters } from '@/components/reui/filters';
 import { Alert } from '@/components/reui/alert';
+import { NativeSelect } from '@/components/reui/native-select';
 import toast from 'react-hot-toast';
 import {
   ArrowLeft,
@@ -297,6 +298,7 @@ function AdminTokensComponent() {
 
             {/* Filters & Controls */}
             <Filters
+                className="admin-token-filters"
                 activeFilters={[
                     ...(statusFilter !== 'pending'
                         ? [{ id: 'token-status', label: `Status: ${statusFilter}`, onRemove: () => setStatusFilter('pending') }]
@@ -318,9 +320,9 @@ function AdminTokensComponent() {
                         >
                             Status:
                         </label>
-                        <select
+                        <NativeSelect
                             id="status-filter"
-                            className="block rounded-lg border border-white/15 bg-transparent p-2.5 text-sm text-white focus:border-cyan-400 focus:ring-cyan-400"
+                            className="!w-[102px] px-2.5"
                             value={statusFilter}
                             onChange={e => {
                                 setStatusFilter(e.target.value as any);
@@ -331,7 +333,7 @@ function AdminTokensComponent() {
                             <option value="approved">Approved</option>
                             <option value="rejected">Rejected</option>
                             <option value="all">All</option>
-                        </select>
+                        </NativeSelect>
                     </div>
 
                     {/* Chain Filter */}
@@ -342,9 +344,9 @@ function AdminTokensComponent() {
                         >
                             Chain:
                         </label>
-                        <select
+                        <NativeSelect
                             id="chain-filter"
-                            className="block rounded-lg border border-white/15 bg-transparent p-2.5 text-sm text-white focus:border-cyan-400 focus:ring-cyan-400"
+                            className="!w-[103px] px-2.5"
                             value={chainFilter}
                             onChange={e => setChainFilter(e.target.value)}
                         >
@@ -353,7 +355,7 @@ function AdminTokensComponent() {
                                     {c === 'all' ? 'All Chains' : c}
                                 </option>
                             ))}
-                        </select>
+                        </NativeSelect>
                     </div>
 
                     {/* Search Input */}
@@ -382,9 +384,9 @@ function AdminTokensComponent() {
                         >
                             Show:
                         </label>
-                        <select
+                        <NativeSelect
                             id="per-page"
-                            className="block rounded-lg border border-white/15 bg-transparent p-2.5 text-sm text-white focus:border-cyan-400 focus:ring-cyan-400"
+                            className="!w-[51px] px-2.5"
                             value={limit}
                             onChange={e => {
                                 setLimit(parseInt(e.target.value, 10));
@@ -394,7 +396,7 @@ function AdminTokensComponent() {
                             <option value={10}>10</option>
                             <option value={25}>25</option>
                             <option value={50}>50</option>
-                        </select>
+                        </NativeSelect>
                     </div>
                 </div>
             </Filters>

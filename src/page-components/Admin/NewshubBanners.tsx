@@ -295,7 +295,7 @@ function NewshubBannersComponent() {
               Newshub Banners
             </h1>
           </div>
-          <p className="text-gray-400 text-sm mt-1">
+          <p className="newshub-banners-description text-gray-400 text-sm mt-1">
             Upload and manage the featured carousel banners displayed on the{' '}
             <code className="text-[#00b8d8] bg-black/40 px-1.5 py-0.5 rounded">/newshub</code> page.
           </p>
@@ -351,7 +351,7 @@ function NewshubBannersComponent() {
           </div>
           <div className="text-sm">
             <h2 className="font-semibold text-white">How Newshub Banners Work</h2>
-            <p className="text-gray-300 mt-1">
+            <p className="newshub-banners-guide text-gray-300 mt-1">
               Banners added here appear dynamically in the top sliding carousel on{' '}
               <strong className="text-white">https://www.nyaltx.pro/newshub</strong>.
               Recommended banner aspect ratio is <strong>8:3</strong> (e.g. 1600×600 px or minimum 1200×450 px).

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
-import { Menu, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { ChevronDown, Menu, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import AdminBreadcrumb from '@/components/AdminBreadcrumb';
 import VerifiedBadge from '@/components/VerifiedBadge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -121,6 +121,10 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                     <VerifiedBadge />
                   </span>
                 </div>
+                <ChevronDown
+                  className="size-4 shrink-0 text-slate-400 transition-transform data-[state=open]:rotate-180"
+                  aria-hidden="true"
+                />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">

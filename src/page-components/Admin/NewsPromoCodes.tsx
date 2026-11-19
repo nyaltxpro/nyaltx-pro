@@ -201,9 +201,9 @@ export default function NewsPromoCodes() {
           title="Create Promo Code"
           maxWidth="max-w-xl"
         >
-          <form onSubmit={createPromoCode} className="admin-panel-form flex h-full min-h-full w-full flex-col overflow-hidden border-l border-white/10 bg-[#0d0d0d]">
-            <header className="flex items-center justify-between gap-4 border-b border-white/10 px-6 py-5">
-              <h2 className="flex items-center gap-2 text-lg font-semibold">
+          <form onSubmit={createPromoCode} className="admin-panel-form admin-promo-code-drawer flex h-full min-h-full w-full flex-col overflow-hidden border-l border-white/10 bg-[#0d0d0d]">
+            <header className="flex items-center justify-between gap-4 border-b border-white/10 px-5 py-4">
+              <h2 className="flex items-center gap-2 text-base font-semibold">
                 <Tag size={18} className="text-cyan-300" aria-hidden="true" />
                 Create a promo code
               </h2>
@@ -218,7 +218,7 @@ export default function NewsPromoCodes() {
                 <X size={20} aria-hidden="true" />
               </Button>
             </header>
-            <div className="flex-1 space-y-5 overflow-y-auto p-6">
+            <div className="flex-1 space-y-4 overflow-y-auto p-5">
               <Field id="promo-code" label="Promo code">
                 <input
                   id="promo-code"
@@ -255,16 +255,16 @@ export default function NewsPromoCodes() {
                 />
               </Field>
               <fieldset className="space-y-3">
-                <legend className="flex items-center gap-2 text-sm font-medium text-gray-300">
+                <legend className="flex items-center gap-2 text-[13px] font-medium text-gray-300">
                   <Package size={14} aria-hidden="true" />
                   Packages (select one or more)
                 </legend>
                 <div className="grid gap-3">
                   {PACKAGE_GROUPS.map(group => (
-                    <fieldset key={group.label} className="space-y-2 rounded-xl border border-white/10 p-4">
-                      <legend className="px-1 text-sm font-medium text-gray-200">{group.label}</legend>
+                    <fieldset key={group.label} className="space-y-2 rounded-xl border border-white/10 p-3">
+                      <legend className="px-1 text-[13px] font-medium text-gray-200">{group.label}</legend>
                       {group.packages.map(option => (
-                        <label key={option.id} className="flex items-center gap-2 text-sm text-gray-300">
+                        <label key={option.id} className="flex items-center gap-2 text-[13px] text-gray-300">
                           <Checkbox
                             checked={packageIds.includes(option.id)}
                             onChange={event => {
@@ -291,7 +291,7 @@ export default function NewsPromoCodes() {
               </p>
               {error && <Alert variant="destructive">{error}</Alert>}
             </div>
-            <footer className="flex justify-end gap-3 border-t border-white/10 px-6 py-4">
+            <footer className="flex justify-end gap-3 border-t border-white/10 px-5 py-3">
               <Button
                 variant="outline"
                 size="sm"

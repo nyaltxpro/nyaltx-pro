@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import {
@@ -10,7 +9,6 @@ import {
   Coins,
   Crown,
   Eye,
-  Image as ImageIcon,
   List,
   Trash2,
   Users,
@@ -225,17 +223,19 @@ export default function AdminDashboardComponent() {
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {[
-          { label: 'Total Memberships', value: membershipsCount ?? '—', description: 'Live membership count', icon: Crown },
-          { label: 'Registered Tokens', value: tokensRegisteredCount ?? '—', description: 'Tokens in the registry', icon: Coins },
-          { label: 'Total Users', value: usersCount ?? '—', description: 'Registered platform users', icon: Users },
-          { label: 'Active Listings', value: listingsCount ?? '—', description: 'Current active listings', icon: List },
+          { label: 'Total Memberships', value: membershipsCount ?? '—', icon: Crown },
+          { label: 'Registered Tokens', value: tokensRegisteredCount ?? '—', icon: Coins },
+          { label: 'Total Users', value: usersCount ?? '—', icon: Users },
+          { label: 'Active Listings', value: listingsCount ?? '—', icon: List },
         ].map(stat => (
           <Card key={stat.label} className="flex items-center gap-3 p-4">
-            <IconTile icon={<stat.icon className="size-5" aria-hidden="true" />} />
+            <IconTile
+              icon={<stat.icon className="size-5" aria-hidden="true" />}
+              className="border-0 bg-transparent"
+            />
             <div className="min-w-0">
               <p className="truncate text-sm font-medium text-slate-300">{stat.label}</p>
               <p className="mt-1 text-xl font-semibold tabular-nums text-white">{stat.value}</p>
-              <p className="mt-1 text-xs text-slate-500">{stat.description}</p>
             </div>
           </Card>
         ))}
@@ -529,44 +529,6 @@ export default function AdminDashboardComponent() {
             </div>
           )}
         </Card>
-
-        <section aria-labelledby="quick-actions-heading" className="space-y-4">
-          <div>
-            <h2 id="quick-actions-heading" className="text-lg font-semibold text-white">
-              Quick Actions
-            </h2>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <Link href="/adminpanel/tokens" className="group block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/50">
-              <Card className="h-full p-4 transition-colors group-hover:border-cyan-400/30">
-                <IconTile icon={<Coins aria-hidden="true" className="size-5" />} />
-                <h3 className="mt-4 font-medium text-white">Manage Tokens</h3>
-                <p className="mt-1 text-sm text-slate-400">View and manage all token registrations</p>
-              </Card>
-            </Link>
-            <Link href="/adminpanel/points" className="group block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/50">
-              <Card className="h-full p-4 transition-colors group-hover:border-cyan-400/30">
-                <IconTile icon={<Crown aria-hidden="true" className="size-5" />} />
-                <h3 className="mt-4 font-medium text-white">Token Points</h3>
-                <p className="mt-1 text-sm text-slate-400">Manage points for token race ranking</p>
-              </Card>
-            </Link>
-            <Link href="/adminpanel/orders" className="group block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/50">
-              <Card className="h-full p-4 transition-colors group-hover:border-cyan-400/30">
-                <IconTile icon={<List aria-hidden="true" className="size-5" />} />
-                <h3 className="mt-4 font-medium text-white">Orders</h3>
-                <p className="mt-1 text-sm text-slate-400">View and manage user orders</p>
-              </Card>
-            </Link>
-            <Link href="/adminpanel/banners" className="group block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/50">
-              <Card className="h-full p-4 transition-colors group-hover:border-cyan-400/30">
-                <IconTile icon={<ImageIcon aria-hidden="true" className="size-5" />} />
-                <h3 className="mt-4 font-medium text-white">Banner Management</h3>
-                <p className="mt-1 text-sm text-slate-400">Upload and manage banner images</p>
-              </Card>
-            </Link>
-          </div>
-        </section>
 
         {publishingCalendarError ? (
           <Card className="p-5">

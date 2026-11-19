@@ -450,8 +450,19 @@ const AdminOrdersComponent = () => {
         ) : (
           <>
           <div className="max-w-full overflow-x-auto">
-            <table data-slot="orders-table" className="w-full min-w-[1100px]">
-              <thead className="bg-gray-700/30 border-b border-gray-600/20">
+            <table data-slot="orders-table" className="w-full min-w-[1450px]">
+              <colgroup>
+                <col className="w-[150px]" />
+                <col className="w-[160px]" />
+                <col className="w-[220px]" />
+                <col className="w-[220px]" />
+                <col className="w-[160px]" />
+                <col className="w-[130px]" />
+                <col className="w-[150px]" />
+                <col className="w-[170px]" />
+                <col className="w-[190px]" />
+              </colgroup>
+              <thead className="border-b border-gray-600/20">
                 <tr>
                   <th
                     className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20"

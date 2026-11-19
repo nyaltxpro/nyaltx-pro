@@ -497,20 +497,22 @@ const AdminBlogManagerComponent = () => {
         <Alert variant="success">{state.success}</Alert>
       ) : null}
 
-      <Filters className="mb-4">
-        {(['all', 'published', 'draft'] as const).map((filter) => (
-          <Button
-            key={filter}
-            variant={activeFilter === filter ? 'secondary' : 'ghost'}
-            size="sm"
-            type="button"
-            onClick={() => setActiveFilter(filter)}
-            className="uppercase tracking-widest"
-          >
-            {filter}
-          </Button>
-        ))}
-        <div className="ml-auto flex flex-wrap items-center gap-3">
+      <Filters className="admin-blog-filters mb-4">
+        <div className="flex items-center gap-2">
+          {(['all', 'published', 'draft'] as const).map((filter) => (
+            <Button
+              key={filter}
+              variant={activeFilter === filter ? 'secondary' : 'ghost'}
+              size="sm"
+              type="button"
+              onClick={() => setActiveFilter(filter)}
+              className="uppercase tracking-widest"
+            >
+              {filter}
+            </Button>
+          ))}
+        </div>
+        <div className="flex min-w-0 items-center justify-end gap-3">
           <input
             type="search"
             value={searchQuery}
@@ -536,8 +538,8 @@ const AdminBlogManagerComponent = () => {
           </div>
         ) : (
           <div className="space-y-3">
-          <div className="overflow-x-auto rounded-lg border border-white/10">
-            <table className="w-full min-w-[760px] text-left text-sm">
+          <div className="max-w-full overflow-x-auto rounded-lg border border-white/10">
+            <table data-slot="blog-table" className="w-full min-w-[900px] text-left">
               <thead className="border-b border-white/10 bg-white/[0.03] text-xs uppercase tracking-wider text-white/50">
                 <tr>
                   <th className="px-4 py-3 font-medium">Post</th>
