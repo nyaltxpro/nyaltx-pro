@@ -11,11 +11,23 @@
   box-shadow: none;
 }
 
+:root {
+  --admin-font-sans: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
 .admin-panel-content {
   color: #e4e4e7;
   font-family: var(--font-sans, Arial), -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   font-size: 14px;
   line-height: 1.5;
+}
+
+.admin-panel-content.admin-panel-drawer-content {
+  font-family: var(--admin-font-sans) !important;
+}
+
+.admin-panel-content.admin-panel-drawer-content :where(*:not(svg):not(code):not(pre):not(.font-mono)) {
+  font-family: var(--admin-font-sans) !important;
 }
 
 .admin-panel-content.admin-panel-content h1 {
@@ -335,7 +347,6 @@
 }
 
 .admin-panel-shell {
-  --admin-font-sans: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-family: var(--admin-font-sans);
 }
 
@@ -344,9 +355,5 @@
 }
 
 .admin-panel-shell :is(h1, h2) {
-  font-family: Georgia, 'Times New Roman', serif !important;
-}
-
-.admin-panel-shell :is(h1, h2).admin-panel-font-sans {
   font-family: var(--admin-font-sans) !important;
 }

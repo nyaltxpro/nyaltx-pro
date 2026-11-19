@@ -160,6 +160,8 @@ export default function AdminModal({
             aria-labelledby={titleId}
             tabIndex={-1}
             className={`admin-panel-content relative w-full ${maxWidth} outline-none ${
+              isRightDrawer ? 'admin-panel-drawer-content' : ''
+            } ${
               isRightDrawer ? 'min-h-full' : ''
             }`}
             initial={isRightDrawer
