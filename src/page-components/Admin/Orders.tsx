@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { Dialog } from '@/components/reui/dialog';
 import { Button } from '@/components/reui/button';
 import {
@@ -282,15 +281,6 @@ const AdminOrdersComponent = () => {
             Comprehensive order management and tracking
           </p>
         </div>
-        <Link
-          href="/admin"
-          className="text-sm text-gray-300 hover:text-white transition-colors"
-          style={{
-            fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
-          }}
-        >
-          Back to Dashboard
-        </Link>
       </div>
 
       {/* Filters */}
