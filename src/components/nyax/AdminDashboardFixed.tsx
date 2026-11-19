@@ -13,9 +13,11 @@ import { Alert } from '@/components/reui/alert';
 import { Badge } from '@/components/reui/badge';
 import { Button } from '@/components/reui/button';
 import { Card } from '@/components/reui/card';
+import { Field } from '@/components/reui/field';
 import { Filters } from '@/components/reui/filters';
 import { IconTile } from '@/components/reui/icon-tile';
 import { Input } from '@/components/reui/input';
+import { NativeSelect } from '@/components/reui/native-select';
 import { ethers } from 'ethers';
 import {
     Activity,
@@ -2037,7 +2039,7 @@ export default function AdminDashboardFixed() {
                 </div>
             </header>
 
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                 {[
                     {
                         label: 'Treasury balance',
@@ -2407,94 +2409,86 @@ export default function AdminDashboardFixed() {
                 <Drawer
                     open={showAddModal}
                     onClose={() => setShowAddModal(false)}
-                    title="Create New Folder"
+                    title="Create folder"
                     maxWidth="max-w-md"
                 >
-                    <div className="admin-panel-form flex h-full min-h-full w-full flex-col border-l border-white/10 bg-[#0d0d0d]">
-                        <header className="flex items-center justify-between border-b border-white/10 px-6 py-5">
+                    <div className="admin-panel-form flex h-full min-h-full w-full flex-col overflow-hidden border-l border-white/10 bg-[#0d0d0d]">
+                        <header className="flex shrink-0 items-center justify-between gap-4 border-b border-white/10 px-5 py-4">
                             <div>
-                                <h3 className="text-lg font-semibold text-white">Create New Folder</h3>
-                                <p className="mt-1 text-xs text-gray-400">FolderFactory contract</p>
+                                <p className="text-xs font-medium uppercase tracking-wide text-cyan-300">Folder registry</p>
+                                <h3 className="mt-1 text-base font-semibold text-white">Create folder</h3>
                             </div>
                             <button
                                 type="button"
                                 onClick={() => setShowAddModal(false)}
                                 aria-label="Close create folder"
-                                className="rounded-md p-1.5 text-gray-400 transition-colors hover:bg-white/5 hover:text-white"
+                                className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-white/5 hover:text-white"
                             >
-                                ✕
+                                <X className="size-5" aria-hidden="true" />
                             </button>
                         </header>
 
-                        <div className="no-scrollbar flex-1 space-y-6 overflow-y-auto p-6">
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="mb-2 block text-sm font-medium text-gray-300">Folder Name *</label>
-                                    <input
-                                        type="text"
-                                        value={newFolderName}
-                                        onChange={e => setNewFolderName(e.target.value)}
-                                        placeholder="Enter folder name..."
-                                        className="h-11 w-full rounded-lg border border-white/20 bg-white/[0.07] px-4 text-sm text-white placeholder-gray-500 focus:border-cyan-400/50 focus:outline-none focus:ring-2 focus:ring-cyan-400/20"
-                                    />
-                                    <p className="mt-1 text-xs text-gray-500">Descriptive name for the folder</p>
-                                </div>
+                        <div className="no-scrollbar flex-1 space-y-5 overflow-y-auto p-5">
+                            <Field
+                                id="new-folder-name"
+                                label="Folder name"
+                                required
+                                description="Choose a clear name for this vesting folder."
+                            >
+                                <Input
+                                    id="new-folder-name"
+                                    value={newFolderName}
+                                    onChange={e => setNewFolderName(e.target.value)}
+                                    placeholder="e.g. Investor"
+                                    autoComplete="off"
+                                />
+                            </Field>
 
-                                <div>
-                                    <label className="mb-2 block text-sm font-medium text-gray-300">Token Contract *</label>
-                                    <div className="flex h-11 w-full items-center rounded-lg border border-white/20 bg-white/[0.07] px-4 text-white">
-                                        <span className="text-sm text-gray-300">NYAX Token</span>
-                                        <span className="ml-2 font-mono text-xs text-gray-500">{CONTRACT_ADDRESSES.nyaxToken?.slice(0, 6)}...{CONTRACT_ADDRESSES.nyaxToken?.slice(-4)}</span>
+                            <section className="space-y-3 rounded-xl border border-white/10 bg-white/[0.025] p-4">
+                                <h4 className="text-sm font-semibold text-white">Deployment details</h4>
+                                <div className="space-y-3 text-sm">
+                                    <div className="flex flex-wrap items-center justify-between gap-2">
+                                        <span className="text-slate-400">Token</span>
+                                        <span className="text-slate-200">
+                                            NYAX <span className="ml-1 font-mono text-xs text-slate-400">{CONTRACT_ADDRESSES.nyaxToken?.slice(0, 6)}...{CONTRACT_ADDRESSES.nyaxToken?.slice(-4)}</span>
+                                        </span>
                                     </div>
-                                    <p className="mt-1 text-xs text-gray-500">Token used for folder allocations</p>
-                                </div>
-
-                                <div>
-                                    <label className="mb-2 block text-sm font-medium text-gray-300">Folder Admin *</label>
-                                    <div className="flex h-11 w-full items-center rounded-lg border border-white/20 bg-white/[0.07] px-4 text-sm text-gray-300">
-                                        Connected Wallet
+                                    <div className="flex flex-wrap items-center justify-between gap-2">
+                                        <span className="text-slate-400">Admin</span>
+                                        <span className="text-slate-200">Connected wallet</span>
                                     </div>
-                                    <p className="mt-1 text-xs text-gray-500">Your wallet will be set as folder administrator</p>
-                                </div>
-                            </div>
-
-                            <div className="space-y-3">
-                                <h4 className="text-sm font-medium text-white">Contract Information</h4>
-                                <div className="space-y-3 rounded-lg border border-white/10 bg-white/[0.04] p-4">
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-sm text-gray-300">Factory Contract</span>
-                                        <span className="font-mono text-xs text-gray-400">{CONTRACT_ADDRESSES.folderEscrowFactory?.slice(0, 6)}...{CONTRACT_ADDRESSES.folderEscrowFactory?.slice(-4)}</span>
+                                    <div className="flex flex-wrap items-center justify-between gap-2">
+                                        <span className="text-slate-400">Factory</span>
+                                        <span className="font-mono text-xs text-slate-300">{CONTRACT_ADDRESSES.folderEscrowFactory?.slice(0, 6)}...{CONTRACT_ADDRESSES.folderEscrowFactory?.slice(-4)}</span>
                                     </div>
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-sm text-gray-300">Network</span>
-                                        <span className="text-xs text-blue-400">Sepolia Testnet</span>
-                                    </div>
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-sm text-gray-300">Governance Required</span>
-                                        <span className="text-xs text-yellow-400">Yes</span>
+                                    <div className="flex flex-wrap items-center justify-between gap-2">
+                                        <span className="text-slate-400">Network</span>
+                                        <Badge variant="info-light" size="sm">Sepolia</Badge>
                                     </div>
                                 </div>
-                            </div>
+                            </section>
 
+                            {!isConnected && (
+                                <Alert variant="warning">Connect a wallet to create a folder.</Alert>
+                            )}
                             {formError && (
                                 <Alert variant="destructive">{formError}</Alert>
                             )}
                         </div>
 
-                        <footer className="flex gap-3 border-t border-white/10 p-6">
-                            <button
-                                className="h-11 flex-1 rounded-lg border border-white/15 bg-white/[0.04] text-sm font-medium text-gray-300 transition hover:bg-white/[0.08] hover:text-white"
+                        <footer className="flex shrink-0 justify-end gap-3 border-t border-white/10 px-5 py-3">
+                            <Button
+                                variant="outline"
                                 onClick={() => setShowAddModal(false)}
                             >
                                 Cancel
-                            </button>
-                            <button
-                                className="h-11 flex-1 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-500 text-sm font-semibold text-white transition hover:from-indigo-600 hover:to-purple-600 disabled:cursor-not-allowed disabled:opacity-50"
+                            </Button>
+                            <Button
                                 onClick={handleCreateFolder}
                                 disabled={actionPending || !isConnected || !newFolderName.trim()}
                             >
                                 {actionPending ? 'Creating...' : 'Create Folder'}
-                            </button>
+                            </Button>
                         </footer>
                     </div>
                 </Drawer>
@@ -2963,90 +2957,85 @@ export default function AdminDashboardFixed() {
                 <Drawer
                     open={showProposalDrawer}
                     onClose={() => setShowProposalDrawer(false)}
-                    title="Create governance proposal"
-                    maxWidth="max-w-4xl"
+                    title="Create proposal"
+                    maxWidth="max-w-3xl"
                 >
-                    <div className="admin-panel-form flex h-dvh min-h-full flex-col border-l border-white/10 bg-[#0d0d0d]">
-                        <header className="flex shrink-0 items-center justify-between border-b border-white/10 px-6 py-5">
+                    <div className="admin-panel-form flex h-full min-h-full flex-col overflow-hidden border-l border-white/10 bg-[#0d0d0d]">
+                        <header className="flex shrink-0 items-center justify-between gap-4 border-b border-white/10 px-5 py-4">
                             <div>
-                                <p className="text-xs uppercase tracking-[0.35em] text-purple-300/70">Governance</p>
-                                <h3 className="text-2xl font-bold text-white flex items-center gap-2 mt-1">
-                                    <Gavel className="w-6 h-6 text-purple-300" />
-                                    Draft proposal payload
+                                <p className="text-xs font-medium uppercase tracking-wide text-cyan-300">Governance</p>
+                                <h3 className="mt-1 flex items-center gap-2 text-base font-semibold text-white">
+                                    <Gavel className="size-4 text-cyan-300" aria-hidden="true" />
+                                    Create proposal
                                 </h3>
                             </div>
                             <button
                                 type="button"
                                 aria-label="Close proposal drawer"
-                                className="rounded-md p-1.5 text-gray-400 transition-colors hover:bg-white/5 hover:text-white"
+                                className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-white/5 hover:text-white"
                                 onClick={() => setShowProposalDrawer(false)}
                             >
-                                <X className="size-5" />
+                                <X className="size-5" aria-hidden="true" />
                             </button>
                         </header>
 
-                        <div className="no-scrollbar min-h-0 flex-1 space-y-5 overflow-y-auto p-6">
+                        <div className="no-scrollbar min-h-0 flex-1 space-y-5 overflow-y-auto p-5">
                             {proposalAlert && (
                                 <Alert variant={proposalAlert.type === 'success' ? 'success' : 'destructive'}>
                                     {proposalAlert.message}
                                 </Alert>
                             )}
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                <div>
-                                    <label className="text-gray-400 text-sm mb-2 block">Proposal title</label>
-                                    <input
-                                        type="text"
+                            <div className="space-y-4">
+                                <Field id="proposal-title" label="Proposal title" required>
+                                    <Input
+                                        id="proposal-title"
                                         value={proposalForm.title}
                                         onChange={e => setProposalForm(prev => ({ ...prev, title: e.target.value }))}
-                                        placeholder="Enable transfers, upgrade contracts…"
-                                        className="w-full px-4 py-3 bg-white/10 rounded-xl border border-white/20 text-white"
+                                        placeholder="Enable transfers or upgrade contracts"
                                     />
-                                </div>
-                                <div>
-                                    <label className="text-gray-400 text-sm mb-2 block">Description</label>
+                                </Field>
+                                <Field
+                                    id="proposal-description"
+                                    label="Description"
+                                    required
+                                    description="Explain the motivation, execution steps, and expected results. Markdown is supported."
+                                >
                                     <textarea
+                                        id="proposal-description"
                                         value={proposalForm.description}
                                         onChange={e => setProposalForm(prev => ({ ...prev, description: e.target.value }))}
                                         rows={4}
-                                        placeholder="Explain motivation, execution steps, and expected results. Markdown supported."
-                                        className="w-full px-4 py-3 bg-white/10 rounded-xl border border-white/20 text-white"
+                                        placeholder="Describe the proposal..."
+                                        className="min-h-28 w-full rounded-lg border border-white/15 bg-white/[0.03] px-3 py-2.5 text-sm text-slate-100 outline-none placeholder:text-slate-500 focus:border-cyan-400/70 focus:ring-3 focus:ring-cyan-400/10"
                                     />
-                                </div>
+                                </Field>
                             </div>
 
                             <div className="space-y-4">
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Actions</p>
-                                        <p className="text-sm text-gray-500">Each action represents one contract call bundled inside the proposal.</p>
+                                        <p className="text-sm font-semibold text-white">Proposal actions</p>
+                                        <p className="mt-1 text-xs text-slate-400">Each action is one contract call in the proposal.</p>
                                     </div>
-                                    <button
-                                        type="button"
-                                        onClick={addProposalAction}
-                                        className="inline-flex items-center gap-2 rounded-full border border-white/15 px-3 py-1.5 text-xs text-white hover:bg-white/10"
-                                    >
-                                        <Plus size={14} /> Add action
-                                    </button>
+                                    <Button type="button" variant="outline" size="sm" onClick={addProposalAction}>
+                                        <Plus className="size-4" aria-hidden="true" /> Add action
+                                    </Button>
                                 </div>
 
                                 {proposalActions.map((action, index) => (
-                                    <div key={`proposal-action-${index}`} className="rounded-2xl border border-white/10 bg-black/30 p-4 space-y-4">
-                                        <div className="flex items-center justify-between text-sm text-gray-400">
-                                            <span>Action {index + 1}</span>
+                                    <section key={`proposal-action-${index}`} className="space-y-4 rounded-xl border border-white/10 bg-white/[0.025] p-4">
+                                        <div className="flex items-center justify-between gap-3">
+                                            <h4 className="text-sm font-medium text-slate-200">Action {index + 1}</h4>
                                             {proposalActions.length > 1 && (
-                                                <button
-                                                    type="button"
-                                                    onClick={() => removeProposalAction(index)}
-                                                    className="text-red-400 hover:text-red-300"
-                                                >
+                                                <Button type="button" variant="ghost" size="sm" onClick={() => removeProposalAction(index)}>
                                                     Remove
-                                                </button>
+                                                </Button>
                                             )}
                                         </div>
-                                        <div>
-                                            <label className="text-xs text-gray-400">Quick presets</label>
-                                            <select
+                                        <Field id={`proposal-preset-${index}`} label="Quick preset">
+                                            <NativeSelect
+                                                id={`proposal-preset-${index}`}
                                                 defaultValue=""
                                                 onChange={event => {
                                                     const presetKey = event.target.value;
@@ -3054,10 +3043,9 @@ export default function AdminDashboardFixed() {
                                                     applyTokenFunctionPreset(index, presetKey);
                                                     event.currentTarget.value = '';
                                                 }}
-                                                className="mt-1 w-full rounded-xl border border-white/10 bg-gray-900/40 px-3 py-2 text-sm text-white"
                                             >
                                                 <option value="" disabled>
-                                                    Use governance function…
+                                                    Select a function
                                                 </option>
                                                 <optgroup label="NYAX Token">
                                                     {PROPOSAL_FUNCTION_PRESETS.filter(p => p.group === 'NYAX Token').map(preset => (
@@ -3073,73 +3061,67 @@ export default function AdminDashboardFixed() {
                                                         </option>
                                                     ))}
                                                 </optgroup>
-                                            </select>
-                                        </div>
-                                        <div className="grid gap-3 md:grid-cols-3">
-                                            <div className="space-y-2">
-                                                <label className="text-xs text-gray-400">Target contract</label>
-                                                <input
+                                            </NativeSelect>
+                                        </Field>
+                                        <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1.3fr)_minmax(8rem,0.7fr)]">
+                                            <Field id={`proposal-target-${index}`} label="Target contract" required>
+                                                <Input
+                                                    id={`proposal-target-${index}`}
                                                     type="text"
                                                     value={action.target}
                                                     onChange={e => updateProposalAction(index, 'target', e.target.value)}
                                                     placeholder="0x…"
-                                                    className="w-full rounded-xl border border-white/10 bg-gray-900/40 px-3 py-2 text-sm text-white"
                                                 />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <label className="text-xs text-gray-400">ETH value</label>
-                                                <input
+                                            </Field>
+                                            <Field id={`proposal-value-${index}`} label="ETH value">
+                                                <Input
+                                                    id={`proposal-value-${index}`}
                                                     type="text"
                                                     value={action.value}
                                                     onChange={e => updateProposalAction(index, 'value', e.target.value)}
                                                     placeholder="0"
-                                                    className="w-full rounded-xl border border-white/10 bg-gray-900/40 px-3 py-2 text-sm text-white"
                                                 />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <label className="text-xs text-gray-400">Calldata</label>
-                                                <input
-                                                    type="text"
-                                                    value={action.calldata}
-                                                    onChange={e => updateProposalAction(index, 'calldata', e.target.value)}
-                                                    placeholder="0x"
-                                                    className="w-full rounded-xl border border-white/10 bg-gray-900/40 px-3 py-2 text-sm text-white"
-                                                />
-                                            </div>
+                                            </Field>
                                         </div>
-                                    </div>
+                                        <Field
+                                            id={`proposal-calldata-${index}`}
+                                            label="Calldata"
+                                            description="Enter encoded contract calldata, or use a preset above."
+                                        >
+                                            <Input
+                                                id={`proposal-calldata-${index}`}
+                                                type="text"
+                                                value={action.calldata}
+                                                onChange={e => updateProposalAction(index, 'calldata', e.target.value)}
+                                                placeholder="0x"
+                                            />
+                                        </Field>
+                                    </section>
                                 ))}
                             </div>
 
-                            <div className="flex flex-col gap-3">
-                                <div className="rounded-2xl border border-white/10 bg-white/5 p-3 text-xs text-gray-400">
-                                    Governor requires <span className="text-white font-semibold">1,000,000 gNYAX</span> voting power.
-                                    Hold tokens and <span className="text-white font-semibold">delegate to yourself</span> before creating a proposal.
-                                </div>
-                                <button
-                                    className="w-full px-4 py-3 rounded-2xl bg-linear-to-r from-indigo-500 via-blue-500 to-purple-500 font-semibold disabled:opacity-50"
-                                    onClick={handleCreateProposal}
-                                    disabled={proposalSubmitting || !isConnected}
-                                >
-                                    {proposalSubmitting ? 'Submitting…' : 'Create proposal'}
-                                </button>
-                                {!isConnected && (
-                                    <div className="rounded-2xl border border-yellow-400/40 bg-yellow-400/10 p-4 text-sm text-yellow-200">
-                                        Connect your wallet to create proposals.
-                                    </div>
-                                )}
-                                {isConnected && !hasSigner && (
-                                    <div className="rounded-2xl border border-orange-400/40 bg-orange-400/10 p-4 text-sm text-orange-200">
-                                        Wallet connected, but signer is not ready. Reconnect your wallet (or refresh) and try again.
-                                    </div>
-                                )}
-                                {!onRequiredNetwork && isConnected && (
-                                    <div className="rounded-2xl border border-orange-400/40 bg-orange-400/10 p-4 text-sm text-orange-200">
-                                        Switch to Ethereum Sepolia (chain ID 11155111) to submit this proposal.
-                                    </div>
-                                )}
+                            <div className="rounded-xl border border-white/10 bg-white/[0.025] p-4 text-xs text-slate-400">
+                                Governor requires <span className="font-semibold text-white">1,000,000 gNYAX</span> voting power.
+                                Hold tokens and <span className="font-semibold text-white">delegate to yourself</span> before creating a proposal.
                             </div>
+
+                            {!isConnected && <Alert variant="warning">Connect your wallet to create proposals.</Alert>}
+                            {isConnected && !hasSigner && (
+                                <Alert variant="warning">Wallet connected, but signer is not ready. Reconnect your wallet and try again.</Alert>
+                            )}
+                            {!onRequiredNetwork && isConnected && (
+                                <Alert variant="warning">Switch to Ethereum Sepolia (chain ID 11155111) to submit this proposal.</Alert>
+                            )}
                         </div>
+
+                        <footer className="flex shrink-0 justify-end gap-3 border-t border-white/10 px-5 py-3">
+                            <Button variant="outline" onClick={() => setShowProposalDrawer(false)}>
+                                Cancel
+                            </Button>
+                            <Button onClick={handleCreateProposal} disabled={proposalSubmitting || !isConnected}>
+                                {proposalSubmitting ? 'Submitting...' : 'Create proposal'}
+                            </Button>
+                        </footer>
                     </div>
                 </Drawer>
         </div>

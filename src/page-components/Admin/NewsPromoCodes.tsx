@@ -9,6 +9,7 @@ import { CalendarInput } from '@/components/reui/calendar';
 import { Button } from '@/components/reui/button';
 import { Field } from '@/components/reui/field';
 import { Filters } from '@/components/reui/filters';
+import { DropdownSelect } from '@/components/reui/dropdown-select';
 import { paginateItems, TablePagination } from '@/components/reui/table-pagination';
 import { PROMO_PACKAGE_OPTIONS } from '@/lib/promoPackages';
 import { Package, Plus, Search, Tag, X } from 'lucide-react';
@@ -339,17 +340,18 @@ export default function NewsPromoCodes() {
             className="w-full px-3 py-2"
           />
         </div>
-        <select
+        <DropdownSelect
           value={statusFilter}
-          onChange={event => setStatusFilter(event.target.value as typeof statusFilter)}
           aria-label="Filter promo codes by status"
-          className="px-3 py-2"
-        >
-          <option value="all">All statuses</option>
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
-          <option value="expired">Expired</option>
-        </select>
+          className="!w-[111px] px-3 py-2"
+          onValueChange={value => setStatusFilter(value as typeof statusFilter)}
+          options={[
+            { value: 'all', label: 'All statuses' },
+            { value: 'active', label: 'Active' },
+            { value: 'inactive', label: 'Inactive' },
+            { value: 'expired', label: 'Expired' },
+          ]}
+        />
       </Filters>
 
       <section className="admin-panel-card overflow-hidden">
