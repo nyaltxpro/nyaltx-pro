@@ -397,14 +397,15 @@ export default function NewsPromoCodes() {
                             className="min-w-[12rem] rounded border border-gray-600 bg-gray-900 px-2 py-1 text-xs text-white"
                             aria-label={`Expiration date for ${promo.code}`}
                           />
-                          <button
+                          <Button
+                            variant="ghost"
+                            size="sm"
                             type="button"
                             onClick={() => saveExpiration(promo)}
                             disabled={savingCode === promo.code}
-                            className="text-cyan-300 hover:text-cyan-200 disabled:opacity-50"
                           >
                             Save
-                          </button>
+                          </Button>
                         </div>
                         {!promo.expiresAt && <span className="mt-1 block text-xs text-gray-500">No expiration</span>}
                       </td>
@@ -412,7 +413,9 @@ export default function NewsPromoCodes() {
                         {expired ? 'Expired' : promo.active ? 'Active' : 'Inactive'}
                       </td>
                       <td className="px-5 py-4">
-                        <button
+                        <Button
+                          variant={promo.active ? 'destructive' : 'outline'}
+                          size="sm"
                           type="button"
                           onClick={() => void updatePromoCode(
                             promo,
@@ -420,10 +423,9 @@ export default function NewsPromoCodes() {
                             `${promo.code} ${promo.active ? 'deactivated' : 'activated'}.`
                           )}
                           disabled={savingCode === promo.code || (expired && !promo.active)}
-                          className="rounded border border-gray-600 px-3 py-1.5 text-xs hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           {promo.active ? 'Deactivate' : 'Activate'}
-                        </button>
+                        </Button>
                       </td>
                     </tr>
                   );
