@@ -70,7 +70,7 @@ body {
   /* Option 6: Trading platform gradient */
   /* background: linear-gradient(135deg, #0f0f0f 0%, #1e1e1e 25%, #0f1419 50%, #1e1e1e 75%, #0f0f0f 100%); */
   
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), sans-serif;
   font-size: 14px;
   position: relative;
   overflow-x: hidden;

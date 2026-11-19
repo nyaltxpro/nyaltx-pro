@@ -234,11 +234,7 @@ export default async function RootLayout({
         <meta name="google-site-verification" content="google337da366d3c2759e" />
         <meta name="robots" content="index,follow" />
       </head>
-      <body className={`${inter.variable} ${poppins.variable} antialiased`}
-        style={{
-          fontFamily:
-            "'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
-        }} >
+      <body className={`${inter.variable} ${poppins.variable} antialiased`}>
         <Providers>
           <ToasterProvider />
           {/* Decorative only — never block clicks */}
