@@ -10,6 +10,8 @@ import { Drawer } from '@/components/reui/drawer';
 import { Checkbox } from '@/components/reui/checkbox';
 import { FaClock, FaEdit, FaEye, FaNewspaper, FaSpinner, FaTags, FaTrash, FaUpload, FaUser } from 'react-icons/fa';
 import { Newspaper, Plus, X } from 'lucide-react';
+import { Badge } from '@/components/reui/badge';
+import { Card } from '@/components/reui/card';
 import { toReliableIpfsUrl } from '@/utils/ipfsUpload';
 
 const AdminCorporateNewsClient = dynamic(() => Promise.resolve(AdminCorporateNewsComponent), {
@@ -937,7 +939,7 @@ function AdminCorporateNewsComponent() {
                     ) : (
                         <div className="space-y-4">
                             {visibleNews.map(article => (
-                                <div key={article._id} className={`admin-panel-card p-5 transition-all duration-200 ${
+                                <Card key={article._id} className={`p-5 transition-all duration-200 ${
                                     article.status === 'pending'
                                         ? 'border-amber-500/30 hover:border-amber-400/50'
                                         : 'hover:border-white/20'
@@ -946,15 +948,19 @@ function AdminCorporateNewsComponent() {
                                         <div className="flex-1">
                                             <div className="flex items-center gap-2 mb-2 flex-wrap">
                                                 <h4 className="font-semibold text-white text-lg">{article.title}</h4>
-                                                <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase ${
+                                                <Badge
+                                                    size="sm"
+                                                    radius="full"
+                                                    variant={
                                                     article.status === 'published'
-                                                        ? 'bg-green-500/10 text-green-300 border border-green-500/20'
+                                                        ? 'success-light'
                                                         : article.status === 'pending'
-                                                        ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold'
-                                                        : 'bg-yellow-500/10 text-yellow-300 border border-yellow-500/20'
-                                                }`}>
+                                                        ? 'warning-light'
+                                                        : 'warning-light'
+                                                    }
+                                                >
                                                     {article.status === 'pending' ? '⏳ Pending Review' : article.status}
-                                                </span>
+                                                </Badge>
                                                 {article.type === 'pr' && (
                                                     <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-purple-500/20 text-purple-300 border border-purple-500/30">
                                                         Press Release
@@ -970,7 +976,7 @@ function AdminCorporateNewsComponent() {
                                                         ★ In Top Banner
                                                     </span>
                                                 )}
-                                            </div>
+                                            </Card>
 
                                             <p className="text-gray-300 text-sm mb-3 line-clamp-2">{article.excerpt}</p>
 

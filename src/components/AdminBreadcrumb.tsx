@@ -1,8 +1,15 @@
 'use client';
 
 import { AnimatePresence, motion } from 'motion/react';
-import { ChevronRight, Home } from 'lucide-react';
-import Link from 'next/link';
+import { ChevronRight, LayoutDashboard } from 'lucide-react';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 
 export interface AdminBreadcrumbItem {
   label: string;
@@ -18,8 +25,8 @@ const ease = [0.22, 1, 0.36, 1] as const;
 
 export default function AdminBreadcrumb({ items, className = '' }: AdminBreadcrumbProps) {
   return (
-    <nav aria-label="Breadcrumb" className={`min-w-0 ${className}`}>
-      <ol className="flex min-w-0 items-center">
+    <Breadcrumb className={`min-w-0 ${className}`}>
+      <BreadcrumbList>
         <AnimatePresence mode="popLayout">
           {items.map((item, index) => {
             const isLast = index === items.length - 1;
@@ -35,35 +42,31 @@ export default function AdminBreadcrumb({ items, className = '' }: AdminBreadcru
                 className="flex min-w-0 items-center"
               >
                 {index > 0 && (
-                  <ChevronRight
-                    aria-hidden="true"
-                    className="mx-1 h-3.5 w-3.5 shrink-0 text-slate-600"
-                    strokeWidth={1.8}
-                  />
+                  <BreadcrumbSeparator>
+                    <ChevronRight
+                      aria-hidden="true"
+                      className="mx-1 h-3.5 w-3.5 shrink-0 text-slate-600"
+                      strokeWidth={1.8}
+                    />
+                  </BreadcrumbSeparator>
                 )}
                 {item.href && !isLast ? (
                   <motion.div whileTap={{ scale: 0.98 }}>
-                    <Link
-                      href={item.href}
-                      className="inline-flex min-h-9 items-center gap-1.5 rounded-lg px-2 text-sm font-medium text-slate-400 transition-colors hover:bg-white/5 hover:text-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/60"
-                    >
-                      {index === 0 && <Home className="h-3.5 w-3.5" strokeWidth={1.8} />}
+                    <BreadcrumbLink href={item.href} className="flex items-center gap-1.5">
+                      {index === 0 && <LayoutDashboard className="h-3.5 w-3.5" strokeWidth={1.8} />}
                       <span className="truncate">{item.label}</span>
-                    </Link>
+                    </BreadcrumbLink>
                   </motion.div>
                 ) : (
-                  <span
-                    aria-current={isLast ? 'page' : undefined}
-                    className="inline-flex min-h-9 max-w-[220px] items-center rounded-lg px-2 text-sm font-medium text-slate-100"
-                  >
+                  <BreadcrumbPage>
                     <span className="truncate">{item.label}</span>
-                  </span>
+                  </BreadcrumbPage>
                 )}
               </motion.li>
             );
           })}
         </AnimatePresence>
-      </ol>
-    </nav>
+      </BreadcrumbList>
+    </Breadcrumb>
   );
 }

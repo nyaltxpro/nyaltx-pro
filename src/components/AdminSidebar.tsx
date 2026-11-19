@@ -6,6 +6,14 @@ import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { Collapsible } from '@/components/reui/collapsible';
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/reui/dropdown-menu';
+import {
   Activity,
   BarChart3,
   Coins,
@@ -21,6 +29,8 @@ import {
   Tags,
   Users,
   Video,
+  ChevronsUpDown,
+  Settings,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -119,28 +129,53 @@ export default function AdminSidebar({
           isCollapsed ? 'md:w-[68px]' : 'md:w-[260px]'
         } ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}
       >
-        <Link
-          href="/adminpanel"
-          aria-label="NYALTX Admin Dashboard"
-          onClick={() => isMobileMenuOpen && toggleMobileMenu()}
-          className={`mb-4 flex h-12 items-center gap-3 rounded-lg px-2 transition-colors hover:bg-white/5 ${
-            isCollapsed ? 'md:justify-center md:px-0' : ''
-          }`}
-        >
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-cyan-500/10 ring-1 ring-cyan-400/15">
-            <Image
-              src="/nyaltxpro.png"
-              alt="NYALTX"
-              width={30}
-              height={30}
-              className="h-7 w-7 object-contain"
-            />
-          </span>
-          <span className={`min-w-0 ${isCollapsed ? 'md:hidden' : ''}`}>
-            <span className="block truncate text-[13px] font-semibold">NYALTX</span>
-            <span className="block truncate text-[11px] text-slate-400">Admin Panel</span>
-          </span>
-        </Link>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              aria-label="Open admin workspace menu"
+              className={`mb-4 flex h-12 w-full items-center gap-3 rounded-lg px-2 text-left transition-colors hover:bg-white/5 ${
+                isCollapsed ? 'md:justify-center md:px-0' : ''
+              }`}
+            >
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-cyan-500/10 ring-1 ring-cyan-400/15">
+                <Image
+                  src="/nyaltxpro.png"
+                  alt=""
+                  width={30}
+                  height={30}
+                  className="h-7 w-7 object-contain"
+                />
+              </span>
+              <span className={`min-w-0 flex-1 ${isCollapsed ? 'md:hidden' : ''}`}>
+                <span className="block truncate text-[13px] font-semibold">NYALTX</span>
+                <span className="block truncate text-[11px] text-slate-400">Admin workspace</span>
+              </span>
+              <ChevronsUpDown
+                className={`h-3.5 w-3.5 shrink-0 text-slate-500 ${isCollapsed ? 'md:hidden' : ''}`}
+                aria-hidden="true"
+              />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-56">
+            <DropdownMenuLabel className="px-3 py-2 text-xs text-slate-400">
+              Admin workspace
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator className="my-1 h-px bg-white/10" />
+            <DropdownMenuItem asChild className="cursor-pointer rounded-md px-3 py-2 outline-none focus:bg-white/10">
+              <Link href="/adminpanel" onClick={() => isMobileMenuOpen && toggleMobileMenu()}>
+                <LayoutDashboard className="mr-2 h-4 w-4" aria-hidden="true" />
+                Dashboard
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild className="cursor-pointer rounded-md px-3 py-2 outline-none focus:bg-white/10">
+              <Link href="/adminpanel/profiles" onClick={() => isMobileMenuOpen && toggleMobileMenu()}>
+                <Users className="mr-2 h-4 w-4" aria-hidden="true" />
+                Profiles
+              </Link>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         <label
           onClick={() => {
@@ -217,20 +252,50 @@ export default function AdminSidebar({
         </nav>
 
         <div className="mt-3 border-t border-white/10 pt-3">
-          <button
-            type="button"
-            onClick={handleLogout}
-            disabled={isLoggingOut}
-            title={isCollapsed ? 'Log out' : undefined}
-            className={`flex h-9 w-full items-center gap-2.5 rounded-md px-2.5 text-[13px] text-rose-300 transition-colors hover:bg-rose-400/10 disabled:opacity-60 ${
-              isCollapsed ? 'md:justify-center md:px-0' : ''
-            }`}
-          >
-            <LogOut className="h-4 w-4 shrink-0" strokeWidth={1.7} />
-            <span className={isCollapsed ? 'md:hidden' : ''}>
-              {isLoggingOut ? 'Logging out...' : 'Log out'}
-            </span>
-          </button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                aria-label="Open administrator menu"
+                className={`flex h-11 w-full items-center gap-2.5 rounded-lg px-2.5 text-left transition-colors hover:bg-white/[0.06] ${
+                  isCollapsed ? 'md:justify-center md:px-0' : ''
+                }`}
+              >
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-700 text-[11px] font-semibold text-slate-200">
+                  AD
+                </span>
+                <span className={`min-w-0 flex-1 ${isCollapsed ? 'md:hidden' : ''}`}>
+                  <span className="block truncate text-[13px] font-medium text-slate-200">Administrator</span>
+                  <span className="block truncate text-[11px] text-slate-500">NYALTX Admin</span>
+                </span>
+                <ChevronsUpDown
+                  className={`h-3.5 w-3.5 shrink-0 text-slate-500 ${isCollapsed ? 'md:hidden' : ''}`}
+                  aria-hidden="true"
+                />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" side="top" className="w-56">
+              <DropdownMenuLabel className="px-3 py-2 text-xs text-slate-400">
+                Administrator
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator className="my-1 h-px bg-white/10" />
+              <DropdownMenuItem asChild className="cursor-pointer rounded-md px-3 py-2 outline-none focus:bg-white/10">
+                <Link href="/adminpanel/profiles" onClick={() => isMobileMenuOpen && toggleMobileMenu()}>
+                  <Settings className="mr-2 h-4 w-4" aria-hidden="true" />
+                  Profiles
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator className="my-1 h-px bg-white/10" />
+              <DropdownMenuItem
+                onSelect={handleLogout}
+                disabled={isLoggingOut}
+                className="cursor-pointer rounded-md px-3 py-2 text-rose-300 outline-none focus:bg-rose-400/10"
+              >
+                <LogOut className="mr-2 h-4 w-4" aria-hidden="true" />
+                {isLoggingOut ? 'Logging out...' : 'Log out'}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <div
             className={`mt-3 flex items-center gap-2 px-2 text-[10px] text-slate-500 ${
               isCollapsed ? 'md:hidden' : ''

@@ -2,9 +2,12 @@
 
 import { useAppKit } from "@reown/appkit/react";
 import Image from "next/image";
-import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { FormEvent, Suspense, useState } from "react";
+import { ChevronLeftIcon, LoaderCircleIcon } from "lucide-react";
 import { useAccount, useSignMessage } from "wagmi";
+import { Button } from "@/components/reui/button";
 
 export default function AdminLoginPage() {
   return (
@@ -15,7 +18,6 @@ export default function AdminLoginPage() {
 }
 
 function AdminLoginInner() {
-  const router = useRouter();
   const params = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -122,6 +124,17 @@ function AdminLoginInner() {
 
       <div className="relative w-full max-w-md">
         <div className="rounded-2xl border border-gray-800/80 bg-black/40 backdrop-blur-md shadow-[0_0_0_1px_rgba(255,255,255,0.04)] p-6 md:p-7">
+          <Button asChild variant="link" size="sm" className="group/back-button mb-3 -ml-3">
+            <Link href="/adminpanel">
+              <ChevronLeftIcon
+                data-icon="inline-start"
+                aria-hidden="true"
+                className="transition-transform duration-200 group-hover/back-button:-translate-x-1"
+              />
+              Go back
+            </Link>
+          </Button>
+
           <div className="mb-4 flex items-center gap-2">
             <div className="h-7 w-7 relative">
               <Image
@@ -172,25 +185,28 @@ function AdminLoginInner() {
                   placeholder="••••••••"
                   required
                 />
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="sm"
                   onClick={() => setShow((s) => !s)}
-                  className="absolute inset-y-0 right-2 my-auto text-xs text-gray-400 hover:text-gray-200"
+                  className="absolute inset-y-0 right-1 my-auto h-8 px-2 text-xs text-gray-400 hover:text-gray-200"
                   aria-label={show ? "Hide password" : "Show password"}
                 >
                   {show ? "Hide" : "Show"}
-                </button>
+                </Button>
               </div>
               <div className="mt-1 text-[11px] text-gray-500">Tip: defined by ADMIN_PASSWORD env</div>
             </div>
 
-            <button
+            <Button
               type="submit"
               disabled={loading}
-              className="w-full rounded-md bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 px-4 py-2 font-medium transition-colors"
+              className="w-full"
             >
+              {loading && <LoaderCircleIcon aria-hidden="true" className="animate-spin" />}
               {loading ? "Signing in..." : "Sign In"}
-            </button>
+            </Button>
           </form>
 
           {/* Divider */}
@@ -207,14 +223,16 @@ function AdminLoginInner() {
                 <span className="text-green-400">●</span> Connected: {address.slice(0, 6)}...{address.slice(-4)}
               </div>
             )}
-            <button
+            <Button
               type="button"
+              variant="outline"
               onClick={handleWalletLogin}
               disabled={wLoading}
-              className="w-full rounded-md border border-cyan-700/60 bg-cyan-900/20 hover:bg-cyan-900/30 disabled:opacity-50 px-4 py-2 font-medium transition-colors"
+              className="w-full border-cyan-700/60 bg-cyan-900/20 hover:bg-cyan-900/30"
             >
+              {wLoading && <LoaderCircleIcon aria-hidden="true" className="animate-spin" />}
               {wLoading ? "Processing..." : (isConnected && address) ? "Sign Message to Authenticate" : "Connect Wallet"}
-            </button>
+            </Button>
             <div className="text-[11px] text-gray-500">
               Only pre-approved admin wallet addresses can access. Configure via <code>ADMIN_WALLET_ADDRESSES</code>.
             </div>
