@@ -200,8 +200,8 @@ const AdminUsersComponent = () => {
 
       {/* Stats Cards */}
       {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
-          <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl p-6 shadow-xl hover:bg-gray-800/50 transition-all duration-200">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
+          <div className="min-w-0 rounded-lg border border-white/10 bg-transparent p-4 shadow-none transition-colors hover:border-white/20">
             <div className="flex items-center justify-between mb-4">
               <User className="size-5 text-slate-400" aria-hidden="true" />
               <div className="text-right">
@@ -235,7 +235,7 @@ const AdminUsersComponent = () => {
             </div>
           </div>
 
-          <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl p-6 shadow-xl hover:bg-gray-800/50 transition-all duration-200">
+          <div className="min-w-0 rounded-lg border border-white/10 bg-transparent p-4 shadow-none transition-colors hover:border-white/20">
             <div className="flex items-center justify-between mb-4">
               <Mail className="size-5 text-slate-400" aria-hidden="true" />
               <div className="text-right">
@@ -273,7 +273,7 @@ const AdminUsersComponent = () => {
             </div>
           </div>
 
-          <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl p-6 shadow-xl hover:bg-gray-800/50 transition-all duration-200">
+          <div className="min-w-0 rounded-lg border border-white/10 bg-transparent p-4 shadow-none transition-colors hover:border-white/20">
             <div className="flex items-center justify-between mb-4">
               <Wallet className="size-5 text-slate-400" aria-hidden="true" />
               <div className="text-right">
@@ -307,7 +307,7 @@ const AdminUsersComponent = () => {
             </div>
           </div>
 
-          <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl p-6 shadow-xl hover:bg-gray-800/50 transition-all duration-200">
+          <div className="min-w-0 rounded-lg border border-white/10 bg-transparent p-4 shadow-none transition-colors hover:border-white/20">
             <div className="flex items-center justify-between mb-4">
               <Coins className="size-5 text-slate-400" aria-hidden="true" />
               <div className="text-right">
@@ -341,7 +341,7 @@ const AdminUsersComponent = () => {
             </div>
           </div>
 
-          <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-xl p-6 shadow-xl hover:bg-gray-800/50 transition-all duration-200">
+          <div className="min-w-0 rounded-lg border border-white/10 bg-transparent p-4 shadow-none transition-colors hover:border-white/20">
             <div className="flex items-center justify-between mb-4">
               <Coins className="size-5 text-slate-400" aria-hidden="true" />
               <div className="text-right">

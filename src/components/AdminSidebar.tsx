@@ -15,6 +15,7 @@ import {
 import {
   Activity,
   BarChart3,
+  ChevronDown,
   ChevronsUpDown,
   Coins,
   Gift,
@@ -32,6 +33,8 @@ import {
   Video,
   type LucideIcon,
 } from 'lucide-react';
+import VerifiedBadge from '@/components/VerifiedBadge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface AdminSidebarProps {
   isMobileMenuOpen: boolean;
@@ -274,19 +277,34 @@ export default function AdminSidebar({
               <button
                 type="button"
                 aria-label="Open administrator menu"
-                className={`flex h-11 w-full items-center gap-2.5 rounded-lg px-2 text-left transition-colors hover:bg-white/[0.055] ${
+                className={`group flex h-11 w-full items-center gap-2.5 rounded-lg px-2 text-left transition-colors hover:bg-white/[0.055] ${
                   isCollapsed ? 'md:justify-center md:px-0' : ''
                 }`}
               >
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-700 text-xs font-semibold text-slate-200 ring-1 ring-inset ring-white/10">
-                  AD
+                <span className="relative shrink-0">
+                  <Avatar size="sm" aria-label="Administrator account">
+                    <AvatarImage
+                      src="https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=96&h=96&dpr=2&q=80"
+                      alt="Aron Thompson"
+                    />
+                    <AvatarFallback>AT</AvatarFallback>
+                  </Avatar>
+                  <span
+                    aria-label="Verified administrator"
+                    role="img"
+                    className="absolute -bottom-0.5 -right-0.5"
+                  >
+                    <VerifiedBadge />
+                  </span>
                 </span>
                 <span className={`min-w-0 flex-1 ${isCollapsed ? 'md:hidden' : ''}`}>
                   <span className="block truncate text-sm font-medium text-slate-200">Administrator</span>
                   <span className="block truncate text-xs text-slate-500">NYALTX Admin</span>
                 </span>
-                <ChevronsUpDown
-                  className={`h-3.5 w-3.5 shrink-0 text-slate-500 ${isCollapsed ? 'md:hidden' : ''}`}
+                <ChevronDown
+                  className={`size-4 shrink-0 text-slate-400 transition-transform group-data-[state=open]:rotate-180 ${
+                    isCollapsed ? 'md:hidden' : ''
+                  }`}
                   aria-hidden="true"
                 />
               </button>

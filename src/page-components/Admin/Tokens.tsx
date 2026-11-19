@@ -8,8 +8,16 @@ import { Checkbox } from '@/components/reui/checkbox';
 import { Badge } from '@/components/reui/badge';
 import { Filters } from '@/components/reui/filters';
 import { Alert } from '@/components/reui/alert';
+import { NativeSelect } from '@/components/reui/native-select';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/reui/tooltip';
 import toast from 'react-hot-toast';
 import {
+  AtSign,
   ArrowLeft,
   ArrowDownAZ,
   ArrowUpAZ,
@@ -22,12 +30,17 @@ import {
   ExternalLink,
   Eye,
   EyeOff,
+  Github,
+  Globe,
+  MessageCircle,
   Pause,
   Play,
   Plus,
   Search,
+  Send,
   Trash2,
   X,
+  type LucideIcon,
 } from 'lucide-react';
 
 const AdminTokensClient = dynamic(() => Promise.resolve(AdminTokensComponent), {
@@ -297,6 +310,7 @@ function AdminTokensComponent() {
 
             {/* Filters & Controls */}
             <Filters
+                className="admin-token-filters"
                 activeFilters={[
                     ...(statusFilter !== 'pending'
                         ? [{ id: 'token-status', label: `Status: ${statusFilter}`, onRemove: () => setStatusFilter('pending') }]
@@ -318,9 +332,9 @@ function AdminTokensComponent() {
                         >
                             Status:
                         </label>
-                        <select
+                        <NativeSelect
                             id="status-filter"
-                            className="block rounded-lg border border-white/15 bg-transparent p-2.5 text-sm text-white focus:border-cyan-400 focus:ring-cyan-400"
+                            className="!w-[102px] px-2.5"
                             value={statusFilter}
                             onChange={e => {
                                 setStatusFilter(e.target.value as any);
@@ -331,7 +345,7 @@ function AdminTokensComponent() {
                             <option value="approved">Approved</option>
                             <option value="rejected">Rejected</option>
                             <option value="all">All</option>
-                        </select>
+                        </NativeSelect>
                     </div>
 
                     {/* Chain Filter */}
@@ -342,9 +356,9 @@ function AdminTokensComponent() {
                         >
                             Chain:
                         </label>
-                        <select
+                        <NativeSelect
                             id="chain-filter"
-                            className="block rounded-lg border border-white/15 bg-transparent p-2.5 text-sm text-white focus:border-cyan-400 focus:ring-cyan-400"
+                            className="!w-[103px] px-2.5"
                             value={chainFilter}
                             onChange={e => setChainFilter(e.target.value)}
                         >
@@ -353,7 +367,7 @@ function AdminTokensComponent() {
                                     {c === 'all' ? 'All Chains' : c}
                                 </option>
                             ))}
-                        </select>
+                        </NativeSelect>
                     </div>
 
                     {/* Search Input */}
@@ -382,9 +396,9 @@ function AdminTokensComponent() {
                         >
                             Show:
                         </label>
-                        <select
+                        <NativeSelect
                             id="per-page"
-                            className="block rounded-lg border border-white/15 bg-transparent p-2.5 text-sm text-white focus:border-cyan-400 focus:ring-cyan-400"
+                            className="!w-[51px] px-2.5"
                             value={limit}
                             onChange={e => {
                                 setLimit(parseInt(e.target.value, 10));
@@ -394,7 +408,7 @@ function AdminTokensComponent() {
                             <option value={10}>10</option>
                             <option value={25}>25</option>
                             <option value={50}>50</option>
-                        </select>
+                        </NativeSelect>
                     </div>
                 </div>
             </Filters>
@@ -416,9 +430,10 @@ function AdminTokensComponent() {
                     </p>
                 </div>
             ) : (
-                <div className="admin-panel-card overflow-hidden">
-                    <div className="overflow-x-auto">
-                        <table className="w-full min-w-[1280px] overflow-hidden">
+                <TooltipProvider>
+                    <div className="admin-panel-card overflow-hidden">
+                        <div className="overflow-x-auto">
+                            <table className="w-full min-w-[1280px] overflow-hidden">
                             <thead className="bg-gray-700/30 border-b border-gray-600/20">
                                 <tr>
                                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-r border-gray-700/20" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
@@ -574,33 +589,38 @@ function AdminTokensComponent() {
                                             </label>
                                         </td>
                                         <td className="px-4 py-3 text-sm border-r border-gray-700/20">
-                                            <div className="flex flex-col gap-2">
+                                            <div className="flex w-max min-w-max flex-nowrap items-center gap-1.5">
                                                 <SocialSwitch
                                                     label="Website"
+                                                    icon={Globe}
                                                     checked={t.showWebsite ?? true}
                                                     disabled={busyId === t.id}
                                                     onChange={(val: boolean) => patchToken(t.id, { socials: { website: val } })}
                                                 />
                                                 <SocialSwitch
                                                     label="Twitter"
+                                                    icon={AtSign}
                                                     checked={t.showTwitter ?? true}
                                                     disabled={busyId === t.id}
                                                     onChange={(val: boolean) => patchToken(t.id, { socials: { twitter: val } })}
                                                 />
                                                 <SocialSwitch
                                                     label="Telegram"
+                                                    icon={Send}
                                                     checked={t.showTelegram ?? true}
                                                     disabled={busyId === t.id}
                                                     onChange={(val: boolean) => patchToken(t.id, { socials: { telegram: val } })}
                                                 />
                                                 <SocialSwitch
                                                     label="Discord"
+                                                    icon={MessageCircle}
                                                     checked={t.showDiscord ?? true}
                                                     disabled={busyId === t.id}
                                                     onChange={(val: boolean) => patchToken(t.id, { socials: { discord: val } })}
                                                 />
                                                 <SocialSwitch
                                                     label="Github"
+                                                    icon={Github}
                                                     checked={t.showGithub ?? true}
                                                     disabled={busyId === t.id}
                                                     onChange={(val: boolean) => patchToken(t.id, { socials: { github: val } })}
@@ -608,60 +628,50 @@ function AdminTokensComponent() {
                                             </div>
                                         </td>
                                         <td className="px-4 py-3 text-sm">
-                                            <div className="flex flex-col gap-2">
-                                                {/* Preview on Trade Page Link */}
-                                                <Link
-                                                    href={`/dashboard/trade?base=${encodeURIComponent(t.tokenSymbol)}&name=${encodeURIComponent(t.tokenName)}&chain=${encodeURIComponent(t.blockchain)}&address=${encodeURIComponent(t.contractAddress)}${t.imageUri ? `&imageUri=${encodeURIComponent(t.imageUri)}` : ''}&source=local`}
-                                                    target="_blank"
-                                                    className="px-3 py-1 rounded-lg text-xs font-medium transition-all duration-200 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/30 text-center"
-                                                    style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
-                                                >
-                                                    <ExternalLink className="w-3 h-3 inline mr-1" />
-                                                    Preview Trade
-                                                </Link>
-                                                
-                                                {/* Action Buttons */}
-                                                <div className="flex gap-2 justify-end">
-                                                    <button
-                                                        disabled={busyId === t.id || t.status === 'approved'}
-                                                        onClick={() => updateStatus(t.id, 'approved')}
-                                                        className={`px-3 py-1 rounded-lg text-xs font-medium transition-all duration-200 ${
-                                                            t.status === 'approved' 
-                                                                ? 'bg-green-500/20 text-green-300 border border-green-500/30 cursor-not-allowed' 
-                                                                : 'bg-green-500/20 hover:bg-green-500/30 text-green-300 border border-green-500/30'
-                                                        }`}
-                                                        style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
-                                                    >
-                                                        <Check className="w-3 h-3 inline mr-1" />
-                                                        {t.status === 'approved' ? 'Approved' : 'Approve'}
-                                                    </button>
-                                                    <button
-                                                        disabled={busyId === t.id}
-                                                        onClick={() => updateStatus(t.id, 'rejected')}
-                                                        className="px-3 py-1 rounded-lg text-xs font-medium transition-all duration-200 bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30"
-                                                        style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
-                                                    >
-                                                        <X className="w-3 h-3 inline mr-1" />
-                                                        Reject
-                                                    </button>
-                                                    <button
-                                                        disabled={busyId === t.id}
-                                                        onClick={() => remove(t.id)}
-                                                        className="px-3 py-1 rounded-lg text-xs font-medium transition-all duration-200 bg-gray-500/20 hover:bg-gray-500/30 text-gray-300 border border-gray-500/30"
-                                                        style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
-                                                    >
-                                                        <Trash2 className="w-3 h-3 inline mr-1" />
-                                                        Delete
-                                                    </button>
-                                                </div>
+                                            <div className="flex items-center gap-1.5">
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <Link
+                                                            href={`/dashboard/trade?base=${encodeURIComponent(t.tokenSymbol)}&name=${encodeURIComponent(t.tokenName)}&chain=${encodeURIComponent(t.blockchain)}&address=${encodeURIComponent(t.contractAddress)}${t.imageUri ? `&imageUri=${encodeURIComponent(t.imageUri)}` : ''}&source=local`}
+                                                            target="_blank"
+                                                            aria-label="Preview Trade"
+                                                            className="inline-flex size-8 shrink-0 items-center justify-center rounded-md border border-cyan-500/30 bg-cyan-500/15 text-cyan-300 transition-colors hover:bg-cyan-500/25"
+                                                        >
+                                                            <ExternalLink className="size-4" aria-hidden="true" />
+                                                        </Link>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>Preview Trade</TooltipContent>
+                                                </Tooltip>
+                                                <TokenActionButton
+                                                    label={t.status === 'approved' ? 'Approved' : 'Approve'}
+                                                    icon={Check}
+                                                    disabled={busyId === t.id || t.status === 'approved'}
+                                                    onClick={() => updateStatus(t.id, 'approved')}
+                                                    className="border-green-500/30 bg-green-500/15 text-green-300 hover:bg-green-500/25"
+                                                />
+                                                <TokenActionButton
+                                                    label="Reject"
+                                                    icon={X}
+                                                    disabled={busyId === t.id}
+                                                    onClick={() => updateStatus(t.id, 'rejected')}
+                                                    className="border-red-500/30 bg-red-500/15 text-red-300 hover:bg-red-500/25"
+                                                />
+                                                <TokenActionButton
+                                                    label="Delete"
+                                                    icon={Trash2}
+                                                    disabled={busyId === t.id}
+                                                    onClick={() => remove(t.id)}
+                                                    className="border-white/10 bg-white/5 text-slate-300 hover:bg-white/10"
+                                                />
                                             </div>
                                         </td>
                                     </tr>
                                 ))}
                             </tbody>
-                        </table>
+                            </table>
+                        </div>
                     </div>
-                </div>
+                </TooltipProvider>
             )}
             {/* Footer pagination */}
             <div className="flex items-center justify-between text-sm text-gray-300">
@@ -754,25 +764,68 @@ function Th({
 
 function SocialSwitch({
     label,
+    icon: Icon,
     checked,
     disabled,
     onChange,
 }: {
     label: string;
+    icon: LucideIcon;
     checked: boolean;
     disabled?: boolean;
     onChange: (value: boolean) => void;
 }) {
     return (
-        <label className="flex items-center justify-between gap-3 text-xs">
-            <span className="text-gray-300">{label}</span>
-            <Checkbox
-                className="accent-cyan-600"
-                checked={checked}
-                disabled={disabled}
-                onChange={e => onChange(e.target.checked)}
-            />
-        </label>
+        <Tooltip>
+            <TooltipTrigger asChild>
+                <button
+                    type="button"
+                    aria-label={`${label}: ${checked ? 'visible' : 'hidden'}`}
+                    aria-pressed={checked}
+                    disabled={disabled}
+                    onClick={() => onChange(!checked)}
+                    className={`inline-flex size-7 shrink-0 items-center justify-center rounded-md border transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+                        checked
+                            ? 'border-cyan-400/30 bg-cyan-400/10 text-cyan-300 hover:bg-cyan-400/20'
+                            : 'border-white/10 bg-white/5 text-slate-500 hover:bg-white/10'
+                    }`}
+                >
+                    <Icon className="size-3.5" aria-hidden="true" />
+                </button>
+            </TooltipTrigger>
+            <TooltipContent>{`${label}: ${checked ? 'visible' : 'hidden'}`}</TooltipContent>
+        </Tooltip>
+    );
+}
+
+function TokenActionButton({
+    label,
+    icon: Icon,
+    disabled,
+    onClick,
+    className,
+}: {
+    label: string;
+    icon: LucideIcon;
+    disabled?: boolean;
+    onClick: () => void;
+    className: string;
+}) {
+    return (
+        <Tooltip>
+            <TooltipTrigger asChild>
+                <button
+                    type="button"
+                    aria-label={label}
+                    disabled={disabled}
+                    onClick={onClick}
+                    className={`inline-flex size-8 shrink-0 items-center justify-center rounded-md border transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
+                >
+                    <Icon className="size-4" aria-hidden="true" />
+                </button>
+            </TooltipTrigger>
+            <TooltipContent>{label}</TooltipContent>
+        </Tooltip>
     );
 }
 
