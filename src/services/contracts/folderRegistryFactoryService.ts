@@ -16,9 +16,9 @@ export interface TokenStats {
 
 export class FolderRegistryFactoryService {
   private contract: ethers.Contract;
-  private provider: ethers.BrowserProvider;
+  private provider: ethers.BrowserProvider | ethers.JsonRpcProvider;
 
-  constructor(provider: ethers.BrowserProvider) {
+  constructor(provider: ethers.BrowserProvider | ethers.JsonRpcProvider) {
     this.provider = provider;
     const address = CONTRACT_ADDRESSES.folderEscrowFactory;
     const abi = CONTRACT_ABIS.folderRegisteryFactory;
@@ -311,6 +311,9 @@ export class FolderRegistryFactoryService {
   }
 
   async claimAllocation(folderId: number, account: string, amount: string): Promise<string> {
+    if (!(this.provider instanceof ethers.BrowserProvider)) {
+      throw new Error('A connected wallet is required to claim an allocation');
+    }
     const signer = await this.provider.getSigner();
     const folderRegistryContract = new ethers.Contract(
       CONTRACT_ADDRESSES.folderRegistry,

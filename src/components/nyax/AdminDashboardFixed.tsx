@@ -6,6 +6,7 @@ import { useFolderRegistry } from '@/hooks/useFolderRegistry';
 import { PROPOSAL_FUNCTION_PRESETS, encodeProposalPreset } from '@/lib/proposalFunctionPresets';
 import { CONTRACT_ADDRESSES, NETWORK_CONFIG } from '@/services/contracts';
 import { FolderEscrowService } from '@/services/contracts/folderEscrowService';
+import { FolderRegistryFactoryService } from '@/services/contracts/folderRegistryFactoryService';
 import { getRpcErrorMessage, isIncompleteRpcResponse, isRpcRateLimitError } from '@/services/contracts/rpcErrors';
 import { FolderInfo, MultisigTransaction } from '@/services/contracts/types';
 import { useAppKitAccount } from '@reown/appkit/react';
@@ -48,6 +49,35 @@ const PERMISSION_FLAGS = [
     { bit: 1 << 4, label: 'Admin' },
     { bit: 1 << 5, label: 'Multisig Required' },
 ];
+
+function getAdminFolderRpcUrls() {
+    const configuredUrls = process.env.NEXT_PUBLIC_RPC_URLS
+        ?.split(',')
+        .map(url => url.trim())
+        .filter(Boolean);
+    const urls = configuredUrls?.length
+        ? configuredUrls
+        : [process.env.NEXT_PUBLIC_RPC_URL || NETWORK_CONFIG.rpcUrl];
+    return [...new Set(urls)];
+}
+
+async function withFolderRpcFailover<T>(
+    providers: ethers.JsonRpcProvider[],
+    startIndex: number,
+    read: (provider: ethers.JsonRpcProvider) => Promise<T>,
+): Promise<{ value: T; providerIndex: number }> {
+    let lastRateLimitError: unknown;
+    for (let offset = 0; offset < providers.length; offset += 1) {
+        const providerIndex = (startIndex + offset) % providers.length;
+        try {
+            return { value: await read(providers[providerIndex]), providerIndex };
+        } catch (error) {
+            if (!isRpcRateLimitError(error)) throw error;
+            lastRateLimitError = error;
+        }
+    }
+    throw lastRateLimitError ?? new Error('No admin folder RPC endpoints are configured');
+}
 
 type ProposalAction = {
     target: string;
@@ -142,8 +172,9 @@ export default function AdminDashboardFixed() {
     const [permissionsLoading, setPermissionsLoading] = useState(false);
     const factoryLoadLock = useRef(false);
     const factoryFoldersCacheKey = `nyaltx:factory-folders:v1:${NETWORK_CONFIG.chainId}:${CONTRACT_ADDRESSES.folderEscrowFactory.toLowerCase()}`;
-    const readOnlyProvider = useMemo(
-        () => new ethers.JsonRpcProvider(NETWORK_CONFIG.rpcUrl),
+    const [activeFolderRpcIndex, setActiveFolderRpcIndex] = useState(0);
+    const folderRpcProviders = useMemo(
+        () => getAdminFolderRpcUrls().map(url => new ethers.JsonRpcProvider(url)),
         [],
     );
 
@@ -958,15 +989,28 @@ export default function AdminDashboardFixed() {
         }
         try {
             // Get detailed folder information
-            const folderDetails = await daoService.folderFactory.getFoldersWithDetails();
+            const folderDetailsResult = await withFolderRpcFailover(
+                folderRpcProviders,
+                activeFolderRpcIndex,
+                provider => new FolderRegistryFactoryService(provider).getFoldersWithDetails(),
+            );
+            let currentProviderIndex = folderDetailsResult.providerIndex;
+            setActiveFolderRpcIndex(currentProviderIndex);
+            const folderDetails = folderDetailsResult.value;
             const enhancedFolders: FactoryFolder[] = [];
             const folderFailures: unknown[] = [];
             let stoppedAfterRpcError = false;
 
             for (const [index, folder] of folderDetails.entries()) {
                 try {
-                    const folderEscrow = new FolderEscrowService(folder.address, readOnlyProvider);
-                    const stats = await folderEscrow.getFolderStatsOptimized();
+                    const statsResult = await withFolderRpcFailover(
+                        folderRpcProviders,
+                        currentProviderIndex,
+                        provider => new FolderEscrowService(folder.address, provider).getFolderStatsOptimized(),
+                    );
+                    currentProviderIndex = statsResult.providerIndex;
+                    setActiveFolderRpcIndex(currentProviderIndex);
+                    const stats = statsResult.value;
 
                     enhancedFolders.push({
                         id: index,
@@ -1024,8 +1068,11 @@ export default function AdminDashboardFixed() {
                 const cachedMessage = cachedSnapshot
                     ? ` Showing saved folder data from ${new Date(cachedSnapshot.savedAt).toLocaleString()}.`
                     : '';
+                const endpointMessage = isRpcRateLimitError(representativeError) && folderRpcProviders.length > 1
+                    ? ` Tried all ${folderRpcProviders.length} configured RPC endpoints.`
+                    : '';
                 setFactoryLoadError(
-                    `${failedRequestsMessage}${stoppedMessage} ${getRpcErrorMessage(representativeError, 'Refresh folders')}${cachedMessage}`,
+                    `${failedRequestsMessage}${stoppedMessage} ${getRpcErrorMessage(representativeError, 'Refresh folders')}${endpointMessage}${cachedMessage}`,
                 );
             }
         } catch (err) {
@@ -1038,7 +1085,10 @@ export default function AdminDashboardFixed() {
             const cachedMessage = cachedSnapshot
                 ? ` Showing saved folder data from ${new Date(cachedSnapshot.savedAt).toLocaleString()}.`
                 : '';
-            setFactoryLoadError(`${getRpcErrorMessage(err, 'Refresh folders')}${cachedMessage}`);
+            const endpointMessage = isRpcRateLimitError(err) && folderRpcProviders.length > 1
+                ? ` Tried all ${folderRpcProviders.length} configured RPC endpoints.`
+                : '';
+            setFactoryLoadError(`${getRpcErrorMessage(err, 'Refresh folders')}${endpointMessage}${cachedMessage}`);
         } finally {
             factoryLoadLock.current = false;
             setFactoryLoading(false);

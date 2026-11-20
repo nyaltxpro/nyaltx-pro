@@ -303,8 +303,13 @@ export const PricingPage = ({ tinaData }: any) => {
                     {/* Hero Section */}
                     <div className="flex items-start justify-between gap-4 mb-8">
                         <div>
-                            <h1 className="text-2xl md:text-7xl font-semibold tracking-tight bg-clip-text my-6 p-3 text-transparent bg-white" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
-                                {content?.hero?.title}
+                            {content?.hero?.eyebrow && (
+                                <p className="mb-3 text-xs font-semibold tracking-[0.3em] text-cyan-300">
+                                    {content.hero.eyebrow}
+                                </p>
+                            )}
+                            <h1 className="my-4 text-3xl font-semibold tracking-tight text-white sm:text-5xl md:text-6xl" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
+                                {content?.hero?.title || 'Corporate Visibility & Media'}
                             </h1>
                             <p
                                 className="text-gray-300 mt-4 max-w-2xl text-sm md:text-lg leading-relaxed"
@@ -375,7 +380,7 @@ export const PricingPage = ({ tinaData }: any) => {
                         </div>
                     </section>
 
-                    {/* Fintech Media & Advertising */}
+                    {/* Media Packages */}
                     <section aria-labelledby="fintech-media" className="mb-12">
                         <div className="flex items-center gap-3 mb-6">
                             <div className="w-1 h-8 bg-gradient-to-b from-cyan-400 to-blue-500 rounded-full"></div>
@@ -452,7 +457,7 @@ export const PricingPage = ({ tinaData }: any) => {
                         )}
                     </section>
 
-                    {/* Corporate Roadshow */}
+                    {/* Roadshows & TV */}
                     <section aria-labelledby="corporate-roadshow" className="mb-12">
                         <div className="flex items-center gap-3 mb-6">
                             <div className="w-1 h-8 bg-gradient-to-b from-cyan-400 to-blue-500 rounded-full"></div>
@@ -551,6 +556,7 @@ export const PricingPage = ({ tinaData }: any) => {
                                 <div className="mb-6">
                                     <div className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                                         ${content?.nyaltxPro?.price}
+                                        <span className="ml-2 text-sm font-medium text-gray-400">/ year</span>
                                     </div>
                                 </div>
                                 <ul className="text-sm text-gray-300 space-y-2 mb-6 list-none pl-0" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
@@ -571,7 +577,7 @@ export const PricingPage = ({ tinaData }: any) => {
                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                                                 <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a9.124 9.124 0 0 1-.077.437c-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287z" />
                                             </svg>
-                                            Register Token & Pay ${content?.nyaltxPro?.price} with PayPal
+                                            Pay ${content?.nyaltxPro?.price} with PayPal
                                         </span>
                                     </button>
                                     <button
@@ -581,7 +587,7 @@ export const PricingPage = ({ tinaData }: any) => {
                                     >
                                         <span className="inline-flex items-center gap-2">
                                             <Image src="/crypto-icons/color/eth.svg" width={16} height={16} alt="eth" />
-                                            Register Token & Pay ${content?.nyaltxPro?.price} with ETH
+                                            Pay with ETH
                                         </span>
                                     </button>
                                     <button
@@ -591,7 +597,7 @@ export const PricingPage = ({ tinaData }: any) => {
                                     >
                                         <span className="inline-flex items-center gap-2">
                                             <Image src="/crypto-icons/color/sol.svg" width={16} height={16} alt="sol" />
-                                            Register Token & Pay ${content?.nyaltxPro?.price} with SOL
+                                            Pay with SOL
                                         </span>
                                     </button>
                                     <button
@@ -601,7 +607,7 @@ export const PricingPage = ({ tinaData }: any) => {
                                     >
                                         <span className="inline-flex items-center gap-2">
                                             <Image src="/logo.png" width={16} height={16} alt="nyax" />
-                                            Register Token & Pay ${Math.round(content?.nyaltxPro?.price * 0.8)} with NYAX (20% off)
+                                            Pay ${Math.round(content?.nyaltxPro?.price * 0.8)} with NYAX (20% off)
                                         </span>
                                     </button>
                                 </div>
@@ -779,7 +785,7 @@ export const PricingPage = ({ tinaData }: any) => {
                                                 <span>ETH: {ethAmt ? `${ethAmt.toFixed(5)} ETH` : '—'}</span>
                                             </div>
                                             <div className="flex items-center gap-2">
-                                                <Image src="/crypto-icons/color/usdt.svg" alt="USDC" width={16} height={16} className="opacity-60" />
+                                                <Image src="/crypto-icons/color/usdc.svg" alt="USDC" width={16} height={16} className="opacity-60" />
                                                 <span>USDC: ${pack.priceUSD.toFixed(2)}</span>
                                             </div>
                                             <div className="flex items-center gap-2">
@@ -812,7 +818,7 @@ export const PricingPage = ({ tinaData }: any) => {
                     <div className="mt-10 text-sm text-gray-400" style={{ fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
                         <p>{content?.footer?.paymentMethods}</p>
                         <p className="mt-1">{content?.footer?.technicalNote}</p>
-                        <p className="mt-1">{content?.footer?.networkFees}</p>
+                        {content?.footer?.networkFees && <p className="mt-1">{content.footer.networkFees}</p>}
                         <p className="mt-1">{content?.footer?.paypalNote}</p>
                     </div>
                 </div>

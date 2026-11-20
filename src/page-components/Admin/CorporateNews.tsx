@@ -14,7 +14,7 @@ import { FileUpload } from '@/components/reui/file-upload';
 import { Filters } from '@/components/reui/filters';
 import { Spinner } from '@/components/reui/spinner';
 import { useConfirmDialog } from '@/components/reui/confirm-dialog';
-import { Eye, Newspaper, Pencil, Pin, PinOff, Plus, Trash2, Upload, X } from 'lucide-react';
+import { Eye, Newspaper, Pencil, Pin, PinOff, Plus, RefreshCw, Trash2, Upload, X } from 'lucide-react';
 import { Switch } from '@/components/reui/switch';
 import { TimePicker } from '@/components/reui/time-picker';
 import { toReliableIpfsUrl } from '@/utils/ipfsUpload';
@@ -73,7 +73,7 @@ const normalizeQuillHtml = (value?: string | null) => {
 interface NewsArticle {
     _id: string;
     title: string;
-    content: string;
+    content?: string;
     excerpt: string;
     featuredImage?: string;
     status: 'published' | 'draft' | 'pending';
@@ -123,6 +123,7 @@ function AdminCorporateNewsComponent() {
     const [publishTime, setPublishTime] = useState('09:00');
     const [approvingId, setApprovingId] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
+    const [hasLoadedNews, setHasLoadedNews] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
     const [isCreating, setIsCreating] = useState(false);
@@ -243,12 +244,29 @@ function AdminCorporateNewsComponent() {
     const loadNews = async () => {
         try {
             setLoading(true);
-            const response = await fetch('/api/admin/news?status=all&limit=500');
-            if (!response.ok) throw new Error('Failed to load news');
-            const data = await response.json();
-            setNews(data.news || []);
+            setError(null);
+            const response = await fetch('/api/admin/news?status=all&limit=500&summary=true', {
+                cache: 'no-store',
+                credentials: 'same-origin',
+            });
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) {
+                if (response.status === 401) {
+                    throw new Error('Your admin session has expired. Sign in again, then refresh news.');
+                }
+                throw new Error(
+                    data.error
+                        ? `${data.error} (HTTP ${response.status})`
+                        : `Could not load news (HTTP ${response.status}). Try refreshing.`,
+                );
+            }
+            if (!Array.isArray(data.news)) {
+                throw new Error('The news service returned an unexpected response. Try refreshing.');
+            }
+            setNews(data.news);
+            setHasLoadedNews(true);
         } catch (err: any) {
-            setError(err.message);
+            setError(err instanceof Error ? err.message : 'Could not load news. Try refreshing.');
         } finally {
             setLoading(false);
         }
@@ -270,20 +288,33 @@ function AdminCorporateNewsComponent() {
         });
     };
 
-    const handleEditNews = (article: NewsArticle) => {
-        setEditingNews(article);
-        setIsCreating(true);
-        setNewsForm({
-            title: article.title,
-            content: article.content || '',
-            excerpt: article.excerpt || '',
-            featuredImage: article.featuredImage || '',
-            status: article.status,
-            featuredInBanner: Boolean(article.featuredInBanner),
-            tags: Array.isArray(article.tags) ? article.tags.join(', ') : '',
-            author: article.author || 'Community Submission',
-            editorType: 'quill' // Default to quill for existing articles
-        });
+    const handleEditNews = async (article: NewsArticle) => {
+        try {
+            const response = await fetch(`/api/admin/news?id=${encodeURIComponent(article._id)}`, {
+                cache: 'no-store',
+                credentials: 'same-origin',
+            });
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok || !data.news) {
+                throw new Error(data.error || `Could not load this article (HTTP ${response.status}).`);
+            }
+            const fullArticle = data.news as NewsArticle;
+            setEditingNews(fullArticle);
+            setIsCreating(true);
+            setNewsForm({
+                title: fullArticle.title,
+                content: fullArticle.content || '',
+                excerpt: fullArticle.excerpt || '',
+                featuredImage: fullArticle.featuredImage || '',
+                status: fullArticle.status,
+                featuredInBanner: Boolean(fullArticle.featuredInBanner),
+                tags: Array.isArray(fullArticle.tags) ? fullArticle.tags.join(', ') : '',
+                author: fullArticle.author || 'Community Submission',
+                editorType: 'quill',
+            });
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Could not load this article for editing.');
+        }
     };
 
     const handleToggleBanner = async (article: NewsArticle) => {
@@ -576,6 +607,14 @@ function AdminCorporateNewsComponent() {
                 <div className="flex shrink-0 items-center gap-3">
                     <Button
                         variant="outline"
+                        onClick={loadNews}
+                        disabled={loading}
+                    >
+                        <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} aria-hidden="true" />
+                        Refresh
+                    </Button>
+                    <Button
+                        variant="outline"
                         onClick={handleCreateNews}
                     >
                         <Plus className="h-4 w-4" aria-hidden="true" />
@@ -585,14 +624,22 @@ function AdminCorporateNewsComponent() {
             </div>
 
             {/* Status Messages */}
-            {error && <Alert variant="destructive">{error}</Alert>}
+            {error && (
+                <Alert variant="destructive" className="flex flex-wrap items-center justify-between gap-3">
+                    <span>{error}</span>
+                    <Button variant="outline" size="sm" onClick={loadNews} disabled={loading}>
+                        <RefreshCw className={`size-4 ${loading ? 'animate-spin' : ''}`} aria-hidden="true" />
+                        Try again
+                    </Button>
+                </Alert>
+            )}
             {success && <Alert variant="success">{success}</Alert>}
 
             <div className="flex flex-wrap items-center gap-2">
                 {([
-                    ['all', 'All News', news.length],
-                    ['paid', 'Paid Submissions', paidNewsCount],
-                    ['corporate', 'Corporate News', news.length - paidNewsCount],
+                    ['all', 'All News', hasLoadedNews ? news.length : null],
+                    ['paid', 'Paid Submissions', hasLoadedNews ? paidNewsCount : null],
+                    ['corporate', 'Corporate News', hasLoadedNews ? news.length - paidNewsCount : null],
                 ] as const).map(([filter, label, count]) => (
                     <Button
                         key={filter}
@@ -600,7 +647,7 @@ function AdminCorporateNewsComponent() {
                         variant={submissionFilter === filter ? 'secondary' : 'ghost'}
                         onClick={() => setSubmissionFilter(filter)}
                     >
-                        {label} ({count})
+                        {label} ({count ?? '—'})
                     </Button>
                 ))}
             </div>
@@ -945,6 +992,16 @@ function AdminCorporateNewsComponent() {
                         <div className="flex items-center gap-3 rounded-lg border border-white/10 bg-white/5 px-4 py-6 text-white/70">
                             <Spinner className="h-4 w-4" />
                             Loading news articles...
+                        </div>
+                    ) : error && !hasLoadedNews ? (
+                        <div className="rounded-lg border border-dashed border-white/15 p-8 text-center">
+                            <Newspaper className="mx-auto mb-4 h-10 w-10 text-gray-500" aria-hidden="true" />
+                            <p className="font-medium text-gray-200">Could not load news articles</p>
+                            <p className="mt-1 text-sm text-gray-400">Your articles have not been replaced with an empty list.</p>
+                            <Button variant="outline" size="sm" onClick={loadNews} disabled={loading} className="mt-4">
+                                <RefreshCw className={`size-4 ${loading ? 'animate-spin' : ''}`} aria-hidden="true" />
+                                Try again
+                            </Button>
                         </div>
                     ) : visibleNews.length === 0 ? (
                         <div className="text-center py-12">
