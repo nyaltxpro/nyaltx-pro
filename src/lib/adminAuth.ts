@@ -2,7 +2,7 @@ import { cookies } from 'next/headers';
 import { SignJWT, jwtVerify, JWTPayload } from 'jose';
 
 const COOKIE_NAME = 'admin_jwt';
-const DEFAULT_TTL_SECONDS = 60 * 60 * 6; // 6 hours
+const DEFAULT_TTL_SECONDS = 60 * 60 * 24; // 24 hours
 
 function getSecret() {
   const secret = process.env.ADMIN_JWT_SECRET || '';

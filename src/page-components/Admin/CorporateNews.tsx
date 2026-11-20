@@ -252,7 +252,7 @@ function AdminCorporateNewsComponent() {
             const data = await response.json().catch(() => ({}));
             if (!response.ok) {
                 if (response.status === 401) {
-                    throw new Error('Your admin session has expired. Sign in again, then refresh news.');
+                    throw new Error('Your admin session is missing, expired, or invalid. Sign in again, then refresh news.');
                 }
                 throw new Error(
                     data.error
