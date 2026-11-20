@@ -11,7 +11,7 @@
     },
     {
       "label": "News Hub",
-      "href": "/newshub/submit",
+      "href": "/newshub",
       "enabled": true
     },
     {
