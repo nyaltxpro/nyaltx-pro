@@ -83,7 +83,7 @@ function slideBackground(slide: BannerSlide, withOverlay = true): string {
 function articleThumbnail(art: Article): string {
   if (art.featuredImage) {
     const url = toReliableIpfsUrl(art.featuredImage);
-    if (url) return `url(${url}) center/cover no-repeat`;
+    if (url) return `url(${url}) center/contain no-repeat`;
   }
   return GRADS[(art.coverColor ?? 0) % GRADS.length];
 }
@@ -679,7 +679,7 @@ const STYLES = `
   /* ─── Article card ─── */
   .nh-item { display: flex; gap: 14px; background: var(--nh-card); border: 1px solid var(--nh-border); border-radius: 14px; padding: 14px; margin-bottom: 12px; transition: transform .2s, border-color .2s; }
   .nh-item:hover { transform: translateY(-1px); border-color: rgba(6,182,212,.4); }
-  .nh-thumb { width: 96px; height: 76px; border-radius: 10px; flex: none; background-position: center; background-size: cover; }
+  .nh-thumb { width: 112px; aspect-ratio: 2/1; height: auto; border-radius: 10px; flex: none; background-position: center; background-size: contain; background-repeat: no-repeat; background-color: #0b111b; }
   .nh-article-body { flex: 1; min-width: 0; }
   .nh-item h3 { margin: 0 0 4px; font-size: 15px; font-weight: 600; line-height: 1.35; }
   .nh-item p  { margin: 0; font-size: 13px; color: var(--nh-muted); line-height: 1.4; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }

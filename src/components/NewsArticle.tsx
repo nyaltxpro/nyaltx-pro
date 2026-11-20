@@ -171,19 +171,19 @@ function NewsArticle({ article }: NewsArticleProps) {
 
         {/* Featured Image */}
         {workingImageUrl && (
-          <div className="featured-image-container relative mb-8 rounded-2xl overflow-hidden w-full" style={{ minHeight: '300px', maxHeight: '60vh' }}>
+          <div className="featured-image-container relative mb-8 rounded-2xl overflow-hidden w-full bg-gray-900/50" style={{ minHeight: '300px', maxHeight: '60vh' }}>
             {!imageError ? (
               <Image
                 src={workingImageUrl}
                 alt={article.title}
                 width={800}
                 height={400}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain"
                 style={{ 
                   minWidth: '400px', 
                   minHeight: '300px',
                   maxHeight: '60vh',
-                  objectFit: 'cover',
+                  objectFit: 'contain',
                   objectPosition: 'center'
                 }}
                 unoptimized={/\/ipfs\//.test(workingImageUrl)}
@@ -196,12 +196,12 @@ function NewsArticle({ article }: NewsArticleProps) {
               <img
                 src={workingImageUrl}
                 alt={article.title}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain"
                 style={{ 
                   minWidth: '400px', 
                   minHeight: '300px',
                   maxHeight: '60vh',
-                  objectFit: 'cover',
+                  objectFit: 'contain',
                   objectPosition: 'center'
                 }}
                 onError={(e) => {
@@ -238,7 +238,7 @@ function NewsArticle({ article }: NewsArticleProps) {
           .featured-image-container img {
             width: 100% !important;
             height: 100% !important;
-            object-fit: cover !important;
+            object-fit: contain !important;
             object-position: center !important;
             min-width: 400px !important;
             min-height: 300px !important;

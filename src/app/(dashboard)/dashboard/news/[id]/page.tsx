@@ -69,7 +69,7 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ id:
         <img
           src={item.image}
           alt=""
-          className="w-full max-h-[380px] object-cover rounded-lg border border-gray-800 mb-4"
+          className="w-full max-h-[380px] object-contain rounded-lg border border-gray-800 mb-4"
         />
       ) : null}
 
