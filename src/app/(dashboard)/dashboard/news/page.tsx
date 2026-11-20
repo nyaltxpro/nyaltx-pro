@@ -194,12 +194,12 @@ export default async function NewsPage() {
                 >
                   {/* IMAGE */}
                   {item.image ? (
-                    <div className="relative h-48 overflow-hidden">
+                    <div className="relative aspect-[2/1] overflow-hidden bg-black/40">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={item.image}
                         alt={item.title}
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        className="h-full w-full object-contain"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 

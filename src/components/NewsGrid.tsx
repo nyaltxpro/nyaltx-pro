@@ -190,13 +190,13 @@ function NewsGrid() {
             className="group relative bg-gray-900/40 backdrop-blur-sm border border-gray-800/50 rounded-2xl overflow-hidden hover:border-gray-700/50 transition-all duration-300 hover:transform hover:scale-[1.02]"
           >
             {/* Featured Image */}
-            <div className="relative h-48 overflow-hidden bg-gray-800/50">
+            <div className="relative aspect-[2/1] overflow-hidden bg-gray-800/50">
               {article.featuredImage ? (
                 <Image
                   src={toReliableIpfsUrl(article.featuredImage)}
                   alt={article.title}
                   fill
-                  className="object-cover transition-transform duration-500 group-hover:scale-110"
+                  className="object-contain"
                   unoptimized={/\/ipfs\//.test(toReliableIpfsUrl(article.featuredImage))}
                   onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
                     console.error('News card image failed to load:', toReliableIpfsUrl(article.featuredImage));

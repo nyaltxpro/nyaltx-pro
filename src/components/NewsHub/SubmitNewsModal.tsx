@@ -434,8 +434,8 @@ export default function SubmitNewsModalCorporate({
       }
       setSelectedFile(file);
       setImgError(
-        img.width < 1200 || img.height < 450
-          ? `Image is ${img.width}×${img.height}. Minimum recommended is 1200×450 px.`
+        img.width < 1200 || img.height < 600
+          ? `Image is ${img.width}×${img.height}. Recommended size is 1200×600 px (2:1 card ratio).`
           : ''
       );
     };
@@ -942,7 +942,7 @@ export default function SubmitNewsModalCorporate({
                   <div className="flex-1 h-px bg-gray-600/50"></div>
                 </div>
                 <div className="mb-3 text-xs text-gray-400">
-                  Requirements: Min 400x200 pixels (1200x450 recommended), Max 10MB, JPEG/PNG/GIF/WebP only
+                  Use a 1200x600 px (2:1) image for best results. Images fit the card without cropping. Minimum 400x200 px; max 10MB; JPEG/PNG/GIF/WebP.
                 </div>
 
                 <div className="flex items-center gap-3 flex-wrap">
@@ -1021,12 +1021,12 @@ export default function SubmitNewsModalCorporate({
               {uploadedImg && (
                 <div className="mt-3">
                   <label className={LABEL}>Preview</label>
-                  <div className="relative w-full h-32 bg-gray-800/50 rounded-lg overflow-hidden">
+                  <div className="relative aspect-[2/1] w-full bg-gray-800/50 rounded-lg overflow-hidden">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={uploadedImg}
                       alt="Cover image preview"
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain"
                       onError={(e) => {
                         (e.target as HTMLImageElement).style.display = 'none';
                       }}

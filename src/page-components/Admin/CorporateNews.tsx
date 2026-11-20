@@ -772,7 +772,7 @@ function AdminCorporateNewsComponent() {
                                     <div className="flex-1 h-px bg-gray-600/50"></div>
                                 </div>
                                 <div className="mb-3 text-xs text-gray-400">
-                                    Requirements: Min 400x300 pixels, Max 10MB, JPEG/PNG/GIF/WebP only
+                                    Recommended: 1200x600 px (2:1 card ratio). Images fit the card without cropping. Minimum 400x200 px; max 10MB; JPEG/PNG/GIF/WebP.
                                 </div>
 
                                 <div className="flex items-center gap-3">
@@ -846,11 +846,11 @@ function AdminCorporateNewsComponent() {
                             {newsForm.featuredImage && (
                                 <div className="mt-3">
                                     <label className="block text-sm font-medium text-gray-300 mb-2">Preview</label>
-                                    <div className="relative w-full h-32 bg-gray-800/50 rounded-lg overflow-hidden">
+                                    <div className="relative aspect-[2/1] w-full bg-gray-800/50 rounded-lg overflow-hidden">
                                         <img
                                             src={newsForm.featuredImage}
                                             alt="Featured image preview"
-                                            className="w-full h-full object-cover"
+                                            className="w-full h-full object-contain"
                                             onError={(e) => {
                                                 const target = e.target as HTMLImageElement;
                                                 target.style.display = 'none';
