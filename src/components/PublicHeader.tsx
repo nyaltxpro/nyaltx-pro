@@ -16,7 +16,7 @@ export default function PublicHeader() {
 
   const fallbackPrimaryLinks = [
     { label: 'Dashboard', href: '/dashboard', enabled: true },
-    { label: 'News Hub', href: '/newshub/submit', enabled: true },
+    { label: 'News Hub', href: '/newshub', enabled: true },
     { label: 'Pricing', href: '/pricing', enabled: true },
     { label: 'Contact us', href: '/contact', enabled: true },
   ];
