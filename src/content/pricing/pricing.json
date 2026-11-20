@@ -1,26 +1,143 @@
 {
   "hero": {
-    "title": "Pricing",
-    "description": "Start with **NyaltxPro** to unlock your project profile and media. Then upgrade to the **Race to Liberty** campaign for broader visibility."
+    "eyebrow": "NYALTX PRICING",
+    "title": "Corporate Visibility & Media",
+    "description": "Publish company news, build a project profile, and boost your visibility."
+  },
+  "newsPublishing": {
+    "sectionTitle": "News Publishing",
+    "description": "One-time publishing for announcements, launches, and industry updates.",
+    "plans": [
+      {
+        "id": "news-release",
+        "name": "News Release",
+        "priceUSD": 99,
+        "description": "One-time publishing for your announcement on the NYALTX News Hub.",
+        "features": [
+          {
+            "text": "Dedicated article page"
+          },
+          {
+            "text": "Company logo and featured image"
+          },
+          {
+            "text": "Company links and shareable URL"
+          }
+        ],
+        "ctaText": "Publish for $99",
+        "ctaLink": "/newshub/submit?modal=open&plan=feed"
+      },
+      {
+        "id": "featured-news-release",
+        "name": "Featured News Release",
+        "priceUSD": 199,
+        "description": "Everything in News Release, with a week of featured placement and social promotion.",
+        "isPopular": true,
+        "popularBadge": "More Visibility",
+        "features": [
+          {
+            "text": "Everything in News Release"
+          },
+          {
+            "text": "7 days of featured placement"
+          },
+          {
+            "text": "Branded social graphic and NYALTX social posts"
+          }
+        ],
+        "ctaText": "Get Featured for $199",
+        "ctaLink": "/newshub/submit?modal=open&plan=slider"
+      }
+    ]
+  },
+  "fintechMedia": {
+    "sectionTitle": "Media Packages",
+    "title": "Professional media services powered by Corporate Roadshow.",
+    "description": "Customized media services built around your goals.",
+    "plans": [
+      {
+        "id": "executive-podcast",
+        "tag": "Podcast Feature",
+        "name": "Executive Podcast Interview",
+        "price": "$3,500",
+        "image": "/crs-podcast-feature.png",
+        "description": "Interview on Off Road with Frank Ferraro and Andrea Cataneo, with message positioning, custom graphics, and major podcast distribution and social promotion.",
+        "features": [
+          { "text": "Interview on Off Road with Frank Ferraro and Andrea Cataneo" },
+          { "text": "Message positioning and custom graphics" },
+          { "text": "Major podcast distribution and social promotion" }
+        ],
+        "ctaText": "Request details",
+        "ctaLink": "mailto:frank@corporateroadshow.com?subject=Podcast%20Feature%20Inquiry"
+      },
+      {
+        "id": "full-media",
+        "tag": "Full Media Package",
+        "name": "Full Media Package",
+        "price": "$8,500",
+        "image": "/crs-full-media.png",
+        "description": "Podcast feature, two full video edits, two short-form clips, custom graphics, a 15-30 second commercial, and a Corporate Roadshow profile.",
+        "features": [
+          { "text": "Podcast feature and two full video edits" },
+          { "text": "Two short-form clips and custom graphics" },
+          { "text": "15-30 second commercial" },
+          { "text": "Corporate Roadshow profile" }
+        ],
+        "ctaText": "Request details",
+        "ctaLink": "mailto:frank@corporateroadshow.com?subject=Full%20Media%20Package%20Inquiry"
+      }
+    ],
+    "distributionImage": "/crs-podcast-distribution.png"
+  },
+  "corporateRoadshow": {
+    "sectionTitle": "Roadshows & TV",
+    "title": "Investor events and large-scale media exposure.",
+    "description": "In-person investor events and national television campaigns.",
+    "plans": [
+      {
+        "id": "live-roadshows",
+        "tag": "Events",
+        "name": "Live Roadshows",
+        "price": "From $20,000",
+        "image": "/crs-live-roadshow.png",
+        "description": "In-person investor events with executive networking, presentations, private meetings, and on-site media coverage.",
+        "ctaText": "Request proposal",
+        "ctaLink": "mailto:frank@corporateroadshow.com?subject=Live%20Roadshow%20Inquiry"
+      },
+      {
+        "id": "national-tv",
+        "tag": "Television",
+        "name": "National TV Campaign",
+        "price": "$80K-$150K+",
+        "image": "/crs-national-tv.png",
+        "description": "50-100 commercial spots across major business and news networks.",
+        "ctaText": "Request proposal",
+        "ctaLink": "mailto:frank@corporateroadshow.com?subject=National%20TV%20Campaign%20Inquiry"
+      }
+    ],
+    "campaign": {
+      "tag": "Custom Media Campaigns",
+      "title": "Want a mix?",
+      "description": "We combine news, interviews, video, and advertising into one campaign.",
+      "ctaText": "Discuss a campaign",
+      "ctaLink": "mailto:frank@corporateroadshow.com?subject=Custom%20Media%20Campaign"
+    }
   },
   "nyaltxPro": {
-    "sectionTitle": "NyaltxPro",
+    "sectionTitle": "NyaltxPro Membership",
     "badge": "Start Here",
     "title": "NyaltxPro Membership",
-    "description": "Unlock your project profile on NYALTX.",
+    "description": "Unlock your project profile on NYALTX for one year.",
     "price": 199,
     "features": [
       {
         "text": "Dedicated project profile page"
       },
       {
-        "text": "Social media links (Twitter/X, Telegram, Website, etc.)"
+        "text": "Social links (X, Telegram, website)"
       },
       {
-        "text": "Embedded project video \u2014 default video provided if none purchased"
-      },
-      {
-        "text": "Valid for 1 year"
+        "text": "Embedded project video, with a default provided"
       }
     ],
     "bannerImage": "/New York Alt Exchange Poster.png",
@@ -42,52 +159,43 @@
             "text": "Placement on Recently Updated for 1 month"
           },
           {
-            "text": "Eligible for Off Road podcast mention"
+            "text": "Logo in Race to Liberty rollup"
           },
           {
-            "text": "Project logo showcased in Race to Liberty rollup"
-          },
-          {
-            "text": "Basic socials link-out"
+            "text": "Off Road podcast mention eligibility"
           }
         ],
-        "buttonText": "\ud83c\udfc6 Select Coin & Enter Race",
-        "buttonSubtext": "Choose your coin \u2022 Earn points \u2022 Boost visibility"
+        "buttonText": "Select coin & enter",
+        "buttonSubtext": "Choose a coin to enter Race to Liberty."
       },
       {
         "id": "helicopter",
         "name": "Helicopter",
-        "description": "6 month placement.",
+        "description": "6 months of homepage placement.",
         "priceUSD": 349,
         "isPopular": true,
         "popularBadge": "Most Popular",
         "features": [
           {
-            "text": "Homepage placement for 6 months"
-          },
-          {
             "text": "Priority slot in Race to Liberty carousel"
           },
           {
-            "text": "Podcast Off Road shout-out (scheduled)"
+            "text": "Scheduled Off Road shout-out"
           },
           {
             "text": "Enhanced socials and website spotlight"
           }
         ],
-        "buttonText": "\ud83c\udfc6 Select Coin & Enter Race",
-        "buttonSubtext": "Choose your coin \u2022 Earn points \u2022 Boost visibility"
+        "buttonText": "Select coin & enter",
+        "buttonSubtext": "Choose a coin to enter Race to Liberty."
       },
       {
         "id": "submarine",
         "name": "Submarine",
-        "description": "1 year placement.",
+        "description": "1 year of premium placement.",
         "priceUSD": 599,
         "isPopular": false,
         "features": [
-          {
-            "text": "Premium placement for 1 year"
-          },
           {
             "text": "Featured in Race to Liberty highlights"
           },
@@ -98,67 +206,66 @@
             "text": "Priority support and promo coordination"
           }
         ],
-        "buttonText": "\ud83c\udfc6 Select Coin & Enter Race",
-        "buttonSubtext": "Choose your coin \u2022 Earn points \u2022 Boost visibility"
+        "buttonText": "Select coin & enter",
+        "buttonSubtext": "Choose a coin to enter Race to Liberty."
       }
     ]
   },
   "boostPacks": {
     "sectionTitle": "Boost Packs",
-    "description": "Projects can purchase Boost Packs to climb the board.",
-    "subDescription": "(Pay in ETH, USDC, or NYAX for bonus points.)",
+    "description": "Climb the board with bonus points.",
+    "subDescription": "Pay in ETH, USDC, or NYAX.",
     "packs": [
       {
         "id": "starter",
         "name": "Starter Boost",
         "points": 250,
         "priceUSD": 199,
-        "description": "Gain entry into the Boosted Zone",
+        "description": "Entry into the Boosted Zone",
         "icon": "\ud83d\udd39",
         "isPopular": false,
-        "buttonText": "Select Tokens & Purchase",
-        "buttonSubtext": "Choose tokens to boost \u2022 Multiple payment options"
+        "buttonText": "Purchase",
+        "buttonSubtext": "Pay in ETH, USDC, or NYAX."
       },
       {
         "id": "growth",
         "name": "Growth Boost",
         "points": 750,
         "priceUSD": 399,
-        "description": "Highlighted in daily Top Movers feed",
+        "description": "Highlighted in the daily Top Movers feed",
         "icon": "\ud83d\udd39",
         "isPopular": true,
         "popularBadge": "Popular",
-        "buttonText": "Select Tokens & Purchase",
-        "buttonSubtext": "Choose tokens to boost \u2022 Multiple payment options"
+        "buttonText": "Purchase",
+        "buttonSubtext": "Pay in ETH, USDC, or NYAX."
       },
       {
         "id": "pro",
         "name": "Pro Boost",
         "points": 1500,
         "priceUSD": 599,
-        "description": "Unlocks Featured placement (color frames, 48h push)",
+        "description": "Featured placement with color frames and a 48-hour push",
         "icon": "\ud83d\udd39",
         "isPopular": false,
-        "buttonText": "Select Tokens & Purchase",
-        "buttonSubtext": "Choose tokens to boost \u2022 Multiple payment options"
+        "buttonText": "Purchase",
+        "buttonSubtext": "Pay in ETH, USDC, or NYAX."
       },
       {
         "id": "elite",
         "name": "Elite Boost",
         "points": 7500,
         "priceUSD": 2999,
-        "description": "Premium: Top of board + Featured Video slot + Podcast appearance",
+        "description": "Top of board, Featured Video slot, and podcast appearance",
         "icon": "\ud83d\udd39",
         "isPopular": false,
-        "buttonText": "Select Tokens & Purchase",
-        "buttonSubtext": "Choose tokens to boost \u2022 Multiple payment options"
+        "buttonText": "Purchase",
+        "buttonSubtext": "Pay in ETH, USDC, or NYAX."
       }
     ]
   },
   "footer": {
-    "paymentMethods": "Accepted payment methods: PayPal, ETH, SOL, or NYAX token (with 30% discount).",
-    "technicalNote": "On-chain payments are sent to the configured receiver address. Default NYAX token address is used. You can override via environment variables.",
-    "networkFees": "Note: Network fees apply to on-chain payments. Ensure you are on the correct chain. Configure receiver address, tokens, and chain via environment variables.",
-    "paypalNote": "PayPal payments are processed securely through PayPal's payment system."
+    "paymentMethods": "Accepted: PayPal, ETH, SOL, or NYAX. Boost Packs accept ETH, USDC, or NYAX.",
+    "technicalNote": "Network fees apply to on-chain payments, so make sure you are on the correct chain.",
+    "paypalNote": "NYALTX membership is $199 per year, or $159 with NYAX (20% off)."
   }
 }

@@ -18,9 +18,22 @@ export async function GET(request: NextRequest) {
     const collection = db.collection('corporate_news');
     
     const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    if (id) {
+      if (!ObjectId.isValid(id)) {
+        return NextResponse.json({ error: 'Invalid news ID' }, { status: 400 });
+      }
+      const article = await collection.findOne({ _id: new ObjectId(id) });
+      if (!article) {
+        return NextResponse.json({ error: 'News article not found' }, { status: 404 });
+      }
+      return NextResponse.json({ news: article });
+    }
+
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
     const status = searchParams.get('status') || 'all'; // published, draft, all
+    const summary = searchParams.get('summary') === 'true';
     
     const skip = (page - 1) * limit;
     
@@ -38,12 +51,15 @@ export async function GET(request: NextRequest) {
     const total = await collection.countDocuments(query);
     
     // Get news articles with pagination
-    const news = await collection
+    let cursor = collection
       .find(query)
       .sort({ publishedAt: -1, createdAt: -1 })
       .skip(skip)
-      .limit(limit)
-      .toArray();
+      .limit(limit);
+    if (summary) {
+      cursor = cursor.project({ content: 0 });
+    }
+    const news = await cursor.toArray();
     
     return NextResponse.json({
       news,
