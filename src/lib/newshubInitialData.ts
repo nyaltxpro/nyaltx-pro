@@ -22,6 +22,7 @@ interface NewsArticleDocument extends Document {
   planName?: string;
   sourceUrl?: string;
   featuredInBanner?: boolean;
+  views?: number;
 }
 
 export const PAID_CRITERIA = [
@@ -153,6 +154,7 @@ export async function getNewshubArticles(category = 'All', page = 1, limit = 12)
         planName: 1,
         sourceUrl: 1,
         featuredInBanner: 1,
+        views: 1,
       })
       .toArray(),
     getNews(),
@@ -182,6 +184,7 @@ export async function getNewshubArticles(category = 'All', page = 1, limit = 12)
           sourceUrl: safeExternalUrl(item.link),
           featuredInBanner: false,
           isSyndicated: true,
+          views: 0,
         }))
       : [];
   const combinedArticles = [...paidArticles, ...syndicatedArticles].sort((left, right) => {
@@ -192,12 +195,21 @@ export async function getNewshubArticles(category = 'All', page = 1, limit = 12)
       timestamp(left.publishedAt || left.createdAt)
     );
   });
+  const trendingArticles = [...combinedArticles]
+    .sort(
+      (left, right) =>
+        (right.views ?? 0) - (left.views ?? 0) ||
+        timestamp(right.publishedAt || right.createdAt) -
+          timestamp(left.publishedAt || left.createdAt)
+    )
+    .slice(0, 4);
   const safeLimit = Number.isFinite(limit) ? Math.min(Math.max(1, limit), 100) : 12;
   const safePage = Number.isFinite(page) ? Math.max(1, page) : 1;
   const total = Math.min(totalPaid, MAX_FEED_ITEMS) + syndicatedArticles.length;
 
   return {
     articles: combinedArticles.slice((safePage - 1) * safeLimit, safePage * safeLimit),
+    trendingArticles,
     pagination: {
       total,
       page: safePage,

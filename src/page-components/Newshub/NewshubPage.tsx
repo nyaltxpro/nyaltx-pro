@@ -38,11 +38,13 @@ interface Article {
   planName?: string;
   sourceUrl?: string;
   isSyndicated?: boolean;
+  views?: number;
 }
 
 export interface NewshubInitialData {
   banners?: BannerSlide[];
   articles?: Article[];
+  trendingArticles?: Article[];
   categories?: string[];
   pagination?: { total: number; page: number; pages: number };
 }
@@ -104,6 +106,22 @@ function relativeDate(dateStr?: string): string {
   return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
+function articleTopic(article: Article): string {
+  return article.category || article.tags?.[0] || 'NYALTX';
+}
+
+function articleMatchesTopic(article: Article, topic: string): boolean {
+  const normalizedTopic = topic.trim().toLowerCase();
+  return [article.category, ...(article.tags || [])].some(
+    value => value?.trim().toLowerCase() === normalizedTopic
+  );
+}
+
+function articleTimestamp(article: Article): number {
+  const timestamp = new Date(article.publishedAt || article.createdAt || 0).getTime();
+  return Number.isNaN(timestamp) ? 0 : timestamp;
+}
+
 function ArticleLink({
   article,
   className,
@@ -138,6 +156,53 @@ function ArticleLink({
   return <div className={className}>{children}</div>;
 }
 
+function DiscoveryStory({ article, rank }: { article: Article; rank?: number }) {
+  const imageUrl = articleThumbnail(article);
+
+  return (
+    <article className="nh-discovery-card">
+      <ArticleLink
+        article={article}
+        className="nh-discovery-image"
+        ariaLabel={`Read ${article.title}`}
+      >
+        {imageUrl ? (
+          <img src={imageUrl} alt={article.title} loading="lazy" />
+        ) : (
+          <span
+            className="nh-discovery-image-fallback"
+            style={{ background: GRADS[(article.coverColor ?? 0) % GRADS.length] }}
+          />
+        )}
+      </ArticleLink>
+      <div className="nh-discovery-copy">
+        <span className="nh-discovery-topic">{articleTopic(article)}</span>
+        <h3>
+          {rank !== undefined && <span className="nh-discovery-rank">{rank}.</span>}
+          <ArticleLink
+            article={article}
+            className="nh-article-link"
+            ariaLabel={`Read ${article.title}`}
+          >
+            {article.title}
+          </ArticleLink>
+        </h3>
+        <div className="nh-discovery-byline">
+          <span>{article.author || 'NYALTX'}</span>
+          <span aria-hidden="true">·</span>
+          <span>{relativeDate(article.publishedAt || article.createdAt)}</span>
+          {article.views !== undefined && article.views > 0 && (
+            <>
+              <span aria-hidden="true">·</span>
+              <span>{article.views.toLocaleString()} reads</span>
+            </>
+          )}
+        </div>
+      </div>
+    </article>
+  );
+}
+
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function NewshubPage({ initialData }: { initialData?: NewshubInitialData }) {
@@ -146,6 +211,9 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
   // Data state
   const [banners, setBanners] = useState<BannerSlide[]>(initialData?.banners ?? []);
   const [articles, setArticles] = useState<Article[]>(initialData?.articles ?? []);
+  const [trendingFeed, setTrendingFeed] = useState<Article[]>(
+    initialData?.trendingArticles ?? []
+  );
   const [categories, setCategories] = useState<string[]>(initialData?.categories ?? CATEGORIES);
   const [pagination, setPagination] = useState(
     initialData?.pagination ?? { total: 0, page: 1, pages: 1 }
@@ -178,6 +246,7 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
       if (!append) {
         setBanners(data.banners || []);
         setArticles(data.articles || []);
+        if (data.trendingArticles) setTrendingFeed(data.trendingArticles);
         setCurSlide(0);
         setSlideDirection(1);
       } else {
@@ -283,6 +352,32 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
     : null;
   const leadArticle = articles[0];
   const featuredSideArticles = articles.slice(activeBanner ? 0 : 1, activeBanner ? 2 : 3);
+  const trendingArticles = trendingFeed.length
+    ? trendingFeed
+    : [...articles]
+        .sort(
+          (a, b) =>
+            (b.views ?? 0) - (a.views ?? 0) || articleTimestamp(b) - articleTimestamp(a)
+        )
+        .slice(0, 4);
+  const recommendationTopics = new Set<string>();
+  const recommendedArticles = articles
+    .filter(article => {
+      const topic = articleTopic(article).trim().toLowerCase();
+      if (recommendationTopics.has(topic)) return false;
+      recommendationTopics.add(topic);
+      return true;
+    })
+    .slice(0, 4);
+  const topicSections = categories
+    .filter(topic => topic.toLowerCase() !== 'all')
+    .map(topic => ({
+      topic,
+      articles: articles.filter(article => articleMatchesTopic(article, topic)).slice(0, 3),
+    }))
+    .filter(section => section.articles.length > 0)
+    .sort((a, b) => b.articles.length - a.articles.length)
+    .slice(0, 3);
   const activeBannerContent = activeBanner ? (
     <div
       className="nh-slide"
@@ -340,7 +435,7 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
               </div>
             </div>
             <div className="nh-row">
-              <Link href="/newshub/submit" className="nh-btn nh-btn-pri">
+              <Link href="/newshub/submit" className="nh-btn nh-btn-pri nh-submit-btn">
                 + Submit news
               </Link>
             </div>
@@ -588,7 +683,7 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
                         ? 'Please check back soon, or submit a story for review.'
                         : `No ${selectedCat} articles are available right now. Try another category or submit your own.`}
                     </div>
-                    <Link href="/newshub/submit" className="nh-btn nh-btn-pri">
+                    <Link href="/newshub/submit" className="nh-btn nh-btn-pri nh-submit-btn">
                       + Submit your news
                     </Link>
                   </div>
@@ -759,6 +854,81 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
                   </div>
                 )}
               </div>
+              {!loading && selectedCat === 'All' && articles.length > 0 && (
+                <section className="nh-discovery" aria-label="More news">
+                  <div className="nh-discovery-pair">
+                    <section className="nh-discovery-module" aria-labelledby="nh-recommended-title">
+                      <div className="nh-discovery-heading">
+                        <div>
+                          <span className="nh-kicker">Across the feed</span>
+                          <h2 id="nh-recommended-title">Recommended</h2>
+                        </div>
+                      </div>
+                      <div className="nh-discovery-list">
+                        {recommendedArticles.map(article => (
+                          <DiscoveryStory key={`recommended-${article._id}`} article={article} />
+                        ))}
+                      </div>
+                    </section>
+
+                    <section className="nh-discovery-module" aria-labelledby="nh-trending-title">
+                      <div className="nh-discovery-heading">
+                        <div>
+                          <span className="nh-kicker">
+                            {trendingArticles.some(article => (article.views ?? 0) > 0)
+                              ? 'Most read'
+                              : 'Recently published'}
+                          </span>
+                          <h2 id="nh-trending-title">Trending posts</h2>
+                        </div>
+                      </div>
+                      <div className="nh-discovery-list">
+                        {trendingArticles.map((article, index) => (
+                          <DiscoveryStory
+                            key={`trending-${article._id}`}
+                            article={article}
+                            rank={index + 1}
+                          />
+                        ))}
+                      </div>
+                    </section>
+                  </div>
+
+                  {topicSections.length > 0 && (
+                    <div className="nh-topic-sections" aria-label="Latest by topic">
+                      {topicSections.map(section => (
+                        <section
+                          key={section.topic}
+                          className="nh-topic-section"
+                          aria-label={`Latest from ${section.topic}`}
+                        >
+                          <div className="nh-discovery-heading">
+                            <div>
+                              <span className="nh-kicker">Latest from</span>
+                              <h2>{section.topic}</h2>
+                            </div>
+                            <button
+                              type="button"
+                              className="nh-topic-link"
+                              onClick={() => setSelectedCat(section.topic)}
+                            >
+                              View topic <FiArrowRight aria-hidden="true" />
+                            </button>
+                          </div>
+                          <div className="nh-topic-list">
+                            {section.articles.map(article => (
+                              <DiscoveryStory
+                                key={`${section.topic}-${article._id}`}
+                                article={article}
+                              />
+                            ))}
+                          </div>
+                        </section>
+                      ))}
+                    </div>
+                  )}
+                </section>
+              )}
             </main>
 
           </div>
@@ -798,7 +968,7 @@ const STYLES = `
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     min-height: 60vh;
   }
-  .nh-wrap { max-width: 1120px; margin: 0 auto; padding: 24px 16px; }
+  .nh-wrap { max-width: 1120px; margin: 0 auto; padding: 12px 8px; }
 
   /* ─── Buttons ─── */
   .nh-btn {
@@ -811,10 +981,13 @@ const STYLES = `
   .nh-btn:disabled { opacity: .5; cursor: not-allowed; }
   .nh-btn-pri { background: var(--nh-accent); border-color: var(--nh-accent); color: var(--nh-accent-ink); }
   .nh-btn-pri:hover { background: #67e8f9; }
+  .nh-submit-btn { width: fit-content; padding: 8px 24px; border: 0; border-radius: 0; background: #6366f1; color: #fff; font-weight: 500; box-shadow: 3px 3px 0 #000; transition: transform .2s ease, box-shadow .2s ease, background-color .2s ease; }
+  .nh-submit-btn:hover { transform: translate(3px, 3px); box-shadow: none; background: #4f46e5; }
   .nh-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 
   /* ─── Header ─── */
   .nh-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+  .nh-top > div:first-child { padding: 8px 0; }
   .nh-top h1 { display: flex; align-items: baseline; gap: .16em; margin: 0; font-size: clamp(30px, 4vw, 42px); font-weight: 600; line-height: .95; letter-spacing: -.06em; }
   .nh-top h1 span { color: #71717a; font-family: Georgia, Cambria, "Times New Roman", serif; font-weight: 300; font-style: italic; letter-spacing: -.04em; }
   .nh-top h1 em { color: #fff; font-style: italic; font-weight: 600; }
@@ -871,7 +1044,7 @@ const STYLES = `
   .nh-slide-backdrop { position: absolute; inset: -20px; background-position: center; background-size: cover; filter: blur(20px) brightness(.42); transform: scale(1.08); }
   .nh-slide-image { position: absolute; z-index: 1; left: 50%; top: 50%; width: calc(100% - 80px); max-width: 90%; height: 88%; object-fit: contain; transform: translate(-50%,-50%); }
   .nh-slide-shade { position: absolute; z-index: 2; inset: 0; background: linear-gradient(to top, rgba(2,6,12,.9), rgba(2,6,12,.12) 72%, transparent); }
-  .nh-slide-copy { position: relative; z-index: 3; }
+  .nh-slide-copy { position: relative; z-index: 3; width: fit-content; max-width: min(760px, 100%); padding: 14px 18px; border: 1px solid rgba(255,255,255,.16); border-radius: 12px; background: rgba(7,11,18,.68); box-shadow: 0 10px 30px rgba(0,0,0,.24); backdrop-filter: blur(14px) saturate(135%); -webkit-backdrop-filter: blur(14px) saturate(135%); }
   .nh-slide h2 { margin: 6px 0; font-family: Georgia, Cambria, "Times New Roman", serif; font-size: clamp(24px, 3vw, 34px); max-width: 680px; font-weight: 500; line-height: 1.08; letter-spacing: -.035em; text-shadow: 0 2px 8px rgba(0,0,0,.6); }
   .nh-slide p  { margin: 0 0 10px; max-width: 620px; font-size: 14px; opacity: .92; text-shadow: 0 1px 4px rgba(0,0,0,.6); }
   .nh-tag { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .05em; padding: 4px 9px; border-radius: 99px; background: rgba(255,255,255,.2); backdrop-filter: blur(4px); width: max-content; margin-bottom: 6px; }
@@ -896,9 +1069,29 @@ const STYLES = `
   .nh-chip.on { color: #fff; }
   .nh-chip-label { position: relative; z-index: 1; }
   .nh-chip-indicator { position: absolute; inset: 0; z-index: 0; border-radius: 8px; background: linear-gradient(90deg, #0891b2, #06b6d4 60%, #22d3ee); }
-  .nh-chip:focus-visible, .nh-btn:focus-visible, .nh-arrow:focus-visible, .nh-dot:focus-visible { outline: 2px solid #67e8f9; outline-offset: 3px; }
+  .nh-chip:focus-visible, .nh-btn:focus-visible, .nh-arrow:focus-visible, .nh-dot:focus-visible, .nh-topic-link:focus-visible { outline: 2px solid #67e8f9; outline-offset: 3px; }
 
   /* ─── Article cards ─── */
+  .nh-discovery { display: flex; flex-direction: column; gap: 30px; margin-top: 32px; }
+  .nh-discovery-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+  .nh-discovery-module, .nh-topic-section { min-width: 0; border-top: 1px solid var(--nh-border); padding-top: 14px; }
+  .nh-discovery-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+  .nh-discovery-heading h2 { margin: 4px 0 0; font-family: Georgia, Cambria, "Times New Roman", serif; font-size: 22px; font-weight: 500; letter-spacing: -.03em; }
+  .nh-discovery-list { display: grid; gap: 14px; }
+  .nh-discovery-card { display: grid; min-width: 0; grid-template-columns: 104px minmax(0, 1fr); align-items: center; gap: 12px; }
+  .nh-discovery-image { display: block; aspect-ratio: 4/3; overflow: hidden; border-radius: 8px; background: #090f18; }
+  .nh-discovery-image > img, .nh-discovery-image-fallback { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform .3s ease; }
+  .nh-discovery-image:hover > img { transform: scale(1.04); }
+  .nh-discovery-copy { min-width: 0; }
+  .nh-discovery-topic { display: block; margin-bottom: 4px; color: #67e8f9; font-size: 9px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+  .nh-discovery-copy h3 { display: -webkit-box; overflow: hidden; margin: 0; font-family: Georgia, Cambria, "Times New Roman", serif; font-size: 15px; font-weight: 500; line-height: 1.3; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+  .nh-discovery-rank { margin-right: 5px; color: #67e8f9; font-family: system-ui, sans-serif; font-size: 12px; font-weight: 700; }
+  .nh-discovery-byline { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; color: var(--nh-muted); font-size: 10px; }
+  .nh-topic-sections { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+  .nh-topic-list { display: grid; gap: 14px; }
+  .nh-topic-list .nh-discovery-card { grid-template-columns: 88px minmax(0, 1fr); }
+  .nh-topic-link { display: inline-flex; flex: none; align-items: center; gap: 5px; border: 0; background: transparent; padding: 4px 0; color: #67e8f9; cursor: pointer; font-size: 11px; font-weight: 600; }
+  .nh-topic-link:hover { color: #a5f3fc; }
   .nh-feed-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin: 0 0 10px; }
   .nh-feed-heading h2 { margin: 4px 0 0; font-family: Georgia, Cambria, "Times New Roman", serif; font-size: 22px; font-weight: 500; letter-spacing: -.03em; }
   .nh-result-count { color: var(--nh-muted); font-size: 12px; }
@@ -931,8 +1124,10 @@ const STYLES = `
   .nh-article-link { color: var(--nh-text); text-decoration: none; }
   .nh-article-link:hover { color: var(--nh-accent); }
   .nh-muted { color: var(--nh-muted); }
+  @media(max-width:860px) { .nh-topic-sections { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media(max-width:620px) { .nh-discovery-pair, .nh-topic-sections { grid-template-columns: 1fr; } .nh-discovery-card, .nh-topic-list .nh-discovery-card { grid-template-columns: 84px minmax(0, 1fr); } .nh-discovery-heading h2 { font-size: 20px; } }
   @media(max-width:860px) { .nh-feature-grid { grid-template-columns: minmax(0, 1.65fr) minmax(220px, 1fr); } .nh-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } .nh-bento-featured, .nh-bento-compact, .nh-bento-standard { grid-column: span 1; } .nh-bento-featured .nh-bento-image { aspect-ratio: 16/9; } }
-  @media(max-width:620px) { .nh-wrap { padding: 20px 12px; } .nh-category-bar { align-items: flex-start; } .nh-feature-grid, .nh-feature-grid:not(.has-side) { grid-template-columns: 1fr; } .nh-feature-primary .nh-slider, .nh-lead-story { height: clamp(320px, 82vw, 420px); min-height: 320px; } .nh-feature-secondary { min-height: 0; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: 165px; } .nh-cards { grid-template-columns: 1fr; } .nh-bento-card, .nh-card-skeleton { grid-column: span 1; } .nh-bento-featured .nh-bento-content h3 { font-size: 19px; } }
+  @media(max-width:620px) { .nh-wrap { padding: 8px 6px; } .nh-category-bar { align-items: flex-start; } .nh-feature-grid, .nh-feature-grid:not(.has-side) { grid-template-columns: 1fr; } .nh-feature-primary .nh-slider, .nh-lead-story { height: clamp(320px, 82vw, 420px); min-height: 320px; } .nh-feature-secondary { min-height: 0; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: 165px; } .nh-cards { grid-template-columns: 1fr; } .nh-bento-card, .nh-card-skeleton { grid-column: span 1; } .nh-bento-featured .nh-bento-content h3 { font-size: 19px; } }
 
   .nh-empty-state { margin-bottom: 12px; border: 1px solid var(--nh-border); border-radius: 12px; background: var(--nh-card); }
 
