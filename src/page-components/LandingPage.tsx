@@ -107,6 +107,11 @@ export default function LandingPage(props?: LandingPageProps) {
             author: 'DeltaX',
         },
     ];
+    const heroTitle = landingContent?.hero?.title || 'Discover. Track. Explore the Future of Digital Markets.';
+    const heroTitleParts =
+        heroTitle.match(/[^.!?]+[.!?]?/g)?.map(part => part.trim()).filter(Boolean) ?? [heroTitle];
+    const heroTitleLead = heroTitleParts.slice(0, -1).join(' ');
+    const heroTitleEmphasis = heroTitleParts.at(-1) || heroTitle;
 
     return (
         <div className="min-h-screen">
@@ -122,7 +127,8 @@ export default function LandingPage(props?: LandingPageProps) {
                     <div className="grid w-full grid-cols-1 md:grid-cols-2 items-center gap-12 md:gap-14">
                         <motion.div className="max-w-3xl overflow-visible" variants={fadeUp}>
                             <h1 className="max-w-3xl font-sans text-[clamp(2rem,5vw,3.5rem)] font-medium leading-[0.98] tracking-[-0.06em] text-white">
-                                {landingContent?.hero?.title || 'Discover. Track. Explore the Future of Digital Markets.'}
+                                {heroTitleLead && <span className="block">{heroTitleLead}</span>}
+                                <span className="block font-semibold italic">{heroTitleEmphasis}</span>
                             </h1>
                             <p className="mt-6 text-sm text-gray-300/90 max-w-2xl leading-relaxed">
                                 {landingContent?.hero?.subtitle || 'Real-time insights, curated listings, and promotional placements to help your project reach more holders across chains.'}
@@ -130,7 +136,7 @@ export default function LandingPage(props?: LandingPageProps) {
                             <div className="mt-8 flex flex-wrap gap-3">
                                 <MotionLink
                                     href={landingContent?.hero?.ctaLink || '/dashboard'}
-                                    className="rounded-full bg-cyan-500/90 px-5 py-2.5 font-medium text-white hover:bg-cyan-400 transition-colors"
+                                    className="rounded-full bg-cyan-500/90 px-5 py-2.5 font-semibold tracking-tight text-white hover:bg-cyan-400 transition-colors"
                                     whileHover={shouldReduceMotion ? undefined : { y: -2, scale: 1.02 }}
                                     whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
                                 >
@@ -138,7 +144,7 @@ export default function LandingPage(props?: LandingPageProps) {
                                 </MotionLink>
                                 <MotionLink
                                     href="/pricing"
-                                    className="rounded-full border border-white/10 bg-white/5 px-5 py-2.5 font-medium text-white hover:bg-white/10 transition-colors"
+                                    className="rounded-full border border-white/10 bg-white/5 px-5 py-2.5 font-semibold tracking-tight text-white hover:bg-white/10 transition-colors"
                                     whileHover={shouldReduceMotion ? undefined : { y: -2, scale: 1.02 }}
                                     whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
                                 >
