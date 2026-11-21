@@ -3,7 +3,7 @@
 import ConnectWalletButton from '@/components/ConnectWalletButton';
 import PayPalCheckout from '@/components/PayPalCheckout';
 import { NEWS_PAYPAL_CRYPTO_DRAFT_KEY, type NewsPayPalCryptoDraft } from '@/lib/newsCryptoDraft';
-import { isPaidNewsCategory, PAID_NEWS_CATEGORIES } from '@/lib/paidNewsCategories';
+import { PAID_NEWS_CATEGORIES } from '@/lib/paidNewsCategories';
 import { getNYAXPriceUSD } from '@/utils/nyaxPriceApi';
 import { calculateNewsPrice, NEWS_NYAX_DISCOUNT } from '@/lib/newsPricing';
 import { USDC_NYAX_RECEIVER } from '@/lib/paymentAddresses';
@@ -28,7 +28,9 @@ type PayMethod = 'paypal' | 'usdc' | 'nyax';
 type WalletMethod = Exclude<PayMethod, 'paypal'>;
 
 /* ---------- Corporate News (admin) theme tokens ---------- */
-const FONT = { fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' } as const;
+const FONT = {
+  fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
+} as const;
 const INPUT =
   'w-full px-3 py-2 bg-gray-700/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 text-sm focus:outline-none focus:border-blue-500/50';
 const LABEL = 'block text-sm font-medium text-gray-300 mb-2';
@@ -129,7 +131,7 @@ const PayPalIcon = () => (
 const LOGOS: Record<PayMethod, React.ReactNode> = {
   paypal: <PayPalIcon />,
   usdc: <Image src="/crypto-icons/color/usdc.svg" width={16} height={16} alt="USDC" />,
-  nyax: <Image src="/logo.png" width={16} height={16} alt="NYAX" />
+  nyax: <Image src="/logo.png" width={16} height={16} alt="NYAX" />,
 };
 
 /* ---------- Animated stepper ---------- */
@@ -151,12 +153,13 @@ const ModalStepper = ({ current }: { current: number }) => {
             <div className="flex flex-col items-center gap-1.5">
               <div className="relative">
                 <div
-                  className={`w-9 h-9 flex items-center justify-center shrink-0 border-2 rounded-full font-semibold text-sm relative z-10 transition-colors duration-300 ${isDone
-                    ? 'border-cyan-500 bg-cyan-500 text-black'
-                    : isCurrent
-                      ? 'border-cyan-500 bg-gray-800 text-cyan-300'
-                      : 'border-gray-600 bg-gray-700/50 text-gray-500'
-                    }`}
+                  className={`w-9 h-9 flex items-center justify-center shrink-0 border-2 rounded-full font-semibold text-sm relative z-10 transition-colors duration-300 ${
+                    isDone
+                      ? 'border-cyan-500 bg-cyan-500 text-black'
+                      : isCurrent
+                        ? 'border-cyan-500 bg-gray-800 text-cyan-300'
+                        : 'border-gray-600 bg-gray-700/50 text-gray-500'
+                  }`}
                 >
                   <AnimatePresence mode="wait">
                     {isDone ? (
@@ -187,8 +190,9 @@ const ModalStepper = ({ current }: { current: number }) => {
                 )}
               </div>
               <span
-                className={`text-[11px] font-medium transition-colors ${isDone || isCurrent ? 'text-cyan-300' : 'text-gray-500'
-                  }`}
+                className={`text-[11px] font-medium transition-colors ${
+                  isDone || isCurrent ? 'text-cyan-300' : 'text-gray-500'
+                }`}
               >
                 {label}
               </span>
@@ -217,7 +221,7 @@ export default function SubmitNewsModalCorporate({
   initialType = 'news',
   initialPlan = 'feed',
   enableTestPlan = false,
-  onSuccess
+  onSuccess,
 }: SubmitNewsModalProps) {
   const [modalStep, setModalStep] = useState(1);
   const [subType, setSubType] = useState<'news' | 'pr'>(initialType);
@@ -235,12 +239,18 @@ export default function SubmitNewsModalCorporate({
   // Form inputs
   const [headline, setHeadline] = useState('');
   const [category, setCategory] = useState('NYAX');
+  const [availableCategories, setAvailableCategories] = useState<string[]>([
+    ...PAID_NEWS_CATEGORIES,
+  ]);
   const [sourceLink, setSourceLink] = useState('');
   const [summary, setSummary] = useState('');
   const [storyBody, setStoryBody] = useState('');
   const [userEmail, setUserEmail] = useState('');
   const [promoCodeInput, setPromoCodeInput] = useState('');
-  const [appliedPromo, setAppliedPromo] = useState<{ code: string; discountPercent: number } | null>(null);
+  const [appliedPromo, setAppliedPromo] = useState<{
+    code: string;
+    discountPercent: number;
+  } | null>(null);
   const [promoError, setPromoError] = useState('');
   const [isApplyingPromo, setIsApplyingPromo] = useState(false);
   const [formError, setFormError] = useState('');
@@ -262,6 +272,34 @@ export default function SubmitNewsModalCorporate({
 
   const editorRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    let active = true;
+
+    fetch('/api/newshub/categories', { cache: 'no-store' })
+      .then(async response => {
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok || !Array.isArray(data.categories)) {
+          throw new Error(data.error || 'Could not load News Hub categories.');
+        }
+        if (!active) return;
+        const categories = data.categories.filter(
+          (item: unknown): item is string => typeof item === 'string' && item !== 'All'
+        );
+        if (categories.length) {
+          setAvailableCategories(categories);
+          setCategory(current => (categories.includes(current) ? current : categories[0]));
+        }
+      })
+      .catch(error => {
+        console.error('Could not load categories for news submission:', error);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -293,7 +331,7 @@ export default function SubmitNewsModalCorporate({
       setPlan(restoredPlan);
       setPayMethod('paypal');
       setHeadline(savedDraft.headline);
-      setCategory(isPaidNewsCategory(savedDraft.category) ? savedDraft.category : 'Other');
+      setCategory(typeof savedDraft.category === 'string' ? savedDraft.category : 'NYAX');
       setSourceLink(typeof savedDraft.sourceLink === 'string' ? savedDraft.sourceLink : '');
       setSummary(savedDraft.summary);
       setStoryBody(savedDraft.storyBody);
@@ -308,10 +346,10 @@ export default function SubmitNewsModalCorporate({
                 ? savedDraft.promoDiscountPercent
                 : 0,
             }
-          : null,
+          : null
       );
       setPendingPaypalPaymentId(
-        typeof savedDraft.paymentId === 'string' ? savedDraft.paymentId : '',
+        typeof savedDraft.paymentId === 'string' ? savedDraft.paymentId : ''
       );
       setModalStep(3);
       setFormError('');
@@ -340,7 +378,9 @@ export default function SubmitNewsModalCorporate({
   }, [modalStep, storyBody]);
 
   useEffect(() => {
-    getNYAXPriceUSD().then(setNyaxPrice).catch(() => setNyaxPrice(null));
+    getNYAXPriceUSD()
+      .then(setNyaxPrice)
+      .catch(() => setNyaxPrice(null));
   }, []);
 
   if (!isOpen) return null;
@@ -353,7 +393,7 @@ export default function SubmitNewsModalCorporate({
   const basePrice = activePlanObj.price;
   const finalPrice = calculateNewsPrice(
     basePrice,
-    plan === 'test' ? 0 : appliedPromo?.discountPercent ?? 0,
+    plan === 'test' ? 0 : (appliedPromo?.discountPercent ?? 0),
     plan !== 'test' && payMethod === 'nyax'
   );
 
@@ -428,7 +468,9 @@ export default function SubmitNewsModalCorporate({
     img.onload = () => {
       URL.revokeObjectURL(objectUrl);
       if (img.width < 400 || img.height < 200) {
-        setImgError(`Image dimensions must be at least 400x200 pixels. Current image is ${img.width}x${img.height} pixels.`);
+        setImgError(
+          `Image dimensions must be at least 400x200 pixels. Current image is ${img.width}x${img.height} pixels.`
+        );
         clearFileInput();
         return;
       }
@@ -496,11 +538,15 @@ export default function SubmitNewsModalCorporate({
   const validateStep1 = () => {
     const titleOk = headline.trim().length >= 8;
     const summaryOk = summary.trim().length >= 10;
-    const bodyContent = editorRef.current ? editorRef.current.textContent?.trim() || '' : storyBody.trim();
+    const bodyContent = editorRef.current
+      ? editorRef.current.textContent?.trim() || ''
+      : storyBody.trim();
     const bodyOk = bodyContent.length >= 30;
 
     if (!titleOk || !summaryOk || !bodyOk) {
-      setFormError('Please add a headline (8+ chars), a short summary (10+ chars), and at least a few sentences of story (30+ chars).');
+      setFormError(
+        'Please add a headline (8+ chars), a short summary (10+ chars), and at least a few sentences of story (30+ chars).'
+      );
       return;
     }
     if (isUploadingToIPFS) {
@@ -572,18 +618,18 @@ export default function SubmitNewsModalCorporate({
       paymentMethod: currentPayMethod,
       amount: chosenAmount,
       promoCode: plan === 'test' ? null : appliedPromo?.code || null,
-      promoDiscount: plan === 'test' ? 0 : appliedPromo?.discountPercent ?? 0,
-      txHash: paymentOverride?.txHash || (cryptoTxHash.trim() || null),
+      promoDiscount: plan === 'test' ? 0 : (appliedPromo?.discountPercent ?? 0),
+      txHash: paymentOverride?.txHash || cryptoTxHash.trim() || null,
       paymentId: paymentOverride?.paymentId || null,
       walletAddress: paymentOverride?.walletAddress || null,
-      paymentStatus: 'completed'
+      paymentStatus: 'completed',
     };
 
     try {
       const response = await fetch('/api/news/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(submissionPayload)
+        body: JSON.stringify(submissionPayload),
       });
 
       const resData = await response.json();
@@ -599,14 +645,17 @@ export default function SubmitNewsModalCorporate({
         img: uploadedImg,
         pend: true,
         com: subType !== 'pr',
-        pr: subType === 'pr'
+        pr: subType === 'pr',
       };
 
       try {
         const stored = localStorage.getItem('nyaltx_news_submissions');
         const existing = stored ? JSON.parse(stored) : [];
-        localStorage.setItem('nyaltx_news_submissions', JSON.stringify([newLocalItem, ...existing]));
-      } catch { }
+        localStorage.setItem(
+          'nyaltx_news_submissions',
+          JSON.stringify([newLocalItem, ...existing])
+        );
+      } catch {}
 
       try {
         sessionStorage.removeItem(NEWS_PAYPAL_CRYPTO_DRAFT_KEY);
@@ -639,7 +688,7 @@ export default function SubmitNewsModalCorporate({
     if (!isConnected) {
       try {
         openAppKit({ view: 'Connect' });
-      } catch { }
+      } catch {}
       return;
     }
 
@@ -652,7 +701,9 @@ export default function SubmitNewsModalCorporate({
           await switchChainAsync({ chainId: PAYMENT_CHAIN_ID });
         } catch (switchError) {
           const reason = switchError instanceof Error ? ` ${switchError.message}` : '';
-          throw new Error(`Please switch to Ethereum Mainnet (ETH) to pay with ${method.toUpperCase()}.${reason}`);
+          throw new Error(
+            `Please switch to Ethereum Mainnet (ETH) to pay with ${method.toUpperCase()}.${reason}`
+          );
         }
       }
 
@@ -686,7 +737,11 @@ export default function SubmitNewsModalCorporate({
       });
     } catch (err: any) {
       console.error('Wallet payment failed:', err);
-      setFormError(err?.shortMessage || err?.message || 'Wallet transaction failed. You can also send manually and paste the tx hash below.');
+      setFormError(
+        err?.shortMessage ||
+          err?.message ||
+          'Wallet transaction failed. You can also send manually and paste the tx hash below.'
+      );
     } finally {
       setWalletPaying(null);
     }
@@ -716,8 +771,11 @@ export default function SubmitNewsModalCorporate({
     <button
       type="button"
       onClick={() => setPayMethod(id)}
-      className={`p-2.5 rounded-lg border text-xs font-medium transition-all flex items-center justify-center gap-2 ${payMethod === id ? `${active} shadow-md` : 'border-gray-600/30 bg-gray-700/30 text-gray-400 hover:bg-gray-700/50'
-        }`}
+      className={`p-2.5 rounded-lg border text-xs font-medium transition-all flex items-center justify-center gap-2 ${
+        payMethod === id
+          ? `${active} shadow-md`
+          : 'border-gray-600/30 bg-gray-700/30 text-gray-400 hover:bg-gray-700/50'
+      }`}
     >
       {LOGOS[id]}
       {label}
@@ -727,14 +785,23 @@ export default function SubmitNewsModalCorporate({
   /* Shared panel for USDC / NYAX (connect wallet -> pay -> auto submit) */
   const renderWalletPanel = (
     method: WalletMethod,
-    cfg: { title: string; subtitle: string; border: string; titleColor: string; amountText: string; btnLabel: string }
+    cfg: {
+      title: string;
+      subtitle: string;
+      border: string;
+      titleColor: string;
+      amountText: string;
+      btnLabel: string;
+    }
   ) => {
     return (
       <div className={`p-4 bg-gray-700/30 border ${cfg.border} rounded-lg space-y-3`}>
         <div className="flex justify-between items-center gap-3">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 bg-gray-800/60 rounded-lg flex items-center justify-center border border-gray-600/40">
-              {method === 'usdc' && <Image src="/crypto-icons/color/usdc.svg" width={20} height={20} alt="USDC" />}
+              {method === 'usdc' && (
+                <Image src="/crypto-icons/color/usdc.svg" width={20} height={20} alt="USDC" />
+              )}
               {method === 'nyax' && <Image src="/logo.png" width={20} height={20} alt="NYAX" />}
             </div>
             <div>
@@ -749,7 +816,9 @@ export default function SubmitNewsModalCorporate({
 
         {!isConnected ? (
           <div className="text-center py-4 bg-black/30 rounded-lg border border-gray-700/40 space-y-2">
-            <p className="text-xs text-gray-400">Connect your Web3 wallet (MetaMask, Coinbase, WalletConnect) to pay:</p>
+            <p className="text-xs text-gray-400">
+              Connect your Web3 wallet (MetaMask, Coinbase, WalletConnect) to pay:
+            </p>
             <div className="flex justify-center">
               <ConnectWalletButton />
             </div>
@@ -759,14 +828,18 @@ export default function SubmitNewsModalCorporate({
             <div className="flex justify-between items-center p-2.5 bg-cyan-500/10 border border-cyan-500/30 rounded-lg text-xs">
               <span className="text-gray-400">Connected Wallet:</span>
               <span className="font-mono text-cyan-300 font-bold">
-                ● {walletAddress ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}` : 'Connected'}
+                ●{' '}
+                {walletAddress
+                  ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`
+                  : 'Connected'}
               </span>
             </div>
 
             {chain?.id !== PAYMENT_CHAIN_ID ? (
               <div className="space-y-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3">
                 <p className="text-xs text-amber-200">
-                  Your wallet is on {chain?.name || 'another network'}. Switch to Ethereum Mainnet before starting payment.
+                  Your wallet is on {chain?.name || 'another network'}. Switch to Ethereum Mainnet
+                  before starting payment.
                 </p>
                 <button
                   type="button"
@@ -783,7 +856,8 @@ export default function SubmitNewsModalCorporate({
               </div>
             ) : (
               <p className="rounded-lg border border-green-500/30 bg-green-500/10 p-2.5 text-xs text-green-300">
-                Wallet is ready on Ethereum Mainnet. Your connected wallet address will stay the same.
+                Wallet is ready on Ethereum Mainnet. Your connected wallet address will stay the
+                same.
               </p>
             )}
 
@@ -815,15 +889,21 @@ export default function SubmitNewsModalCorporate({
           </summary>
           <div className="mt-2 space-y-2">
             <div className="flex items-center gap-2">
-              <code className="flex-1 p-2 bg-black/40 rounded border border-gray-700/40 text-[11px] truncate">{USDC_NYAX_RECEIVER}</code>
-              <button type="button" onClick={() => copyAddr(USDC_NYAX_RECEIVER)} className="px-2.5 py-1.5 bg-gray-600/50 hover:bg-gray-600/70 text-xs rounded text-white">
+              <code className="flex-1 p-2 bg-black/40 rounded border border-gray-700/40 text-[11px] truncate">
+                {USDC_NYAX_RECEIVER}
+              </code>
+              <button
+                type="button"
+                onClick={() => copyAddr(USDC_NYAX_RECEIVER)}
+                className="px-2.5 py-1.5 bg-gray-600/50 hover:bg-gray-600/70 text-xs rounded text-white"
+              >
                 {copiedReceiver ? '✓ Copied' : 'Copy'}
               </button>
             </div>
             <input
               placeholder="0x... (paste your transaction hash here)"
               value={cryptoTxHash}
-              onChange={(e) => setCryptoTxHash(e.target.value)}
+              onChange={e => setCryptoTxHash(e.target.value)}
               className={INPUT}
             />
           </div>
@@ -833,7 +913,10 @@ export default function SubmitNewsModalCorporate({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-start justify-center p-4 z-50 overflow-y-auto" style={FONT}>
+    <div
+      className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-start justify-center p-4 z-50 overflow-y-auto"
+      style={FONT}
+    >
       <div className="bg-gray-800/40 backdrop-blur-lg border border-gray-700/20 rounded-lg w-full max-w-3xl p-6 my-8 text-white shadow-xl relative">
         <div className="flex justify-between items-center mb-4 border-b border-gray-700/20 pb-3">
           <h3 className="font-semibold text-white flex items-center gap-2 text-lg">
@@ -859,7 +942,7 @@ export default function SubmitNewsModalCorporate({
               <label className={LABEL}>What are you submitting?</label>
               <select
                 value={subType}
-                onChange={(e) => {
+                onChange={e => {
                   setSubType(e.target.value as 'news' | 'pr');
                   selectPlan('feed');
                 }}
@@ -874,7 +957,7 @@ export default function SubmitNewsModalCorporate({
               <label className={LABEL}>Headline *</label>
               <input
                 value={headline}
-                onChange={(e) => setHeadline(e.target.value)}
+                onChange={e => setHeadline(e.target.value)}
                 maxLength={110}
                 placeholder="e.g. NYAX launches staking rewards v2"
                 className={INPUT}
@@ -884,8 +967,12 @@ export default function SubmitNewsModalCorporate({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className={LABEL}>Category</label>
-                <select value={category} onChange={(e) => setCategory(e.target.value)} className={INPUT}>
-                  {PAID_NEWS_CATEGORIES.map(option => (
+                <select
+                  value={category}
+                  onChange={e => setCategory(e.target.value)}
+                  className={INPUT}
+                >
+                  {availableCategories.map(option => (
                     <option key={option} value={option}>
                       {option}
                     </option>
@@ -896,7 +983,7 @@ export default function SubmitNewsModalCorporate({
                 <label className={LABEL}>Source link (optional)</label>
                 <input
                   value={sourceLink}
-                  onChange={(e) => setSourceLink(e.target.value)}
+                  onChange={e => setSourceLink(e.target.value)}
                   placeholder="https://original-link.com"
                   className={INPUT}
                 />
@@ -907,7 +994,7 @@ export default function SubmitNewsModalCorporate({
               <label className={LABEL}>Short summary (shown in feed) *</label>
               <textarea
                 value={summary}
-                onChange={(e) => setSummary(e.target.value)}
+                onChange={e => setSummary(e.target.value)}
                 rows={2}
                 maxLength={180}
                 placeholder="One or two sentences shown in the newsfeed..."
@@ -918,16 +1005,40 @@ export default function SubmitNewsModalCorporate({
             <div>
               <label className={LABEL}>Story Content *</label>
               <div className="flex gap-1.5 bg-gray-700/50 p-1.5 rounded-t-lg border border-b-0 border-gray-600/50">
-                <button type="button" onClick={() => execFmt('bold')} className="px-2 py-0.5 bg-gray-600/50 hover:bg-gray-600/70 rounded text-xs font-bold">B</button>
-                <button type="button" onClick={() => execFmt('italic')} className="px-2 py-0.5 bg-gray-600/50 hover:bg-gray-600/70 rounded text-xs italic">I</button>
-                <button type="button" onClick={() => execFmt('insertUnorderedList')} className="px-2 py-0.5 bg-gray-600/50 hover:bg-gray-600/70 rounded text-xs">• List</button>
-                <button type="button" onClick={handleLinkPrompt} className="px-2 py-0.5 bg-gray-600/50 hover:bg-gray-600/70 rounded text-xs">Link</button>
+                <button
+                  type="button"
+                  onClick={() => execFmt('bold')}
+                  className="px-2 py-0.5 bg-gray-600/50 hover:bg-gray-600/70 rounded text-xs font-bold"
+                >
+                  B
+                </button>
+                <button
+                  type="button"
+                  onClick={() => execFmt('italic')}
+                  className="px-2 py-0.5 bg-gray-600/50 hover:bg-gray-600/70 rounded text-xs italic"
+                >
+                  I
+                </button>
+                <button
+                  type="button"
+                  onClick={() => execFmt('insertUnorderedList')}
+                  className="px-2 py-0.5 bg-gray-600/50 hover:bg-gray-600/70 rounded text-xs"
+                >
+                  • List
+                </button>
+                <button
+                  type="button"
+                  onClick={handleLinkPrompt}
+                  className="px-2 py-0.5 bg-gray-600/50 hover:bg-gray-600/70 rounded text-xs"
+                >
+                  Link
+                </button>
               </div>
               <div
                 ref={editorRef}
                 contentEditable
                 suppressContentEditableWarning
-                onInput={(e) => setStoryBody(e.currentTarget.innerHTML)}
+                onInput={e => setStoryBody(e.currentTarget.innerHTML)}
                 className="w-full bg-gray-700/50 border border-gray-600/50 rounded-b-lg p-3 text-sm text-white focus:outline-none focus:border-blue-500/50 min-h-[140px] max-h-[220px] overflow-y-auto"
               />
             </div>
@@ -942,7 +1053,8 @@ export default function SubmitNewsModalCorporate({
                   <div className="flex-1 h-px bg-gray-600/50"></div>
                 </div>
                 <div className="mb-3 text-xs text-gray-400">
-                  Use a 1200x600 px (2:1) image for best results. Images fit the card without cropping. Minimum 400x200 px; max 10MB; JPEG/PNG/GIF/WebP.
+                  Use a 1200x600 px (2:1) image for best results. Images fit the card without
+                  cropping. Minimum 400x200 px; max 10MB; JPEG/PNG/GIF/WebP.
                 </div>
 
                 <div className="flex items-center gap-3 flex-wrap">
@@ -995,7 +1107,7 @@ export default function SubmitNewsModalCorporate({
                   <input
                     type="url"
                     value={uploadedImg || ''}
-                    onChange={(e) => setUploadedImg(e.target.value || null)}
+                    onChange={e => setUploadedImg(e.target.value || null)}
                     className={`flex-1 ${INPUT}`}
                     placeholder="https://example.com/image.jpg or IPFS URL"
                   />
@@ -1027,7 +1139,7 @@ export default function SubmitNewsModalCorporate({
                       src={uploadedImg}
                       alt="Cover image preview"
                       className="w-full h-full object-contain"
-                      onError={(e) => {
+                      onError={e => {
                         (e.target as HTMLImageElement).style.display = 'none';
                       }}
                     />
@@ -1048,7 +1160,9 @@ export default function SubmitNewsModalCorporate({
             </div>
 
             {formError && (
-              <div className="p-3 rounded-lg border border-red-500/30 bg-red-500/10 text-red-300 text-xs font-medium">{formError}</div>
+              <div className="p-3 rounded-lg border border-red-500/30 bg-red-500/10 text-red-300 text-xs font-medium">
+                {formError}
+              </div>
             )}
 
             <div className="flex justify-between items-center pt-3 border-t border-gray-700/20">
@@ -1064,12 +1178,16 @@ export default function SubmitNewsModalCorporate({
         {modalStep === 2 && (
           <div className="space-y-4">
             <div className="text-center mb-1">
-              <h4 className="text-xl font-bold text-white tracking-tight">Choose how you publish</h4>
-              <p className="text-xs text-gray-400 mt-1">Select the distribution plan that fits your announcement.</p>
+              <h4 className="text-xl font-bold text-white tracking-tight">
+                Choose how you publish
+              </h4>
+              <p className="text-xs text-gray-400 mt-1">
+                Select the distribution plan that fits your announcement.
+              </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-              {currentPlans.map((p) => {
+              {currentPlans.map(p => {
                 const isSelected = plan === p.id;
                 const isPopular = p.badge === 'MOST POPULAR';
 
@@ -1123,7 +1241,7 @@ export default function SubmitNewsModalCorporate({
 
                     <button
                       type="button"
-                      onClick={(e) => {
+                      onClick={e => {
                         e.stopPropagation();
                         selectPlan(p.id);
                         setModalStep(3);
@@ -1156,12 +1274,14 @@ export default function SubmitNewsModalCorporate({
         {modalStep === 3 && (
           <div className="space-y-4">
             <div>
-              <label className={LABEL}>Your Contact Email (for editorial updates & live notification) *</label>
+              <label className={LABEL}>
+                Your Contact Email (for editorial updates & live notification) *
+              </label>
               <input
                 type="email"
                 placeholder="name@company.com"
                 value={userEmail}
-                onChange={(e) => setUserEmail(e.target.value)}
+                onChange={e => setUserEmail(e.target.value)}
                 required
                 className={INPUT}
               />
@@ -1198,10 +1318,15 @@ export default function SubmitNewsModalCorporate({
                     {isApplyingPromo ? 'Checking...' : appliedPromo ? 'Applied' : 'Apply'}
                   </button>
                 </div>
-                {promoError && <p role="alert" className="mt-2 text-xs text-red-300">{promoError}</p>}
+                {promoError && (
+                  <p role="alert" className="mt-2 text-xs text-red-300">
+                    {promoError}
+                  </p>
+                )}
                 {appliedPromo && (
                   <p role="status" className="mt-2 text-xs text-green-300">
-                    {appliedPromo.discountPercent}% discount applied. It stacks with the 20% NYAX discount when paying with NYAX.
+                    {appliedPromo.discountPercent}% discount applied. It stacks with the 20% NYAX
+                    discount when paying with NYAX.
                   </p>
                 )}
               </div>
@@ -1235,7 +1360,9 @@ export default function SubmitNewsModalCorporate({
                   </span>
                 )}
               </div>
-              <span className="text-2xl font-semibold text-cyan-400">${finalPrice.toFixed(2)} USD</span>
+              <span className="text-2xl font-semibold text-cyan-400">
+                ${finalPrice.toFixed(2)} USD
+              </span>
             </div>
 
             {/* PayPal */}
@@ -1246,9 +1373,7 @@ export default function SubmitNewsModalCorporate({
                     <PayPalIcon />
                   </div>
                   <div>
-                    <h4 className="text-sm font-semibold text-blue-400">
-                      PayPal & Card Payment
-                    </h4>
+                    <h4 className="text-sm font-semibold text-blue-400">PayPal & Card Payment</h4>
                     <p className="text-xs text-gray-400">
                       Complete payment securely with PayPal or Credit/Debit Card
                     </p>
@@ -1289,19 +1414,23 @@ export default function SubmitNewsModalCorporate({
                       onBeforeCryptoRedirect={() => saveNewsCryptoDraft()}
                       onSuccess={(details: any) => {
                         const isCryptoPayment =
-                          details?.paymentSource === 'paypal_crypto' || details?.payment_source?.crypto;
+                          details?.paymentSource === 'paypal_crypto' ||
+                          details?.payment_source?.crypto;
                         if (isCryptoPayment) {
                           try {
                             saveNewsCryptoDraft(details.id);
                           } catch (error) {
-                            console.error('Could not save the verified PayPal crypto payment:', error);
+                            console.error(
+                              'Could not save the verified PayPal crypto payment:',
+                              error
+                            );
                           }
                         }
                         setPendingPaypalPaymentId(details.id);
                         return handlePayAndSubmit({
                           paymentMethod: 'paypal',
                           paymentId: details.id,
-                          amount: finalPrice
+                          amount: finalPrice,
                         });
                       }}
                       onError={(err: any) => {
@@ -1321,28 +1450,33 @@ export default function SubmitNewsModalCorporate({
                 border: 'border-cyan-500/30',
                 titleColor: 'text-cyan-300',
                 amountText: `${usdcAmount.toFixed(2)} USDC`,
-                btnLabel: `Pay ${usdcAmount.toFixed(2)} USDC ($${finalPrice.toFixed(2)})`
+                btnLabel: `Pay ${usdcAmount.toFixed(2)} USDC ($${finalPrice.toFixed(2)})`,
               })}
 
             {/* NYAX */}
             {payMethod === 'nyax' &&
               renderWalletPanel('nyax', {
-                title: plan === 'test'
-                  ? 'Pay with NYAX'
-                  : `Pay with NYAX (${NEWS_NYAX_DISCOUNT * 100}% off)`,
+                title:
+                  plan === 'test'
+                    ? 'Pay with NYAX'
+                    : `Pay with NYAX (${NEWS_NYAX_DISCOUNT * 100}% off)`,
                 subtitle: 'Ethereum Mainnet (ETH, chain ID 1) only',
                 border: 'border-amber-500/30',
                 titleColor: 'text-amber-300',
                 amountText: `~${nyaxAmount.toFixed(2)} NYAX`,
-                btnLabel: `Pay ${nyaxAmount.toFixed(2)} NYAX ($${finalPrice.toFixed(2)})`
+                btnLabel: `Pay ${nyaxAmount.toFixed(2)} NYAX ($${finalPrice.toFixed(2)})`,
               })}
 
             {formError && (
-              <div className="p-3 rounded-lg border border-red-500/30 bg-red-500/10 text-red-300 text-xs font-medium">{formError}</div>
+              <div className="p-3 rounded-lg border border-red-500/30 bg-red-500/10 text-red-300 text-xs font-medium">
+                {formError}
+              </div>
             )}
 
             <div className="flex justify-between items-center pt-3 border-t border-gray-700/20">
-              <button type="button" onClick={() => setModalStep(2)} className={BTN_GHOST}>← Back</button>
+              <button type="button" onClick={() => setModalStep(2)} className={BTN_GHOST}>
+                ← Back
+              </button>
               {payMethod !== 'paypal' && (
                 <button
                   type="button"
@@ -1363,8 +1497,9 @@ export default function SubmitNewsModalCorporate({
             <div className="text-5xl">✅</div>
             <h3 className="text-2xl font-semibold text-white">Story submitted for moderation!</h3>
             <p className="text-sm text-gray-300 max-w-md mx-auto leading-relaxed">
-              Thank you! Your submission is now in our moderation queue and marked as <b>“Pending review”</b>.
-              Our editors verify the payment and accuracy, and you will receive an email as soon as it goes live!
+              Thank you! Your submission is now in our moderation queue and marked as{' '}
+              <b>“Pending review”</b>. Our editors verify the payment and accuracy, and you will
+              receive an email as soon as it goes live!
             </p>
             <button onClick={onClose} className={BTN_PRIMARY}>
               Back to News Hub

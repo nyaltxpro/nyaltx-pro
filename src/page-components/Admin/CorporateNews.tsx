@@ -14,1177 +14,1414 @@ import { FileUpload } from '@/components/reui/file-upload';
 import { Filters } from '@/components/reui/filters';
 import { Spinner } from '@/components/reui/spinner';
 import { useConfirmDialog } from '@/components/reui/confirm-dialog';
-import { Eye, Newspaper, Pencil, Pin, PinOff, Plus, RefreshCw, Trash2, Upload, X } from 'lucide-react';
+import {
+  Eye,
+  Newspaper,
+  Pencil,
+  Pin,
+  PinOff,
+  Plus,
+  RefreshCw,
+  Tags,
+  Trash2,
+  Upload,
+  X,
+} from 'lucide-react';
 import { Switch } from '@/components/reui/switch';
 import { TimePicker } from '@/components/reui/time-picker';
 import { toReliableIpfsUrl } from '@/utils/ipfsUpload';
+import { PAID_NEWS_CATEGORIES } from '@/lib/paidNewsCategories';
 
 const AdminCorporateNewsClient = dynamic(() => Promise.resolve(AdminCorporateNewsComponent), {
-    ssr: false,
-    loading: () => (
-        <div className="text-center py-12">
-            <Newspaper className="mx-auto mb-4 h-10 w-10 animate-pulse text-gray-400" aria-hidden="true" />
-            <p className="text-gray-400 font-medium">
-                Loading news management...
-            </p>
-        </div>
-    )
+  ssr: false,
+  loading: () => (
+    <div className="text-center py-12">
+      <Newspaper
+        className="mx-auto mb-4 h-10 w-10 animate-pulse text-gray-400"
+        aria-hidden="true"
+      />
+      <p className="text-gray-400 font-medium">Loading news management...</p>
+    </div>
+  ),
 });
 
 const quillModules: NonNullable<QuillOptions['modules']> = {
-    toolbar: [
-        [{ header: [1, 2, 3, false] }],
-        ['bold', 'italic', 'underline', 'strike'],
-        [{ list: 'ordered' }, { list: 'bullet' }],
-        [{ script: 'sub' }, { script: 'super' }],
-        [{ indent: '-1' }, { indent: '+1' }],
-        [{ color: [] }, { background: [] }],
-        [{ align: [] }],
-        ['link', 'blockquote', 'code-block'],
-        ['clean'],
-    ],
+  toolbar: [
+    [{ header: [1, 2, 3, false] }],
+    ['bold', 'italic', 'underline', 'strike'],
+    [{ list: 'ordered' }, { list: 'bullet' }],
+    [{ script: 'sub' }, { script: 'super' }],
+    [{ indent: '-1' }, { indent: '+1' }],
+    [{ color: [] }, { background: [] }],
+    [{ align: [] }],
+    ['link', 'blockquote', 'code-block'],
+    ['clean'],
+  ],
 };
 
 const quillFormats = [
-    'header',
-    'bold',
-    'italic',
-    'underline',
-    'strike',
-    'blockquote',
-    'code-block',
-    'list',
-    'bullet',
-    'indent',
-    'script',
-    'align',
-    'link',
-    'color',
-    'background',
+  'header',
+  'bold',
+  'italic',
+  'underline',
+  'strike',
+  'blockquote',
+  'code-block',
+  'list',
+  'bullet',
+  'indent',
+  'script',
+  'align',
+  'link',
+  'color',
+  'background',
 ];
 
 const normalizeQuillHtml = (value?: string | null) => {
-    if (!value) return '';
-    const trimmed = value.replace(/\s+$/, '');
-    if (trimmed === '<p><br></p>') return '';
-    return trimmed;
+  if (!value) return '';
+  const trimmed = value.replace(/\s+$/, '');
+  if (trimmed === '<p><br></p>') return '';
+  return trimmed;
 };
 
 interface NewsArticle {
-    _id: string;
-    title: string;
-    content?: string;
-    excerpt: string;
-    featuredImage?: string;
-    status: 'published' | 'draft' | 'pending';
-    featuredInBanner?: boolean;
-    publishedAt?: Date;
-    tags: string[];
-    author: string;
-    slug: string;
-    createdAt: Date;
-    updatedAt: Date;
-    views: number;
-    // Payment & submission details
-    type?: 'news' | 'pr';
-    plan?: string;
-    planName?: string;
-    paymentMethod?: string;
-    amount?: number;
-    paymentId?: string;
-    txHash?: string;
-    walletAddress?: string;
-    paymentStatus?: string;
-    paymentSource?: string;
-    email?: string;
-    isPaid?: boolean;
-    paymentVerified?: boolean;
+  _id: string;
+  title: string;
+  content?: string;
+  excerpt: string;
+  featuredImage?: string;
+  category?: string;
+  status: 'published' | 'draft' | 'pending';
+  featuredInBanner?: boolean;
+  publishedAt?: Date;
+  tags: string[];
+  author: string;
+  slug: string;
+  createdAt: Date;
+  updatedAt: Date;
+  views: number;
+  // Payment & submission details
+  type?: 'news' | 'pr';
+  plan?: string;
+  planName?: string;
+  paymentMethod?: string;
+  amount?: number;
+  paymentId?: string;
+  txHash?: string;
+  walletAddress?: string;
+  paymentStatus?: string;
+  paymentSource?: string;
+  email?: string;
+  isPaid?: boolean;
+  paymentVerified?: boolean;
 }
 
 const isPaidNewsSubmission = (article: NewsArticle) =>
-    Boolean(
-        article.isPaid ||
-        article.paymentVerified ||
-        article.paymentMethod ||
-        article.paymentId ||
-        article.txHash ||
-        article.plan ||
-        article.amount
-    );
+  Boolean(
+    article.isPaid ||
+    article.paymentVerified ||
+    article.paymentMethod ||
+    article.paymentId ||
+    article.txHash ||
+    article.plan ||
+    article.amount
+  );
 
 function AdminCorporateNewsComponent() {
-    const { confirm, dialog: confirmationDialog } = useConfirmDialog();
-    const [news, setNews] = useState<NewsArticle[]>([]);
-    const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'published' | 'draft'>('all');
-    const [submissionFilter, setSubmissionFilter] = useState<'all' | 'paid' | 'corporate'>('all');
-    const [newsSearch, setNewsSearch] = useState('');
-    const [currentPage, setCurrentPage] = useState(1);
-    const pageSize = 10;
-    const [publishTime, setPublishTime] = useState('09:00');
-    const [approvingId, setApprovingId] = useState<string | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [hasLoadedNews, setHasLoadedNews] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [success, setSuccess] = useState<string | null>(null);
-    const [isCreating, setIsCreating] = useState(false);
-    const [editingNews, setEditingNews] = useState<NewsArticle | null>(null);
-    const [newsForm, setNewsForm] = useState({
-        title: '',
-        content: '',
-        excerpt: '',
-        featuredImage: '',
-        status: 'draft' as 'published' | 'draft' | 'pending',
-        featuredInBanner: false,
-        tags: '',
-        author: 'NYALTX Team',
-        editorType: 'quill' as 'simple' | 'quill'
+  const { confirm, dialog: confirmationDialog } = useConfirmDialog();
+  const [news, setNews] = useState<NewsArticle[]>([]);
+  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'published' | 'draft'>(
+    'all'
+  );
+  const [submissionFilter, setSubmissionFilter] = useState<'all' | 'paid' | 'corporate'>('all');
+  const [newsSearch, setNewsSearch] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
+  const [publishTime, setPublishTime] = useState('09:00');
+  const [approvingId, setApprovingId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [hasLoadedNews, setHasLoadedNews] = useState(false);
+  const [categories, setCategories] = useState<string[]>([...PAID_NEWS_CATEGORIES]);
+  const [showCategoryManager, setShowCategoryManager] = useState(false);
+  const [categoryDraft, setCategoryDraft] = useState('');
+  const [categoryLoading, setCategoryLoading] = useState(false);
+  const [categorySaving, setCategorySaving] = useState(false);
+  const [categoryError, setCategoryError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
+  const [editingNews, setEditingNews] = useState<NewsArticle | null>(null);
+  const [newsForm, setNewsForm] = useState({
+    title: '',
+    content: '',
+    excerpt: '',
+    featuredImage: '',
+    category: String(PAID_NEWS_CATEGORIES[0]),
+    status: 'draft' as 'published' | 'draft' | 'pending',
+    featuredInBanner: false,
+    tags: '',
+    author: 'NYALTX Team',
+    editorType: 'quill' as 'simple' | 'quill',
+  });
+
+  // IPFS upload state
+  const [isUploadingToIPFS, setIsUploadingToIPFS] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+  // Quill editor state
+  const quillContainerRef = useRef<HTMLDivElement | null>(null);
+  const quillInstanceRef = useRef<QuillType | null>(null);
+  const quillChangeHandlerRef = useRef<
+    ((delta: unknown, oldDelta: unknown, source: string) => void) | null
+  >(null);
+  const suppressQuillChangeRef = useRef(false);
+  const [isQuillLoading, setIsQuillLoading] = useState(false);
+
+  useEffect(() => {
+    const teardown = () => {
+      const existing = quillInstanceRef.current;
+      if (existing && quillChangeHandlerRef.current) {
+        existing.off('text-change', quillChangeHandlerRef.current);
+      }
+      quillInstanceRef.current = null;
+      quillChangeHandlerRef.current = null;
+      suppressQuillChangeRef.current = false;
+      setIsQuillLoading(false);
+    };
+
+    if (!isCreating || newsForm.editorType !== 'quill') {
+      teardown();
+      return teardown;
+    }
+
+    let isCancelled = false;
+
+    const initializeQuill = async () => {
+      const container = quillContainerRef.current;
+      if (!container) return;
+      if (quillInstanceRef.current) return;
+
+      setIsQuillLoading(true);
+
+      container.innerHTML = '';
+
+      const { default: Quill } = await import('quill');
+      if (isCancelled) return;
+
+      const quill = new Quill(container, {
+        theme: 'snow',
+        modules: quillModules,
+        formats: quillFormats,
+        placeholder: 'Write your news article content here...',
+      });
+
+      quillInstanceRef.current = quill;
+
+      const handler = (_delta: unknown, _oldDelta: unknown, source: string) => {
+        if (suppressQuillChangeRef.current || source !== 'user') return;
+        const html = normalizeQuillHtml(quill.root.innerHTML);
+        setNewsForm(prev => (prev.content === html ? prev : { ...prev, content: html }));
+      };
+
+      quillChangeHandlerRef.current = handler;
+      quill.on('text-change', handler);
+
+      const startingContent = normalizeQuillHtml(newsForm.content || '');
+      suppressQuillChangeRef.current = true;
+      quill.clipboard.dangerouslyPasteHTML(startingContent);
+      quill.history.clear();
+      suppressQuillChangeRef.current = false;
+
+      setIsQuillLoading(false);
+    };
+
+    void initializeQuill();
+
+    return () => {
+      isCancelled = true;
+      teardown();
+    };
+  }, [isCreating, newsForm.editorType]);
+
+  useEffect(() => {
+    if (!isCreating || newsForm.editorType !== 'quill') return;
+    const quill = quillInstanceRef.current;
+    if (!quill) return;
+
+    const desired = normalizeQuillHtml(newsForm.content || '');
+    const current = normalizeQuillHtml(quill.root.innerHTML);
+
+    if (desired === current) return;
+
+    suppressQuillChangeRef.current = true;
+    quill.clipboard.dangerouslyPasteHTML(desired);
+    quill.history.clear();
+    suppressQuillChangeRef.current = false;
+  }, [newsForm.content, isCreating, newsForm.editorType]);
+
+  const loadCategories = async () => {
+    try {
+      setCategoryLoading(true);
+      setCategoryError(null);
+      const response = await fetch('/api/admin/newshub-categories', {
+        cache: 'no-store',
+        credentials: 'same-origin',
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !Array.isArray(data.categories)) {
+        throw new Error(data.error || 'Could not load News Hub categories.');
+      }
+      setCategories(data.categories);
+    } catch (err) {
+      setCategoryError(err instanceof Error ? err.message : 'Could not load News Hub categories.');
+    } finally {
+      setCategoryLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadNews();
+    loadCategories();
+  }, []);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [newsSearch, statusFilter, submissionFilter]);
+
+  const loadNews = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await fetch('/api/admin/news?status=all&limit=500&summary=true', {
+        cache: 'no-store',
+        credentials: 'same-origin',
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error(
+            'Your admin session is missing, expired, or invalid. Sign in again, then refresh news.'
+          );
+        }
+        throw new Error(
+          data.error
+            ? `${data.error} (HTTP ${response.status})`
+            : `Could not load news (HTTP ${response.status}). Try refreshing.`
+        );
+      }
+      if (!Array.isArray(data.news)) {
+        throw new Error('The news service returned an unexpected response. Try refreshing.');
+      }
+      setNews(data.news);
+      setHasLoadedNews(true);
+    } catch (err: any) {
+      setError(err instanceof Error ? err.message : 'Could not load news. Try refreshing.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreateNews = () => {
+    setIsCreating(true);
+    setEditingNews(null);
+    setNewsForm({
+      title: '',
+      content: '',
+      excerpt: '',
+      featuredImage: '',
+      category: categories[0] || '',
+      status: 'draft',
+      featuredInBanner: false,
+      tags: '',
+      author: 'NYALTX Team',
+      editorType: 'quill',
     });
+  };
 
-    // IPFS upload state
-    const [isUploadingToIPFS, setIsUploadingToIPFS] = useState(false);
-    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const handleEditNews = async (article: NewsArticle) => {
+    try {
+      const response = await fetch(`/api/admin/news?id=${encodeURIComponent(article._id)}`, {
+        cache: 'no-store',
+        credentials: 'same-origin',
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.news) {
+        throw new Error(data.error || `Could not load this article (HTTP ${response.status}).`);
+      }
+      const fullArticle = data.news as NewsArticle;
+      setEditingNews(fullArticle);
+      setIsCreating(true);
+      setNewsForm({
+        title: fullArticle.title,
+        content: fullArticle.content || '',
+        excerpt: fullArticle.excerpt || '',
+        featuredImage: fullArticle.featuredImage || '',
+        category: fullArticle.category || fullArticle.tags?.[0] || categories[0] || '',
+        status: fullArticle.status,
+        featuredInBanner: Boolean(fullArticle.featuredInBanner),
+        tags: Array.isArray(fullArticle.tags) ? fullArticle.tags.join(', ') : '',
+        author: fullArticle.author || 'Community Submission',
+        editorType: 'quill',
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not load this article for editing.');
+    }
+  };
 
-    // Quill editor state
-    const quillContainerRef = useRef<HTMLDivElement | null>(null);
-    const quillInstanceRef = useRef<QuillType | null>(null);
-    const quillChangeHandlerRef = useRef<((delta: unknown, oldDelta: unknown, source: string) => void) | null>(null);
-    const suppressQuillChangeRef = useRef(false);
-    const [isQuillLoading, setIsQuillLoading] = useState(false);
+  const handleToggleBanner = async (article: NewsArticle) => {
+    try {
+      const nextState = !article.featuredInBanner;
+      const response = await fetch('/api/admin/news', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: article._id, featuredInBanner: nextState }),
+      });
 
-    useEffect(() => {
-        const teardown = () => {
-            const existing = quillInstanceRef.current;
-            if (existing && quillChangeHandlerRef.current) {
-                existing.off('text-change', quillChangeHandlerRef.current);
-            }
-            quillInstanceRef.current = null;
-            quillChangeHandlerRef.current = null;
-            suppressQuillChangeRef.current = false;
-            setIsQuillLoading(false);
-        };
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || 'Failed to update banner status');
+      }
 
-        if (!isCreating || newsForm.editorType !== 'quill') {
-            teardown();
-            return teardown;
-        }
+      setSuccess(
+        nextState
+          ? `"${article.title}" added to Top Banner Slider!`
+          : `"${article.title}" removed from Top Banner Slider.`
+      );
+      loadNews();
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
 
-        let isCancelled = false;
+  const handleApproveNews = async (article: NewsArticle) => {
+    try {
+      setApprovingId(article._id);
+      const isPaidSubmission = isPaidNewsSubmission(article);
+      const shouldBeInBanner =
+        article.plan === 'slider' || article.plan === 'prem' || Boolean(article.featuredInBanner);
+      const response = await fetch('/api/admin/news', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: article._id,
+          status: 'published',
+          publishedAt: new Date().toISOString(),
+          featuredInBanner: shouldBeInBanner,
+          isPaid: isPaidSubmission,
+          isPendingReview: false,
+        }),
+      });
 
-        const initializeQuill = async () => {
-            const container = quillContainerRef.current;
-            if (!container) return;
-            if (quillInstanceRef.current) return;
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || 'Failed to approve article');
+      }
 
-            setIsQuillLoading(true);
+      setSuccess(`✓ "${article.title}" approved and published live to NYALTX News Hub!`);
+      await loadNews();
+    } catch (err: any) {
+      setError(err.message || 'Error approving news article');
+    } finally {
+      setApprovingId(null);
+    }
+  };
 
-            container.innerHTML = '';
+  const handleSaveNews = async () => {
+    try {
+      const tagsArray = newsForm.tags
+        .split(',')
+        .map(tag => tag.trim())
+        .filter(tag => tag);
+      const [publishHours = '9', publishMinutes = '0'] = publishTime.split(':');
+      const publishedAt =
+        newsForm.status === 'published'
+          ? new Date(
+              new Date().getFullYear(),
+              new Date().getMonth(),
+              new Date().getDate(),
+              Number(publishHours),
+              Number(publishMinutes)
+            ).toISOString()
+          : null;
 
-            const { default: Quill } = await import('quill');
-            if (isCancelled) return;
+      const newsData = {
+        ...newsForm,
+        category: newsForm.category.trim(),
+        tags: tagsArray,
+        publishedAt,
+      };
 
-            const quill = new Quill(container, {
-                theme: 'snow',
-                modules: quillModules,
-                formats: quillFormats,
-                placeholder: 'Write your news article content here...'
-            });
+      console.log('Saving news article:', { editingNews: !!editingNews, newsData });
 
-            quillInstanceRef.current = quill;
-
-            const handler = (_delta: unknown, _oldDelta: unknown, source: string) => {
-                if (suppressQuillChangeRef.current || source !== 'user') return;
-                const html = normalizeQuillHtml(quill.root.innerHTML);
-                setNewsForm(prev => (prev.content === html ? prev : { ...prev, content: html }));
-            };
-
-            quillChangeHandlerRef.current = handler;
-            quill.on('text-change', handler);
-
-            const startingContent = normalizeQuillHtml(newsForm.content || '');
-            suppressQuillChangeRef.current = true;
-            quill.clipboard.dangerouslyPasteHTML(startingContent);
-            quill.history.clear();
-            suppressQuillChangeRef.current = false;
-
-            setIsQuillLoading(false);
-        };
-
-        void initializeQuill();
-
-        return () => {
-            isCancelled = true;
-            teardown();
-        };
-    }, [isCreating, newsForm.editorType]);
-
-    useEffect(() => {
-        if (!isCreating || newsForm.editorType !== 'quill') return;
-        const quill = quillInstanceRef.current;
-        if (!quill) return;
-
-        const desired = normalizeQuillHtml(newsForm.content || '');
-        const current = normalizeQuillHtml(quill.root.innerHTML);
-
-        if (desired === current) return;
-
-        suppressQuillChangeRef.current = true;
-        quill.clipboard.dangerouslyPasteHTML(desired);
-        quill.history.clear();
-        suppressQuillChangeRef.current = false;
-    }, [newsForm.content, isCreating, newsForm.editorType]);
-
-    useEffect(() => {
-        loadNews();
-    }, []);
-
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [newsSearch, statusFilter, submissionFilter]);
-
-    const loadNews = async () => {
-        try {
-            setLoading(true);
-            setError(null);
-            const response = await fetch('/api/admin/news?status=all&limit=500&summary=true', {
-                cache: 'no-store',
-                credentials: 'same-origin',
-            });
-            const data = await response.json().catch(() => ({}));
-            if (!response.ok) {
-                if (response.status === 401) {
-                    throw new Error('Your admin session is missing, expired, or invalid. Sign in again, then refresh news.');
-                }
-                throw new Error(
-                    data.error
-                        ? `${data.error} (HTTP ${response.status})`
-                        : `Could not load news (HTTP ${response.status}). Try refreshing.`,
-                );
-            }
-            if (!Array.isArray(data.news)) {
-                throw new Error('The news service returned an unexpected response. Try refreshing.');
-            }
-            setNews(data.news);
-            setHasLoadedNews(true);
-        } catch (err: any) {
-            setError(err instanceof Error ? err.message : 'Could not load news. Try refreshing.');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleCreateNews = () => {
-        setIsCreating(true);
-        setEditingNews(null);
-        setNewsForm({
-            title: '',
-            content: '',
-            excerpt: '',
-            featuredImage: '',
-            status: 'draft',
-            featuredInBanner: false,
-            tags: '',
-            author: 'NYALTX Team',
-            editorType: 'quill'
+      let response;
+      if (editingNews) {
+        console.log('Updating article with ID:', editingNews._id);
+        response = await fetch('/api/admin/news', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: editingNews._id, ...newsData }),
         });
-    };
+      } else {
+        console.log('Creating new article');
+        response = await fetch('/api/admin/news', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newsData),
+        });
+      }
 
-    const handleEditNews = async (article: NewsArticle) => {
-        try {
-            const response = await fetch(`/api/admin/news?id=${encodeURIComponent(article._id)}`, {
-                cache: 'no-store',
-                credentials: 'same-origin',
-            });
-            const data = await response.json().catch(() => ({}));
-            if (!response.ok || !data.news) {
-                throw new Error(data.error || `Could not load this article (HTTP ${response.status}).`);
-            }
-            const fullArticle = data.news as NewsArticle;
-            setEditingNews(fullArticle);
-            setIsCreating(true);
-            setNewsForm({
-                title: fullArticle.title,
-                content: fullArticle.content || '',
-                excerpt: fullArticle.excerpt || '',
-                featuredImage: fullArticle.featuredImage || '',
-                status: fullArticle.status,
-                featuredInBanner: Boolean(fullArticle.featuredInBanner),
-                tags: Array.isArray(fullArticle.tags) ? fullArticle.tags.join(', ') : '',
-                author: fullArticle.author || 'Community Submission',
-                editorType: 'quill',
-            });
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Could not load this article for editing.');
-        }
-    };
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to save news');
+      }
 
-    const handleToggleBanner = async (article: NewsArticle) => {
-        try {
-            const nextState = !article.featuredInBanner;
-            const response = await fetch('/api/admin/news', {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: article._id, featuredInBanner: nextState })
-            });
+      setSuccess(
+        editingNews ? 'News article updated successfully!' : 'News article created successfully!'
+      );
+      setIsCreating(false);
+      setEditingNews(null);
+      loadNews();
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
 
-            if (!response.ok) {
-                const errData = await response.json().catch(() => ({}));
-                throw new Error(errData.error || 'Failed to update banner status');
-            }
+  const handleAddCategory = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (categorySaving) return;
+    try {
+      setCategorySaving(true);
+      setCategoryError(null);
+      const response = await fetch('/api/admin/newshub-categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ category: categoryDraft }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || 'Could not add category.');
+      setCategories(data.categories);
+      setNewsForm(previous => ({
+        ...previous,
+        category: previous.category || categoryDraft.trim(),
+      }));
+      setCategoryDraft('');
+      setSuccess('News Hub category added.');
+    } catch (err) {
+      setCategoryError(err instanceof Error ? err.message : 'Could not add category.');
+    } finally {
+      setCategorySaving(false);
+    }
+  };
 
-            setSuccess(nextState ? `"${article.title}" added to Top Banner Slider!` : `"${article.title}" removed from Top Banner Slider.`);
-            loadNews();
-        } catch (err: any) {
-            setError(err.message);
-        }
-    };
+  const handleRemoveCategory = async (category: string) => {
+    if (
+      !(await confirm({
+        title: `Remove “${category}” category?`,
+        description:
+          'Articles assigned to this category must be reassigned before it can be removed.',
+        confirmLabel: 'Remove category',
+        destructive: true,
+      }))
+    )
+      return;
 
-    const handleApproveNews = async (article: NewsArticle) => {
-        try {
-            setApprovingId(article._id);
-            const isPaidSubmission = isPaidNewsSubmission(article);
-            const shouldBeInBanner = article.plan === 'slider' || article.plan === 'prem' || Boolean(article.featuredInBanner);
-            const response = await fetch('/api/admin/news', {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    id: article._id,
-                    status: 'published',
-                    publishedAt: new Date().toISOString(),
-                    featuredInBanner: shouldBeInBanner,
-                    isPaid: isPaidSubmission,
-                    isPendingReview: false
-                })
-            });
+    try {
+      setCategoryError(null);
+      const response = await fetch('/api/admin/newshub-categories', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ category }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || 'Could not remove category.');
+      setCategories(data.categories);
+      if (newsForm.category === category) {
+        setNewsForm(previous => ({ ...previous, category: data.categories[0] || '' }));
+      }
+      setSuccess(`Removed “${category}” category.`);
+    } catch (err) {
+      setCategoryError(err instanceof Error ? err.message : 'Could not remove category.');
+    }
+  };
 
-            if (!response.ok) {
-                const errData = await response.json().catch(() => ({}));
-                throw new Error(errData.error || 'Failed to approve article');
-            }
+  const handleDeleteNews = async (id: string) => {
+    if (
+      !(await confirm({
+        title: 'Delete news article?',
+        description: 'This article will be permanently deleted.',
+        confirmLabel: 'Delete article',
+        destructive: true,
+      }))
+    )
+      return;
 
-            setSuccess(`✓ "${article.title}" approved and published live to NYALTX News Hub!`);
-            await loadNews();
-        } catch (err: any) {
-            setError(err.message || 'Error approving news article');
-        } finally {
-            setApprovingId(null);
-        }
-    };
+    try {
+      console.log('Deleting article with ID:', id);
+      const response = await fetch('/api/admin/news', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      });
 
-    const handleSaveNews = async () => {
-        try {
-            const tagsArray = newsForm.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
-            const [publishHours = '9', publishMinutes = '0'] = publishTime.split(':');
-            const publishedAt = newsForm.status === 'published'
-                ? new Date(
-                    new Date().getFullYear(),
-                    new Date().getMonth(),
-                    new Date().getDate(),
-                    Number(publishHours),
-                    Number(publishMinutes)
-                ).toISOString()
-                : null;
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to delete news');
+      }
 
-            const newsData = {
-                ...newsForm,
-                tags: tagsArray,
-                publishedAt
-            };
+      setSuccess('News article deleted successfully!');
+      loadNews();
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
 
-            console.log('Saving news article:', { editingNews: !!editingNews, newsData });
+  // IPFS upload function
+  const handleFileSelect = (files: File[]) => {
+    const file = files[0];
+    if (file) {
+      // Validate file type
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+      if (!validTypes.includes(file.type)) {
+        setError('Please select a valid image file (JPEG, PNG, GIF, or WebP)');
+        return;
+      }
 
-            let response;
-            if (editingNews) {
-                console.log('Updating article with ID:', editingNews._id);
-                response = await fetch('/api/admin/news', {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id: editingNews._id, ...newsData })
-                });
-            } else {
-                console.log('Creating new article');
-                response = await fetch('/api/admin/news', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(newsData)
-                });
-            }
+      // Validate file size (max 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        setError('File size must be less than 10MB');
+        return;
+      }
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Failed to save news');
-            }
+      // Validate image dimensions
+      const img = new Image();
+      const objectUrl = URL.createObjectURL(file);
 
-            setSuccess(editingNews ? 'News article updated successfully!' : 'News article created successfully!');
-            setIsCreating(false);
-            setEditingNews(null);
-            loadNews();
-        } catch (err: any) {
-            setError(err.message);
-        }
-    };
+      img.onload = () => {
+        URL.revokeObjectURL(objectUrl);
 
-    const handleDeleteNews = async (id: string) => {
-        if (!(await confirm({
-            title: 'Delete news article?',
-            description: 'This article will be permanently deleted.',
-            confirmLabel: 'Delete article',
-            destructive: true,
-        }))) return;
-
-        try {
-            console.log('Deleting article with ID:', id);
-            const response = await fetch('/api/admin/news', {
-                method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id })
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Failed to delete news');
-            }
-
-            setSuccess('News article deleted successfully!');
-            loadNews();
-        } catch (err: any) {
-            setError(err.message);
-        }
-    };
-
-    // IPFS upload function
-    const handleFileSelect = (files: File[]) => {
-        const file = files[0];
-        if (file) {
-            // Validate file type
-            const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
-            if (!validTypes.includes(file.type)) {
-                setError('Please select a valid image file (JPEG, PNG, GIF, or WebP)');
-                return;
-            }
-
-            // Validate file size (max 10MB)
-            if (file.size > 10 * 1024 * 1024) {
-                setError('File size must be less than 10MB');
-                return;
-            }
-
-            // Validate image dimensions
-            const img = new Image();
-            const objectUrl = URL.createObjectURL(file);
-
-            img.onload = () => {
-                URL.revokeObjectURL(objectUrl);
-
-                if (img.width < 400 || img.height < 200) {
-                    setError(`Image dimensions must be at least 400x200 pixels. Current image is ${img.width}x${img.height} pixels.`);
-                    // Clear the file input
-                    const fileInput = document.getElementById('ipfs-file-input') as HTMLInputElement;
-                    if (fileInput) fileInput.value = '';
-                    return;
-                }
-
-                setSelectedFile(file);
-                setError(null);
-            };
-
-            img.onerror = () => {
-                URL.revokeObjectURL(objectUrl);
-                setError('Failed to load image. Please select a valid image file.');
-                // Clear the file input
-                const fileInput = document.getElementById('ipfs-file-input') as HTMLInputElement;
-                if (fileInput) fileInput.value = '';
-            };
-
-            img.src = objectUrl;
-        }
-    };
-
-    const uploadToIPFS = async () => {
-        if (!selectedFile) {
-            setError('Please select a file first');
-            return;
+        if (img.width < 400 || img.height < 200) {
+          setError(
+            `Image dimensions must be at least 400x200 pixels. Current image is ${img.width}x${img.height} pixels.`
+          );
+          // Clear the file input
+          const fileInput = document.getElementById('ipfs-file-input') as HTMLInputElement;
+          if (fileInput) fileInput.value = '';
+          return;
         }
 
-        setIsUploadingToIPFS(true);
+        setSelectedFile(file);
         setError(null);
+      };
 
-        try {
-            const formData = new FormData();
-            formData.append('file', selectedFile);
+      img.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        setError('Failed to load image. Please select a valid image file.');
+        // Clear the file input
+        const fileInput = document.getElementById('ipfs-file-input') as HTMLInputElement;
+        if (fileInput) fileInput.value = '';
+      };
 
-            const response = await fetch('/api/upload/ipfs', {
-                method: 'POST',
-                body: formData,
-            });
+      img.src = objectUrl;
+    }
+  };
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Failed to upload to IPFS');
-            }
+  const uploadToIPFS = async () => {
+    if (!selectedFile) {
+      setError('Please select a file first');
+      return;
+    }
 
-            const data = await response.json();
-            const ipfsUrl = data.url || `https://gateway.pinata.cloud/ipfs/${data.hash}`;
+    setIsUploadingToIPFS(true);
+    setError(null);
 
-            // Update the featured image field with IPFS URL
-            setNewsForm(prev => ({ ...prev, featuredImage: ipfsUrl }));
-            setSuccess(`Image uploaded to IPFS successfully! Hash: ${data.hash}`);
-            setSelectedFile(null);
+    try {
+      const formData = new FormData();
+      formData.append('file', selectedFile);
 
-            // Clear the file input
-            const fileInput = document.getElementById('ipfs-file-input') as HTMLInputElement;
-            if (fileInput) fileInput.value = '';
+      const response = await fetch('/api/upload/ipfs', {
+        method: 'POST',
+        body: formData,
+      });
 
-        } catch (err: any) {
-            setError(err.message);
-        } finally {
-            setIsUploadingToIPFS(false);
-        }
-    };
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to upload to IPFS');
+      }
 
-    const handleCancel = () => {
-        setIsCreating(false);
-        setEditingNews(null);
-        setSelectedFile(null);
-        setIsUploadingToIPFS(false);
-        setNewsForm({
-            title: '',
-            content: '',
-            excerpt: '',
-            featuredImage: '',
-            status: 'draft',
-            featuredInBanner: false,
-            tags: '',
-            author: 'NYALTX Team',
-            editorType: 'quill'
-        });
-    };
+      const data = await response.json();
+      const ipfsUrl = data.url || `https://gateway.pinata.cloud/ipfs/${data.hash}`;
 
-    const formatDate = (date: Date | string) => {
-        return new Date(date).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    };
+      // Update the featured image field with IPFS URL
+      setNewsForm(prev => ({ ...prev, featuredImage: ipfsUrl }));
+      setSuccess(`Image uploaded to IPFS successfully! Hash: ${data.hash}`);
+      setSelectedFile(null);
 
-    const newsByType = news.filter(article => {
-        if (submissionFilter === 'paid') return isPaidNewsSubmission(article);
-        if (submissionFilter === 'corporate') return !isPaidNewsSubmission(article);
-        return true;
+      // Clear the file input
+      const fileInput = document.getElementById('ipfs-file-input') as HTMLInputElement;
+      if (fileInput) fileInput.value = '';
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsUploadingToIPFS(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setIsCreating(false);
+    setEditingNews(null);
+    setSelectedFile(null);
+    setIsUploadingToIPFS(false);
+    setNewsForm({
+      title: '',
+      content: '',
+      excerpt: '',
+      featuredImage: '',
+      category: categories[0] || '',
+      status: 'draft',
+      featuredInBanner: false,
+      tags: '',
+      author: 'NYALTX Team',
+      editorType: 'quill',
     });
-    const visibleNews = newsByType.filter(article => {
-        if (statusFilter !== 'all' && article.status !== statusFilter) return false;
-        const query = newsSearch.trim().toLowerCase();
-        if (!query) return true;
-        return [article.title, article.author, article.excerpt, ...(article.tags ?? [])]
-            .join(' ')
-            .toLowerCase()
-            .includes(query);
+  };
+
+  const formatDate = (date: Date | string) => {
+    return new Date(date).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
     });
-    const totalPages = Math.max(1, Math.ceil(visibleNews.length / pageSize));
-    const pagedNews = visibleNews.slice((currentPage - 1) * pageSize, currentPage * pageSize);
-    const paidNewsCount = news.filter(isPaidNewsSubmission).length;
+  };
 
-    return (
-        <div className="min-w-0 space-y-6">
-            {confirmationDialog}
-            <div className="flex flex-wrap items-start justify-between gap-4">
-                <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-3">
-                        <div className="min-w-0">
-                            <h1 className="break-words text-xl font-semibold text-white sm:text-2xl">
-                                News Management
-                            </h1>
-                            <p className="mt-1 text-sm text-gray-400">Review submissions and publish corporate updates.</p>
-                        </div>
-                    </div>
-                    <p className="text-gray-400 text-sm mt-1">
-                        Review paid submissions and manage corporate announcements separately
-                    </p>
-                </div>
-                <div className="flex shrink-0 items-center gap-3">
-                    <Button
-                        variant="outline"
-                        onClick={loadNews}
-                        disabled={loading}
-                    >
-                        <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} aria-hidden="true" />
-                        Refresh
-                    </Button>
-                    <Button
-                        variant="outline"
-                        onClick={handleCreateNews}
-                    >
-                        <Plus className="h-4 w-4" aria-hidden="true" />
-                        Create News Article
-                    </Button>
-                </div>
+  const newsByType = news.filter(article => {
+    if (submissionFilter === 'paid') return isPaidNewsSubmission(article);
+    if (submissionFilter === 'corporate') return !isPaidNewsSubmission(article);
+    return true;
+  });
+  const visibleNews = newsByType.filter(article => {
+    if (statusFilter !== 'all' && article.status !== statusFilter) return false;
+    const query = newsSearch.trim().toLowerCase();
+    if (!query) return true;
+    return [article.title, article.author, article.excerpt, ...(article.tags ?? [])]
+      .join(' ')
+      .toLowerCase()
+      .includes(query);
+  });
+  const totalPages = Math.max(1, Math.ceil(visibleNews.length / pageSize));
+  const pagedNews = visibleNews.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const paidNewsCount = news.filter(isPaidNewsSubmission).length;
+
+  return (
+    <div className="min-w-0 space-y-6">
+      {confirmationDialog}
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-3">
+            <div className="min-w-0">
+              <h1 className="break-words text-xl font-semibold text-white sm:text-2xl">
+                News Management
+              </h1>
+              <p className="mt-1 text-sm text-gray-400">
+                Review submissions and publish corporate updates.
+              </p>
             </div>
-
-            {/* Status Messages */}
-            {error && (
-                <Alert variant="destructive" className="flex flex-wrap items-center justify-between gap-3">
-                    <span>{error}</span>
-                    <Button variant="outline" size="sm" onClick={loadNews} disabled={loading}>
-                        <RefreshCw className={`size-4 ${loading ? 'animate-spin' : ''}`} aria-hidden="true" />
-                        Try again
-                    </Button>
-                </Alert>
-            )}
-            {success && <Alert variant="success">{success}</Alert>}
-
-            <div className="flex flex-wrap items-center gap-2">
-                {([
-                    ['all', 'All News', hasLoadedNews ? news.length : null],
-                    ['paid', 'Paid Submissions', hasLoadedNews ? paidNewsCount : null],
-                    ['corporate', 'Corporate News', hasLoadedNews ? news.length - paidNewsCount : null],
-                ] as const).map(([filter, label, count]) => (
-                    <Button
-                        key={filter}
-                        size="sm"
-                        variant={submissionFilter === filter ? 'secondary' : 'ghost'}
-                        onClick={() => setSubmissionFilter(filter)}
-                    >
-                        {label} ({count ?? '—'})
-                    </Button>
-                ))}
-            </div>
-
-            {/* Create/Edit Form */}
-            <Drawer
-                open={isCreating}
-                onClose={handleCancel}
-                title={editingNews ? 'Edit News Article' : 'Create News Article'}
-                maxWidth="max-w-4xl"
-            >
-                <div className="admin-panel-form flex h-full max-h-screen w-full flex-col overflow-y-auto border-l border-white/10 bg-[#0d0d0d] p-6">
-                    <div className="mb-5 flex items-center justify-between gap-4 border-b border-white/10 pb-4">
-                        <h2 className="font-semibold text-white flex items-center gap-2">
-                            <Newspaper className="h-5 w-5 text-slate-300" aria-hidden="true" />
-                            {editingNews ? 'Edit News Article' : 'Create News Article'}
-                        </h2>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            type="button"
-                            onClick={handleCancel}
-                            aria-label="Close news editor"
-                        >
-                            <X size={20} aria-hidden="true" />
-                        </Button>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">Title *</label>
-                            <input
-                                type="text"
-                                value={newsForm.title}
-                                onChange={(e) => setNewsForm(prev => ({ ...prev, title: e.target.value }))}
-                                className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500/50"
-                                placeholder="Enter news title"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">Author</label>
-                            <input
-                                type="text"
-                                value={newsForm.author}
-                                onChange={(e) => setNewsForm(prev => ({ ...prev, author: e.target.value }))}
-                                className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500/50"
-                                placeholder="Author name"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-300 mb-2">Excerpt</label>
-                        <textarea
-                            value={newsForm.excerpt}
-                            onChange={(e) => setNewsForm(prev => ({ ...prev, excerpt: e.target.value }))}
-                            rows={2}
-                            className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500/50"
-                            placeholder="Brief description (optional - will be auto-generated from content)"
-                        />
-                    </div>
-
-                    <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-300 mb-2">Editor Type</label>
-                        <select
-                            value={newsForm.editorType}
-                            onChange={(e) => {
-                                const newEditorType = e.target.value as 'simple' | 'quill';
-                                if (newEditorType === newsForm.editorType) return;
-
-                                if (quillInstanceRef.current && newsForm.editorType === 'quill') {
-                                    const html = normalizeQuillHtml(quillInstanceRef.current.root.innerHTML);
-                                    setNewsForm(prev => ({ ...prev, content: html, editorType: newEditorType }));
-                                } else {
-                                    setNewsForm(prev => ({ ...prev, editorType: newEditorType }));
-                                }
-                            }}
-                            className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600/50 rounded-lg text-white focus:outline-none focus:border-blue-500/50"
-                        >
-                            <option value="simple">Simple Text</option>
-                            <option value="quill">Rich Text (Quill)</option>
-                        </select>
-                    </div>
-
-                    <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-300 mb-2">Content *</label>
-                        {newsForm.editorType === 'simple' ? (
-                            <textarea
-                                value={newsForm.content}
-                                onChange={(e) => setNewsForm(prev => ({ ...prev, content: e.target.value }))}
-                                rows={8}
-                                className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500/50"
-                                placeholder="Write your news article content here..."
-                            />
-                        ) : (
-                            <div className="quill-dark relative overflow-hidden rounded-xl">
-                                {isQuillLoading && (
-                                    <div className="absolute inset-0 z-10 flex items-center justify-center bg-gray-900/60 backdrop-blur-sm">
-                                        <div className="text-center">
-                                            <Spinner className="w-8 h-8 text-cyan-400 mx-auto mb-4" />
-                                            <p className="text-gray-300">Loading rich text editor...</p>
-                                        </div>
-                                    </div>
-                                )}
-                                <div
-                                    ref={quillContainerRef}
-                                    className={`quill-editor ${isQuillLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-200`}
-                                    style={{ minHeight: '320px' }}
-                                />
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                        <div className="md:col-span-2">
-                            <label className="block text-sm font-medium text-gray-300 mb-2">Featured Image</label>
-
-                            {/* IPFS Upload Section */}
-                            <div className="mb-3 p-4 bg-gray-700/30 border border-gray-600/30 rounded-lg">
-                                <div className="flex items-center gap-3 mb-2">
-                                    <span className="text-sm font-medium text-cyan-300">Upload to IPFS</span>
-                                    <div className="flex-1 h-px bg-gray-600/50"></div>
-                                </div>
-                                <div className="mb-3 text-xs text-gray-400">
-                                    Recommended: 1200x600 px (2:1 card ratio). Images fit the card without cropping. Minimum 400x200 px; max 10MB; JPEG/PNG/GIF/WebP.
-                                </div>
-
-                                <div className="flex items-center gap-3">
-                                    <FileUpload
-                                        id="ipfs-file-input"
-                                        accept="image/jpeg,image/png,image/gif,image/webp"
-                                        onFilesSelected={handleFileSelect}
-                                        disabled={isUploadingToIPFS}
-                                        label="Choose featured image"
-                                        description="JPEG, PNG, GIF or WebP, up to 10 MB."
-                                        className="flex-1"
-                                    />
-                                    {selectedFile && (
-                                        <span className="text-sm text-gray-400 flex-1 truncate">
-                                            {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
-                                        </span>
-                                    )}
-
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        type="button"
-                                        onClick={uploadToIPFS}
-                                        disabled={!selectedFile || isUploadingToIPFS}
-                                    >
-                                        {isUploadingToIPFS ? (
-                                            <>
-                                                <Spinner className="w-4 h-4" />
-                                                Uploading...
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Upload className="w-4 h-4" />
-                                                Upload to IPFS
-                                            </>
-                                        )}
-                                    </Button>
-                                </div>
-                            </div>
-
-                            {/* Manual URL Input */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">Or enter image URL manually</label>
-                                <div className="flex gap-2">
-                                    <input
-                                        type="url"
-                                        value={newsForm.featuredImage}
-                                        onChange={(e) => setNewsForm(prev => ({ ...prev, featuredImage: e.target.value }))}
-                                        className="flex-1 px-3 py-2 bg-gray-700/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500/50"
-                                        placeholder="https://example.com/image.jpg or IPFS URL"
-                                    />
-                                    {newsForm.featuredImage.includes('gateway.pinata.cloud') && (
-                                        <Button
-                                            size="sm"
-                                            variant="outline"
-                                            type="button"
-                                            onClick={() => {
-                                                const fixedUrl = toReliableIpfsUrl(newsForm.featuredImage);
-                                                setNewsForm(prev => ({ ...prev, featuredImage: fixedUrl }));
-                                                setSuccess('URL converted to working IPFS gateway!');
-                                            }}
-                                            title="Convert Pinata gateway URL to working IPFS.io gateway"
-                                        >
-                                            Fix URL
-                                        </Button>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Image Preview */}
-                            {newsForm.featuredImage && (
-                                <div className="mt-3">
-                                    <label className="block text-sm font-medium text-gray-300 mb-2">Preview</label>
-                                    <div className="relative aspect-[2/1] w-full bg-gray-800/50 rounded-lg overflow-hidden">
-                                        <img
-                                            src={newsForm.featuredImage}
-                                            alt="Featured image preview"
-                                            className="w-full h-full object-contain"
-                                            onError={(e) => {
-                                                const target = e.target as HTMLImageElement;
-                                                target.style.display = 'none';
-                                            }}
-                                        />
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                        <div>
-                            <Field id="news-status" label="Status">
-                                <Combobox
-                                    id="news-status"
-                                    value={newsForm.status}
-                                    options={[
-                                        { value: 'draft', label: 'Draft' },
-                                        { value: 'published', label: 'Published' },
-                                        { value: 'pending', label: 'Pending Review' },
-                                    ]}
-                                    onValueChange={(value) => setNewsForm(prev => ({ ...prev, status: value as 'published' | 'draft' | 'pending' }))}
-                                    placeholder="Select status"
-                                    className="w-full rounded-lg border border-gray-600/50 bg-gray-700/50 px-3 py-2 text-white focus:border-blue-500/50"
-                                />
-                            </Field>
-                            {newsForm.status === 'published' && (
-                                <Field id="publish-time" label="Publish time" className="mt-3">
-                                    <TimePicker
-                                        id="publish-time"
-                                        value={publishTime}
-                                        onChange={(event) => setPublishTime(event.target.value)}
-                                        aria-label="Publish time"
-                                    />
-                                </Field>
-                            )}
-                            <div className="mt-3 flex items-center gap-3">
-                                <Switch
-                                    checked={newsForm.featuredInBanner}
-                                    onCheckedChange={(checked) => setNewsForm(prev => ({ ...prev, featuredInBanner: checked }))}
-                                    aria-label="Feature in top banner slider"
-                                />
-                                <span className="text-xs font-medium text-yellow-300">Feature in Top Banner Slider</span>
-                            </div>
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">Tags</label>
-                            <input
-                                type="text"
-                                value={newsForm.tags}
-                                onChange={(e) => setNewsForm(prev => ({ ...prev, tags: e.target.value }))}
-                                className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500/50"
-                                placeholder="announcement, partnership, update"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="flex gap-3 border-t border-white/10 pt-4">
-                        <Button
-                            variant="outline"
-                            onClick={handleCancel}
-                        >
-                            Cancel
-                        </Button>
-                        <Button
-                            variant="default"
-                            onClick={handleSaveNews}
-                            disabled={!newsForm.title || !newsForm.content}
-                        >
-                            {editingNews ? 'Update Article' : 'Create Article'}
-                        </Button>
-                    </div>
-                </div>
-            </Drawer>
-
-            {/* News List */}
-            <div className="min-w-0 overflow-hidden">
-                <div className="p-6 border-b border-gray-700/20 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <h3 className="font-semibold text-white flex items-center gap-2">
-                        <Newspaper className="w-5 h-5 text-slate-300" />
-                        {submissionFilter === 'paid'
-                            ? 'Paid News Submissions'
-                            : submissionFilter === 'corporate'
-                                ? 'Corporate News'
-                                : 'News Articles & Submissions'}
-                        {newsByType.length > 0 && (
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
-                                {newsByType.length}
-                            </span>
-                        )}
-                    </h3>
-
-                    {/* Status Filter Tabs */}
-                    <div className="flex items-center gap-2 flex-wrap">
-                        <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => setStatusFilter('all')}
-                        >
-                            All ({newsByType.length})
-                        </Button>
-                        <Button
-                            size="sm"
-                            variant={statusFilter === 'pending' ? 'secondary' : 'ghost'}
-                            onClick={() => setStatusFilter('pending')}
-                        >
-                            <span>Pending Review</span>
-                            <span className="rounded-full px-1.5 text-[10px]">
-                                {newsByType.filter(n => n.status === 'pending').length}
-                            </span>
-                        </Button>
-                        <Button
-                            size="sm"
-                            variant={statusFilter === 'published' ? 'secondary' : 'ghost'}
-                            onClick={() => setStatusFilter('published')}
-                        >
-                            Published ({newsByType.filter(n => n.status === 'published').length})
-                        </Button>
-                        <Button
-                            size="sm"
-                            variant={statusFilter === 'draft' ? 'secondary' : 'ghost'}
-                            onClick={() => setStatusFilter('draft')}
-                        >
-                            Drafts ({newsByType.filter(n => n.status === 'draft').length})
-                        </Button>
-                    </div>
-                </div>
-
-                <Filters className="admin-panel-news-filters px-6 py-3">
-                    <input
-                        type="search"
-                        value={newsSearch}
-                        onChange={(event) => setNewsSearch(event.target.value)}
-                        placeholder="Search articles"
-                        className="h-9 w-48 rounded-lg border border-white/10 bg-black/30 px-3 text-sm text-white placeholder:text-white/40 focus:border-cyan-500/60 focus:outline-none"
-                    />
-                </Filters>
-
-                <div className="p-6">
-                    {loading ? (
-                        <div className="flex items-center gap-3 rounded-lg border border-white/10 bg-white/5 px-4 py-6 text-white/70">
-                            <Spinner className="h-4 w-4" />
-                            Loading news articles...
-                        </div>
-                    ) : error && !hasLoadedNews ? (
-                        <div className="rounded-lg border border-dashed border-white/15 p-8 text-center">
-                            <Newspaper className="mx-auto mb-4 h-10 w-10 text-gray-500" aria-hidden="true" />
-                            <p className="font-medium text-gray-200">Could not load news articles</p>
-                            <p className="mt-1 text-sm text-gray-400">Your articles have not been replaced with an empty list.</p>
-                            <Button variant="outline" size="sm" onClick={loadNews} disabled={loading} className="mt-4">
-                                <RefreshCw className={`size-4 ${loading ? 'animate-spin' : ''}`} aria-hidden="true" />
-                                Try again
-                            </Button>
-                        </div>
-                    ) : visibleNews.length === 0 ? (
-                        <div className="text-center py-12">
-                            <Newspaper className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                            <p className="text-gray-400 font-medium mb-2">No news articles found in this filter</p>
-                            <p className="text-gray-500 text-sm">
-                                {statusFilter === 'pending'
-                                    ? 'No pending submissions awaiting review.'
-                                    : submissionFilter === 'paid'
-                                        ? 'No paid news submissions found in this filter.'
-                                        : submissionFilter === 'corporate'
-                                            ? 'No corporate news articles found in this filter.'
-                                            : 'Create your first news article to get started'}
-                            </p>
-                        </div>
-                    ) : (
-                        <div className="overflow-x-auto rounded-lg border border-white/10">
-                            <table className="w-full min-w-[900px] text-left text-xs">
-                                <thead className="border-b border-white/10 bg-white/[0.03] text-xs uppercase tracking-wider text-white/50">
-                                    <tr>
-                                        <th className="px-4 py-3 font-medium">Article</th>
-                                        <th className="px-4 py-3 font-medium">Status</th>
-                                        <th className="px-4 py-3 font-medium">Submission</th>
-                                        <th className="px-4 py-3 font-medium">Published</th>
-                                        <th className="px-4 py-3 text-right font-medium">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-white/10">
-                                    {pagedNews.map(article => (
-                                        <tr key={article._id} className="transition hover:bg-white/[0.025]">
-                                            <td className="max-w-md px-4 py-4">
-                                                <p className="font-semibold text-white">{article.title}</p>
-                                                <p className="mt-1 line-clamp-1 text-xs text-white/50">
-                                                    {article.excerpt || `By ${article.author}`}
-                                                </p>
-                                                {article.featuredInBanner && (
-                                                    <span className="mt-2 inline-flex rounded-full border border-cyan-500/30 bg-cyan-500/10 px-2 py-0.5 text-[11px] text-cyan-200">
-                                                        In top banner
-                                                    </span>
-                                                )}
-                                            </td>
-                                            <td className="px-4 py-4">
-                                                <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${
-                                                    article.status === 'published'
-                                                        ? 'bg-green-500/20 text-green-200'
-                                                        : article.status === 'pending'
-                                                            ? 'bg-amber-500/20 text-amber-200'
-                                                            : 'bg-purple-500/20 text-purple-200'
-                                                }`}>
-                                                    {article.status === 'pending' ? 'Pending review' : article.status}
-                                                </span>
-                                            </td>
-                                            <td className="px-4 py-4">
-                                                <div className="flex flex-col gap-1 text-xs text-white/60">
-                                                    {isPaidNewsSubmission(article) ? (
-                                                        <>
-                                                            <span className="text-blue-200">
-                                                                {article.paymentSource === 'paypal_crypto'
-                                                                    ? 'PayPal Crypto'
-                                                                    : article.paymentMethod === 'paypal'
-                                                                        ? 'PayPal'
-                                                                        : 'Paid submission'}
-                                                            </span>
-                                                            {article.amount ? <span>${article.amount} USD</span> : null}
-                                                            {article.email ? <span className="max-w-48 truncate">{article.email}</span> : null}
-                                                        </>
-                                                    ) : (
-                                                        <span>{article.type === 'pr' ? 'Press release' : 'Corporate news'}</span>
-                                                    )}
-                                                </div>
-                                            </td>
-                                            <td className="whitespace-nowrap px-4 py-4 text-white/60">
-                                                {formatDate(article.publishedAt || article.createdAt)}
-                                            </td>
-                                            <td className="px-4 py-4">
-                                                <div className="flex justify-end gap-2">
-                                                    {article.status === 'pending' && (
-                                                        <Button
-                                                            size="sm"
-                                                            variant="outline"
-                                                            onClick={() => handleApproveNews(article)}
-                                                            disabled={approvingId === article._id}
-                                                        >
-                                                            {approvingId === article._id ? <><Spinner className="h-3.5 w-3.5" /> Publishing</> : 'Approve'}
-                                                        </Button>
-                                                    )}
-                                                    <Button
-                                                        size="icon"
-                                                        variant={article.featuredInBanner ? 'secondary' : 'outline'}
-                                                        onClick={() => handleToggleBanner(article)}
-                                                        aria-label={`${article.featuredInBanner ? 'Unpin' : 'Pin'} ${article.title}`}
-                                                        title={article.featuredInBanner ? 'Unpin article' : 'Pin article'}
-                                                    >
-                                                        {article.featuredInBanner ? (
-                                                            <PinOff className="size-4" aria-hidden="true" />
-                                                        ) : (
-                                                            <Pin className="size-4" aria-hidden="true" />
-                                                        )}
-                                                    </Button>
-                                                    {article.status === 'published' && (
-                                                        <Button
-                                                            size="icon"
-                                                            variant="outline"
-                                                            onClick={() => window.open(`/news/${article.slug}`, '_blank')}
-                                                            title="View live article"
-                                                        >
-                                                            <Eye className="h-4 w-4" />
-                                                        </Button>
-                                                    )}
-                                                    <Button
-                                                        size="icon"
-                                                        variant="outline"
-                                                        onClick={() => handleEditNews(article)}
-                                                        title="Edit article"
-                                                        aria-label={`Edit ${article.title}`}
-                                                    >
-                                                        <Pencil className="h-4 w-4" />
-                                                    </Button>
-                                                    <Button
-                                                        size="icon"
-                                                        variant="destructive"
-                                                        onClick={() => handleDeleteNews(article._id)}
-                                                        title="Delete article"
-                                                    >
-                                                        <Trash2 className="h-4 w-4" />
-                                                    </Button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
-                    {visibleNews.length > pageSize && (
-                        <div className="mt-4 flex items-center justify-between gap-3">
-                            <p className="text-xs text-white/50">
-                                Page {currentPage} of {totalPages}
-                            </p>
-                            <div className="flex overflow-hidden rounded-md border border-white/10">
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    type="button"
-                                    onClick={() => setCurrentPage(page => Math.max(1, page - 1))}
-                                    disabled={currentPage === 1}
-                                    className="border-r border-white/10 px-3 py-2 text-sm text-white/70 disabled:opacity-40"
-                                >
-                                    Previous
-                                </Button>
-                                {Array.from({ length: totalPages }, (_, index) => index + 1).slice(
-                                    Math.max(0, currentPage - 2),
-                                    Math.max(3, currentPage + 1)
-                                ).map(page => (
-                                    <Button
-                                        type="button"
-                                        key={page}
-                                        variant={currentPage === page ? 'secondary' : 'ghost'}
-                                        size="sm"
-                                        onClick={() => setCurrentPage(page)}
-                                    >
-                                        {page}
-                                    </Button>
-                                ))}
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    type="button"
-                                    onClick={() => setCurrentPage(page => Math.min(totalPages, page + 1))}
-                                    disabled={currentPage === totalPages}
-                                    className="border-l border-white/10 px-3 py-2 text-sm text-white/70 disabled:opacity-40"
-                                >
-                                    Next
-                                </Button>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            </div>
+          </div>
+          <p className="text-gray-400 text-sm mt-1">
+            Review paid submissions and manage corporate announcements separately
+          </p>
         </div>
-    );
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={() => setShowCategoryManager(open => !open)}
+            aria-expanded={showCategoryManager}
+          >
+            <Tags className="h-4 w-4" aria-hidden="true" />
+            Manage Categories
+          </Button>
+          <Button variant="outline" onClick={loadNews} disabled={loading}>
+            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} aria-hidden="true" />
+            Refresh
+          </Button>
+          <Button variant="outline" onClick={handleCreateNews}>
+            <Plus className="h-4 w-4" aria-hidden="true" />
+            Create News Article
+          </Button>
+        </div>
+      </div>
+
+      {/* Status Messages */}
+      {error && (
+        <Alert variant="destructive" className="flex flex-wrap items-center justify-between gap-3">
+          <span>{error}</span>
+          <Button variant="outline" size="sm" onClick={loadNews} disabled={loading}>
+            <RefreshCw className={`size-4 ${loading ? 'animate-spin' : ''}`} aria-hidden="true" />
+            Try again
+          </Button>
+        </Alert>
+      )}
+      {success && <Alert variant="success">{success}</Alert>}
+
+      {showCategoryManager && (
+        <section className="rounded-xl border border-white/10 bg-white/[0.025] p-5">
+          <div className="mb-4">
+            <h2 className="font-semibold text-white">News Hub categories</h2>
+            <p className="mt-1 text-sm text-white/50">
+              Categories appear as filters on the public News Hub. Assign each article a category
+              when creating or editing it.
+            </p>
+          </div>
+          <form onSubmit={handleAddCategory} className="flex flex-wrap gap-2">
+            <input
+              value={categoryDraft}
+              onChange={event => setCategoryDraft(event.target.value)}
+              maxLength={32}
+              placeholder="Add a category"
+              aria-label="New News Hub category"
+              className="h-10 min-w-48 flex-1 rounded-lg border border-white/10 bg-black/30 px-3 text-sm text-white placeholder:text-white/40 focus:border-cyan-500/60 focus:outline-none"
+            />
+            <Button type="submit" disabled={categorySaving || categoryDraft.trim().length < 2}>
+              <Plus className="h-4 w-4" aria-hidden="true" />
+              {categorySaving ? 'Adding…' : 'Add category'}
+            </Button>
+          </form>
+          {categoryError && (
+            <p role="alert" className="mt-3 text-sm text-rose-300">
+              {categoryError}
+            </p>
+          )}
+          <div className="mt-4 flex flex-wrap gap-2">
+            {categoryLoading ? (
+              <span className="text-sm text-white/50">Loading categories…</span>
+            ) : (
+              categories.map(category => (
+                <span
+                  key={category}
+                  className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 py-1 pl-3 pr-1 text-sm text-slate-200"
+                >
+                  {category}
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveCategory(category)}
+                    aria-label={`Remove ${category} category`}
+                    className="rounded-full p-1 text-slate-400 transition hover:bg-rose-500/15 hover:text-rose-200"
+                  >
+                    <X className="h-3.5 w-3.5" aria-hidden="true" />
+                  </button>
+                </span>
+              ))
+            )}
+          </div>
+        </section>
+      )}
+
+      <div className="flex flex-wrap items-center gap-2">
+        {(
+          [
+            ['all', 'All News', hasLoadedNews ? news.length : null],
+            ['paid', 'Paid Submissions', hasLoadedNews ? paidNewsCount : null],
+            ['corporate', 'Corporate News', hasLoadedNews ? news.length - paidNewsCount : null],
+          ] as const
+        ).map(([filter, label, count]) => (
+          <Button
+            key={filter}
+            size="sm"
+            variant={submissionFilter === filter ? 'secondary' : 'ghost'}
+            onClick={() => setSubmissionFilter(filter)}
+          >
+            {label} ({count ?? '—'})
+          </Button>
+        ))}
+      </div>
+
+      {/* Create/Edit Form */}
+      <Drawer
+        open={isCreating}
+        onClose={handleCancel}
+        title={editingNews ? 'Edit News Article' : 'Create News Article'}
+        maxWidth="max-w-4xl"
+      >
+        <div className="admin-panel-form flex h-full max-h-screen w-full flex-col overflow-y-auto border-l border-white/10 bg-[#0d0d0d] p-6">
+          <div className="mb-5 flex items-center justify-between gap-4 border-b border-white/10 pb-4">
+            <h2 className="font-semibold text-white flex items-center gap-2">
+              <Newspaper className="h-5 w-5 text-slate-300" aria-hidden="true" />
+              {editingNews ? 'Edit News Article' : 'Create News Article'}
+            </h2>
+            <Button
+              variant="ghost"
+              size="icon"
+              type="button"
+              onClick={handleCancel}
+              aria-label="Close news editor"
+            >
+              <X size={20} aria-hidden="true" />
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Title *</label>
+              <input
+                type="text"
+                value={newsForm.title}
+                onChange={e => setNewsForm(prev => ({ ...prev, title: e.target.value }))}
+                className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500/50"
+                placeholder="Enter news title"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Author</label>
+              <input
+                type="text"
+                value={newsForm.author}
+                onChange={e => setNewsForm(prev => ({ ...prev, author: e.target.value }))}
+                className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500/50"
+                placeholder="Author name"
+              />
+            </div>
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-300 mb-2">Excerpt</label>
+            <textarea
+              value={newsForm.excerpt}
+              onChange={e => setNewsForm(prev => ({ ...prev, excerpt: e.target.value }))}
+              rows={2}
+              className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500/50"
+              placeholder="Brief description (optional - will be auto-generated from content)"
+            />
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-300 mb-2">Editor Type</label>
+            <select
+              value={newsForm.editorType}
+              onChange={e => {
+                const newEditorType = e.target.value as 'simple' | 'quill';
+                if (newEditorType === newsForm.editorType) return;
+
+                if (quillInstanceRef.current && newsForm.editorType === 'quill') {
+                  const html = normalizeQuillHtml(quillInstanceRef.current.root.innerHTML);
+                  setNewsForm(prev => ({ ...prev, content: html, editorType: newEditorType }));
+                } else {
+                  setNewsForm(prev => ({ ...prev, editorType: newEditorType }));
+                }
+              }}
+              className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600/50 rounded-lg text-white focus:outline-none focus:border-blue-500/50"
+            >
+              <option value="simple">Simple Text</option>
+              <option value="quill">Rich Text (Quill)</option>
+            </select>
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-300 mb-2">Content *</label>
+            {newsForm.editorType === 'simple' ? (
+              <textarea
+                value={newsForm.content}
+                onChange={e => setNewsForm(prev => ({ ...prev, content: e.target.value }))}
+                rows={8}
+                className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500/50"
+                placeholder="Write your news article content here..."
+              />
+            ) : (
+              <div className="quill-dark relative overflow-hidden rounded-xl">
+                {isQuillLoading && (
+                  <div className="absolute inset-0 z-10 flex items-center justify-center bg-gray-900/60 backdrop-blur-sm">
+                    <div className="text-center">
+                      <Spinner className="w-8 h-8 text-cyan-400 mx-auto mb-4" />
+                      <p className="text-gray-300">Loading rich text editor...</p>
+                    </div>
+                  </div>
+                )}
+                <div
+                  ref={quillContainerRef}
+                  className={`quill-editor ${isQuillLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-200`}
+                  style={{ minHeight: '320px' }}
+                />
+              </div>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-300 mb-2">Featured Image</label>
+
+              {/* IPFS Upload Section */}
+              <div className="mb-3 p-4 bg-gray-700/30 border border-gray-600/30 rounded-lg">
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="text-sm font-medium text-cyan-300">Upload to IPFS</span>
+                  <div className="flex-1 h-px bg-gray-600/50"></div>
+                </div>
+                <div className="mb-3 text-xs text-gray-400">
+                  Recommended: 1200x600 px (2:1 card ratio). Images fit the card without cropping.
+                  Minimum 400x200 px; max 10MB; JPEG/PNG/GIF/WebP.
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <FileUpload
+                    id="ipfs-file-input"
+                    accept="image/jpeg,image/png,image/gif,image/webp"
+                    onFilesSelected={handleFileSelect}
+                    disabled={isUploadingToIPFS}
+                    label="Choose featured image"
+                    description="JPEG, PNG, GIF or WebP, up to 10 MB."
+                    className="flex-1"
+                  />
+                  {selectedFile && (
+                    <span className="text-sm text-gray-400 flex-1 truncate">
+                      {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
+                    </span>
+                  )}
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    type="button"
+                    onClick={uploadToIPFS}
+                    disabled={!selectedFile || isUploadingToIPFS}
+                  >
+                    {isUploadingToIPFS ? (
+                      <>
+                        <Spinner className="w-4 h-4" />
+                        Uploading...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-4 h-4" />
+                        Upload to IPFS
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+
+              {/* Manual URL Input */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Or enter image URL manually
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="url"
+                    value={newsForm.featuredImage}
+                    onChange={e =>
+                      setNewsForm(prev => ({ ...prev, featuredImage: e.target.value }))
+                    }
+                    className="flex-1 px-3 py-2 bg-gray-700/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500/50"
+                    placeholder="https://example.com/image.jpg or IPFS URL"
+                  />
+                  {newsForm.featuredImage.includes('gateway.pinata.cloud') && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      type="button"
+                      onClick={() => {
+                        const fixedUrl = toReliableIpfsUrl(newsForm.featuredImage);
+                        setNewsForm(prev => ({ ...prev, featuredImage: fixedUrl }));
+                        setSuccess('URL converted to working IPFS gateway!');
+                      }}
+                      title="Convert Pinata gateway URL to working IPFS.io gateway"
+                    >
+                      Fix URL
+                    </Button>
+                  )}
+                </div>
+              </div>
+
+              {/* Image Preview */}
+              {newsForm.featuredImage && (
+                <div className="mt-3">
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Preview</label>
+                  <div className="relative aspect-[2/1] w-full bg-gray-800/50 rounded-lg overflow-hidden">
+                    <img
+                      src={newsForm.featuredImage}
+                      alt="Featured image preview"
+                      className="w-full h-full object-contain"
+                      onError={e => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+            <div>
+              <Field id="news-category" label="News Hub category">
+                <Combobox
+                  id="news-category"
+                  value={newsForm.category}
+                  options={[...new Set([newsForm.category, ...categories].filter(Boolean))].map(
+                    category => ({
+                      value: category,
+                      label: category,
+                    })
+                  )}
+                  onValueChange={value =>
+                    setNewsForm(previous => ({ ...previous, category: value }))
+                  }
+                  placeholder="Select category"
+                  className="w-full rounded-lg border border-gray-600/50 bg-gray-700/50 px-3 py-2 text-white focus:border-blue-500/50"
+                />
+              </Field>
+              <Field id="news-status" label="Status">
+                <Combobox
+                  id="news-status"
+                  value={newsForm.status}
+                  options={[
+                    { value: 'draft', label: 'Draft' },
+                    { value: 'published', label: 'Published' },
+                    { value: 'pending', label: 'Pending Review' },
+                  ]}
+                  onValueChange={value =>
+                    setNewsForm(prev => ({
+                      ...prev,
+                      status: value as 'published' | 'draft' | 'pending',
+                    }))
+                  }
+                  placeholder="Select status"
+                  className="w-full rounded-lg border border-gray-600/50 bg-gray-700/50 px-3 py-2 text-white focus:border-blue-500/50"
+                />
+              </Field>
+              {newsForm.status === 'published' && (
+                <Field id="publish-time" label="Publish time" className="mt-3">
+                  <TimePicker
+                    id="publish-time"
+                    value={publishTime}
+                    onChange={event => setPublishTime(event.target.value)}
+                    aria-label="Publish time"
+                  />
+                </Field>
+              )}
+              <div className="mt-3 flex items-center gap-3">
+                <Switch
+                  checked={newsForm.featuredInBanner}
+                  onCheckedChange={checked =>
+                    setNewsForm(prev => ({ ...prev, featuredInBanner: checked }))
+                  }
+                  aria-label="Feature in top banner slider"
+                />
+                <span className="text-xs font-medium text-yellow-300">
+                  Feature in Top Banner Slider
+                </span>
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Tags</label>
+              <input
+                type="text"
+                value={newsForm.tags}
+                onChange={e => setNewsForm(prev => ({ ...prev, tags: e.target.value }))}
+                className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500/50"
+                placeholder="announcement, partnership, update"
+              />
+            </div>
+          </div>
+
+          <div className="flex gap-3 border-t border-white/10 pt-4">
+            <Button variant="outline" onClick={handleCancel}>
+              Cancel
+            </Button>
+            <Button
+              variant="default"
+              onClick={handleSaveNews}
+              disabled={!newsForm.title || !newsForm.content}
+            >
+              {editingNews ? 'Update Article' : 'Create Article'}
+            </Button>
+          </div>
+        </div>
+      </Drawer>
+
+      {/* News List */}
+      <div className="min-w-0 overflow-hidden">
+        <div className="p-6 border-b border-gray-700/20 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <h3 className="font-semibold text-white flex items-center gap-2">
+            <Newspaper className="w-5 h-5 text-slate-300" />
+            {submissionFilter === 'paid'
+              ? 'Paid News Submissions'
+              : submissionFilter === 'corporate'
+                ? 'Corporate News'
+                : 'News Articles & Submissions'}
+            {newsByType.length > 0 && (
+              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
+                {newsByType.length}
+              </span>
+            )}
+          </h3>
+
+          {/* Status Filter Tabs */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <Button size="sm" variant="ghost" onClick={() => setStatusFilter('all')}>
+              All ({newsByType.length})
+            </Button>
+            <Button
+              size="sm"
+              variant={statusFilter === 'pending' ? 'secondary' : 'ghost'}
+              onClick={() => setStatusFilter('pending')}
+            >
+              <span>Pending Review</span>
+              <span className="rounded-full px-1.5 text-[10px]">
+                {newsByType.filter(n => n.status === 'pending').length}
+              </span>
+            </Button>
+            <Button
+              size="sm"
+              variant={statusFilter === 'published' ? 'secondary' : 'ghost'}
+              onClick={() => setStatusFilter('published')}
+            >
+              Published ({newsByType.filter(n => n.status === 'published').length})
+            </Button>
+            <Button
+              size="sm"
+              variant={statusFilter === 'draft' ? 'secondary' : 'ghost'}
+              onClick={() => setStatusFilter('draft')}
+            >
+              Drafts ({newsByType.filter(n => n.status === 'draft').length})
+            </Button>
+          </div>
+        </div>
+
+        <Filters className="admin-panel-news-filters px-6 py-3">
+          <input
+            type="search"
+            value={newsSearch}
+            onChange={event => setNewsSearch(event.target.value)}
+            placeholder="Search articles"
+            className="h-9 w-48 rounded-lg border border-white/10 bg-black/30 px-3 text-sm text-white placeholder:text-white/40 focus:border-cyan-500/60 focus:outline-none"
+          />
+        </Filters>
+
+        <div className="p-6">
+          {loading ? (
+            <div className="flex items-center gap-3 rounded-lg border border-white/10 bg-white/5 px-4 py-6 text-white/70">
+              <Spinner className="h-4 w-4" />
+              Loading news articles...
+            </div>
+          ) : error && !hasLoadedNews ? (
+            <div className="rounded-lg border border-dashed border-white/15 p-8 text-center">
+              <Newspaper className="mx-auto mb-4 h-10 w-10 text-gray-500" aria-hidden="true" />
+              <p className="font-medium text-gray-200">Could not load news articles</p>
+              <p className="mt-1 text-sm text-gray-400">
+                Your articles have not been replaced with an empty list.
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={loadNews}
+                disabled={loading}
+                className="mt-4"
+              >
+                <RefreshCw
+                  className={`size-4 ${loading ? 'animate-spin' : ''}`}
+                  aria-hidden="true"
+                />
+                Try again
+              </Button>
+            </div>
+          ) : visibleNews.length === 0 ? (
+            <div className="text-center py-12">
+              <Newspaper className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-400 font-medium mb-2">
+                No news articles found in this filter
+              </p>
+              <p className="text-gray-500 text-sm">
+                {statusFilter === 'pending'
+                  ? 'No pending submissions awaiting review.'
+                  : submissionFilter === 'paid'
+                    ? 'No paid news submissions found in this filter.'
+                    : submissionFilter === 'corporate'
+                      ? 'No corporate news articles found in this filter.'
+                      : 'Create your first news article to get started'}
+              </p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto rounded-lg border border-white/10">
+              <table className="w-full min-w-[900px] text-left text-xs">
+                <thead className="border-b border-white/10 bg-white/[0.03] text-xs uppercase tracking-wider text-white/50">
+                  <tr>
+                    <th className="px-4 py-3 font-medium">Article</th>
+                    <th className="px-4 py-3 font-medium">Status</th>
+                    <th className="px-4 py-3 font-medium">Submission</th>
+                    <th className="px-4 py-3 font-medium">Published</th>
+                    <th className="px-4 py-3 text-right font-medium">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/10">
+                  {pagedNews.map(article => (
+                    <tr key={article._id} className="transition hover:bg-white/[0.025]">
+                      <td className="max-w-md px-4 py-4">
+                        <p className="font-semibold text-white">{article.title}</p>
+                        <p className="mt-1 line-clamp-1 text-xs text-white/50">
+                          {article.excerpt || `By ${article.author}`}
+                        </p>
+                        {article.category && (
+                          <span className="mt-2 inline-flex rounded-full border border-cyan-500/30 bg-cyan-500/10 px-2 py-0.5 text-[11px] text-cyan-200">
+                            {article.category}
+                          </span>
+                        )}
+                        {article.featuredInBanner && (
+                          <span className="mt-2 inline-flex rounded-full border border-cyan-500/30 bg-cyan-500/10 px-2 py-0.5 text-[11px] text-cyan-200">
+                            In top banner
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-4">
+                        <span
+                          className={`rounded-full px-2.5 py-1 text-xs font-medium ${
+                            article.status === 'published'
+                              ? 'bg-green-500/20 text-green-200'
+                              : article.status === 'pending'
+                                ? 'bg-amber-500/20 text-amber-200'
+                                : 'bg-purple-500/20 text-purple-200'
+                          }`}
+                        >
+                          {article.status === 'pending' ? 'Pending review' : article.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="flex flex-col gap-1 text-xs text-white/60">
+                          {isPaidNewsSubmission(article) ? (
+                            <>
+                              <span className="text-blue-200">
+                                {article.paymentSource === 'paypal_crypto'
+                                  ? 'PayPal Crypto'
+                                  : article.paymentMethod === 'paypal'
+                                    ? 'PayPal'
+                                    : 'Paid submission'}
+                              </span>
+                              {article.amount ? <span>${article.amount} USD</span> : null}
+                              {article.email ? (
+                                <span className="max-w-48 truncate">{article.email}</span>
+                              ) : null}
+                            </>
+                          ) : (
+                            <span>
+                              {article.type === 'pr' ? 'Press release' : 'Corporate news'}
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-4 text-white/60">
+                        {formatDate(article.publishedAt || article.createdAt)}
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="flex justify-end gap-2">
+                          {article.status === 'pending' && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleApproveNews(article)}
+                              disabled={approvingId === article._id}
+                            >
+                              {approvingId === article._id ? (
+                                <>
+                                  <Spinner className="h-3.5 w-3.5" /> Publishing
+                                </>
+                              ) : (
+                                'Approve'
+                              )}
+                            </Button>
+                          )}
+                          <Button
+                            size="icon"
+                            variant={article.featuredInBanner ? 'secondary' : 'outline'}
+                            onClick={() => handleToggleBanner(article)}
+                            aria-label={`${article.featuredInBanner ? 'Unpin' : 'Pin'} ${article.title}`}
+                            title={article.featuredInBanner ? 'Unpin article' : 'Pin article'}
+                          >
+                            {article.featuredInBanner ? (
+                              <PinOff className="size-4" aria-hidden="true" />
+                            ) : (
+                              <Pin className="size-4" aria-hidden="true" />
+                            )}
+                          </Button>
+                          {article.status === 'published' && (
+                            <Button
+                              size="icon"
+                              variant="outline"
+                              onClick={() => window.open(`/news/${article.slug}`, '_blank')}
+                              title="View live article"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          )}
+                          <Button
+                            size="icon"
+                            variant="outline"
+                            onClick={() => handleEditNews(article)}
+                            title="Edit article"
+                            aria-label={`Edit ${article.title}`}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="destructive"
+                            onClick={() => handleDeleteNews(article._id)}
+                            title="Delete article"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+          {visibleNews.length > pageSize && (
+            <div className="mt-4 flex items-center justify-between gap-3">
+              <p className="text-xs text-white/50">
+                Page {currentPage} of {totalPages}
+              </p>
+              <div className="flex overflow-hidden rounded-md border border-white/10">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  type="button"
+                  onClick={() => setCurrentPage(page => Math.max(1, page - 1))}
+                  disabled={currentPage === 1}
+                  className="border-r border-white/10 px-3 py-2 text-sm text-white/70 disabled:opacity-40"
+                >
+                  Previous
+                </Button>
+                {Array.from({ length: totalPages }, (_, index) => index + 1)
+                  .slice(Math.max(0, currentPage - 2), Math.max(3, currentPage + 1))
+                  .map(page => (
+                    <Button
+                      type="button"
+                      key={page}
+                      variant={currentPage === page ? 'secondary' : 'ghost'}
+                      size="sm"
+                      onClick={() => setCurrentPage(page)}
+                    >
+                      {page}
+                    </Button>
+                  ))}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  type="button"
+                  onClick={() => setCurrentPage(page => Math.min(totalPages, page + 1))}
+                  disabled={currentPage === totalPages}
+                  className="border-l border-white/10 px-3 py-2 text-sm text-white/70 disabled:opacity-40"
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default function CorporateNewsManagementPage() {
-    return <AdminCorporateNewsClient />;
+  return <AdminCorporateNewsClient />;
 }

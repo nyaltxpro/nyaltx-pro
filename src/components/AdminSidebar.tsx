@@ -14,6 +14,7 @@ import {
 } from '@/components/reui/dropdown-menu';
 import {
   BarChart3,
+  Megaphone,
   ChevronDown,
   Coins,
   Gift,
@@ -71,6 +72,7 @@ const navGroups: AdminNavGroup[] = [
     items: [
       { title: 'Token Points', href: '/adminpanel/points', icon: Gift },
       { title: 'Email Management', href: '/adminpanel/email-management', icon: Mail },
+      { title: 'Announcement Banner', href: '/adminpanel/announcement', icon: Megaphone },
       { title: 'Blog Posts', href: '/adminpanel/blog', icon: Newspaper },
       { title: 'Corporate News', href: '/adminpanel/news', icon: Newspaper },
       { title: 'Media Inquiries', href: '/adminpanel/media-inquiries', icon: Mail },
@@ -93,13 +95,13 @@ export default function AdminSidebar({
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const filteredGroups = navGroups
-    .map((group) => ({
+    .map(group => ({
       ...group,
-      items: group.items.filter((item) =>
-        item.title.toLowerCase().includes(search.trim().toLowerCase()),
+      items: group.items.filter(item =>
+        item.title.toLowerCase().includes(search.trim().toLowerCase())
       ),
     }))
-    .filter((group) => group.items.length > 0);
+    .filter(group => group.items.length > 0);
 
   const handleLogout = async () => {
     if (isLoggingOut) return;
@@ -133,7 +135,9 @@ export default function AdminSidebar({
         className={`fixed inset-y-0 left-0 z-50 flex flex-col border-r border-white/[0.08] bg-[#0b111b] text-white shadow-2xl transition-[width,transform] duration-200 md:translate-x-0 ${
           isCollapsed ? 'md:w-[72px]' : 'md:w-[260px]'
         } ${
-          isMobileMenuOpen ? 'w-[280px] translate-x-0' : '-translate-x-full w-[280px] md:translate-x-0'
+          isMobileMenuOpen
+            ? 'w-[280px] translate-x-0'
+            : '-translate-x-full w-[280px] md:translate-x-0'
         }`}
       >
         <div className="flex h-14 shrink-0 items-center border-b border-white/[0.08] px-3">
@@ -156,7 +160,9 @@ export default function AdminSidebar({
                   />
                 </span>
                 <span className={`min-w-0 flex-1 ${isCollapsed ? 'md:hidden' : ''}`}>
-                  <span className="block truncate text-sm font-semibold tracking-tight">NYALTX</span>
+                  <span className="block truncate text-sm font-semibold tracking-tight">
+                    NYALTX
+                  </span>
                   <span className="block truncate text-xs text-slate-500">Admin workspace</span>
                 </span>
                 <ChevronDown
@@ -215,7 +221,7 @@ export default function AdminSidebar({
             <input
               type="search"
               value={search}
-              onChange={(event) => setSearch(event.target.value)}
+              onChange={event => setSearch(event.target.value)}
               placeholder="Filter navigation"
               aria-label="Filter admin navigation"
               className={`min-w-0 flex-1 bg-transparent text-xs text-white outline-none placeholder:text-slate-600 ${
@@ -226,7 +232,7 @@ export default function AdminSidebar({
         </div>
 
         <nav aria-label="Admin navigation" className="flex-1 space-y-5 overflow-y-auto px-3 pb-4">
-          {filteredGroups.map((group) => (
+          {filteredGroups.map(group => (
             <section key={group.title} className="space-y-1">
               <div
                 className={`flex h-6 items-center px-2 text-xs font-semibold uppercase tracking-[0.14em] text-slate-600 ${
@@ -235,7 +241,7 @@ export default function AdminSidebar({
               >
                 {group.title}
               </div>
-              {group.items.map((item) => {
+              {group.items.map(item => {
                 const isActive =
                   pathname === item.href ||
                   (item.href !== '/adminpanel' && pathname.startsWith(`${item.href}/`));
@@ -309,7 +315,9 @@ export default function AdminSidebar({
                   </span>
                 </span>
                 <span className={`min-w-0 flex-1 ${isCollapsed ? 'md:hidden' : ''}`}>
-                  <span className="block truncate text-sm font-medium text-slate-200">Administrator</span>
+                  <span className="block truncate text-sm font-medium text-slate-200">
+                    Administrator
+                  </span>
                   <span className="block truncate text-xs text-slate-500">NYALTX Admin</span>
                 </span>
                 <ChevronDown
@@ -359,7 +367,6 @@ export default function AdminSidebar({
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-
         </div>
       </aside>
     </>

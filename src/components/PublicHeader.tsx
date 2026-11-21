@@ -2,8 +2,10 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { type MouseEvent as ReactMouseEvent, useEffect, useRef, useState } from 'react';
 import { FaBars, FaChevronDown, FaTimes } from 'react-icons/fa';
+import { FiArrowUpRight } from 'react-icons/fi';
+import { motion } from 'motion/react';
 import { usePublicNavigation } from '../hooks/useTinaContent';
 import SimpleUnifiedWalletButton from './SimpleUnifiedWalletButton';
 
@@ -12,6 +14,11 @@ export default function PublicHeader() {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const dropdownRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const navRef = useRef<HTMLElement | null>(null);
+  const [pointer, setPointer] = useState({ x: 0, y: 0, visible: false });
+  const [announcement, setAnnouncement] = useState<{ enabled: boolean; message: string } | null>(
+    null
+  );
   const { content } = usePublicNavigation();
 
   const fallbackPrimaryLinks = [
@@ -34,32 +41,46 @@ export default function PublicHeader() {
         { label: 'Team', href: '/team', enabled: true },
         { label: 'Our News', href: '/news', enabled: true },
         { label: 'Whitepaper', href: '/whitepaper', enabled: true },
-
       ],
     },
   ];
 
   const primaryLinks = (content?.primaryLinks ?? fallbackPrimaryLinks).filter(
-    (link) => link.enabled !== false,
+    link => link.enabled !== false
   );
 
   const dropdownMenus = (content?.dropdownMenus ?? fallbackDropdownMenus)
-    .filter((menu) => menu.enabled !== false)
-    .map((menu) => ({
+    .filter(menu => menu.enabled !== false)
+    .map(menu => ({
       ...menu,
-      links: (menu.links ?? []).filter((link) => link.enabled !== false),
+      links: (menu.links ?? []).filter(link => link.enabled !== false),
     }))
-    .filter((menu) => (menu.links?.length ?? 0) > 0);
+    .filter(menu => (menu.links?.length ?? 0) > 0);
 
   const brandLabel = content?.brand?.label ?? 'NYALTX';
   const brandHref = content?.brand?.href ?? '/';
+
+  const handleNavPointerMove = (event: ReactMouseEvent<HTMLElement>) => {
+    const target = event.target as HTMLElement;
+    if (!target.closest('[data-glass-link]') || !navRef.current) {
+      setPointer(current => ({ ...current, visible: false }));
+      return;
+    }
+
+    const bounds = navRef.current.getBoundingClientRect();
+    setPointer({
+      x: event.clientX - bounds.left,
+      y: event.clientY - bounds.top,
+      visible: true,
+    });
+  };
 
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node;
-      const isInsideDropdown = Object.values(dropdownRefs.current).some(
-        (ref) => ref?.contains(target),
+      const isInsideDropdown = Object.values(dropdownRefs.current).some(ref =>
+        ref?.contains(target)
       );
 
       if (!isInsideDropdown) {
@@ -82,6 +103,35 @@ export default function PublicHeader() {
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    let active = true;
+    fetch('/api/announcement', { cache: 'no-store' })
+      .then(async response => {
+        if (!response.ok)
+          throw new Error(`Announcement request failed with status ${response.status}`);
+        return response.json();
+      })
+      .then(data => {
+        if (active) {
+          setAnnouncement({
+            enabled:
+              data.enabled === true &&
+              typeof data.message === 'string' &&
+              data.message.trim().length > 0,
+            message: typeof data.message === 'string' ? data.message.trim() : '',
+          });
+        }
+      })
+      .catch(error => {
+        console.error('Failed to load announcement banner:', error);
+        if (active) setAnnouncement({ enabled: false, message: '' });
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (mobileMenuOpen) {
@@ -133,27 +183,29 @@ export default function PublicHeader() {
     const isNewsHub = label === 'News Hub';
     const classes =
       variant === 'desktop'
-        ? isNewsHub
-          ? `rounded-md px-3 py-2 text-sm font-semibold transition-colors ${
-              active ? 'bg-cyan-500 text-black' : 'bg-cyan-600 text-white hover:bg-cyan-500'
-            }`
-          : active
-            ? 'px-3 py-2 text-sm text-cyan-300'
-            : 'px-3 py-2 text-sm text-gray-300 hover:text-white'
-        : isNewsHub
-          ? `block w-full rounded-md px-3 py-2 text-sm font-semibold transition-colors ${
-              active ? 'bg-cyan-500 text-black' : 'bg-cyan-600 text-white hover:bg-cyan-500'
-            }`
-          : active
-            ? 'block w-full rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white'
-            : 'block w-full rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-white';
+        ? `group relative overflow-hidden rounded-lg px-4 py-2 text-sm transition-all active:scale-95 ${
+            active || isNewsHub ? 'text-white' : 'text-white/75 hover:text-white'
+          }`
+        : `block w-full rounded-lg px-4 py-3 text-sm transition-colors ${
+            active
+              ? 'bg-white/10 font-medium text-white'
+              : 'text-white/75 hover:bg-white/5 hover:text-white'
+          }`;
     return (
       <Link
         href={href}
         className={classes}
         onClick={onClick}
+        data-glass-link={variant === 'desktop' ? '' : undefined}
       >
-        {label}
+        {variant === 'desktop' && (
+          <span
+            className={`absolute inset-0 bg-gradient-to-br from-white/20 to-white/5 transition-opacity ${
+              active || isNewsHub ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+            }`}
+          />
+        )}
+        <span className="relative z-10">{label}</span>
       </Link>
     );
   };
@@ -176,139 +228,150 @@ export default function PublicHeader() {
   };
 
   return (
-    <header className="relative z-[100] isolate bg-transparent">
-      <div className="relative z-[101] mx-auto flex h-20 max-w-7xl items-center justify-between gap-4 px-4 py-4">
-        {/* Logo - Left */}
-        <div className="flex shrink-0 items-center">
-          <Link href={brandHref} className="flex items-center gap-2">
-            <span className="text-base font-semibold tracking-tight md:text-lg">{brandLabel}</span>
-          </Link>
+    <header
+      className={`relative z-[100] bg-transparent transition-[height] duration-200 ${
+        announcement?.enabled ? 'h-[116px] md:h-[140px]' : 'h-20'
+      }`}
+    >
+      {announcement?.enabled && (
+        <div
+          role="status"
+          className="fixed left-0 right-0 top-0 z-[102] flex h-9 items-center justify-center overflow-hidden bg-gradient-to-r from-[#0c3140] via-[#12314b] to-[#14264a] px-4 text-center text-xs font-medium text-white shadow-md sm:text-sm"
+        >
+          <span className="max-w-5xl truncate">{announcement.message}</span>
         </div>
+      )}
+      <nav
+        ref={navRef}
+        onMouseMove={handleNavPointerMove}
+        onMouseLeave={() => setPointer(current => ({ ...current, visible: false }))}
+        className={`fixed left-3 right-3 z-[100] mx-auto max-w-6xl overflow-visible rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.12] to-white/[0.035] text-white shadow-[0_12px_60px_rgba(0,0,0,0.35)] backdrop-blur-2xl md:left-6 md:right-6 ${
+          announcement?.enabled ? 'top-11 md:top-14' : 'top-3 md:top-6'
+        }`}
+      >
+        <div
+          className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl"
+          style={{
+            backgroundImage:
+              'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22 width=%2232%22 height=%2232%22 fill=%22none%22 stroke=%22%23ffffff%22 stroke-opacity=%220.055%22%3E%3Cpath d=%22M0 .5H31.5V32%22/%3E%3C/svg%3E")',
+          }}
+        />
+        <motion.span
+          aria-hidden="true"
+          animate={{ left: pointer.x, top: pointer.y, opacity: pointer.visible ? 1 : 0 }}
+          transition={{ duration: 0.12 }}
+          className="pointer-events-none absolute z-0 grid h-12 w-12 -translate-x-1/2 -translate-y-1/2 place-content-center rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 shadow-[0_0_30px_rgba(34,211,238,0.4)]"
+        >
+          <FiArrowUpRight className="text-xl text-white" />
+        </motion.span>
+        <div className="relative z-10 flex min-h-[68px] items-center justify-between gap-4 px-4 py-3 sm:px-5">
+          <Link
+            href={brandHref}
+            className="shrink-0 text-xl font-black tracking-[0.12em] text-white md:text-2xl"
+          >
+            {brandLabel}
+          </Link>
 
-        {/* Navigation - Center */}
-        <nav className="hidden flex-1 items-center justify-center gap-1 text-sm md:flex">
-          {primaryLinks.map((link) => (
-            <NavLink key={link.href} href={link.href} label={link.label} />
-          ))}
-          {dropdownMenus.map((menu) => {
-            const isOpen = openDropdown === menu.label;
-            return (
-              <div
-                key={menu.label}
-                className="relative"
-                ref={(el) => {
-                  dropdownRefs.current[menu.label] = el;
-                }}
-              >
-                <button
-                  type="button"
-                  onClick={() => setOpenDropdown(isOpen ? null : menu.label)}
-                  className="flex items-center gap-1 px-3 py-2 text-sm text-gray-300 transition-colors hover:text-white"
+          <div className="hidden flex-1 items-center justify-center gap-1 md:flex">
+            {primaryLinks.map(link => (
+              <NavLink key={link.href} href={link.href} label={link.label} />
+            ))}
+            {dropdownMenus.map(menu => {
+              const isOpen = openDropdown === menu.label;
+              return (
+                <div
+                  key={menu.label}
+                  className="relative"
+                  ref={element => {
+                    dropdownRefs.current[menu.label] = element;
+                  }}
                 >
-                  {menu.label}
-                  <FaChevronDown className={`h-3 w-3 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-                </button>
-
-                {isOpen && (
-                  <div className="absolute left-0 top-full z-[110] mt-1 w-48 rounded-md border border-gray-700 bg-[#101010] shadow-lg">
-                    <div className="py-1">
-                      {menu.links?.map((link) => (
+                  <button
+                    type="button"
+                    onClick={() => setOpenDropdown(isOpen ? null : menu.label)}
+                    data-glass-link=""
+                    className={`group relative flex items-center gap-2 overflow-hidden rounded-lg px-4 py-2 text-sm transition-colors ${
+                      isOpen ? 'text-white' : 'text-white/75 hover:text-white'
+                    }`}
+                  >
+                    <span
+                      className={`absolute inset-0 bg-gradient-to-br from-white/20 to-white/5 transition-opacity ${isOpen ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+                    />
+                    <span className="relative z-10">{menu.label}</span>
+                    <FaChevronDown
+                      className={`relative z-10 h-3 w-3 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+                    />
+                  </button>
+                  {isOpen && (
+                    <div className="absolute left-0 top-full z-[110] mt-3 w-56 rounded-xl border border-white/10 bg-[#10141d]/95 py-2 shadow-2xl backdrop-blur-xl">
+                      {menu.links?.map(link => (
                         <DropdownLink key={link.href} href={link.href} label={link.label} />
                       ))}
                     </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </nav>
+                  )}
+                </div>
+              );
+            })}
+          </div>
 
-        {/* Connect Wallet - Right */}
-        <div className="relative z-[110] hidden shrink-0 items-center gap-2 md:flex">
-          <SimpleUnifiedWalletButton />
-        </div>
+          <div className="hidden shrink-0 md:block">
+            <SimpleUnifiedWalletButton />
+          </div>
 
-        {/* Mobile Menu Toggle */}
-        <div className="relative z-[110] flex items-center md:hidden">
           <button
             type="button"
             aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
-            onClick={() => setMobileMenuOpen((prev) => !prev)}
-            className="inline-flex items-center justify-center rounded-md border border-gray-800 p-2 text-gray-300 transition-colors hover:bg-gray-900 hover:text-white"
+            aria-expanded={mobileMenuOpen}
+            onClick={() => setMobileMenuOpen(open => !open)}
+            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white/90 transition hover:bg-white/10 md:hidden"
           >
             {mobileMenuOpen ? <FaTimes className="h-4 w-4" /> : <FaBars className="h-4 w-4" />}
           </button>
         </div>
-      </div>
 
-      {/* Only mount mobile overlays when open — avoids invisible click-blocking layers */}
-      {mobileMenuOpen ? (
-        <div className="md:hidden">
-          <div
-            className="fixed inset-0 z-[120] bg-black/60 backdrop-blur-sm"
-            onClick={() => setMobileMenuOpen(false)}
-            aria-hidden
-          />
-          <aside className="fixed inset-y-0 left-0 z-[130] flex h-full w-72 max-w-[80vw] flex-col border-r border-gray-800 bg-[#050505] shadow-2xl">
-            <div className="flex items-center justify-between border-b border-gray-800 px-4 py-4">
-              <Link
-                href={brandHref}
-                className="flex items-center gap-2 text-lg font-semibold tracking-tight"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                {brandLabel}
-              </Link>
-              <button
-                type="button"
-                aria-label="Close menu"
-                onClick={() => setMobileMenuOpen(false)}
-                className="rounded-md border border-gray-800 p-2 text-gray-300 transition-colors hover:bg-gray-900 hover:text-white"
-              >
-                <FaTimes className="h-4 w-4" />
-              </button>
+        <motion.div
+          initial={false}
+          animate={{ height: mobileMenuOpen ? 'auto' : 0, opacity: mobileMenuOpen ? 1 : 0 }}
+          transition={{ duration: 0.25, ease: 'easeInOut' }}
+          aria-hidden={!mobileMenuOpen}
+          className="overflow-hidden md:hidden"
+        >
+          <div className="border-t border-white/10 px-4 pb-4 pt-3">
+            <div className="space-y-1">
+              {primaryLinks.map(link => (
+                <NavLink
+                  key={`mobile-${link.href}`}
+                  href={link.href}
+                  label={link.label}
+                  onClick={() => setMobileMenuOpen(false)}
+                  variant="mobile"
+                />
+              ))}
             </div>
-
-            <div className="flex-1 space-y-6 overflow-y-auto px-4 py-6">
-              <div className="space-y-2">
-                {primaryLinks.map((link) => (
-                  <NavLink
-                    key={`mobile-${link.href}`}
-                    href={link.href}
-                    label={link.label}
-                    onClick={() => setMobileMenuOpen(false)}
-                    variant="mobile"
-                  />
-                ))}
-              </div>
-
-              {dropdownMenus.length > 0 && (
-                <div className="space-y-5">
-                  {dropdownMenus.map((menu) => (
-                    <div key={`mobile-${menu.label}`} className="space-y-3">
-                      <p className="text-xs uppercase tracking-wide text-gray-500">{menu.label}</p>
-                      <div className="space-y-2">
-                        {menu.links?.map((link) => (
-                          <NavLink
-                            key={`mobile-${menu.label}-${link.href}`}
-                            href={link.href}
-                            label={link.label}
-                            onClick={() => setMobileMenuOpen(false)}
-                            variant="mobile"
-                          />
-                        ))}
-                      </div>
-                    </div>
+            {dropdownMenus.map(menu => (
+              <div key={`mobile-${menu.label}`} className="mt-5">
+                <p className="mb-2 px-4 text-xs uppercase tracking-[0.18em] text-white/40">
+                  {menu.label}
+                </p>
+                <div className="space-y-1">
+                  {menu.links?.map(link => (
+                    <NavLink
+                      key={`mobile-${menu.label}-${link.href}`}
+                      href={link.href}
+                      label={link.label}
+                      onClick={() => setMobileMenuOpen(false)}
+                      variant="mobile"
+                    />
                   ))}
                 </div>
-              )}
-            </div>
-
-            <div className="border-t border-gray-800 px-4 py-4">
+              </div>
+            ))}
+            <div className="mt-4 border-t border-white/10 pt-4">
               <SimpleUnifiedWalletButton className="w-full justify-center" />
             </div>
-          </aside>
-        </div>
-      ) : null}
+          </div>
+        </motion.div>
+      </nav>
     </header>
   );
 }
