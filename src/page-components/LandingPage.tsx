@@ -135,9 +135,9 @@ export default function LandingPage(props?: LandingPageProps) {
                                         {heroTitleLead}
                                     </span>
                                 )}
-                                <span className="block font-semibold italic">{heroTitleEmphasis}</span>
+                                <span className="mt-2 block font-semibold italic">{heroTitleEmphasis}</span>
                             </h1>
-                            <p className="mt-6 text-sm text-gray-300/90 max-w-2xl leading-relaxed">
+                            <p className="mt-6 text-xs text-gray-300/90 max-w-2xl leading-relaxed sm:text-sm">
                                 {landingContent?.hero?.subtitle || 'Real-time insights, curated listings, and promotional placements to help your project reach more holders across chains.'}
                             </p>
                             <div className="mt-8 flex flex-wrap gap-3">
