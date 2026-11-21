@@ -10,7 +10,7 @@ import {
     WalletIcon,
 } from '@web3icons/react/dynamic';
 import type { Variants } from 'framer-motion';
-import { animate, motion, useInView } from 'framer-motion';
+import { motion, useAnimationFrame, useMotionValue } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -145,88 +145,51 @@ export default function LandingPage(props?: LandingPageProps) {
             </motion.section>
 
             <motion.section
-                className="mx-auto max-w-7xl px-6 py-10"
+                className="overflow-hidden bg-[#080d18] text-slate-100"
                 variants={container}
                 initial={false}
                 whileInView="show"
                 viewport={{ once: true, amount: 0.2 }}
             >
-                <div className="relative overflow-hidden">
-                    <div className="flex items-center gap-10 animate-[marquee_28s_linear_infinite] opacity-80 hover:opacity-100">
-                        {[
-                            'Ethereum',
-                            'Polygon',
-                            'Optimism',
-                            'Base',
-                            'Arbitrum',
-                            'Scroll',
-                            'Fantom',
-                            'Linea',
-                            'Mantle',
-                        ].map((name, i) => (
-                            <div key={i} className="flex items-center gap-2 min-w-[110px]">
-                                <CryptoIcon name={name} size={28} />
-                                <span className="text-xs text-gray-300/80">{name}</span>
-                            </div>
-                        ))}
-                        {[
-                            'Ethereum',
-                            'Polygon',
-                            'Optimism',
-                            'Base',
-                            'Arbitrum',
-                            'Scroll',
-                            'Fantom',
-                            'Linea',
-                            'Mantle',
-                        ].map((name, i) => (
-                            <div key={`dup-${i}`} className="flex items-center gap-2 min-w-[110px]">
-                                <CryptoIcon name={name} size={28} />
-                                <span className="text-xs text-gray-300/80">{name}</span>
-                            </div>
-                        ))}
-                    </div>
+                <div className="px-4">
+                    <div className="mx-auto h-16 max-w-7xl border-x border-white/10" />
                 </div>
-                <style dangerouslySetInnerHTML={{ __html: `
-            @keyframes marquee {
-              from {
-                transform: translateX(0);
-              }
-              to {
-                transform: translateX(-50%);
-              }
-            }
-          ` }} />
+                <NetworkLogoCarousel />
+                <div className="px-4">
+                    <div className="mx-auto h-16 max-w-7xl border-x border-white/10" />
+                </div>
             </motion.section>
 
             <motion.section
-                className="border-y border-white/10 bg-white/[0.03] backdrop-blur"
+                className="overflow-hidden bg-[#080d18] text-slate-100"
                 variants={container}
                 initial={false}
                 whileInView="show"
                 viewport={{ once: true, amount: 0.2 }}
             >
-                <motion.div
-                    className="mx-auto max-w-7xl px-6 py-8 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm"
-                    variants={fadeUp}
-                >
-                    {landingContent?.stats?.items?.map((stat, index) => (
-                        <Stat
-                            key={index}
-                            label={stat.label}
-                            value={parseInt(stat.value.replace(/[^\d]/g, '')) || 0}
-                            suffix={stat.value.replace(/[\d,]/g, '')}
-                            highlight={index === landingContent.stats.items.length - 1}
+                <div className="px-4">
+                    <div className="mx-auto h-8 max-w-7xl border-x border-white/10" />
+                </div>
+                <div className="border-y border-white/10 px-4">
+                    <div className="mx-auto max-w-7xl border-x border-white/10">
+                        <StatsShowcase
+                            title={landingContent?.stats?.title || 'Platform insights at a glance'}
+                            items={
+                                landingContent?.stats?.items?.length
+                                    ? landingContent.stats.items
+                                    : [
+                                          { value: '132', label: 'Networks' },
+                                          { value: '21,586', label: 'DEXs' },
+                                          { value: '19,440,364', label: 'Pools' },
+                                          { value: '29,055,602', label: 'Tokens' },
+                                      ]
+                            }
                         />
-                    )) || (
-                            <>
-                                <Stat label="Networks" value={132} />
-                                <Stat label="Dexes" value={21586} />
-                                <Stat label="Pools" value={19440364} />
-                                <Stat label="Tokens" value={29055602} />
-                            </>
-                        )}
-                </motion.div>
+                    </div>
+                </div>
+                <div className="px-4">
+                    <div className="mx-auto h-8 max-w-7xl border-x border-white/10" />
+                </div>
             </motion.section>
 
             <motion.section
@@ -560,7 +523,7 @@ function StaggerTestimonials({ items }: { items: LandingTestimonial[] }) {
                             {testimonial.avatar ? (
                                 <img
                                     src={testimonial.avatar}
-                                    alt=""
+                                    alt={testimonial.author}
                                     className="mb-4 h-12 w-12 rounded-full border border-white/20 object-cover object-top"
                                 />
                             ) : (
@@ -681,55 +644,205 @@ function CryptoIcon({
     return <Image src={fallbackSrc} alt={name} width={size} height={size} className="opacity-90" />;
 }
 
-function Stat({
-    label,
-    value,
-    suffix = '',
-    highlight,
-}: {
-    label: string;
-    value: number;
-    suffix?: string;
-    highlight?: boolean;
-}) {
-    const ref = React.useRef<HTMLDivElement | null>(null);
-    const [isMounted, setIsMounted] = React.useState(false);
-    const inView = useInView(ref, { once: true, margin: '-20% 0px' });
-    const [display, setDisplay] = React.useState('0');
-    const [color, setColor] = React.useState<string | undefined>(undefined);
+const NETWORK_LOGOS = [
+    'Ethereum',
+    'Polygon',
+    'Optimism',
+    'Base',
+    'Arbitrum',
+    'Scroll',
+    'Fantom',
+    'Linea',
+    'Mantle',
+];
+
+function NetworkLogoCarousel() {
+    const [hoveredLogo, setHoveredLogo] = React.useState<string | null>(null);
+    const [trackWidth, setTrackWidth] = React.useState(0);
+    const measureRef = React.useRef<HTMLDivElement | null>(null);
+    const x = useMotionValue(0);
 
     React.useEffect(() => {
-        setIsMounted(true);
+        const element = measureRef.current;
+        if (!element) return;
+
+        const measure = () => setTrackWidth(element.getBoundingClientRect().width);
+        const observer = new ResizeObserver(measure);
+        observer.observe(element);
+        measure();
+
+        return () => observer.disconnect();
     }, []);
 
-    const formatNumber = (n: number) => n.toLocaleString();
+    useAnimationFrame((_, delta) => {
+        if (hoveredLogo || !trackWidth) return;
 
-    React.useEffect(() => {
-        if (!isMounted || !inView) return;
-        const controls = animate(0, value, {
-            duration: 1.8,
-            onUpdate: latest => setDisplay(formatNumber(Math.floor(latest))),
-        });
-        const colorAnim = animate('#9ca3af', '#ffffff', {
-            duration: 1.5,
-            onUpdate: latest => setColor(latest as string),
-        });
-        return () => {
-            controls.stop();
-            colorAnim.stop();
-        };
-    }, [isMounted, inView, value]);
+        const next = x.get() - (delta / 1000) * 56;
+        x.set(next <= -trackWidth ? next % trackWidth : next);
+    });
 
     return (
-        <div ref={ref} className="p-1">
-            <span className="text-gray-400 text-xs">{label}</span>
-            <div className="mt-1 text-2xl md:text-3xl font-extrabold" style={{ color: color }}>
-                <span className={`${highlight ? 'text-cyan-400' : ''}`}>
-                    {display}
-                    {suffix}
-                </span>
+        <div className="border-y border-white/10 px-4">
+            <div className="mx-auto max-w-7xl border-x border-white/10">
+                <motion.div
+                    initial={{ opacity: 0, y: 24 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                    className="overflow-hidden bg-slate-950/40"
+                >
+                    <motion.div style={{ x }} className="flex w-max">
+                        <div ref={measureRef} className="flex">
+                            {NETWORK_LOGOS.map(name => (
+                                <NetworkLogoCell
+                                    key={`primary-${name}`}
+                                    name={name}
+                                    hoveredLogo={hoveredLogo}
+                                    setHoveredLogo={setHoveredLogo}
+                                />
+                            ))}
+                        </div>
+                        <div className="flex" aria-hidden="true">
+                            {NETWORK_LOGOS.map(name => (
+                                <NetworkLogoCell
+                                    key={`duplicate-${name}`}
+                                    name={name}
+                                    hoveredLogo={hoveredLogo}
+                                    setHoveredLogo={setHoveredLogo}
+                                    duplicate
+                                />
+                            ))}
+                        </div>
+                    </motion.div>
+                </motion.div>
             </div>
         </div>
+    );
+}
+
+function NetworkLogoCell({
+    name,
+    hoveredLogo,
+    setHoveredLogo,
+    duplicate = false,
+}: {
+    name: string;
+    hoveredLogo: string | null;
+    setHoveredLogo: React.Dispatch<React.SetStateAction<string | null>>;
+    duplicate?: boolean;
+}) {
+    const isDimmed = hoveredLogo !== null && hoveredLogo !== name;
+
+    return (
+        <motion.button
+            type="button"
+            onPointerEnter={() => setHoveredLogo(name)}
+            onPointerLeave={() =>
+                setHoveredLogo(current => (current === name ? null : current))
+            }
+            onFocus={() => setHoveredLogo(name)}
+            onBlur={() =>
+                setHoveredLogo(current => (current === name ? null : current))
+            }
+            animate={{
+                filter: isDimmed ? 'grayscale(1)' : 'grayscale(0)',
+                opacity: isDimmed ? 0.48 : 1,
+            }}
+            whileHover={{ y: -3 }}
+            transition={{ duration: 0.25, ease: 'easeOut' }}
+            className="flex h-[72px] min-w-[148px] shrink-0 items-center justify-center px-5 md:h-[82px] md:min-w-[176px] md:px-7"
+            aria-label={`${name} network`}
+            aria-hidden={duplicate}
+            tabIndex={duplicate ? -1 : 0}
+        >
+            <span className="flex items-center gap-3 whitespace-nowrap">
+                <CryptoIcon name={name} size={24} kind="network" />
+                <span className="text-sm font-semibold tracking-tight text-slate-200 md:text-base">
+                    {name}
+                </span>
+            </span>
+        </motion.button>
+    );
+}
+
+interface LandingStat {
+    value: string;
+    label: string;
+}
+
+function StatsShowcase({ title, items }: { title: string; items: LandingStat[] }) {
+    const [activeIndex, setActiveIndex] = React.useState(0);
+    const spring = { type: 'spring' as const, stiffness: 320, damping: 32 };
+
+    return (
+        <motion.div className="relative overflow-hidden" variants={fadeUp}>
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(8,145,178,0.12),transparent_58%)]" />
+            <div className="relative px-6 py-14 text-center sm:px-8 sm:py-16 md:px-10 md:py-[4.5rem]">
+                <h2 className="mx-auto max-w-3xl text-[clamp(2rem,5vw,3.5rem)] font-medium leading-[0.98] tracking-[-0.06em] text-white">
+                    {title}
+                </h2>
+            </div>
+            <div
+                className="relative grid grid-cols-2 border-y border-white/10 md:grid-cols-4"
+                onMouseLeave={() => setActiveIndex(0)}
+            >
+                {items.map((stat, index) => {
+                    const isActive = index === activeIndex;
+
+                    return (
+                        <motion.button
+                            key={`${stat.label}-${index}`}
+                            type="button"
+                            onMouseEnter={() => setActiveIndex(index)}
+                            onFocus={() => setActiveIndex(index)}
+                            onClick={() => setActiveIndex(index)}
+                            aria-pressed={isActive}
+                            className="relative overflow-hidden px-6 py-8 text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-inset md:px-8 md:py-10"
+                        >
+                            {isActive && (
+                                <>
+                                    <motion.div
+                                        layoutId="nyaltx-stats-left"
+                                        transition={spring}
+                                        className="absolute inset-y-0 left-0 w-px bg-gradient-to-b from-transparent via-cyan-400 to-transparent md:hidden"
+                                    />
+                                    <motion.div
+                                        layoutId="nyaltx-stats-right"
+                                        transition={spring}
+                                        className="absolute inset-y-0 right-0 w-px bg-gradient-to-b from-transparent via-cyan-400 to-transparent md:hidden"
+                                    />
+                                    <motion.div
+                                        layoutId="nyaltx-stats-top"
+                                        transition={spring}
+                                        className="absolute inset-x-0 top-0 hidden h-px bg-gradient-to-r from-transparent via-cyan-400 to-transparent md:block"
+                                    />
+                                    <motion.div
+                                        layoutId="nyaltx-stats-bottom"
+                                        transition={spring}
+                                        className="absolute inset-x-0 bottom-0 hidden h-px bg-gradient-to-r from-transparent via-cyan-400 to-transparent md:block"
+                                    />
+                                </>
+                            )}
+                            <div className="relative flex min-h-[120px] flex-col items-center justify-center gap-2">
+                                <span
+                                    className={`text-[clamp(2.15rem,3.9vw,3.45rem)] leading-none tracking-[-0.07em] transition-colors duration-300 ${
+                                        isActive ? 'text-white' : 'text-slate-500'
+                                    }`}
+                                >
+                                    {stat.value}
+                                </span>
+                                <span
+                                    className={`max-w-[13rem] text-[clamp(0.9rem,1.05vw,1.02rem)] leading-[1.32] tracking-[-0.04em] transition-colors duration-300 ${
+                                        isActive ? 'text-slate-200' : 'text-slate-500'
+                                    }`}
+                                >
+                                    {stat.label}
+                                </span>
+                            </div>
+                        </motion.button>
+                    );
+                })}
+            </div>
+        </motion.div>
     );
 }
 
