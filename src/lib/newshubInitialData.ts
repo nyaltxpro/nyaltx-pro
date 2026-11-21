@@ -41,6 +41,7 @@ export const PAID_CRITERIA = [
 export const NEWSHUB_CATEGORIES = ['All', ...PAID_NEWS_CATEGORIES];
 
 const MAX_FEED_ITEMS = 100;
+const DEFAULT_NEWSHUB_CATEGORIES = [...PAID_NEWS_CATEGORIES];
 
 function stripHtml(value?: string) {
   return value
@@ -71,7 +72,11 @@ function isPinnedArticle(article: {
   planName?: string;
 }) {
   if (typeof article.featuredInBanner === 'boolean') return article.featuredInBanner;
-  return article.plan === 'slider' || article.plan === 'prem' || /full service/i.test(article.planName || '');
+  return (
+    article.plan === 'slider' ||
+    article.plan === 'prem' ||
+    /full service/i.test(article.planName || '')
+  );
 }
 
 function safeExternalUrl(value?: string) {
@@ -84,6 +89,25 @@ function safeExternalUrl(value?: string) {
   }
 }
 
+export async function getNewshubCategories() {
+  const db = await getDb();
+  const settings = await db
+    .collection<Document & { _id: string; categories?: unknown }>('newshub_settings')
+    .findOne({ _id: 'categories' });
+  const categories = Array.isArray(settings?.categories)
+    ? settings.categories
+    : DEFAULT_NEWSHUB_CATEGORIES;
+  const normalized = categories
+    .filter(
+      (category: unknown): category is string =>
+        typeof category === 'string' && category.trim().length > 0
+    )
+    .map(category => category.trim())
+    .filter(category => category.toLowerCase() !== 'all');
+  const uniqueCategories = new Map(normalized.map(category => [category.toLowerCase(), category]));
+  return ['All', ...uniqueCategories.values()];
+}
+
 export async function getNewshubArticles(category = 'All', page = 1, limit = 12) {
   const db = await getDb();
   const collection = db.collection('corporate_news');
@@ -94,9 +118,10 @@ export async function getNewshubArticles(category = 'All', page = 1, limit = 12)
     $or: PAID_CRITERIA,
   };
   if (category !== 'All') {
+    const escapedCategory = category.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const categoryFilter = {
       $or: [
-        { category: { $regex: new RegExp(`^${category}$`, 'i') } },
+        { category: { $regex: new RegExp(`^${escapedCategory}$`, 'i') } },
         { tags: { $in: [category] } },
       ],
     };
@@ -138,9 +163,7 @@ export async function getNewshubArticles(category = 'All', page = 1, limit = 12)
     _id: String(article._id),
     author: displayAuthor(article.author),
     publishedAt:
-      article.publishedAt instanceof Date
-        ? article.publishedAt.toISOString()
-        : article.publishedAt,
+      article.publishedAt instanceof Date ? article.publishedAt.toISOString() : article.publishedAt,
     createdAt:
       article.createdAt instanceof Date ? article.createdAt.toISOString() : article.createdAt,
     isSyndicated: false,
@@ -161,16 +184,14 @@ export async function getNewshubArticles(category = 'All', page = 1, limit = 12)
           isSyndicated: true,
         }))
       : [];
-  const combinedArticles = [...paidArticles, ...syndicatedArticles].sort(
-    (left, right) => {
-      const pinDifference = Number(isPinnedArticle(right)) - Number(isPinnedArticle(left));
-      if (pinDifference !== 0) return pinDifference;
-      return (
-        timestamp(right.publishedAt || right.createdAt) -
-        timestamp(left.publishedAt || left.createdAt)
-      );
-    },
-  );
+  const combinedArticles = [...paidArticles, ...syndicatedArticles].sort((left, right) => {
+    const pinDifference = Number(isPinnedArticle(right)) - Number(isPinnedArticle(left));
+    if (pinDifference !== 0) return pinDifference;
+    return (
+      timestamp(right.publishedAt || right.createdAt) -
+      timestamp(left.publishedAt || left.createdAt)
+    );
+  });
   const safeLimit = Number.isFinite(limit) ? Math.min(Math.max(1, limit), 100) : 12;
   const safePage = Number.isFinite(page) ? Math.max(1, page) : 1;
   const total = Math.min(totalPaid, MAX_FEED_ITEMS) + syndicatedArticles.length;
@@ -251,10 +272,14 @@ export async function getNewshubBanners() {
 }
 
 export async function getNewshubInitialData() {
-  const [feed, banners] = await Promise.all([getNewshubArticles(), getNewshubBanners()]);
+  const [feed, banners, categories] = await Promise.all([
+    getNewshubArticles(),
+    getNewshubBanners(),
+    getNewshubCategories(),
+  ]);
   return {
     banners,
     ...feed,
-    categories: NEWSHUB_CATEGORIES,
+    categories,
   };
 }

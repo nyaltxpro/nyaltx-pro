@@ -55,15 +55,7 @@ const GRADS = [
   'linear-gradient(135deg,#1e293b,#475569)',
 ];
 
-const CATEGORIES = [
-  'All',
-  'NYAX',
-  'Solana',
-  'Ethereum',
-  'DeFi',
-  'Blockchain',
-  'Other',
-];
+const CATEGORIES = ['All', 'NYAX', 'Solana', 'Ethereum', 'DeFi', 'Blockchain', 'Other'];
 
 const RSS_URL = 'https://www.nyaltx.pro/rss.xml';
 
@@ -106,7 +98,9 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
   const [banners, setBanners] = useState<BannerSlide[]>(initialData?.banners ?? []);
   const [articles, setArticles] = useState<Article[]>(initialData?.articles ?? []);
   const [categories, setCategories] = useState<string[]>(initialData?.categories ?? CATEGORIES);
-  const [pagination, setPagination] = useState(initialData?.pagination ?? { total: 0, page: 1, pages: 1 });
+  const [pagination, setPagination] = useState(
+    initialData?.pagination ?? { total: 0, page: 1, pages: 1 }
+  );
   const [loading, setLoading] = useState(initialData === undefined);
   const [feedLoading, setFeedLoading] = useState(false);
 
@@ -230,10 +224,13 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
 
   const copyRss = () => {
     if (navigator.clipboard) {
-      navigator.clipboard.writeText(RSS_URL).then(() => {
-        setRssCopied(true);
-        setTimeout(() => setRssCopied(false), 2500);
-      }).catch(() => alert('RSS URL:\n' + RSS_URL));
+      navigator.clipboard
+        .writeText(RSS_URL)
+        .then(() => {
+          setRssCopied(true);
+          setTimeout(() => setRssCopied(false), 2500);
+        })
+        .catch(() => alert('RSS URL:\n' + RSS_URL));
     } else {
       alert('RSS URL:\n' + RSS_URL);
     }
@@ -268,7 +265,7 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
     } catch (error) {
       setNewsletterMsgType('error');
       setNewsletterMsg(
-        error instanceof Error ? error.message : 'Something went wrong. Please try again.',
+        error instanceof Error ? error.message : 'Something went wrong. Please try again.'
       );
     } finally {
       setNewsletterSubmitting(false);
@@ -289,10 +286,13 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
 
       <div className="nh-root">
         <div className="nh-wrap">
-
           {/* ── HERO BANNER ──────────────────────────────────────────── */}
           <section className="nyb" aria-label="NYALTX News Hub">
-            <Link href="/newshub/submit" className="nh-banner-link" aria-label="Submit news to NYALTX News Hub">
+            <Link
+              href="/newshub/submit"
+              className="nh-banner-link"
+              aria-label="Submit news to NYALTX News Hub"
+            >
               <img
                 src="/nyaltx-news-hub-banner.png"
                 alt="New York Alt Exchange NYALTX News Hub"
@@ -305,7 +305,9 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
           <header className="nh-top">
             <div>
               <h1>News Hub</h1>
-              <div className="nh-sub">Paid press releases &amp; sponsored news, curated by our editorial team.</div>
+              <div className="nh-sub">
+                Paid press releases &amp; sponsored news, curated by our editorial team.
+              </div>
             </div>
             <div className="nh-row">
               <button className="nh-btn" onClick={copyRss} title="Copy RSS URL">
@@ -338,11 +340,22 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
                     <div key={slide._id ?? idx} className="nh-slide-wrapper">
                       {target && target !== '#' && target !== '' ? (
                         isExternal ? (
-                          <a href={target} target="_blank" rel="noopener noreferrer" className="nh-slide-link">{slideEl}</a>
+                          <a
+                            href={target}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="nh-slide-link"
+                          >
+                            {slideEl}
+                          </a>
                         ) : (
-                          <Link href={target} className="nh-slide-link">{slideEl}</Link>
+                          <Link href={target} className="nh-slide-link">
+                            {slideEl}
+                          </Link>
                         )
-                      ) : slideEl}
+                      ) : (
+                        slideEl
+                      )}
                     </div>
                   );
                 })}
@@ -350,11 +363,20 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
 
               {banners.length > 1 && (
                 <>
-                  <button className="nh-arrow nh-arrow-l" onClick={prevSlide} aria-label="Previous">‹</button>
-                  <button className="nh-arrow nh-arrow-r" onClick={nextSlide} aria-label="Next">›</button>
+                  <button className="nh-arrow nh-arrow-l" onClick={prevSlide} aria-label="Previous">
+                    ‹
+                  </button>
+                  <button className="nh-arrow nh-arrow-r" onClick={nextSlide} aria-label="Next">
+                    ›
+                  </button>
                   <div className="nh-dots">
                     {banners.map((_, i) => (
-                      <button key={i} className={`nh-dot${i === curSlide ? ' on' : ''}`} onClick={() => goToSlide(i)} aria-label={`Slide ${i + 1}`} />
+                      <button
+                        key={i}
+                        className={`nh-dot${i === curSlide ? ' on' : ''}`}
+                        onClick={() => goToSlide(i)}
+                        aria-label={`Slide ${i + 1}`}
+                      />
                     ))}
                   </div>
                 </>
@@ -364,7 +386,16 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
 
           {/* Slider loading skeleton */}
           {loading && (
-            <div className="nh-skeleton" style={{ width: '100%', aspectRatio: '8/3', minHeight: 230, borderRadius: 16, marginBottom: 24 }} />
+            <div
+              className="nh-skeleton"
+              style={{
+                width: '100%',
+                aspectRatio: '8/3',
+                minHeight: 230,
+                borderRadius: 16,
+                marginBottom: 24,
+              }}
+            />
           )}
 
           {/* ── MAIN GRID ────────────────────────────────────────────── */}
@@ -372,28 +403,46 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
             {/* Feed */}
             <main>
               {/* Category chips */}
-              <div className="nh-chips">
-                {categories.map(cat => (
-                  <button
-                    key={cat}
-                    className={`nh-chip${cat === selectedCat ? ' on' : ''}`}
-                    onClick={() => setSelectedCat(cat)}
-                  >
-                    {cat}
-                  </button>
-                ))}
+              <div className="nh-category-bar">
+                <div>
+                  <span className="nh-kicker">Browse by topic</span>
+                  <h2 className="nh-category-title">Explore the feed</h2>
+                </div>
+                <div className="nh-chips" role="group" aria-label="Filter news by category">
+                  {categories.map(cat => (
+                    <button
+                      key={cat}
+                      className={`nh-chip${cat === selectedCat ? ' on' : ''}`}
+                      onClick={() => setSelectedCat(cat)}
+                      aria-pressed={cat === selectedCat}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               {/* Articles feed */}
               <div>
-                {loading ? (
-                  Array.from({ length: 4 }).map((_, i) => (
-                    <div key={i} className="nh-skeleton" style={{ height: 108, marginBottom: 12, borderRadius: 14 }} />
-                  ))
+                <div className="nh-feed-heading">
+                  <div>
+                    <span className="nh-kicker">From NYALTX and trusted sources</span>
+                    <h2>{selectedCat === 'All' ? 'Latest stories' : `${selectedCat} stories`}</h2>
+                  </div>
+                  {!loading && <span className="nh-result-count">{pagination.total} stories</span>}
+                </div>
+                {loading || (feedLoading && articles.length === 0) ? (
+                  <div className="nh-cards">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                      <div key={i} className="nh-skeleton nh-card-skeleton" />
+                    ))}
+                  </div>
                 ) : articles.length === 0 ? (
                   <div className="nh-side" style={{ textAlign: 'center', padding: '48px 20px' }}>
                     <div style={{ fontSize: 40, marginBottom: 12 }}>📰</div>
-                    <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 8 }}>No news available right now</div>
+                    <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 8 }}>
+                      No news available right now
+                    </div>
                     <div style={{ color: 'var(--nh-muted)', fontSize: 14, marginBottom: 20 }}>
                       {selectedCat === 'All'
                         ? 'Please check back soon, or submit a story for review.'
@@ -404,52 +453,80 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
                     </Link>
                   </div>
                 ) : (
-                  articles.map(art => (
-                    <article key={art._id} className="nh-item">
-                      <div className="nh-thumb" style={{ background: articleThumbnail(art) }} />
-                      <div className="nh-article-body">
-                        <div className="nh-meta">
-                          {art.isSyndicated ? (
-                            <span className="nh-badge">RSS</span>
-                          ) : art.type === 'pr' ? (
-                            <span className="nh-badge nh-badge-pr">PRESS RELEASE</span>
-                          ) : (
-                            <span className="nh-badge nh-badge-paid">SPONSORED</span>
-                          )}
-                          <span className="nh-badge">{art.category || art.tags?.[0] || 'NYAX'}</span>
-                          {art.author && <span>{art.author}</span>}
-                          <span>·</span>
-                          <span>{relativeDate(art.publishedAt || art.createdAt)}</span>
+                  <div className="nh-cards">
+                    {articles.map(art => (
+                      <article key={art._id} className="nh-card">
+                        <div
+                          className="nh-card-cover"
+                          style={{ background: articleThumbnail(art) }}
+                        >
+                          <span className={`nh-card-type${art.type === 'pr' ? ' pr' : ''}`}>
+                            {art.isSyndicated
+                              ? 'RSS'
+                              : art.type === 'pr'
+                                ? 'Press release'
+                                : 'Sponsored'}
+                          </span>
                         </div>
-                        <h3>
-                          {art.isSyndicated && art.sourceUrl ? (
-                            <a
-                              href={art.sourceUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="nh-article-link"
-                            >
-                              {art.title}
-                            </a>
-                          ) : art.slug ? (
-                            <Link href={`/news/${art.slug}`} className="nh-article-link">
-                              {art.title}
-                            </Link>
-                          ) : (
-                            art.title
-                          )}
-                        </h3>
-                        {art.excerpt && <p>{art.excerpt}</p>}
-                      </div>
-                    </article>
-                  ))
+                        <div className="nh-card-content">
+                          <div className="nh-card-meta">
+                            <span className="nh-card-category">
+                              {art.category || art.tags?.[0] || 'NYAX'}
+                            </span>
+                            <span>{relativeDate(art.publishedAt || art.createdAt)}</span>
+                          </div>
+                          <h3>
+                            {art.isSyndicated && art.sourceUrl ? (
+                              <a
+                                href={art.sourceUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="nh-article-link"
+                              >
+                                {art.title}
+                              </a>
+                            ) : art.slug ? (
+                              <Link href={`/news/${art.slug}`} className="nh-article-link">
+                                {art.title}
+                              </Link>
+                            ) : (
+                              art.title
+                            )}
+                          </h3>
+                          <p>
+                            {art.excerpt ||
+                              'Read the latest update from the digital asset and tokenization ecosystem.'}
+                          </p>
+                          <div className="nh-card-footer">
+                            <span>{art.author || 'NYALTX'}</span>
+                            {art.isSyndicated && art.sourceUrl ? (
+                              <a
+                                href={art.sourceUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="nh-read-link"
+                              >
+                                Read story <span aria-hidden="true">↗</span>
+                              </a>
+                            ) : art.slug ? (
+                              <Link href={`/news/${art.slug}`} className="nh-read-link">
+                                Read story <span aria-hidden="true">→</span>
+                              </Link>
+                            ) : null}
+                          </div>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
                 )}
 
                 {/* Load more */}
                 {!loading && articles.length > 0 && pagination.page < pagination.pages && (
                   <div style={{ textAlign: 'center', marginTop: 20, marginBottom: 12 }}>
                     <button className="nh-btn" onClick={loadMore} disabled={feedLoading}>
-                      {feedLoading ? 'Loading…' : `Load more (${pagination.total - articles.length} more)`}
+                      {feedLoading
+                        ? 'Loading…'
+                        : `Load more (${pagination.total - articles.length} more)`}
                     </button>
                   </div>
                 )}
@@ -461,8 +538,15 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
               {/* CTA card */}
               <div className="nh-side nh-cta">
                 <h4>Got news? Get seen.</h4>
-                <p>Publish your press release or sponsored story to the NYALTX feed and reach thousands of crypto readers.</p>
-                <Link href="/newshub/submit" className="nh-btn" style={{ width: '100%', justifyContent: 'center' }}>
+                <p>
+                  Publish your press release or sponsored story to the NYALTX feed and reach
+                  thousands of crypto readers.
+                </p>
+                <Link
+                  href="/newshub/submit"
+                  className="nh-btn"
+                  style={{ width: '100%', justifyContent: 'center' }}
+                >
                   Submit a story
                 </Link>
                 <div style={{ marginTop: 10, fontSize: 12, color: '#023038', opacity: 0.75 }}>
@@ -473,20 +557,25 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
               {/* RSS */}
               <div className="nh-side">
                 <h4>📡 Subscribe via RSS</h4>
-                <code
-                  style={{ cursor: 'pointer' }}
-                  onClick={copyRss}
-                  title="Click to copy RSS URL"
-                >
+                <code style={{ cursor: 'pointer' }} onClick={copyRss} title="Click to copy RSS URL">
                   {RSS_URL}
                 </code>
-                <button className="nh-btn" style={{ marginTop: 8, width: '100%', justifyContent: 'center' }} onClick={copyRss}>
+                <button
+                  className="nh-btn"
+                  style={{ marginTop: 8, width: '100%', justifyContent: 'center' }}
+                  onClick={copyRss}
+                >
                   {rssCopied ? '✓ Copied!' : 'Copy RSS URL'}
                 </button>
                 <div className="nh-note" style={{ marginTop: 8 }}>
                   Filters:&nbsp;
-                  <code style={{ display: 'inline', padding: '1px 5px', fontSize: 11 }}>?tag=nyax</code>&nbsp;
-                  <code style={{ display: 'inline', padding: '1px 5px', fontSize: 11 }}>?tag=btc</code>
+                  <code style={{ display: 'inline', padding: '1px 5px', fontSize: 11 }}>
+                    ?tag=nyax
+                  </code>
+                  &nbsp;
+                  <code style={{ display: 'inline', padding: '1px 5px', fontSize: 11 }}>
+                    ?tag=btc
+                  </code>
                 </div>
               </div>
 
@@ -535,7 +624,15 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
               {/* How it works */}
               <div className="nh-side">
                 <h4>How it works</h4>
-                <ol style={{ margin: 0, paddingLeft: 18, fontSize: 13, color: 'var(--nh-muted)', lineHeight: 1.7 }}>
+                <ol
+                  style={{
+                    margin: 0,
+                    paddingLeft: 18,
+                    fontSize: 13,
+                    color: 'var(--nh-muted)',
+                    lineHeight: 1.7,
+                  }}
+                >
                   <li>Submit your news or press release</li>
                   <li>Select a plan ($199 or $499)</li>
                   <li>Complete payment securely</li>
@@ -557,14 +654,17 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
           {/* Footer note */}
           <div className="nh-disclaimer">
             <p>
-              NYALTX News Hub features syndicated headlines from trusted news sources alongside approved paid press releases and sponsored stories.
-              Paid submissions are reviewed before going live. RSS feed available at{' '}
-              <a href={RSS_URL} style={{ color: '#06b6d4' }}>{RSS_URL}</a>.
+              NYALTX News Hub features syndicated headlines from trusted news sources alongside
+              approved paid press releases and sponsored stories. Paid submissions are reviewed
+              before going live. RSS feed available at{' '}
+              <a href={RSS_URL} style={{ color: '#06b6d4' }}>
+                {RSS_URL}
+              </a>
+              .
             </p>
           </div>
         </div>
       </div>
-
     </>
   );
 }
@@ -671,25 +771,39 @@ const STYLES = `
   @media(max-width:860px) { .nh-grid { grid-template-columns: 1fr; } }
 
   /* ─── Chips ─── */
-  .nh-chips { display: flex; gap: 7px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 14px; }
-  .nh-chip { white-space: nowrap; border: 1px solid var(--nh-border); background: var(--nh-card); color: var(--nh-muted); padding: 6px 14px; border-radius: 99px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all .2s; }
+  .nh-category-bar { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 18px; padding: 16px 0; border-bottom: 1px solid var(--nh-border); }
+  .nh-kicker { color: var(--nh-accent); font-size: 10px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+  .nh-category-title { margin: 4px 0 0; font-size: 19px; font-weight: 750; letter-spacing: -.02em; }
+  .nh-chips { display: flex; max-width: 100%; gap: 7px; overflow-x: auto; padding: 2px 0 5px; scrollbar-width: thin; }
+  .nh-chip { white-space: nowrap; border: 1px solid var(--nh-border); background: var(--nh-card); color: var(--nh-muted); padding: 7px 13px; border-radius: 99px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all .2s; }
   .nh-chip:hover { border-color: var(--nh-accent); color: var(--nh-text); }
   .nh-chip.on { background: var(--nh-accent); border-color: var(--nh-accent); color: var(--nh-accent-ink); font-weight: 700; }
+  .nh-chip:focus-visible, .nh-btn:focus-visible, .nh-arrow:focus-visible, .nh-dot:focus-visible { outline: 2px solid #67e8f9; outline-offset: 3px; }
 
-  /* ─── Article card ─── */
-  .nh-item { display: flex; gap: 14px; background: var(--nh-card); border: 1px solid var(--nh-border); border-radius: 14px; padding: 14px; margin-bottom: 12px; transition: transform .2s, border-color .2s; }
-  .nh-item:hover { transform: translateY(-1px); border-color: rgba(6,182,212,.4); }
-  .nh-thumb { width: 112px; aspect-ratio: 2/1; height: auto; border-radius: 10px; flex: none; background-position: center; background-size: contain; background-repeat: no-repeat; background-color: #0b111b; }
-  .nh-article-body { flex: 1; min-width: 0; }
-  .nh-item h3 { margin: 0 0 4px; font-size: 15px; font-weight: 600; line-height: 1.35; }
-  .nh-item p  { margin: 0; font-size: 13px; color: var(--nh-muted); line-height: 1.4; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+  /* ─── Article cards ─── */
+  .nh-feed-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin: 0 0 14px; }
+  .nh-feed-heading h2 { margin: 4px 0 0; font-size: 23px; font-weight: 750; letter-spacing: -.025em; }
+  .nh-result-count { color: var(--nh-muted); font-size: 12px; }
+  .nh-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+  .nh-card { display: flex; min-width: 0; flex-direction: column; overflow: hidden; border: 1px solid var(--nh-border); border-radius: 16px; background: linear-gradient(160deg, #111b2a, #0d1420); transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease; }
+  .nh-card:hover { transform: translateY(-3px); border-color: rgba(6,182,212,.55); box-shadow: 0 14px 36px rgba(0,0,0,.24); }
+  .nh-card-cover { position: relative; aspect-ratio: 16/9; width: 100%; background-position: center; background-size: contain; background-repeat: no-repeat; background-color: #090f18; border-bottom: 1px solid var(--nh-border); }
+  .nh-card-type { position: absolute; top: 11px; left: 11px; border: 1px solid rgba(255,255,255,.14); border-radius: 999px; background: rgba(7,11,18,.78); padding: 5px 9px; color: #d7f8fc; font-size: 10px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; backdrop-filter: blur(8px); }
+  .nh-card-type.pr { background: rgba(6,95,70,.85); color: #d1fae5; }
+  .nh-card-content { display: flex; flex: 1; flex-direction: column; padding: 15px; }
+  .nh-card-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 9px; color: var(--nh-muted); font-size: 11px; }
+  .nh-card-category { max-width: 65%; overflow: hidden; border-radius: 6px; background: var(--nh-soft); padding: 4px 8px; color: #67e8f9; font-size: 10px; font-weight: 750; text-overflow: ellipsis; white-space: nowrap; }
+  .nh-card h3 { margin: 0 0 8px; font-size: 16px; font-weight: 700; line-height: 1.4; letter-spacing: -.01em; }
+  .nh-card p { display: -webkit-box; overflow: hidden; margin: 0 0 15px; color: var(--nh-muted); font-size: 13px; line-height: 1.55; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
+  .nh-card-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: auto; border-top: 1px solid rgba(255,255,255,.07); padding-top: 12px; color: var(--nh-muted); font-size: 11px; }
+  .nh-card-footer > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .nh-read-link { flex: none; color: #67e8f9; font-size: 12px; font-weight: 700; text-decoration: none; }
+  .nh-read-link:hover { color: #a5f3fc; }
+  .nh-card-skeleton { min-height: 320px; border-radius: 16px; }
   .nh-article-link { color: var(--nh-text); text-decoration: none; }
   .nh-article-link:hover { color: var(--nh-accent); }
-  .nh-meta { font-size: 12px; color: var(--nh-muted); margin-bottom: 4px; display: flex; align-items: center; flex-wrap: wrap; gap: 4px; }
-  .nh-badge { font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 6px; background: var(--nh-soft); color: var(--nh-accent); letter-spacing: .04em; }
-  .nh-badge-paid { background: #fef3c7; color: #92400e; }
-  .nh-badge-pr   { background: #dcfce7; color: #15803d; }
   .nh-muted { color: var(--nh-muted); }
+  @media(max-width:620px) { .nh-cards { grid-template-columns: 1fr; } .nh-category-bar { align-items: flex-start; } .nh-card-cover { aspect-ratio: 16/8.5; } }
 
   /* ─── Sidebar ─── */
   .nh-side { background: var(--nh-card); border: 1px solid var(--nh-border); border-radius: 14px; padding: 16px; margin-bottom: 16px; }

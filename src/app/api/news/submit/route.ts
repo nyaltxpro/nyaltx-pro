@@ -4,7 +4,7 @@ import { Order } from '@/app/api/admin/orders/route';
 import { verifyNewsPayment, sendNewsSubmissionConfirmationEmail } from '@/lib/newsEmailService';
 import { findUsablePromoCode } from '@/lib/newsPromoCodes';
 import { calculateNewsPrice } from '@/lib/newsPricing';
-import { isPaidNewsCategory } from '@/lib/paidNewsCategories';
+import { getNewshubCategories } from '@/lib/newshubInitialData';
 
 const NEWS_TEST_PLAN_ENABLED = process.env.NEXT_PUBLIC_ENABLE_NEWS_TEST_PLAN === 'true';
 
@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
       paymentId,
       walletAddress,
       paymentStatus = 'completed',
-      planName
+      planName,
     } = data;
 
     if (!['paypal', 'usdc', 'nyax'].includes(paymentMethod)) {
@@ -40,7 +40,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (!isPaidNewsCategory(category)) {
+    const availableCategories = await getNewshubCategories();
+    if (
+      typeof category !== 'string' ||
+      !availableCategories.includes(category) ||
+      category === 'All'
+    ) {
       return NextResponse.json(
         { error: 'Choose one of the available news categories.' },
         { status: 400 }
@@ -55,17 +60,26 @@ export async function POST(req: NextRequest) {
     }
 
     const planPrice =
-      plan === 'feed' ? 99 :
-      plan === 'slider' || plan === 'prem' ? 199 :
-      plan === 'test' && NEWS_TEST_PLAN_ENABLED ? 1 :
-      null;
+      plan === 'feed'
+        ? 99
+        : plan === 'slider' || plan === 'prem'
+          ? 199
+          : plan === 'test' && NEWS_TEST_PLAN_ENABLED
+            ? 1
+            : null;
     if (planPrice === null) {
-      return NextResponse.json({ error: 'This news publishing plan is unavailable.' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'This news publishing plan is unavailable.' },
+        { status: 400 }
+      );
     }
 
     const promoCode = typeof data.promoCode === 'string' ? data.promoCode.trim().toUpperCase() : '';
     if (promoCode && plan === 'test') {
-      return NextResponse.json({ error: 'Promo codes cannot be applied to the test plan.' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Promo codes cannot be applied to the test plan.' },
+        { status: 400 }
+      );
     }
 
     let promoDiscountPercent = 0;
@@ -73,7 +87,10 @@ export async function POST(req: NextRequest) {
       const packageId = plan === 'feed' ? 'news:feed' : 'news:slider';
       const { promo, message } = await findUsablePromoCode(promoCode, packageId);
       if (!promo) {
-        return NextResponse.json({ error: message || 'This promo code is invalid.' }, { status: 400 });
+        return NextResponse.json(
+          { error: message || 'This promo code is invalid.' },
+          { status: 400 }
+        );
       }
       promoDiscountPercent = promo.discountPercent;
     }
@@ -92,19 +109,31 @@ export async function POST(req: NextRequest) {
     }
 
     if (!title || title.trim().length < 5) {
-      return NextResponse.json({ error: 'Headline is required (minimum 5 characters)' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Headline is required (minimum 5 characters)' },
+        { status: 400 }
+      );
     }
 
     if (!summary || summary.trim().length < 10) {
-      return NextResponse.json({ error: 'Summary is required (minimum 10 characters)' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Summary is required (minimum 10 characters)' },
+        { status: 400 }
+      );
     }
 
     if (!content || content.trim().length < 20) {
-      return NextResponse.json({ error: 'Story content is required (minimum 20 characters)' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Story content is required (minimum 20 characters)' },
+        { status: 400 }
+      );
     }
 
     if (!email || !email.trim() || !email.includes('@')) {
-      return NextResponse.json({ error: 'A valid email address is required to receive payment and status confirmation.' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'A valid email address is required to receive payment and status confirmation.' },
+        { status: 400 }
+      );
     }
 
     // 1. Verify Payment on Backend before proceeding
@@ -113,13 +142,18 @@ export async function POST(req: NextRequest) {
       paymentId: paymentId || null,
       txHash: txHash || null,
       amount: submissionAmount,
-      paymentStatus
+      paymentStatus,
     });
 
     if (!paymentVerification.verified) {
-      return NextResponse.json({
-        error: paymentVerification.reason || 'Payment verification failed. Please complete payment before submitting.'
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error:
+            paymentVerification.reason ||
+            'Payment verification failed. Please complete payment before submitting.',
+        },
+        { status: 400 }
+      );
     }
 
     const db = await getDb();
@@ -132,13 +166,13 @@ export async function POST(req: NextRequest) {
       .replace(/(^-|-$)/g, '');
     const finalSlug = `${baseSlug}-${Date.now().toString(36)}`;
 
-    const resolvedPlanName = planName || (
-      plan === 'test'
+    const resolvedPlanName =
+      planName ||
+      (plan === 'test'
         ? 'Checkout Flow Test ($1)'
         : plan === 'slider' || plan === 'prem'
           ? 'News Publishing & Distribution ($199)'
-          : 'News Publishing ($99)'
-    );
+          : 'News Publishing ($99)');
     const authorName = typeof author === 'string' ? author.trim() : '';
     const orderId = `order_news_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 
@@ -151,9 +185,10 @@ export async function POST(req: NextRequest) {
       sourceUrl: sourceUrl?.trim() || null,
       featuredImage: featuredImage || null,
       coverColor: Number(coverColor) || 0,
-      author: authorName.toLowerCase() === 'you'
-        ? 'NYALTX'
-        : authorName || (type === 'pr' ? 'Press Release' : 'NYALTX'),
+      author:
+        authorName.toLowerCase() === 'you'
+          ? 'NYALTX'
+          : authorName || (type === 'pr' ? 'Press Release' : 'NYALTX'),
       email: email.trim(),
       plan,
       planName: resolvedPlanName,
@@ -181,7 +216,7 @@ export async function POST(req: NextRequest) {
       slug: finalSlug,
       views: 0,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     const insertResult = await newsCollection.insertOne(submissionDoc);
@@ -190,8 +225,12 @@ export async function POST(req: NextRequest) {
     let orderRecorded = false;
     try {
       const ordersCollection = await getCollection<Order>('orders');
-      
-      const newOrder: Order & { promoCode?: string; promoDiscount?: number; originalAmount?: string } = {
+
+      const newOrder: Order & {
+        promoCode?: string;
+        promoDiscount?: number;
+        originalAmount?: string;
+      } = {
         id: orderId,
         type: 'news_submission',
         status: 'completed',
@@ -225,14 +264,17 @@ export async function POST(req: NextRequest) {
           paymentId,
           txHash,
           walletAddress,
-          paymentVerified: true
-        }
+          paymentVerified: true,
+        },
       };
 
       await ordersCollection.insertOne(newOrder);
       orderRecorded = true;
     } catch (orderErr) {
-      console.error('Could not record news submission order; the admin orders API will recover it from the submission:', orderErr);
+      console.error(
+        'Could not record news submission order; the admin orders API will recover it from the submission:',
+        orderErr
+      );
     }
 
     // 3. Send payment & submission confirmation email to client
@@ -248,7 +290,7 @@ export async function POST(req: NextRequest) {
         paymentId: paymentId || undefined,
         txHash: txHash || undefined,
         author: submissionDoc.author,
-        submittedAt: submissionDoc.createdAt.toISOString()
+        submittedAt: submissionDoc.createdAt.toISOString(),
       });
 
       if (emailRes.success) {
@@ -259,8 +301,8 @@ export async function POST(req: NextRequest) {
             $set: {
               paymentConfirmationEmailSent: true,
               paymentConfirmationEmailSentAt: new Date(),
-              paymentConfirmationMessageId: emailRes.messageId
-            }
+              paymentConfirmationMessageId: emailRes.messageId,
+            },
           }
         );
       }
@@ -276,9 +318,9 @@ export async function POST(req: NextRequest) {
       orderRecorded,
       paymentVerified: true,
       emailSent,
-      message: 'Payment verified successfully. Your story has been submitted and is pending admin approval.'
+      message:
+        'Payment verified successfully. Your story has been submitted and is pending admin approval.',
     });
-
   } catch (error: any) {
     console.error('Error submitting news:', error);
     return NextResponse.json({ error: error.message || 'Failed to submit story' }, { status: 500 });

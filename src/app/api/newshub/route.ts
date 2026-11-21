@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import {
   getNewshubArticles,
   getNewshubBanners,
-  NEWSHUB_CATEGORIES,
+  getNewshubCategories,
 } from '@/lib/newshubInitialData';
 
 export async function GET(request: NextRequest) {
@@ -11,16 +11,17 @@ export async function GET(request: NextRequest) {
     const category = searchParams.get('category');
     const limit = parseInt(searchParams.get('limit') || '12', 10);
     const page = parseInt(searchParams.get('page') || '1', 10);
-    const [banners, feed] = await Promise.all([
+    const [banners, feed, categories] = await Promise.all([
       getNewshubBanners(),
       getNewshubArticles(category || 'All', page, limit),
+      getNewshubCategories(),
     ]);
 
     return NextResponse.json({
       success: true,
       banners,
       ...feed,
-      categories: NEWSHUB_CATEGORIES,
+      categories,
     });
   } catch (error: any) {
     console.error('Error fetching newshub data:', error);

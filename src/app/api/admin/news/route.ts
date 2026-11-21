@@ -3,6 +3,7 @@ import { getDb } from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
 import { sendNewsApprovalEmail } from '@/lib/newsEmailService';
 import { getAdminFromRequest } from '@/lib/adminAuth';
+import { revalidatePath } from 'next/cache';
 
 async function requireAdmin() {
   const admin = await getAdminFromRequest();
@@ -16,7 +17,7 @@ export async function GET(request: NextRequest) {
   try {
     const db = await getDb();
     const collection = db.collection('corporate_news');
-    
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
     if (id) {
@@ -34,9 +35,9 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '10');
     const status = searchParams.get('status') || 'all'; // published, draft, all
     const summary = searchParams.get('summary') === 'true';
-    
+
     const skip = (page - 1) * limit;
-    
+
     // Build query based on status
     let query: any = {};
     if (status === 'published') {
@@ -46,10 +47,10 @@ export async function GET(request: NextRequest) {
     } else if (status === 'pending') {
       query.status = 'pending';
     }
-    
+
     // Get total count for pagination
     const total = await collection.countDocuments(query);
-    
+
     // Get news articles with pagination
     let cursor = collection
       .find(query)
@@ -60,15 +61,15 @@ export async function GET(request: NextRequest) {
       cursor = cursor.project({ content: 0 });
     }
     const news = await cursor.toArray();
-    
+
     return NextResponse.json({
       news,
       pagination: {
         page,
         limit,
         total,
-        pages: Math.ceil(total / limit)
-      }
+        pages: Math.ceil(total / limit),
+      },
     });
   } catch (error: any) {
     console.error('Error fetching corporate news:', error);
@@ -83,48 +84,59 @@ export async function POST(request: NextRequest) {
   try {
     const db = await getDb();
     const collection = db.collection('corporate_news');
-    
+
     const {
       title,
       content,
       excerpt,
       featuredImage,
+      category,
       status = 'draft',
       publishedAt,
       tags = [],
       author,
       slug,
-      featuredInBanner = false
+      featuredInBanner = false,
     } = await request.json();
-    
+
     // Validate required fields
     if (!title || !content) {
-      return NextResponse.json({ 
-        error: 'Title and content are required' 
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: 'Title and content are required',
+        },
+        { status: 400 }
+      );
     }
-    
+
     // Generate slug if not provided
-    const finalSlug = slug || title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '');
-    
+    const finalSlug =
+      slug ||
+      title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
+
     // Check if slug already exists
     const existingNews = await collection.findOne({ slug: finalSlug });
     if (existingNews) {
-      return NextResponse.json({ 
-        error: 'A news article with this slug already exists' 
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: 'A news article with this slug already exists',
+        },
+        { status: 400 }
+      );
     }
-    
+
     const newsArticle = {
       title,
       content,
       excerpt: excerpt || content.substring(0, 200) + '...',
       featuredImage: featuredImage || null,
+      category: typeof category === 'string' && category.trim() ? category.trim() : 'NYAX',
       status,
-      publishedAt: status === 'published' ? (publishedAt ? new Date(publishedAt) : new Date()) : null,
+      publishedAt:
+        status === 'published' ? (publishedAt ? new Date(publishedAt) : new Date()) : null,
       tags,
       author: author || 'NYALTX Team',
       slug: finalSlug,
@@ -132,16 +144,17 @@ export async function POST(request: NextRequest) {
       isPaid: false,
       createdAt: new Date(),
       updatedAt: new Date(),
-      views: 0
+      views: 0,
     };
-    
+
     const result = await collection.insertOne(newsArticle);
-    
+    revalidatePath('/newshub');
+
     return NextResponse.json({
       success: true,
       message: 'News article created successfully',
       id: result.insertedId,
-      news: newsArticle
+      news: newsArticle,
     });
   } catch (error: any) {
     console.error('Error creating news article:', error);
@@ -156,13 +169,14 @@ export async function PUT(request: NextRequest) {
   try {
     const db = await getDb();
     const collection = db.collection('corporate_news');
-    
+
     const {
       id,
       title,
       content,
       excerpt,
       featuredImage,
+      category,
       status,
       publishedAt,
       tags,
@@ -170,28 +184,32 @@ export async function PUT(request: NextRequest) {
       slug,
       featuredInBanner,
       isPaid,
-      isPendingReview
+      isPendingReview,
     } = await request.json();
-    
+
     if (!id) {
       return NextResponse.json({ error: 'News ID is required' }, { status: 400 });
     }
-    
+
     console.log('Updating news article with ID:', id);
 
     const existingArticle = await collection.findOne({ _id: new ObjectId(id) });
     if (!existingArticle) {
       return NextResponse.json({ error: 'News article not found' }, { status: 404 });
     }
-    
+
     const updateData: any = {
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
-    
+
     if (title) updateData.title = title;
     if (content) updateData.content = content;
     if (excerpt) updateData.excerpt = excerpt;
     if (featuredImage !== undefined) updateData.featuredImage = featuredImage;
+    if (category !== undefined) {
+      updateData.category =
+        typeof category === 'string' && category.trim() ? category.trim() : null;
+    }
     if (status) {
       updateData.status = status;
       if (status === 'published' && publishedAt) {
@@ -220,7 +238,7 @@ export async function PUT(request: NextRequest) {
           category: existingArticle.category || existingArticle.tags?.[0] || 'News',
           planName: existingArticle.planName || existingArticle.plan,
           publishedAt: updateData.publishedAt || existingArticle.publishedAt || new Date(),
-          author: author || existingArticle.author
+          author: author || existingArticle.author,
         });
 
         if (emailResult.success) {
@@ -233,16 +251,14 @@ export async function PUT(request: NextRequest) {
         console.error('Error sending approval notification email:', emailErr);
       }
     }
-    
-    const result = await collection.updateOne(
-      { _id: new ObjectId(id) },
-      { $set: updateData }
-    );
-    
+
+    const result = await collection.updateOne({ _id: new ObjectId(id) }, { $set: updateData });
+    revalidatePath('/newshub');
+
     return NextResponse.json({
       success: true,
       message: 'News article updated successfully',
-      emailSent
+      emailSent,
     });
   } catch (error: any) {
     console.error('Error updating news article:', error);
@@ -257,24 +273,25 @@ export async function DELETE(request: NextRequest) {
   try {
     const db = await getDb();
     const collection = db.collection('corporate_news');
-    
+
     const { id } = await request.json();
-    
+
     if (!id) {
       return NextResponse.json({ error: 'News ID is required' }, { status: 400 });
     }
-    
+
     console.log('Deleting news article with ID:', id);
-    
+
     const result = await collection.deleteOne({ _id: new ObjectId(id) });
-    
+
     if (result.deletedCount === 0) {
       return NextResponse.json({ error: 'News article not found' }, { status: 404 });
     }
-    
+    revalidatePath('/newshub');
+
     return NextResponse.json({
       success: true,
-      message: 'News article deleted successfully'
+      message: 'News article deleted successfully',
     });
   } catch (error: any) {
     console.error('Error deleting news article:', error);
