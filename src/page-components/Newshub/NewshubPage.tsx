@@ -1,11 +1,11 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { AnimatePresence, MotionConfig, motion, useReducedMotion } from 'framer-motion';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toReliableIpfsUrl } from '@/utils/ipfsUpload';
-import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { FiArrowRight, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -86,12 +86,12 @@ function slideBackground(slide: BannerSlide, withOverlay = true): string {
   return GRADS[slide.gradientIndex ?? 0] ?? GRADS[0];
 }
 
-function articleThumbnail(art: Article): string {
+function articleThumbnail(art: Article): string | null {
   if (art.featuredImage) {
     const url = toReliableIpfsUrl(art.featuredImage);
-    if (url) return `url(${url}) center/contain no-repeat`;
+    if (url) return url;
   }
-  return GRADS[(art.coverColor ?? 0) % GRADS.length];
+  return null;
 }
 
 function relativeDate(dateStr?: string): string {
@@ -368,7 +368,9 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
           {/* ── PAGE HEADER ──────────────────────────────────────────── */}
           <header className="nh-top">
             <div>
-              <h1>News Hub</h1>
+              <h1>
+                <span>News</span> <em>Hub</em>
+              </h1>
               <div className="nh-sub">
                 Paid press releases &amp; sponsored news, curated by our editorial team.
               </div>
@@ -448,10 +450,10 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
               className="nh-skeleton"
               style={{
                 width: '100%',
-                aspectRatio: '8/3',
-                minHeight: 230,
-                borderRadius: 16,
-                marginBottom: 24,
+                aspectRatio: '16/6',
+                minHeight: 190,
+                borderRadius: 14,
+                marginBottom: 16,
               }}
             />
           )}
@@ -523,71 +525,159 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
                     </Link>
                   </div>
                 ) : (
-                  <div className="nh-cards">
-                    {articles.map(art => (
-                      <article key={art._id} className="nh-card">
-                        <div
-                          className="nh-card-cover"
-                          style={{ background: articleThumbnail(art) }}
-                        >
-                          <span className={`nh-card-type${art.type === 'pr' ? ' pr' : ''}`}>
-                            {art.isSyndicated
-                              ? 'RSS'
-                              : art.type === 'pr'
-                                ? 'Press release'
-                                : 'Sponsored'}
-                          </span>
-                        </div>
-                        <div className="nh-card-content">
-                          <div className="nh-card-meta">
-                            <span className="nh-card-category">
-                              {art.category || art.tags?.[0] || 'NYAX'}
-                            </span>
-                            <span>{relativeDate(art.publishedAt || art.createdAt)}</span>
-                          </div>
-                          <h3>
-                            {art.isSyndicated && art.sourceUrl ? (
-                              <a
-                                href={art.sourceUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="nh-article-link"
-                              >
-                                {art.title}
-                              </a>
-                            ) : art.slug ? (
-                              <Link href={`/news/${art.slug}`} className="nh-article-link">
-                                {art.title}
-                              </Link>
+                  <MotionConfig
+                    transition={
+                      shouldReduceMotion
+                        ? { duration: 0 }
+                        : {
+                            type: 'spring',
+                            mass: 3,
+                            stiffness: 400,
+                            damping: 50,
+                          }
+                    }
+                  >
+                    <motion.div
+                      initial={shouldReduceMotion ? false : 'initial'}
+                      animate="animate"
+                      transition={{ staggerChildren: shouldReduceMotion ? 0 : 0.05 }}
+                      className="nh-cards"
+                    >
+                      {articles.map((art, index) => {
+                        const externalUrl =
+                          art.isSyndicated && art.sourceUrl ? art.sourceUrl : undefined;
+                        const internalUrl =
+                          !externalUrl && art.slug ? `/news/${art.slug}` : undefined;
+                        const imageUrl = articleThumbnail(art);
+                        const published = relativeDate(art.publishedAt || art.createdAt);
+                        const spanClass =
+                          index % 6 === 0
+                            ? 'nh-bento-featured'
+                            : index % 6 === 1
+                              ? 'nh-bento-compact'
+                              : 'nh-bento-standard';
+                        const image = (
+                          <div className="nh-bento-image">
+                            {imageUrl ? (
+                              <img src={imageUrl} alt={art.title} loading="lazy" />
                             ) : (
-                              art.title
+                              <div
+                                className="nh-bento-image-fallback"
+                                style={{
+                                  background:
+                                    GRADS[(art.coverColor ?? 0) % GRADS.length],
+                                }}
+                              />
                             )}
-                          </h3>
-                          <p>
-                            {art.excerpt ||
-                              'Read the latest update from the digital asset and tokenization ecosystem.'}
-                          </p>
-                          <div className="nh-card-footer">
-                            <span>{art.author || 'NYALTX'}</span>
-                            {art.isSyndicated && art.sourceUrl ? (
-                              <a
-                                href={art.sourceUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="nh-read-link"
-                              >
-                                Read story <span aria-hidden="true">↗</span>
-                              </a>
-                            ) : art.slug ? (
-                              <Link href={`/news/${art.slug}`} className="nh-read-link">
-                                Read story <span aria-hidden="true">→</span>
-                              </Link>
-                            ) : null}
+                            <span
+                              className={`nh-card-type${art.type === 'pr' ? ' pr' : ''}`}
+                            >
+                              {art.isSyndicated
+                                ? 'RSS'
+                                : art.type === 'pr'
+                                  ? 'Press release'
+                                  : 'Sponsored'}
+                            </span>
                           </div>
-                        </div>
-                      </article>
-                    ))}
-                  </div>
+                        );
+
+                        return (
+                          <motion.article
+                            key={art._id}
+                            variants={{
+                              initial: { scale: 0.94, y: 28, opacity: 0 },
+                              animate: { scale: 1, y: 0, opacity: 1 },
+                            }}
+                            whileHover={
+                              shouldReduceMotion ? undefined : { y: -4, borderColor: '#71717a' }
+                            }
+                            className={`nh-bento-card ${spanClass}`}
+                          >
+                            <div className="nh-bento-media">
+                              {externalUrl ? (
+                                <a
+                                  href={externalUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  aria-label={`Read ${art.title}`}
+                                >
+                                  {image}
+                                </a>
+                              ) : internalUrl ? (
+                                <Link href={internalUrl} aria-label={`Read ${art.title}`}>
+                                  {image}
+                                </Link>
+                              ) : (
+                                image
+                              )}
+                            </div>
+                            <div className="nh-bento-content">
+                              <div className="nh-editorial-tags">
+                                {[
+                                  art.category || art.tags?.[0] || 'NYAX',
+                                  ...(art.tags || []).filter(
+                                    tag =>
+                                      tag !== (art.category || art.tags?.[0] || 'NYAX')
+                                  ),
+                                ]
+                                  .slice(0, 3)
+                                  .map(tag => (
+                                    <span key={tag}>{tag}</span>
+                                  ))}
+                              </div>
+                              <h3>
+                                {externalUrl ? (
+                                  <a
+                                    href={externalUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="nh-article-link"
+                                  >
+                                    {art.title}
+                                  </a>
+                                ) : internalUrl ? (
+                                  <Link href={internalUrl} className="nh-article-link">
+                                    {art.title}
+                                  </Link>
+                                ) : (
+                                  art.title
+                                )}
+                              </h3>
+                              <p>
+                                {art.excerpt ||
+                                  'Read the latest update from the digital asset and tokenization ecosystem.'}
+                              </p>
+                              <div className="nh-editorial-byline">
+                                <span>{art.author || 'NYALTX'}</span>
+                                <span aria-hidden="true">·</span>
+                                <span>{published}</span>
+                              </div>
+                              {(externalUrl || internalUrl) && (
+                                <div className="nh-editorial-read">
+                                  {externalUrl ? (
+                                    <a
+                                      href={externalUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="nh-read-link"
+                                    >
+                                      Read story <FiArrowRight aria-hidden="true" />
+                                    </a>
+                                  ) : (
+                                    internalUrl && (
+                                      <Link href={internalUrl} className="nh-read-link">
+                                        Read story <FiArrowRight aria-hidden="true" />
+                                      </Link>
+                                    )
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </motion.article>
+                        );
+                      })}
+                    </motion.div>
+                  </MotionConfig>
                 )}
 
                 {/* Load more */}
@@ -756,12 +846,12 @@ const STYLES = `
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     min-height: 60vh;
   }
-  .nh-wrap { max-width: 1120px; margin: 0 auto; padding: 40px 16px 24px; }
+  .nh-wrap { max-width: 1120px; margin: 0 auto; padding: 24px 16px; }
 
   /* ─── Hero ─── */
   .nyb {
     position: relative; overflow: hidden; border-radius: 20px;
-    aspect-ratio: 2000 / 451; margin-bottom: 24px; color: #fff;
+    aspect-ratio: 2000 / 451; margin-bottom: 16px; color: #fff;
     background: #07182f;
     box-shadow: 0 10px 32px rgba(0,0,0,.5);
   }
@@ -807,14 +897,16 @@ const STYLES = `
   .nh-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 
   /* ─── Header ─── */
-  .nh-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
-  .nh-top h1 { margin: 0; font-size: 26px; font-weight: 700; }
-  .nh-sub    { color: var(--nh-muted); font-size: 14px; margin-top: 2px; }
+  .nh-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+  .nh-top h1 { display: flex; align-items: baseline; gap: .16em; margin: 0; font-size: clamp(30px, 4vw, 42px); font-weight: 600; line-height: .95; letter-spacing: -.06em; }
+  .nh-top h1 span { color: #cbd5e1; font-family: Georgia, Cambria, "Times New Roman", serif; font-weight: 300; font-style: italic; letter-spacing: -.04em; }
+  .nh-top h1 em { color: #fff; font-style: italic; font-weight: 600; }
+  .nh-sub    { color: var(--nh-muted); font-size: 13px; margin-top: 5px; }
 
   /* ─── Slider ─── */
   .nh-slider {
-    position: relative; height: clamp(400px, 50vw, 600px); border-radius: 16px; overflow: hidden;
-    border: 1px solid var(--nh-border); margin-bottom: 24px;
+    position: relative; height: clamp(280px, 34vw, 420px); border-radius: 14px; overflow: hidden;
+    border: 1px solid var(--nh-border); margin-bottom: 16px;
     box-shadow: 0 8px 24px rgba(0,0,0,.35);
   }
   .nh-slide-wrapper { position: absolute; inset: 0; width: 100%; }
@@ -828,7 +920,7 @@ const STYLES = `
   .nh-slide-image { position: absolute; z-index: 1; left: 50%; top: 50%; width: calc(100% - 80px); max-width: 90%; height: 88%; object-fit: contain; transform: translate(-50%,-50%); }
   .nh-slide-shade { position: absolute; z-index: 2; inset: 0; background: linear-gradient(to top, rgba(2,6,12,.9), rgba(2,6,12,.12) 72%, transparent); }
   .nh-slide-copy { position: relative; z-index: 3; }
-  .nh-slide h2 { margin: 6px 0; font-size: 25px; max-width: 680px; font-weight: 700; line-height: 1.2; text-shadow: 0 2px 8px rgba(0,0,0,.6); }
+  .nh-slide h2 { margin: 6px 0; font-family: Georgia, Cambria, "Times New Roman", serif; font-size: clamp(24px, 3vw, 34px); max-width: 680px; font-weight: 500; line-height: 1.08; letter-spacing: -.035em; text-shadow: 0 2px 8px rgba(0,0,0,.6); }
   .nh-slide p  { margin: 0 0 10px; max-width: 620px; font-size: 14px; opacity: .92; text-shadow: 0 1px 4px rgba(0,0,0,.6); }
   .nh-tag { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .05em; padding: 4px 9px; border-radius: 99px; background: rgba(255,255,255,.2); backdrop-filter: blur(4px); width: max-content; margin-bottom: 6px; }
   .nh-tag.sp { background: #facc15; color: #422006; font-weight: 800; }
@@ -840,15 +932,15 @@ const STYLES = `
   .nh-arrow-l { left: 12px; } .nh-arrow-r { right: 12px; }
 
   /* ─── Grid ─── */
-  .nh-grid { display: grid; grid-template-columns: 1fr 310px; gap: 20px; }
+  .nh-grid { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 18px; }
   @media(max-width:860px) { .nh-grid { grid-template-columns: 1fr; } }
 
   /* ─── Chips ─── */
-  .nh-category-bar { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 18px; padding: 16px 0; border-bottom: 1px solid var(--nh-border); }
+  .nh-category-bar { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; padding: 10px 0; border-bottom: 1px solid var(--nh-border); }
   .nh-kicker { color: var(--nh-accent); font-size: 10px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
   .nh-category-title { margin: 4px 0 0; font-size: 19px; font-weight: 750; letter-spacing: -.02em; }
   .nh-chips { display: flex; max-width: 100%; gap: 7px; overflow-x: auto; padding: 2px 0 5px; scrollbar-width: thin; }
-  .nh-chip { position: relative; flex: 0 0 auto; white-space: nowrap; border: 1px solid transparent; background: transparent; color: var(--nh-muted); padding: 7px 13px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600; transition: color .2s; }
+  .nh-chip { position: relative; flex: 0 0 auto; white-space: nowrap; border: 1px solid transparent; background: transparent; color: var(--nh-muted); padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600; transition: color .2s; }
   .nh-chip:hover { color: var(--nh-text); }
   .nh-chip.on { color: #fff; }
   .nh-chip-label { position: relative; z-index: 1; }
@@ -856,32 +948,43 @@ const STYLES = `
   .nh-chip:focus-visible, .nh-btn:focus-visible, .nh-arrow:focus-visible, .nh-dot:focus-visible { outline: 2px solid #67e8f9; outline-offset: 3px; }
 
   /* ─── Article cards ─── */
-  .nh-feed-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin: 0 0 14px; }
-  .nh-feed-heading h2 { margin: 4px 0 0; font-size: 23px; font-weight: 750; letter-spacing: -.025em; }
+  .nh-feed-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin: 0 0 10px; }
+  .nh-feed-heading h2 { margin: 4px 0 0; font-family: Georgia, Cambria, "Times New Roman", serif; font-size: 22px; font-weight: 500; letter-spacing: -.03em; }
   .nh-result-count { color: var(--nh-muted); font-size: 12px; }
-  .nh-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
-  .nh-card { display: flex; min-width: 0; flex-direction: column; overflow: hidden; border: 1px solid var(--nh-border); border-radius: 16px; background: linear-gradient(160deg, #111b2a, #0d1420); transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease; }
-  .nh-card:hover { transform: translateY(-3px); border-color: rgba(6,182,212,.55); box-shadow: 0 14px 36px rgba(0,0,0,.24); }
-  .nh-card-cover { position: relative; aspect-ratio: 16/9; width: 100%; background-position: center; background-size: contain; background-repeat: no-repeat; background-color: #090f18; border-bottom: 1px solid var(--nh-border); }
-  .nh-card-type { position: absolute; top: 11px; left: 11px; border: 1px solid rgba(255,255,255,.14); border-radius: 999px; background: rgba(7,11,18,.78); padding: 5px 9px; color: #d7f8fc; font-size: 10px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; backdrop-filter: blur(8px); }
+  .nh-cards { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); grid-auto-flow: dense; gap: 14px; }
+  .nh-bento-card { display: flex; min-width: 0; grid-column: span 6; flex-direction: column; overflow: hidden; border: 1px solid #3f3f46; border-radius: 10px; background: #18181b; padding: 12px; transition: border-color .2s ease, background-color .2s ease; }
+  .nh-bento-card:hover { background: #202024; }
+  .nh-bento-featured { grid-column: span 8; }
+  .nh-bento-compact { grid-column: span 4; }
+  .nh-bento-standard { grid-column: span 6; }
+  .nh-bento-media > a { display: block; color: inherit; }
+  .nh-bento-image { position: relative; aspect-ratio: 16/9; width: 100%; overflow: hidden; border-radius: 8px; background: #090f18; }
+  .nh-bento-featured .nh-bento-image { aspect-ratio: 16/8; }
+  .nh-bento-image img, .nh-bento-image-fallback { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform .3s ease, opacity .3s ease; }
+  .nh-bento-card:hover .nh-bento-image img { transform: scale(1.035); opacity: .88; }
+  .nh-card-type { position: absolute; top: 10px; left: 10px; z-index: 1; border: 1px solid rgba(255,255,255,.14); border-radius: 999px; background: rgba(7,11,18,.78); padding: 5px 9px; color: #d7f8fc; font-size: 10px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; backdrop-filter: blur(8px); }
   .nh-card-type.pr { background: rgba(6,95,70,.85); color: #d1fae5; }
-  .nh-card-content { display: flex; flex: 1; flex-direction: column; padding: 15px; }
-  .nh-card-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 9px; color: var(--nh-muted); font-size: 11px; }
-  .nh-card-category { max-width: 65%; overflow: hidden; border-radius: 6px; background: var(--nh-soft); padding: 4px 8px; color: #67e8f9; font-size: 10px; font-weight: 750; text-overflow: ellipsis; white-space: nowrap; }
-  .nh-card h3 { margin: 0 0 8px; font-size: 16px; font-weight: 700; line-height: 1.4; letter-spacing: -.01em; }
-  .nh-card p { display: -webkit-box; overflow: hidden; margin: 0 0 15px; color: var(--nh-muted); font-size: 13px; line-height: 1.55; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
-  .nh-card-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: auto; border-top: 1px solid rgba(255,255,255,.07); padding-top: 12px; color: var(--nh-muted); font-size: 11px; }
-  .nh-card-footer > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .nh-bento-content { display: flex; min-width: 0; flex: 1; flex-direction: column; padding-top: 12px; }
+  .nh-editorial-tags { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 11px; }
+  .nh-editorial-tags span { border: 1px solid #3f3f46; border-radius: 999px; padding: 3px 8px; color: #a1a1aa; font-size: 10px; font-weight: 600; }
+  .nh-bento-content h3 { margin: 0; font-family: Georgia, Cambria, "Times New Roman", serif; font-size: 18px; font-weight: 500; line-height: 1.3; letter-spacing: -.02em; }
+  .nh-bento-featured .nh-bento-content h3 { font-size: 23px; }
+  .nh-bento-content p { display: -webkit-box; overflow: hidden; margin: 10px 0 0; color: #a1a1aa; font-size: 13px; line-height: 1.6; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
+  .nh-editorial-byline { display: flex; align-items: center; gap: 10px; margin-top: 14px; color: #a1a1aa; font-size: 11px; }
+  .nh-editorial-read { margin-top: auto; padding-top: 16px; }
+  .nh-editorial-read .nh-read-link { display: inline-flex; align-items: center; gap: 7px; color: #fca5a5; font-size: 12px; font-weight: 600; text-decoration: none; }
+  .nh-editorial-read .nh-read-link:hover { text-decoration: underline; }
   .nh-read-link { flex: none; color: #67e8f9; font-size: 12px; font-weight: 700; text-decoration: none; }
   .nh-read-link:hover { color: #a5f3fc; }
-  .nh-card-skeleton { min-height: 320px; border-radius: 16px; }
+  .nh-card-skeleton { min-height: 250px; grid-column: span 6; border-radius: 12px; }
   .nh-article-link { color: var(--nh-text); text-decoration: none; }
   .nh-article-link:hover { color: var(--nh-accent); }
   .nh-muted { color: var(--nh-muted); }
-  @media(max-width:620px) { .nh-wrap { padding-top: 32px; } .nh-cards { grid-template-columns: 1fr; } .nh-category-bar { align-items: flex-start; } .nh-card-cover { aspect-ratio: 16/8.5; } }
+  @media(max-width:860px) { .nh-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } .nh-bento-featured, .nh-bento-compact, .nh-bento-standard { grid-column: span 1; } .nh-bento-featured .nh-bento-image { aspect-ratio: 16/9; } }
+  @media(max-width:620px) { .nh-wrap { padding: 20px 12px; } .nh-category-bar { align-items: flex-start; } .nh-cards { grid-template-columns: 1fr; } .nh-bento-card, .nh-card-skeleton { grid-column: span 1; } .nh-bento-featured .nh-bento-content h3 { font-size: 19px; } }
 
   /* ─── Sidebar ─── */
-  .nh-side { background: var(--nh-card); border: 1px solid var(--nh-border); border-radius: 14px; padding: 16px; margin-bottom: 16px; }
+  .nh-side { background: var(--nh-card); border: 1px solid var(--nh-border); border-radius: 12px; padding: 12px; margin-bottom: 12px; }
   .nh-side h4 { margin: 0 0 8px; font-size: 15px; font-weight: 700; }
   .nh-side code { display: block; background: var(--nh-bg); border: 1px solid var(--nh-border); padding: 8px 10px; border-radius: 8px; font-size: 12px; word-break: break-all; color: var(--nh-accent); margin-bottom: 6px; }
   .nh-cta { background: linear-gradient(135deg,#0891b2,#06b6d4 60%,#22d3ee); color: #023038; border: 0; box-shadow: 0 8px 20px rgba(6,182,212,.3); }
