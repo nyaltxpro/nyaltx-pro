@@ -2,9 +2,8 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { type MouseEvent as ReactMouseEvent, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { FaBars, FaChevronDown, FaTimes } from 'react-icons/fa';
-import { FiArrowUpRight } from 'react-icons/fi';
 import { motion } from 'motion/react';
 import { usePublicNavigation } from '../hooks/useTinaContent';
 import SimpleUnifiedWalletButton from './SimpleUnifiedWalletButton';
@@ -14,8 +13,6 @@ export default function PublicHeader() {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const dropdownRefs = useRef<Record<string, HTMLDivElement | null>>({});
-  const navRef = useRef<HTMLElement | null>(null);
-  const [pointer, setPointer] = useState({ x: 0, y: 0, visible: false });
   const [announcement, setAnnouncement] = useState<{ enabled: boolean; message: string } | null>(
     null
   );
@@ -59,21 +56,6 @@ export default function PublicHeader() {
 
   const brandLabel = content?.brand?.label ?? 'NYALTX';
   const brandHref = content?.brand?.href ?? '/';
-
-  const handleNavPointerMove = (event: ReactMouseEvent<HTMLElement>) => {
-    const target = event.target as HTMLElement;
-    if (!target.closest('[data-glass-link]') || !navRef.current) {
-      setPointer(current => ({ ...current, visible: false }));
-      return;
-    }
-
-    const bounds = navRef.current.getBoundingClientRect();
-    setPointer({
-      x: event.clientX - bounds.left,
-      y: event.clientY - bounds.top,
-      visible: true,
-    });
-  };
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -192,12 +174,7 @@ export default function PublicHeader() {
               : 'text-white/75 hover:bg-white/5 hover:text-white'
           }`;
     return (
-      <Link
-        href={href}
-        className={classes}
-        onClick={onClick}
-        data-glass-link={variant === 'desktop' ? '' : undefined}
-      >
+      <Link href={href} className={classes} onClick={onClick}>
         {variant === 'desktop' && (
           <span
             className={`absolute inset-0 bg-gradient-to-br from-white/20 to-white/5 transition-opacity ${
@@ -217,8 +194,8 @@ export default function PublicHeader() {
         href={href}
         className={
           active
-            ? 'block px-4 py-2 text-sm text-cyan-300 hover:bg-gray-800'
-            : 'block px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-800'
+            ? 'mx-1 block rounded-lg bg-cyan-400/10 px-3 py-2 text-sm font-medium text-cyan-200'
+            : 'mx-1 block rounded-lg px-3 py-2 text-sm text-white/75 transition-colors hover:bg-white/10 hover:text-white'
         }
         onClick={() => setOpenDropdown(null)}
       >
@@ -242,37 +219,12 @@ export default function PublicHeader() {
         </div>
       )}
       <nav
-        ref={navRef}
-        onMouseMove={handleNavPointerMove}
-        onMouseLeave={() => setPointer(current => ({ ...current, visible: false }))}
         className={`fixed left-3 right-3 z-[100] mx-auto max-w-6xl overflow-visible rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.12] to-white/[0.035] text-white shadow-[0_12px_60px_rgba(0,0,0,0.35)] backdrop-blur-2xl md:left-6 md:right-6 ${
           announcement?.enabled ? 'top-11 md:top-14' : 'top-3 md:top-6'
         }`}
       >
-        <div
-          className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl"
-          style={{
-            backgroundImage:
-              'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22 width=%2232%22 height=%2232%22 fill=%22none%22 stroke=%22%23ffffff%22 stroke-opacity=%220.055%22%3E%3Cpath d=%22M0 .5H31.5V32%22/%3E%3C/svg%3E")',
-          }}
-        />
-        <motion.span
-          aria-hidden="true"
-          animate={{ left: pointer.x, top: pointer.y, opacity: pointer.visible ? 1 : 0 }}
-          transition={{ duration: 0.12 }}
-          className="pointer-events-none absolute z-0 grid h-12 w-12 -translate-x-1/2 -translate-y-1/2 place-content-center rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 shadow-[0_0_30px_rgba(34,211,238,0.4)]"
-        >
-          <FiArrowUpRight className="text-xl text-white" />
-        </motion.span>
-        <div className="relative z-10 flex min-h-[68px] items-center justify-between gap-4 px-4 py-3 sm:px-5">
-          <Link
-            href={brandHref}
-            className="shrink-0 text-xl font-black tracking-[0.12em] text-white md:text-2xl"
-          >
-            {brandLabel}
-          </Link>
-
-          <div className="hidden flex-1 items-center justify-center gap-1 md:flex">
+        <div className="relative z-10 flex min-h-[68px] items-center justify-between gap-3 px-4 py-3 sm:gap-4 sm:px-5">
+          <div className="hidden w-1/2 items-center justify-start gap-0 md:flex">
             {primaryLinks.map(link => (
               <NavLink key={link.href} href={link.href} label={link.label} />
             ))}
@@ -289,8 +241,7 @@ export default function PublicHeader() {
                   <button
                     type="button"
                     onClick={() => setOpenDropdown(isOpen ? null : menu.label)}
-                    data-glass-link=""
-                    className={`group relative flex items-center gap-2 overflow-hidden rounded-lg px-4 py-2 text-sm transition-colors ${
+                    className={`group relative flex items-center gap-2 overflow-hidden rounded-lg px-3 py-2 text-sm transition-colors ${
                       isOpen ? 'text-white' : 'text-white/75 hover:text-white'
                     }`}
                   >
@@ -303,7 +254,7 @@ export default function PublicHeader() {
                     />
                   </button>
                   {isOpen && (
-                    <div className="absolute left-0 top-full z-[110] mt-3 w-56 rounded-xl border border-white/10 bg-[#10141d]/95 py-2 shadow-2xl backdrop-blur-xl">
+                    <div className="absolute left-0 top-full z-[110] mt-3 w-56 overflow-hidden rounded-2xl border border-white/15 bg-gradient-to-br from-[#172334]/95 to-[#0b111b]/95 py-2 shadow-[0_18px_50px_rgba(0,0,0,0.55)] backdrop-blur-2xl">
                       {menu.links?.map(link => (
                         <DropdownLink key={link.href} href={link.href} label={link.label} />
                       ))}
@@ -314,7 +265,18 @@ export default function PublicHeader() {
             })}
           </div>
 
-          <div className="hidden shrink-0 md:block">
+          <Link
+            href={brandHref}
+            aria-label="NYALTX Pro home"
+            className="absolute left-1/2 top-1/2 z-20 inline-flex -translate-x-1/2 -translate-y-1/2 items-center gap-1.5 whitespace-nowrap text-xl font-black tracking-[0.12em] text-white md:text-2xl"
+          >
+            {brandLabel.replace(/\s+pro$/i, '')}
+            <span className="rounded border border-cyan-300/40 bg-cyan-300/10 px-1.5 py-0.5 text-[9px] font-bold tracking-[0.14em] text-cyan-200 md:text-[10px]">
+              PRO
+            </span>
+          </Link>
+
+          <div className="ml-auto hidden shrink-0 md:block">
             <SimpleUnifiedWalletButton />
           </div>
 
