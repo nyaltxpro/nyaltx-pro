@@ -224,7 +224,18 @@ export default function PublicHeader() {
         }`}
       >
         <div className="relative z-10 flex min-h-[68px] items-center justify-between gap-3 px-4 py-3 sm:gap-4 sm:px-5">
-          <div className="hidden w-1/2 items-center justify-start gap-0 md:flex">
+          <Link
+            href={brandHref}
+            aria-label="NYALTX Pro home"
+            className="relative z-20 inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap text-xl font-black tracking-[0.06em] text-white md:text-2xl"
+          >
+            {brandLabel.replace(/\s+pro$/i, '')}
+            <span className="rounded border border-cyan-300/40 bg-cyan-300/10 px-1.5 py-0.5 text-[9px] font-bold tracking-[0.14em] text-cyan-200 md:text-[10px]">
+              PRO
+            </span>
+          </Link>
+
+          <div className="hidden flex-1 items-center justify-center gap-1 md:flex">
             {primaryLinks.map(link => (
               <NavLink key={link.href} href={link.href} label={link.label} />
             ))}
@@ -265,18 +276,7 @@ export default function PublicHeader() {
             })}
           </div>
 
-          <Link
-            href={brandHref}
-            aria-label="NYALTX Pro home"
-            className="absolute left-1/2 top-1/2 z-20 inline-flex -translate-x-1/2 -translate-y-1/2 items-center gap-1.5 whitespace-nowrap text-xl font-black tracking-[0.12em] text-white md:text-2xl"
-          >
-            {brandLabel.replace(/\s+pro$/i, '')}
-            <span className="rounded border border-cyan-300/40 bg-cyan-300/10 px-1.5 py-0.5 text-[9px] font-bold tracking-[0.14em] text-cyan-200 md:text-[10px]">
-              PRO
-            </span>
-          </Link>
-
-          <div className="ml-auto hidden shrink-0 md:block">
+          <div className="hidden shrink-0 md:block">
             <SimpleUnifiedWalletButton />
           </div>
 
