@@ -10,7 +10,13 @@ import {
     WalletIcon,
 } from '@web3icons/react/dynamic';
 import type { Variants } from 'framer-motion';
-import { motion, useAnimationFrame, useMotionValue } from 'framer-motion';
+import {
+    MotionConfig,
+    motion,
+    useAnimationFrame,
+    useMotionValue,
+    useReducedMotion,
+} from 'framer-motion';
 import {
     BarChart3,
     ChevronLeft,
@@ -47,6 +53,7 @@ const scaleIn: Variants = {
 
 const sectionHeadingClass =
     'mx-auto max-w-3xl text-center font-sans text-[clamp(2rem,5vw,3.5rem)] font-medium leading-[0.98] tracking-[-0.06em] text-white';
+const MotionLink = motion(Link);
 
 interface LandingPageProps {
     initialContent?: any;
@@ -102,6 +109,7 @@ export default function LandingPage(props?: LandingPageProps) {
     ];
 
     return (
+        <MotionConfig reducedMotion="user">
         <div className="min-h-screen">
             {/* 1) Hero */}
             <motion.section
@@ -121,18 +129,22 @@ export default function LandingPage(props?: LandingPageProps) {
                                 {landingContent?.hero?.subtitle || 'Real-time insights, curated listings, and promotional placements to help your project reach more holders across chains.'}
                             </p>
                             <div className="mt-8 flex flex-wrap gap-3">
-                                <Link
+                                <MotionLink
                                     href={landingContent?.hero?.ctaLink || '/dashboard'}
                                     className="rounded-full bg-cyan-500/90 px-5 py-2.5 font-medium text-white hover:bg-cyan-400 transition-colors"
+                                    whileHover={{ y: -2, scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
                                 >
                                     {landingContent?.hero?.ctaText || 'Explore Dashboard'}
-                                </Link>
-                                <Link
+                                </MotionLink>
+                                <MotionLink
                                     href="/pricing"
                                     className="rounded-full border border-white/10 bg-white/5 px-5 py-2.5 font-medium text-white hover:bg-white/10 transition-colors"
+                                    whileHover={{ y: -2, scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
                                 >
                                     View Pricing
-                                </Link>
+                                </MotionLink>
                             </div>
                         </motion.div>
                         <motion.div className="flex justify-center md:justify-center" variants={scaleIn}>
@@ -431,6 +443,7 @@ export default function LandingPage(props?: LandingPageProps) {
                 </motion.div>
             </motion.section>
         </div>
+        </MotionConfig>
     );
 }
 
@@ -668,6 +681,7 @@ const NETWORK_LOGOS = [
 ];
 
 function NetworkLogoCarousel() {
+    const shouldReduceMotion = useReducedMotion();
     const [hoveredLogo, setHoveredLogo] = React.useState<string | null>(null);
     const [trackWidth, setTrackWidth] = React.useState(0);
     const measureRef = React.useRef<HTMLDivElement | null>(null);
@@ -686,7 +700,7 @@ function NetworkLogoCarousel() {
     }, []);
 
     useAnimationFrame((_, delta) => {
-        if (hoveredLogo || !trackWidth) return;
+        if (shouldReduceMotion || hoveredLogo || !trackWidth) return;
 
         const next = x.get() - (delta / 1000) * 56;
         x.set(next <= -trackWidth ? next % trackWidth : next);
@@ -802,6 +816,9 @@ function StatsShowcase({ title, items }: { title: string; items: LandingStat[] }
                             onFocus={() => setActiveIndex(index)}
                             onClick={() => setActiveIndex(index)}
                             aria-pressed={isActive}
+                            whileHover={{ y: -3 }}
+                            whileTap={{ scale: 0.99 }}
+                            transition={{ type: 'spring', stiffness: 320, damping: 28 }}
                             className="relative overflow-hidden px-6 py-8 text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-inset md:px-8 md:py-10"
                         >
                             {isActive && (
@@ -911,7 +928,11 @@ function LandingCard({ children }: { children: React.ReactNode }) {
         'pointer-events-none absolute from-transparent via-cyan-400 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-within:opacity-100';
 
     return (
-        <div className="group relative flex h-full min-h-[184px] flex-col items-center justify-center gap-2 overflow-hidden px-6 py-8 text-center">
+        <motion.div
+            whileHover={{ y: -4, scale: 1.01 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 24 }}
+            className="group relative flex h-full min-h-[184px] flex-col items-center justify-center gap-2 overflow-hidden px-6 py-8 text-center"
+        >
             <div
                 aria-hidden="true"
                 className={`${accentLineClass} inset-y-0 left-0 w-px bg-gradient-to-b md:hidden`}
@@ -931,6 +952,6 @@ function LandingCard({ children }: { children: React.ReactNode }) {
             <div className="relative flex flex-col items-center justify-center gap-2">
                 {children}
             </div>
-        </div>
+        </motion.div>
     );
 }
