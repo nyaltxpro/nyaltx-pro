@@ -186,7 +186,7 @@ const Faq: React.FC<FaqProps> = ({
       }
     >
       {isLanding ? (
-        <h2 className="mb-4 text-center text-3xl font-semibold text-white">
+        <h2 className="mx-auto mb-4 max-w-3xl text-center font-sans text-[clamp(2rem,5vw,3.5rem)] font-medium leading-[0.98] tracking-[-0.06em] text-white">
           Frequently asked questions
         </h2>
       ) : (

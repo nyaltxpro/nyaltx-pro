@@ -34,6 +34,9 @@ const scaleIn: Variants = {
     show: { opacity: 1, scale: 1, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] } },
 };
 
+const sectionHeadingClass =
+    'max-w-3xl font-sans text-[clamp(2rem,5vw,3.5rem)] font-medium leading-[0.98] tracking-[-0.06em] text-white';
+
 interface LandingPageProps {
     initialContent?: any;
     data?: any;
@@ -109,7 +112,7 @@ export default function LandingPage(props?: LandingPageProps) {
                             <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight leading-[1.2] md:leading-[1.18] pb-2 bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-indigo-400">
                                 {landingContent?.hero?.title || 'Discover. Track. Explore the Future of Digital Markets.'}
                             </h1>
-                            <p className="mt-6 text-base md:text-lg text-gray-300/90 max-w-2xl leading-relaxed">
+                            <p className="mt-6 text-sm text-gray-300/90 max-w-2xl leading-relaxed">
                                 {landingContent?.hero?.subtitle || 'Real-time insights, curated listings, and promotional placements to help your project reach more holders across chains.'}
                             </p>
                             <div className="mt-8 flex flex-wrap gap-3">
@@ -184,7 +187,7 @@ export default function LandingPage(props?: LandingPageProps) {
                 viewport={{ once: true, amount: 0.2 }}
             >
                 <motion.h2
-                    className="text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-indigo-400"
+                    className={sectionHeadingClass}
                     variants={fadeUp}
                 >
                     {landingContent?.features?.title || 'Why NYALTX'}
@@ -234,7 +237,7 @@ export default function LandingPage(props?: LandingPageProps) {
                 viewport={{ once: true, amount: 0.2 }}
             >
                 <motion.h2
-                    className="text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-indigo-400"
+                    className={sectionHeadingClass}
                     variants={fadeUp}
                 >
                     Popular wallets
@@ -271,7 +274,7 @@ export default function LandingPage(props?: LandingPageProps) {
                 whileInView="show"
                 viewport={{ once: true, amount: 0.2 }}
             >
-                <motion.h2 className="text-2xl md:text-3xl font-bold" variants={fadeUp}>
+                <motion.h2 className={sectionHeadingClass} variants={fadeUp}>
                     How it works
                 </motion.h2>
                 <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -307,7 +310,7 @@ export default function LandingPage(props?: LandingPageProps) {
                 viewport={{ once: true, amount: 0.2 }}
             >
                 <motion.h2
-                    className="text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-indigo-400"
+                    className={sectionHeadingClass}
                     variants={fadeUp}
                 >
                     {landingContent?.testimonials?.title || 'What builders say'}
@@ -333,7 +336,7 @@ export default function LandingPage(props?: LandingPageProps) {
                 viewport={{ once: true, amount: 0.2 }}
             >
                 <motion.h2
-                    className="text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-indigo-400"
+                    className={sectionHeadingClass}
                     variants={fadeUp}
                 >
                     Ecosystem integrations
@@ -372,7 +375,7 @@ export default function LandingPage(props?: LandingPageProps) {
                 viewport={{ once: true, amount: 0.2 }}
             >
                 <motion.h2
-                    className="text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-indigo-400"
+                    className={sectionHeadingClass}
                     variants={fadeUp}
                 >
                     Built for Web3
@@ -764,7 +767,7 @@ function NetworkLogoCell({
             tabIndex={duplicate ? -1 : 0}
         >
             <span className="flex items-center gap-3 whitespace-nowrap">
-                <CryptoIcon name={name} size={32} kind="network" />
+                <CryptoIcon name={name} size={40} kind="network" />
                 <span className="text-sm font-semibold tracking-tight text-slate-200 md:text-base">
                     {name}
                 </span>
@@ -785,7 +788,7 @@ function StatsShowcase({ title, items }: { title: string; items: LandingStat[] }
     return (
         <motion.div className="relative overflow-hidden" variants={fadeUp}>
             <div className="relative px-6 py-14 text-center sm:px-8 sm:py-16 md:px-10 md:py-[4.5rem]">
-                <h2 className="mx-auto max-w-3xl text-[clamp(2rem,5vw,3.5rem)] font-medium leading-[0.98] tracking-[-0.06em] text-white">
+                <h2 className={`${sectionHeadingClass} mx-auto text-center`}>
                     {title}
                 </h2>
             </div>
