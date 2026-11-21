@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { FaBars, FaChevronDown, FaTimes } from 'react-icons/fa';
@@ -161,12 +162,11 @@ export default function PublicHeader() {
     onClick?: () => void;
     variant?: 'desktop' | 'mobile';
   }) => {
-    const active = pathname === href || (href !== '/' && pathname?.startsWith(href));
-    const isNewsHub = label === 'News Hub';
+    const active = pathname === href || (href !== '/' && pathname?.startsWith(`${href}/`));
     const classes =
       variant === 'desktop'
         ? `group relative overflow-hidden rounded-lg px-4 py-2 text-sm transition-all active:scale-95 ${
-            active || isNewsHub ? 'text-white' : 'text-white/75 hover:text-white'
+            active ? 'text-white' : 'text-white/75 hover:text-white'
           }`
         : `block w-full rounded-lg px-4 py-3 text-sm transition-colors ${
             active
@@ -178,7 +178,7 @@ export default function PublicHeader() {
         {variant === 'desktop' && (
           <span
             className={`absolute inset-0 bg-gradient-to-br from-white/20 to-white/5 transition-opacity ${
-              active || isNewsHub ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+              active ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
             }`}
           />
         )}
@@ -188,7 +188,7 @@ export default function PublicHeader() {
   };
 
   const DropdownLink = ({ href, label }: { href: string; label: string }) => {
-    const active = pathname === href || (href !== '/' && pathname?.startsWith(href));
+    const active = pathname === href || (href !== '/' && pathname?.startsWith(`${href}/`));
     return (
       <Link
         href={href}
@@ -229,6 +229,13 @@ export default function PublicHeader() {
             aria-label="NYALTX Pro home"
             className="relative z-20 inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap text-xl font-black tracking-[0.06em] text-white md:text-2xl"
           >
+            <Image
+              src="/nyaltxpro.png"
+              alt=""
+              width={36}
+              height={36}
+              className="h-8 w-8 shrink-0 object-contain"
+            />
             {brandLabel.replace(/\s+pro$/i, '')}
             <span className="rounded border border-cyan-300/40 bg-cyan-300/10 px-1.5 py-0.5 text-[9px] font-bold tracking-[0.14em] text-cyan-200 md:text-[10px]">
               PRO
