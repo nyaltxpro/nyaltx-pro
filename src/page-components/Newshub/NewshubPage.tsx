@@ -351,7 +351,12 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
     ? toReliableIpfsUrl(activeBanner.imageUrl) || null
     : null;
   const leadArticle = articles[0];
-  const featuredSideArticles = articles.slice(activeBanner ? 0 : 1, activeBanner ? 2 : 3);
+  const featuredArticle = activeBanner
+    ? articles.find(article => activeBannerTarget === `/news/${article.slug}`)
+    : leadArticle;
+  const recentArticles = articles
+    .filter(article => article._id !== featuredArticle?._id)
+    .slice(0, 4);
   const trendingArticles = trendingFeed.length
     ? trendingFeed
     : [...articles]
@@ -380,8 +385,8 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
     .slice(0, 3);
   const discoveryInsertIndex = Math.min(3, articles.length - 1);
   const topicInsertIndex = Math.min(7, articles.length - 1);
-  const recommendedTrendingModules = (
-    <div className="nh-inline-discovery">
+  const recommendedModule = (
+    <div className="nh-inline-recommended">
       <section className="nh-discovery-module" aria-labelledby="nh-recommended-title">
         <div className="nh-discovery-heading">
           <div>
@@ -395,29 +400,34 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
           ))}
         </div>
       </section>
-
-      <section className="nh-discovery-module" aria-labelledby="nh-trending-title">
-        <div className="nh-discovery-heading">
-          <div>
-            <span className="nh-kicker">
-              {trendingArticles.some(article => (article.views ?? 0) > 0)
-                ? 'Most read'
-                : 'Recently published'}
-            </span>
-            <h2 id="nh-trending-title">Trending posts</h2>
-          </div>
-        </div>
-        <div className="nh-discovery-list">
-          {trendingArticles.map((article, index) => (
-            <DiscoveryStory
-              key={`trending-${article._id}`}
-              article={article}
-              rank={index + 1}
-            />
-          ))}
-        </div>
-      </section>
     </div>
+  );
+
+  const trendingPanel = (
+    <section
+      className="nh-feature-trending nh-discovery-module"
+      aria-labelledby="nh-trending-title"
+    >
+      <div className="nh-discovery-heading">
+        <div>
+          <span className="nh-kicker">
+            {trendingArticles.some(article => (article.views ?? 0) > 0)
+              ? 'Most read'
+              : 'Recently published'}
+          </span>
+          <h2 id="nh-trending-title">Trending posts</h2>
+        </div>
+      </div>
+      <div className="nh-discovery-list">
+        {trendingArticles.map((article, index) => (
+          <DiscoveryStory
+            key={`trending-${article._id}`}
+            article={article}
+            rank={index + 1}
+          />
+        ))}
+      </div>
+    </section>
   );
   const topicModules =
     topicSections.length > 0 && topicInsertIndex > discoveryInsertIndex ? (
@@ -487,8 +497,14 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
         <span className={`nh-tag${activeBanner.isSponsored ? ' sp' : ''}`}>
           {(activeBanner.category || 'NYAX').toUpperCase()}
         </span>
-        <h2>{activeBanner.title}</h2>
-        {activeBanner.description && <p>{activeBanner.description}</p>}
+        <h2>
+          <span>{activeBanner.title}</span>
+        </h2>
+        {activeBanner.description && (
+          <p>
+            <span>{activeBanner.description}</span>
+          </p>
+        )}
       </motion.div>
     </div>
   ) : null;
@@ -539,7 +555,7 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
                 </div>
               )}
 
-              <div className={`nh-feature-grid${featuredSideArticles.length ? ' has-side' : ''}`}>
+              <div className={`nh-feature-grid${recentArticles.length ? ' has-side' : ''}`}>
                 <div className="nh-feature-primary">
                   {activeBanner ? (
                     <section className="nh-slider" aria-label="Featured banners">
@@ -648,40 +664,48 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
                   )}
                 </div>
 
-                {featuredSideArticles.length > 0 && (
+                {recentArticles.length > 0 && (
                   <div className="nh-feature-secondary">
-                    {featuredSideArticles.map(article => (
-                      <ArticleLink
-                        key={article._id}
-                        article={article}
-                        className="nh-side-story"
-                        ariaLabel={`Read ${article.title}`}
-                      >
-                        {articleThumbnail(article) ? (
-                          <img
-                            src={articleThumbnail(article) || ''}
-                            alt={article.title}
-                          />
-                        ) : (
-                          <div
-                            className="nh-side-story-fallback"
-                            style={{
-                              background:
-                                GRADS[(article.coverColor ?? 0) % GRADS.length],
-                            }}
-                          />
-                        )}
-                        <div className="nh-side-story-shade" />
-                        <div className="nh-side-story-copy">
-                          <span>{article.category || article.tags?.[0] || 'NYALTX'}</span>
-                          <h2>{article.title}</h2>
-                          <small>
-                            {article.author || 'NYALTX'} ·{' '}
-                            {relativeDate(article.publishedAt || article.createdAt)}
-                          </small>
-                        </div>
-                      </ArticleLink>
-                    ))}
+                    <div className="nh-recent-posts-heading">
+                      <span className="nh-kicker">Latest updates</span>
+                      <h2>Recent posts</h2>
+                    </div>
+                    <div className="nh-recent-post-list">
+                      {recentArticles.map(article => (
+                        <ArticleLink
+                          key={article._id}
+                          article={article}
+                          className="nh-recent-post"
+                          ariaLabel={`Read ${article.title}`}
+                        >
+                          {articleThumbnail(article) ? (
+                            <img
+                              src={articleThumbnail(article) || ''}
+                              alt=""
+                              loading="lazy"
+                            />
+                          ) : (
+                            <span
+                              className="nh-recent-post-fallback"
+                              style={{
+                                background:
+                                  GRADS[(article.coverColor ?? 0) % GRADS.length],
+                              }}
+                            />
+                          )}
+                          <span className="nh-recent-post-copy">
+                            <span className="nh-recent-post-topic">
+                              {article.category || article.tags?.[0] || 'NYALTX'}
+                            </span>
+                            <span className="nh-recent-post-title">{article.title}</span>
+                            <span className="nh-recent-post-meta">
+                              {article.author || 'NYALTX'} ·{' '}
+                              {relativeDate(article.publishedAt || article.createdAt)}
+                            </span>
+                          </span>
+                        </ArticleLink>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
@@ -692,11 +716,15 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
             <div className="nh-feature-grid nh-feature-grid-loading" aria-hidden="true">
               <div className="nh-skeleton nh-lead-skeleton" />
               <div className="nh-feature-secondary">
-                <div className="nh-skeleton nh-side-story-skeleton" />
-                <div className="nh-skeleton nh-side-story-skeleton" />
+                <div className="nh-skeleton nh-recent-header-skeleton" />
+                <div className="nh-skeleton nh-recent-row-skeleton" />
+                <div className="nh-skeleton nh-recent-row-skeleton" />
+                <div className="nh-skeleton nh-recent-row-skeleton" />
               </div>
             </div>
           )}
+
+          {!loading && trendingArticles.length > 0 && trendingPanel}
 
           {/* ── MAIN GRID ────────────────────────────────────────────── */}
           <div className="nh-grid">
@@ -912,7 +940,9 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
                               )}
                             </div>
                           </motion.article>
-                          {selectedCat === 'All' && index === discoveryInsertIndex && recommendedTrendingModules}
+                          {selectedCat === 'All' &&
+                            index === discoveryInsertIndex &&
+                            recommendedModule}
                           {selectedCat === 'All' && index === topicInsertIndex && topicModules}
                           </React.Fragment>
                         );
@@ -989,7 +1019,7 @@ const STYLES = `
   .nh-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 
   /* ─── Header ─── */
-  .nh-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin: 16px 0; }
+  .nh-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin: 32px 0 20px; }
   .nh-top > div:first-child { padding: 8px 0; }
   .nh-top h1 { display: flex; align-items: baseline; gap: .16em; margin: 0; font-size: clamp(30px, 4vw, 42px); font-weight: 600; line-height: .95; letter-spacing: -.06em; }
   .nh-top h1 span { color: #71717a; font-family: Georgia, Cambria, "Times New Roman", serif; font-weight: 300; font-style: italic; letter-spacing: -.04em; }
@@ -1015,21 +1045,27 @@ const STYLES = `
   .nh-lead-story-fallback { display: block; }
   .nh-lead-shade { position: absolute; inset: 0; background: linear-gradient(180deg,rgba(0,0,0,.03) 25%,rgba(0,0,0,.82) 100%); }
   .nh-lead-copy { position: absolute; right: 0; bottom: 0; left: 0; z-index: 1; padding: 20px 22px; }
-  .nh-lead-category, .nh-side-story-copy > span { display: inline-flex; background: #22d3ee; padding: 4px 8px; color: #023038; font-size: 9px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+  .nh-lead-category { display: inline-flex; background: #22d3ee; padding: 4px 8px; color: #023038; font-size: 9px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
   .nh-lead-copy h2 { max-width: 720px; margin: 8px 0; font-family: Georgia, Cambria, "Times New Roman", serif; font-size: clamp(24px, 3vw, 38px); font-weight: 600; line-height: 1.06; letter-spacing: -.035em; }
   .nh-lead-copy p { max-width: 620px; margin: 0 0 10px; color: rgba(255,255,255,.82); font-size: 13px; line-height: 1.5; }
   .nh-lead-byline { color: rgba(255,255,255,.74); font-size: 11px; }
-  .nh-feature-secondary { display: grid; min-height: 380px; grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 12px; }
-  .nh-side-story { position: relative; display: block; min-height: 0; overflow: hidden; border: 1px solid var(--nh-border); border-radius: 12px; background: #090f18; color: #fff; text-decoration: none; }
-  .nh-side-story > img, .nh-side-story-fallback { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform .3s ease; }
-  .nh-side-story:hover > img { transform: scale(1.04); }
-  .nh-side-story-fallback { display: block; }
-  .nh-side-story-shade { position: absolute; inset: 0; background: linear-gradient(180deg,rgba(0,0,0,.02) 10%,rgba(0,0,0,.83) 100%); }
-  .nh-side-story-copy { position: absolute; right: 0; bottom: 0; left: 0; z-index: 1; padding: 12px; }
-  .nh-side-story-copy h2 { display: -webkit-box; overflow: hidden; margin: 6px 0; font-family: Georgia, Cambria, "Times New Roman", serif; font-size: 17px; font-weight: 600; line-height: 1.16; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
-  .nh-side-story-copy small { color: rgba(255,255,255,.72); font-size: 10px; }
+  .nh-feature-secondary { display: flex; min-height: 380px; flex-direction: column; border-top: 1px solid var(--nh-border); padding-top: 14px; }
+  .nh-recent-posts-heading { margin-bottom: 6px; }
+  .nh-recent-posts-heading h2 { margin: 4px 0 0; font-family: Georgia, Cambria, "Times New Roman", serif; font-size: 21px; font-weight: 500; letter-spacing: -.03em; }
+  .nh-recent-post-list { display: grid; grid-template-columns: 1fr; }
+  .nh-recent-post { display: grid; min-width: 0; grid-template-columns: 84px minmax(0, 1fr); align-items: center; gap: 10px; border-bottom: 1px solid var(--nh-border); padding: 10px 0; color: inherit; text-decoration: none; }
+  .nh-recent-post:first-child { padding-top: 6px; }
+  .nh-recent-post > img, .nh-recent-post-fallback { display: block; width: 84px; height: 64px; border-radius: 7px; object-fit: cover; transition: transform .2s ease; }
+  .nh-recent-post:hover > img { transform: scale(1.04); }
+  .nh-recent-post-fallback { flex: none; }
+  .nh-recent-post-copy { display: flex; min-width: 0; flex-direction: column; gap: 4px; }
+  .nh-recent-post-topic { color: #67e8f9; font-size: 9px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+  .nh-recent-post-title { display: -webkit-box; overflow: hidden; font-family: Georgia, Cambria, "Times New Roman", serif; font-size: 13px; font-weight: 600; line-height: 1.25; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+  .nh-recent-post:hover .nh-recent-post-title { color: #67e8f9; }
+  .nh-recent-post-meta { color: var(--nh-muted); font-size: 10px; }
   .nh-lead-skeleton { height: 100%; min-height: 380px; border-radius: 12px; }
-  .nh-side-story-skeleton { min-height: 180px; border-radius: 12px; }
+  .nh-recent-header-skeleton { height: 38px; margin-bottom: 8px; border-radius: 8px; }
+  .nh-recent-row-skeleton { height: 84px; border-radius: 8px; }
 
   /* ─── Featured carousel ─── */
   .nh-slider {
@@ -1047,9 +1083,11 @@ const STYLES = `
   .nh-slide-backdrop { position: absolute; inset: -20px; background-position: center; background-size: cover; filter: blur(20px) brightness(.42); transform: scale(1.08); }
   .nh-slide-image { position: absolute; z-index: 1; left: 50%; top: 50%; width: calc(100% - 80px); max-width: 90%; height: 88%; object-fit: contain; transform: translate(-50%,-50%); }
   .nh-slide-shade { position: absolute; z-index: 2; inset: 0; background: linear-gradient(to top, rgba(2,6,12,.35), rgba(2,6,12,.06) 45%, transparent); }
-  .nh-slide-copy { position: relative; z-index: 3; align-self: flex-start; width: fit-content; max-width: min(760px, 88%); padding: 14px 18px; border: 1px solid rgba(255,255,255,.55); border-radius: 12px; background: rgba(230,237,246,.78); color: #07111d; box-shadow: 0 10px 30px rgba(0,0,0,.18); backdrop-filter: blur(10px) saturate(140%); -webkit-backdrop-filter: blur(10px) saturate(140%); }
-  .nh-slide h2 { margin: 6px 0; color: #07111d; font-family: Georgia, Cambria, "Times New Roman", serif; font-size: clamp(24px, 3vw, 34px); max-width: 680px; font-weight: 500; line-height: 1.08; letter-spacing: -.035em; }
-  .nh-slide p  { margin: 0 0 10px; max-width: 620px; color: #334155; font-size: 14px; opacity: 1; }
+  .nh-slide-copy { position: relative; z-index: 3; align-self: flex-start; width: fit-content; max-width: min(760px, 88%); color: #fff; }
+  .nh-slide h2 { margin: 6px 0; font-family: Georgia, Cambria, "Times New Roman", serif; font-size: clamp(24px, 3vw, 34px); max-width: 680px; font-weight: 500; line-height: 1.08; letter-spacing: -.035em; }
+  .nh-slide h2 span, .nh-slide p span { border-radius: 6px; padding: 2px 7px; background: rgba(230,237,246,.88); color: #07111d; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+  .nh-slide p  { margin: 0 0 10px; max-width: 620px; font-size: 14px; opacity: 1; line-height: 1.65; }
+  .nh-slide p span { background: rgba(230,237,246,.82); color: #334155; }
   .nh-tag { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .05em; padding: 4px 9px; border-radius: 99px; background: rgba(255,255,255,.2); backdrop-filter: blur(4px); width: max-content; margin-bottom: 6px; }
   .nh-tag.sp { background: #facc15; color: #422006; font-weight: 800; }
   .nh-dots { position: absolute; right: 20px; bottom: 16px; display: flex; gap: 6px; z-index: 5; }
@@ -1075,10 +1113,12 @@ const STYLES = `
   .nh-chip:focus-visible, .nh-btn:focus-visible, .nh-arrow:focus-visible, .nh-dot:focus-visible, .nh-topic-link:focus-visible { outline: 2px solid #67e8f9; outline-offset: 3px; }
 
   /* ─── Article cards ─── */
-  .nh-inline-discovery { display: grid; grid-column: 1 / -1; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; margin: 4px 0; border-top: 1px solid var(--nh-border); border-bottom: 1px solid var(--nh-border); padding: 18px 0; }
+  .nh-inline-recommended { grid-column: 1 / -1; margin: 4px 0; border-top: 1px solid var(--nh-border); border-bottom: 1px solid var(--nh-border); padding: 18px 0; }
+  .nh-inline-recommended .nh-discovery-module { border-top: 0; padding-top: 0; }
+  .nh-inline-recommended .nh-discovery-list, .nh-feature-trending .nh-discovery-list { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .nh-feature-trending { margin: 18px 0 24px; }
   .nh-inline-topics { grid-column: 1 / -1; }
   .nh-discovery-module, .nh-topic-section { min-width: 0; border-top: 1px solid var(--nh-border); padding-top: 14px; }
-  .nh-inline-discovery .nh-discovery-module { border-top: 0; padding-top: 0; }
   .nh-discovery-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
   .nh-discovery-heading h2 { margin: 4px 0 0; font-family: Georgia, Cambria, "Times New Roman", serif; font-size: 22px; font-weight: 500; letter-spacing: -.03em; }
   .nh-discovery-list { display: grid; gap: 14px; }
@@ -1128,10 +1168,10 @@ const STYLES = `
   .nh-article-link { color: var(--nh-text); text-decoration: none; }
   .nh-article-link:hover { color: var(--nh-accent); }
   .nh-muted { color: var(--nh-muted); }
-  @media(max-width:860px) { .nh-topic-sections { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-  @media(max-width:620px) { .nh-inline-discovery, .nh-topic-sections { grid-template-columns: 1fr; } .nh-discovery-card, .nh-topic-list .nh-discovery-card { grid-template-columns: 84px minmax(0, 1fr); } .nh-discovery-heading h2 { font-size: 20px; } }
+  @media(max-width:860px) { .nh-inline-recommended .nh-discovery-list, .nh-feature-trending .nh-discovery-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } .nh-topic-sections { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media(max-width:620px) { .nh-inline-recommended .nh-discovery-list, .nh-feature-trending .nh-discovery-list, .nh-topic-sections { grid-template-columns: 1fr; } .nh-discovery-card, .nh-topic-list .nh-discovery-card { grid-template-columns: 84px minmax(0, 1fr); } .nh-discovery-heading h2 { font-size: 20px; } }
   @media(max-width:860px) { .nh-feature-grid { grid-template-columns: minmax(0, 1.65fr) minmax(220px, 1fr); } .nh-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } .nh-bento-featured, .nh-bento-compact, .nh-bento-standard { grid-column: span 1; } .nh-bento-featured .nh-bento-image { aspect-ratio: 16/9; } }
-  @media(max-width:620px) { .nh-wrap { padding: 8px 6px; } .nh-category-bar { align-items: flex-start; } .nh-feature-grid, .nh-feature-grid:not(.has-side) { grid-template-columns: 1fr; } .nh-feature-primary .nh-slider, .nh-lead-story { height: clamp(320px, 82vw, 420px); min-height: 320px; } .nh-feature-secondary { min-height: 0; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: 165px; } .nh-cards { grid-template-columns: 1fr; } .nh-bento-card, .nh-card-skeleton { grid-column: span 1; } .nh-bento-featured .nh-bento-content h3 { font-size: 19px; } }
+  @media(max-width:620px) { .nh-wrap { padding: 8px 6px; } .nh-category-bar { align-items: flex-start; } .nh-feature-grid, .nh-feature-grid:not(.has-side) { grid-template-columns: 1fr; } .nh-feature-primary .nh-slider, .nh-lead-story { height: clamp(320px, 82vw, 420px); min-height: 320px; } .nh-feature-secondary { min-height: 0; } .nh-cards { grid-template-columns: 1fr; } .nh-bento-card, .nh-card-skeleton { grid-column: span 1; } .nh-bento-featured .nh-bento-content h3 { font-size: 19px; } }
 
   .nh-empty-state { margin-bottom: 12px; border: 1px solid var(--nh-border); border-radius: 12px; background: var(--nh-card); }
 
