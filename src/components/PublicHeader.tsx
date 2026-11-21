@@ -237,9 +237,6 @@ export default function PublicHeader() {
               className="h-8 w-8 shrink-0 object-contain"
             />
             {brandLabel.replace(/\s+pro$/i, '')}
-            <span className="rounded border border-cyan-300/40 bg-cyan-300/10 px-1.5 py-0.5 text-[9px] font-bold tracking-[0.14em] text-cyan-200 md:text-[10px]">
-              PRO
-            </span>
           </Link>
 
           <div className="hidden flex-1 items-center justify-center gap-1 md:flex">
