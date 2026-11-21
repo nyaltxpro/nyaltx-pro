@@ -1,6 +1,7 @@
 'use client';
 import React, { useEffect } from 'react';
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
+import { FiChevronDown } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface FAQ {
@@ -13,9 +14,15 @@ interface FaqProps {
   baseToken?: string;
   quoteToken?: string;
   className?: string;
+  variant?: 'default' | 'landing';
 }
 
-const Faq: React.FC<FaqProps> = ({ baseToken = '', quoteToken = '', className = '' }) => {
+const Faq: React.FC<FaqProps> = ({
+  baseToken = '',
+  quoteToken = '',
+  className = '',
+  variant = 'default',
+}) => {
   // Get token-specific FAQs based on the provided tokens
   const getTokenSpecificFaqs = (): FAQ[] => {
     // Bitcoin specific FAQs
@@ -148,53 +155,102 @@ const Faq: React.FC<FaqProps> = ({ baseToken = '', quoteToken = '', className = 
     ];
   };
 
-  // Initialize with token-specific FAQs
-  const [faqs, setFaqs] = React.useState<FAQ[]>(() => getTokenSpecificFaqs());
+  const getInitialFaqs = () => {
+    const initialFaqs = getTokenSpecificFaqs();
+    if (variant === 'landing' && initialFaqs.length) {
+      initialFaqs[0].isOpen = true;
+    }
+    return initialFaqs;
+  };
+
+  const [faqs, setFaqs] = React.useState<FAQ[]>(getInitialFaqs);
 
   // Update FAQs when tokens change
   useEffect(() => {
-    setFaqs(getTokenSpecificFaqs());
-  }, [baseToken, quoteToken]);
+    setFaqs(getInitialFaqs());
+  }, [baseToken, quoteToken, variant]);
 
   const toggleFAQ = (index: number) => {
     const updatedFaqs = [...faqs];
     updatedFaqs[index].isOpen = !updatedFaqs[index].isOpen;
     setFaqs(updatedFaqs);
   };
+  const isLanding = variant === 'landing';
+
   return (
     <div
-      className={`my-5 rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur p-6 ${className}`}
+      className={
+        isLanding
+          ? `mx-auto max-w-3xl px-4 py-8 ${className}`
+          : `my-5 rounded-2xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur ${className}`
+      }
     >
-      <h2 className="text-xl font-semibold text-white mb-2">
-        {baseToken && quoteToken
-          ? `Frequently Asked Questions about ${baseToken}/${quoteToken}`
-          : 'Frequently Asked Questions'}
-      </h2>
+      {isLanding ? (
+        <h2 className="mb-4 text-center text-3xl font-semibold text-white">
+          Frequently asked questions
+        </h2>
+      ) : (
+        <h2 className="mb-2 text-xl font-semibold text-white">
+          {baseToken && quoteToken
+            ? `Frequently Asked Questions about ${baseToken}/${quoteToken}`
+            : 'Frequently Asked Questions'}
+        </h2>
+      )}
 
-      <p className="text-gray-300/90 mb-4 text-sm">
-        {baseToken && quoteToken
-          ? `Find answers to common questions about trading ${baseToken} against ${quoteToken} and using our platform.`
-          : 'Our platform is easy to use, has low fees, and is trusted by thousands of users for cryptocurrency trading.'}
-      </p>
+      {!isLanding && (
+        <p className="mb-4 text-sm text-gray-300/90">
+          {baseToken && quoteToken
+            ? `Find answers to common questions about trading ${baseToken} against ${quoteToken} and using our platform.`
+            : 'Our platform is easy to use, has low fees, and is trusted by thousands of users for cryptocurrency trading.'}
+        </p>
+      )}
 
-      <div className="space-y-3 mt-4">
+      <div className={isLanding ? '' : 'mt-4 space-y-3'}>
         {faqs.map((faq, index) => (
           <motion.div
             key={index}
-            className="rounded-xl border border-white/10 bg-white/[0.02] p-4 transition-colors"
+            className={
+              isLanding
+                ? 'border-b border-white/10'
+                : 'rounded-xl border border-white/10 bg-white/[0.02] p-4 transition-colors'
+            }
             initial={false}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
           >
             <button
-              className="flex justify-between items-center w-full text-left text-gray-300 hover:text-white"
+              type="button"
+              aria-expanded={faq.isOpen}
+              className={`flex w-full items-center justify-between gap-4 text-left transition-colors ${
+                isLanding
+                  ? 'py-6 text-slate-100 hover:text-white'
+                  : 'text-gray-300 hover:text-white'
+              }`}
               onClick={() => toggleFAQ(index)}
             >
-              <span className="font-medium">{faq.question}</span>
-              <span className="shrink-0 ml-3">
-                {faq.isOpen ? <FaChevronUp /> : <FaChevronDown />}
+              <span
+                className={
+                  isLanding
+                    ? 'bg-gradient-to-r from-cyan-300 to-indigo-400 bg-clip-text text-lg font-medium text-transparent'
+                    : 'font-medium'
+                }
+              >
+                {faq.question}
               </span>
+              <motion.span
+                animate={{ rotate: faq.isOpen ? 180 : 0 }}
+                transition={{ duration: 0.2 }}
+                className={`shrink-0 ${isLanding ? 'text-cyan-300' : 'ml-3'}`}
+              >
+                {isLanding ? (
+                  <FiChevronDown className="text-2xl" aria-hidden="true" />
+                ) : faq.isOpen ? (
+                  <FaChevronUp />
+                ) : (
+                  <FaChevronDown />
+                )}
+              </motion.span>
             </button>
             <AnimatePresence initial={false}>
               {faq.isOpen && (
@@ -204,9 +260,17 @@ const Faq: React.FC<FaqProps> = ({ baseToken = '', quoteToken = '', className = 
                   animate={{ height: 'auto', opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
                   transition={{ duration: 0.3 }}
-                  className="overflow-hidden"
+                  className={`overflow-hidden ${isLanding ? 'text-slate-300' : ''}`}
                 >
-                  <p className="mt-2 text-gray-400 text-sm">{faq.answer}</p>
+                  <p
+                    className={
+                      isLanding
+                        ? 'mb-6 text-sm leading-6 text-slate-300'
+                        : 'mt-2 text-sm text-gray-400'
+                    }
+                  >
+                    {faq.answer}
+                  </p>
                 </motion.div>
               )}
             </AnimatePresence>

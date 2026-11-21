@@ -11,6 +11,7 @@ import {
 } from '@web3icons/react/dynamic';
 import type { Variants } from 'framer-motion';
 import { animate, motion, useInView } from 'framer-motion';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
@@ -65,6 +66,26 @@ export default function LandingPage(props?: LandingPageProps) {
             </div>
         );
     }
+
+    const configuredTestimonials = landingContent?.testimonials?.items as
+        (LandingTestimonial | null | undefined)[] | null | undefined;
+    const testimonialItems = configuredTestimonials?.filter(
+        (testimonial): testimonial is LandingTestimonial =>
+            Boolean(testimonial?.quote && testimonial.author)
+    ) ?? [
+        {
+            quote: 'NYALTX helped us boost discovery during launch week.',
+            author: 'Team Atlas',
+        },
+        {
+            quote: 'The Race to Liberty brought real traffic and holders.',
+            author: 'Liberty Labs',
+        },
+        {
+            quote: 'Smooth UX and flexible payments — exactly what we needed.',
+            author: 'DeltaX',
+        },
+    ];
 
     return (
         <div className="min-h-screen">
@@ -344,49 +365,7 @@ export default function LandingPage(props?: LandingPageProps) {
                 >
                     {landingContent?.testimonials?.title || 'What builders say'}
                 </motion.h2>
-                <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {landingContent?.testimonials?.items?.map((testimonial, i) => (
-                        <motion.div
-                            key={i}
-                            variants={scaleIn}
-                            className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur-md"
-                        >
-                            <p className="text-gray-200">"{testimonial.quote}"</p>
-                            <div className="mt-3 flex items together gap-3">
-                                <div>
-                                    <p className="text-sm font-medium text-gray-300">— {testimonial.author}</p>
-                                    {testimonial.role && (
-                                        <p className="text-xs text-gray-500">{testimonial.role}</p>
-                                    )}
-                                </div>
-                            </div>
-                        </motion.div>
-                    )) || (
-                            [
-                                {
-                                    q: 'NYALTX helped us boost discovery during launch week.',
-                                    a: '— Team Atlas',
-                                },
-                                {
-                                    q: 'The Race to Liberty brought real traffic and holders.',
-                                    a: '— Liberty Labs',
-                                },
-                                {
-                                    q: 'Smooth UX and flexible payments — exactly what we needed.',
-                                    a: '— DeltaX',
-                                },
-                            ].map((t, i) => (
-                                <motion.div
-                                    key={i}
-                                    variants={scaleIn}
-                                    className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur-md"
-                                >
-                                    <p className="text-gray-200">"{t.q}"</p>
-                                    <p className="mt-3 text-sm text-gray-400">{t.a}</p>
-                                </motion.div>
-                            ))
-                        )}
-                </div>
+                <StaggerTestimonials items={testimonialItems} />
             </motion.section>
 
             <motion.section
@@ -396,13 +375,7 @@ export default function LandingPage(props?: LandingPageProps) {
                 whileInView="show"
                 viewport={{ once: true, amount: 0.2 }}
             >
-                <motion.h2
-                    className="text-2xl md:text-3xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-indigo-400"
-                    variants={fadeUp}
-                >
-                    FAQ
-                </motion.h2>
-                <Faq className="bg-white/[0.03] border border-white/10" />
+                <Faq variant="landing" />
             </motion.section>
 
             <motion.section
@@ -512,6 +485,128 @@ export default function LandingPage(props?: LandingPageProps) {
                     </div>
                 </motion.div>
             </motion.section>
+        </div>
+    );
+}
+
+interface LandingTestimonial {
+    quote: string;
+    author: string;
+    role?: string | null;
+    avatar?: string | null;
+}
+
+function StaggerTestimonials({ items }: { items: LandingTestimonial[] }) {
+    const [activeIndex, setActiveIndex] = React.useState(0);
+    const [cardSize, setCardSize] = React.useState(290);
+    const count = items.length;
+
+    React.useEffect(() => {
+        const mediaQuery = window.matchMedia('(min-width: 640px)');
+        const updateCardSize = () => setCardSize(mediaQuery.matches ? 365 : 290);
+
+        updateCardSize();
+        mediaQuery.addEventListener('change', updateCardSize);
+        return () => mediaQuery.removeEventListener('change', updateCardSize);
+    }, []);
+
+    if (!count) return null;
+
+    const move = (offset: number) => {
+        setActiveIndex(current => (current + offset + count) % count);
+    };
+
+    return (
+        <div className="relative mt-8 h-[560px] w-full overflow-hidden sm:h-[600px]">
+            {items.map((testimonial, index) => {
+                const relativeIndex = (index - activeIndex + count) % count;
+                const position = relativeIndex > count / 2 ? relativeIndex - count : relativeIndex;
+                const isActive = position === 0;
+
+                return (
+                    <motion.button
+                        key={`${testimonial.author}-${index}`}
+                        type="button"
+                        aria-label={`Show testimonial by ${testimonial.author}`}
+                        aria-pressed={isActive}
+                        onClick={() => move(position)}
+                        className={`absolute left-1/2 top-1/2 overflow-hidden border-2 p-6 text-left transition-colors duration-500 sm:p-8 ${
+                            isActive
+                                ? 'z-10 border-cyan-300/70 bg-gradient-to-br from-cyan-700 to-blue-900 text-white'
+                                : 'z-0 border-white/10 bg-slate-900/95 text-slate-200'
+                        }`}
+                        style={{
+                            clipPath:
+                                'polygon(40px 0%, calc(100% - 40px) 0%, 100% 40px, 100% 100%, 40px 100%, 0 100%, 0 0)',
+                        }}
+                        animate={{
+                            width: cardSize,
+                            height: cardSize,
+                            x: `calc(-50% + ${position * (cardSize / 1.5)}px)`,
+                            y: `calc(-50% + ${isActive ? -48 : position % 2 ? 14 : -14}px)`,
+                            rotate: isActive ? 0 : position % 2 ? 2.5 : -2.5,
+                            boxShadow: isActive
+                                ? '0 12px 32px rgba(8, 145, 178, 0.3)'
+                                : '0 8px 24px rgba(0, 0, 0, 0.3)',
+                        }}
+                        transition={{
+                            type: 'spring',
+                            mass: 2,
+                            stiffness: 350,
+                            damping: 42,
+                        }}
+                    >
+                        <div className="flex h-full flex-col">
+                            {testimonial.avatar ? (
+                                <img
+                                    src={testimonial.avatar}
+                                    alt=""
+                                    className="mb-4 h-12 w-12 rounded-full border border-white/20 object-cover object-top"
+                                />
+                            ) : (
+                                <div className="mb-4 grid h-12 w-12 place-items-center rounded-full border border-cyan-300/30 bg-cyan-400/10 text-lg font-bold text-cyan-200">
+                                    {testimonial.author.trim().charAt(0).toUpperCase()}
+                                </div>
+                            )}
+                            <p className="line-clamp-5 text-sm leading-6 sm:text-base">
+                                “{testimonial.quote}”
+                            </p>
+                            <div className="mt-auto pt-4">
+                                <p
+                                    className={`text-sm font-semibold ${isActive ? 'text-white' : 'text-slate-100'}`}
+                                >
+                                    — {testimonial.author}
+                                </p>
+                                {testimonial.role && (
+                                    <p
+                                        className={`mt-1 text-xs ${isActive ? 'text-cyan-100/80' : 'text-slate-400'}`}
+                                    >
+                                        {testimonial.role}
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+                    </motion.button>
+                );
+            })}
+            <div className="absolute bottom-4 left-1/2 z-20 flex -translate-x-1/2 gap-3">
+                <button
+                    type="button"
+                    aria-label="Previous testimonial"
+                    onClick={() => move(-1)}
+                    className="grid h-12 w-12 place-items-center rounded-full border border-white/15 bg-slate-900/90 text-slate-100 transition hover:border-cyan-300/60 hover:bg-cyan-950"
+                >
+                    <ChevronLeft aria-hidden="true" size={22} />
+                </button>
+                <button
+                    type="button"
+                    aria-label="Next testimonial"
+                    onClick={() => move(1)}
+                    className="grid h-12 w-12 place-items-center rounded-full border border-white/15 bg-slate-900/90 text-slate-100 transition hover:border-cyan-300/60 hover:bg-cyan-950"
+                >
+                    <ChevronRight aria-hidden="true" size={22} />
+                </button>
+            </div>
         </div>
     );
 }
