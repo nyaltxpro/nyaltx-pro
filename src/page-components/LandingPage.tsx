@@ -66,7 +66,7 @@ export default function LandingPage(props?: LandingPageProps) {
                         Retry
                     </button>
                 </div>
-            </motion.div>
+            </div>
         );
     }
 
