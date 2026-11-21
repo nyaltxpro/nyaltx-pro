@@ -111,16 +111,10 @@ export default function LandingPage(props?: LandingPageProps) {
                 animate="show"
             >
                 <PublicHeader />
-                <div className="pointer-events-none absolute inset-0 -z-10">
-                    <div className="absolute -top-24 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-cyan-500/20 blur-3xl" />
-                    <div className="absolute top-40 right-10 h-72 w-72 rounded-full bg-indigo-500/10 blur-3xl" />
-                    <div className="absolute bottom-0 left-10 h-64 w-64 rounded-full bg-fuchsia-500/10 blur-3xl" />
-                    <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent_0,transparent_95%,rgba(255,255,255,0.04)_95%,rgba(255,255,255,0.04)_100%),linear-gradient(to_bottom,transparent_0,transparent_95%,rgba(255,255,255,0.04)_95%,rgba(255,255,255,0.04)_100%)] bg-[length:22px_22px] opacity-30" />
-                </div>
                 <div className="mx-auto flex w-full max-w-7xl flex-1 items-center px-6 py-24 md:py-32 lg:py-36">
                     <div className="grid w-full grid-cols-1 md:grid-cols-2 items-center gap-12 md:gap-14">
                         <motion.div className="max-w-3xl overflow-visible" variants={fadeUp}>
-                            <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight leading-[1.2] md:leading-[1.18] pb-2 bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-indigo-400">
+                            <h1 className="max-w-3xl font-sans text-[clamp(2rem,5vw,3.5rem)] font-medium leading-[0.98] tracking-[-0.06em] text-white">
                                 {landingContent?.hero?.title || 'Discover. Track. Explore the Future of Digital Markets.'}
                             </h1>
                             <p className="mt-6 text-sm text-gray-300/90 max-w-2xl leading-relaxed">
