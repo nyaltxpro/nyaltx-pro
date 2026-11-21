@@ -241,7 +241,7 @@ export default async function RootLayout({
           <div className="dex-bg-pattern pointer-events-none fixed inset-0 -z-10" aria-hidden />
 
           <div className="relative z-0 flex min-h-screen flex-col transition-all duration-300">
-            <main className="relative z-0 flex-grow">
+            <main className="relative z-[1] flex-grow">
               {children}
             </main>
             <Footer />

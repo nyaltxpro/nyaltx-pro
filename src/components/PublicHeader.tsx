@@ -227,7 +227,7 @@ export default function PublicHeader() {
           <Link
             href={brandHref}
             aria-label="NYALTX Pro home"
-            className="relative z-20 inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap text-xl font-black tracking-[0.06em] text-white md:text-2xl"
+            className="relative z-20 inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap text-xl font-black italic text-white md:text-2xl"
           >
             <Image
               src="/nyaltxpro.png"
