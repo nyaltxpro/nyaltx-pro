@@ -104,6 +104,40 @@ function relativeDate(dateStr?: string): string {
   return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
+function ArticleLink({
+  article,
+  className,
+  ariaLabel,
+  children,
+}: {
+  article: Article;
+  className: string;
+  ariaLabel: string;
+  children: React.ReactNode;
+}) {
+  if (article.isSyndicated && article.sourceUrl) {
+    return (
+      <a
+        href={article.sourceUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={className}
+        aria-label={ariaLabel}
+      >
+        {children}
+      </a>
+    );
+  }
+  if (article.slug) {
+    return (
+      <Link href={`/news/${article.slug}`} className={className} aria-label={ariaLabel}>
+        {children}
+      </Link>
+    );
+  }
+  return <div className={className}>{children}</div>;
+}
+
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function NewshubPage({ initialData }: { initialData?: NewshubInitialData }) {
@@ -304,6 +338,8 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
   const activeBannerImage = activeBanner?.imageUrl
     ? toReliableIpfsUrl(activeBanner.imageUrl) || null
     : null;
+  const leadArticle = articles[0];
+  const featuredSideArticles = articles.slice(activeBanner ? 0 : 1, activeBanner ? 2 : 3);
   const activeBannerContent = activeBanner ? (
     <div
       className="nh-slide"
@@ -350,21 +386,6 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
 
       <div className="nh-root">
         <div className="nh-wrap">
-          {/* ── HERO BANNER ──────────────────────────────────────────── */}
-          <section className="nyb" aria-label="NYALTX News Hub">
-            <Link
-              href="/newshub/submit"
-              className="nh-banner-link"
-              aria-label="Submit news to NYALTX News Hub"
-            >
-              <img
-                src="/nyaltx-news-hub-banner.png"
-                alt="New York Alt Exchange NYALTX News Hub"
-                className="nh-banner-image"
-              />
-            </Link>
-          </section>
-
           {/* ── PAGE HEADER ──────────────────────────────────────────── */}
           <header className="nh-top">
             <div>
@@ -382,80 +403,184 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
             </div>
           </header>
 
-          {/* ── SLIDER ───────────────────────────────────────────────── */}
-          {/* Only show slider if there are real banners from admin or featured paid articles */}
-          {!loading && activeBanner && (
-            <section className="nh-slider" aria-label="Featured banners">
-              <AnimatePresence initial={false} custom={slideDirection}>
-                <motion.div
-                  key={activeBanner._id}
-                  custom={slideDirection}
-                  variants={bannerSlideVariants}
-                  initial={shouldReduceMotion ? false : 'enter'}
-                  animate="center"
-                  exit={shouldReduceMotion ? undefined : 'exit'}
-                  transition={{
-                    duration: shouldReduceMotion ? 0 : 0.55,
-                    ease: [0.22, 1, 0.36, 1],
-                  }}
-                  className="nh-slide-wrapper"
-                >
-                  {activeBannerTarget && activeBannerTarget !== '#' ? (
-                    activeBannerIsExternal ? (
-                      <a
-                        href={activeBannerTarget}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="nh-slide-link"
+          {!loading && (activeBanner || articles.length > 0) && (
+            <section className="nh-news-lead" aria-label="Top stories">
+              {articles.length > 0 && (
+                <div className="nh-trending">
+                  <span className="nh-trending-label">Trending</span>
+                  <div className="nh-trending-list">
+                    {articles.slice(0, 5).map(article => (
+                      <ArticleLink
+                        key={article._id}
+                        article={article}
+                        className="nh-trending-story"
+                        ariaLabel={`Read ${article.title}`}
                       >
-                        {activeBannerContent}
-                      </a>
-                    ) : (
-                      <Link href={activeBannerTarget} className="nh-slide-link">
-                        {activeBannerContent}
-                      </Link>
-                    )
-                  ) : (
-                    activeBannerContent
-                  )}
-                </motion.div>
-              </AnimatePresence>
-
-              {banners.length > 1 && (
-                <>
-                  <button className="nh-arrow nh-arrow-l" onClick={prevSlide} aria-label="Previous">
-                    <FiChevronLeft aria-hidden="true" />
-                  </button>
-                  <button className="nh-arrow nh-arrow-r" onClick={nextSlide} aria-label="Next">
-                    <FiChevronRight aria-hidden="true" />
-                  </button>
-                  <div className="nh-dots">
-                    {banners.map((_, i) => (
-                      <button
-                        key={i}
-                        className={`nh-dot${i === curSlide ? ' on' : ''}`}
-                        onClick={() => goToSlide(i)}
-                        aria-label={`Slide ${i + 1}`}
-                      />
+                        <span>{article.category || article.tags?.[0] || 'NYALTX'}</span>
+                        <strong>{article.title}</strong>
+                      </ArticleLink>
                     ))}
                   </div>
-                </>
+                </div>
               )}
+
+              <div className={`nh-feature-grid${featuredSideArticles.length ? ' has-side' : ''}`}>
+                <div className="nh-feature-primary">
+                  {activeBanner ? (
+                    <section className="nh-slider" aria-label="Featured banners">
+                      <AnimatePresence initial={false} custom={slideDirection}>
+                        <motion.div
+                          key={activeBanner._id}
+                          custom={slideDirection}
+                          variants={bannerSlideVariants}
+                          initial={shouldReduceMotion ? false : 'enter'}
+                          animate="center"
+                          exit={shouldReduceMotion ? undefined : 'exit'}
+                          transition={{
+                            duration: shouldReduceMotion ? 0 : 0.55,
+                            ease: [0.22, 1, 0.36, 1],
+                          }}
+                          className="nh-slide-wrapper"
+                        >
+                          {activeBannerTarget && activeBannerTarget !== '#' ? (
+                            activeBannerIsExternal ? (
+                              <a
+                                href={activeBannerTarget}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="nh-slide-link"
+                              >
+                                {activeBannerContent}
+                              </a>
+                            ) : (
+                              <Link href={activeBannerTarget} className="nh-slide-link">
+                                {activeBannerContent}
+                              </Link>
+                            )
+                          ) : (
+                            activeBannerContent
+                          )}
+                        </motion.div>
+                      </AnimatePresence>
+
+                      {banners.length > 1 && (
+                        <>
+                          <button
+                            className="nh-arrow nh-arrow-l"
+                            onClick={prevSlide}
+                            aria-label="Previous"
+                          >
+                            <FiChevronLeft aria-hidden="true" />
+                          </button>
+                          <button
+                            className="nh-arrow nh-arrow-r"
+                            onClick={nextSlide}
+                            aria-label="Next"
+                          >
+                            <FiChevronRight aria-hidden="true" />
+                          </button>
+                          <div className="nh-dots">
+                            {banners.map((_, i) => (
+                              <button
+                                key={i}
+                                className={`nh-dot${i === curSlide ? ' on' : ''}`}
+                                onClick={() => goToSlide(i)}
+                                aria-label={`Slide ${i + 1}`}
+                              />
+                            ))}
+                          </div>
+                        </>
+                      )}
+                    </section>
+                  ) : (
+                    leadArticle && (
+                      <ArticleLink
+                        article={leadArticle}
+                        className="nh-lead-story"
+                        ariaLabel={`Read ${leadArticle.title}`}
+                      >
+                        {articleThumbnail(leadArticle) ? (
+                          <img
+                            src={articleThumbnail(leadArticle) || ''}
+                            alt={leadArticle.title}
+                          />
+                        ) : (
+                          <div
+                            className="nh-lead-story-fallback"
+                            style={{
+                              background:
+                                GRADS[(leadArticle.coverColor ?? 0) % GRADS.length],
+                            }}
+                          />
+                        )}
+                        <div className="nh-lead-shade" />
+                        <div className="nh-lead-copy">
+                          <span className="nh-lead-category">
+                            {leadArticle.category || leadArticle.tags?.[0] || 'NYALTX'}
+                          </span>
+                          <h2>{leadArticle.title}</h2>
+                          <p>
+                            {leadArticle.excerpt ||
+                              'The latest news and updates from across digital markets.'}
+                          </p>
+                          <span className="nh-lead-byline">
+                            {leadArticle.author || 'NYALTX'} ·{' '}
+                            {relativeDate(leadArticle.publishedAt || leadArticle.createdAt)}
+                          </span>
+                        </div>
+                      </ArticleLink>
+                    )
+                  )}
+                </div>
+
+                {featuredSideArticles.length > 0 && (
+                  <div className="nh-feature-secondary">
+                    {featuredSideArticles.map(article => (
+                      <ArticleLink
+                        key={article._id}
+                        article={article}
+                        className="nh-side-story"
+                        ariaLabel={`Read ${article.title}`}
+                      >
+                        {articleThumbnail(article) ? (
+                          <img
+                            src={articleThumbnail(article) || ''}
+                            alt={article.title}
+                          />
+                        ) : (
+                          <div
+                            className="nh-side-story-fallback"
+                            style={{
+                              background:
+                                GRADS[(article.coverColor ?? 0) % GRADS.length],
+                            }}
+                          />
+                        )}
+                        <div className="nh-side-story-shade" />
+                        <div className="nh-side-story-copy">
+                          <span>{article.category || article.tags?.[0] || 'NYALTX'}</span>
+                          <h2>{article.title}</h2>
+                          <small>
+                            {article.author || 'NYALTX'} ·{' '}
+                            {relativeDate(article.publishedAt || article.createdAt)}
+                          </small>
+                        </div>
+                      </ArticleLink>
+                    ))}
+                  </div>
+                )}
+              </div>
             </section>
           )}
 
-          {/* Slider loading skeleton */}
           {loading && (
-            <div
-              className="nh-skeleton"
-              style={{
-                width: '100%',
-                aspectRatio: '16/6',
-                minHeight: 190,
-                borderRadius: 14,
-                marginBottom: 16,
-              }}
-            />
+            <div className="nh-feature-grid nh-feature-grid-loading" aria-hidden="true">
+              <div className="nh-skeleton nh-lead-skeleton" />
+              <div className="nh-feature-secondary">
+                <div className="nh-skeleton nh-side-story-skeleton" />
+                <div className="nh-skeleton nh-side-story-skeleton" />
+              </div>
+            </div>
           )}
 
           {/* ── MAIN GRID ────────────────────────────────────────────── */}
@@ -833,55 +958,20 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
 
 const STYLES = `
   .nh-root {
-    --nh-bg: #070b12;
-    --nh-card: #0f1623;
-    --nh-text: #e6edf6;
-    --nh-muted: #8a99ad;
-    --nh-border: #1e293b;
-    --nh-accent: #06b6d4;
-    --nh-accent-ink: #023038;
-    --nh-soft: #08222b;
+    --nh-bg: #fff;
+    --nh-card: #f8fafc;
+    --nh-text: #18181b;
+    --nh-muted: #71717a;
+    --nh-border: #e4e4e7;
+    --nh-accent: #e11d48;
+    --nh-accent-ink: #fff;
+    --nh-soft: #fff1f2;
     background: var(--nh-bg);
     color: var(--nh-text);
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     min-height: 60vh;
   }
   .nh-wrap { max-width: 1120px; margin: 0 auto; padding: 24px 16px; }
-
-  /* ─── Hero ─── */
-  .nyb {
-    position: relative; overflow: hidden; border-radius: 20px;
-    aspect-ratio: 2000 / 451; margin-bottom: 16px; color: #fff;
-    background: #07182f;
-    box-shadow: 0 10px 32px rgba(0,0,0,.5);
-  }
-  .nh-banner-link { position: absolute; inset: 0; z-index: 5; display: block; }
-  .nh-banner-image { display: block; width: 100%; height: 100%; object-fit: cover; }
-  .nh-net { position: absolute; inset: 0; width: 100%; height: 100%; }
-  .nh-sk  { position: absolute; right: 0; bottom: 0; height: 88%; width: auto; max-width: 78%; }
-  .nh-tk  {
-    position: absolute; top: 0; left: 0; right: 0; height: 32px;
-    background: rgba(2,10,24,.65); backdrop-filter: blur(6px);
-    overflow: hidden; z-index: 3; border-bottom: 1px solid rgba(255,255,255,.14);
-    font-size: 11px; font-weight: 700; letter-spacing: .12em; white-space: nowrap;
-  }
-  .nh-tk div { display: inline-block; padding-left: 100%; line-height: 32px; animation: nh-mq 32s linear infinite; }
-  .nh-tk i   { color: #fbbf24; font-style: normal; margin: 0 12px; }
-  @keyframes nh-mq { to { transform: translateX(-100%); } }
-  .nh-txt    { position: relative; z-index: 2; padding: 48px 24px 0; max-width: 560px; }
-  .nh-eyebrow{ font-size: 11px; font-weight: 800; letter-spacing: .28em; color: #fde68a; text-transform: uppercase; }
-  .nyb h2    { margin: 8px 0 8px; font-size: 38px; line-height: 1.05; letter-spacing: -.01em; font-weight: 800; }
-  .nyb h2 span{ color: #67e8f9; }
-  .nyb p     { margin: 0; font-size: 15px; opacity: .94; max-width: 440px; line-height: 1.4; }
-  .nh-pl     { animation: nh-pl 2.4s ease-in-out infinite alternate; }
-  .nh-pl:nth-child(2n) { animation-delay: .8s; }
-  .nh-pl:nth-child(3n) { animation-delay: 1.6s; }
-  @keyframes nh-pl { from { opacity: .35; } to { opacity: 1; } }
-  .nh-submit-cta {
-    position: absolute; left: 24px; bottom: 22px; z-index: 3;
-    box-shadow: 0 6px 20px rgba(6,182,212,.5);
-  }
-  @media(max-width:560px) { .nyb h2 { font-size: 27px; } .nh-sk { opacity: .4; max-width: 100%; } }
 
   /* ─── Buttons ─── */
   .nh-btn {
@@ -893,19 +983,54 @@ const STYLES = `
   .nh-btn:hover { border-color: var(--nh-accent); }
   .nh-btn:disabled { opacity: .5; cursor: not-allowed; }
   .nh-btn-pri { background: var(--nh-accent); border-color: var(--nh-accent); color: var(--nh-accent-ink); }
-  .nh-btn-pri:hover { background: #22d3ee; }
+  .nh-btn-pri:hover { background: #be123c; }
   .nh-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 
   /* ─── Header ─── */
   .nh-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
   .nh-top h1 { display: flex; align-items: baseline; gap: .16em; margin: 0; font-size: clamp(30px, 4vw, 42px); font-weight: 600; line-height: .95; letter-spacing: -.06em; }
-  .nh-top h1 span { color: #cbd5e1; font-family: Georgia, Cambria, "Times New Roman", serif; font-weight: 300; font-style: italic; letter-spacing: -.04em; }
-  .nh-top h1 em { color: #fff; font-style: italic; font-weight: 600; }
+  .nh-top h1 span { color: #71717a; font-family: Georgia, Cambria, "Times New Roman", serif; font-weight: 300; font-style: italic; letter-spacing: -.04em; }
+  .nh-top h1 em { color: #18181b; font-style: italic; font-weight: 600; }
   .nh-sub    { color: var(--nh-muted); font-size: 13px; margin-top: 5px; }
 
-  /* ─── Slider ─── */
+  /* ─── Editorial lead ─── */
+  .nh-news-lead { margin-bottom: 20px; }
+  .nh-trending { display: flex; min-width: 0; align-items: stretch; gap: 14px; margin-bottom: 14px; border-top: 1px solid var(--nh-border); border-bottom: 1px solid var(--nh-border); }
+  .nh-trending-label { display: flex; flex: none; align-items: center; background: #e11d48; padding: 0 12px; color: #fff; font-size: 10px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+  .nh-trending-list { display: flex; min-width: 0; gap: 20px; overflow-x: auto; padding: 10px 0; scrollbar-width: thin; }
+  .nh-trending-story { display: flex; min-width: 190px; max-width: 260px; flex-direction: column; justify-content: center; gap: 3px; border-right: 1px solid var(--nh-border); padding-right: 16px; color: inherit; text-decoration: none; }
+  .nh-trending-story span { color: #be123c; font-size: 9px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+  .nh-trending-story strong { overflow: hidden; font-family: Georgia, Cambria, "Times New Roman", serif; font-size: 13px; font-weight: 600; line-height: 1.3; text-overflow: ellipsis; }
+  .nh-trending-story:hover strong { color: #be123c; }
+  .nh-feature-grid { display: grid; grid-template-columns: minmax(0, 2fr) minmax(250px, 1fr); align-items: stretch; gap: 12px; }
+  .nh-feature-grid:not(.has-side) { grid-template-columns: 1fr; }
+  .nh-feature-primary { min-width: 0; min-height: 380px; }
+  .nh-feature-primary .nh-slider, .nh-lead-story { height: clamp(380px, 36vw, 520px); min-height: 380px; }
+  .nh-feature-primary .nh-slider { margin: 0; border-radius: 12px; }
+  .nh-lead-story { position: relative; display: block; overflow: hidden; border: 1px solid var(--nh-border); border-radius: 12px; background: #090f18; color: #fff; text-decoration: none; }
+  .nh-lead-story > img, .nh-lead-story-fallback { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .nh-lead-story-fallback { display: block; }
+  .nh-lead-shade { position: absolute; inset: 0; background: linear-gradient(180deg,rgba(0,0,0,.03) 25%,rgba(0,0,0,.82) 100%); }
+  .nh-lead-copy { position: absolute; right: 0; bottom: 0; left: 0; z-index: 1; padding: 20px 22px; }
+  .nh-lead-category, .nh-side-story-copy > span { display: inline-flex; background: #e11d48; padding: 4px 8px; color: #fff; font-size: 9px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+  .nh-lead-copy h2 { max-width: 720px; margin: 8px 0; font-family: Georgia, Cambria, "Times New Roman", serif; font-size: clamp(24px, 3vw, 38px); font-weight: 600; line-height: 1.06; letter-spacing: -.035em; }
+  .nh-lead-copy p { max-width: 620px; margin: 0 0 10px; color: rgba(255,255,255,.82); font-size: 13px; line-height: 1.5; }
+  .nh-lead-byline { color: rgba(255,255,255,.74); font-size: 11px; }
+  .nh-feature-secondary { display: grid; min-height: 380px; grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .nh-side-story { position: relative; display: block; min-height: 0; overflow: hidden; border: 1px solid var(--nh-border); border-radius: 12px; background: #090f18; color: #fff; text-decoration: none; }
+  .nh-side-story > img, .nh-side-story-fallback { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform .3s ease; }
+  .nh-side-story:hover > img { transform: scale(1.04); }
+  .nh-side-story-fallback { display: block; }
+  .nh-side-story-shade { position: absolute; inset: 0; background: linear-gradient(180deg,rgba(0,0,0,.02) 10%,rgba(0,0,0,.83) 100%); }
+  .nh-side-story-copy { position: absolute; right: 0; bottom: 0; left: 0; z-index: 1; padding: 12px; }
+  .nh-side-story-copy h2 { display: -webkit-box; overflow: hidden; margin: 6px 0; font-family: Georgia, Cambria, "Times New Roman", serif; font-size: 17px; font-weight: 600; line-height: 1.16; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+  .nh-side-story-copy small { color: rgba(255,255,255,.72); font-size: 10px; }
+  .nh-lead-skeleton { height: 100%; min-height: 380px; border-radius: 12px; }
+  .nh-side-story-skeleton { min-height: 180px; border-radius: 12px; }
+
+  /* ─── Featured carousel ─── */
   .nh-slider {
-    position: relative; height: clamp(280px, 34vw, 420px); border-radius: 14px; overflow: hidden;
+    position: relative; height: clamp(380px, 36vw, 520px); border-radius: 14px; overflow: hidden;
     border: 1px solid var(--nh-border); margin-bottom: 16px;
     box-shadow: 0 8px 24px rgba(0,0,0,.35);
   }
@@ -944,7 +1069,7 @@ const STYLES = `
   .nh-chip:hover { color: var(--nh-text); }
   .nh-chip.on { color: #fff; }
   .nh-chip-label { position: relative; z-index: 1; }
-  .nh-chip-indicator { position: absolute; inset: 0; z-index: 0; border-radius: 8px; background: linear-gradient(90deg, #7c3aed, #4f46e5); }
+  .nh-chip-indicator { position: absolute; inset: 0; z-index: 0; border-radius: 8px; background: linear-gradient(90deg, #e11d48, #be123c); }
   .nh-chip:focus-visible, .nh-btn:focus-visible, .nh-arrow:focus-visible, .nh-dot:focus-visible { outline: 2px solid #67e8f9; outline-offset: 3px; }
 
   /* ─── Article cards ─── */
@@ -952,8 +1077,8 @@ const STYLES = `
   .nh-feed-heading h2 { margin: 4px 0 0; font-family: Georgia, Cambria, "Times New Roman", serif; font-size: 22px; font-weight: 500; letter-spacing: -.03em; }
   .nh-result-count { color: var(--nh-muted); font-size: 12px; }
   .nh-cards { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); grid-auto-flow: dense; gap: 14px; }
-  .nh-bento-card { display: flex; min-width: 0; grid-column: span 6; flex-direction: column; overflow: hidden; border: 1px solid #3f3f46; border-radius: 10px; background: #18181b; padding: 12px; transition: border-color .2s ease, background-color .2s ease; }
-  .nh-bento-card:hover { background: #202024; }
+  .nh-bento-card { display: flex; min-width: 0; grid-column: span 6; flex-direction: column; overflow: hidden; border: 1px solid #e4e4e7; border-radius: 10px; background: #fff; padding: 12px; transition: border-color .2s ease, background-color .2s ease; }
+  .nh-bento-card:hover { background: #fafafa; }
   .nh-bento-featured { grid-column: span 8; }
   .nh-bento-compact { grid-column: span 4; }
   .nh-bento-standard { grid-column: span 6; }
@@ -966,32 +1091,32 @@ const STYLES = `
   .nh-card-type.pr { background: rgba(6,95,70,.85); color: #d1fae5; }
   .nh-bento-content { display: flex; min-width: 0; flex: 1; flex-direction: column; padding-top: 12px; }
   .nh-editorial-tags { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 11px; }
-  .nh-editorial-tags span { border: 1px solid #3f3f46; border-radius: 999px; padding: 3px 8px; color: #a1a1aa; font-size: 10px; font-weight: 600; }
+  .nh-editorial-tags span { border: 1px solid #e4e4e7; border-radius: 999px; padding: 3px 8px; color: #71717a; font-size: 10px; font-weight: 600; }
   .nh-bento-content h3 { margin: 0; font-family: Georgia, Cambria, "Times New Roman", serif; font-size: 18px; font-weight: 500; line-height: 1.3; letter-spacing: -.02em; }
   .nh-bento-featured .nh-bento-content h3 { font-size: 23px; }
-  .nh-bento-content p { display: -webkit-box; overflow: hidden; margin: 10px 0 0; color: #a1a1aa; font-size: 13px; line-height: 1.6; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
-  .nh-editorial-byline { display: flex; align-items: center; gap: 10px; margin-top: 14px; color: #a1a1aa; font-size: 11px; }
+  .nh-bento-content p { display: -webkit-box; overflow: hidden; margin: 10px 0 0; color: #71717a; font-size: 13px; line-height: 1.6; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
+  .nh-editorial-byline { display: flex; align-items: center; gap: 10px; margin-top: 14px; color: #71717a; font-size: 11px; }
   .nh-editorial-read { margin-top: auto; padding-top: 16px; }
-  .nh-editorial-read .nh-read-link { display: inline-flex; align-items: center; gap: 7px; color: #fca5a5; font-size: 12px; font-weight: 600; text-decoration: none; }
+  .nh-editorial-read .nh-read-link { display: inline-flex; align-items: center; gap: 7px; color: #e11d48; font-size: 12px; font-weight: 600; text-decoration: none; }
   .nh-editorial-read .nh-read-link:hover { text-decoration: underline; }
-  .nh-read-link { flex: none; color: #67e8f9; font-size: 12px; font-weight: 700; text-decoration: none; }
-  .nh-read-link:hover { color: #a5f3fc; }
+  .nh-read-link { flex: none; color: #e11d48; font-size: 12px; font-weight: 700; text-decoration: none; }
+  .nh-read-link:hover { color: #be123c; }
   .nh-card-skeleton { min-height: 250px; grid-column: span 6; border-radius: 12px; }
   .nh-article-link { color: var(--nh-text); text-decoration: none; }
   .nh-article-link:hover { color: var(--nh-accent); }
   .nh-muted { color: var(--nh-muted); }
-  @media(max-width:860px) { .nh-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } .nh-bento-featured, .nh-bento-compact, .nh-bento-standard { grid-column: span 1; } .nh-bento-featured .nh-bento-image { aspect-ratio: 16/9; } }
-  @media(max-width:620px) { .nh-wrap { padding: 20px 12px; } .nh-category-bar { align-items: flex-start; } .nh-cards { grid-template-columns: 1fr; } .nh-bento-card, .nh-card-skeleton { grid-column: span 1; } .nh-bento-featured .nh-bento-content h3 { font-size: 19px; } }
+  @media(max-width:860px) { .nh-feature-grid { grid-template-columns: minmax(0, 1.65fr) minmax(220px, 1fr); } .nh-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } .nh-bento-featured, .nh-bento-compact, .nh-bento-standard { grid-column: span 1; } .nh-bento-featured .nh-bento-image { aspect-ratio: 16/9; } }
+  @media(max-width:620px) { .nh-wrap { padding: 20px 12px; } .nh-category-bar { align-items: flex-start; } .nh-feature-grid, .nh-feature-grid:not(.has-side) { grid-template-columns: 1fr; } .nh-feature-primary .nh-slider, .nh-lead-story { height: clamp(320px, 82vw, 420px); min-height: 320px; } .nh-feature-secondary { min-height: 0; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: 165px; } .nh-cards { grid-template-columns: 1fr; } .nh-bento-card, .nh-card-skeleton { grid-column: span 1; } .nh-bento-featured .nh-bento-content h3 { font-size: 19px; } }
 
   /* ─── Sidebar ─── */
   .nh-side { background: var(--nh-card); border: 1px solid var(--nh-border); border-radius: 12px; padding: 12px; margin-bottom: 12px; }
   .nh-side h4 { margin: 0 0 8px; font-size: 15px; font-weight: 700; }
   .nh-side code { display: block; background: var(--nh-bg); border: 1px solid var(--nh-border); padding: 8px 10px; border-radius: 8px; font-size: 12px; word-break: break-all; color: var(--nh-accent); margin-bottom: 6px; }
-  .nh-cta { background: linear-gradient(135deg,#0891b2,#06b6d4 60%,#22d3ee); color: #023038; border: 0; box-shadow: 0 8px 20px rgba(6,182,212,.3); }
-  .nh-cta h4 { color: #023038; font-size: 17px; }
-  .nh-cta p  { font-size: 13px; margin: 0 0 12px; font-weight: 500; color: #023038; }
-  .nh-cta .nh-btn { background: #023038; color: #fff; border: 0; }
-  .nh-cta .nh-btn:hover { background: #044b57; }
+  .nh-cta { background: linear-gradient(135deg,#e11d48,#be123c); color: #fff; border: 0; box-shadow: 0 8px 20px rgba(225,29,72,.2); }
+  .nh-cta h4 { color: #fff; font-size: 17px; }
+  .nh-cta p  { font-size: 13px; margin: 0 0 12px; font-weight: 500; color: rgba(255,255,255,.86); }
+  .nh-cta .nh-btn { background: #fff; color: #18181b; border: 0; }
+  .nh-cta .nh-btn:hover { background: #ffe4e6; }
 
   /* ─── Input ─── */
   .nh-input { width: 100%; background: var(--nh-bg); color: var(--nh-text); border: 1px solid var(--nh-border); border-radius: 10px; padding: 10px 12px; font-size: 14px; box-sizing: border-box; outline: none; }
@@ -999,7 +1124,7 @@ const STYLES = `
   .nh-note { font-size: 12px; color: var(--nh-muted); margin-top: 8px; line-height: 1.4; }
 
   /* ─── Skeleton ─── */
-  .nh-skeleton { background: linear-gradient(90deg,var(--nh-card) 25%,#1a2535 50%,var(--nh-card) 75%); background-size: 400% 100%; animation: nh-shimmer 1.4s ease-in-out infinite; border: 1px solid var(--nh-border); }
+  .nh-skeleton { background: linear-gradient(90deg,var(--nh-card) 25%,#e4e4e7 50%,var(--nh-card) 75%); background-size: 400% 100%; animation: nh-shimmer 1.4s ease-in-out infinite; border: 1px solid var(--nh-border); }
   @keyframes nh-shimmer { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
 
   /* ─── Disclaimer ─── */
