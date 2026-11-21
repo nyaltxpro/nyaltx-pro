@@ -53,3 +53,35 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to update pricing inquiry.' }, { status: 500 });
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  if (!(await getAdminFromRequest())) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  try {
+    const body = await request.json().catch(() => null);
+    if (!body || typeof body !== 'object' || Array.isArray(body)) {
+      return NextResponse.json({ error: 'Invalid inquiry deletion.' }, { status: 400 });
+    }
+
+    const { id } = body;
+    if (typeof id !== 'string' || !ObjectId.isValid(id)) {
+      return NextResponse.json({ error: 'Invalid inquiry ID.' }, { status: 400 });
+    }
+
+    const result = await (
+      await getCollection('pricing_inquiries')
+    ).deleteOne({
+      _id: new ObjectId(id),
+    });
+    if (!result.deletedCount) {
+      return NextResponse.json({ error: 'Inquiry not found.' }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Failed to delete pricing inquiry:', error);
+    return NextResponse.json({ error: 'Failed to delete inquiry.' }, { status: 500 });
+  }
+}

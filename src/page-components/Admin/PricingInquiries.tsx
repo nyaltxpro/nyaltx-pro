@@ -1,7 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Building2, Mail, MapPin, RefreshCw } from 'lucide-react';
+import { Building2, Mail, MapPin, RefreshCw, Trash2 } from 'lucide-react';
+import { useConfirmDialog } from '@/components/reui/confirm-dialog';
 
 type PricingInquiry = {
   _id: string;
@@ -27,10 +28,12 @@ const serviceNames: Record<string, string> = {
 };
 
 export default function PricingInquiries() {
+  const { confirm, dialog: confirmationDialog } = useConfirmDialog();
   const [inquiries, setInquiries] = useState<PricingInquiry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const loadInquiries = useCallback(async () => {
     setLoading(true);
@@ -69,6 +72,34 @@ export default function PricingInquiries() {
       setError(updateError instanceof Error ? updateError.message : 'Could not update inquiry.');
     } finally {
       setUpdatingId(null);
+    }
+  };
+
+  const deleteInquiry = async (inquiry: PricingInquiry) => {
+    const confirmed = await confirm({
+      title: 'Delete media inquiry?',
+      description: `Permanently delete the inquiry from ${inquiry.name} for ${inquiry.serviceName || serviceNames[inquiry.serviceId] || inquiry.serviceId}? This cannot be undone.`,
+      confirmLabel: 'Delete inquiry',
+      destructive: true,
+    });
+    if (!confirmed) return;
+
+    setDeletingId(inquiry._id);
+    setError('');
+    try {
+      const response = await fetch('/api/admin/pricing-inquiries', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: inquiry._id }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok)
+        throw new Error(data.error || `Could not delete inquiry (HTTP ${response.status}).`);
+      setInquiries(current => current.filter(item => item._id !== inquiry._id));
+    } catch (deleteError) {
+      setError(deleteError instanceof Error ? deleteError.message : 'Could not delete inquiry.');
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -157,7 +188,7 @@ export default function PricingInquiries() {
                 {inquiry.status !== 'contacted' && (
                   <button
                     type="button"
-                    disabled={updatingId === inquiry._id}
+                    disabled={updatingId === inquiry._id || deletingId === inquiry._id}
                     onClick={() => void updateStatus(inquiry._id, 'contacted')}
                     className="rounded-lg border border-cyan-500/30 px-3 py-1.5 text-sm text-cyan-200 hover:bg-cyan-500/10 disabled:opacity-50"
                   >
@@ -167,7 +198,7 @@ export default function PricingInquiries() {
                 {inquiry.status !== 'closed' && (
                   <button
                     type="button"
-                    disabled={updatingId === inquiry._id}
+                    disabled={updatingId === inquiry._id || deletingId === inquiry._id}
                     onClick={() => void updateStatus(inquiry._id, 'closed')}
                     className="rounded-lg border border-white/10 px-3 py-1.5 text-sm text-slate-300 hover:bg-white/5 disabled:opacity-50"
                   >
@@ -177,18 +208,29 @@ export default function PricingInquiries() {
                 {inquiry.status !== 'new' && (
                   <button
                     type="button"
-                    disabled={updatingId === inquiry._id}
+                    disabled={updatingId === inquiry._id || deletingId === inquiry._id}
                     onClick={() => void updateStatus(inquiry._id, 'new')}
                     className="rounded-lg border border-white/10 px-3 py-1.5 text-sm text-slate-300 hover:bg-white/5 disabled:opacity-50"
                   >
                     Reopen
                   </button>
                 )}
+                <button
+                  type="button"
+                  disabled={updatingId === inquiry._id || deletingId === inquiry._id}
+                  onClick={() => void deleteInquiry(inquiry)}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-red-500/30 px-3 py-1.5 text-sm text-red-200 hover:bg-red-500/10 disabled:opacity-50"
+                  aria-label={`Delete inquiry from ${inquiry.name}`}
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Delete
+                </button>
               </div>
             </article>
           ))}
         </div>
       )}
+      {confirmationDialog}
     </main>
   );
 }
