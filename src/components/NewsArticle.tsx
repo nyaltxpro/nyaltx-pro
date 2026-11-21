@@ -2,8 +2,15 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
-import { FaClock, FaUser, FaEye, FaTags, FaArrowLeft, FaShare, FaTwitter, FaLinkedin, FaCopy } from 'react-icons/fa';
+import {
+  FaArrowLeft,
+  FaClock,
+  FaCopy,
+  FaEye,
+  FaLinkedin,
+  FaTags,
+  FaTwitter,
+} from 'react-icons/fa';
 import { toReliableIpfsUrl } from '@/utils/ipfsUpload';
 
 interface NewsData {
@@ -26,6 +33,7 @@ interface NewsArticleProps {
 function NewsArticle({ article }: NewsArticleProps) {
   const [copied, setCopied] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const authorName = article.author?.trim() || 'NYALTX';
 
   const articleContent = useMemo(() => {
     if (!article.content) return '';
@@ -43,12 +51,11 @@ function NewsArticle({ article }: NewsArticleProps) {
   const workingImageUrl = article.featuredImage ? toReliableIpfsUrl(article.featuredImage) : '';
 
   const formatDate = (dateString: string) => {
+    if (!dateString || Number.isNaN(new Date(dateString).getTime())) return 'Recently';
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
     });
   };
 
@@ -81,39 +88,38 @@ function NewsArticle({ article }: NewsArticleProps) {
     }
     
     if (shareLink) {
-      window.open(shareLink, '_blank', 'width=600,height=400');
+      window.open(shareLink, '_blank', 'width=600,height=400,noopener,noreferrer');
     }
   };
 
   return (
-    <div className="relative">
-      {/* Background effects */}
-      <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute top-0 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-cyan-500/10 blur-3xl" />
-        <div className="absolute top-40 right-10 h-72 w-72 rounded-full bg-indigo-500/5 blur-3xl" />
-      </div>
+    <div className="article-detail min-h-screen bg-slate-950 text-white">
+      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:py-12">
+        <nav aria-label="Breadcrumb" className="mb-7 text-sm text-gray-400">
+          <ol className="flex flex-wrap items-center gap-2">
+            <li>
+              <Link href="/" className="transition-colors hover:text-cyan-300">
+                Home
+              </Link>
+            </li>
+            <li aria-hidden="true">/</li>
+            <li>
+              <Link href="/newshub" className="transition-colors hover:text-cyan-300">
+                News Hub
+              </Link>
+            </li>
+            <li aria-hidden="true">/</li>
+            <li className="text-cyan-200">{article.tags[0] || 'Article'}</li>
+          </ol>
+        </nav>
 
-      <div className="mx-auto max-w-4xl px-6 py-12">
-        {/* Back to News */}
-        <div className="mb-8">
-          <Link
-            href="/news"
-            className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
-          >
-            <FaArrowLeft className="w-4 h-4" />
-            Back to News
-          </Link>
-        </div>
-
-        {/* Article Header */}
-        <header className="mb-8">
-          {/* Tags */}
+        <header className="mb-7 border-b border-white/10 pb-6">
           {article.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-4">
-              {article.tags.map(tag => (
+            <div className="mb-4 flex flex-wrap gap-2">
+              {article.tags.slice(0, 3).map(tag => (
                 <span
                   key={tag}
-                  className="px-3 py-1 bg-cyan-500/10 text-cyan-300 text-sm rounded-full border border-cyan-500/20"
+                  className="rounded-full border border-cyan-300/20 bg-cyan-500/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-cyan-200"
                 >
                   {tag}
                 </span>
@@ -121,195 +127,207 @@ function NewsArticle({ article }: NewsArticleProps) {
             </div>
           )}
 
-          {/* Title */}
-          <h1 className="text-3xl md:text-5xl font-bold bg-clip-text text-transparent bg-linear-to-r from-cyan-400 to-indigo-400 mb-6 leading-tight">
+          <h1 className="max-w-5xl font-serif text-4xl font-semibold leading-[1.05] tracking-[-0.04em] text-white sm:text-5xl lg:text-6xl">
             {article.title}
           </h1>
+          {article.excerpt && (
+            <p className="mt-4 max-w-4xl text-base leading-relaxed text-gray-300 sm:text-lg">
+              {article.excerpt}
+            </p>
+          )}
 
-          {/* Meta info */}
-          <div className="flex flex-wrap items-center gap-6 text-gray-400 mb-6">
-            <div className="flex items-center gap-2">
-              <FaUser className="w-4 h-4" />
-              <span>{article.author}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <FaClock className="w-4 h-4" />
-              <span>{formatDate(article.publishedAt)}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <FaEye className="w-4 h-4" />
-              <span>{article.views} views</span>
-            </div>
-          </div>
-
-          {/* Share buttons */}
-          <div className="flex items-center gap-3 mb-8">
-            <span className="text-sm text-gray-400 mr-2">Share:</span>
-            <button
-              onClick={() => handleShare('twitter')}
-              className="flex items-center gap-2 px-3 py-2 bg-blue-500/10 text-blue-400 rounded-lg border border-blue-500/20 hover:bg-blue-500/20 transition-all duration-200"
-            >
-              <FaTwitter className="w-4 h-4" />
-              <span className="text-sm">Twitter</span>
-            </button>
-            <button
-              onClick={() => handleShare('linkedin')}
-              className="flex items-center gap-2 px-3 py-2 bg-blue-600/10 text-blue-400 rounded-lg border border-blue-600/20 hover:bg-blue-600/20 transition-all duration-200"
-            >
-              <FaLinkedin className="w-4 h-4" />
-              <span className="text-sm">LinkedIn</span>
-            </button>
-            <button
-              onClick={handleCopyLink}
-              className="flex items-center gap-2 px-3 py-2 bg-gray-500/10 text-gray-400 rounded-lg border border-gray-500/20 hover:bg-gray-500/20 transition-all duration-200"
-            >
-              <FaCopy className="w-4 h-4" />
-              <span className="text-sm">{copied ? 'Copied!' : 'Copy Link'}</span>
-            </button>
+          <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3 text-xs text-gray-400">
+            <span className="inline-flex items-center gap-2 font-semibold text-white">
+              <span className="grid size-8 place-items-center rounded-full bg-white/10 font-serif text-sm uppercase text-cyan-200">
+                {authorName.charAt(0)}
+              </span>
+              {authorName}
+            </span>
+            <span className="inline-flex items-center gap-2">
+              <FaClock aria-hidden="true" />
+              {formatDate(article.publishedAt)}
+            </span>
+            <span className="inline-flex items-center gap-2">
+              <FaEye aria-hidden="true" />
+              {article.views.toLocaleString()} views
+            </span>
           </div>
         </header>
 
-        {/* Featured Image */}
         {workingImageUrl && (
-          <div className="featured-image-container relative mb-8 rounded-2xl overflow-hidden w-full bg-gray-900/50" style={{ minHeight: '300px', maxHeight: '60vh' }}>
+          <figure className="featured-image-container relative mb-8 aspect-[16/8] overflow-hidden rounded-lg bg-gray-900/50">
             {!imageError ? (
-              <Image
-                src={workingImageUrl}
-                alt={article.title}
-                width={800}
-                height={400}
-                className="w-full h-full object-contain"
-                style={{ 
-                  minWidth: '400px', 
-                  minHeight: '300px',
-                  maxHeight: '60vh',
-                  objectFit: 'contain',
-                  objectPosition: 'center'
-                }}
-                unoptimized={/\/ipfs\//.test(workingImageUrl)}
-                onError={(e) => {
-                  console.error('Next.js Image failed to load:', workingImageUrl);
-                  setImageError(true);
-                }}
-              />
-            ) : (
               <img
                 src={workingImageUrl}
                 alt={article.title}
-                className="w-full h-full object-contain"
-                style={{ 
-                  minWidth: '400px', 
-                  minHeight: '300px',
-                  maxHeight: '60vh',
-                  objectFit: 'contain',
-                  objectPosition: 'center'
-                }}
-                onError={(e) => {
-                  console.error('Fallback img also failed to load:', workingImageUrl);
-                  const target = e.target as HTMLImageElement;
-                  target.style.display = 'none';
-                }}
+                className="h-full w-full object-contain"
+                onError={() => setImageError(true)}
               />
+            ) : (
+              <div className="grid h-full place-items-center text-gray-500">
+                <FaTags className="size-8" aria-hidden="true" />
+              </div>
             )}
-          </div>
+          </figure>
         )}
 
-        {/* Article Content */}
-        <article className="prose prose-lg prose-invert max-w-none">
-          <div className="text-gray-300 leading-relaxed space-y-6 article-content">
+        <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_240px] lg:gap-14">
+          <article className="article-content min-w-0">
             <div dangerouslySetInnerHTML={{ __html: articleContent }} />
-          </div>
-        </article>
 
-        {/* Custom styles for article images */}
-        <style jsx>{`
-          .article-content :global(img) {
-            min-width: 400px !important;
-            min-height: 300px !important;
-            width: 100% !important;
-            height: auto !important;
-            object-fit: cover !important;
-            object-position: center !important;
-            border-radius: 12px !important;
-            margin: 24px 0 !important;
-            display: block !important;
-          }
-          
-          .featured-image-container img {
-            width: 100% !important;
-            height: 100% !important;
-            object-fit: contain !important;
-            object-position: center !important;
-            min-width: 400px !important;
-            min-height: 300px !important;
-            max-height: 60vh !important;
-          }
-          
-          @media (max-width: 640px) {
-            .article-content :global(img) {
-              min-width: 100% !important;
-              min-height: 200px !important;
-            }
-            
-            .featured-image-container img {
-              min-width: 100% !important;
-              min-height: 200px !important;
-            }
-          }
-        `}</style>
+            {article.tags.length > 0 && (
+              <div className="mt-10 flex flex-wrap gap-2 border-t border-zinc-200 pt-5">
+                {article.tags.map(tag => (
+                  <span
+                    key={tag}
+                    className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-gray-300"
+                  >
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+            )}
+          </article>
 
-        {/* Article Footer */}
-        <footer className="mt-12 pt-8 border-t border-gray-800">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div>
-              <h3 className="text-lg font-semibold text-white mb-2">About the Author</h3>
-              <p className="text-gray-400">{article.author}</p>
-            </div>
-            
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-gray-400">Share this article:</span>
+          <aside className="space-y-5">
+            <section className="rounded-xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur-sm">
+              <h2 className="mb-4 text-xs font-bold uppercase tracking-[0.12em] text-cyan-300">
+                Share this story
+              </h2>
               <div className="flex gap-2">
                 <button
                   onClick={() => handleShare('twitter')}
-                  className="p-2 bg-blue-500/10 text-blue-400 rounded-lg border border-blue-500/20 hover:bg-blue-500/20 transition-all duration-200"
-                  title="Share on Twitter"
+                  aria-label="Share on X"
+                  className="grid size-10 place-items-center rounded-lg border border-white/10 bg-white/5 text-gray-300 transition-colors hover:border-cyan-300/50 hover:text-cyan-200"
                 >
-                  <FaTwitter className="w-4 h-4" />
+                  <FaTwitter aria-hidden="true" />
                 </button>
                 <button
                   onClick={() => handleShare('linkedin')}
-                  className="p-2 bg-blue-600/10 text-blue-400 rounded-lg border border-blue-600/20 hover:bg-blue-600/20 transition-all duration-200"
-                  title="Share on LinkedIn"
+                  aria-label="Share on LinkedIn"
+                  className="grid size-10 place-items-center rounded-lg border border-white/10 bg-white/5 text-gray-300 transition-colors hover:border-cyan-300/50 hover:text-cyan-200"
                 >
-                  <FaLinkedin className="w-4 h-4" />
+                  <FaLinkedin aria-hidden="true" />
                 </button>
                 <button
                   onClick={handleCopyLink}
-                  className="p-2 bg-gray-500/10 text-gray-400 rounded-lg border border-gray-500/20 hover:bg-gray-500/20 transition-all duration-200"
-                  title="Copy link"
+                  aria-label={copied ? 'Link copied' : 'Copy article link'}
+                  className="grid size-10 place-items-center rounded-lg border border-white/10 bg-white/5 text-gray-300 transition-colors hover:border-cyan-300/50 hover:text-cyan-200"
                 >
-                  <FaCopy className="w-4 h-4" />
+                  <FaCopy aria-hidden="true" />
                 </button>
               </div>
-            </div>
-          </div>
-        </footer>
+              <p aria-live="polite" className="mt-3 min-h-4 text-xs text-cyan-300">
+                {copied ? 'Link copied to clipboard' : ''}
+              </p>
+            </section>
 
-        {/* Related Articles CTA */}
-        <div className="mt-12 p-6 bg-gray-900/40 backdrop-blur-sm border border-gray-800/50 rounded-2xl text-center">
-          <h3 className="text-xl font-semibold text-white mb-2">Stay Updated</h3>
-          <p className="text-gray-400 mb-4">
-            Don't miss out on the latest NYALTX news and updates
-          </p>
-          <Link
-            href="/news"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-linear-to-r from-cyan-500 to-indigo-500 hover:from-cyan-600 hover:to-indigo-600 text-white font-medium rounded-lg transition-all duration-200"
-          >
-            <FaTags className="w-4 h-4" />
-            View All News
-          </Link>
+            <section className="rounded-xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur-sm">
+              <h2 className="text-xs font-bold uppercase tracking-[0.12em] text-cyan-300">
+                About the author
+              </h2>
+              <p className="mt-3 font-serif text-lg font-semibold text-white">
+                {authorName}
+              </p>
+              <p className="mt-2 text-sm leading-relaxed text-gray-400">
+                Article contributor
+              </p>
+            </section>
+
+            <Link
+              href="/newshub"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-cyan-300 transition-colors hover:text-cyan-100"
+            >
+              <FaArrowLeft aria-hidden="true" />
+              Back to all stories
+            </Link>
+          </aside>
         </div>
-      </div>
+
+        <footer className="mt-12 border-t border-white/10 pt-6">
+          <Link
+            href="/newshub"
+            className="inline-flex items-center gap-2 rounded-full border border-cyan-300/50 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-cyan-400 hover:text-slate-950"
+          >
+            <FaTags aria-hidden="true" />
+            More NYALTX news
+          </Link>
+        </footer>
+      </main>
+
+      <style jsx>{`
+        .article-content {
+          color: #d1d5db;
+          font-size: 17px;
+          line-height: 1.85;
+          overflow-wrap: anywhere;
+        }
+
+        .article-content :global(p) {
+          margin: 0 0 1.5rem;
+        }
+
+        .article-content :global(h2),
+        .article-content :global(h3),
+        .article-content :global(h4) {
+          margin: 2rem 0 0.8rem;
+          color: #fff;
+          font-family: Georgia, Cambria, 'Times New Roman', serif;
+          font-weight: 600;
+          line-height: 1.2;
+        }
+
+        .article-content :global(h2) {
+          font-size: 1.8rem;
+        }
+
+        .article-content :global(h3) {
+          font-size: 1.45rem;
+        }
+
+        .article-content :global(blockquote) {
+          margin: 2rem 0;
+          border-left: 4px solid #22d3ee;
+          padding: 0.25rem 0 0.25rem 1.25rem;
+          color: #e2e8f0;
+          font-family: Georgia, Cambria, 'Times New Roman', serif;
+          font-size: 1.3rem;
+          font-style: italic;
+        }
+
+        .article-content :global(img) {
+          display: block;
+          width: 100%;
+          height: auto;
+          max-height: 75vh;
+          margin: 2rem auto;
+          border-radius: 8px;
+          object-fit: contain;
+        }
+
+        .article-content :global(a) {
+          color: #67e8f9;
+          text-decoration: underline;
+          text-underline-offset: 3px;
+        }
+
+        .article-content :global(ul),
+        .article-content :global(ol) {
+          margin: 0 0 1.5rem;
+          padding-left: 1.5rem;
+        }
+
+        .article-content :global(li) {
+          margin: 0.4rem 0;
+          padding-left: 0.25rem;
+        }
+
+        @media (max-width: 640px) {
+          .article-content {
+            font-size: 16px;
+          }
+        }
+      `}</style>
     </div>
   );
 }
