@@ -50,7 +50,7 @@ export default function LandingPage(props?: LandingPageProps) {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-cyan-500"></div>
-            </motion.div>
+            </div>
         );
     }
 
@@ -66,7 +66,7 @@ export default function LandingPage(props?: LandingPageProps) {
                         Retry
                     </button>
                 </div>
-            </div>
+            </motion.div>
         );
     }
 
@@ -727,7 +727,7 @@ function NetworkLogoCarousel() {
                     ))}
                 </div>
             </motion.div>
-        </div>
+        </motion.div>
     );
 }
 
