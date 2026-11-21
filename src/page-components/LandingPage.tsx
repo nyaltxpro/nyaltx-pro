@@ -11,7 +11,18 @@ import {
 } from '@web3icons/react/dynamic';
 import type { Variants } from 'framer-motion';
 import { motion, useAnimationFrame, useMotionValue } from 'framer-motion';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import {
+    BarChart3,
+    ChevronLeft,
+    ChevronRight,
+    Layers3,
+    Megaphone,
+    Network,
+    ShieldCheck,
+    Sparkles,
+    Wallet,
+    type LucideIcon,
+} from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
@@ -35,7 +46,7 @@ const scaleIn: Variants = {
 };
 
 const sectionHeadingClass =
-    'max-w-3xl font-sans text-[clamp(2rem,5vw,3.5rem)] font-medium leading-[0.98] tracking-[-0.06em] text-white';
+    'mx-auto max-w-3xl text-center font-sans text-[clamp(2rem,5vw,3.5rem)] font-medium leading-[0.98] tracking-[-0.06em] text-white';
 
 interface LandingPageProps {
     initialContent?: any;
@@ -257,11 +268,11 @@ export default function LandingPage(props?: LandingPageProps) {
                         <motion.div
                             key={i}
                             variants={scaleIn}
-                            className="group relative border border-white/10 rounded-2xl bg-gradient-to-b from-white/5 to-white/[0.03] p-4 backdrop-blur-md flex flex-col items-center justify-center gap-2 hover:shadow-[0_0_40px_-10px_rgba(99,102,241,0.35)]"
                         >
-                            <WalletIcon name={name} variant="branded" size="36" />
-                            <div className="text-xs text-gray-300/90">{name}</div>
-                            <div className="pointer-events-none absolute inset-0 rounded-2xl border border-transparent group-hover:border-white/15 transition-colors" />
+                            <LandingCard>
+                                <WalletIcon name={name} variant="branded" size="36" />
+                                <div className="text-sm text-slate-200">{name}</div>
+                            </LandingCard>
                         </motion.div>
                     ))}
                 </div>
@@ -356,12 +367,11 @@ export default function LandingPage(props?: LandingPageProps) {
                         <motion.div
                             key={i}
                             variants={scaleIn}
-                            className="rounded-2xl border border-white/10 bg-gradient-to-b from-white/5 to-white/[0.03] p-4 backdrop-blur text-center"
                         >
-                            <div className="flex flex-col items-center gap-2">
+                            <LandingCard>
                                 <CryptoIcon name={it.name} size={36} kind={'exchange'} fallback={it.fallback} />
-                                <span className="text-xs text-gray-300/80">{it.label}</span>
-                            </div>
+                                <span className="text-sm text-slate-200">{it.label}</span>
+                            </LandingCard>
                         </motion.div>
                     ))}
                 </div>
@@ -398,11 +408,11 @@ export default function LandingPage(props?: LandingPageProps) {
                         <motion.div
                             key={i}
                             variants={scaleIn}
-                            className="group relative rounded-2xl border border-white/10 bg-gradient-to-b from-white/5 to-white/[0.03] p-5 backdrop-blur-md"
                         >
-                            <div className="text-lg font-semibold">{x.t}</div>
-                            <p className="mt-1 text-gray-300/90 text-sm">{x.d}</p>
-                            <div className="pointer-events-none absolute inset-0 rounded-2xl border border-transparent group-hover:border-white/15 transition-colors" />
+                            <LandingCard>
+                                <div className="text-lg font-semibold">{x.t}</div>
+                                <p className="text-gray-300/90 text-sm">{x.d}</p>
+                            </LandingCard>
                         </motion.div>
                     ))}
                 </div>
@@ -858,25 +868,84 @@ function StatsShowcase({ title, items }: { title: string; items: LandingStat[] }
 }
 
 function Feature({ title, desc, icon }: { title: string; desc: string; icon?: string }) {
+    const Icon = getFeatureIcon(icon, title, desc);
+
     return (
-        <div className="group relative rounded-2xl border border-white/10 bg-gradient-to-b from-white/5 to-white/[0.03] p-5 backdrop-blur-md transition-all duration-300 hover:shadow-[0_0_40px_-10px_rgba(99,102,241,0.35)]">
-            {icon && <div className="text-2xl mb-3">{icon}</div>}
+        <LandingCard>
+            <Icon aria-hidden="true" className="text-cyan-300" size={28} strokeWidth={1.75} />
             <div className="text-lg font-semibold">{title}</div>
-            <p className="mt-1 text-gray-300/90 text-sm">{desc}</p>
-            <div className="pointer-events-none absolute inset-0 rounded-2xl border border-transparent group-hover:border-white/15 transition-colors" />
-        </div>
+            <p className="text-gray-300/90 text-sm">{desc}</p>
+        </LandingCard>
     );
+}
+
+function getFeatureIcon(icon: string | undefined, title: string, desc: string): LucideIcon {
+    switch (icon?.trim().toLowerCase()) {
+        case 'network':
+            return Network;
+        case 'layers':
+            return Layers3;
+        case 'megaphone':
+            return Megaphone;
+        case 'wallet':
+            return Wallet;
+        case 'chart':
+            return BarChart3;
+        case 'shield':
+            return ShieldCheck;
+        case 'sparkles':
+            return Sparkles;
+    }
+
+    const content = `${title} ${desc}`.toLowerCase();
+
+    if (/network|chain/.test(content)) return Network;
+    if (/promot|placement|campaign|marketing/.test(content)) return Megaphone;
+    if (/payment|pay|wallet|card/.test(content)) return Wallet;
+    if (/analytics|insight|track|monitor|stat/.test(content)) return BarChart3;
+    if (/security|secure|protect|custod/.test(content)) return ShieldCheck;
+    if (/multi|layer|ecosystem/.test(content)) return Layers3;
+
+    return Sparkles;
 }
 
 function Step({ index, title, desc }: { index: number; title: string; desc: string }) {
     return (
-        <div className="group relative rounded-2xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur-md transition-all duration-300 hover:shadow-[0_0_40px_-10px_rgba(99,102,241,0.35)]">
+        <LandingCard>
             <div className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-cyan-500 text-black text-sm font-bold">
                 {index}
             </div>
-            <div className="mt-2 text-lg font-semibold">{title}</div>
-            <p className="mt-1 text-gray-300/90 text-sm">{desc}</p>
-            <div className="pointer-events-none absolute inset-0 rounded-2xl border border-transparent group-hover:border-white/15 transition-colors" />
+            <div className="text-lg font-semibold">{title}</div>
+            <p className="text-gray-300/90 text-sm">{desc}</p>
+        </LandingCard>
+    );
+}
+
+function LandingCard({ children }: { children: React.ReactNode }) {
+    const accentLineClass =
+        'pointer-events-none absolute from-transparent via-cyan-400 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-within:opacity-100';
+
+    return (
+        <div className="group relative flex h-full min-h-[184px] flex-col items-center justify-center gap-2 overflow-hidden px-6 py-8 text-center">
+            <div
+                aria-hidden="true"
+                className={`${accentLineClass} inset-y-0 left-0 w-px bg-gradient-to-b md:hidden`}
+            />
+            <div
+                aria-hidden="true"
+                className={`${accentLineClass} inset-y-0 right-0 w-px bg-gradient-to-b md:hidden`}
+            />
+            <div
+                aria-hidden="true"
+                className={`${accentLineClass} inset-x-0 top-0 hidden h-px bg-gradient-to-r md:block`}
+            />
+            <div
+                aria-hidden="true"
+                className={`${accentLineClass} inset-x-0 bottom-0 hidden h-px bg-gradient-to-r md:block`}
+            />
+            <div className="relative flex flex-col items-center justify-center gap-2">
+                {children}
+            </div>
         </div>
     );
 }

@@ -265,7 +265,7 @@ export default defineConfig({
                   {
                     type: "string",
                     name: "icon",
-                    label: "Feature Icon (emoji)",
+                    label: "Feature Icon (Lucide name)",
                   },
                   {
                     type: "image",
