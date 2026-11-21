@@ -203,9 +203,6 @@ export default function LandingPage(props?: LandingPageProps) {
                 >
                     {landingContent?.features?.title || 'Why NYALTX'}
                 </motion.h2>
-                <motion.p className="mt-2 text-gray-300/90 max-w-2xl" variants={fadeUp}>
-                    {landingContent?.features?.subtitle || 'A modern stack for token discovery, analytics, and promotion.'}
-                </motion.p>
                 <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
                     {landingContent?.features?.items?.slice(0, 3).map((feature, index) => (
                         <motion.div key={index} variants={scaleIn}>
@@ -253,9 +250,6 @@ export default function LandingPage(props?: LandingPageProps) {
                 >
                     Popular wallets
                 </motion.h2>
-                <motion.p className="mt-2 text-gray-300/90 max-w-2xl" variants={fadeUp}>
-                    Connect seamlessly with leading wallets.
-                </motion.p>
                 <div className="mt-8 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
                     {[
                         'MetaMask',
@@ -352,9 +346,6 @@ export default function LandingPage(props?: LandingPageProps) {
                 >
                     Ecosystem integrations
                 </motion.h2>
-                <motion.p className="mt-2 text-gray-300/90 max-w-2xl" variants={fadeUp}>
-                    We surface pricing and pairs data from leading DEXs and networks.
-                </motion.p>
                 <div className="mt-8 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
                     {[
                         { name: 'Uniswap', fallback: 'uniswap', label: 'Uniswap' },
