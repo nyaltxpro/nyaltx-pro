@@ -63,6 +63,9 @@ export default function LandingPage(props?: LandingPageProps) {
     const serverContent = props?.initialContent || props?.data?.landing || null;
     const { content: landingContent, loading, error } = useLandingPageContent(serverContent);
     const shouldReduceMotion = useReducedMotion();
+    const scrollRevealProps = shouldReduceMotion
+        ? {}
+        : { initial: 'hidden' as const, whileInView: 'show' as const };
 
     if (loading && !landingContent) {
         return (
@@ -119,15 +122,19 @@ export default function LandingPage(props?: LandingPageProps) {
             <motion.section
                 className="relative overflow-hidden min-h-[70vh] md:min-h-[78vh] flex flex-col"
                 variants={container}
-                initial={false}
+                initial={shouldReduceMotion ? false : 'hidden'}
                 animate="show"
             >
                 <PublicHeader />
                 <div className="mx-auto flex w-full max-w-7xl flex-1 items-center px-6 py-24 md:py-32 lg:py-36">
                     <div className="grid w-full grid-cols-1 md:grid-cols-2 items-center gap-12 md:gap-14">
                         <motion.div className="max-w-3xl overflow-visible" variants={fadeUp}>
-                            <h1 className="max-w-3xl font-sans text-[clamp(2rem,5vw,3.5rem)] font-medium leading-[0.98] tracking-[-0.06em] text-white">
-                                {heroTitleLead && <span className="block">{heroTitleLead}</span>}
+                            <h1 className="max-w-3xl font-sans text-[clamp(2rem,5vw,3.5rem)] font-medium leading-[0.9] tracking-[-0.06em] [word-spacing:-0.08em] text-white">
+                                {heroTitleLead && (
+                                    <span className="block font-serif font-extralight italic tracking-[-0.04em] text-slate-200">
+                                        {heroTitleLead}
+                                    </span>
+                                )}
                                 <span className="block font-semibold italic">{heroTitleEmphasis}</span>
                             </h1>
                             <p className="mt-6 text-sm text-gray-300/90 max-w-2xl leading-relaxed">
@@ -172,8 +179,7 @@ export default function LandingPage(props?: LandingPageProps) {
             <motion.section
                 className="overflow-hidden"
                 variants={container}
-                initial={false}
-                whileInView="show"
+                {...scrollRevealProps}
                 viewport={{ once: true, amount: 0.2 }}
             >
                 <NetworkLogoCarousel />
@@ -182,8 +188,7 @@ export default function LandingPage(props?: LandingPageProps) {
             <motion.section
                 className="mx-auto max-w-7xl px-6 py-10 text-slate-100"
                 variants={container}
-                initial={false}
-                whileInView="show"
+                {...scrollRevealProps}
                 viewport={{ once: true, amount: 0.2 }}
             >
                 <StatsShowcase
@@ -204,8 +209,7 @@ export default function LandingPage(props?: LandingPageProps) {
             <motion.section
                 className="mx-auto max-w-7xl px-6 py-16 md:py-20"
                 variants={container}
-                initial={false}
-                whileInView="show"
+                {...scrollRevealProps}
                 viewport={{ once: true, amount: 0.2 }}
             >
                 <motion.h2
@@ -251,8 +255,7 @@ export default function LandingPage(props?: LandingPageProps) {
             <motion.section
                 className="mx-auto max-w-7xl px-6 py-10"
                 variants={container}
-                initial={false}
-                whileInView="show"
+                {...scrollRevealProps}
                 viewport={{ once: true, amount: 0.2 }}
             >
                 <motion.h2
@@ -286,8 +289,7 @@ export default function LandingPage(props?: LandingPageProps) {
             <motion.section
                 className="mx-auto max-w-7xl px-6 py-16 md:py-20"
                 variants={container}
-                initial={false}
-                whileInView="show"
+                {...scrollRevealProps}
                 viewport={{ once: true, amount: 0.2 }}
             >
                 <motion.h2 className={sectionHeadingClass} variants={fadeUp}>
@@ -321,8 +323,7 @@ export default function LandingPage(props?: LandingPageProps) {
             <motion.section
                 className="mx-auto max-w-7xl px-6 py-16 md:py-20"
                 variants={container}
-                initial={false}
-                whileInView="show"
+                {...scrollRevealProps}
                 viewport={{ once: true, amount: 0.2 }}
             >
                 <motion.h2
@@ -337,8 +338,7 @@ export default function LandingPage(props?: LandingPageProps) {
             <motion.section
                 className="mx-auto max-w-7xl px-6 py-10"
                 variants={container}
-                initial={false}
-                whileInView="show"
+                {...scrollRevealProps}
                 viewport={{ once: true, amount: 0.2 }}
             >
                 <Faq variant="landing" />
@@ -347,8 +347,7 @@ export default function LandingPage(props?: LandingPageProps) {
             <motion.section
                 className="mx-auto max-w-7xl px-6 py-16 md:py-20"
                 variants={container}
-                initial={false}
-                whileInView="show"
+                {...scrollRevealProps}
                 viewport={{ once: true, amount: 0.2 }}
             >
                 <motion.h2
@@ -382,8 +381,7 @@ export default function LandingPage(props?: LandingPageProps) {
             <motion.section
                 className="mx-auto max-w-7xl px-6 py-16 md:py-20"
                 variants={container}
-                initial={false}
-                whileInView="show"
+                {...scrollRevealProps}
                 viewport={{ once: true, amount: 0.2 }}
             >
                 <motion.h2
@@ -423,8 +421,7 @@ export default function LandingPage(props?: LandingPageProps) {
             <motion.section
                 className="mx-auto max-w-7xl px-6 py-16 md:py-20"
                 variants={container}
-                initial={false}
-                whileInView="show"
+                {...scrollRevealProps}
                 viewport={{ once: true, amount: 0.2 }}
             >
                 <motion.div
