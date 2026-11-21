@@ -1,9 +1,11 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toReliableIpfsUrl } from '@/utils/ipfsUpload';
+import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -55,6 +57,18 @@ const GRADS = [
   'linear-gradient(135deg,#1e293b,#475569)',
 ];
 
+const bannerSlideVariants = {
+  enter: (direction: number) => ({
+    x: direction > 0 ? '100%' : '-100%',
+    opacity: 0,
+  }),
+  center: { x: 0, opacity: 1 },
+  exit: (direction: number) => ({
+    x: direction > 0 ? '-100%' : '100%',
+    opacity: 0,
+  }),
+};
+
 const CATEGORIES = ['All', 'NYAX', 'Solana', 'Ethereum', 'DeFi', 'Blockchain', 'Other'];
 
 const RSS_URL = 'https://www.nyaltx.pro/rss.xml';
@@ -94,6 +108,7 @@ function relativeDate(dateStr?: string): string {
 
 export default function NewshubPage({ initialData }: { initialData?: NewshubInitialData }) {
   const router = useRouter();
+  const shouldReduceMotion = useReducedMotion();
   // Data state
   const [banners, setBanners] = useState<BannerSlide[]>(initialData?.banners ?? []);
   const [articles, setArticles] = useState<Article[]>(initialData?.articles ?? []);
@@ -106,6 +121,7 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
 
   // Slider
   const [curSlide, setCurSlide] = useState(0);
+  const [slideDirection, setSlideDirection] = useState(1);
   const sliderTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Filter
@@ -136,6 +152,7 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
         setBanners(data.banners || []);
         setArticles(data.articles || []);
         setCurSlide(0);
+        setSlideDirection(1);
       } else {
         setArticles(prev => [...prev, ...(data.articles || [])]);
       }
@@ -192,6 +209,7 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
     stopSlider();
     if (banners.length > 1) {
       sliderTimerRef.current = setInterval(() => {
+        setSlideDirection(1);
         setCurSlide(prev => (prev + 1) % banners.length);
       }, 6000);
     }
@@ -206,18 +224,21 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
 
   const prevSlide = () => {
     stopSlider();
+    setSlideDirection(-1);
     setCurSlide(prev => (prev - 1 + banners.length) % banners.length);
     setTimeout(startSlider, 100);
   };
 
   const nextSlide = () => {
     stopSlider();
+    setSlideDirection(1);
     setCurSlide(prev => (prev + 1) % banners.length);
     setTimeout(startSlider, 100);
   };
 
   const goToSlide = (i: number) => {
     stopSlider();
+    setSlideDirection(i >= curSlide ? 1 : -1);
     setCurSlide(i);
     setTimeout(startSlider, 100);
   };
@@ -277,6 +298,49 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
       fetchData(selectedCat, pagination.page + 1, true);
     }
   };
+  const activeBanner = banners[curSlide];
+  const activeBannerTarget = activeBanner?.linkUrl?.trim();
+  const activeBannerIsExternal = activeBannerTarget?.startsWith('http') ?? false;
+  const activeBannerImage = activeBanner?.imageUrl
+    ? toReliableIpfsUrl(activeBanner.imageUrl) || null
+    : null;
+  const activeBannerContent = activeBanner ? (
+    <div
+      className="nh-slide"
+      style={{
+        background: activeBannerImage
+          ? '#070b12'
+          : slideBackground(activeBanner, false),
+      }}
+    >
+      {activeBannerImage && (
+        <>
+          <div
+            aria-hidden="true"
+            className="nh-slide-backdrop"
+            style={{ backgroundImage: `url("${activeBannerImage}")` }}
+          />
+          <img className="nh-slide-image" src={activeBannerImage} alt="" />
+        </>
+      )}
+      <div aria-hidden="true" className="nh-slide-shade" />
+      <motion.div
+        initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{
+          duration: shouldReduceMotion ? 0 : 0.4,
+          delay: shouldReduceMotion ? 0 : 0.2,
+        }}
+        className="nh-slide-copy"
+      >
+        <span className={`nh-tag${activeBanner.isSponsored ? ' sp' : ''}`}>
+          {(activeBanner.category || 'NYAX').toUpperCase()}
+        </span>
+        <h2>{activeBanner.title}</h2>
+        {activeBanner.description && <p>{activeBanner.description}</p>}
+      </motion.div>
+    </div>
+  ) : null;
 
   // ─── Render ──────────────────────────────────────────────────────────────
 
@@ -310,9 +374,6 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
               </div>
             </div>
             <div className="nh-row">
-              <button className="nh-btn" onClick={copyRss} title="Copy RSS URL">
-                {rssCopied ? '✓ Copied!' : '📡 RSS feed'}
-              </button>
               <Link href="/newshub/submit" className="nh-btn nh-btn-pri">
                 + Submit news
               </Link>
@@ -321,53 +382,50 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
 
           {/* ── SLIDER ───────────────────────────────────────────────── */}
           {/* Only show slider if there are real banners from admin or featured paid articles */}
-          {!loading && banners.length > 0 && (
+          {!loading && activeBanner && (
             <section className="nh-slider" aria-label="Featured banners">
-              <div className="nh-track" style={{ transform: `translateX(-${curSlide * 100}%)` }}>
-                {banners.map((slide, idx) => {
-                  const target = slide.linkUrl?.trim();
-                  const isExternal = target?.startsWith('http');
-                  const slideEl = (
-                    <div className="nh-slide" style={{ background: slideBackground(slide) }}>
-                      <span className={`nh-tag${slide.isSponsored ? ' sp' : ''}`}>
-                        {(slide.category || 'NYAX').toUpperCase()}
-                      </span>
-                      <h2>{slide.title}</h2>
-                      {slide.description && <p>{slide.description}</p>}
-                    </div>
-                  );
-                  return (
-                    <div key={slide._id ?? idx} className="nh-slide-wrapper">
-                      {target && target !== '#' && target !== '' ? (
-                        isExternal ? (
-                          <a
-                            href={target}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="nh-slide-link"
-                          >
-                            {slideEl}
-                          </a>
-                        ) : (
-                          <Link href={target} className="nh-slide-link">
-                            {slideEl}
-                          </Link>
-                        )
-                      ) : (
-                        slideEl
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+              <AnimatePresence initial={false} custom={slideDirection}>
+                <motion.div
+                  key={activeBanner._id}
+                  custom={slideDirection}
+                  variants={bannerSlideVariants}
+                  initial={shouldReduceMotion ? false : 'enter'}
+                  animate="center"
+                  exit={shouldReduceMotion ? undefined : 'exit'}
+                  transition={{
+                    duration: shouldReduceMotion ? 0 : 0.55,
+                    ease: [0.22, 1, 0.36, 1],
+                  }}
+                  className="nh-slide-wrapper"
+                >
+                  {activeBannerTarget && activeBannerTarget !== '#' ? (
+                    activeBannerIsExternal ? (
+                      <a
+                        href={activeBannerTarget}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="nh-slide-link"
+                      >
+                        {activeBannerContent}
+                      </a>
+                    ) : (
+                      <Link href={activeBannerTarget} className="nh-slide-link">
+                        {activeBannerContent}
+                      </Link>
+                    )
+                  ) : (
+                    activeBannerContent
+                  )}
+                </motion.div>
+              </AnimatePresence>
 
               {banners.length > 1 && (
                 <>
                   <button className="nh-arrow nh-arrow-l" onClick={prevSlide} aria-label="Previous">
-                    ‹
+                    <FiChevronLeft aria-hidden="true" />
                   </button>
                   <button className="nh-arrow nh-arrow-r" onClick={nextSlide} aria-label="Next">
-                    ›
+                    <FiChevronRight aria-hidden="true" />
                   </button>
                   <div className="nh-dots">
                     {banners.map((_, i) => (
@@ -410,14 +468,26 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
                 </div>
                 <div className="nh-chips" role="group" aria-label="Filter news by category">
                   {categories.map(cat => (
-                    <button
+                    <motion.button
                       key={cat}
+                      type="button"
                       className={`nh-chip${cat === selectedCat ? ' on' : ''}`}
                       onClick={() => setSelectedCat(cat)}
                       aria-pressed={cat === selectedCat}
                     >
-                      {cat}
-                    </button>
+                      <span className="nh-chip-label">{cat}</span>
+                      {cat === selectedCat && (
+                        <motion.span
+                          layoutId="newshub-category-pill"
+                          transition={
+                            shouldReduceMotion
+                              ? { duration: 0 }
+                              : { type: 'spring', duration: 0.5 }
+                          }
+                          className="nh-chip-indicator"
+                        />
+                      )}
+                    </motion.button>
                   ))}
                 </div>
               </div>
@@ -686,7 +756,7 @@ const STYLES = `
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     min-height: 60vh;
   }
-  .nh-wrap { max-width: 1120px; margin: 0 auto; padding: 24px 16px; }
+  .nh-wrap { max-width: 1120px; margin: 0 auto; padding: 40px 16px 24px; }
 
   /* ─── Hero ─── */
   .nyb {
@@ -743,18 +813,21 @@ const STYLES = `
 
   /* ─── Slider ─── */
   .nh-slider {
-    position: relative; border-radius: 16px; overflow: hidden;
+    position: relative; height: clamp(400px, 50vw, 600px); border-radius: 16px; overflow: hidden;
     border: 1px solid var(--nh-border); margin-bottom: 24px;
     box-shadow: 0 8px 24px rgba(0,0,0,.35);
   }
-  .nh-track { display: flex; transition: transform .5s cubic-bezier(.4,0,.2,1); }
-  .nh-slide-wrapper { min-width: 100%; }
-  .nh-slide-link { display: block; text-decoration: none; color: inherit; }
+  .nh-slide-wrapper { position: absolute; inset: 0; width: 100%; }
+  .nh-slide-link { display: block; width: 100%; height: 100%; text-decoration: none; color: inherit; }
   .nh-slide {
-    min-width: 100%; aspect-ratio: 8/3; min-height: 230px;
-    padding: 26px 32px; display: flex; flex-direction: column; justify-content: flex-end;
-    color: #fff; background-position: center; background-size: cover;
+    position: relative; width: 100%; height: 100%; padding: 26px 32px;
+    display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden;
+    color: #fff;
   }
+  .nh-slide-backdrop { position: absolute; inset: -20px; background-position: center; background-size: cover; filter: blur(20px) brightness(.42); transform: scale(1.08); }
+  .nh-slide-image { position: absolute; z-index: 1; left: 50%; top: 50%; width: calc(100% - 80px); max-width: 90%; height: 88%; object-fit: contain; transform: translate(-50%,-50%); }
+  .nh-slide-shade { position: absolute; z-index: 2; inset: 0; background: linear-gradient(to top, rgba(2,6,12,.9), rgba(2,6,12,.12) 72%, transparent); }
+  .nh-slide-copy { position: relative; z-index: 3; }
   .nh-slide h2 { margin: 6px 0; font-size: 25px; max-width: 680px; font-weight: 700; line-height: 1.2; text-shadow: 0 2px 8px rgba(0,0,0,.6); }
   .nh-slide p  { margin: 0 0 10px; max-width: 620px; font-size: 14px; opacity: .92; text-shadow: 0 1px 4px rgba(0,0,0,.6); }
   .nh-tag { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .05em; padding: 4px 9px; border-radius: 99px; background: rgba(255,255,255,.2); backdrop-filter: blur(4px); width: max-content; margin-bottom: 6px; }
@@ -775,9 +848,11 @@ const STYLES = `
   .nh-kicker { color: var(--nh-accent); font-size: 10px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
   .nh-category-title { margin: 4px 0 0; font-size: 19px; font-weight: 750; letter-spacing: -.02em; }
   .nh-chips { display: flex; max-width: 100%; gap: 7px; overflow-x: auto; padding: 2px 0 5px; scrollbar-width: thin; }
-  .nh-chip { white-space: nowrap; border: 1px solid var(--nh-border); background: var(--nh-card); color: var(--nh-muted); padding: 7px 13px; border-radius: 99px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all .2s; }
-  .nh-chip:hover { border-color: var(--nh-accent); color: var(--nh-text); }
-  .nh-chip.on { background: var(--nh-accent); border-color: var(--nh-accent); color: var(--nh-accent-ink); font-weight: 700; }
+  .nh-chip { position: relative; flex: 0 0 auto; white-space: nowrap; border: 1px solid transparent; background: transparent; color: var(--nh-muted); padding: 7px 13px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600; transition: color .2s; }
+  .nh-chip:hover { color: var(--nh-text); }
+  .nh-chip.on { color: #fff; }
+  .nh-chip-label { position: relative; z-index: 1; }
+  .nh-chip-indicator { position: absolute; inset: 0; z-index: 0; border-radius: 8px; background: linear-gradient(90deg, #7c3aed, #4f46e5); }
   .nh-chip:focus-visible, .nh-btn:focus-visible, .nh-arrow:focus-visible, .nh-dot:focus-visible { outline: 2px solid #67e8f9; outline-offset: 3px; }
 
   /* ─── Article cards ─── */
@@ -803,7 +878,7 @@ const STYLES = `
   .nh-article-link { color: var(--nh-text); text-decoration: none; }
   .nh-article-link:hover { color: var(--nh-accent); }
   .nh-muted { color: var(--nh-muted); }
-  @media(max-width:620px) { .nh-cards { grid-template-columns: 1fr; } .nh-category-bar { align-items: flex-start; } .nh-card-cover { aspect-ratio: 16/8.5; } }
+  @media(max-width:620px) { .nh-wrap { padding-top: 32px; } .nh-cards { grid-template-columns: 1fr; } .nh-category-bar { align-items: flex-start; } .nh-card-cover { aspect-ratio: 16/8.5; } }
 
   /* ─── Sidebar ─── */
   .nh-side { background: var(--nh-card); border: 1px solid var(--nh-border); border-radius: 14px; padding: 16px; margin-bottom: 16px; }

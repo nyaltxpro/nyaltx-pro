@@ -1,5 +1,4 @@
 import PublicHeader from '@/components/PublicHeader';
-import Footer from '@/components/Footer';
 import NewshubPage from '@/page-components/Newshub/NewshubPage';
 import { Metadata } from 'next';
 import { getNewshubInitialData } from '@/lib/newshubInitialData';
@@ -68,7 +67,6 @@ export default async function NewshubRoute() {
       <main className="flex-1">
         <NewshubPage initialData={initialData} />
       </main>
-      <Footer />
     </div>
   );
 }

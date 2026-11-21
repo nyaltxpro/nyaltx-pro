@@ -1,12 +1,20 @@
 'use client';
 
 import { useFooterContent } from '@/hooks/useTinaContent';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BsDiscord } from 'react-icons/bs';
 import { FaTelegram, FaYoutube } from 'react-icons/fa';
 import { FaXTwitter } from 'react-icons/fa6';
+
+const NEWSLETTER_EXAMPLES = [
+  'Exclusive crypto insights and market updates',
+  'The latest digital asset headlines and launches',
+  'Early access to new NYALTX features',
+];
 
 const Footer = () => {
   const pathname = usePathname();
@@ -88,9 +96,18 @@ const Footer = () => {
           {/* Left column */}
           <div className="xl:col-span-2">
             <div className="p-5">
-              <h1 className="text-2xl font-medium mb-4">
-                {footerContent?.branding?.title || "NYALTX"}
-              </h1>
+              <div className="mb-4 flex items-center gap-2">
+                <Image
+                  src="/nyaltxpro.png"
+                  alt=""
+                  width={36}
+                  height={36}
+                  className="h-8 w-8 shrink-0 object-contain"
+                />
+                <h1 className="text-2xl font-medium">
+                  {footerContent?.branding?.title || "NYALTX"}
+                </h1>
+              </div>
               {footerContent?.branding?.subtitle && (
                 <h2 className="text-xl font-medium mb-4">{footerContent.branding.subtitle}</h2>
               )}
@@ -99,29 +116,42 @@ const Footer = () => {
               </h3>
 
               {/* Newsletter Signup */}
-              <div className="mt-6 p-4 bg-gradient-to-r from-black-500/10 to-blue-black/10 border border-gray-500/20 rounded-xl backdrop-blur-sm">
-                <h4 className="text-lg font-semibold mb-3 text-cyan-400">
-                  {footerContent?.newsletter?.title || "Join Our Community"}
-                </h4>
-                <p className="text-sm text-gray-300 mb-4">
-                  {footerContent?.newsletter?.description || "Get exclusive crypto insights, market updates, and early access to new features."}
+              <div className="mt-6 w-full max-w-xl space-y-5 rounded-2xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur-sm sm:p-6">
+                <div>
+                  <p className="mb-2 text-xs font-light uppercase tracking-[0.18em] text-cyan-300">
+                    / Newsletter
+                  </p>
+                  <hr className="border-white/15" />
+                </div>
+                <p className="max-w-lg text-lg leading-relaxed text-white sm:text-xl">
+                  <strong className="font-semibold">
+                    {footerContent?.newsletter?.title || "Join Our Community"}
+                  </strong>{' '}
+                  <span className="text-gray-300">
+                    {footerContent?.newsletter?.description || "Get exclusive crypto insights, market updates, and early access to new features."}
+                  </span>
                 </p>
+                <NewsletterPrompt
+                  examples={NEWSLETTER_EXAMPLES}
+                />
                 <form onSubmit={handleNewsletterSignup} className="space-y-3">
-                  <div className="flex flex-col sm:flex-row gap-3">
+                  <div className="grid gap-3 sm:grid-cols-2">
                     <input
                       type="text"
                       value={name}
                       onChange={e => setName(e.target.value)}
+                      aria-label="Your name (optional)"
                       placeholder="Your name (optional)"
-                      className="flex-1 px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all duration-300"
+                      className="min-w-0 rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-white placeholder-gray-400 transition-all duration-300 focus:border-cyan-500/50 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
                       disabled={isSubmitting}
                     />
                     <input
                       type="email"
                       value={email}
                       onChange={e => setEmail(e.target.value)}
+                      aria-label="Email address"
                       placeholder={footerContent?.newsletter?.placeholder || "Enter your email address"}
-                      className="flex-1 px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all duration-300"
+                      className="min-w-0 rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-white placeholder-gray-400 transition-all duration-300 focus:border-cyan-500/50 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
                       required
                       disabled={isSubmitting}
                     />
@@ -129,7 +159,7 @@ const Footer = () => {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full sm:w-auto px-6 py-3 bg-[#00b8d8] rounded-full text-white font-semibold   transition-all duration-300 shadow-lg hover:shadow-cyan-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full rounded-full border border-cyan-300/50 py-2.5 text-sm font-medium transition-colors hover:bg-cyan-400 hover:text-slate-950 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {isSubmitting ? 'Signing Up...' : (footerContent?.newsletter?.buttonText || 'Join Community')}
                   </button>
@@ -147,7 +177,7 @@ const Footer = () => {
                   </div>
                 )}
 
-                <p className="text-xs text-gray-400 mt-2">
+                <p className="text-xs leading-relaxed text-gray-400">
                   By signing up, you agree to our Terms of Service and Privacy Policy.
                 </p>
               </div>
@@ -293,3 +323,42 @@ const Footer = () => {
 };
 
 export default Footer;
+
+function NewsletterPrompt({ examples }: { examples: string[] }) {
+  const [exampleIndex, setExampleIndex] = useState(0);
+  const shouldReduceMotion = useReducedMotion();
+
+  useEffect(() => {
+    if (shouldReduceMotion || examples.length < 2) return;
+
+    const intervalId = window.setInterval(() => {
+      setExampleIndex(index => (index + 1) % examples.length);
+    }, 5500);
+
+    return () => window.clearInterval(intervalId);
+  }, [examples.length, shouldReduceMotion]);
+
+  return (
+    <div className="space-y-2">
+      <p className="flex items-center gap-3 text-xs font-light uppercase tracking-[0.12em] text-gray-400">
+        <span aria-hidden="true" className="size-2 shrink-0 bg-cyan-300" />
+        <span>In your inbox</span>
+      </p>
+      <div className="min-h-5 pl-5 text-sm text-gray-200">
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.span
+            key={examples[exampleIndex]}
+            initial={shouldReduceMotion ? false : { opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={shouldReduceMotion ? undefined : { opacity: 0, y: -6 }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.2 }}
+            className="inline-block"
+          >
+            {examples[exampleIndex]}
+          </motion.span>
+        </AnimatePresence>
+      </div>
+      <hr className="border-white/10" />
+    </div>
+  );
+}
