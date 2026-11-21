@@ -378,6 +378,83 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
     .filter(section => section.articles.length > 0)
     .sort((a, b) => b.articles.length - a.articles.length)
     .slice(0, 3);
+  const discoveryInsertIndex = Math.min(3, articles.length - 1);
+  const topicInsertIndex = Math.min(7, articles.length - 1);
+  const recommendedTrendingModules = (
+    <div className="nh-inline-discovery">
+      <section className="nh-discovery-module" aria-labelledby="nh-recommended-title">
+        <div className="nh-discovery-heading">
+          <div>
+            <span className="nh-kicker">Across the feed</span>
+            <h2 id="nh-recommended-title">Recommended</h2>
+          </div>
+        </div>
+        <div className="nh-discovery-list">
+          {recommendedArticles.map(article => (
+            <DiscoveryStory key={`recommended-${article._id}`} article={article} />
+          ))}
+        </div>
+      </section>
+
+      <section className="nh-discovery-module" aria-labelledby="nh-trending-title">
+        <div className="nh-discovery-heading">
+          <div>
+            <span className="nh-kicker">
+              {trendingArticles.some(article => (article.views ?? 0) > 0)
+                ? 'Most read'
+                : 'Recently published'}
+            </span>
+            <h2 id="nh-trending-title">Trending posts</h2>
+          </div>
+        </div>
+        <div className="nh-discovery-list">
+          {trendingArticles.map((article, index) => (
+            <DiscoveryStory
+              key={`trending-${article._id}`}
+              article={article}
+              rank={index + 1}
+            />
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+  const topicModules =
+    topicSections.length > 0 && topicInsertIndex > discoveryInsertIndex ? (
+      <div className="nh-inline-topics">
+        <div className="nh-topic-sections">
+          {topicSections.map(section => (
+            <section
+              key={section.topic}
+              className="nh-topic-section"
+              aria-label={`Latest from ${section.topic}`}
+            >
+              <div className="nh-discovery-heading">
+                <div>
+                  <span className="nh-kicker">Latest from</span>
+                  <h2>{section.topic}</h2>
+                </div>
+                <button
+                  type="button"
+                  className="nh-topic-link"
+                  onClick={() => setSelectedCat(section.topic)}
+                >
+                  View topic <FiArrowRight aria-hidden="true" />
+                </button>
+              </div>
+              <div className="nh-topic-list">
+                {section.articles.map(article => (
+                  <DiscoveryStory
+                    key={`${section.topic}-${article._id}`}
+                    article={article}
+                  />
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+      </div>
+    ) : null;
   const activeBannerContent = activeBanner ? (
     <div
       className="nh-slide"
@@ -628,7 +705,6 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
               {/* Category chips */}
               <div className="nh-category-bar">
                 <div>
-                  <span className="nh-kicker">Browse by topic</span>
                   <h2 className="nh-category-title">Explore the feed</h2>
                 </div>
                 <div className="nh-chips" role="group" aria-label="Filter news by category">
@@ -661,7 +737,6 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
               <div>
                 <div className="nh-feed-heading">
                   <div>
-                    <span className="nh-kicker">From NYALTX and trusted sources</span>
                     <h2>{selectedCat === 'All' ? 'Latest stories' : `${selectedCat} stories`}</h2>
                   </div>
                   {!loading && <span className="nh-result-count">{pagination.total} stories</span>}
@@ -745,8 +820,8 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
                         );
 
                         return (
+                          <React.Fragment key={art._id}>
                           <motion.article
-                            key={art._id}
                             variants={{
                               initial: { scale: 0.94, y: 28, opacity: 0 },
                               animate: { scale: 1, y: 0, opacity: 1 },
@@ -837,6 +912,9 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
                               )}
                             </div>
                           </motion.article>
+                          {selectedCat === 'All' && index === discoveryInsertIndex && recommendedTrendingModules}
+                          {selectedCat === 'All' && index === topicInsertIndex && topicModules}
+                          </React.Fragment>
                         );
                       })}
                     </motion.div>
@@ -854,81 +932,6 @@ export default function NewshubPage({ initialData }: { initialData?: NewshubInit
                   </div>
                 )}
               </div>
-              {!loading && selectedCat === 'All' && articles.length > 0 && (
-                <section className="nh-discovery" aria-label="More news">
-                  <div className="nh-discovery-pair">
-                    <section className="nh-discovery-module" aria-labelledby="nh-recommended-title">
-                      <div className="nh-discovery-heading">
-                        <div>
-                          <span className="nh-kicker">Across the feed</span>
-                          <h2 id="nh-recommended-title">Recommended</h2>
-                        </div>
-                      </div>
-                      <div className="nh-discovery-list">
-                        {recommendedArticles.map(article => (
-                          <DiscoveryStory key={`recommended-${article._id}`} article={article} />
-                        ))}
-                      </div>
-                    </section>
-
-                    <section className="nh-discovery-module" aria-labelledby="nh-trending-title">
-                      <div className="nh-discovery-heading">
-                        <div>
-                          <span className="nh-kicker">
-                            {trendingArticles.some(article => (article.views ?? 0) > 0)
-                              ? 'Most read'
-                              : 'Recently published'}
-                          </span>
-                          <h2 id="nh-trending-title">Trending posts</h2>
-                        </div>
-                      </div>
-                      <div className="nh-discovery-list">
-                        {trendingArticles.map((article, index) => (
-                          <DiscoveryStory
-                            key={`trending-${article._id}`}
-                            article={article}
-                            rank={index + 1}
-                          />
-                        ))}
-                      </div>
-                    </section>
-                  </div>
-
-                  {topicSections.length > 0 && (
-                    <div className="nh-topic-sections" aria-label="Latest by topic">
-                      {topicSections.map(section => (
-                        <section
-                          key={section.topic}
-                          className="nh-topic-section"
-                          aria-label={`Latest from ${section.topic}`}
-                        >
-                          <div className="nh-discovery-heading">
-                            <div>
-                              <span className="nh-kicker">Latest from</span>
-                              <h2>{section.topic}</h2>
-                            </div>
-                            <button
-                              type="button"
-                              className="nh-topic-link"
-                              onClick={() => setSelectedCat(section.topic)}
-                            >
-                              View topic <FiArrowRight aria-hidden="true" />
-                            </button>
-                          </div>
-                          <div className="nh-topic-list">
-                            {section.articles.map(article => (
-                              <DiscoveryStory
-                                key={`${section.topic}-${article._id}`}
-                                article={article}
-                              />
-                            ))}
-                          </div>
-                        </section>
-                      ))}
-                    </div>
-                  )}
-                </section>
-              )}
             </main>
 
           </div>
@@ -981,12 +984,12 @@ const STYLES = `
   .nh-btn:disabled { opacity: .5; cursor: not-allowed; }
   .nh-btn-pri { background: var(--nh-accent); border-color: var(--nh-accent); color: var(--nh-accent-ink); }
   .nh-btn-pri:hover { background: #67e8f9; }
-  .nh-submit-btn { width: fit-content; padding: 8px 24px; border: 0; border-radius: 0; background: #6366f1; color: #fff; font-weight: 500; box-shadow: 3px 3px 0 #000; transition: transform .2s ease, box-shadow .2s ease, background-color .2s ease; }
-  .nh-submit-btn:hover { transform: translate(3px, 3px); box-shadow: none; background: #4f46e5; }
+  .nh-submit-btn { width: fit-content; padding: 8px 24px; border: 0; border-radius: 0; background: var(--nh-accent); color: var(--nh-accent-ink); font-weight: 500; box-shadow: 3px 3px 0 #e6edf6; transition: transform .2s ease, box-shadow .2s ease, background-color .2s ease; }
+  .nh-submit-btn:hover { transform: translate(3px, 3px); box-shadow: none; background: #67e8f9; }
   .nh-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 
   /* ─── Header ─── */
-  .nh-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+  .nh-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin: 16px 0; }
   .nh-top > div:first-child { padding: 8px 0; }
   .nh-top h1 { display: flex; align-items: baseline; gap: .16em; margin: 0; font-size: clamp(30px, 4vw, 42px); font-weight: 600; line-height: .95; letter-spacing: -.06em; }
   .nh-top h1 span { color: #71717a; font-family: Georgia, Cambria, "Times New Roman", serif; font-weight: 300; font-style: italic; letter-spacing: -.04em; }
@@ -1043,10 +1046,10 @@ const STYLES = `
   }
   .nh-slide-backdrop { position: absolute; inset: -20px; background-position: center; background-size: cover; filter: blur(20px) brightness(.42); transform: scale(1.08); }
   .nh-slide-image { position: absolute; z-index: 1; left: 50%; top: 50%; width: calc(100% - 80px); max-width: 90%; height: 88%; object-fit: contain; transform: translate(-50%,-50%); }
-  .nh-slide-shade { position: absolute; z-index: 2; inset: 0; background: linear-gradient(to top, rgba(2,6,12,.9), rgba(2,6,12,.12) 72%, transparent); }
-  .nh-slide-copy { position: relative; z-index: 3; width: fit-content; max-width: min(760px, 100%); padding: 14px 18px; border: 1px solid rgba(255,255,255,.16); border-radius: 12px; background: rgba(7,11,18,.68); box-shadow: 0 10px 30px rgba(0,0,0,.24); backdrop-filter: blur(14px) saturate(135%); -webkit-backdrop-filter: blur(14px) saturate(135%); }
-  .nh-slide h2 { margin: 6px 0; font-family: Georgia, Cambria, "Times New Roman", serif; font-size: clamp(24px, 3vw, 34px); max-width: 680px; font-weight: 500; line-height: 1.08; letter-spacing: -.035em; text-shadow: 0 2px 8px rgba(0,0,0,.6); }
-  .nh-slide p  { margin: 0 0 10px; max-width: 620px; font-size: 14px; opacity: .92; text-shadow: 0 1px 4px rgba(0,0,0,.6); }
+  .nh-slide-shade { position: absolute; z-index: 2; inset: 0; background: linear-gradient(to top, rgba(2,6,12,.35), rgba(2,6,12,.06) 45%, transparent); }
+  .nh-slide-copy { position: relative; z-index: 3; align-self: flex-start; width: fit-content; max-width: min(760px, 88%); padding: 14px 18px; border: 1px solid rgba(255,255,255,.55); border-radius: 12px; background: rgba(230,237,246,.78); color: #07111d; box-shadow: 0 10px 30px rgba(0,0,0,.18); backdrop-filter: blur(10px) saturate(140%); -webkit-backdrop-filter: blur(10px) saturate(140%); }
+  .nh-slide h2 { margin: 6px 0; color: #07111d; font-family: Georgia, Cambria, "Times New Roman", serif; font-size: clamp(24px, 3vw, 34px); max-width: 680px; font-weight: 500; line-height: 1.08; letter-spacing: -.035em; }
+  .nh-slide p  { margin: 0 0 10px; max-width: 620px; color: #334155; font-size: 14px; opacity: 1; }
   .nh-tag { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .05em; padding: 4px 9px; border-radius: 99px; background: rgba(255,255,255,.2); backdrop-filter: blur(4px); width: max-content; margin-bottom: 6px; }
   .nh-tag.sp { background: #facc15; color: #422006; font-weight: 800; }
   .nh-dots { position: absolute; right: 20px; bottom: 16px; display: flex; gap: 6px; z-index: 5; }
@@ -1072,9 +1075,10 @@ const STYLES = `
   .nh-chip:focus-visible, .nh-btn:focus-visible, .nh-arrow:focus-visible, .nh-dot:focus-visible, .nh-topic-link:focus-visible { outline: 2px solid #67e8f9; outline-offset: 3px; }
 
   /* ─── Article cards ─── */
-  .nh-discovery { display: flex; flex-direction: column; gap: 30px; margin-top: 32px; }
-  .nh-discovery-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+  .nh-inline-discovery { display: grid; grid-column: 1 / -1; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; margin: 4px 0; border-top: 1px solid var(--nh-border); border-bottom: 1px solid var(--nh-border); padding: 18px 0; }
+  .nh-inline-topics { grid-column: 1 / -1; }
   .nh-discovery-module, .nh-topic-section { min-width: 0; border-top: 1px solid var(--nh-border); padding-top: 14px; }
+  .nh-inline-discovery .nh-discovery-module { border-top: 0; padding-top: 0; }
   .nh-discovery-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
   .nh-discovery-heading h2 { margin: 4px 0 0; font-family: Georgia, Cambria, "Times New Roman", serif; font-size: 22px; font-weight: 500; letter-spacing: -.03em; }
   .nh-discovery-list { display: grid; gap: 14px; }
@@ -1125,7 +1129,7 @@ const STYLES = `
   .nh-article-link:hover { color: var(--nh-accent); }
   .nh-muted { color: var(--nh-muted); }
   @media(max-width:860px) { .nh-topic-sections { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-  @media(max-width:620px) { .nh-discovery-pair, .nh-topic-sections { grid-template-columns: 1fr; } .nh-discovery-card, .nh-topic-list .nh-discovery-card { grid-template-columns: 84px minmax(0, 1fr); } .nh-discovery-heading h2 { font-size: 20px; } }
+  @media(max-width:620px) { .nh-inline-discovery, .nh-topic-sections { grid-template-columns: 1fr; } .nh-discovery-card, .nh-topic-list .nh-discovery-card { grid-template-columns: 84px minmax(0, 1fr); } .nh-discovery-heading h2 { font-size: 20px; } }
   @media(max-width:860px) { .nh-feature-grid { grid-template-columns: minmax(0, 1.65fr) minmax(220px, 1fr); } .nh-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } .nh-bento-featured, .nh-bento-compact, .nh-bento-standard { grid-column: span 1; } .nh-bento-featured .nh-bento-image { aspect-ratio: 16/9; } }
   @media(max-width:620px) { .nh-wrap { padding: 8px 6px; } .nh-category-bar { align-items: flex-start; } .nh-feature-grid, .nh-feature-grid:not(.has-side) { grid-template-columns: 1fr; } .nh-feature-primary .nh-slider, .nh-lead-story { height: clamp(320px, 82vw, 420px); min-height: 320px; } .nh-feature-secondary { min-height: 0; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: 165px; } .nh-cards { grid-template-columns: 1fr; } .nh-bento-card, .nh-card-skeleton { grid-column: span 1; } .nh-bento-featured .nh-bento-content h3 { font-size: 19px; } }
 
