@@ -5,7 +5,8 @@ import { getNYAXPriceUSD } from '@/utils/nyaxPriceApi';
 import { useAppKit } from '@reown/appkit/react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
+import { X } from 'lucide-react';
+import { type FormEvent, useCallback, useEffect, useState } from 'react';
 import { useTina } from 'tinacms/dist/react';
 import { erc20Abi, parseEther, parseUnits } from 'viem';
 import { useAccount, useSendTransaction, useSwitchChain, useWriteContract } from 'wagmi';
@@ -108,11 +109,61 @@ export const PricingPage = ({ tinaData }: any) => {
     const [nyaxPrice, setNyaxPrice] = useState<number | null>(null);
     const [busy, setBusy] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [inquiryService, setInquiryService] = useState<{ id: string; name: string; price: string } | null>(null);
+    const [inquiryForm, setInquiryForm] = useState({
+        name: '',
+        companyName: '',
+        email: '',
+        state: '',
+        city: '',
+        message: '',
+    });
+    const [inquirySubmitting, setInquirySubmitting] = useState(false);
+    const [inquiryError, setInquiryError] = useState<string | null>(null);
+    const [inquirySuccess, setInquirySuccess] = useState(false);
     const { open } = useAppKit();
     const router = useRouter();
 
     const { sendTransactionAsync } = useSendTransaction();
     const { writeContractAsync } = useWriteContract();
+
+    const openInquiry = (id: string, name: string, price: string) => {
+        setInquiryService({ id, name, price });
+        setInquiryError(null);
+        setInquirySuccess(false);
+    };
+
+    const closeInquiry = () => {
+        if (inquirySubmitting) return;
+        setInquiryService(null);
+        setInquiryForm({ name: '', companyName: '', email: '', state: '', city: '', message: '' });
+        setInquiryError(null);
+        setInquirySuccess(false);
+    };
+
+    const submitInquiry = async (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        if (!inquiryService || inquirySubmitting) return;
+
+        setInquirySubmitting(true);
+        setInquiryError(null);
+        try {
+            const response = await fetch('/api/pricing-inquiries', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ...inquiryForm, serviceId: inquiryService.id }),
+            });
+            const result = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(result.error || 'Could not submit your inquiry. Please try again.');
+            setInquirySuccess(true);
+        } catch (submitError) {
+            setInquiryError(
+                submitError instanceof Error ? submitError.message : 'Could not submit your inquiry. Please try again.',
+            );
+        } finally {
+            setInquirySubmitting(false);
+        }
+    };
 
     useEffect(() => {
         fetchETHPriceUSD()
@@ -434,12 +485,13 @@ export const PricingPage = ({ tinaData }: any) => {
                                                 ))}
                                             </ul>
                                         )}
-                                        <a
-                                            href={plan.ctaLink}
+                                        <button
+                                            type="button"
+                                            onClick={() => openInquiry(plan.id, plan.name, plan.price)}
                                             className="mt-auto w-full py-3 rounded-xl text-center bg-gradient-to-r from-cyan-600 to-blue-700 text-white font-semibold hover:from-cyan-700 hover:to-blue-800 transition-all duration-300"
                                         >
                                             {plan.ctaText}
-                                        </a>
+                                        </button>
                                     </div>
                                 </article>
                             ))}
@@ -501,12 +553,13 @@ export const PricingPage = ({ tinaData }: any) => {
                                             {plan.price}
                                         </div>
                                         <p className="text-gray-300 text-sm mb-6 flex-grow">{plan.description}</p>
-                                        <a
-                                            href={plan.ctaLink}
+                                        <button
+                                            type="button"
+                                            onClick={() => openInquiry(plan.id, plan.name, plan.price)}
                                             className="mt-auto w-full py-3 rounded-xl text-center border border-cyan-500/40 bg-cyan-500/10 text-cyan-200 font-semibold hover:bg-cyan-500/20 transition-colors"
                                         >
                                             {plan.ctaText}
-                                        </a>
+                                        </button>
                                     </div>
                                 </article>
                             ))}
@@ -524,12 +577,13 @@ export const PricingPage = ({ tinaData }: any) => {
                                 <p className="text-gray-300 mb-6 max-w-3xl">
                                     {content.corporateRoadshow.campaign.description}
                                 </p>
-                                <a
-                                    href={content.corporateRoadshow.campaign.ctaLink}
+                                <button
+                                    type="button"
+                                    onClick={() => openInquiry('custom-media-campaign', content.corporateRoadshow.campaign.title || 'Custom Media Campaign', 'Custom proposal')}
                                     className="inline-flex px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-700 text-white font-semibold"
                                 >
                                     {content.corporateRoadshow.campaign.ctaText}
-                                </a>
+                                </button>
                             </div>
                         )}
                     </section>
@@ -823,6 +877,78 @@ export const PricingPage = ({ tinaData }: any) => {
                     </div>
                 </div>
             </div>
+            {inquiryService && (
+                <div
+                    className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm"
+                    onMouseDown={event => {
+                        if (event.target === event.currentTarget) closeInquiry();
+                    }}
+                >
+                    <section
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="pricing-inquiry-title"
+                        className="relative max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-2xl border border-white/10 bg-[#101a29] p-6 text-white shadow-2xl sm:p-8"
+                    >
+                        <button
+                            type="button"
+                            onClick={closeInquiry}
+                            aria-label="Close inquiry form"
+                            className="absolute right-4 top-4 rounded-lg p-2 text-gray-400 hover:bg-white/10 hover:text-white"
+                        >
+                            <X className="h-5 w-5" />
+                        </button>
+                        {inquirySuccess ? (
+                            <div className="py-8 text-center">
+                                <h2 id="pricing-inquiry-title" className="mb-3 text-2xl font-semibold">Request received</h2>
+                                <p className="mb-6 text-gray-300">Thank you. Our media team will contact you about {inquiryService.name}.</p>
+                                <button type="button" onClick={closeInquiry} className="rounded-lg bg-cyan-600 px-5 py-2.5 font-semibold hover:bg-cyan-500">
+                                    Close
+                                </button>
+                            </div>
+                        ) : (
+                            <>
+                                <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300">Media inquiry</p>
+                                <h2 id="pricing-inquiry-title" className="mb-1 pr-8 text-2xl font-semibold">{inquiryService.name}</h2>
+                                <p className="mb-6 text-gray-400">{inquiryService.price}</p>
+                                <form onSubmit={submitInquiry} className="space-y-4">
+                                    <div className="grid gap-4 sm:grid-cols-2">
+                                        <label className="block text-sm text-gray-300">
+                                            Full name *
+                                            <input required maxLength={120} autoComplete="name" value={inquiryForm.name} onChange={event => setInquiryForm({ ...inquiryForm, name: event.target.value })} className="mt-1.5 w-full rounded-lg border border-white/15 bg-black/20 px-3 py-2.5 text-white outline-none focus:border-cyan-400" />
+                                        </label>
+                                        <label className="block text-sm text-gray-300">
+                                            Company / project name *
+                                            <input required maxLength={160} autoComplete="organization" value={inquiryForm.companyName} onChange={event => setInquiryForm({ ...inquiryForm, companyName: event.target.value })} className="mt-1.5 w-full rounded-lg border border-white/15 bg-black/20 px-3 py-2.5 text-white outline-none focus:border-cyan-400" />
+                                        </label>
+                                        <label className="block text-sm text-gray-300 sm:col-span-2">
+                                            Contact email *
+                                            <input required type="email" maxLength={254} autoComplete="email" value={inquiryForm.email} onChange={event => setInquiryForm({ ...inquiryForm, email: event.target.value })} className="mt-1.5 w-full rounded-lg border border-white/15 bg-black/20 px-3 py-2.5 text-white outline-none focus:border-cyan-400" />
+                                        </label>
+                                        <label className="block text-sm text-gray-300">
+                                            City *
+                                            <input required maxLength={100} autoComplete="address-level2" value={inquiryForm.city} onChange={event => setInquiryForm({ ...inquiryForm, city: event.target.value })} className="mt-1.5 w-full rounded-lg border border-white/15 bg-black/20 px-3 py-2.5 text-white outline-none focus:border-cyan-400" />
+                                        </label>
+                                        <label className="block text-sm text-gray-300">
+                                            State / region *
+                                            <input required maxLength={100} autoComplete="address-level1" value={inquiryForm.state} onChange={event => setInquiryForm({ ...inquiryForm, state: event.target.value })} className="mt-1.5 w-full rounded-lg border border-white/15 bg-black/20 px-3 py-2.5 text-white outline-none focus:border-cyan-400" />
+                                        </label>
+                                    </div>
+                                    <label className="block text-sm text-gray-300">
+                                        What would you like to discuss? (optional)
+                                        <textarea maxLength={2000} rows={3} value={inquiryForm.message} onChange={event => setInquiryForm({ ...inquiryForm, message: event.target.value })} className="mt-1.5 w-full resize-y rounded-lg border border-white/15 bg-black/20 px-3 py-2.5 text-white outline-none focus:border-cyan-400" />
+                                    </label>
+                                    {inquiryError && <p role="alert" className="text-sm text-red-300">{inquiryError}</p>}
+                                    <button type="submit" disabled={inquirySubmitting} className="w-full rounded-xl bg-gradient-to-r from-cyan-600 to-blue-700 px-5 py-3 font-semibold transition hover:from-cyan-500 hover:to-blue-600 disabled:cursor-not-allowed disabled:opacity-60">
+                                        {inquirySubmitting ? 'Submitting…' : 'Send inquiry'}
+                                    </button>
+                                    <p className="text-xs text-gray-500">Your details will be shared with our media team so they can follow up on your request.</p>
+                                </form>
+                            </>
+                        )}
+                    </section>
+                </div>
+            )}
         </>
     );
 }

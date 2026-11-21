@@ -73,6 +73,7 @@ const navGroups: AdminNavGroup[] = [
       { title: 'Email Management', href: '/adminpanel/email-management', icon: Mail },
       { title: 'Blog Posts', href: '/adminpanel/blog', icon: Newspaper },
       { title: 'Corporate News', href: '/adminpanel/news', icon: Newspaper },
+      { title: 'Media Inquiries', href: '/adminpanel/media-inquiries', icon: Mail },
       { title: 'News Promo Codes', href: '/adminpanel/news-promo-codes', icon: Tags },
       { title: 'Banners', href: '/adminpanel/banners', icon: ImageIcon },
       { title: 'Newshub Banners', href: '/adminpanel/newshub-banners', icon: ImageIcon },
