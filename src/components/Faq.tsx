@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react';
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import { FiChevronDown } from 'react-icons/fi';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 
 interface FAQ {
   question: string;
@@ -23,6 +23,8 @@ const Faq: React.FC<FaqProps> = ({
   className = '',
   variant = 'default',
 }) => {
+  const shouldReduceMotion = useReducedMotion();
+
   // Get token-specific FAQs based on the provided tokens
   const getTokenSpecificFaqs = (): FAQ[] => {
     // Bitcoin specific FAQs
@@ -214,8 +216,10 @@ const Faq: React.FC<FaqProps> = ({
                 ? 'border-b border-white/10'
                 : 'rounded-xl border border-white/10 bg-white/[0.02] p-4 transition-colors'
             }
-            initial={false}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={isLanding && !shouldReduceMotion ? { opacity: 0, y: 16 } : false}
+            whileInView={
+              isLanding && shouldReduceMotion ? undefined : { opacity: 1, y: 0 }
+            }
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
           >
