@@ -161,35 +161,25 @@ export default function LandingPage(props?: LandingPageProps) {
             </motion.section>
 
             <motion.section
-                className="overflow-hidden bg-[#080d18] text-slate-100"
+                className="mx-auto max-w-7xl px-6 py-10 text-slate-100"
                 variants={container}
                 initial={false}
                 whileInView="show"
                 viewport={{ once: true, amount: 0.2 }}
             >
-                <div className="px-4">
-                    <div className="mx-auto h-8 max-w-7xl border-x border-white/10" />
-                </div>
-                <div className="border-y border-white/10 px-4">
-                    <div className="mx-auto max-w-7xl border-x border-white/10">
-                        <StatsShowcase
-                            title={landingContent?.stats?.title || 'Platform insights at a glance'}
-                            items={
-                                landingContent?.stats?.items?.length
-                                    ? landingContent.stats.items
-                                    : [
-                                          { value: '132', label: 'Networks' },
-                                          { value: '21,586', label: 'DEXs' },
-                                          { value: '19,440,364', label: 'Pools' },
-                                          { value: '29,055,602', label: 'Tokens' },
-                                      ]
-                            }
-                        />
-                    </div>
-                </div>
-                <div className="px-4">
-                    <div className="mx-auto h-8 max-w-7xl border-x border-white/10" />
-                </div>
+                <StatsShowcase
+                    title={landingContent?.stats?.title || 'Platform insights at a glance'}
+                    items={
+                        landingContent?.stats?.items?.length
+                            ? landingContent.stats.items
+                            : [
+                                  { value: '132', label: 'Networks' },
+                                  { value: '21,586', label: 'DEXs' },
+                                  { value: '19,440,364', label: 'Pools' },
+                                  { value: '29,055,602', label: 'Tokens' },
+                              ]
+                    }
+                />
             </motion.section>
 
             <motion.section
@@ -452,6 +442,42 @@ export default function LandingPage(props?: LandingPageProps) {
     );
 }
 
+function TestimonialAvatar({ author, src }: { author: string; src?: string | null }) {
+    const [imageFailed, setImageFailed] = React.useState(false);
+    const initials =
+        author
+            .trim()
+            .split(/\s+/)
+            .slice(0, 2)
+            .map(name => name.charAt(0))
+            .join('')
+            .toUpperCase() || '?';
+    const escapedInitials = initials.replace(/[&<>"']/g, character => {
+        const entities: Record<string, string> = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&apos;',
+        };
+        return entities[character];
+    });
+    const fallbackSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#0891b2"/><stop offset="1" stop-color="#3730a3"/></linearGradient></defs><circle cx="32" cy="32" r="32" fill="url(#bg)"/><text x="32" y="41" text-anchor="middle" fill="#ffffff" font-family="Arial,sans-serif" font-size="24" font-weight="700">${escapedInitials}</text></svg>`;
+    const imageSrc =
+        src && !imageFailed
+            ? src
+            : `data:image/svg+xml,${encodeURIComponent(fallbackSvg)}`;
+
+    return (
+        <img
+            src={imageSrc}
+            alt={author}
+            onError={() => setImageFailed(true)}
+            className="mb-4 h-12 w-12 rounded-full border border-white/20 object-cover object-top"
+        />
+    );
+}
+
 interface LandingTestimonial {
     quote: string;
     author: string;
@@ -520,17 +546,10 @@ function StaggerTestimonials({ items }: { items: LandingTestimonial[] }) {
                         }}
                     >
                         <div className="flex h-full flex-col">
-                            {testimonial.avatar ? (
-                                <img
-                                    src={testimonial.avatar}
-                                    alt={testimonial.author}
-                                    className="mb-4 h-12 w-12 rounded-full border border-white/20 object-cover object-top"
-                                />
-                            ) : (
-                                <div className="mb-4 grid h-12 w-12 place-items-center rounded-full border border-cyan-300/30 bg-cyan-400/10 text-lg font-bold text-cyan-200">
-                                    {testimonial.author.trim().charAt(0).toUpperCase()}
-                                </div>
-                            )}
+                            <TestimonialAvatar
+                                author={testimonial.author}
+                                src={testimonial.avatar}
+                            />
                             <p className="line-clamp-5 text-sm leading-6 sm:text-base">
                                 “{testimonial.quote}”
                             </p>
@@ -755,7 +774,7 @@ function NetworkLogoCell({
             tabIndex={duplicate ? -1 : 0}
         >
             <span className="flex items-center gap-3 whitespace-nowrap">
-                <CryptoIcon name={name} size={24} kind="network" />
+                <CryptoIcon name={name} size={32} kind="network" />
                 <span className="text-sm font-semibold tracking-tight text-slate-200 md:text-base">
                     {name}
                 </span>
@@ -775,14 +794,13 @@ function StatsShowcase({ title, items }: { title: string; items: LandingStat[] }
 
     return (
         <motion.div className="relative overflow-hidden" variants={fadeUp}>
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(8,145,178,0.12),transparent_58%)]" />
             <div className="relative px-6 py-14 text-center sm:px-8 sm:py-16 md:px-10 md:py-[4.5rem]">
                 <h2 className="mx-auto max-w-3xl text-[clamp(2rem,5vw,3.5rem)] font-medium leading-[0.98] tracking-[-0.06em] text-white">
                     {title}
                 </h2>
             </div>
             <div
-                className="relative grid grid-cols-2 border-y border-white/10 md:grid-cols-4"
+                className="relative grid grid-cols-2 md:grid-cols-4"
                 onMouseLeave={() => setActiveIndex(0)}
             >
                 {items.map((stat, index) => {
