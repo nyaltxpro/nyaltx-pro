@@ -548,15 +548,15 @@ export const PricingPage = ({ tinaData }: any) => {
               {content?.newsPublishing?.plans?.map((plan: any) => (
                 <article
                   key={plan.id}
-                  className="group relative flex min-h-[360px] w-full flex-col rounded-xl border border-slate-300 bg-white p-6 text-slate-950 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-cyan-400 hover:shadow-xl"
+                  className="group relative flex min-h-[360px] w-full flex-col rounded-xl border border-white/10 bg-[#0f172a] p-6 text-white shadow-lg shadow-black/20 transition-all duration-300 hover:-translate-y-1 hover:border-cyan-400/60 hover:shadow-cyan-950/30"
                 >
                   {plan.isPopular && (
-                    <span className="absolute right-5 top-5 rounded-full bg-indigo-600 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white shadow-lg">
+                    <span className="absolute right-5 top-5 rounded-full border border-cyan-300/30 bg-cyan-400/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-cyan-200">
                       {plan.popularBadge}
                     </span>
                   )}
                   <h3
-                    className="mb-2 pr-24 text-2xl font-bold text-slate-950"
+                    className="mb-2 pr-24 text-2xl font-bold text-white"
                     style={{
                       fontFamily:
                         'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
@@ -565,27 +565,27 @@ export const PricingPage = ({ tinaData }: any) => {
                     {plan.name}
                   </h3>
                   <div
-                    className="mb-4 text-5xl font-bold tracking-tight text-cyan-700"
+                    className="mb-4 text-5xl font-bold tracking-tight text-cyan-300"
                     style={{
                       fontFamily:
                         'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
                     }}
                   >
                     ${plan.priceUSD}
-                    <span className="text-sm font-normal text-slate-500"> / release</span>
+                    <span className="text-sm font-normal text-slate-400"> / release</span>
                   </div>
-                  <p className="mb-5 text-slate-600">{plan.description}</p>
-                  <ul className="mb-6 list-none space-y-2 pl-0 text-sm text-slate-700">
+                  <p className="mb-5 text-slate-300">{plan.description}</p>
+                  <ul className="mb-6 list-none space-y-2 pl-0 text-sm text-slate-200">
                     {plan.features?.map((feature: any, idx: number) => (
                       <li key={idx} className="flex items-center gap-3">
-                        <Check className="h-4 w-4 shrink-0 text-cyan-700" aria-hidden="true" />
+                        <Check className="h-4 w-4 shrink-0 text-cyan-300" aria-hidden="true" />
                         <span>{feature.text}</span>
                       </li>
                     ))}
                   </ul>
                   <button
                     onClick={() => router.push(plan.ctaLink)}
-                    className="mt-auto w-full rounded-lg bg-slate-950 py-4 font-semibold uppercase text-white transition-colors hover:bg-cyan-800"
+                    className="mt-auto w-full rounded-lg bg-cyan-400 py-4 font-semibold uppercase text-slate-950 transition-colors hover:bg-cyan-300"
                   >
                     {plan.ctaText}
                   </button>
@@ -628,10 +628,10 @@ export const PricingPage = ({ tinaData }: any) => {
               {content?.fintechMedia?.plans?.map((plan: any) => (
                 <article
                   key={plan.id}
-                  className="relative flex min-h-[380px] flex-col overflow-hidden rounded-xl border border-slate-300 bg-white text-slate-950 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-cyan-400 hover:shadow-xl"
+                  className="relative flex min-h-[380px] flex-col overflow-hidden rounded-xl border border-white/10 bg-[#0f172a] text-white shadow-lg shadow-black/20 transition-all duration-300 hover:-translate-y-1 hover:border-cyan-400/60 hover:shadow-cyan-950/30"
                 >
                   {plan.image && (
-                    <div className="relative aspect-[16/9] w-full overflow-hidden border-b border-slate-200">
+                    <div className="relative aspect-[16/9] w-full overflow-hidden border-b border-white/10">
                       <Image
                         src={plan.image}
                         alt={plan.name}
@@ -643,12 +643,12 @@ export const PricingPage = ({ tinaData }: any) => {
                   )}
                   <div className="flex flex-col flex-grow p-8">
                     {plan.tag && (
-                      <span className="mb-3 text-xs font-bold uppercase tracking-wider text-cyan-800">
+                      <span className="mb-3 text-xs font-bold uppercase tracking-wider text-cyan-300">
                         {plan.tag}
                       </span>
                     )}
                     <h3
-                      className="mb-2 text-2xl font-bold text-slate-950"
+                      className="mb-2 text-2xl font-bold text-white"
                       style={{
                         fontFamily:
                           'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
@@ -656,15 +656,15 @@ export const PricingPage = ({ tinaData }: any) => {
                     >
                       {plan.name}
                     </h3>
-                    <div className="mb-4 text-4xl font-bold tracking-tight text-cyan-700">
+                    <div className="mb-4 text-4xl font-bold tracking-tight text-cyan-300">
                       {plan.price}
                     </div>
-                    <p className="mb-5 text-slate-600">{plan.description}</p>
+                    <p className="mb-5 text-slate-300">{plan.description}</p>
                     {plan.features?.length > 0 && (
-                      <ul className="mb-6 list-none space-y-2 pl-0 text-sm text-slate-700">
+                      <ul className="mb-6 list-none space-y-2 pl-0 text-sm text-slate-200">
                         {plan.features.map((feature: any, idx: number) => (
                           <li key={idx} className="flex items-center gap-3">
-                            <Check className="h-4 w-4 shrink-0 text-cyan-700" aria-hidden="true" />
+                            <Check className="h-4 w-4 shrink-0 text-cyan-300" aria-hidden="true" />
                             <span>{feature.text}</span>
                           </li>
                         ))}
@@ -673,7 +673,7 @@ export const PricingPage = ({ tinaData }: any) => {
                     <button
                       type="button"
                       onClick={() => openInquiry(plan.id, plan.name, plan.price)}
-                      className="mt-auto w-full rounded-lg bg-slate-950 py-4 text-center font-semibold uppercase text-white transition-colors hover:bg-cyan-800"
+                      className="mt-auto w-full rounded-lg bg-cyan-400 py-4 text-center font-semibold uppercase text-slate-950 transition-colors hover:bg-cyan-300"
                     >
                       {plan.ctaText}
                     </button>
@@ -717,10 +717,10 @@ export const PricingPage = ({ tinaData }: any) => {
               {content?.corporateRoadshow?.plans?.map((plan: any) => (
                 <article
                   key={plan.id}
-                  className="relative flex min-h-[300px] flex-col overflow-hidden rounded-xl border border-slate-300 bg-white text-slate-950 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-cyan-400 hover:shadow-xl"
+                  className="relative flex min-h-[300px] flex-col overflow-hidden rounded-xl border border-white/10 bg-[#0f172a] text-white shadow-lg shadow-black/20 transition-all duration-300 hover:-translate-y-1 hover:border-cyan-400/60 hover:shadow-cyan-950/30"
                 >
                   {plan.image && (
-                    <div className="relative aspect-[16/9] w-full overflow-hidden border-b border-slate-200">
+                    <div className="relative aspect-[16/9] w-full overflow-hidden border-b border-white/10">
                       <Image
                         src={plan.image}
                         alt={plan.name}
@@ -732,12 +732,12 @@ export const PricingPage = ({ tinaData }: any) => {
                   )}
                   <div className="flex flex-col flex-grow p-6">
                     {plan.tag && (
-                      <span className="mb-3 text-xs font-bold uppercase tracking-wider text-cyan-800">
+                      <span className="mb-3 text-xs font-bold uppercase tracking-wider text-cyan-300">
                         {plan.tag}
                       </span>
                     )}
                     <h3
-                      className="mb-2 text-xl font-bold text-slate-950"
+                      className="mb-2 text-xl font-bold text-white"
                       style={{
                         fontFamily:
                           'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
@@ -745,14 +745,14 @@ export const PricingPage = ({ tinaData }: any) => {
                     >
                       {plan.name}
                     </h3>
-                    <div className="mb-4 text-3xl font-bold tracking-tight text-cyan-700">
+                    <div className="mb-4 text-3xl font-bold tracking-tight text-cyan-300">
                       {plan.price}
                     </div>
-                    <p className="mb-6 flex-grow text-sm text-slate-600">{plan.description}</p>
+                    <p className="mb-6 flex-grow text-sm text-slate-300">{plan.description}</p>
                     <button
                       type="button"
                       onClick={() => openInquiry(plan.id, plan.name, plan.price)}
-                      className="mt-auto w-full rounded-lg bg-slate-950 py-4 text-center font-semibold uppercase text-white transition-colors hover:bg-cyan-800"
+                      className="mt-auto w-full rounded-lg bg-cyan-400 py-4 text-center font-semibold uppercase text-slate-950 transition-colors hover:bg-cyan-300"
                     >
                       {plan.ctaText}
                     </button>
@@ -761,16 +761,16 @@ export const PricingPage = ({ tinaData }: any) => {
               ))}
             </div>
             {content?.corporateRoadshow?.campaign && (
-              <div className="mt-8 rounded-xl border border-slate-300 bg-white p-8 text-slate-950 shadow-sm">
+              <div className="mt-8 rounded-xl border border-white/10 bg-[#0f172a] p-8 text-white shadow-lg shadow-black/20">
                 {content.corporateRoadshow.campaign.tag && (
-                  <span className="text-xs font-bold uppercase tracking-wider text-cyan-800">
+                  <span className="text-xs font-bold uppercase tracking-wider text-cyan-300">
                     {content.corporateRoadshow.campaign.tag}
                   </span>
                 )}
-                <h3 className="mb-3 mt-2 text-2xl font-bold text-slate-950">
+                <h3 className="mb-3 mt-2 text-2xl font-bold text-white">
                   {content.corporateRoadshow.campaign.title}
                 </h3>
-                <p className="mb-6 max-w-3xl text-slate-600">
+                <p className="mb-6 max-w-3xl text-slate-300">
                   {content.corporateRoadshow.campaign.description}
                 </p>
                 <button
@@ -782,7 +782,7 @@ export const PricingPage = ({ tinaData }: any) => {
                       'Custom proposal'
                     )
                   }
-                  className="inline-flex rounded-lg bg-slate-950 px-6 py-4 font-semibold uppercase text-white transition-colors hover:bg-cyan-800"
+                  className="inline-flex rounded-lg bg-cyan-400 px-6 py-4 font-semibold uppercase text-slate-950 transition-colors hover:bg-cyan-300"
                 >
                   {content.corporateRoadshow.campaign.ctaText}
                 </button>
@@ -805,12 +805,12 @@ export const PricingPage = ({ tinaData }: any) => {
               </h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="group relative flex min-h-[400px] flex-col rounded-xl border border-slate-300 bg-white p-8 text-slate-950 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-cyan-400 hover:shadow-xl">
-                <span className="absolute right-6 top-5 rounded-full bg-indigo-600 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-white shadow-lg">
+              <div className="group relative flex min-h-[400px] flex-col rounded-xl border border-white/10 bg-[#0f172a] p-8 text-white shadow-lg shadow-black/20 transition-all duration-300 hover:-translate-y-1 hover:border-cyan-400/60 hover:shadow-cyan-950/30">
+                <span className="absolute right-6 top-5 rounded-full border border-cyan-300/30 bg-cyan-400/10 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-cyan-200">
                   {content?.nyaltxPro?.badge}
                 </span>
                 <h3
-                  className="mb-2 pr-20 text-2xl font-bold text-slate-950"
+                  className="mb-2 pr-20 text-2xl font-bold text-white"
                   style={{
                     fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
                   }}
@@ -818,7 +818,7 @@ export const PricingPage = ({ tinaData }: any) => {
                   {content?.nyaltxPro?.title}
                 </h3>
                 <p
-                  className="mb-6 text-base text-slate-600"
+                  className="mb-6 text-base text-slate-300"
                   style={{
                     fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
                   }}
@@ -827,29 +827,29 @@ export const PricingPage = ({ tinaData }: any) => {
                 </p>
                 <div className="mb-6">
                   <div
-                    className="text-5xl font-bold tracking-tight text-cyan-700"
+                    className="text-5xl font-bold tracking-tight text-cyan-300"
                     style={{
                       fontFamily:
                         'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
                     }}
                   >
                     ${content?.nyaltxPro?.price}
-                    <span className="ml-2 text-sm font-medium text-slate-500">/ year</span>
+                    <span className="ml-2 text-sm font-medium text-slate-400">/ year</span>
                   </div>
                 </div>
                 <ul
-                  className="mb-6 list-none space-y-2 pl-0 text-sm text-slate-700"
+                  className="mb-6 list-none space-y-2 pl-0 text-sm text-slate-200"
                   style={{
                     fontFamily: 'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
                   }}
                 >
                   {content?.nyaltxPro?.features?.map((feature: any, idx: number) => (
                     <li key={idx} className="flex items-center gap-3">
-                      <Check className="h-4 w-4 shrink-0 text-cyan-700" aria-hidden="true" />
+                      <Check className="h-4 w-4 shrink-0 text-cyan-300" aria-hidden="true" />
                       <span
                         dangerouslySetInnerHTML={{
                           __html: feature.text
-                            .replace(/—/g, '<span class="text-slate-500 text-xs"> — ')
+                            .replace(/—/g, '<span class="text-slate-400 text-xs"> — ')
                             .replace(/default video/g, 'default video</span>'),
                         }}
                       />
@@ -882,7 +882,7 @@ export const PricingPage = ({ tinaData }: any) => {
                         `/dashboard/register-token?redirect=pricing/checkout/nyaltxpro&method=eth`
                       )
                     }
-                    className="w-full rounded-lg border border-slate-300 bg-white py-3 text-sm font-medium text-slate-800 transition-all hover:border-indigo-400 hover:bg-indigo-50 sm:text-base"
+                    className="w-full rounded-lg border border-white/10 bg-slate-800 py-3 text-sm font-medium text-slate-100 transition-all hover:border-indigo-400/60 hover:bg-slate-700 sm:text-base"
                     style={{
                       fontFamily:
                         'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
@@ -899,7 +899,7 @@ export const PricingPage = ({ tinaData }: any) => {
                         `/dashboard/register-token?redirect=pricing/checkout/nyaltxpro&method=sol`
                       )
                     }
-                    className="w-full rounded-lg border border-slate-300 bg-white py-3 font-medium text-slate-800 transition-all hover:border-emerald-400 hover:bg-emerald-50"
+                    className="w-full rounded-lg border border-white/10 bg-slate-800 py-3 font-medium text-slate-100 transition-all hover:border-emerald-400/60 hover:bg-slate-700"
                     style={{
                       fontFamily:
                         'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
@@ -916,7 +916,7 @@ export const PricingPage = ({ tinaData }: any) => {
                         `/dashboard/register-token?redirect=pricing/checkout/nyaltxpro&method=nyax`
                       )
                     }
-                    className="w-full rounded-lg border border-slate-300 bg-white py-3 text-sm font-medium text-slate-800 transition-all hover:border-cyan-400 hover:bg-cyan-50 sm:text-base"
+                    className="w-full rounded-lg border border-white/10 bg-slate-800 py-3 text-sm font-medium text-slate-100 transition-all hover:border-cyan-400/60 hover:bg-slate-700 sm:text-base"
                     style={{
                       fontFamily:
                         'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
@@ -930,7 +930,7 @@ export const PricingPage = ({ tinaData }: any) => {
                 </div>
                 {isPro && (
                   <div
-                    className="mt-4 rounded-xl border border-cyan-200 bg-cyan-50 p-4 text-sm text-cyan-900"
+                    className="mt-4 rounded-xl border border-cyan-400/20 bg-cyan-400/10 p-4 text-sm text-cyan-100"
                     style={{
                       fontFamily:
                         'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
@@ -941,7 +941,7 @@ export const PricingPage = ({ tinaData }: any) => {
                       window.location.hostname === '127.0.0.1')
                       ? '🚀 Development Mode: Race to Liberty unlocked! '
                       : content?.nyaltxPro?.proMessage.split('Upgrade to Race to Liberty')[0]}
-                    <a href="#race" className="underline hover:text-cyan-700 transition-colors">
+                    <a href="#race" className="underline transition-colors hover:text-white">
                       Upgrade to Race to Liberty
                     </a>
                     .
@@ -1011,15 +1011,15 @@ export const PricingPage = ({ tinaData }: any) => {
                 return (
                   <div
                     key={t.id}
-                    className="group relative flex min-h-[440px] flex-col rounded-xl border border-slate-300 bg-white p-6 text-slate-950 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-cyan-400 hover:shadow-xl"
+                    className="group relative flex min-h-[440px] flex-col rounded-xl border border-white/10 bg-[#0f172a] p-6 text-white shadow-lg shadow-black/20 transition-all duration-300 hover:-translate-y-1 hover:border-cyan-400/60 hover:shadow-cyan-950/30"
                   >
                     {t.isPopular && (
-                      <span className="absolute right-4 top-4 rounded-full bg-indigo-600 px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white shadow">
+                      <span className="absolute right-4 top-4 rounded-full border border-cyan-300/30 bg-cyan-400/10 px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-cyan-200">
                         {t.popularBadge}
                       </span>
                     )}
                     <h2
-                      className="mb-1 pr-20 text-xl font-bold text-slate-950"
+                      className="mb-1 pr-20 text-xl font-bold text-white"
                       style={{
                         fontFamily:
                           'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
@@ -1028,7 +1028,7 @@ export const PricingPage = ({ tinaData }: any) => {
                       {t.name}
                     </h2>
                     <p
-                      className="mb-4 text-sm text-slate-600"
+                      className="mb-4 text-sm text-slate-300"
                       style={{
                         fontFamily:
                           'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
@@ -1038,7 +1038,7 @@ export const PricingPage = ({ tinaData }: any) => {
                     </p>
                     <div className="mb-4">
                       <div
-                        className="text-4xl font-bold tracking-tight text-cyan-700"
+                        className="text-4xl font-bold tracking-tight text-cyan-300"
                         style={{
                           fontFamily:
                             'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
@@ -1046,7 +1046,7 @@ export const PricingPage = ({ tinaData }: any) => {
                       >
                         ${t.priceUSD.toLocaleString()}
                       </div>
-                      <div className="mt-2 grid grid-cols-1 gap-1 text-xs text-slate-500">
+                      <div className="mt-2 grid grid-cols-1 gap-1 text-xs text-slate-400">
                         <div className="flex items-center gap-2">
                           <Image
                             src="/crypto-icons/color/eth.svg"
@@ -1086,7 +1086,7 @@ export const PricingPage = ({ tinaData }: any) => {
                       </div>
                     </div>
                     <ul
-                      className="mb-4 list-none space-y-2 pl-0 text-sm text-slate-700"
+                      className="mb-4 list-none space-y-2 pl-0 text-sm text-slate-200"
                       style={{
                         fontFamily:
                           'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
@@ -1095,7 +1095,7 @@ export const PricingPage = ({ tinaData }: any) => {
                       {t.features?.map((feature: any, fIdx: number) => (
                         <li key={fIdx} className="flex items-start gap-2">
                           <Check
-                            className="mt-0.5 h-4 w-4 shrink-0 text-cyan-700"
+                            className="mt-0.5 h-4 w-4 shrink-0 text-cyan-300"
                             aria-hidden="true"
                           />
                           <span>{feature.text}</span>
@@ -1110,7 +1110,7 @@ export const PricingPage = ({ tinaData }: any) => {
                     <div className="mt-auto flex flex-col gap-2">
                       <button
                         onClick={() => router.push(`/pricing/race-to-liberty/${t.id}`)}
-                        className="w-full py-3 rounded-lg bg-gradient-to-r from-cyan-600 to-indigo-600 text-white font-medium hover:from-cyan-700 hover:to-indigo-700 disabled:opacity-50 transition-all transform hover:scale-105"
+                        className="w-full rounded-lg bg-gradient-to-r from-cyan-400 to-blue-500 py-3 font-semibold text-slate-950 transition-all hover:from-cyan-300 hover:to-blue-400 disabled:opacity-50"
                         style={{
                           fontFamily:
                             'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
@@ -1119,7 +1119,7 @@ export const PricingPage = ({ tinaData }: any) => {
                         <span className="inline-flex items-center gap-2">{t.buttonText}</span>
                       </button>
                       <div
-                        className="mt-2 text-center text-xs text-slate-500"
+                        className="mt-2 text-center text-xs text-slate-400"
                         style={{
                           fontFamily:
                             'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
@@ -1174,10 +1174,10 @@ export const PricingPage = ({ tinaData }: any) => {
                 return (
                   <div
                     key={pack.id}
-                    className="group relative flex min-h-[380px] flex-col rounded-xl border border-slate-300 bg-white p-6 text-slate-950 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-cyan-400 hover:shadow-xl"
+                    className="group relative flex min-h-[380px] flex-col rounded-xl border border-white/10 bg-[#0f172a] p-6 text-white shadow-lg shadow-black/20 transition-all duration-300 hover:-translate-y-1 hover:border-cyan-400/60 hover:shadow-cyan-950/30"
                   >
                     {pack.isPopular && (
-                      <span className="absolute right-4 top-4 rounded-full bg-indigo-600 px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white shadow">
+                      <span className="absolute right-4 top-4 rounded-full border border-cyan-300/30 bg-cyan-400/10 px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-cyan-200">
                         {pack.popularBadge}
                       </span>
                     )}
@@ -1197,7 +1197,7 @@ export const PricingPage = ({ tinaData }: any) => {
 
                     <div className="mb-4">
                       <div
-                        className="text-2xl font-bold text-cyan-700"
+                        className="text-2xl font-bold text-cyan-300"
                         style={{
                           fontFamily:
                             'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
@@ -1206,7 +1206,7 @@ export const PricingPage = ({ tinaData }: any) => {
                         {pack.points} pts
                       </div>
                       <div
-                        className="text-4xl font-bold tracking-tight text-slate-950"
+                        className="text-4xl font-bold tracking-tight text-white"
                         style={{
                           fontFamily:
                             'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
@@ -1217,7 +1217,7 @@ export const PricingPage = ({ tinaData }: any) => {
                     </div>
 
                     <p
-                      className="mb-4 flex-grow text-sm text-slate-600"
+                      className="mb-4 flex-grow text-sm text-slate-300"
                       style={{
                         fontFamily:
                           'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
@@ -1226,7 +1226,7 @@ export const PricingPage = ({ tinaData }: any) => {
                       {pack.description}
                     </p>
 
-                    <div className="mb-4 space-y-1 text-xs text-slate-500">
+                    <div className="mb-4 space-y-1 text-xs text-slate-400">
                       <div className="flex items-center gap-2">
                         <Image
                           src="/crypto-icons/color/eth.svg"
@@ -1269,7 +1269,7 @@ export const PricingPage = ({ tinaData }: any) => {
                       <button
                         disabled={busy !== null}
                         onClick={() => router.push(`/pricing/boost-pack/${pack.id}`)}
-                        className="w-full rounded-lg bg-slate-950 py-4 font-semibold uppercase text-white transition-colors hover:bg-cyan-800 disabled:opacity-50"
+                        className="w-full rounded-lg bg-cyan-400 py-4 font-semibold uppercase text-slate-950 transition-colors hover:bg-cyan-300 disabled:opacity-50"
                         style={{
                           fontFamily:
                             'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
@@ -1279,7 +1279,7 @@ export const PricingPage = ({ tinaData }: any) => {
                       </button>
 
                       <div
-                        className="text-center text-xs text-slate-500"
+                        className="text-center text-xs text-slate-400"
                         style={{
                           fontFamily:
                             'Poppins, -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
