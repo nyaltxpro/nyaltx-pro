@@ -145,19 +145,13 @@ export default function LandingPage(props?: LandingPageProps) {
             </motion.section>
 
             <motion.section
-                className="overflow-hidden bg-[#080d18] text-slate-100"
+                className="overflow-hidden"
                 variants={container}
                 initial={false}
                 whileInView="show"
                 viewport={{ once: true, amount: 0.2 }}
             >
-                <div className="px-4">
-                    <div className="mx-auto h-16 max-w-7xl border-x border-white/10" />
-                </div>
                 <NetworkLogoCarousel />
-                <div className="px-4">
-                    <div className="mx-auto h-16 max-w-7xl border-x border-white/10" />
-                </div>
             </motion.section>
 
             <motion.section
@@ -701,39 +695,35 @@ function NetworkLogoCarousel() {
     });
 
     return (
-        <div className="border-y border-white/10 px-4">
-            <div className="mx-auto max-w-7xl border-x border-white/10">
-                <motion.div
-                    initial={{ opacity: 0, y: 24 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                    className="overflow-hidden bg-slate-950/40"
-                >
-                    <motion.div style={{ x }} className="flex w-max">
-                        <div ref={measureRef} className="flex">
-                            {NETWORK_LOGOS.map(name => (
-                                <NetworkLogoCell
-                                    key={`primary-${name}`}
-                                    name={name}
-                                    hoveredLogo={hoveredLogo}
-                                    setHoveredLogo={setHoveredLogo}
-                                />
-                            ))}
-                        </div>
-                        <div className="flex" aria-hidden="true">
-                            {NETWORK_LOGOS.map(name => (
-                                <NetworkLogoCell
-                                    key={`duplicate-${name}`}
-                                    name={name}
-                                    hoveredLogo={hoveredLogo}
-                                    setHoveredLogo={setHoveredLogo}
-                                    duplicate
-                                />
-                            ))}
-                        </div>
-                    </motion.div>
-                </motion.div>
-            </div>
+        <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            className="overflow-hidden"
+        >
+            <motion.div style={{ x }} className="flex w-max">
+                <div ref={measureRef} className="flex">
+                    {NETWORK_LOGOS.map(name => (
+                        <NetworkLogoCell
+                            key={`primary-${name}`}
+                            name={name}
+                            hoveredLogo={hoveredLogo}
+                            setHoveredLogo={setHoveredLogo}
+                        />
+                    ))}
+                </div>
+                <div className="flex" aria-hidden="true">
+                    {NETWORK_LOGOS.map(name => (
+                        <NetworkLogoCell
+                            key={`duplicate-${name}`}
+                            name={name}
+                            hoveredLogo={hoveredLogo}
+                            setHoveredLogo={setHoveredLogo}
+                            duplicate
+                        />
+                    ))}
+                </div>
+            </motion.div>
         </div>
     );
 }
