@@ -126,8 +126,12 @@ export default function LandingPage(props?: LandingPageProps) {
                 <div className="mx-auto flex w-full max-w-7xl flex-1 items-center px-6 py-24 md:py-32 lg:py-36">
                     <div className="grid w-full grid-cols-1 md:grid-cols-2 items-center gap-12 md:gap-14">
                         <motion.div className="max-w-3xl overflow-visible" variants={fadeUp}>
-                            <h1 className="max-w-3xl font-sans text-[clamp(2rem,5vw,3.5rem)] font-medium leading-[0.98] tracking-[-0.06em] text-white">
-                                {heroTitleLead && <span className="block">{heroTitleLead}</span>}
+                            <h1 className="max-w-3xl font-sans text-[clamp(2rem,5vw,3.5rem)] font-medium leading-[0.9] tracking-[-0.06em] [word-spacing:-0.08em] text-white">
+                                {heroTitleLead && (
+                                    <span className="block font-serif font-light italic tracking-[-0.04em] text-slate-200">
+                                        {heroTitleLead}
+                                    </span>
+                                )}
                                 <span className="block font-semibold italic">{heroTitleEmphasis}</span>
                             </h1>
                             <p className="mt-6 text-sm text-gray-300/90 max-w-2xl leading-relaxed">
