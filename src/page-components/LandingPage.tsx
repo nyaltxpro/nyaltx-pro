@@ -11,7 +11,6 @@ import {
 } from '@web3icons/react/dynamic';
 import type { Variants } from 'framer-motion';
 import {
-    MotionConfig,
     motion,
     useAnimationFrame,
     useMotionValue,
@@ -63,6 +62,7 @@ interface LandingPageProps {
 export default function LandingPage(props?: LandingPageProps) {
     const serverContent = props?.initialContent || props?.data?.landing || null;
     const { content: landingContent, loading, error } = useLandingPageContent(serverContent);
+    const shouldReduceMotion = useReducedMotion();
 
     if (loading && !landingContent) {
         return (
@@ -109,7 +109,6 @@ export default function LandingPage(props?: LandingPageProps) {
     ];
 
     return (
-        <MotionConfig reducedMotion="user">
         <div className="min-h-screen">
             {/* 1) Hero */}
             <motion.section
@@ -132,16 +131,16 @@ export default function LandingPage(props?: LandingPageProps) {
                                 <MotionLink
                                     href={landingContent?.hero?.ctaLink || '/dashboard'}
                                     className="rounded-full bg-cyan-500/90 px-5 py-2.5 font-medium text-white hover:bg-cyan-400 transition-colors"
-                                    whileHover={{ y: -2, scale: 1.02 }}
-                                    whileTap={{ scale: 0.98 }}
+                                    whileHover={shouldReduceMotion ? undefined : { y: -2, scale: 1.02 }}
+                                    whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
                                 >
                                     {landingContent?.hero?.ctaText || 'Explore Dashboard'}
                                 </MotionLink>
                                 <MotionLink
                                     href="/pricing"
                                     className="rounded-full border border-white/10 bg-white/5 px-5 py-2.5 font-medium text-white hover:bg-white/10 transition-colors"
-                                    whileHover={{ y: -2, scale: 1.02 }}
-                                    whileTap={{ scale: 0.98 }}
+                                    whileHover={shouldReduceMotion ? undefined : { y: -2, scale: 1.02 }}
+                                    whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
                                 >
                                     View Pricing
                                 </MotionLink>
@@ -443,7 +442,6 @@ export default function LandingPage(props?: LandingPageProps) {
                 </motion.div>
             </motion.section>
         </div>
-        </MotionConfig>
     );
 }
 
@@ -793,6 +791,7 @@ interface LandingStat {
 function StatsShowcase({ title, items }: { title: string; items: LandingStat[] }) {
     const [activeIndex, setActiveIndex] = React.useState(0);
     const spring = { type: 'spring' as const, stiffness: 320, damping: 32 };
+    const shouldReduceMotion = useReducedMotion();
 
     return (
         <motion.div className="relative overflow-hidden" variants={fadeUp}>
@@ -816,8 +815,8 @@ function StatsShowcase({ title, items }: { title: string; items: LandingStat[] }
                             onFocus={() => setActiveIndex(index)}
                             onClick={() => setActiveIndex(index)}
                             aria-pressed={isActive}
-                            whileHover={{ y: -3 }}
-                            whileTap={{ scale: 0.99 }}
+                            whileHover={shouldReduceMotion ? undefined : { y: -3 }}
+                            whileTap={shouldReduceMotion ? undefined : { scale: 0.99 }}
                             transition={{ type: 'spring', stiffness: 320, damping: 28 }}
                             className="relative overflow-hidden px-6 py-8 text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-inset md:px-8 md:py-10"
                         >
@@ -924,12 +923,13 @@ function Step({ index, title, desc }: { index: number; title: string; desc: stri
 }
 
 function LandingCard({ children }: { children: React.ReactNode }) {
+    const shouldReduceMotion = useReducedMotion();
     const accentLineClass =
         'pointer-events-none absolute from-transparent via-cyan-400 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-within:opacity-100';
 
     return (
         <motion.div
-            whileHover={{ y: -4, scale: 1.01 }}
+            whileHover={shouldReduceMotion ? undefined : { y: -4, scale: 1.01 }}
             transition={{ type: 'spring', stiffness: 300, damping: 24 }}
             className="group relative flex h-full min-h-[184px] flex-col items-center justify-center gap-2 overflow-hidden px-6 py-8 text-center"
         >
