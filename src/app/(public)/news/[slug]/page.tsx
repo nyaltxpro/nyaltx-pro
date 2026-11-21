@@ -170,7 +170,7 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
   }
 
   return (
-    <div className="min-h-screen  text-white">
+    <div className="min-h-screen bg-slate-950 text-white">
       <PublicHeader />
       <NewsArticle article={article} />
     </div>
